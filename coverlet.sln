@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E877EBA4-E78
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.core", "src\coverlet.core\coverlet.core.csproj", "{31084026-D563-4B91-BE71-174C4270CCF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.collector", "src\coverlet.collector\coverlet.collector.csproj", "{686FC783-73E5-42C2-814C-5AE64B88AFE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,8 +34,21 @@ Global
 		{31084026-D563-4B91-BE71-174C4270CCF4}.Release|x64.Build.0 = Release|x64
 		{31084026-D563-4B91-BE71-174C4270CCF4}.Release|x86.ActiveCfg = Release|x86
 		{31084026-D563-4B91-BE71-174C4270CCF4}.Release|x86.Build.0 = Release|x86
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Debug|x64.ActiveCfg = Debug|x64
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Debug|x64.Build.0 = Debug|x64
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Debug|x86.ActiveCfg = Debug|x86
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Debug|x86.Build.0 = Debug|x86
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Release|x64.ActiveCfg = Release|x64
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Release|x64.Build.0 = Release|x64
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Release|x86.ActiveCfg = Release|x86
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{31084026-D563-4B91-BE71-174C4270CCF4} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
+		{686FC783-73E5-42C2-814C-5AE64B88AFE5} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
 	EndGlobalSection
 EndGlobal
