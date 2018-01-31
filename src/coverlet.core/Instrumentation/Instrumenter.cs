@@ -24,9 +24,7 @@ namespace Coverlet.Core.Instrumentation
         {
             string reportPath = Path.Combine(
                 Path.GetTempPath(),
-                Path.GetFileNameWithoutExtension(_module),
-                "_",
-                _identifier
+                Path.GetFileNameWithoutExtension(_module) + "_" + _identifier
             );
 
             _result = new InstrumenterResult
