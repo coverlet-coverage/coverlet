@@ -45,7 +45,7 @@ namespace Coverlet.Core
                 {
                     Lines lines = new Lines();
                     foreach (var line in document.Lines)
-                        lines.Add(line.Number, lines.Count);
+                        lines.Add(line.Number, line.Count);
 
                     documents.Add(document.Path, lines);
                 }
@@ -68,6 +68,10 @@ namespace Coverlet.Core
                 for (int i = 0; i < lines.Length - 1; i++)
                 {
                     var info = lines[i].Split(':');
+                    // Ignore malformed lines
+                    if (info.Length != 3)
+                        continue;
+
                     var document = result.Documents.First(d => d.Path == info[0]);
                     int start = int.Parse(info[1]);
                     int end = int.Parse(info[2]);

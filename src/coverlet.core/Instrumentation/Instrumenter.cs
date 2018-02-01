@@ -200,10 +200,14 @@ namespace Coverlet.Core.Instrumentation
             }
 
             for (int i = sequencePoint.StartLine; i <= sequencePoint.EndLine; i++)
-                document.Lines.Add(new Line { Number = i });
+            {
+                if (!document.Lines.Exists(l => l.Number == i))
+                    document.Lines.Add(new Line { Number = i });
+            }
 
+            string info = $"{document.Path}:{sequencePoint.StartLine}:{sequencePoint.EndLine}\n";
             processor.Append(Instruction.Create(OpCodes.Ldstr, _result.ReportPath));
-            processor.Append(Instruction.Create(OpCodes.Ldstr, $"{document.Path}:{sequencePoint.StartLine}:{sequencePoint.EndLine}\n"));
+            processor.Append(Instruction.Create(OpCodes.Ldstr, info));
             processor.Append(Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(typeof(File).GetMethod("AppendAllText", new[] { typeof(string), typeof(string) }))));
         }
     }
