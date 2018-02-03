@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.core", "src\coverl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.collector", "src\coverlet.collector\coverlet.collector.csproj", "{686FC783-73E5-42C2-814C-5AE64B88AFE5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.msbuild.tasks", "src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj", "{FA73E423-9790-4F35-B018-3C4E3CA338BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,9 +48,22 @@ Global
 		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Release|x64.Build.0 = Release|x64
 		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Release|x86.ActiveCfg = Release|x86
 		{686FC783-73E5-42C2-814C-5AE64B88AFE5}.Release|x86.Build.0 = Release|x86
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Debug|x64.ActiveCfg = Debug|x64
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Debug|x64.Build.0 = Debug|x64
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Debug|x86.ActiveCfg = Debug|x86
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Debug|x86.Build.0 = Debug|x86
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Release|x64.ActiveCfg = Release|x64
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Release|x64.Build.0 = Release|x64
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Release|x86.ActiveCfg = Release|x86
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{31084026-D563-4B91-BE71-174C4270CCF4} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
 		{686FC783-73E5-42C2-814C-5AE64B88AFE5} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
 	EndGlobalSection
 EndGlobal
