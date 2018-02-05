@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.IO;
+
+using Jil;
 
 namespace Coverlet.Core
 {
@@ -10,5 +13,14 @@ namespace Coverlet.Core
     {
         public string Identifier;
         public Data Data;
+
+        public string ToJson()
+        {
+            using (var writer = new StringWriter())
+            {
+                JSON.Serialize(this.Data, writer, Options.PrettyPrint);
+                return writer.ToString();
+            }
+        }
     }
 }
