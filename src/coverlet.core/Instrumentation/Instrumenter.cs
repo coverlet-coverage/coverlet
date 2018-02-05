@@ -27,10 +27,19 @@ namespace Coverlet.Core.Instrumentation
                 Path.GetFileNameWithoutExtension(_module) + "_" + _identifier
             );
 
+            string originalModuleTempPath = Path.Combine(
+                Path.GetTempPath(),
+                Path.GetFileNameWithoutExtension(_module) + "_" + _identifier + ".dll"
+            );
+
+            File.Copy(_module, originalModuleTempPath);
+
             _result = new InstrumenterResult
             {
                 Module = Path.GetFileNameWithoutExtension(_module),
-                ReportPath = reportPath
+                ReportPath = reportPath,
+                OriginalModulePath = _module,
+                OriginalModuleTempPath = originalModuleTempPath
             };
 
             InstrumentModule();

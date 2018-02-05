@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
 
+using Coverlet.Core.Instrumentation;
+
 namespace Coverlet.Core.Helpers
 {
     internal static class InstrumentationHelper
@@ -30,6 +32,15 @@ namespace Coverlet.Core.Helpers
                 }
 
                 return false;
+            }
+        }
+
+        public static void RestoreOriginalModules(IEnumerable<InstrumenterResult> results)
+        {
+            foreach (var result in results)
+            {
+                File.Copy(result.OriginalModuleTempPath, result.OriginalModulePath, true);
+                File.Delete(result.OriginalModuleTempPath);
             }
         }
     }

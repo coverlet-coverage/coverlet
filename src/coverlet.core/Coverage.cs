@@ -53,6 +53,8 @@ namespace Coverlet.Core
                 data.Add(instrumenterResult.Module, documents);
             }
 
+            InstrumentationHelper.RestoreOriginalModules(_results);
+
             return new CoverageResult
             {
                 Identifier = _identifier,
