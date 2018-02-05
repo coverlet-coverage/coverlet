@@ -1,0 +1,14 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask TaskName="Coverlet.MSbuild.Tasks.InstrumentationTask" AssemblyFile="$(MSBuildThisFileDirectory)coverlet.msbuild.tasks.dll"/>
+  <UsingTask TaskName="Coverlet.MSbuild.Tasks.CoverageResultTask" AssemblyFile="$(MSBuildThisFileDirectory)coverlet.msbuild.tasks.dll"/>
+
+  <Target Name="InstrumentModules" BeforeTargets="VSTest">
+    <Coverlet.MSbuild.Tasks.InstrumentationTask Path="$(TargetPath)" />
+  </Target>
+
+  <Target Name="GenerateCoverageResult" AfterTargets="VSTest">
+    <Coverlet.MSbuild.Tasks.CoverageResultTask Output="$(CoverletOutput)" />
+  </Target>
+
+</Project>
