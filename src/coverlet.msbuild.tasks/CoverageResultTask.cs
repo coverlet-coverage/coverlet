@@ -2,6 +2,8 @@ using System;
 using System.IO;
 
 using Coverlet.Core;
+using Coverlet.Core.Formatters;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -24,7 +26,7 @@ namespace Coverlet.MSbuild.Tasks
             {
                 var coverage = InstrumentationTask.Coverage;
                 CoverageResult result = coverage.GetCoverageResult();
-                File.WriteAllText(_filename, result.ToJson());
+                File.WriteAllText(_filename, result.Format(new JsonFormatter()));
             }
             catch
             {
