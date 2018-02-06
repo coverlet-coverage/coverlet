@@ -3,9 +3,9 @@
   <PropertyGroup>
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
 
-    <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'json'">.json</CoverletOutputExtension>
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'lcov'">.lcov</CoverletOutputExtension>
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'opencover'">.xml</CoverletOutputExtension>
+    <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov' and $(CoverletOutputFormat) != 'opencover'">.json</CoverletOutputExtension>
 
     <CoverletOutput Condition="$(CoverletOutput) == ''">$(MSBuildProjectDirectory)\coverage$(CoverletOutputExtension)</CoverletOutput>
     <CollectCoverage Condition="$(CollectCoverage) == ''">true</CollectCoverage>
