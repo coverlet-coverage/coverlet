@@ -3,7 +3,11 @@
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.InstrumentationTask" AssemblyFile="$(MSBuildThisFileDirectory)coverlet.msbuild.tasks.dll"/>
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.CoverageResultTask" AssemblyFile="$(MSBuildThisFileDirectory)coverlet.msbuild.tasks.dll"/>
 
-  <Target Name="InstrumentModules" BeforeTargets="VSTest">
+  <Target Name="InstrumentModules" Condition="'$(VSTestNoBuild)' == 'true'" BeforeTargets="VSTest">
+    <Coverlet.MSbuild.Tasks.InstrumentationTask Path="$(TargetPath)" />
+  </Target>
+
+  <Target Name="InstrumentModulesAfterBuild" Condition="'$(VSTestNoBuild)' != 'true'" AfterTargets="BuildProject">
     <Coverlet.MSbuild.Tasks.InstrumentationTask Path="$(TargetPath)" />
   </Target>
 
