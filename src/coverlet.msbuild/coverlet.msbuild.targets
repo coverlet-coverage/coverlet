@@ -8,11 +8,11 @@
   </Target>
 
   <Target Name="InstrumentModulesNoBuild" BeforeTargets="VSTest">
-    <CallTarget Condition="'$(VSTestNoBuild)' == 'true'" Targets="InstrumentModules" />
+    <CallTarget Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'" Targets="InstrumentModules" />
   </Target>
 
   <Target Name="InstrumentModulesAfterBuild" AfterTargets="BuildProject">
-    <CallTarget Condition="'$(VSTestNoBuild)' != 'true'" Targets="InstrumentModules" />
+    <CallTarget Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'" Targets="InstrumentModules" />
   </Target>
 
   <Target Name="GenerateCoverageResult" AfterTargets="VSTest">

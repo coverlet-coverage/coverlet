@@ -8,6 +8,7 @@
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'opencover'">.xml</CoverletOutputExtension>
 
     <CoverletOutput Condition="$(CoverletOutput) == ''">$(MSBuildProjectDirectory)\coverage$(CoverletOutputExtension)</CoverletOutput>
+    <CollectCoverage Condition="$(CollectCoverage) == ''">true</CollectCoverage>
   </PropertyGroup>
 
 </Project>
