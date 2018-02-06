@@ -16,7 +16,10 @@
   </Target>
 
   <Target Name="GenerateCoverageResult" AfterTargets="VSTest">
-    <Coverlet.MSbuild.Tasks.CoverageResultTask Output="$(CoverletOutput)" />
+    <Coverlet.MSbuild.Tasks.CoverageResultTask
+      Output="$(CoverletOutput)"
+      OutputFormat="$(CoverletOutputFormat)"
+    />
   </Target>
 
 </Project>

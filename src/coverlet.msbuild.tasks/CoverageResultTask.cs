@@ -12,6 +12,7 @@ namespace Coverlet.MSbuild.Tasks
     public class CoverageResultTask : Task
     {
         private string _filename;
+        private string _format;
 
         [Required]
         public string Output
@@ -20,13 +21,27 @@ namespace Coverlet.MSbuild.Tasks
             set { _filename = value; }
         }
 
+        [Required]
+        public string OutputFormat
+        {
+            get { return _format; }
+            set { _format = value; }
+        }
+
         public override bool Execute()
         {
             try
             {
                 var coverage = InstrumentationTask.Coverage;
                 CoverageResult result = coverage.GetCoverageResult();
-                File.WriteAllText(_filename, result.Format(new JsonFormatter()));
+
+                IFormatter formatter = default(IFormatter);
+                if (_format == "lcov")
+                    formatter = new LcovFormatter();
+                else
+                    formatter = new JsonFormatter();
+
+                File.WriteAllText(_filename, result.Format(formatter));
             }
             catch
             {
