@@ -15,16 +15,10 @@
     <language>en-US</language>
     <copyright>Copyright 2018</copyright>
     <tags>coverage testing lcov</tags>
-    <dependencies>
-      <group targetFramework=".NETStandard2.0">
-        <dependency id="Jil" version="2.15.4" />
-        <dependency id="Mono.Cecil" version="0.10.0-beta7" />
-        <dependency id="System.Reflection.Metadata" version="1.5.0" />
-        <dependency id="Microsoft.Build.Utilities.Core" version="15.5.180" />
-      </group>
-    </dependencies>
   </metadata>
   <files>
-    <file src="src\coverlet.msbuild.tasks\bin\Release\netstandard2.0\*" target="build\netstandard2.0\" />
+    <file src="src\coverlet.msbuild.tasks\bin\$configuration$\netstandard2.0\publish\**\*.dll" target="build\netstandard2.0\" />
+    <file src="src\coverlet.msbuild.tasks\bin\$configuration$\netstandard2.0\publish\coverlet.msbuild.props" target="build\netstandard2.0\coverlet.props" />
+    <file src="src\coverlet.msbuild.tasks\bin\$configuration$\netstandard2.0\publish\coverlet.msbuild.targets" target="build\netstandard2.0\coverlet.targets" />
   </files>
 </package>
