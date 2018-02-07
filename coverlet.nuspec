@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Coverlet</id>
+    <version>1.0.0</version>
+    <title>Code Coverage Library</title>
+    <authors>tonerdo</authors>
+    <owners>tonerdo</owners>
+    <licenseUrl>https://github.com/tonerdo/coverlet/blob/master/LICENSE</licenseUrl>
+    <projectUrl>http://github.com/tonerdo/coverlet</projectUrl>
+    <iconUrl>https://nuget.org/Content/gallery/img/default-package-icon.svg</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>true</developmentDependency>
+    <description>Cross platform code coverage library for .NET/.NET Core</description>
+    <language>en-US</language>
+    <copyright>Copyright 2018</copyright>
+    <tags>coverage testing lcov</tags>
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Jil" version="2.15.4" />
+        <dependency id="Mono.Cecil" version="0.10.0-beta7" />
+        <dependency id="System.Reflection.Metadata" version="1.5.0" />
+        <dependency id="Microsoft.Build.Utilities.Core" version="15.5.180" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="src\coverlet.msbuild.tasks\bin\Release\netstandard2.0\*" target="build\netstandard2.0\" />
+  </files>
+</package>
