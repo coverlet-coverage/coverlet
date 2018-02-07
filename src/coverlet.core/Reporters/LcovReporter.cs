@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace Coverlet.Core.Formatters
+namespace Coverlet.Core.Reporters
 {
-    public class LcovFormatter : IFormatter
+    public class LcovReporter : IReporter
     {
         public string Format(CoverageResult result)
         {

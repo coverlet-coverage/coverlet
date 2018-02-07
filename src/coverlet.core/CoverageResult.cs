@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-using Coverlet.Core.Formatters;
+using Coverlet.Core.Reporters;
 using Jil;
 
 namespace Coverlet.Core
@@ -15,7 +15,7 @@ namespace Coverlet.Core
         public string Identifier;
         public Data Data;
 
-        public string Format(IFormatter formatter)
-            => formatter.Format(this);
+        public string Format(IReporter reporter)
+            => reporter.Format(this);
     }
 }

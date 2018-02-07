@@ -2,7 +2,7 @@ using System;
 using System.IO;
 
 using Coverlet.Core;
-using Coverlet.Core.Formatters;
+using Coverlet.Core.Reporters;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -35,13 +35,13 @@ namespace Coverlet.MSbuild.Tasks
                 var coverage = InstrumentationTask.Coverage;
                 CoverageResult result = coverage.GetCoverageResult();
 
-                IFormatter formatter = default(IFormatter);
+                IReporter reporter = default(IReporter);
                 if (_format == "lcov")
-                    formatter = new LcovFormatter();
+                    reporter = new LcovReporter();
                 else
-                    formatter = new JsonFormatter();
+                    reporter = new JsonReporter();
 
-                File.WriteAllText(_filename, result.Format(formatter));
+                File.WriteAllText(_filename, result.Format(reporter));
             }
             catch
             {

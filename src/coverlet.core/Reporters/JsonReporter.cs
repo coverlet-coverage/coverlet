@@ -1,9 +1,9 @@
 using System.IO;
 using Jil;
 
-namespace Coverlet.Core.Formatters
+namespace Coverlet.Core.Reporters
 {
-    public class JsonFormatter : IFormatter
+    public class JsonReporter : IReporter
     {
         public string Format(CoverageResult result)
         {
