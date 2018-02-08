@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using Coverlet.Core.Helpers;
+
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -43,22 +45,26 @@ namespace Coverlet.Core.Instrumentation
             };
 
             InstrumentModule();
+            InstrumentationHelper.CopyCoverletDependency(Path.GetDirectoryName(_module));
+
             return _result;
         }
 
         private void InstrumentModule()
         {
-            var parameters = new ReaderParameters { ReadSymbols = true };
-            ModuleDefinition module = ModuleDefinition.ReadModule(_module, parameters);
-
-            foreach (var type in module.GetTypes())
+            using (var stream = new FileStream(_module, FileMode.Open, FileAccess.ReadWrite))
             {
-                foreach (var method in type.Methods)
-                    InstrumentMethod(method);
-            }
+                var parameters = new ReaderParameters { ReadSymbols = true };
+                ModuleDefinition module = ModuleDefinition.ReadModule(stream, parameters);
 
-            File.Delete(module.FileName);
-            module.Write(module.FileName);
+                foreach (var type in module.GetTypes())
+                {
+                    foreach (var method in type.Methods)
+                        InstrumentMethod(method);
+                }
+
+                module.Write(stream);
+            }
         }
 
         private void InstrumentMethod(MethodDefinition method)
@@ -214,10 +220,10 @@ namespace Coverlet.Core.Instrumentation
                     document.Lines.Add(new Line { Number = i });
             }
 
-            string info = $"{document.Path}:{sequencePoint.StartLine}:{sequencePoint.EndLine}\n";
+            string marker = $"{document.Path}:{sequencePoint.StartLine}:{sequencePoint.EndLine}";
             processor.Append(Instruction.Create(OpCodes.Ldstr, _result.ReportPath));
-            processor.Append(Instruction.Create(OpCodes.Ldstr, info));
-            processor.Append(Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(typeof(File).GetMethod("AppendAllText", new[] { typeof(string), typeof(string) }))));
+            processor.Append(Instruction.Create(OpCodes.Ldstr, marker));
+            processor.Append(Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(typeof(CoverageTracker).GetMethod("MarkExecuted"))));
         }
     }
 }

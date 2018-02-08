@@ -35,6 +35,13 @@ namespace Coverlet.Core.Helpers
             }
         }
 
+        public static void CopyCoverletDependency(string directory)
+        {
+            var assembly = typeof(Coverage).Assembly;
+            string name = Path.GetFileName(assembly.Location);
+            File.Copy(assembly.Location, Path.Combine(directory, name), true);
+        }
+
         public static void RestoreOriginalModules(IEnumerable<InstrumenterResult> results)
         {
             foreach (var result in results)
