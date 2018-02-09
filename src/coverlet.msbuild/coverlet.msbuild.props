@@ -7,7 +7,7 @@
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov'">.json</CoverletOutputExtension>
 
     <CoverletOutput Condition="$(CoverletOutput) == ''">$(MSBuildProjectDirectory)\coverage$(CoverletOutputExtension)</CoverletOutput>
-    <CollectCoverage Condition="$(CollectCoverage) == ''">true</CollectCoverage>
+    <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>
   </PropertyGroup>
 
 </Project>
