@@ -67,9 +67,9 @@ namespace Coverlet.Core
             foreach (var result in _results)
             {
                 var lines = File.ReadAllLines(result.ReportPath);
-                for (int i = 0; i < lines.Length - 1; i++)
+                for (int i = 0; i < lines.Length; i++)
                 {
-                    var info = lines[i].Split(':');
+                    var info = lines[i].Split(',');
                     // Ignore malformed lines
                     if (info.Length != 3)
                         continue;

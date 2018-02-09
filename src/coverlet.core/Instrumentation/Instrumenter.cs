@@ -220,7 +220,7 @@ namespace Coverlet.Core.Instrumentation
                     document.Lines.Add(new Line { Number = i });
             }
 
-            string marker = $"{document.Path}:{sequencePoint.StartLine}:{sequencePoint.EndLine}";
+            string marker = $"{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine}";
             processor.Append(Instruction.Create(OpCodes.Ldstr, _result.ReportPath));
             processor.Append(Instruction.Create(OpCodes.Ldstr, marker));
             processor.Append(Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(typeof(CoverageTracker).GetMethod("MarkExecuted"))));

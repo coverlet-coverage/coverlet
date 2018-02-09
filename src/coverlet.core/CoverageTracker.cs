@@ -6,7 +6,7 @@ namespace Coverlet.Core
     {
         public static void MarkExecuted(string path, string marker)
         {
-            using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+            using (var stream = new FileStream(path, FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
             {
                 using (var streamWriter = new StreamWriter(stream))
                 {
