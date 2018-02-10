@@ -15,6 +15,8 @@ namespace Coverlet.Core
         public string Identifier;
         public Data Data;
 
+        internal CoverageResult() { }
+
         public string Format(IReporter reporter)
             => reporter.Format(this);
     }
