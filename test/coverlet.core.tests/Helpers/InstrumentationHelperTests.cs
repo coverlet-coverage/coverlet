@@ -26,9 +26,21 @@ namespace Coverlet.Core.Helpers.Tests
         {
             var tempPath = Path.GetTempPath();
             var directory = Directory.CreateDirectory(Path.Combine(tempPath, "tempdir"));
-            InstrumentationHelper.CopyCoverletDependency(directory.FullName);
+            InstrumentationHelper.CopyCoverletDependency(Path.Combine(directory.FullName, "somemodule.dll"));
 
             Assert.True(File.Exists(Path.Combine(directory.FullName, "coverlet.core.dll")));
+            Directory.Delete(directory.FullName, true);
+        }
+
+        [Fact]
+        public void TestDontCopyCoverletDependency()
+        {
+            var tempPath = Path.GetTempPath();
+            var directory = Directory.CreateDirectory(Path.Combine(tempPath, "tempdir"));
+            InstrumentationHelper.CopyCoverletDependency(Path.Combine(directory.FullName, "coverlet.core.dll"));
+
+            Assert.False(File.Exists(Path.Combine(directory.FullName, "coverlet.core.dll")));
+            Directory.Delete(directory.FullName, true);
         }
     }
 }

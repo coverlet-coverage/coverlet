@@ -45,7 +45,7 @@ namespace Coverlet.Core.Instrumentation
             };
 
             InstrumentModule();
-            InstrumentationHelper.CopyCoverletDependency(Path.GetDirectoryName(_module));
+            InstrumentationHelper.CopyCoverletDependency(_module);
 
             return _result;
         }

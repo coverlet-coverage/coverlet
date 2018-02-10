@@ -35,8 +35,12 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public static void CopyCoverletDependency(string directory)
+        public static void CopyCoverletDependency(string module)
         {
+            var directory = Path.GetDirectoryName(module);
+            if (Path.GetFileNameWithoutExtension(module) == "coverlet.core")
+                return;
+
             var assembly = typeof(Coverage).Assembly;
             string name = Path.GetFileName(assembly.Location);
             File.Copy(assembly.Location, Path.Combine(directory, name), true);
