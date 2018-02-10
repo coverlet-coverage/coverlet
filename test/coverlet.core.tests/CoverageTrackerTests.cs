@@ -13,11 +13,9 @@ namespace Coverlet.Core.Tests
             string path = Path.Combine(Path.GetTempPath(), "testfile");
             string marker = "this.is.a.marker";
 
-            if (File.Exists(path))
-                File.Delete(path);
-
             CoverageTracker.MarkExecuted(path, marker);
             Assert.Equal(marker, File.ReadAllLines(path)[0]);
+            File.Delete(path);
         }
     }
 }
