@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>Coverlet</id>
+    <id>coverlet</id>
     <version>1.0.0</version>
     <title>Code Coverage Library</title>
     <authors>tonerdo</authors>
@@ -17,8 +17,8 @@
     <tags>coverage testing lcov</tags>
   </metadata>
   <files>
-    <file src="src\coverlet.msbuild.tasks\bin\$configuration$\netstandard2.0\publish\**\*.dll" target="build\netstandard2.0\" />
-    <file src="src\coverlet.msbuild.tasks\bin\$configuration$\netstandard2.0\publish\coverlet.msbuild.props" target="build\netstandard2.0\coverlet.props" />
-    <file src="src\coverlet.msbuild.tasks\bin\$configuration$\netstandard2.0\publish\coverlet.msbuild.targets" target="build\netstandard2.0\coverlet.targets" />
+    <file src="build\**\*.dll" target="build\netstandard2.0\" />
+    <file src="build\**\*.props" target="build\netstandard2.0\" />
+    <file src="build\**\*.targets" target="build\netstandard2.0\" />
   </files>
 </package>
