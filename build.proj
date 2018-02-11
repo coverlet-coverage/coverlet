@@ -1,0 +1,33 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <NuspecFile>$(MSBuildThisFileDirectory)coverlet.nuspec</NuspecFile>
+    <Configuration>Debug</Configuration>
+    <OutputPath>$(MSBuildThisFileDirectory)build</OutputPath>
+  </PropertyGroup>
+
+  <Target Name="BuildAllProjects">
+    <Exec Command="dotnet build $(MSBuildThisFileDirectory)coverlet.sln -c $(Configuration)" />
+  </Target>
+
+  <Target Name="PublishMSBuildTaskProject" AfterTargets="BuildAllProjects">
+    <Exec Command="dotnet publish $(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj -c $(Configuration) -o $(OutputPath)" />
+  </Target>
+
+  <Target Name="CopyMSBuildScripts" AfterTargets="PublishMSBuildTaskProject">
+    <ItemGroup>
+      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild\coverlet.msbuild.props" />
+      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild\coverlet.msbuild.targets" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BuildScript)" DestinationFolder="$(OutputPath)" />
+  </Target>
+
+  <Target Name="RunTests" AfterTargets="CopyMSBuildScripts">
+    <Exec Command="dotnet test $(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj -c $(Configuration)" />
+  </Target>
+
+  <Target Name="CreateNuGetPackage" AfterTargets="RunTests">
+    <Exec Command="dotnet pack $(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj -c $(Configuration) -o $(OutputPath) /p:NuspecFile=$(NuspecFile)" />
+  </Target>
+
+</Project>
