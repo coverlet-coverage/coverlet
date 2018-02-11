@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <NuspecFile>$(MSBuildThisFileDirectory)..\..\coverlet.nuspec</NuspecFile>
-    <NuspecProperties>$(NuspecProperties);configuration=$(Configuration)</NuspecProperties>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,16 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\coverlet.core\coverlet.core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)..\coverlet.msbuild\coverlet.msbuild.props">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(MSBuildThisFileDirectory)..\coverlet.msbuild\coverlet.msbuild.targets">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
 
 </Project>
