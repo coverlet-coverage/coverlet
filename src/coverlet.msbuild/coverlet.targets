@@ -3,23 +3,22 @@
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.InstrumentationTask" AssemblyFile="$(MSBuildThisFileDirectory)coverlet.msbuild.tasks.dll"/>
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.CoverageResultTask" AssemblyFile="$(MSBuildThisFileDirectory)coverlet.msbuild.tasks.dll"/>
 
-  <Target Name="InstrumentModules">
-    <Coverlet.MSbuild.Tasks.InstrumentationTask Path="$(TargetPath)" />
-  </Target>
-
   <Target Name="InstrumentModulesNoBuild" BeforeTargets="VSTest">
-    <CallTarget Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'" Targets="InstrumentModules" />
+    <Coverlet.MSbuild.Tasks.InstrumentationTask
+      Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'"
+      Path="$(TargetPath)" />
   </Target>
 
   <Target Name="InstrumentModulesAfterBuild" AfterTargets="BuildProject">
-    <CallTarget Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'" Targets="InstrumentModules" />
+    <Coverlet.MSbuild.Tasks.InstrumentationTask
+      Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
+      Path="$(TargetPath)" />
   </Target>
 
   <Target Name="GenerateCoverageResult" AfterTargets="VSTest">
     <Coverlet.MSbuild.Tasks.CoverageResultTask
       Output="$(CoverletOutput)"
-      OutputFormat="$(CoverletOutputFormat)"
-    />
+      OutputFormat="$(CoverletOutputFormat)" />
   </Target>
 
 </Project>
