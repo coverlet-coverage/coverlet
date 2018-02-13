@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <Target Name="BuildAllProjects">
+    <RemoveDir Directories="$(MSBuildThisFileDirectory)\build" Condition="Exists('$(MSBuildThisFileDirectory)\build')" />
     <Exec Command="dotnet build $(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj -c $(Configuration)" />
   </Target>
 
