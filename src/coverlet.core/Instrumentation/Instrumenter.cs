@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 
 using Coverlet.Core.Helpers;
+using Coverlet.Core.Extensions;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -80,15 +81,26 @@ namespace Coverlet.Core.Instrumentation
             ILProcessor processor = method.Body.GetILProcessor();
             var instructions = processor.Body.Instructions.ToList();
 
-            var ifTargets = instructions
-                .Where(i => (i.Operand as Instruction) != null)
-                .Select(i => (i.Operand as Instruction).Offset);
+            List<int> targetOffsets = new List<int>();
+
+            targetOffsets.AddRange(
+                instructions
+                    .Where(i => (i.Operand as Instruction) != null)
+                    .Select(i => (i.Operand as Instruction).Offset)
+            );
+
+            var switchTargets = instructions
+                .Where(i => (i.Operand as Instruction[]) != null)
+                .Select(i => (i.Operand as Instruction[]));
+
+            foreach (Instruction[] _instructions in switchTargets)
+                targetOffsets.AddRange(_instructions.Select(i => i.Offset));
 
             var targetInstructions = new Dictionary<int, Instruction>();
             foreach (var instruction in instructions)
             {
-                if (ifTargets.Contains(instruction.Offset))
-                    targetInstructions.Add(instruction.Offset, Instruction.Create(OpCodes.Nop));
+                if (targetOffsets.Contains(instruction.Offset))
+                    targetInstructions.TryAdd(instruction.Offset, Instruction.Create(OpCodes.Nop));
             }
 
             processor.Body.Instructions.Clear();
@@ -160,6 +172,14 @@ namespace Coverlet.Core.Instrumentation
                         var target = (Instruction)instruction.Operand;
                         _instruction = Instruction.Create(opCode, targetInstructions[target.Offset]);
                         break;
+                    case OperandType.InlineSwitch:
+                        var targets = (Instruction[])instruction.Operand;
+                        var newTargets = new Instruction[targets.Length];
+                        for (int i = 0; i < targets.Length; i++)
+                            newTargets[i] = targetInstructions[targets[i].Offset];
+
+                        _instruction = Instruction.Create(instruction.OpCode, newTargets);
+                        break;
                     case OperandType.ShortInlineVar:
                     case OperandType.InlineVar:
                         var variable = (VariableDefinition)instruction.Operand;
@@ -188,7 +208,7 @@ namespace Coverlet.Core.Instrumentation
                     processor,
                     method.DebugInformation.GetSequencePoint(instruction));
 
-                if (ifTargets.Contains(instruction.Offset))
+                if (targetOffsets.Contains(instruction.Offset))
                 {
                     targetInstructions[instruction.Offset].Offset = _instruction.Offset;
                     targetInstructions[instruction.Offset].OpCode = _instruction.OpCode;
