@@ -17,6 +17,7 @@
 
   <Target Name="GenerateCoverageResult" AfterTargets="VSTest">
     <Coverlet.MSbuild.Tasks.CoverageResultTask
+      Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
       Output="$(CoverletOutput)"
       OutputFormat="$(CoverletOutputFormat)" />
   </Target>
