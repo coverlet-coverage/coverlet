@@ -8,14 +8,6 @@ namespace Coverlet.Core.Helpers.Tests
     public class InstrumentationHelperTests
     {
         [Fact]
-        public void TestGetCoverableModules()
-        {
-            var coverable = InstrumentationHelper.GetCoverableModules(typeof(InstrumentationHelperTests).Assembly.Location);
-            Assert.Single(coverable);
-            Assert.Equal(typeof(InstrumentationHelper).Assembly.Location, coverable[0]);
-        }
-
-        [Fact]
         public void TestHasPdb()
         {
             Assert.True(InstrumentationHelper.HasPdb(typeof(InstrumentationHelperTests).Assembly.Location));
