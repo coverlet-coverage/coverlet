@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <NuspecFile>$(MSBuildThisFileDirectory)coverlet.nuspec</NuspecFile>
-    <Configuration>Debug</Configuration>
-    <OutputPath>$(MSBuildThisFileDirectory)build</OutputPath>
+    <Configuration Condition="$(Configuration) == ''">Debug</Configuration>
+    <OutputPath>$(MSBuildThisFileDirectory)build\$(Configuration)</OutputPath>
   </PropertyGroup>
 
   <Target Name="BuildAllProjects">
-    <RemoveDir Directories="$(MSBuildThisFileDirectory)\build" Condition="Exists('$(MSBuildThisFileDirectory)\build')" />
+    <RemoveDir Directories="$(OutputPath)" Condition="Exists('$(MSBuildThisFileDirectory)\build')" />
     <Exec Command="dotnet build $(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj -c $(Configuration)" />
   </Target>
 
