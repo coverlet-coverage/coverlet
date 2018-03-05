@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using ConsoleTables;
 
 using Coverlet.Core;
 using Coverlet.Core.Reporters;
@@ -32,6 +33,7 @@ namespace Coverlet.MSbuild.Tasks
         {
             try
             {
+                Console.WriteLine("\nCalculating coverage result...");
                 var coverage = InstrumentationTask.Coverage;
                 CoverageResult result = coverage.GetCoverageResult();
 
@@ -41,10 +43,22 @@ namespace Coverlet.MSbuild.Tasks
                 else
                     reporter = new JsonReporter();
 
+                Console.WriteLine($"  Generating report '{_filename}'");
                 File.WriteAllText(_filename, result.Format(reporter));
+
+                CoverageSummary coverageSummary = new CoverageSummary(result);
+                var summary = coverageSummary.CalculateSummary();
+
+                ConsoleTable table = new ConsoleTable("Module", "Coverage");
+                foreach (var item in summary)
+                    table.AddRow(item.Key, $"{item.Value}%");
+
+                Console.WriteLine();
+                table.Write(Format.Alternative);
             }
-            catch
+            catch (Exception ex)
             {
+                Log.LogErrorFromException(ex);
                 return false;
             }
 

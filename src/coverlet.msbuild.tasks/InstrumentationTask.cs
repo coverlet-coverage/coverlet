@@ -31,8 +31,9 @@ namespace Coverlet.MSbuild.Tasks
                 _coverage = new Coverage(_path, Guid.NewGuid().ToString());
                 _coverage.PrepareModules();
             }
-            catch
+            catch(Exception ex)
             {
+                Log.LogErrorFromException(ex);
                 return false;
             }
 

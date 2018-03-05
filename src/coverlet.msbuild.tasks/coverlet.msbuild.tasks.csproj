@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ConsoleTables" Version="2.1.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" />
   </ItemGroup>
 
