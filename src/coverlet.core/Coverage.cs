@@ -74,7 +74,10 @@ namespace Coverlet.Core
                     if (info.Length != 3)
                         continue;
 
-                    var document = result.Documents.First(d => d.Path == info[0]);
+                    var document = result.Documents.FirstOrDefault(d => d.Path == info[0]);
+                    if (document == null)
+                        continue;
+
                     int start = int.Parse(info[1]);
                     int end = int.Parse(info[2]);
 
