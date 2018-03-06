@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\build\$(Configuration)\coverlet.props" />
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -18,4 +18,5 @@
     <ProjectReference Include="..\..\src\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
 
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\build\$(Configuration)\coverlet.targets" />
 </Project>
