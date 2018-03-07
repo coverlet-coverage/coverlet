@@ -12,7 +12,7 @@ namespace Coverlet.Core
         public CoverageSummaryResult CalculateSummary()
         {
             CoverageSummaryResult result = new CoverageSummaryResult();
-            foreach (var mod in _result.Data)
+            foreach (var mod in _result.Modules)
             {
                 int totalLines = 0, linesCovered = 0;
                 foreach (var doc in mod.Value)

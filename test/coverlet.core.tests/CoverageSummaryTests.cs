@@ -18,8 +18,8 @@ namespace Coverlet.Core.Tests
             lines.Add(2, 0);
             Documents documents = new Documents();
             documents.Add("doc.cs", lines);
-            result.Data = new Data();
-            result.Data.Add("module", documents);
+            result.Modules = new Modules();
+            result.Modules.Add("module", documents);
 
             CoverageSummary summary = new CoverageSummary(result);
             CoverageSummaryResult summaryResult = summary.CalculateSummary();

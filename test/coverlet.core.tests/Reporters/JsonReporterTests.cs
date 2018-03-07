@@ -8,7 +8,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void TestFormat()
         {
             JsonReporter reporter = new JsonReporter();
-            CoverageResult result = new CoverageResult { Data = new Data() };
+            CoverageResult result = new CoverageResult { Modules = new Modules() };
 
             Assert.Equal("{\n}", reporter.Format(result));
         }

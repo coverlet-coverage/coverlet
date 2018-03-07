@@ -34,7 +34,7 @@ namespace Coverlet.Core
         public CoverageResult GetCoverageResult()
         {
             CalculateCoverage();
-            Data data = new Data();
+            Modules modules = new Modules();
 
             for (int i = 0; i < _results.Count; i++)
             {
@@ -50,7 +50,7 @@ namespace Coverlet.Core
                     documents.Add(document.Path, lines);
                 }
 
-                data.Add(instrumenterResult.Module, documents);
+                modules.Add(instrumenterResult.Module, documents);
             }
 
             InstrumentationHelper.RestoreOriginalModules(_results);
@@ -58,7 +58,7 @@ namespace Coverlet.Core
             return new CoverageResult
             {
                 Identifier = _identifier,
-                Data = data
+                Modules = modules
             };
         }
 

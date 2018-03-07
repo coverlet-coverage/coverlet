@@ -9,7 +9,7 @@ namespace Coverlet.Core.Reporters
         {
             using (var writer = new StringWriter())
             {
-                JSON.Serialize(result.Data, writer, Options.PrettyPrint);
+                JSON.Serialize(result.Modules, writer, Options.PrettyPrint);
                 return writer.ToString();
             }
         }

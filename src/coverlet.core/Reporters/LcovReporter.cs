@@ -8,7 +8,7 @@ namespace Coverlet.Core.Reporters
         public string Format(CoverageResult result)
         {
             List<string> lcov = new List<string>();
-            foreach (var module in result.Data)
+            foreach (var module in result.Modules)
             {
                 foreach (var doc in module.Value)
                 {
