@@ -1,3 +1,4 @@
+using System;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -7,10 +8,19 @@ namespace Coverlet.Core.Reporters.Tests
         [Fact]
         public void TestFormat()
         {
-            JsonReporter reporter = new JsonReporter();
-            CoverageResult result = new CoverageResult { Modules = new Modules() };
+            CoverageResult result = new CoverageResult();
+            result.Identifier = Guid.NewGuid().ToString();
+            Lines lines = new Lines();
+            lines.Add(1, 1);
+            lines.Add(2, 0);
+            Documents documents = new Documents();
+            documents.Add("doc.cs", lines);
+            result.Modules = new Modules();
+            result.Modules.Add("module", documents);
 
-            Assert.Equal("{\n}", reporter.Format(result));
+            JsonReporter reporter = new JsonReporter();
+            Assert.NotEqual("{\n}", reporter.Format(result));
+            Assert.NotEqual(string.Empty, reporter.Format(result));
         }
     }
 }
