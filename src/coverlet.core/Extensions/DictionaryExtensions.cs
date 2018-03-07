@@ -6,15 +6,11 @@ namespace Coverlet.Core.Extensions
     {
         public static bool TryAdd<T, U>(this Dictionary<T, U> dictionary, T key, U value)
         {
-            try
-            {
-                dictionary.Add(key, value);
-                return true;
-            }
-            catch
-            {
+            if (dictionary.ContainsKey(key))
                 return false;
-            }
+
+            dictionary.Add(key, value);
+            return true;
         }
     }
 }
