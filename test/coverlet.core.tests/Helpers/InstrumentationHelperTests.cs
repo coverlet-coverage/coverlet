@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 using Xunit;
@@ -8,9 +9,33 @@ namespace Coverlet.Core.Helpers.Tests
     public class InstrumentationHelperTests
     {
         [Fact]
+        public void TestGetDependencies()
+        {
+            string module = typeof(InstrumentationHelperTests).Assembly.Location;
+            var modules = InstrumentationHelper.GetDependencies(module);
+            Assert.False(Array.Exists(modules, m => m == module));
+        }
+
+        [Fact]
         public void TestHasPdb()
         {
             Assert.True(InstrumentationHelper.HasPdb(typeof(InstrumentationHelperTests).Assembly.Location));
+        }
+
+        [Fact]
+        public void TestBackupOriginalModule()
+        {
+            string module = typeof(InstrumentationHelperTests).Assembly.Location;
+            string identifier = Guid.NewGuid().ToString();
+
+            InstrumentationHelper.BackupOriginalModule(module, identifier);
+
+            var backupPath = Path.Combine(
+                Path.GetTempPath(),
+                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
+            );
+
+            Assert.True(File.Exists(backupPath));
         }
 
         [Fact]
