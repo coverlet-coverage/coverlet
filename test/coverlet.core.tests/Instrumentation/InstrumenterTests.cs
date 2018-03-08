@@ -17,8 +17,8 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
 
-            File.Copy(module, directory.FullName, true);
-            File.Copy(pdb, directory.FullName, true);
+            File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
+            File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
             module = Path.Combine(directory.FullName, Path.GetFileName(module));
 

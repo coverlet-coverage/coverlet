@@ -18,9 +18,7 @@ namespace Coverlet.Core.Tests
 
             var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
 
-            File.Copy(module, directory.FullName, true);
-
-            module = Path.Combine(directory.FullName, Path.GetFileName(module));
+            File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
 
             var coverage = new Coverage(module, identifier);
             coverage.PrepareModules();
