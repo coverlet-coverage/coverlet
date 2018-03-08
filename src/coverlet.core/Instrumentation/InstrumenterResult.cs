@@ -20,9 +20,8 @@ namespace Coverlet.Core.Instrumentation
     {
         public InstrumenterResult() => Documents = new List<Document>();
         public string Module;
-        public string ReportPath;
-        public string OriginalModulePath;
-        public string OriginalModuleTempPath;
+        public string HitsFilePath;
+        public string ModulePath;
         public List<Document> Documents { get; private set; }
     }
 }

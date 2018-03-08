@@ -22,26 +22,28 @@ namespace Coverlet.Core
 
         public void PrepareModules()
         {
-            string[] modules =  InstrumentationHelper.GetCoverableModules(_module);
+            string[] modules = InstrumentationHelper.GetDependencies(_module);
             foreach (var module in modules)
             {
-                Instrumenter instrumenter = new Instrumenter(module, _identifier);
-                var result = instrumenter.Instrument();
-                _results.Add(result);
+                var instrumenter = new Instrumenter(module, _identifier);
+                if (instrumenter.CanInstrument())
+                {
+                    InstrumentationHelper.BackupOriginalModule(module, _identifier);
+                    var result = instrumenter.Instrument();
+                    _results.Add(result);
+                }
             }
         }
 
         public CoverageResult GetCoverageResult()
         {
             CalculateCoverage();
-            Modules modules = new Modules();
 
-            for (int i = 0; i < _results.Count; i++)
+            Modules modules = new Modules();
+            foreach (var result in _results)
             {
                 Documents documents = new Documents();
-                var instrumenterResult = _results[i];
-
-                foreach (var document in instrumenterResult.Documents)
+                foreach (var document in result.Documents)
                 {
                     Lines lines = new Lines();
                     foreach (var line in document.Lines)
@@ -50,10 +52,9 @@ namespace Coverlet.Core
                     documents.Add(document.Path, lines);
                 }
 
-                modules.Add(instrumenterResult.Module, documents);
+                modules.Add(result.Module, documents);
+                InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
-
-            InstrumentationHelper.RestoreOriginalModules(_results);
 
             return new CoverageResult
             {
@@ -66,7 +67,7 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                var lines = File.ReadAllLines(result.ReportPath);
+                var lines = File.ReadAllLines(result.HitsFilePath);
                 for (int i = 0; i < lines.Length; i++)
                 {
                     var info = lines[i].Split(',');

@@ -9,11 +9,10 @@ namespace Coverlet.Core.Helpers
 {
     internal static class InstrumentationHelper
     {
-        public static string[] GetCoverableModules(string module)
+        public static string[] GetDependencies(string module)
         {
             IEnumerable<string> modules = Directory.GetFiles(Path.GetDirectoryName(module), "*.dll");
             modules = modules.Where(a => Path.GetFileName(a) != Path.GetFileName(module));
-            modules = modules.Where(a => HasPdb(a));
             return modules.ToArray();
         }
 
@@ -46,13 +45,25 @@ namespace Coverlet.Core.Helpers
             File.Copy(assembly.Location, Path.Combine(directory, name), true);
         }
 
-        public static void RestoreOriginalModules(IEnumerable<InstrumenterResult> results)
+        public static void BackupOriginalModule(string module, string identifier)
         {
-            foreach (var result in results)
-            {
-                File.Copy(result.OriginalModuleTempPath, result.OriginalModulePath, true);
-                File.Delete(result.OriginalModuleTempPath);
-            }
+            var backupPath = Path.Combine(
+                Path.GetTempPath(),
+                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
+            );
+
+            File.Copy(module, backupPath);
+        }
+
+        public static void RestoreOriginalModule(string module, string identifier)
+        {
+            var backupPath = Path.Combine(
+                Path.GetTempPath(),
+                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
+            );
+
+            File.Copy(backupPath, module, true);
+            File.Delete(backupPath);
         }
     }
 }

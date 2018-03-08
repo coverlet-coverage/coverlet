@@ -24,26 +24,20 @@ namespace Coverlet.Core.Instrumentation
             _identifier = identifier;
         }
 
+        public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
+
         public InstrumenterResult Instrument()
         {
-            string reportPath = Path.Combine(
+            string hitsFilePath = Path.Combine(
                 Path.GetTempPath(),
                 Path.GetFileNameWithoutExtension(_module) + "_" + _identifier
             );
 
-            string originalModuleTempPath = Path.Combine(
-                Path.GetTempPath(),
-                Path.GetFileNameWithoutExtension(_module) + "_" + _identifier + ".dll"
-            );
-
-            File.Copy(_module, originalModuleTempPath);
-
             _result = new InstrumenterResult
             {
                 Module = Path.GetFileNameWithoutExtension(_module),
-                ReportPath = reportPath,
-                OriginalModulePath = _module,
-                OriginalModuleTempPath = originalModuleTempPath
+                HitsFilePath = hitsFilePath,
+                ModulePath = _module
             };
 
             InstrumentModule();
@@ -128,7 +122,7 @@ namespace Coverlet.Core.Instrumentation
 
             string marker = $"{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine}";
 
-            var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.ReportPath);
+            var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
             var callInstr = Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(typeof(CoverageTracker).GetMethod("MarkExecuted")));
 
