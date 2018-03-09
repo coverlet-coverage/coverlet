@@ -3,7 +3,7 @@
   <PropertyGroup>
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
 
-    <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'lcov'">.lcov</CoverletOutputExtension>
+    <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'lcov'">.info</CoverletOutputExtension>
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov'">.json</CoverletOutputExtension>
 
     <CoverletOutput Condition="$(CoverletOutput) == ''">$(MSBuildProjectDirectory)\coverage$(CoverletOutputExtension)</CoverletOutput>
