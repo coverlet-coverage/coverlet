@@ -37,13 +37,18 @@ namespace Coverlet.MSbuild.Tasks
                 var coverage = InstrumentationTask.Coverage;
                 CoverageResult result = coverage.GetCoverageResult();
 
+                var directory = Path.GetDirectoryName(_filename);
+                if (!Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
+
+                Console.WriteLine($"  Generating report '{_filename}'");
+
                 IReporter reporter = default(IReporter);
                 if (_format == "lcov")
                     reporter = new LcovReporter();
                 else
                     reporter = new JsonReporter();
 
-                Console.WriteLine($"  Generating report '{_filename}'");
                 File.WriteAllText(_filename, result.Format(reporter));
 
                 CoverageSummary coverageSummary = new CoverageSummary(result);

@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
+    <CoverletOutputDirectory Condition="$(CoverletOutputDirectory) == ''">$(MSBuildProjectDirectory)</CoverletOutputDirectory>
 
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'lcov'">.info</CoverletOutputExtension>
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov'">.json</CoverletOutputExtension>
 
-    <CoverletOutput Condition="$(CoverletOutput) == ''">$(MSBuildProjectDirectory)\coverage$(CoverletOutputExtension)</CoverletOutput>
+    <CoverletOutput>$(CoverletOutputDirectory)\coverage$(CoverletOutputExtension)</CoverletOutput>
     <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>
   </PropertyGroup>
 
