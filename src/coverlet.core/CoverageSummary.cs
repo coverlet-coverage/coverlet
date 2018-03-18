@@ -31,7 +31,7 @@ namespace Coverlet.Core
                     }
                 }
 
-                result.Add(mod.Key, (linesCovered * 100) / totalLines);
+                result.Add(System.IO.Path.GetFileNameWithoutExtension(mod.Key), (linesCovered * 100) / totalLines);
             }
 
             return result;
