@@ -5,7 +5,8 @@
     <CoverletOutputDirectory Condition="$(CoverletOutputDirectory) == ''">$(MSBuildProjectDirectory)</CoverletOutputDirectory>
 
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'lcov'">.info</CoverletOutputExtension>
-    <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov'">.json</CoverletOutputExtension>
+    <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'opencover'">.xml</CoverletOutputExtension>
+    <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov' and $(CoverletOutputFormat) != 'opencover'">.json</CoverletOutputExtension>
 
     <CoverletOutput>$(CoverletOutputDirectory)\coverage$(CoverletOutputExtension)</CoverletOutput>
     <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>

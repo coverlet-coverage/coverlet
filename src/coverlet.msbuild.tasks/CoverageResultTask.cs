@@ -44,10 +44,18 @@ namespace Coverlet.MSbuild.Tasks
                 Console.WriteLine($"  Generating report '{_filename}'");
 
                 IReporter reporter = default(IReporter);
-                if (_format == "lcov")
-                    reporter = new LcovReporter();
-                else
-                    reporter = new JsonReporter();
+                switch (_format)
+                {
+                    case "lcov":
+                        reporter = new LcovReporter();
+                        break;
+                    case "opencover":
+                        reporter = new OpenCoverReporter();
+                        break;
+                    default:
+                        reporter = new JsonReporter();
+                        break;
+                }
 
                 File.WriteAllText(_filename, result.Format(reporter));
 
