@@ -43,13 +43,39 @@ namespace Coverlet.Core
             foreach (var result in _results)
             {
                 Documents documents = new Documents();
-                foreach (var document in result.Documents)
+                foreach (var doc in result.Documents)
                 {
-                    Lines lines = new Lines();
-                    foreach (var line in document.Lines)
-                        lines.Add(line.Number, line.Count);
-
-                    documents.Add(document.Path, lines);
+                    foreach (var line in doc.Lines)
+                    {
+                        if (documents.TryGetValue(doc.Path, out Classes classes))
+                        {
+                            if (classes.TryGetValue(line.Class, out Methods methods))
+                            {
+                                if (methods.TryGetValue(line.Method, out Lines lines))
+                                {
+                                    documents[doc.Path][line.Class][line.Method].Add(line.Number, line.Hits);
+                                }
+                                else
+                                {
+                                    documents[doc.Path][line.Class].Add(line.Method, new Lines());
+                                    documents[doc.Path][line.Class][line.Method].Add(line.Number, line.Hits);
+                                }
+                            }
+                            else
+                            {
+                                documents[doc.Path].Add(line.Class, new Methods());
+                                documents[doc.Path][line.Class].Add(line.Method, new Lines());
+                                documents[doc.Path][line.Class][line.Method].Add(line.Number, line.Hits);
+                            }
+                        }
+                        else
+                        {
+                            documents.Add(doc.Path, new Classes());
+                            documents[doc.Path].Add(line.Class, new Methods());
+                            documents[doc.Path][line.Class].Add(line.Method, new Lines());
+                            documents[doc.Path][line.Class][line.Method].Add(line.Number, line.Hits);
+                        }
+                    }
                 }
 
                 modules.Add(result.Module, documents);
@@ -85,7 +111,7 @@ namespace Coverlet.Core
                     for (int j = start; j <= end; j++)
                     {
                         var line = document.Lines.First(l => l.Number == j);
-                        line.Count = line.Count + 1;
+                        line.Hits = line.Hits + 1;
                     }
                 }
             }

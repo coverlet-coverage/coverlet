@@ -91,7 +91,7 @@ namespace Coverlet.Core.Instrumentation
                     continue;
                 }
 
-                var target = AddInstrumentationCode(processor, instruction, sequencePoint);
+                var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);
                 foreach (var _instruction in processor.Body.Instructions)
                     ReplaceInstructionTarget(_instruction, instruction, target);
 
@@ -105,7 +105,7 @@ namespace Coverlet.Core.Instrumentation
             method.Body.OptimizeMacros();
         }
 
-        private Instruction AddInstrumentationCode(ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
+        private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
         {
             var document = _result.Documents.FirstOrDefault(d => d.Path == sequencePoint.Document.Url);
             if (document == null)
@@ -117,7 +117,7 @@ namespace Coverlet.Core.Instrumentation
             for (int i = sequencePoint.StartLine; i <= sequencePoint.EndLine; i++)
             {
                 if (!document.Lines.Exists(l => l.Number == i))
-                    document.Lines.Add(new Line { Number = i });
+                    document.Lines.Add(new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
 
             string marker = $"{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine}";

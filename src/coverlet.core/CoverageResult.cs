@@ -7,7 +7,9 @@ using Jil;
 namespace Coverlet.Core
 {
     public class Lines : SortedDictionary<int, int> { }
-    public class Documents : Dictionary<string, Lines> { }
+    public class Methods : Dictionary<string, Lines> { }
+    public class Classes : Dictionary<string, Methods> { }
+    public class Documents : Dictionary<string, Classes> { }
     public class Modules : Dictionary<string, Documents> { }
 
     public class CoverageResult

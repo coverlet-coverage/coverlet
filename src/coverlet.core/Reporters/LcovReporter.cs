@@ -13,8 +13,16 @@ namespace Coverlet.Core.Reporters
                 foreach (var doc in module.Value)
                 {
                     lcov.Add("SF:" + doc.Key);
-                    foreach (var line in doc.Value)
-                        lcov.Add($"DA:{line.Key},{line.Value}");
+                    foreach (var @class in doc.Value)
+                    {
+                        foreach (var method in @class.Value)
+                        {
+                            foreach (var line in method.Value)
+                            {
+                                lcov.Add($"DA:{line.Key},{line.Value}");
+                            }
+                        }
+                    }
 
                     lcov.Add("end_of_record");
                 }

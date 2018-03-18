@@ -17,11 +17,17 @@ namespace Coverlet.Core
                 int totalLines = 0, linesCovered = 0;
                 foreach (var doc in mod.Value)
                 {
-                    totalLines += doc.Value.Count;
-                    foreach (var line in doc.Value)
+                    foreach (var @class in doc.Value)
                     {
-                        if (line.Value > 0)
-                            linesCovered++;
+                        foreach (var method in @class.Value)
+                        {
+                            foreach (var line in method.Value)
+                            {
+                                totalLines++;
+                                if (line.Value > 0)
+                                    linesCovered++;
+                            }
+                        }
                     }
                 }
 

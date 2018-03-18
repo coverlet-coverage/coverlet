@@ -5,7 +5,9 @@ namespace Coverlet.Core.Instrumentation
     internal class Line
     {
         public int Number;
-        public int Count;
+        public string Class;
+        public string Method;
+        public int Hits;
     }
 
     internal class Document
