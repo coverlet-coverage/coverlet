@@ -2,12 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
 
 namespace Coverlet.Core.Reporters
 {
     public class OpenCoverReporter : IReporter
     {
+        private sealed class Utf8StringWriter : StringWriter
+        {
+            public override Encoding Encoding => Encoding.UTF8;
+        }
+
         public string Format(CoverageResult result)
         {
             XmlDocument xml = new XmlDocument();
@@ -81,7 +87,7 @@ namespace Coverlet.Core.Reporters
                             fileRef.SetAttribute("uid", i.ToString());
 
                             XmlElement methodPoint = xml.CreateElement("MethodPoint");
-                            methodPoint.SetAttribute("vc", "0");
+                            methodPoint.SetAttribute("vc", meth.Value.Select(l => l.Value).Sum().ToString());
                             methodPoint.SetAttribute("upsid", "0");
                             methodPoint.SetAttribute("type", "xsi", "SequencePoint");
                             methodPoint.SetAttribute("ordinal", j.ToString());
@@ -103,7 +109,7 @@ namespace Coverlet.Core.Reporters
                             foreach (var lines in meth.Value)
                             {
                                 XmlElement sequencePoint = xml.CreateElement("SequencePoint");
-                                sequencePoint.SetAttribute("vc", "0");
+                                sequencePoint.SetAttribute("vc", lines.Value.ToString());
                                 sequencePoint.SetAttribute("upsid", lines.Key.ToString());
                                 sequencePoint.SetAttribute("ordinal", k.ToString());
                                 sequencePoint.SetAttribute("sl", lines.Key.ToString());
@@ -201,7 +207,7 @@ namespace Coverlet.Core.Reporters
             coverage.AppendChild(modules);
             xml.AppendChild(coverage);
 
-            StringWriter writer = new StringWriter();
+            Utf8StringWriter writer = new Utf8StringWriter();
             xml.Save(writer);
 
             return writer.ToString();
