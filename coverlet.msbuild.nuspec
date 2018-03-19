@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>coverlet</id>
+    <id>coverlet.msbuild</id>
     <version>1.0.0</version>
     <title>Code Coverage Library</title>
     <authors>tonerdo</authors>

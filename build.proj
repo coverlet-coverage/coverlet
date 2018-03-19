@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <NuspecFile>$(MSBuildThisFileDirectory)coverlet.nuspec</NuspecFile>
+    <NuspecFile>$(MSBuildThisFileDirectory)coverlet.msbuild.nuspec</NuspecFile>
     <Configuration Condition="$(Configuration) == ''">Debug</Configuration>
     <OutputPath>$(MSBuildThisFileDirectory)build\$(Configuration)</OutputPath>
   </PropertyGroup>
@@ -17,8 +17,8 @@
 
   <Target Name="CopyMSBuildScripts" AfterTargets="PublishMSBuildTaskProject">
     <ItemGroup>
-      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild\coverlet.props" />
-      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild\coverlet.targets" />
+      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild\coverlet.msbuild.props" />
+      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild\coverlet.msbuild.targets" />
     </ItemGroup>
     <Copy SourceFiles="@(BuildScript)" DestinationFolder="$(OutputPath)" />
   </Target>
