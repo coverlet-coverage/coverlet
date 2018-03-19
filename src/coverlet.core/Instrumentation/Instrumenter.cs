@@ -55,9 +55,12 @@ namespace Coverlet.Core.Instrumentation
 
                 foreach (var type in module.GetTypes())
                 {
+                    if (type.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
+                        continue;
+
                     foreach (var method in type.Methods)
                     {
-                        if (!method.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute"))
+                        if (!method.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
                             InstrumentMethod(method);
                     }
                 }
