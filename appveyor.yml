@@ -1,0 +1,12 @@
+version: '{build}'
+configuration:
+  - Debug
+  - Release
+build_script:
+  - echo "Building for %CONFIGURATION%"
+  - dotnet msbuild build.proj /p:Configuration=%CONFIGURATION%
+test_script:
+  - ps: dotnet test .\test\coverlet.core.tests\coverlet.core.tests.csproj
+  - ps: if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode) }
+cache:
+  - '%USERPROFILE%\.nuget\packages'
