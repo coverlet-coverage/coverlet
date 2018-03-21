@@ -27,7 +27,7 @@
     <Exec Command="dotnet test $(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover" />
   </Target>
 
-  <Target Name="CreateNuGetPackage" AfterTargets="RunTests">
+  <Target Name="CreateNuGetPackage" AfterTargets="RunTests" Condition="$(Configuration) == 'Release'">
     <Exec Command="dotnet pack $(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj -c $(Configuration) -o $(OutputPath) /p:NuspecFile=$(NuspecFile)" />
   </Target>
 
