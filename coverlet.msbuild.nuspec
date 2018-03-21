@@ -3,7 +3,7 @@
   <metadata>
     <id>coverlet.msbuild</id>
     <version>1.0.0</version>
-    <title>Code Coverage Library</title>
+    <title>coverlet.msbuild</title>
     <authors>tonerdo</authors>
     <owners>tonerdo</owners>
     <licenseUrl>https://github.com/tonerdo/coverlet/blob/master/LICENSE</licenseUrl>
@@ -11,14 +11,14 @@
     <iconUrl>https://nuget.org/Content/gallery/img/default-package-icon.svg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>true</developmentDependency>
-    <description>Cross platform code coverage library for .NET/.NET Core</description>
+    <description>Coverlet is a cross platform code coverage library for .NET Core, with support for line and method coverage.</description>
     <language>en-US</language>
-    <copyright>Copyright 2018</copyright>
-    <tags>coverage testing lcov</tags>
+    <tags>coverage testing unit-test lcov opencover quality</tags>
   </metadata>
   <files>
-    <file src="build\**\*.dll" target="build\netstandard2.0\" />
-    <file src="build\**\*.props" target="build\netstandard2.0\" />
-    <file src="build\**\*.targets" target="build\netstandard2.0\" />
+    <file src="build\Release\**\*.dll" target="build\netstandard2.0\" />
+    <file src="build\Release\**\*.props" target="build\netstandard2.0\" />
+    <file src="build\Release\**\*.targets" target="build\netstandard2.0\" />
+    <file src="build\Release\**\*.deps.json" target="build\netstandard2.0\" />
   </files>
 </package>
