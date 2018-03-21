@@ -39,7 +39,7 @@ Coverlet integrates with the MSBuild system and that allows it to go through the
 
 ## Usage
 
-Coverlet deosn't require any additional setup other than including the NuGet package. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled will automatically generate coverage results after tests are run.
+Coverlet doesn't require any additional setup other than including the NuGet package. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled will automatically generate coverage results after tests are run.
 
 ### Code Coverage
 
