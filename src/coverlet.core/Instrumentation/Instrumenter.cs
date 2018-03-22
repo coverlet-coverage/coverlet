@@ -138,20 +138,21 @@ namespace Coverlet.Core.Instrumentation
 
         private void ReplaceInstructionTarget(Instruction instruction, Instruction oldTarget, Instruction newTarget)
         {
-            if (!(instruction.Operand is Instruction _instruction)
-                || !(instruction.Operand is Instruction[] _instructions))
-                return;
-
-            if (_instruction == oldTarget)
+            if (instruction.Operand is Instruction _instruction)
             {
-                instruction.Operand = newTarget;
-                return;
+                if (_instruction == oldTarget)
+                {
+                    instruction.Operand = newTarget;
+                    return;
+                }
             }
-
-            for (int i = 0; i < _instructions.Length; i++)
+            else if (instruction.Operand is Instruction[] _instructions)
             {
-                if (_instructions[i] == oldTarget)
-                    _instructions[i] = newTarget;
+                for (int i = 0; i < _instructions.Length; i++)
+                {
+                    if (_instructions[i] == oldTarget)
+                        _instructions[i] = newTarget;
+                }
             }
         }
 
