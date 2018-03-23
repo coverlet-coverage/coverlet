@@ -37,6 +37,8 @@ Coverlet integrates with the MSBuild system and that allows it to go through the
 * Read the recorded hits information from the temporary file.
 * Generate the coverage result from the hits information and write it to a file.
 
+_Note: The assembly you'd like to get coverage for must be different from the assembly that contains the tests_
+
 ## Usage
 
 Coverlet doesn't require any additional setup other than including the NuGet package. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled will automatically generate coverage results after tests are run.
@@ -61,9 +63,14 @@ dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
 
 The output folder of the coverage result file can also be specified using the `CoverletOutputDirectory` property.
 
+### Excluding Classes/Methods From Coverage
+
+By default, Coverlet instruments every method of every class but sometimes for any number of reasons you might want it to ignore a specific method or class altogether. This is easily achieved by creating and applying the `ExcludeFromCoverage` attribute to the method or the class. Coverlet uses just the type name so the `ExcludeFromCoverage` class can be created under any namespace you wish. Also, in line with standard C# convention, either `ExcludeFromCoverage` or `ExcludeFromCoverageAttribute` will work.
+
 ## Roadmap
 
 * Branch coverage
+* Filter modules to be instrumented
 * Console runner (removes the need for requiring a NuGet package)
 
 ## Issues & Contributions
