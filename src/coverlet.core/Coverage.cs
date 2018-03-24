@@ -115,6 +115,8 @@ namespace Coverlet.Core
                         line.Hits = line.Hits + 1;
                     }
                 }
+
+                File.Delete(result.HitsFilePath);
             }
         }
     }
