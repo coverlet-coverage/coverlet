@@ -7,15 +7,21 @@ namespace Coverlet.Core
 {
     public static class CoverageTracker
     {
-        private static List<string> _markers;
-        private static string _path;
+        private static Dictionary<string, List<string>> _markers;
         private static bool _registered;
 
         [ExcludeFromCoverage]
         public static void MarkExecuted(string path, string marker)
         {
             if (_markers == null)
-                _markers = new List<string>();
+            {
+                _markers = new Dictionary<string, List<string>>();
+            }
+
+            if (!_markers.ContainsKey(path))
+            {
+                _markers.Add(path, new List<string>());
+            }
 
             if (!_registered)
             {
@@ -23,11 +29,15 @@ namespace Coverlet.Core
                 _registered = true;
             }
 
-            _markers.Add(marker);
-            _path = path;
+            _markers[path].Add(marker);
         }
 
         public static void CurrentDomain_ProcessExit(object sender, EventArgs e)
-            => File.WriteAllLines(_path, _markers);
+        {
+            foreach (var kvp in _markers)
+            {
+                File.WriteAllLines(kvp.Key, kvp.Value);
+            }
+        }
     }
 }
