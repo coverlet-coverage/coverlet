@@ -17,10 +17,11 @@ namespace Coverlet.Core.Tests
             string identifier = Guid.NewGuid().ToString();
 
             var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
+            var tempModule = Path.Combine(directory.FullName, Path.GetFileName(module));
 
-            File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
+            File.Copy(module, tempModule, true);
 
-            var coverage = new Coverage(module, identifier);
+            var coverage = new Coverage(tempModule, identifier);
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
