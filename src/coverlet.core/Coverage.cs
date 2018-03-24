@@ -93,7 +93,6 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                if (!File.Exists(result.HitsFilePath)) { continue; }
                 var lines = File.ReadAllLines(result.HitsFilePath);
                 for (int i = 0; i < lines.Length; i++)
                 {
