@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Jil" Version="2.15.4" />
-    <PackageReference Include="Mono.Cecil" Version="0.10.0-beta7" />
+    <PackageReference Include="Mono.Cecil" Version="0.10.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
   </ItemGroup>
 
