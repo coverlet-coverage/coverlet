@@ -71,6 +71,7 @@ By default, Coverlet instruments every method of every class but sometimes for a
 
 * Branch coverage
 * Filter modules to be instrumented
+* Support for more output formats (e.g. JaCoCo, Cobertura)
 * Console runner (removes the need for requiring a NuGet package)
 
 ## Issues & Contributions
