@@ -25,6 +25,8 @@ namespace Coverlet.Core.Reporters
             int numSequencePoints = 0, numClasses = 0, numMethods = 0;
             int visitedSequencePoints = 0, visitedClasses = 0, visitedMethods = 0;
 
+            int i = 1;
+
             foreach (var mod in result.Modules)
             {
                 XmlElement module = xml.CreateElement("Module");
@@ -44,10 +46,8 @@ namespace Coverlet.Core.Reporters
                 module.AppendChild(name);
 
                 XmlElement files = xml.CreateElement("Files");
-                XmlElement classes = xml.CreateElement("Classes");
-
-                int i = 1;
-
+                XmlElement classes = xml.CreateElement("Classes");                                
+                                
                 foreach (var doc in mod.Value)
                 {
                     XmlElement file = xml.CreateElement("File");
