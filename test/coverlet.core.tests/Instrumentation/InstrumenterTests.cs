@@ -47,5 +47,50 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.Equal(Path.GetFileNameWithoutExtension(_module), result.Module);
             Assert.Equal(_module, result.ModulePath);
         }
+
+        public static List<object[]> ExcludeFromCoverageAttributeNames = new List<object[]>
+        {
+            new object[] {typeof(ExcludeFromCoverageAttribute).Name},
+            new object[] { RemoveAttributeSuffix(typeof(ExcludeFromCoverageAttribute).Name) }
+        };
+
+        private static string RemoveAttributeSuffix(string attributeName)
+        {
+            return attributeName.Replace("Attribute", "");
+        }
+
+        [Theory]
+        [MemberData(nameof(ExcludeFromCoverageAttributeNames))]
+        public void Instrument__ClassesWithExcludeFromCoverageAttributeMustExcludedFromResult(
+            string excludeAttributeName)
+        {
+            // Arrange
+            var validClassesThatMustBeExcluded = new List<string>() { };
+            var validMethodsThatMustBeExcluded = new List<string>() { };
+            // Act
+            var instrumenter = new Instrumenter(_module, _identifier);
+            var result = instrumenter.Instrument();
+            var documents = result.Documents;
+            // Assert
+        }
+
+
+        public static List<object[]> ExcludeFromCodeCoverageAttributeNames = new List<object[]>
+        {
+            new object[] {typeof(ExcludeFromCodeCoverageAttribute).Name},
+            new object[] { RemoveAttributeSuffix(typeof(ExcludeFromCodeCoverageAttribute).Name) }
+        };
+
+        [Theory]
+        [MemberData(nameof(ExcludeFromCoverageAttributeNames))]
+        public void Instrument__ClassesWithExcludeFromCodeCoverageAttributeMustExcludedFromResult(
+            string excludeAttributeName)
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
+        }
     }
 }
