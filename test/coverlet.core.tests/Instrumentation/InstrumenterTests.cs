@@ -11,24 +11,28 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument()
         {
-            string module = typeof(InstrumenterTests).Assembly.Location;
-            string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
-            string identifier = Guid.NewGuid().ToString();
+            var module = typeof(InstrumenterTests).Assembly.Location;
+            
+            var pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
+            var identifier = Guid.NewGuid().ToString();
 
-            var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
+            var tempDirectoryPath = Path.Combine(Path.GetTempPath(), identifier);
+            var tempDirectory = Directory.CreateDirectory(tempDirectoryPath);
+            
+            var moduleFileForCopy = Path.Combine(tempDirectory.FullName, Path.GetFileName(module));
+            var pdbFileForCopy = Path.Combine(tempDirectory.FullName, Path.GetFileName(pdb));
+            File.Copy(module, moduleFileForCopy, true);
+            File.Copy(pdb, pdbFileForCopy, true);
 
-            File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
-            File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
+            module = Path.Combine(tempDirectory.FullName, Path.GetFileName(module));
 
-            module = Path.Combine(directory.FullName, Path.GetFileName(module));
-
-            Instrumenter instrumenter = new Instrumenter(module, identifier);
+            var instrumenter = new Instrumenter(module, identifier);
             var result = instrumenter.Instrument();
 
             Assert.Equal(Path.GetFileNameWithoutExtension(module), result.Module);
             Assert.Equal(module, result.ModulePath);
 
-            directory.Delete(true);
+            tempDirectory.Delete(true);
         }
     }
 }
