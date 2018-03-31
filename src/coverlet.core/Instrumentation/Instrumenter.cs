@@ -53,20 +53,35 @@ namespace Coverlet.Core.Instrumentation
                 var parameters = new ReaderParameters { ReadSymbols = true };
                 ModuleDefinition module = ModuleDefinition.ReadModule(stream, parameters);
 
-                foreach (var type in module.GetTypes())
+                var moduleTypes = module.GetTypes().ToList();
+                foreach (var type in moduleTypes)
                 {
                     if (type.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
+                    //if (type.CustomAttributes.Any(a => IsExcludeFromCoverage(a.AttributeType.Name)))
                         continue;
 
                     foreach (var method in type.Methods)
                     {
                         if (!method.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
+                        //if (!method.CustomAttributes.Any(a => IsExcludeFromCoverage(a.AttributeType.Name)))
                             InstrumentMethod(method);
                     }
                 }
 
                 module.Write(stream);
             }
+        }
+
+        private bool IsExcludeFromCoverage(string attributeName)
+        {
+            var excludedAtrributeNames = new List<string>
+            {
+                "ExcludeFromCoverageAttribute",
+                "ExcludeFromCoverage",
+                "ExcludeFromCodeCoverageAttribute",
+                "ExcludeFromCodeCoverage"
+            };
+            return excludedAtrributeNames.Contains(attributeName);
         }
 
         private void InstrumentMethod(MethodDefinition method)
