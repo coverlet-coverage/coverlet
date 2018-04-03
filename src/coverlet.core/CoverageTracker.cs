@@ -15,7 +15,6 @@ namespace Coverlet.Core
         static CoverageTracker()
         {
             _markers = new Dictionary<string, List<string>>();
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
         }
 
         [ExcludeFromCoverage]
@@ -25,13 +24,8 @@ namespace Coverlet.Core
             {
                 _markers.TryAdd(path, new List<string>());
                 _markers[path].Add(marker);
+                File.WriteAllLines(path, _markers[path]);
             }
-        }
-
-        public static void CurrentDomain_ProcessExit(object sender, EventArgs e)
-        {
-            foreach (var kvp in _markers)
-                File.WriteAllLines(kvp.Key, kvp.Value);
         }
     }
 }
