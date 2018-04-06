@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>coverlet.msbuild</id>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <title>coverlet.msbuild</title>
     <authors>tonerdo</authors>
     <owners>tonerdo</owners>
