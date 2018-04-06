@@ -2,9 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using Coverlet.Core.Attributes;
 using Xunit;
 using Coverlet.Core.Instrumentation;
+using Coverlet.Core.Instrumentation.Tests.TestClasses;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
@@ -47,49 +51,100 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.Equal(_module, result.ModulePath);
         }
 
-        public static List<object[]> ExcludeFromCoverageAttributeNames = new List<object[]>
+        private List<string> GetMethodsThatMustBeIncludedToCoverage(Type classType, Type excludeAttributeType)
         {
-            new object[] {typeof(ExcludeFromCoverageAttribute).Name},
-            new object[] { RemoveAttributeSuffix(typeof(ExcludeFromCoverageAttribute).Name) }
-        };
-
-        private static string RemoveAttributeSuffix(string attributeName)
-        {
-            return attributeName.Replace("Attribute", "");
+            var methodsForIncludingToCodeCoverage = classType
+                .GetMethods()
+                .Where(e => e.DeclaringType.Name == classType.Name &&
+                            (!e.CustomAttributes.Any() ||
+                             e.CustomAttributes.Any(a => a.AttributeType.Name != excludeAttributeType.Name)))
+                .Select(e => e.GetMethodNameInMonoCecilFormat())
+                .ToList();
+            return methodsForIncludingToCodeCoverage;
         }
 
+        private List<string> GetMethodsThatMustBeExcludedFromCoverage(Type classType, Type excludeAttributeType)
+        {
+            var methodsForExcludingFromCodeCoverage = classType
+                .GetMethods()
+                .Where(e => e.CustomAttributes.Any(a => a.AttributeType.Name == excludeAttributeType.Name))
+                .Select(e => e.GetMethodNameInMonoCecilFormat())
+                .ToList();
+            return methodsForExcludingFromCodeCoverage;
+        }
+
+        public static List<object[]> ClassesWithExcludingAttributes = new List<object[]>
+        {
+            new object[] {typeof(ClassWithExcludeFromCoverage)},
+            //new object[] {typeof(ClassWithExcludeFromCodeCoverage)}
+        };
+
         [Theory]
-        [MemberData(nameof(ExcludeFromCoverageAttributeNames))]
-        public void Instrument__ClassesWithExcludeFromCoverageAttributeMustExcludedFromResult(
-            string excludeAttributeName)
+        [MemberData(nameof(ClassesWithExcludingAttributes))]
+        public void Instrument__ClassWithExcludeFromCodeCoverageAttributeMustExcludedFromResult(
+            Type targetClassType)
         {
             // Arrange
-            var validClassesThatMustBeExcluded = new List<string>() { };
-            var validMethodsThatMustBeExcluded = new List<string>() { };
+            var classForExcludingFromCodeCoverage = targetClassType.Name;
             // Act
             var instrumenter = new Instrumenter(_module, _identifier);
             var result = instrumenter.Instrument();
             var documents = result.Documents;
             // Assert
+            var classNamesForIncludingInCodeCoverage =
+                documents.Select(e => Path.GetFileNameWithoutExtension(e.Path)).ToList();
+            Assert.NotEmpty(classNamesForIncludingInCodeCoverage);
+            Assert.DoesNotContain(classForExcludingFromCodeCoverage, classNamesForIncludingInCodeCoverage);
+            //Assert.Null(classNamesForIncludingInCodeCoverage.FirstOrDefault(e => e == classForExcludingFromCodeCoverage));
         }
 
-
-        public static List<object[]> ExcludeFromCodeCoverageAttributeNames = new List<object[]>
+        public static List<object[]> ClassesWithMethodsWithExcludingAttributes = new List<object[]>
         {
-            new object[] {typeof(ExcludeFromCodeCoverageAttribute).Name},
-            new object[] { RemoveAttributeSuffix(typeof(ExcludeFromCodeCoverageAttribute).Name) }
+            new object[] {typeof(ClassWithExcludeFromCoverageOnMethods), typeof(ExcludeFromCoverageAttribute)},
+            //new object[] {typeof(ClassWithExcludeFromCodeCoverageOnMethods), typeof(ExcludeFromCodeCoverageAttribute) }
         };
-
         [Theory]
-        [MemberData(nameof(ExcludeFromCoverageAttributeNames))]
-        public void Instrument__ClassesWithExcludeFromCodeCoverageAttributeMustExcludedFromResult(
-            string excludeAttributeName)
+        [MemberData(nameof(ClassesWithMethodsWithExcludingAttributes))]
+        public void Instrument__MethodsWithoutExcludeAttributeMustBeIncludedToResult(
+            Type targetClassType, Type targetExcludeAttributeType)
         {
             // Arrange
-
+            var targetClassName = targetClassType.Name;
+            var methodsForIncludingToCodeCoverage =
+                GetMethodsThatMustBeIncludedToCoverage(targetClassType, targetExcludeAttributeType);
             // Act
-
+            var instrumenter = new Instrumenter(_module, _identifier);
+            var result = instrumenter.Instrument();
+            var documents = result.Documents;
+            var foundClass = documents.FirstOrDefault(e =>
+                Path.GetFileNameWithoutExtension(e.Path) == targetClassName);
             // Assert
+            Assert.NotNull(foundClass);
+            var methodsForIncluding = foundClass.Lines.Select(l => l.Method).Distinct().ToList();
+            var intersections = methodsForIncluding.Intersect(methodsForIncludingToCodeCoverage);
+            Assert.NotEmpty(intersections);
+            Assert.Equal(methodsForIncludingToCodeCoverage.Count, methodsForIncluding.Count);
+        }
+        [Theory]
+        [MemberData(nameof(ClassesWithMethodsWithExcludingAttributes))]
+        public void Instrument__MethodsWithExcludeAttributeMustBeExcludedFromResult(
+            Type targetClassType, Type targetExcludeAttributeType)
+        {
+            // Arrange
+            var targetClassName = targetClassType.Name;
+            var methodsForExcludingFromCodeCoverage =
+                GetMethodsThatMustBeExcludedFromCoverage(targetClassType, targetExcludeAttributeType);
+            // Act
+            var instrumenter = new Instrumenter(_module, _identifier);
+            var result = instrumenter.Instrument();
+            var documents = result.Documents;
+            var foundClass = documents.FirstOrDefault(e =>
+                Path.GetFileNameWithoutExtension(e.Path) == targetClassName);
+            // Assert
+            Assert.NotNull(foundClass);
+            var methodsForIncluding = foundClass.Lines.Select(l => l.Method).Distinct().ToList();
+            var intersections = methodsForIncluding.Intersect(methodsForExcludingFromCodeCoverage);
+            Assert.Empty(intersections);
         }
     }
 }
