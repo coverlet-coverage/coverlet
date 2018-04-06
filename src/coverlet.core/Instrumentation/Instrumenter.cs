@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
@@ -77,8 +78,8 @@ namespace Coverlet.Core.Instrumentation
             {
                 "ExcludeFromCoverageAttribute",
                 "ExcludeFromCoverage",
-                "ExcludeFromCodeCoverageAttribute",
-                "ExcludeFromCodeCoverage"
+                nameof(ExcludeFromCodeCoverageAttribute),
+                nameof(ExcludeFromCodeCoverageAttribute).RemoveAttributeSuffix()
             };
             return excludedAtrributeNames.Contains(attributeName);
         }
