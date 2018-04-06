@@ -12,6 +12,7 @@ using Coverlet.Core.Instrumentation.Tests.TestClasses;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class InstrumenterTests : IDisposable
     {
         private readonly string _module;
