@@ -57,14 +57,12 @@ namespace Coverlet.Core.Instrumentation
                 var moduleTypes = module.GetTypes().ToList();
                 foreach (var type in moduleTypes)
                 {
-                    if (type.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
-                    //if (type.CustomAttributes.Any(a => IsExcludeFromCoverage(a.AttributeType.Name)))
+                    if (type.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
                         continue;
 
                     foreach (var method in type.Methods)
                     {
-                        if (!method.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
-                        //if (!method.CustomAttributes.Any(a => IsExcludeFromCoverage(a.AttributeType.Name)))
+                        if (!method.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
                             InstrumentMethod(method);
                     }
                 }
@@ -73,14 +71,14 @@ namespace Coverlet.Core.Instrumentation
             }
         }
 
-        private bool IsExcludeFromCoverage(string attributeName)
+        private bool IsExcludeFromCoverageAttribute(string attributeName)
         {
             var excludedAtrributeNames = new List<string>
             {
                 "ExcludeFromCoverageAttribute",
                 "ExcludeFromCoverage",
-                "ExcludeFromCodeCoverageAttribute",
-                "ExcludeFromCodeCoverage"
+                //"ExcludeFromCodeCoverageAttribute",
+                //"ExcludeFromCodeCoverage"
             };
             return excludedAtrributeNames.Contains(attributeName);
         }
