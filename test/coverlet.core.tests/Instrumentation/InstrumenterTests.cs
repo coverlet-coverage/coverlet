@@ -76,7 +76,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         public static List<object[]> ClassesWithExcludingAttributes = new List<object[]>
         {
             new object[] {typeof(ClassWithExcludeFromCoverage)},
-            //new object[] {typeof(ClassWithExcludeFromCodeCoverage)}
+            new object[] {typeof(ClassWithExcludeFromCodeCoverage)}
         };
 
         [Theory]
@@ -101,7 +101,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         public static List<object[]> ClassesWithMethodsWithExcludingAttributes = new List<object[]>
         {
             new object[] {typeof(ClassWithExcludeFromCoverageOnMethods), typeof(ExcludeFromCoverageAttribute)},
-            //new object[] {typeof(ClassWithExcludeFromCodeCoverageOnMethods), typeof(ExcludeFromCodeCoverageAttribute) }
+            new object[] {typeof(ClassWithExcludeFromCodeCoverageOnMethods), typeof(ExcludeFromCodeCoverageAttribute) }
         };
         [Theory]
         [MemberData(nameof(ClassesWithMethodsWithExcludingAttributes))]
