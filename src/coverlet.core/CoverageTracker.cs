@@ -25,13 +25,18 @@ namespace Coverlet.Core
             {
                 _markers.TryAdd(path, new List<string>());
                 _markers[path].Add(marker);
+                if (_markers[path].Count >= 100000)
+                {
+                    File.AppendAllLines(path, _markers[path]);
+                    _markers[path].Clear();
+                }
             }
         }
 
         public static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             foreach (var kvp in _markers)
-                File.WriteAllLines(kvp.Key, kvp.Value);
+                File.AppendAllLines(kvp.Key, kvp.Value);
         }
     }
 }
