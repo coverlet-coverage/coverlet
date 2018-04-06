@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,7 +49,9 @@ namespace Coverlet.Core.Instrumentation
         {
             using (var stream = new FileStream(_module, FileMode.Open, FileAccess.ReadWrite))
             {
-                var parameters = new ReaderParameters { ReadSymbols = true };
+                var resolver = new DefaultAssemblyResolver();
+                resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
+                var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
                 ModuleDefinition module = ModuleDefinition.ReadModule(stream, parameters);
 
                 foreach (var type in module.GetTypes())
