@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
@@ -54,20 +55,33 @@ namespace Coverlet.Core.Instrumentation
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
                 ModuleDefinition module = ModuleDefinition.ReadModule(stream, parameters);
 
-                foreach (var type in module.GetTypes())
+                var moduleTypes = module.GetTypes().ToList();
+                foreach (var type in moduleTypes)
                 {
-                    if (type.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
+                    if (type.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
                         continue;
 
                     foreach (var method in type.Methods)
                     {
-                        if (!method.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
+                        if (!method.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
                             InstrumentMethod(method);
                     }
                 }
 
                 module.Write(stream);
             }
+        }
+
+        private bool IsExcludeFromCoverageAttribute(string attributeName)
+        {
+            var excludedAtrributeNames = new List<string>
+            {
+                "ExcludeFromCoverageAttribute",
+                "ExcludeFromCoverage",
+                nameof(ExcludeFromCodeCoverageAttribute),
+                nameof(ExcludeFromCodeCoverageAttribute).RemoveAttributeSuffix()
+            };
+            return excludedAtrributeNames.Contains(attributeName);
         }
 
         private void InstrumentMethod(MethodDefinition method)
