@@ -22,8 +22,8 @@ namespace Coverlet.Core.Reporters
 
             XmlElement modules = xml.CreateElement("Modules");
 
-            int numSequencePoints = 0, numClasses = 0, numMethods = 0;
-            int visitedSequencePoints = 0, visitedClasses = 0, visitedMethods = 0;
+            int numSequencePoints = 0, numBranchPoints = 0, numClasses = 0, numMethods = 0;
+            int visitedSequencePoints = 0, visitedBranchPoints = 0, visitedClasses = 0, visitedMethods = 0;
 
             int i = 1;
 
@@ -87,7 +87,7 @@ namespace Coverlet.Core.Reporters
                             fileRef.SetAttribute("uid", i.ToString());
 
                             XmlElement methodPoint = xml.CreateElement("MethodPoint");
-                            methodPoint.SetAttribute("vc", meth.Value.Select(l => l.Value).Sum().ToString());
+                            methodPoint.SetAttribute("vc", meth.Value.Select(l => l.Value.Hits).Sum().ToString());
                             methodPoint.SetAttribute("upsid", "0");
                             methodPoint.SetAttribute("type", "xsi", "SequencePoint");
                             methodPoint.SetAttribute("ordinal", j.ToString());
@@ -102,14 +102,16 @@ namespace Coverlet.Core.Reporters
 
                             // They're really just lines
                             XmlElement sequencePoints = xml.CreateElement("SequencePoints");
+                            XmlElement branchPoints = xml.CreateElement("BranchPoints");
                             XmlElement methodSummary = xml.CreateElement("Summary");
                             int k = 0;
+                            int kBr = 0;
                             var methodVisited = false;
 
                             foreach (var lines in meth.Value)
                             {
                                 XmlElement sequencePoint = xml.CreateElement("SequencePoint");
-                                sequencePoint.SetAttribute("vc", lines.Value.ToString());
+                                sequencePoint.SetAttribute("vc", lines.Value.Hits.ToString());
                                 sequencePoint.SetAttribute("upsid", lines.Key.ToString());
                                 sequencePoint.SetAttribute("ordinal", k.ToString());
                                 sequencePoint.SetAttribute("sl", lines.Key.ToString());
@@ -121,12 +123,27 @@ namespace Coverlet.Core.Reporters
                                 sequencePoint.SetAttribute("fileid", i.ToString());
                                 sequencePoints.AppendChild(sequencePoint);
 
+                                if (lines.Value.IsBranchPoint)
+                                {
+                                    XmlElement branchPoint = xml.CreateElement("BranchPoint");
+                                    branchPoint.SetAttribute("vc", lines.Value.Hits.ToString());
+                                    branchPoint.SetAttribute("upsid", lines.Key.ToString());
+                                    branchPoint.SetAttribute("ordinal", kBr.ToString());
+                                    branchPoint.SetAttribute("sl", lines.Key.ToString());
+                                    branchPoint.SetAttribute("fileid", i.ToString());
+                                    branchPoints.AppendChild(branchPoint);
+                                    kBr++;
+                                    numBranchPoints++;
+                                }
+
                                 numSequencePoints++;
-                                if (lines.Value > 0)
+                                if (lines.Value.Hits > 0)
                                 {
                                     visitedSequencePoints++;
                                     classVisited = true;
                                     methodVisited = true;
+                                    if (lines.Value.IsBranchPoint)
+                                        visitedBranchPoints++;
                                 }
 
                                 k++;
@@ -137,9 +154,9 @@ namespace Coverlet.Core.Reporters
                                 visitedMethods++;
 
                             methodSummary.SetAttribute("numSequencePoints", meth.Value.Count().ToString());
-                            methodSummary.SetAttribute("visitedSequencePoints", meth.Value.Where(l => l.Value > 0).Count().ToString());
-                            methodSummary.SetAttribute("numBranchPoints", "0");
-                            methodSummary.SetAttribute("visitedBranchPoints", "0");
+                            methodSummary.SetAttribute("visitedSequencePoints", meth.Value.Where(l => l.Value.Hits > 0).Count().ToString());
+                            methodSummary.SetAttribute("numBranchPoints", meth.Value.Where(l => l.Value.IsBranchPoint).Count().ToString());
+                            methodSummary.SetAttribute("visitedBranchPoints", meth.Value.Where(l => l.Value.IsBranchPoint && l.Value.Hits > 0).Count().ToString());
                             methodSummary.SetAttribute("sequenceCoverage", "0");
                             methodSummary.SetAttribute("branchCoverage", "0");
                             methodSummary.SetAttribute("maxCyclomaticComplexity", "0");
@@ -154,7 +171,7 @@ namespace Coverlet.Core.Reporters
                             method.AppendChild(methodName);
                             method.AppendChild(fileRef);
                             method.AppendChild(sequencePoints);
-                            method.AppendChild(xml.CreateElement("BranchPoints"));
+                            method.AppendChild(branchPoints);
                             method.AppendChild(methodPoint);
                             methods.AppendChild(method);
                             j++;
@@ -165,9 +182,9 @@ namespace Coverlet.Core.Reporters
                             visitedClasses++;
 
                         classSummary.SetAttribute("numSequencePoints", cls.Value.Select(c => c.Value.Count).Sum().ToString());
-                        classSummary.SetAttribute("visitedSequencePoints", cls.Value.Select(c => c.Value.Where(l => l.Value > 0).Count()).Sum().ToString());
-                        classSummary.SetAttribute("numBranchPoints", "0");
-                        classSummary.SetAttribute("visitedBranchPoints", "0");
+                        classSummary.SetAttribute("visitedSequencePoints", cls.Value.Select(c => c.Value.Where(l => l.Value.Hits > 0).Count()).Sum().ToString());
+                        classSummary.SetAttribute("numBranchPoints", cls.Value.Select(c => c.Value.Count(l => l.Value.IsBranchPoint)).Sum().ToString());
+                        classSummary.SetAttribute("visitedBranchPoints", cls.Value.Select(c => c.Value.Where(l => l.Value.Hits > 0 && l.Value.IsBranchPoint).Count()).Sum().ToString());
                         classSummary.SetAttribute("sequenceCoverage", "0");
                         classSummary.SetAttribute("branchCoverage", "0");
                         classSummary.SetAttribute("maxCyclomaticComplexity", "0");
@@ -192,8 +209,8 @@ namespace Coverlet.Core.Reporters
 
             coverageSummary.SetAttribute("numSequencePoints", numSequencePoints.ToString());
             coverageSummary.SetAttribute("visitedSequencePoints", visitedSequencePoints.ToString());
-            coverageSummary.SetAttribute("numBranchPoints", "0");
-            coverageSummary.SetAttribute("visitedBranchPoints", "0");
+            coverageSummary.SetAttribute("numBranchPoints", numBranchPoints.ToString());
+            coverageSummary.SetAttribute("visitedBranchPoints", visitedBranchPoints.ToString());
             coverageSummary.SetAttribute("sequenceCoverage", "0");
             coverageSummary.SetAttribute("branchCoverage", "0");
             coverageSummary.SetAttribute("maxCyclomaticComplexity", "0");
