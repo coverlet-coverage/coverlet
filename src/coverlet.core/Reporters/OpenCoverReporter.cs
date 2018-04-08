@@ -109,7 +109,7 @@ namespace Coverlet.Core.Reporters
                             foreach (var lines in meth.Value)
                             {
                                 XmlElement sequencePoint = xml.CreateElement("SequencePoint");
-                                sequencePoint.SetAttribute("vc", lines.Value.ToString());
+                                sequencePoint.SetAttribute("vc", lines.Value.Hits.ToString());
                                 sequencePoint.SetAttribute("upsid", lines.Key.ToString());
                                 sequencePoint.SetAttribute("ordinal", k.ToString());
                                 sequencePoint.SetAttribute("sl", lines.Key.ToString());
