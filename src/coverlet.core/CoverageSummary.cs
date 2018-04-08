@@ -25,7 +25,7 @@ namespace Coverlet.Core
                             foreach (var line in method.Value)
                             {
                                 totalLines++;
-                                if (line.Value > 0)
+                                if (line.Value.Hits > 0)
                                     linesCovered++;
                             }
                         }

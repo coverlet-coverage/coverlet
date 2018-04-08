@@ -87,7 +87,7 @@ namespace Coverlet.Core.Reporters
                             fileRef.SetAttribute("uid", i.ToString());
 
                             XmlElement methodPoint = xml.CreateElement("MethodPoint");
-                            methodPoint.SetAttribute("vc", meth.Value.Select(l => l.Value).Sum().ToString());
+                            methodPoint.SetAttribute("vc", meth.Value.Select(l => l.Value.Hits).Sum().ToString());
                             methodPoint.SetAttribute("upsid", "0");
                             methodPoint.SetAttribute("type", "xsi", "SequencePoint");
                             methodPoint.SetAttribute("ordinal", j.ToString());
@@ -122,7 +122,7 @@ namespace Coverlet.Core.Reporters
                                 sequencePoints.AppendChild(sequencePoint);
 
                                 numSequencePoints++;
-                                if (lines.Value > 0)
+                                if (lines.Value.Hits > 0)
                                 {
                                     visitedSequencePoints++;
                                     classVisited = true;
@@ -137,7 +137,7 @@ namespace Coverlet.Core.Reporters
                                 visitedMethods++;
 
                             methodSummary.SetAttribute("numSequencePoints", meth.Value.Count().ToString());
-                            methodSummary.SetAttribute("visitedSequencePoints", meth.Value.Where(l => l.Value > 0).Count().ToString());
+                            methodSummary.SetAttribute("visitedSequencePoints", meth.Value.Where(l => l.Value.Hits > 0).Count().ToString());
                             methodSummary.SetAttribute("numBranchPoints", "0");
                             methodSummary.SetAttribute("visitedBranchPoints", "0");
                             methodSummary.SetAttribute("sequenceCoverage", "0");
@@ -165,7 +165,7 @@ namespace Coverlet.Core.Reporters
                             visitedClasses++;
 
                         classSummary.SetAttribute("numSequencePoints", cls.Value.Select(c => c.Value.Count).Sum().ToString());
-                        classSummary.SetAttribute("visitedSequencePoints", cls.Value.Select(c => c.Value.Where(l => l.Value > 0).Count()).Sum().ToString());
+                        classSummary.SetAttribute("visitedSequencePoints", cls.Value.Select(c => c.Value.Where(l => l.Value.Hits > 0).Count()).Sum().ToString());
                         classSummary.SetAttribute("numBranchPoints", "0");
                         classSummary.SetAttribute("visitedBranchPoints", "0");
                         classSummary.SetAttribute("sequenceCoverage", "0");
