@@ -3,7 +3,7 @@
   <PropertyGroup>
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
     <CoverletOutputDirectory Condition="$(CoverletOutputDirectory) == ''">$(MSBuildProjectDirectory)</CoverletOutputDirectory>
-
+    <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'lcov'">.info</CoverletOutputExtension>
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'opencover'">.xml</CoverletOutputExtension>
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov' and $(CoverletOutputFormat) != 'opencover'">.json</CoverletOutputExtension>

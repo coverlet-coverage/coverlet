@@ -14,6 +14,7 @@ namespace Coverlet.MSbuild.Tasks
     {
         private string _filename;
         private string _format;
+        private int _threshold;
 
         [Required]
         public string Output
@@ -27,6 +28,13 @@ namespace Coverlet.MSbuild.Tasks
         {
             get { return _format; }
             set { _format = value; }
+        }
+
+        [Required]
+        public int Threshold
+        {
+            get { return _threshold; }
+            set { _threshold = value; }
         }
 
         public override bool Execute()
@@ -59,15 +67,23 @@ namespace Coverlet.MSbuild.Tasks
 
                 File.WriteAllText(_filename, result.Format(reporter));
 
+                int total = 0;
                 CoverageSummary coverageSummary = new CoverageSummary(result);
                 var summary = coverageSummary.CalculateSummary();
 
                 ConsoleTable table = new ConsoleTable("Module", "Coverage");
                 foreach (var item in summary)
+                {
                     table.AddRow(item.Key, $"{item.Value}%");
+                    total += item.Value;
+                }
 
                 Console.WriteLine();
                 table.Write(Format.Alternative);
+
+                int average = total / summary.Count;
+                if (average < _threshold)
+                    return false;
             }
             catch (Exception ex)
             {
