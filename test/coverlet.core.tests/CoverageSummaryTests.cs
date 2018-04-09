@@ -14,8 +14,8 @@ namespace Coverlet.Core.Tests
             CoverageResult result = new CoverageResult();
             result.Identifier = Guid.NewGuid().ToString();
             Lines lines = new Lines();
-            lines.Add(1, 1);
-            lines.Add(2, 0);
+            lines.Add(1, new LineInfo { Hits = 1 });
+            lines.Add(2, new LineInfo { Hits = 0 });
             Methods methods = new Methods();
             methods.Add("System.Void Coverlet.Core.Tests.CoverageSummaryTests.TestCalculateSummary()", lines);
             Classes classes = new Classes();

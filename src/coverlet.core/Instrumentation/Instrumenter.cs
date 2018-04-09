@@ -124,7 +124,8 @@ namespace Coverlet.Core.Instrumentation
                     document.Lines.Add(new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
 
-            string marker = $"{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine}";
+            string flag = IsBranchTarget(processor, instruction) ? "B" : "L";
+            string marker = $"{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine},{flag}";
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
@@ -135,6 +136,23 @@ namespace Coverlet.Core.Instrumentation
             processor.InsertBefore(markInstr, pathInstr);
 
             return pathInstr;
+        }
+
+        private bool IsBranchTarget(ILProcessor processor, Instruction instruction)
+        {
+            foreach (var _instruction in processor.Body.Instructions)
+            {
+                if (_instruction.Operand is Instruction target)
+                {
+                    if (target == instruction)
+                        return true;
+                }
+
+                if (_instruction.Operand is Instruction[] targets)
+                    return targets.Any(t => t == instruction);
+            }
+
+            return false;
         }
 
         private void ReplaceInstructionTarget(Instruction instruction, Instruction oldTarget, Instruction newTarget)

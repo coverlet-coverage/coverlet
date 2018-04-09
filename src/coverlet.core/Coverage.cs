@@ -53,19 +53,19 @@ namespace Coverlet.Core
                             {
                                 if (methods.TryGetValue(line.Method, out Lines lines))
                                 {
-                                    documents[doc.Path][line.Class][line.Method].Add(line.Number, line.Hits);
+                                    documents[doc.Path][line.Class][line.Method].Add(line.Number, new LineInfo { Hits = line.Hits, IsBranchPoint = line.IsBranchTarget });
                                 }
                                 else
                                 {
                                     documents[doc.Path][line.Class].Add(line.Method, new Lines());
-                                    documents[doc.Path][line.Class][line.Method].Add(line.Number, line.Hits);
+                                    documents[doc.Path][line.Class][line.Method].Add(line.Number,  new LineInfo { Hits = line.Hits, IsBranchPoint = line.IsBranchTarget });
                                 }
                             }
                             else
                             {
                                 documents[doc.Path].Add(line.Class, new Methods());
                                 documents[doc.Path][line.Class].Add(line.Method, new Lines());
-                                documents[doc.Path][line.Class][line.Method].Add(line.Number, line.Hits);
+                                documents[doc.Path][line.Class][line.Method].Add(line.Number,  new LineInfo { Hits = line.Hits, IsBranchPoint = line.IsBranchTarget });
                             }
                         }
                         else
@@ -73,7 +73,7 @@ namespace Coverlet.Core
                             documents.Add(doc.Path, new Classes());
                             documents[doc.Path].Add(line.Class, new Methods());
                             documents[doc.Path][line.Class].Add(line.Method, new Lines());
-                            documents[doc.Path][line.Class][line.Method].Add(line.Number, line.Hits);
+                            documents[doc.Path][line.Class][line.Method].Add(line.Number,  new LineInfo { Hits = line.Hits, IsBranchPoint = line.IsBranchTarget });
                         }
                     }
                 }
@@ -99,7 +99,7 @@ namespace Coverlet.Core
                 {
                     var info = lines[i].Split(',');
                     // Ignore malformed lines
-                    if (info.Length != 3)
+                    if (info.Length != 4)
                         continue;
 
                     var document = result.Documents.FirstOrDefault(d => d.Path == info[0]);
@@ -108,11 +108,15 @@ namespace Coverlet.Core
 
                     int start = int.Parse(info[1]);
                     int end = int.Parse(info[2]);
+                    bool target = info[3] == "B";
 
                     for (int j = start; j <= end; j++)
                     {
                         var line = document.Lines.First(l => l.Number == j);
                         line.Hits = line.Hits + 1;
+
+                        if (j == start)
+                            line.IsBranchTarget = target;
                     }
                 }
 
