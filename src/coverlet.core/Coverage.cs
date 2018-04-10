@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -120,7 +121,7 @@ namespace Coverlet.Core
                     }
                 }
 
-                File.Delete(result.HitsFilePath);
+                InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
             }
         }
     }
