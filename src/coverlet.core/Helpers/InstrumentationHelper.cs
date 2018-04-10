@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -62,8 +63,31 @@ namespace Coverlet.Core.Helpers
                 Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
             );
 
-            File.Copy(backupPath, module, true);
-            File.Delete(backupPath);
+            // Restore the original module - retry up to 10 times, since the destination file could be locked
+            // See: https://github.com/tonerdo/coverlet/issues/25
+            var currentSleep = 6;
+            Func<TimeSpan> retryStrategy = () => {
+                var sleep = TimeSpan.FromMilliseconds(currentSleep);
+                currentSleep *= 2;
+                return sleep;
+            };
+            RetryHelper.Retry(() => {
+                File.Copy(backupPath, module, true);
+                File.Delete(backupPath);
+            }, retryStrategy, 10);
+        }
+
+        public static void DeleteHitsFile(string path)
+        {
+            // Retry hitting the hits file - retry up to 10 times, since the file could be locked
+            // See: https://github.com/tonerdo/coverlet/issues/25
+            var currentSleep = 6;
+            Func<TimeSpan> retryStrategy = () => {
+                var sleep = TimeSpan.FromMilliseconds(currentSleep);
+                currentSleep *= 2;
+                return sleep;
+            };
+            RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
         }
     }
 }
