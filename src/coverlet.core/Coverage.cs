@@ -80,16 +80,7 @@ namespace Coverlet.Core
                 }
 
                 modules.Add(result.ModulePath, documents);
-                
-                // Restore the original module - retry up to 10 times, since the destination file could be locked
-                // See: https://github.com/tonerdo/coverlet/issues/25
-                var currentSleep = 6;
-                Func<TimeSpan> retryStrategy = () => {
-                    var sleep = TimeSpan.FromMilliseconds(currentSleep);
-                    currentSleep *= 2;
-                    return sleep;
-                };
-                RetryHelper.Retry(() => InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier), retryStrategy, 10);
+                InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
             return new CoverageResult
@@ -130,15 +121,7 @@ namespace Coverlet.Core
                     }
                 }
 
-                // Restore the original module - retry up to 10 times, since the destination file could be locked
-                // See: https://github.com/tonerdo/coverlet/issues/25
-                var currentSleep = 6;
-                Func<TimeSpan> retryStrategy = () => {
-                    var sleep = TimeSpan.FromMilliseconds(currentSleep);
-                    currentSleep *= 2;
-                    return sleep;
-                };
-                RetryHelper.Retry(() => File.Delete(result.HitsFilePath), retryStrategy, 10);
+                InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
             }
         }
     }
