@@ -15,7 +15,7 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
 
             OpenCoverReporter reporter = new OpenCoverReporter();
-            Assert.NotEqual(string.Empty, reporter.Format(result));
+            Assert.NotEqual(string.Empty, reporter.Report(result));
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("Some.Other.Module", CreateSecondDocuments());
 
             OpenCoverReporter reporter = new OpenCoverReporter();
-            var xml = reporter.Format(result);
+            var xml = reporter.Report(result);
             Assert.NotEqual(string.Empty, xml);
 
             Assert.Contains(@"<FileRef uid=""1"" />", xml);

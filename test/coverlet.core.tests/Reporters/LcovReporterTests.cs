@@ -23,7 +23,7 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("module", documents);
 
             LcovReporter reporter = new LcovReporter();
-            Assert.NotEqual(string.Empty, reporter.Format(result));
+            Assert.NotEqual(string.Empty, reporter.Report(result));
         }
     }
 }

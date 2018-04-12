@@ -7,7 +7,7 @@ namespace Coverlet.Core.Reporters
 {
     public class CoberturaReporter : IReporter
     {
-        public string Format(CoverageResult result)
+        public string Report(CoverageResult result)
         {
             XmlDocument xml = new XmlDocument();
             XmlElement coverage = xml.CreateElement("coverage");
