@@ -6,7 +6,8 @@
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'lcov'">.info</CoverletOutputExtension>
     <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'opencover'">.xml</CoverletOutputExtension>
-    <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov' and $(CoverletOutputFormat) != 'opencover'">.json</CoverletOutputExtension>
+    <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'cobertura'">.xml</CoverletOutputExtension>
+    <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov' and $(CoverletOutputFormat) != 'opencover' and $(CoverletOutputFormat) != 'cobertura'">.json</CoverletOutputExtension>
 
     <CoverletOutput>$(CoverletOutputDirectory)\coverage$(CoverletOutputExtension)</CoverletOutput>
     <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>

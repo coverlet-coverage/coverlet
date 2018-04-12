@@ -60,6 +60,9 @@ namespace Coverlet.MSbuild.Tasks
                     case "opencover":
                         reporter = new OpenCoverReporter();
                         break;
+                    case "cobertura":
+                        reporter = new CoberturaReporter();
+                        break;
                     default:
                         reporter = new JsonReporter();
                         break;
