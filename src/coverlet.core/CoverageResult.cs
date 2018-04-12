@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 
-using Coverlet.Core.Reporters;
 using Jil;
 
 namespace Coverlet.Core
@@ -24,8 +23,5 @@ namespace Coverlet.Core
         public Modules Modules;
 
         internal CoverageResult() { }
-
-        public string Format(IReporter reporter)
-            => reporter.Report(this);
     }
 }

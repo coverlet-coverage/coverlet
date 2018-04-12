@@ -5,6 +5,10 @@ namespace Coverlet.Core.Reporters
 {
     public class LcovReporter : IReporter
     {
+        public string Format => "lcov";
+
+        public string Extension => "info";
+
         public string Report(CoverageResult result)
         {
             List<string> lcov = new List<string>();
