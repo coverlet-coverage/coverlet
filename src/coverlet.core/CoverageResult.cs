@@ -26,6 +26,6 @@ namespace Coverlet.Core
         internal CoverageResult() { }
 
         public string Format(IReporter reporter)
-            => reporter.Format(this);
+            => reporter.Report(this);
     }
 }

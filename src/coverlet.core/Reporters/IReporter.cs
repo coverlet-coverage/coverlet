@@ -2,6 +2,6 @@ namespace Coverlet.Core.Reporters
 {
     public interface IReporter
     {
-        string Format(CoverageResult result);
+        string Report(CoverageResult result);
     }
 }

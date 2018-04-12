@@ -5,7 +5,7 @@ namespace Coverlet.Core.Reporters
 {
     public class LcovReporter : IReporter
     {
-        public string Format(CoverageResult result)
+        public string Report(CoverageResult result)
         {
             List<string> lcov = new List<string>();
             foreach (var module in result.Modules)

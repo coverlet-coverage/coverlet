@@ -16,7 +16,7 @@ namespace Coverlet.Core.Tests
             CoverageResult coverageResult = new CoverageResult();
             coverageResult.Format(mock.Object);
 
-            mock.Verify(m => m.Format(coverageResult));
+            mock.Verify(m => m.Report(coverageResult));
         }
     }
 }

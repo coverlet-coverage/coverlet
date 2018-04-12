@@ -23,8 +23,8 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("module", documents);
 
             JsonReporter reporter = new JsonReporter();
-            Assert.NotEqual("{\n}", reporter.Format(result));
-            Assert.NotEqual(string.Empty, reporter.Format(result));
+            Assert.NotEqual("{\n}", reporter.Report(result));
+            Assert.NotEqual(string.Empty, reporter.Report(result));
         }
     }
 }
