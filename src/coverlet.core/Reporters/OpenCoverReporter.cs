@@ -14,7 +14,11 @@ namespace Coverlet.Core.Reporters
             public override Encoding Encoding => Encoding.UTF8;
         }
 
-        public string Format(CoverageResult result)
+        public string Format => "opencover";
+
+        public string Extension => "xml";
+
+        public string Report(CoverageResult result)
         {
             XmlDocument xml = new XmlDocument();
             XmlElement coverage = xml.CreateElement("CoverageSession");
