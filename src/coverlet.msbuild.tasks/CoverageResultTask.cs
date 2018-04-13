@@ -49,23 +49,13 @@ namespace Coverlet.MSbuild.Tasks
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
+                IReporter reporter = new ReporterFactory(_format).CreateReporter();
+                if (reporter == null)
+                    throw new Exception($"Specified output format '{_format}' is not supported");
+
+                _filename = _filename + "." + reporter.Extension;
                 Console.WriteLine($"  Generating report '{_filename}'");
-
-                IReporter reporter = default(IReporter);
-                switch (_format)
-                {
-                    case "lcov":
-                        reporter = new LcovReporter();
-                        break;
-                    case "opencover":
-                        reporter = new OpenCoverReporter();
-                        break;
-                    default:
-                        reporter = new JsonReporter();
-                        break;
-                }
-
-                File.WriteAllText(_filename, result.Format(reporter));
+                File.WriteAllText(_filename, reporter.Report(result));
 
                 int total = 0;
                 CoverageSummary coverageSummary = new CoverageSummary(result);
