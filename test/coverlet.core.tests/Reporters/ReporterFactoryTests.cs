@@ -12,7 +12,7 @@ namespace Coverlet.Core.Reporters.Tests
             Assert.Equal(typeof(LcovReporter), new ReporterFactory("lcov").CreateReporter().GetType());
             Assert.Equal(typeof(OpenCoverReporter), new ReporterFactory("opencover").CreateReporter().GetType());
             Assert.Equal(typeof(CoberturaReporter), new ReporterFactory("cobertura").CreateReporter().GetType());
-            Assert.Equal(null, new ReporterFactory("").CreateReporter());
+            Assert.Null(new ReporterFactory("").CreateReporter());
         }
     }
 }
