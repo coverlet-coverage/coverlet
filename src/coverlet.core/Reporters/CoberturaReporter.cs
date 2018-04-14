@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace Coverlet.Core.Reporters
             coverage.SetAttribute("line-rate", summary.CalculateLineCoverage(result.Modules).ToString());
             coverage.SetAttribute("branch-rate", summary.CalculateBranchCoverage(result.Modules).ToString());
             coverage.SetAttribute("version", "1.9");
-            coverage.SetAttribute("timestamp", "0");
+            coverage.SetAttribute("timestamp", ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString());
 
             XmlElement sources = xml.CreateElement("sources");
             foreach (var src in GetSources(result.Modules))
