@@ -53,7 +53,7 @@ namespace Coverlet.Core
             }
 
             coverage = totalLines == 0 ? totalLines : linesCovered / totalLines;
-            return Math.Round(coverage, 1);
+            return Math.Round(coverage, 3);
         }
 
         public double CalculateLineCoverage(KeyValuePair<string, Methods> @class)
@@ -63,7 +63,7 @@ namespace Coverlet.Core
                 total += CalculateLineCoverage(method);
 
             average = total / @class.Value.Count;
-            return Math.Round(average, 1);
+            return Math.Round(average, 3);
         }
 
         public double CalculateLineCoverage(KeyValuePair<string, Classes> document)
@@ -73,7 +73,7 @@ namespace Coverlet.Core
                 total += CalculateLineCoverage(@class);
 
             average = total / document.Value.Count;
-            return Math.Round(average, 1);
+            return Math.Round(average, 3);
         }
 
         public double CalculateLineCoverage(KeyValuePair<string, Documents> module)
@@ -83,7 +83,7 @@ namespace Coverlet.Core
                 total += CalculateLineCoverage(document);
 
             average = total / module.Value.Count;
-            return Math.Round(average, 1);
+            return Math.Round(average, 3);
         }
 
         public double CalculateBranchCoverage(KeyValuePair<string, Lines> method)
@@ -97,7 +97,7 @@ namespace Coverlet.Core
             }
 
             coverage = totalLines == 0 ? totalLines : linesCovered / totalLines;
-            return Math.Round(coverage, 1);
+            return Math.Round(coverage, 3);
         }
 
         public double CalculateBranchCoverage(KeyValuePair<string, Methods> @class)
@@ -107,7 +107,7 @@ namespace Coverlet.Core
                 total += CalculateBranchCoverage(method);
 
             average = total / @class.Value.Count;
-            return Math.Round(average, 1);
+            return Math.Round(average, 3);
         }
 
         public double CalculateBranchCoverage(KeyValuePair<string, Classes> document)
@@ -117,7 +117,7 @@ namespace Coverlet.Core
                 total += CalculateBranchCoverage(@class);
 
             average = total / document.Value.Count;
-            return Math.Round(average, 1);
+            return Math.Round(average, 3);
         }
 
         public double CalculateBranchCoverage(KeyValuePair<string, Documents> module)
@@ -127,7 +127,7 @@ namespace Coverlet.Core
                 total += CalculateBranchCoverage(document);
 
             average = total / module.Value.Count;
-            return Math.Round(average, 1);
+            return Math.Round(average, 3);
         }
 
         public double CalculateMethodCoverage(KeyValuePair<string, Lines> method)
@@ -145,7 +145,7 @@ namespace Coverlet.Core
                 total += CalculateMethodCoverage(method);
 
             average = total / @class.Value.Count;
-            return Math.Round(average, 1);
+            return Math.Round(average, 3);
         }
 
         public double CalculateMethodCoverage(KeyValuePair<string, Classes> document)
@@ -155,7 +155,7 @@ namespace Coverlet.Core
                 total += CalculateMethodCoverage(@class);
 
             average = total / document.Value.Count;
-            return Math.Round(average, 1);
+            return Math.Round(average, 3);
         }
 
         public double CalculateMethodCoverage(KeyValuePair<string, Documents> module)
@@ -165,7 +165,7 @@ namespace Coverlet.Core
                 total += CalculateMethodCoverage(document);
 
             average = total / module.Value.Count;
-            return Math.Round(average, 1);
+            return Math.Round(average, 3);
         }
     }
 }
