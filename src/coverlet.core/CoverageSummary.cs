@@ -52,15 +52,18 @@ namespace Coverlet.Core
 
         public double CalculateBranchCoverage(KeyValuePair<string, Lines> method)
         {
-            double coverage = 0, totalLines = 0, linesCovered = 0;
+            double coverage = 0, totalPoints = 0, pointsCovered = 0;
             foreach (var line in method.Value)
             {
-                totalLines++;
-                if (line.Value.Hits > 0 && line.Value.IsBranchPoint)
-                    linesCovered++;
+                if (line.Value.IsBranchPoint)
+                {
+                    totalPoints++;
+                    if (line.Value.Hits > 0)
+                        pointsCovered++;
+                }
             }
 
-            coverage = totalLines == 0 ? totalLines : linesCovered / totalLines;
+            coverage = totalPoints == 0 ? totalPoints : pointsCovered / totalPoints;
             return Math.Round(coverage, 3);
         }
 
