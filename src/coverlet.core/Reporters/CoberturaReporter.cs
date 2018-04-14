@@ -13,10 +13,12 @@ namespace Coverlet.Core.Reporters
 
         public string Report(CoverageResult result)
         {
+            CoverageSummary summary = new CoverageSummary();
+
             XmlDocument xml = new XmlDocument();
             XmlElement coverage = xml.CreateElement("coverage");
-            coverage.SetAttribute("line-rate", "0");
-            coverage.SetAttribute("branch-rate", "0");
+            coverage.SetAttribute("line-rate", summary.CalculateLineCoverage(result.Modules).ToString());
+            coverage.SetAttribute("branch-rate", summary.CalculateBranchCoverage(result.Modules).ToString());
             coverage.SetAttribute("version", "1.9");
             coverage.SetAttribute("timestamp", "0");
 
@@ -32,8 +34,8 @@ namespace Coverlet.Core.Reporters
             foreach (var module in result.Modules)
             {
                 XmlElement package = xml.CreateElement("package");
-                package.SetAttribute("line-rate", "0");
-                package.SetAttribute("branch-rate", "0");
+                package.SetAttribute("line-rate", summary.CalculateLineCoverage(module.Value).ToString());
+                package.SetAttribute("branch-rate", summary.CalculateBranchCoverage(module.Value).ToString());
                 package.SetAttribute("complexity", "0");
 
                 XmlElement classes = xml.CreateElement("classes");
@@ -44,8 +46,8 @@ namespace Coverlet.Core.Reporters
                         XmlElement @class = xml.CreateElement("class");
                         @class.SetAttribute("name", cls.Key);
                         @class.SetAttribute("filename", Path.GetFileName(document.Key));
-                        @class.SetAttribute("line-rate", "0");
-                        @class.SetAttribute("branch-rate", "0");
+                        @class.SetAttribute("line-rate", summary.CalculateLineCoverage(cls.Value).ToString());
+                        @class.SetAttribute("branch-rate", summary.CalculateBranchCoverage(cls.Value).ToString());
                         @class.SetAttribute("complexity", "0");
 
                         XmlElement methods = xml.CreateElement("methods");
@@ -54,8 +56,8 @@ namespace Coverlet.Core.Reporters
                             XmlElement method = xml.CreateElement("method");
                             method.SetAttribute("name", meth.Key.Split(':')[2].Split('(')[0]);
                             method.SetAttribute("signature", meth.Key);
-                            method.SetAttribute("line-rate", "0");
-                            method.SetAttribute("branch-rate", "0");
+                            method.SetAttribute("line-rate", summary.CalculateLineCoverage(meth.Value).ToString());
+                            method.SetAttribute("branch-rate", summary.CalculateBranchCoverage(meth.Value).ToString());
 
                             XmlElement lines = xml.CreateElement("lines");
                             foreach (var ln in meth.Value)
