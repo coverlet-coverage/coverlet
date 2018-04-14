@@ -63,7 +63,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 foreach (var module in result.Modules)
                 {
-                    double percent = summary.CalculateLineCoverage(module) * 100;
+                    double percent = summary.CalculateLineCoverage(module.Value) * 100;
                     table.AddRow(System.IO.Path.GetFileNameWithoutExtension(module.Key), $"{percent}%");
                     total += percent;
                 }

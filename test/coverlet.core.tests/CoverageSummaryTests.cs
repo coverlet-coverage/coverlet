@@ -40,10 +40,10 @@ namespace Coverlet.Core.Tests
             var @class = document.Value.First();
             var method = @class.Value.First();
             
-            Assert.Equal(0.5, summary.CalculateLineCoverage(module));
-            Assert.Equal(0.5, summary.CalculateLineCoverage(document));
-            Assert.Equal(0.5, summary.CalculateLineCoverage(@class));
-            Assert.Equal(0.5, summary.CalculateLineCoverage(method));
+            Assert.Equal(0.5, summary.CalculateLineCoverage(module.Value));
+            Assert.Equal(0.5, summary.CalculateLineCoverage(document.Value));
+            Assert.Equal(0.5, summary.CalculateLineCoverage(@class.Value));
+            Assert.Equal(0.5, summary.CalculateLineCoverage(method.Value));
         }
 
         [Fact]
@@ -56,10 +56,10 @@ namespace Coverlet.Core.Tests
             var @class = document.Value.First();
             var method = @class.Value.First();
 
-            Assert.Equal(1, summary.CalculateBranchCoverage(module));
-            Assert.Equal(1, summary.CalculateBranchCoverage(document));
-            Assert.Equal(1, summary.CalculateBranchCoverage(@class));
-            Assert.Equal(1, summary.CalculateBranchCoverage(method));
+            Assert.Equal(1, summary.CalculateBranchCoverage(module.Value));
+            Assert.Equal(1, summary.CalculateBranchCoverage(document.Value));
+            Assert.Equal(1, summary.CalculateBranchCoverage(@class.Value));
+            Assert.Equal(1, summary.CalculateBranchCoverage(method.Value));
         }
 
         [Fact]
@@ -72,10 +72,10 @@ namespace Coverlet.Core.Tests
             var @class = document.Value.First();
             var method = @class.Value.First();
 
-            Assert.Equal(1, summary.CalculateMethodCoverage(module));
-            Assert.Equal(1, summary.CalculateMethodCoverage(document));
-            Assert.Equal(1, summary.CalculateMethodCoverage(@class));
-            Assert.Equal(1, summary.CalculateMethodCoverage(method));
+            Assert.Equal(1, summary.CalculateMethodCoverage(module.Value));
+            Assert.Equal(1, summary.CalculateMethodCoverage(document.Value));
+            Assert.Equal(1, summary.CalculateMethodCoverage(@class.Value));
+            Assert.Equal(1, summary.CalculateMethodCoverage(method.Value));
         }
     }
 }
