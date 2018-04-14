@@ -20,6 +20,7 @@ namespace Coverlet.Core.Reporters
 
         public string Report(CoverageResult result)
         {
+            CoverageSummary summary = new CoverageSummary();
             XmlDocument xml = new XmlDocument();
             XmlElement coverage = xml.CreateElement("CoverageSession");
             XmlElement coverageSummary = xml.CreateElement("Summary");
@@ -77,8 +78,8 @@ namespace Coverlet.Core.Reporters
 
                             method.SetAttribute("cyclomaticComplexity", "0");
                             method.SetAttribute("nPathComplexity", "0");
-                            method.SetAttribute("sequenceCoverage", "0");
-                            method.SetAttribute("branchCoverage", "0");
+                            method.SetAttribute("sequenceCoverage", summary.CalculateLineCoverage(meth.Value).ToString());
+                            method.SetAttribute("branchCoverage", summary.CalculateBranchCoverage(meth.Value).ToString());
                             method.SetAttribute("isConstructor", meth.Key.Contains("ctor").ToString());
                             method.SetAttribute("isGetter", meth.Key.Contains("get_").ToString());
                             method.SetAttribute("isSetter", meth.Key.Contains("set_").ToString());
@@ -161,8 +162,8 @@ namespace Coverlet.Core.Reporters
                             methodSummary.SetAttribute("visitedSequencePoints", meth.Value.Where(l => l.Value.Hits > 0).Count().ToString());
                             methodSummary.SetAttribute("numBranchPoints", meth.Value.Where(l => l.Value.IsBranchPoint).Count().ToString());
                             methodSummary.SetAttribute("visitedBranchPoints", meth.Value.Where(l => l.Value.IsBranchPoint && l.Value.Hits > 0).Count().ToString());
-                            methodSummary.SetAttribute("sequenceCoverage", "0");
-                            methodSummary.SetAttribute("branchCoverage", "0");
+                            methodSummary.SetAttribute("sequenceCoverage", summary.CalculateLineCoverage(meth.Value).ToString());
+                            methodSummary.SetAttribute("branchCoverage", summary.CalculateBranchCoverage(meth.Value).ToString());
                             methodSummary.SetAttribute("maxCyclomaticComplexity", "0");
                             methodSummary.SetAttribute("minCyclomaticComplexity", "0");
                             methodSummary.SetAttribute("visitedClasses", "0");
@@ -189,8 +190,8 @@ namespace Coverlet.Core.Reporters
                         classSummary.SetAttribute("visitedSequencePoints", cls.Value.Select(c => c.Value.Where(l => l.Value.Hits > 0).Count()).Sum().ToString());
                         classSummary.SetAttribute("numBranchPoints", cls.Value.Select(c => c.Value.Count(l => l.Value.IsBranchPoint)).Sum().ToString());
                         classSummary.SetAttribute("visitedBranchPoints", cls.Value.Select(c => c.Value.Where(l => l.Value.Hits > 0 && l.Value.IsBranchPoint).Count()).Sum().ToString());
-                        classSummary.SetAttribute("sequenceCoverage", "0");
-                        classSummary.SetAttribute("branchCoverage", "0");
+                        classSummary.SetAttribute("sequenceCoverage", summary.CalculateLineCoverage(cls.Value).ToString());
+                        classSummary.SetAttribute("branchCoverage", summary.CalculateBranchCoverage(cls.Value).ToString());
                         classSummary.SetAttribute("maxCyclomaticComplexity", "0");
                         classSummary.SetAttribute("minCyclomaticComplexity", "0");
                         classSummary.SetAttribute("visitedClasses", classVisited ? "1" : "0");
@@ -215,8 +216,8 @@ namespace Coverlet.Core.Reporters
             coverageSummary.SetAttribute("visitedSequencePoints", visitedSequencePoints.ToString());
             coverageSummary.SetAttribute("numBranchPoints", numBranchPoints.ToString());
             coverageSummary.SetAttribute("visitedBranchPoints", visitedBranchPoints.ToString());
-            coverageSummary.SetAttribute("sequenceCoverage", "0");
-            coverageSummary.SetAttribute("branchCoverage", "0");
+            coverageSummary.SetAttribute("sequenceCoverage", summary.CalculateLineCoverage(result.Modules).ToString());
+            coverageSummary.SetAttribute("branchCoverage", summary.CalculateLineCoverage(result.Modules).ToString());
             coverageSummary.SetAttribute("maxCyclomaticComplexity", "0");
             coverageSummary.SetAttribute("minCyclomaticComplexity", "0");
             coverageSummary.SetAttribute("visitedClasses", visitedClasses.ToString());
