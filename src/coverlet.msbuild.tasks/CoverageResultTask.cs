@@ -57,21 +57,21 @@ namespace Coverlet.MSbuild.Tasks
                 Console.WriteLine($"  Generating report '{_filename}'");
                 File.WriteAllText(_filename, reporter.Report(result));
 
-                int total = 0;
-                CoverageSummary coverageSummary = new CoverageSummary(result);
-                var summary = coverageSummary.CalculateSummary();
-
+                double total = 0;
+                CoverageSummary summary = new CoverageSummary();
                 ConsoleTable table = new ConsoleTable("Module", "Coverage");
-                foreach (var item in summary)
+
+                foreach (var module in result.Modules)
                 {
-                    table.AddRow(item.Key, $"{item.Value}%");
-                    total += item.Value;
+                    double percent = summary.CalculateLineCoverage(module) * 100;
+                    table.AddRow(System.IO.Path.GetFileNameWithoutExtension(module.Key), $"{percent}%");
+                    total += percent;
                 }
 
                 Console.WriteLine();
-                table.Write(Format.Alternative);
+                Console.WriteLine(table.ToMarkDownString());
 
-                int average = total / summary.Count;
+                double average = total / result.Modules.Count;
                 if (average < _threshold)
                     return false;
             }
