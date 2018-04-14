@@ -71,6 +71,7 @@ namespace Coverlet.Core.Helpers
                 currentSleep *= 2;
                 return sleep;
             };
+
             RetryHelper.Retry(() => {
                 File.Copy(backupPath, module, true);
                 File.Delete(backupPath);
@@ -87,6 +88,7 @@ namespace Coverlet.Core.Helpers
                 currentSleep *= 2;
                 return sleep;
             };
+
             RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
         }
     }
