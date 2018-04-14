@@ -59,5 +59,15 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.False(File.Exists(Path.Combine(directory.FullName, "coverlet.core.dll")));
             Directory.Delete(directory.FullName, true);
         }
+
+        [Fact]
+        public void TestDeleteHitsFile()
+        {
+            var tempFile = Path.GetTempFileName();
+            Assert.True(File.Exists(tempFile));
+
+            InstrumentationHelper.DeleteHitsFile(tempFile);
+            Assert.False(File.Exists(tempFile));
+        }
     }
 }
