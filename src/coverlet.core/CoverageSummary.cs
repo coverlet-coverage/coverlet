@@ -6,132 +6,146 @@ namespace Coverlet.Core
 {
     public class CoverageSummary
     {
-        public double CalculateLineCoverage(KeyValuePair<string, Lines> method)
+        public double CalculateLineCoverage(Lines lines)
         {
-            double coverage = 0, totalLines = 0, linesCovered = 0;
-            foreach (var line in method.Value)
-            {
-                totalLines++;
-                if (line.Value.Hits > 0)
-                    linesCovered++;
-            }
-
-            coverage = totalLines == 0 ? totalLines : linesCovered / totalLines;
+            double linesCovered = lines.Where(l => l.Value.Hits > 0).Count();
+            double coverage = lines.Count == 0 ? lines.Count : linesCovered / lines.Count;
             return Math.Round(coverage, 3);
         }
 
-        public double CalculateLineCoverage(KeyValuePair<string, Methods> @class)
+        public double CalculateLineCoverage(Methods methods)
         {
             double total = 0, average = 0;
-            foreach (var method in @class.Value)
-                total += CalculateLineCoverage(method);
+            foreach (var method in methods)
+                total += CalculateLineCoverage(method.Value);
 
-            average = total / @class.Value.Count;
+            average = total / methods.Count;
             return Math.Round(average, 3);
         }
 
-        public double CalculateLineCoverage(KeyValuePair<string, Classes> document)
+        public double CalculateLineCoverage(Classes classes)
         {
             double total = 0, average = 0;
-            foreach (var @class in document.Value)
-                total += CalculateLineCoverage(@class);
+            foreach (var @class in classes)
+                total += CalculateLineCoverage(@class.Value);
 
-            average = total / document.Value.Count;
+            average = total / classes.Count;
             return Math.Round(average, 3);
         }
 
-        public double CalculateLineCoverage(KeyValuePair<string, Documents> module)
+        public double CalculateLineCoverage(Documents documents)
         {
             double total = 0, average = 0;
-            foreach (var document in module.Value)
-                total += CalculateLineCoverage(document);
+            foreach (var document in documents)
+                total += CalculateLineCoverage(document.Value);
 
-            average = total / module.Value.Count;
+            average = total / documents.Count;
             return Math.Round(average, 3);
         }
 
-        public double CalculateBranchCoverage(KeyValuePair<string, Lines> method)
+        public double CalculateLineCoverage(Modules modules)
         {
-            double coverage = 0, totalPoints = 0, pointsCovered = 0;
-            foreach (var line in method.Value)
-            {
-                if (line.Value.IsBranchPoint)
-                {
-                    totalPoints++;
-                    if (line.Value.Hits > 0)
-                        pointsCovered++;
-                }
-            }
+            double total = 0, average = 0;
+            foreach (var module in modules)
+                total += CalculateLineCoverage(module.Value);
 
-            coverage = totalPoints == 0 ? totalPoints : pointsCovered / totalPoints;
+            average = total / modules.Count;
+            return Math.Round(average, 3);
+        }
+
+        public double CalculateBranchCoverage(Lines lines)
+        {
+            double pointsCovered = lines.Where(l => l.Value.Hits > 0 && l.Value.IsBranchPoint).Count();
+            double totalPoints = lines.Where(l => l.Value.IsBranchPoint).Count();
+            double coverage = totalPoints == 0 ? totalPoints : pointsCovered / totalPoints;
             return Math.Round(coverage, 3);
         }
 
-        public double CalculateBranchCoverage(KeyValuePair<string, Methods> @class)
+        public double CalculateBranchCoverage(Methods methods)
         {
             double total = 0, average = 0;
-            foreach (var method in @class.Value)
-                total += CalculateBranchCoverage(method);
+            foreach (var method in methods)
+                total += CalculateBranchCoverage(method.Value);
 
-            average = total / @class.Value.Count;
+            average = total / methods.Count;
             return Math.Round(average, 3);
         }
 
-        public double CalculateBranchCoverage(KeyValuePair<string, Classes> document)
+        public double CalculateBranchCoverage(Classes classes)
         {
             double total = 0, average = 0;
-            foreach (var @class in document.Value)
-                total += CalculateBranchCoverage(@class);
+            foreach (var @class in classes)
+                total += CalculateBranchCoverage(@class.Value);
 
-            average = total / document.Value.Count;
+            average = total / classes.Count;
             return Math.Round(average, 3);
         }
 
-        public double CalculateBranchCoverage(KeyValuePair<string, Documents> module)
+        public double CalculateBranchCoverage(Documents documents)
         {
             double total = 0, average = 0;
-            foreach (var document in module.Value)
-                total += CalculateBranchCoverage(document);
+            foreach (var document in documents)
+                total += CalculateBranchCoverage(document.Value);
 
-            average = total / module.Value.Count;
+            average = total / documents.Count;
             return Math.Round(average, 3);
         }
 
-        public double CalculateMethodCoverage(KeyValuePair<string, Lines> method)
+        public double CalculateBranchCoverage(Modules modules)
         {
-            if (method.Value.Any(l => l.Value.Hits > 0))
+            double total = 0, average = 0;
+            foreach (var module in modules)
+                total += CalculateBranchCoverage(module.Value);
+
+            average = total / modules.Count;
+            return Math.Round(average, 3);
+        }
+
+        public double CalculateMethodCoverage(Lines lines)
+        {
+            if (lines.Any(l => l.Value.Hits > 0))
                 return 1;
 
             return 0;
         }
 
-        public double CalculateMethodCoverage(KeyValuePair<string, Methods> @class)
+        public double CalculateMethodCoverage(Methods methods)
         {
             double total = 0, average = 0;
-            foreach (var method in @class.Value)
-                total += CalculateMethodCoverage(method);
+            foreach (var method in methods)
+                total += CalculateMethodCoverage(method.Value);
 
-            average = total / @class.Value.Count;
+            average = total / methods.Count;
             return Math.Round(average, 3);
         }
 
-        public double CalculateMethodCoverage(KeyValuePair<string, Classes> document)
+        public double CalculateMethodCoverage(Classes classes)
         {
             double total = 0, average = 0;
-            foreach (var @class in document.Value)
-                total += CalculateMethodCoverage(@class);
+            foreach (var @class in classes)
+                total += CalculateMethodCoverage(@class.Value);
 
-            average = total / document.Value.Count;
+            average = total / classes.Count;
             return Math.Round(average, 3);
         }
 
-        public double CalculateMethodCoverage(KeyValuePair<string, Documents> module)
+        public double CalculateMethodCoverage(Documents documents)
         {
             double total = 0, average = 0;
-            foreach (var document in module.Value)
-                total += CalculateMethodCoverage(document);
+            foreach (var document in documents)
+                total += CalculateMethodCoverage(document.Value);
 
-            average = total / module.Value.Count;
+            average = total / documents.Count;
+            return Math.Round(average, 3);
+        }
+
+        public double CalculateMethodCoverage(Modules modules)
+        {
+            double total = 0, average = 0;
+            foreach (var module in modules)
+                total += CalculateMethodCoverage(module.Value);
+
+            average = total / modules.Count;
             return Math.Round(average, 3);
         }
     }
