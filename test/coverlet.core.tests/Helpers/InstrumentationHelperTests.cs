@@ -61,6 +61,16 @@ namespace Coverlet.Core.Helpers.Tests
         }
 
         [Fact]
+        public void TestReadHitsFile()
+        {
+            var tempFile = Path.GetTempFileName();
+            Assert.True(File.Exists(tempFile));
+
+            var lines = InstrumentationHelper.ReadHitsFile(tempFile);
+            Assert.NotNull(lines);
+        }
+
+        [Fact]
         public void TestDeleteHitsFile()
         {
             var tempFile = Path.GetTempFileName();
