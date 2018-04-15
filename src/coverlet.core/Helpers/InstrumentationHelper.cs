@@ -78,6 +78,21 @@ namespace Coverlet.Core.Helpers
             }, retryStrategy, 10);
         }
 
+        public static string[] ReadHitsFile(string path)
+        {
+            // Retry hitting the hits file - retry up to 10 times, since the file could be locked
+            // See: https://github.com/tonerdo/coverlet/issues/25
+            var currentSleep = 6;
+            Func<TimeSpan> retryStrategy = () =>
+            {
+                var sleep = TimeSpan.FromMilliseconds(currentSleep);
+                currentSleep *= 2;
+                return sleep;
+            };
+
+            return RetryHelper.Do(() => File.ReadAllLines(path), retryStrategy, 10);
+        }
+
         public static void DeleteHitsFile(string path)
         {
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
