@@ -54,9 +54,8 @@ namespace Coverlet.Core.Instrumentation
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
                 ModuleDefinition module = ModuleDefinition.ReadModule(stream, parameters);
-
-                var moduleTypes = module.GetTypes().ToList();
-                foreach (var type in moduleTypes)
+                
+                foreach (var type in module.GetTypes())
                 {
                     if (type.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
                         continue;
