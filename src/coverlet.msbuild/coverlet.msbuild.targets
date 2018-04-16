@@ -19,7 +19,8 @@
     <Coverlet.MSbuild.Tasks.CoverageResultTask
       Condition="$(CollectCoverage) == 'true'"
       Output="$(CoverletOutput)"
-      OutputFormat="$(CoverletOutputFormat)" />
+      OutputFormat="$(CoverletOutputFormat)"
+      Threshold="$(Threshold)" />
   </Target>
 
 </Project>

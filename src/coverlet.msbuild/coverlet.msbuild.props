@@ -1,15 +1,14 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+  
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
     <CoverletOutputDirectory Condition="$(CoverletOutputDirectory) == ''">$(MSBuildProjectDirectory)</CoverletOutputDirectory>
+    <CoverletOutput>$(CoverletOutputDirectory)\coverage</CoverletOutput>
 
-    <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'lcov'">.info</CoverletOutputExtension>
-    <CoverletOutputExtension Condition="$(CoverletOutputFormat) == 'opencover'">.xml</CoverletOutputExtension>
-    <CoverletOutputExtension Condition="$(CoverletOutputFormat) != 'lcov' and $(CoverletOutputFormat) != 'opencover'">.json</CoverletOutputExtension>
-
-    <CoverletOutput>$(CoverletOutputDirectory)\coverage$(CoverletOutputExtension)</CoverletOutput>
+    <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>
+
   </PropertyGroup>
 
 </Project>

@@ -14,6 +14,7 @@ namespace Coverlet.MSbuild.Tasks
     {
         private string _filename;
         private string _format;
+        private int _threshold;
 
         [Required]
         public string Output
@@ -29,6 +30,13 @@ namespace Coverlet.MSbuild.Tasks
             set { _format = value; }
         }
 
+        [Required]
+        public int Threshold
+        {
+            get { return _threshold; }
+            set { _threshold = value; }
+        }
+
         public override bool Execute()
         {
             try
@@ -41,33 +49,31 @@ namespace Coverlet.MSbuild.Tasks
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
-                Console.WriteLine($"  Generating report '{_filename}'");
+                IReporter reporter = new ReporterFactory(_format).CreateReporter();
+                if (reporter == null)
+                    throw new Exception($"Specified output format '{_format}' is not supported");
 
-                IReporter reporter = default(IReporter);
-                switch (_format)
+                _filename = _filename + "." + reporter.Extension;
+                Console.WriteLine($"  Generating report '{_filename}'");
+                File.WriteAllText(_filename, reporter.Report(result));
+
+                double total = 0;
+                CoverageSummary summary = new CoverageSummary();
+                ConsoleTable table = new ConsoleTable("Module", "Coverage");
+
+                foreach (var module in result.Modules)
                 {
-                    case "lcov":
-                        reporter = new LcovReporter();
-                        break;
-                    case "opencover":
-                        reporter = new OpenCoverReporter();
-                        break;
-                    default:
-                        reporter = new JsonReporter();
-                        break;
+                    double percent = summary.CalculateLineCoverage(module.Value) * 100;
+                    table.AddRow(System.IO.Path.GetFileNameWithoutExtension(module.Key), $"{percent}%");
+                    total += percent;
                 }
 
-                File.WriteAllText(_filename, result.Format(reporter));
-
-                CoverageSummary coverageSummary = new CoverageSummary(result);
-                var summary = coverageSummary.CalculateSummary();
-
-                ConsoleTable table = new ConsoleTable("Module", "Coverage");
-                foreach (var item in summary)
-                    table.AddRow(item.Key, $"{item.Value}%");
-
                 Console.WriteLine();
-                table.Write(Format.Alternative);
+                Console.WriteLine(table.ToMarkDownString());
+
+                double average = total / result.Modules.Count;
+                if (average < _threshold)
+                    return false;
             }
             catch (Exception ex)
             {
