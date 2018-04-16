@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 using Coverlet.Core;
@@ -7,6 +8,7 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class CoverageSummaryTests
     {
         private Modules _modules;
