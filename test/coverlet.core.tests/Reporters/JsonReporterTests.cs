@@ -1,8 +1,10 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class JsonReporterTests
     {
         [Fact]

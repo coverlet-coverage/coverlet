@@ -1,10 +1,11 @@
 using System.Collections.Generic;
-
+using System.Diagnostics.CodeAnalysis;
 using Coverlet.Core.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Extensions
 {
+    [ExcludeFromCodeCoverage]
     public class DictionaryExtensionsTests
     {
         [Fact]

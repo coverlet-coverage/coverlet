@@ -1,9 +1,11 @@
 
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 using Coverlet.Core.Instrumentation;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class InstrumenterResultTests
     {
         [Fact]

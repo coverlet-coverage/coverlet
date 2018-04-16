@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 using Xunit;
@@ -6,6 +7,7 @@ using Coverlet.Core.Helpers;
 
 namespace Coverlet.Core.Helpers.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class InstrumentationHelperTests
     {
         [Fact]

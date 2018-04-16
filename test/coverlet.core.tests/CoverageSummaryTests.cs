@@ -1,11 +1,12 @@
 using System;
-
+using System.Diagnostics.CodeAnalysis;
 using Coverlet.Core;
 using Moq;
 using Xunit;
 
 namespace Coverlet.Core.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class CoverageSummaryTests
     {
         [Fact]
