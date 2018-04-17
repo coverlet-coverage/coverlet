@@ -23,7 +23,7 @@ namespace Coverlet.Core.Reporters
                         {
                             foreach (var line in method.Value)
                             {
-                                lcov.Add($"DA:{line.Key},{line.Value}");
+                                lcov.Add($"DA:{line.Key},{line.Value.Hits}");
                             }
                         }
                     }
