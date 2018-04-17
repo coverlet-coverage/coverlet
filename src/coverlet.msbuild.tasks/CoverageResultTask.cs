@@ -73,7 +73,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 double average = total / result.Modules.Count;
                 if (average < _threshold)
-                    return false;
+                    throw new Exception($"Overall average coverage '{average}%' is lower than specified threshold '{_threshold}%'");
             }
             catch (Exception ex)
             {
