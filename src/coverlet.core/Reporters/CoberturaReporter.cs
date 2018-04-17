@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace Coverlet.Core.Reporters
 {
@@ -16,82 +18,81 @@ namespace Coverlet.Core.Reporters
         {
             CoverageSummary summary = new CoverageSummary();
 
-            XmlDocument xml = new XmlDocument();
-            XmlElement coverage = xml.CreateElement("coverage");
-            coverage.SetAttribute("line-rate", summary.CalculateLineCoverage(result.Modules).ToString());
-            coverage.SetAttribute("branch-rate", summary.CalculateBranchCoverage(result.Modules).ToString());
-            coverage.SetAttribute("version", "1.9");
-            coverage.SetAttribute("timestamp", ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString());
+            XDocument xml = new XDocument();
+            XElement coverage = new XElement("coverage");
+            coverage.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(result.Modules).ToString()));
+            coverage.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(result.Modules).ToString()));
+            coverage.Add(new XAttribute("version", "1.9"));
+            coverage.Add(new XAttribute("timestamp", ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString()));
 
-            XmlElement sources = xml.CreateElement("sources");
+            XElement sources = new XElement("sources");
             foreach (var src in GetSources(result.Modules))
             {
-                XmlElement source = xml.CreateElement("source");
-                source.AppendChild(xml.CreateTextNode(src));
-                sources.AppendChild(source);
+                XElement source = new XElement("source", src);
+                sources.Add(source);
             }
 
-            XmlElement packages = xml.CreateElement("packages");
+            XElement packages = new XElement("packages");
             foreach (var module in result.Modules)
             {
-                XmlElement package = xml.CreateElement("package");
-                package.SetAttribute("line-rate", summary.CalculateLineCoverage(module.Value).ToString());
-                package.SetAttribute("branch-rate", summary.CalculateBranchCoverage(module.Value).ToString());
-                package.SetAttribute("complexity", "0");
+                XElement package = new XElement("package");
+                package.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(module.Value).ToString()));
+                package.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(module.Value).ToString()));
+                package.Add(new XAttribute("complexity", "0"));
 
-                XmlElement classes = xml.CreateElement("classes");
+                XElement classes = new XElement("classes");
                 foreach (var document in module.Value)
                 {
                     foreach (var cls in document.Value)
                     {
-                        XmlElement @class = xml.CreateElement("class");
-                        @class.SetAttribute("name", cls.Key);
-                        @class.SetAttribute("filename", Path.GetFileName(document.Key));
-                        @class.SetAttribute("line-rate", summary.CalculateLineCoverage(cls.Value).ToString());
-                        @class.SetAttribute("branch-rate", summary.CalculateBranchCoverage(cls.Value).ToString());
-                        @class.SetAttribute("complexity", "0");
+                        XElement @class = new XElement("class");
+                        @class.Add(new XAttribute("name", cls.Key));
+                        @class.Add(new XAttribute("filename", Path.GetFileName(document.Key)));
+                        @class.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(cls.Value).ToString()));
+                        @class.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(cls.Value).ToString()));
+                        @class.Add(new XAttribute("complexity", "0"));
 
-                        XmlElement methods = xml.CreateElement("methods");
+                        XElement methods = new XElement("methods");
                         foreach (var meth in cls.Value)
                         {
-                            XmlElement method = xml.CreateElement("method");
-                            method.SetAttribute("name", meth.Key.Split(':')[2].Split('(')[0]);
-                            method.SetAttribute("signature", meth.Key);
-                            method.SetAttribute("line-rate", summary.CalculateLineCoverage(meth.Value).ToString());
-                            method.SetAttribute("branch-rate", summary.CalculateBranchCoverage(meth.Value).ToString());
+                            XElement method = new XElement("method");
+                            method.Add(new XAttribute("name", meth.Key.Split(':')[2].Split('(')[0]));
+                            method.Add(new XAttribute("signature", meth.Key));
+                            method.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(meth.Value).ToString()));
+                            method.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(meth.Value).ToString()));
 
-                            XmlElement lines = xml.CreateElement("lines");
+                            XElement lines = new XElement("lines");
                             foreach (var ln in meth.Value)
                             {
-                                XmlElement line = xml.CreateElement("line");
-                                line.SetAttribute("number", ln.Key.ToString());
-                                line.SetAttribute("hits", ln.Value.Hits.ToString());
-                                line.SetAttribute("branch", ln.Value.IsBranchPoint.ToString());
+                                XElement line = new XElement("line");
+                                line.Add(new XAttribute("number", ln.Key.ToString()));
+                                line.Add(new XAttribute("hits", ln.Value.Hits.ToString()));
+                                line.Add(new XAttribute("branch", ln.Value.IsBranchPoint.ToString()));
 
-                                lines.AppendChild(line);
+                                lines.Add(line);
                             }
 
-                            method.AppendChild(lines);
-                            methods.AppendChild(method);
+                            method.Add(lines);
+                            methods.Add(method);
                         }
 
-                        @class.AppendChild(methods);
-                        classes.AppendChild(@class);
+                        @class.Add(methods);
+                        classes.Add(@class);
                     }
                 }
 
-                package.AppendChild(classes);
-                packages.AppendChild(package);
+                package.Add(classes);
+                packages.Add(package);
             }
 
-            coverage.AppendChild(sources);
-            coverage.AppendChild(packages);
-            xml.AppendChild(coverage);
+            coverage.Add(sources);
+            coverage.Add(packages);
+            xml.Add(coverage);
 
-            StringWriter writer = new StringWriter();
-            xml.Save(writer);
+            var stream = new MemoryStream();
+            xml.Save(stream);
 
-            return writer.ToString();
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
 
         private string[] GetSources(Modules modules)
