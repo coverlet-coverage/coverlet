@@ -11,7 +11,7 @@
     <iconUrl>https://nuget.org/Content/gallery/img/default-package-icon.svg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>true</developmentDependency>
-    <description>Coverlet is a cross platform code coverage library for .NET Core, with support for line and method coverage.</description>
+    <description>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</description>
     <language>en-US</language>
     <tags>coverage testing unit-test lcov opencover quality</tags>
   </metadata>
