@@ -16,7 +16,7 @@ namespace Coverlet.Core.Reporters
         public string Report(CoverageResult result)
         {
             CoverageSummary summary = new CoverageSummary();
-            XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+            XDocument xml = new XDocument();
             XElement coverage = new XElement("CoverageSession");
             XElement coverageSummary = new XElement("Summary");
             XElement modules = new XElement("Modules");
@@ -219,7 +219,7 @@ namespace Coverlet.Core.Reporters
             var stream = new MemoryStream();
             xml.Save(stream);
 
-            return Encoding.UTF8.GetString(stream.GetBuffer());
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
     }
 }
