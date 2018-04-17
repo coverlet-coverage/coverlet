@@ -121,6 +121,9 @@ namespace Coverlet.Core.Reporters
                                     branchPoint.Add(new XAttribute("vc", lines.Value.Hits.ToString()));
                                     branchPoint.Add(new XAttribute("upsid", lines.Key.ToString()));
                                     branchPoint.Add(new XAttribute("ordinal", kBr.ToString()));
+                                    branchPoint.Add(new XAttribute("path", ""));
+                                    branchPoint.Add(new XAttribute("offset", kBr.ToString()));
+                                    branchPoint.Add(new XAttribute("offsetend", kBr.ToString()));
                                     branchPoint.Add(new XAttribute("sl", lines.Key.ToString()));
                                     branchPoint.Add(new XAttribute("fileid", i.ToString()));
                                     branchPoints.Add(branchPoint);
