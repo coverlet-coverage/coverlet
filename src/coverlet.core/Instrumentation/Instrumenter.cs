@@ -77,8 +77,8 @@ namespace Coverlet.Core.Instrumentation
             {
                 "ExcludeFromCoverageAttribute",
                 "ExcludeFromCoverage",
-                nameof(ExcludeFromCodeCoverageAttribute),
-                nameof(ExcludeFromCodeCoverageAttribute).RemoveAttributeSuffix()
+                "ExcludeFromCodeCoverageAttribute",
+                "ExcludeFromCodeCoverage"
             };
             return excludedAtrributeNames.Contains(attributeName);
         }
