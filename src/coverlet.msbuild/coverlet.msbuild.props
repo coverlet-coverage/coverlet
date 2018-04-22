@@ -5,7 +5,7 @@
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
     <CoverletOutputDirectory Condition="$(CoverletOutputDirectory) == ''">$(MSBuildProjectDirectory)</CoverletOutputDirectory>
     <CoverletOutputName Condition=" '$(CoverletOutputName)' == '' ">coverage</CoverletOutputName>
-    <CoverletOutput>$([MSBuild]::EnsureTrailingSlash('$(CoverletOutputDirectory)')$(CoverletOutputName)</CoverletOutput>
+    <CoverletOutput>$([MSBuild]::EnsureTrailingSlash('$(CoverletOutputDirectory)'))$(CoverletOutputName)</CoverletOutput>
 
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>
