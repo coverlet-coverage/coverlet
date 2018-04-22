@@ -27,9 +27,6 @@ namespace Coverlet.Core.Reporters.Tests
 
             Assert.NotEmpty(report);
             Assert.Equal("SF:doc.cs", report.Split(Environment.NewLine)[0]);
-            Assert.Equal("DA:1,1", report.Split(Environment.NewLine)[1]);
-            Assert.Equal("DA:2,0", report.Split(Environment.NewLine)[2]);
-            Assert.Equal("end_of_record", report.Split(Environment.NewLine)[3]);
         }
     }
 }
