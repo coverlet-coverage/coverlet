@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>coverlet.msbuild</id>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <title>coverlet.msbuild</title>
     <authors>tonerdo</authors>
     <owners>tonerdo</owners>
@@ -11,7 +11,7 @@
     <iconUrl>https://nuget.org/Content/gallery/img/default-package-icon.svg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>true</developmentDependency>
-    <description>Coverlet is a cross platform code coverage library for .NET Core, with support for line and method coverage.</description>
+    <description>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</description>
     <language>en-US</language>
     <tags>coverage testing unit-test lcov opencover quality</tags>
   </metadata>
