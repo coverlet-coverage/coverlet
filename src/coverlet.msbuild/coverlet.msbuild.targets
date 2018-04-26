@@ -6,12 +6,16 @@
   <Target Name="InstrumentModulesNoBuild" BeforeTargets="VSTest">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'"
+      ExclusionRules="$(ExclusionRules)"
+      ExclusionParentDir="$(CoverletExclusionParentDir)"
       Path="$(TargetPath)" />
   </Target>
 
   <Target Name="InstrumentModulesAfterBuild" AfterTargets="BuildProject">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
+      ExclusionRules="$(ExclusionRules)"
+      ExclusionParentDir="$(CoverletExclusionParentDir)"
       Path="$(TargetPath)" />
   </Target>
 

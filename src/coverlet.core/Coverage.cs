@@ -12,12 +12,14 @@ namespace Coverlet.Core
     {
         private string _module;
         private string _identifier;
+        private IEnumerable<string> _excludedFiles;
         private List<InstrumenterResult> _results;
 
-        public Coverage(string module, string identifier)
+        public Coverage(string module, string identifier, IEnumerable<string> excludedFiles)
         {
             _module = module;
             _identifier = identifier;
+            _excludedFiles = excludedFiles;
             _results = new List<InstrumenterResult>();
         }
 
@@ -26,7 +28,7 @@ namespace Coverlet.Core
             string[] modules = InstrumentationHelper.GetDependencies(_module);
             foreach (var module in modules)
             {
-                var instrumenter = new Instrumenter(module, _identifier);
+                var instrumenter = new Instrumenter(module, _identifier, _excludedFiles);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);

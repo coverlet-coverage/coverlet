@@ -1,35 +1,31 @@
 ﻿using System;
 using Coverlet.Core;
-
+using Coverlet.Core.Helpers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : Task
-    {
-        private string _path;
-        private static Coverage _coverage;
-
-        internal static Coverage Coverage
-        {
-            get { return _coverage; }
-            private set { _coverage = value; }
-        }
+    {        
+        internal static Coverage Coverage { get; private set; }
 
         [Required]
-        public string Path
-        {
-            get { return _path; }
-            set { _path = value; }
-        }
-
+        public string Path { get; set; }
+        
+        [Required]
+        public string[] ExclusionRules { get; set; }
+        
+        public string ExclusionParentDir { get; set; }
+        
         public override bool Execute()
         {
             try
             {
-                _coverage = new Coverage(_path, Guid.NewGuid().ToString());
-                _coverage.PrepareModules();
+                var excludedFiles =  InstrumentationHelper.GetExcludedFiles(
+                    ExclusionRules, ExclusionParentDir);
+                Coverage = new Coverage(Path, Guid.NewGuid().ToString(), excludedFiles);
+                Coverage.PrepareModules();
             }
             catch(Exception ex)
             {
