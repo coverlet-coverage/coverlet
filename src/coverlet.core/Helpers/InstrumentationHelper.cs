@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
+using Microsoft.Extensions.FileSystemGlobbing;
 
 using Coverlet.Core.Instrumentation;
+using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
-    internal static class InstrumentationHelper
+    public static class InstrumentationHelper
     {
         public static string[] GetDependencies(string module)
         {
@@ -107,5 +109,26 @@ namespace Coverlet.Core.Helpers
 
             RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
         }
+        
+        public static string[] GetExcludedFiles(string[] exclusionRules, string parentDir) {
+            if (exclusionRules == null || exclusionRules.Length == 0 ) return null;
+            var matcher = new Matcher();
+            foreach (var exclusionRule in exclusionRules)
+            {
+                matcher.AddInclude(exclusionRule);
+            }
+        
+            DirectoryInfo directoryInfo = new DirectoryInfo(parentDir);
+            
+            var fileMatchResult = matcher.Execute(new DirectoryInfoWrapper(directoryInfo));
+            return fileMatchResult.Files
+                .Select(
+                    f => System.IO.Path.GetFullPath(
+                        System.IO.Path.Combine(directoryInfo.ToString(), f.Path)
+                    )
+                )
+                .ToArray();
+        }
     }
 }
+

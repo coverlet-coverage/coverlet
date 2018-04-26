@@ -6,6 +6,7 @@
     <CoverletOutputDirectory Condition="$(CoverletOutputDirectory) == ''">$(MSBuildProjectDirectory)</CoverletOutputDirectory>
     <CoverletOutputName Condition=" '$(CoverletOutputName)' == '' ">coverage</CoverletOutputName>
     <CoverletOutput>$([MSBuild]::EnsureTrailingSlash('$(CoverletOutputDirectory)'))$(CoverletOutputName)</CoverletOutput>
+    <CoverletExclusionParentDir Condition="$(CoverletExclusionParentDir) == ''">$(MSBuildProjectDirectory)</CoverletExclusionParentDir>
 
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>

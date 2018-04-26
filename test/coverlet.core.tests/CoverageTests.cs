@@ -21,7 +21,7 @@ namespace Coverlet.Core.Tests
 
             File.Copy(module, tempModule, true);
 
-            var coverage = new Coverage(tempModule, identifier);
+            var coverage = new Coverage(tempModule, identifier, null);
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
