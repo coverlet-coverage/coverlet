@@ -3,6 +3,7 @@ using System.IO;
 
 using Xunit;
 using Coverlet.Core.Instrumentation;
+using Coverlet.MSbuild.Tasks;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
@@ -21,7 +22,6 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
             module = Path.Combine(directory.FullName, Path.GetFileName(module));
-
             Instrumenter instrumenter = new Instrumenter(module, identifier);
             var result = instrumenter.Instrument();
 
