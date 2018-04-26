@@ -12,18 +12,18 @@ namespace Coverlet.Core.Reporters
 
         public string Report(CoverageResult result)
         {
-            List<string> lcov = new List<string>();
+            var lcov = new List<string>();
             int numSequencePoints = 0, numBranchPoints = 0, numMethods = 0, numBlockBranch = 1;
             int visitedSequencePoints = 0, visitedBranchPoints = 0, visitedMethods = 0;
 
             foreach (var module in result.Modules)
             {
-                foreach (var doc in module.Value)
+                foreach (var document in module.Value)
                 {
-                    lcov.Add("SF:" + doc.Key);
-                    foreach (var @class in doc.Value)
+                    lcov.Add("SF:" + document.Key);
+                    foreach (var @class in document.Value)
                     {
-                        bool methodVisited = false;
+                        var methodVisited = false;
                         foreach (var method in @class.Value)
                         {
                             lcov.Add($"FN:{method.Value.First().Key - 1},{method.Key}");

@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(MSBuildThisFileDirectory)\..\..\build\$(Configuration)\coverlet.msbuild.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\src\coverlet.msbuild\coverlet.msbuild.props" />
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bogus" Version="22.0.8" />
     <PackageReference Include="coveralls.net" Version="0.7.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="Moq" Version="4.8.1" />
@@ -19,5 +20,5 @@
     <ProjectReference Include="..\..\src\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)\..\..\build\$(Configuration)\coverlet.msbuild.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\src\coverlet.msbuild\coverlet.msbuild.targets" />
 </Project>

@@ -8,25 +8,94 @@ namespace Coverlet.Core.Reporters.Tests
     public class JsonReporterTests
     {
         [Fact]
-        public void TestReport()
+        public void Ctor__FormatIsValid()
         {
-            CoverageResult result = new CoverageResult();
-            result.Identifier = Guid.NewGuid().ToString();
-            Lines lines = new Lines();
-            lines.Add(1, new LineInfo { Hits = 1 });
-            lines.Add(2, new LineInfo { Hits = 0 });
-            Methods methods = new Methods();
-            methods.Add("System.Void Coverlet.Core.Reporters.Tests.JsonReporterTests.TestReport()", lines);
-            Classes classes = new Classes();
-            classes.Add("Coverlet.Core.Reporters.Tests.JsonReporterTests", methods);
-            Documents documents = new Documents();
-            documents.Add("doc.cs", classes);
-            result.Modules = new Modules();
-            result.Modules.Add("module", documents);
+            // Arrange
+            // Act
+            var reporter = new JsonReporter();
+            // Assert
+            Assert.Equal("json", reporter.Format);
+        }
+        [Fact]
+        public void Ctor__ExtensionIsValid()
+        {
+            // Arrange
+            // Act
+            var reporter = new JsonReporter();
+            // Assert
+            Assert.Equal("json", reporter.Extension);
+        }
 
-            JsonReporter reporter = new JsonReporter();
-            Assert.NotEqual("{\n}", reporter.Report(result));
-            Assert.NotEqual(string.Empty, reporter.Report(result));
+        [Fact]
+        public void Report__ResultAsJsonDoesNotContainsNewLineOnly()
+        {
+            // Arrange
+            var result = new CoverageResult
+            {
+                Identifier = Guid.NewGuid().ToString()
+            };
+            var lines = new Lines
+            {
+                {1, new LineInfo {Hits = 1}},
+                {2, new LineInfo {Hits = 0}}
+            };
+            var methods = new Methods
+            {
+                {"System.Void Coverlet.Core.Reporters.Tests.JsonReporterTests.TestReport()", lines}
+            };
+            var classes = new Classes
+            {
+                {"Coverlet.Core.Reporters.Tests.JsonReporterTests", methods}
+            };
+            var documents = new Documents
+            {
+                {"doc.cs", classes}
+            };
+            result.Modules = new Modules
+            {
+                {"module", documents}
+            };
+            var reporter = new JsonReporter();
+            // Act
+            var report = reporter.Report(result);
+            // Assert
+            Assert.NotEqual("{\n}", report);
+        }
+
+        [Fact]
+        public void Report__ResultAsJsonIsNotEmpty()
+        {
+            // Arrange
+            var result = new CoverageResult
+            {
+                Identifier = Guid.NewGuid().ToString()
+            };
+            var lines = new Lines
+            {
+                {1, new LineInfo {Hits = 1}},
+                {2, new LineInfo {Hits = 0}}
+            };
+            var methods = new Methods
+            {
+                {"System.Void Coverlet.Core.Reporters.Tests.JsonReporterTests.TestReport()", lines}
+            };
+            var classes = new Classes
+            {
+                {"Coverlet.Core.Reporters.Tests.JsonReporterTests", methods}
+            };
+            var documents = new Documents
+            {
+                {"doc.cs", classes}
+            };
+            result.Modules = new Modules
+            {
+                {"module", documents}
+            };
+            var reporter = new JsonReporter();
+            // Act
+            var report = reporter.Report(result);
+            // Assert
+            Assert.NotEqual(string.Empty, report);
         }
     }
 }

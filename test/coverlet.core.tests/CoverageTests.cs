@@ -10,26 +10,53 @@ using Coverlet.Core;
 namespace Coverlet.Core.Tests
 {
     [ExcludeFromCodeCoverage]
-    public class CoverageTests
+    public class CoverageTests : IDisposable
     {
-        [Fact]
-        public void TestCoverage()
+        private readonly string _module;
+        private readonly string _identifier;
+        private readonly DirectoryInfo _tempDirectory;
+        private readonly string _tempModule;
+
+        public CoverageTests()
         {
-            string module = typeof(CoverageTests).Assembly.Location;
-            string identifier = Guid.NewGuid().ToString();
+            _module = typeof(CoverageTests).Assembly.Location;
+            _identifier = Guid.NewGuid().ToString();
 
-            var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
-            var tempModule = Path.Combine(directory.FullName, Path.GetFileName(module));
+            var tempDirectoryPath = Path.Combine(Path.GetTempPath(), _identifier);
+            _tempDirectory = Directory.CreateDirectory(tempDirectoryPath);
 
-            File.Copy(module, tempModule, true);
+            _tempModule = Path.Combine(_tempDirectory.FullName, Path.GetFileName(_module));
 
-            var coverage = new Coverage(tempModule, identifier);
+            File.Copy(_module, _tempModule, true);
+        }
+
+        [Fact]
+        public void Coverage__CoverageResultModulesIsNotNull()
+        {
+            // Arrange
+            var coverage = new Coverage(_tempModule, _identifier);
             coverage.PrepareModules();
-
+            // Act
             var result = coverage.GetCoverageResult();
-            Assert.Empty(result.Modules);
+            // Assert
+            Assert.NotNull(result.Modules);
+        }
 
-            directory.Delete(true);
+        [Fact]
+        public void Coverage__CoverageResultModulesIsEmpty()
+        {
+            // Arrange
+            var coverage = new Coverage(_tempModule, _identifier);
+            coverage.PrepareModules();
+            // Act
+            var result = coverage.GetCoverageResult();
+            // Assert
+            Assert.Empty(result.Modules);
+        }
+
+        public void Dispose()
+        {
+            _tempDirectory.Delete(true);
         }
     }
 }

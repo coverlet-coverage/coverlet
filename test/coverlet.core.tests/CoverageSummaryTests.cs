@@ -11,73 +11,199 @@ namespace Coverlet.Core.Tests
     [ExcludeFromCodeCoverage]
     public class CoverageSummaryTests
     {
-        private Modules _modules;
+        private readonly Modules _modules;
 
         public CoverageSummaryTests()
         {
-            Lines lines = new Lines();
-            lines.Add(1, new LineInfo { Hits = 1, IsBranchPoint = true });
-            lines.Add(2, new LineInfo { Hits = 0 });
+            var lines = new Lines
+            {
+                {1, new LineInfo {Hits = 1, IsBranchPoint = true}},
+                {2, new LineInfo {Hits = 0}}
+            };
+            var methods = new Methods
+            {
+                {"System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()", lines}
+            };
+            var classes = new Classes
+            {
+                {"Coverlet.Core.Tests.CoverageSummaryTests", methods}
+            };
+            var documents = new Documents
+            {
+                {"doc.cs", classes}
+            };
+            _modules = new Modules {{"module", documents}};
+        }
 
-            Methods methods = new Methods();
-            methods.Add("System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()", lines);
+        #region Method: CalculateLineCoverage
 
-            Classes classes = new Classes();
-            classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
-
-            Documents documents = new Documents();
-            documents.Add("doc.cs", classes);
-
-            _modules = new Modules();
-            _modules.Add("module", documents);
+        [Fact]
+        public void CalculateLineCoverage__ForModule__ReturnValidCoverageResult()
+        {
+            // Arrange
+            var module = _modules.First();
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateLineCoverage(module.Value);
+            // Assert
+            Assert.Equal(0.5, coverageResult);
         }
 
         [Fact]
-        public void TestCalculateLineCoverage()
+        public void CalculateLineCoverage__ForDocument__ReturnValidCoverageResult()
         {
-            CoverageSummary summary = new CoverageSummary();
+            // Arrange
+            var module = _modules.First();
+            var document = module.Value.First();
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateLineCoverage(document.Value);
+            // Assert
+            Assert.Equal(0.5, coverageResult);
+        }
 
+        [Fact]
+        public void CalculateLineCoverage__ForClass__ReturnValidCoverageResult()
+        {
+            // Arrange
+            var module = _modules.First();
+            var document = module.Value.First();
+            var @class = document.Value.First();
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateLineCoverage(@class.Value);
+            // Assert
+            Assert.Equal(0.5, coverageResult);
+        }
+
+        [Fact]
+        public void CalculateLineCoverage__ForMethod__ReturnValidCoverageResult()
+        {
+            // Arrange
             var module = _modules.First();
             var document = module.Value.First();
             var @class = document.Value.First();
             var method = @class.Value.First();
-            
-            Assert.Equal(0.5, summary.CalculateLineCoverage(module.Value));
-            Assert.Equal(0.5, summary.CalculateLineCoverage(document.Value));
-            Assert.Equal(0.5, summary.CalculateLineCoverage(@class.Value));
-            Assert.Equal(0.5, summary.CalculateLineCoverage(method.Value));
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateLineCoverage(method.Value);
+            // Assert
+            Assert.Equal(0.5, coverageResult);
+        }
+
+        #endregion
+
+        #region Method: CalculateBranchCoverage
+
+        [Fact]
+        public void CalculateBranchCoverage__ForModule__ReturnValidCoverageResult()
+        {
+            // Arrange
+            var module = _modules.First();
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateBranchCoverage(module.Value);
+            // Assert
+            Assert.Equal(1, coverageResult);
         }
 
         [Fact]
-        public void TestCalculateBranchCoverage()
+        public void CalculateBranchCoverage__ForDocument__ReturnValidCoverageResult()
         {
-            CoverageSummary summary = new CoverageSummary();
+            // Arrange
+            var module = _modules.First();
+            var document = module.Value.First();
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateBranchCoverage(document.Value);
+            // Assert
+            Assert.Equal(1, coverageResult);
+        }
 
+        [Fact]
+        public void CalculateBranchCoverage__ForClass__ReturnValidCoverageResult()
+        {
+            // Arrange
+            var module = _modules.First();
+            var document = module.Value.First();
+            var @class = document.Value.First();
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateBranchCoverage(@class.Value);
+            // Assert
+            Assert.Equal(1, coverageResult);
+        }
+
+        [Fact]
+        public void CalculateBranchCoverage__ForMethod__ReturnValidCoverageResult()
+        {
+            // Arrange
             var module = _modules.First();
             var document = module.Value.First();
             var @class = document.Value.First();
             var method = @class.Value.First();
-
-            Assert.Equal(1, summary.CalculateBranchCoverage(module.Value));
-            Assert.Equal(1, summary.CalculateBranchCoverage(document.Value));
-            Assert.Equal(1, summary.CalculateBranchCoverage(@class.Value));
-            Assert.Equal(1, summary.CalculateBranchCoverage(method.Value));
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateBranchCoverage(method.Value);
+            // Assert
+            Assert.Equal(1, coverageResult);
         }
 
-        [Fact]
-        public void TestCalculateMethodCoverage()
-        {
-            CoverageSummary summary = new CoverageSummary();
+        #endregion
 
+        #region Method: CalculateMethodCoverage
+
+        [Fact]
+        public void CalculateMethodCoverage__ForModule__ReturnValidCoverageResult()
+        {
+            // Arrange
+            var module = _modules.First();
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateMethodCoverage(module.Value);
+            // Assert
+            Assert.Equal(1, coverageResult);
+        }
+        [Fact]
+        public void CalculateMethodCoverage__ForDocument__ReturnValidCoverageResult()
+        {
+            // Arrange
+            var module = _modules.First();
+            var document = module.Value.First();
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateMethodCoverage(document.Value);
+            // Assert
+            Assert.Equal(1, coverageResult);
+        }
+        [Fact]
+        public void CalculateMethodCoverage__ForClass__ReturnValidCoverageResult()
+        {
+            // Arrange
+            var module = _modules.First();
+            var document = module.Value.First();
+            var @class = document.Value.First();
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateMethodCoverage(@class.Value);
+            // Assert
+            Assert.Equal(1, coverageResult);
+        }
+        [Fact]
+        public void CalculateMethodCoverage__ForMethod__ReturnValidCoverageResult()
+        {
+            // Arrange
             var module = _modules.First();
             var document = module.Value.First();
             var @class = document.Value.First();
             var method = @class.Value.First();
-
-            Assert.Equal(1, summary.CalculateMethodCoverage(module.Value));
-            Assert.Equal(1, summary.CalculateMethodCoverage(document.Value));
-            Assert.Equal(1, summary.CalculateMethodCoverage(@class.Value));
-            Assert.Equal(1, summary.CalculateMethodCoverage(method.Value));
+            var summary = new CoverageSummary();
+            // Act
+            var coverageResult = summary.CalculateMethodCoverage(method.Value);
+            // Assert
+            Assert.Equal(1, coverageResult);
         }
+
+        #endregion
     }
 }

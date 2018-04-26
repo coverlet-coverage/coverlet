@@ -9,17 +9,50 @@ namespace Coverlet.Core.Instrumentation.Tests
     public class InstrumenterResultTests
     {
         [Fact]
-        public void TestEnsureDocumentsPropertyNotNull()
+        public void Ctor__DocumentsIsNotNull()
         {
-            InstrumenterResult result = new InstrumenterResult();
+            // Arrange
+            // Act
+            var result = new InstrumenterResult();
+            // Assert
             Assert.NotNull(result.Documents);
+        }
+        [Fact]
+        public void Ctor__DocumentsIsEmpty()
+        {
+            // Arrange
+            // Act
+            var result = new InstrumenterResult();
+            // Assert
+            Assert.Empty(result.Documents);
         }
 
         [Fact]
-        public void TestEnsureLinesPropertyNotNull()
+        public void Ctor__ModuleIsNull()
         {
-            Document document = new Document();
-            Assert.NotNull(document.Lines);
+            // Arrange
+            // Act
+            var result = new InstrumenterResult();
+            // Assert
+            Assert.Null(result.Module);
+        }
+        [Fact]
+        public void Ctor__ModulePathIsNull()
+        {
+            // Arrange
+            // Act
+            var result = new InstrumenterResult();
+            // Assert
+            Assert.Null(result.ModulePath);
+        }
+        [Fact]
+        public void Ctor__HitsFilePathIsNull()
+        {
+            // Arrange
+            // Act
+            var result = new InstrumenterResult();
+            // Assert
+            Assert.Null(result.HitsFilePath);
         }
     }
 }

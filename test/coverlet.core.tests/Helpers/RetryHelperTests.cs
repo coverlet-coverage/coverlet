@@ -1,79 +1,72 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
-
+using Bogus;
 using Xunit;
 using Coverlet.Core.Helpers;
 
 namespace Coverlet.Core.Helpers.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class RetryHelperTests
     {
-        [Fact]
-        public void TestRetryWithFixedRetryBackoff()
-        {
-            Func<TimeSpan> retryStrategy = () => {
-                return TimeSpan.FromMilliseconds(1);
-            };
+        private readonly Faker _faker = new Faker();
 
+        [Fact]
+        public void Retry__WithFixedRetryBackoff__CallsEqualsMaxAttemptsCount()
+        {
+            // Arrange
+            var maxAttemptCount = _faker.Random.Int(min: 1, max: 30);
+            Func<TimeSpan> retryStrategy = () => TimeSpan.FromMilliseconds(1);
             var target = new RetryTarget();
             try
             {
-                RetryHelper.Retry(() => target.TargetActionThrows(), retryStrategy, 7);
+                // Act
+                RetryHelper.Retry(() => target.TargetActionThrows(), retryStrategy, maxAttemptCount);
             }
             catch
             {
-                Assert.Equal(7, target.Calls);
+                // Assert
+                Assert.Equal(maxAttemptCount, target.Calls);
             }
         }
 
         [Fact]
-        public void TestRetryWithExponentialRetryBackoff()
+        public void Retry__WithExponentialRetryBackoff__CurrentSleepEquals24IfMaxAttemptsCountEquals3()
         {
+            // Arrange
             var currentSleep = 6;
+            var maxAttemptCount = 3;
             Func<TimeSpan> retryStrategy = () => {
                 var sleep = TimeSpan.FromMilliseconds(currentSleep);
                 currentSleep *= 2;
                 return sleep;
             };
-
             var target = new RetryTarget();
             try 
             {
-                RetryHelper.Retry(() => target.TargetActionThrows(), retryStrategy, 3);
+                // Act
+                RetryHelper.Retry(() => target.TargetActionThrows(), retryStrategy, maxAttemptCount);
             }
             catch
             {
-                Assert.Equal(3, target.Calls);
-                Assert.Equal(24, currentSleep);
+                // Assert
+                var validSleepsCount = 24;
+                Assert.Equal(validSleepsCount, currentSleep);
             }
         }
 
         [Fact]
-        public void TestRetryFinishesIfSuccessful()
+        public void Retry__RetryingFinishesIfSuccessful()
         {
-            Func<TimeSpan> retryStrategy = () => {
-                return TimeSpan.FromMilliseconds(1);
-            };
-
+            // Arrange
+            var maxAttemptCount = _faker.Random.Int(min: 6, max: 20);
+            Func<TimeSpan> retryStrategy = () => TimeSpan.FromMilliseconds(1);
             var target = new RetryTarget();
-            RetryHelper.Retry(() => target.TargetActionThrows5Times(), retryStrategy, 20);
+            // Act
+            RetryHelper.Retry(() => target.TargetActionThrows5Times(), retryStrategy, maxAttemptCount);
+            // Assert
             Assert.Equal(6, target.Calls);
-        }
-
-    }
-
-    public class RetryTarget
-    {
-        public int Calls { get; set; }
-        public void TargetActionThrows() 
-        {
-            Calls++;
-            throw new Exception("Simulating Failure");
-        }
-        public void TargetActionThrows5Times() 
-        {
-            Calls++;
-            if (Calls < 6) throw new Exception("Simulating Failure");
         }
     }
 }

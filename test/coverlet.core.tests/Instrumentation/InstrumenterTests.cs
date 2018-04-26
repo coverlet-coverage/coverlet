@@ -43,12 +43,25 @@ namespace Coverlet.Core.Instrumentation.Tests
         }
 
         [Fact]
-        public void TestInstrument()
+        public void Instrument__ResultModuleIsValid()
         {
+            // Arrange
             var instrumenter = new Instrumenter(_module, _identifier);
+            // Act
             var result = instrumenter.Instrument();
-
-            Assert.Equal(Path.GetFileNameWithoutExtension(_module), result.Module);
+            // Assert
+            var validModuleName = Path.GetFileNameWithoutExtension(_module);
+            Assert.Equal(validModuleName, result.Module);
+            Assert.Equal(_module, result.ModulePath);
+        }
+        [Fact]
+        public void Instrument__ResultModulePathIsValid()
+        {
+            // Arrange
+            var instrumenter = new Instrumenter(_module, _identifier);
+            // Act
+            var result = instrumenter.Instrument();
+            // Assert
             Assert.Equal(_module, result.ModulePath);
         }
 

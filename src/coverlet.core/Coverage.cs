@@ -10,9 +10,9 @@ namespace Coverlet.Core
 {
     public class Coverage
     {
-        private string _module;
-        private string _identifier;
-        private List<InstrumenterResult> _results;
+        private readonly string _module;
+        private readonly string _identifier;
+        private readonly List<InstrumenterResult> _results;
 
         public Coverage(string module, string identifier)
         {

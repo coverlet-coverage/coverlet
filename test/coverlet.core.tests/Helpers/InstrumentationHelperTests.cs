@@ -8,78 +8,104 @@ using Coverlet.Core.Helpers;
 namespace Coverlet.Core.Helpers.Tests
 {
     [ExcludeFromCodeCoverage]
-    public class InstrumentationHelperTests
+    public class InstrumentationHelperTests : IDisposable
     {
-        [Fact]
-        public void TestGetDependencies()
+        private readonly DirectoryInfo _tempDirectory;
+
+        public InstrumentationHelperTests()
         {
-            string module = typeof(InstrumentationHelperTests).Assembly.Location;
+            var tempPath = Path.GetTempPath();
+            _tempDirectory = Directory.CreateDirectory(Path.Combine(tempPath, "tempdir"));
+        }
+
+        [Fact]
+        public void GetDependencies__ReturnedDependenciesDoesNotContainsTargetModule()
+        {
+            // Arrange
+            var module = typeof(InstrumentationHelperTests).Assembly.Location;
+            // Act
             var modules = InstrumentationHelper.GetDependencies(module);
-            Assert.False(Array.Exists(modules, m => m == module));
+            // Assert
+            Assert.DoesNotContain(module, modules);
         }
 
         [Fact]
-        public void TestHasPdb()
+        public void HasPdb__ReturnTrue()
         {
-            Assert.True(InstrumentationHelper.HasPdb(typeof(InstrumentationHelperTests).Assembly.Location));
+            // Arrange
+            var module = typeof(InstrumentationHelperTests).Assembly.Location;
+            // Act
+            var hasPdb = InstrumentationHelper.HasPdb(module);
+            // Assert
+            Assert.True(hasPdb);
         }
 
         [Fact]
-        public void TestBackupOriginalModule()
+        public void BackupOriginalModule__BackupFileIsExists()
         {
-            string module = typeof(InstrumentationHelperTests).Assembly.Location;
-            string identifier = Guid.NewGuid().ToString();
-
+            // Arrange
+            var module = typeof(InstrumentationHelperTests).Assembly.Location;
+            var identifier = Guid.NewGuid().ToString();
+            // Act
             InstrumentationHelper.BackupOriginalModule(module, identifier);
-
+            // Assert
             var backupPath = Path.Combine(
                 Path.GetTempPath(),
                 Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
             );
-
             Assert.True(File.Exists(backupPath));
         }
 
         [Fact]
-        public void TestCopyCoverletDependency()
+        public void CopyCoverletDependency__ForSomeModuleCopyAllDependencies()
         {
-            var tempPath = Path.GetTempPath();
-            var directory = Directory.CreateDirectory(Path.Combine(tempPath, "tempdir"));
-            InstrumentationHelper.CopyCoverletDependency(Path.Combine(directory.FullName, "somemodule.dll"));
-
-            Assert.True(File.Exists(Path.Combine(directory.FullName, "coverlet.core.dll")));
-            Directory.Delete(directory.FullName, true);
+            // Arrange
+            var module = Path.Combine(_tempDirectory.FullName, "somemodule.dll");
+            // Act
+            InstrumentationHelper.CopyCoverletDependency(module);
+            // Assert
+            var copiedFile = Path.Combine(_tempDirectory.FullName, "coverlet.core.dll");
+            Assert.True(File.Exists(copiedFile));
         }
 
         [Fact]
-        public void TestDontCopyCoverletDependency()
-        {
-            var tempPath = Path.GetTempPath();
-            var directory = Directory.CreateDirectory(Path.Combine(tempPath, "tempdir"));
-            InstrumentationHelper.CopyCoverletDependency(Path.Combine(directory.FullName, "coverlet.core.dll"));
-
-            Assert.False(File.Exists(Path.Combine(directory.FullName, "coverlet.core.dll")));
-            Directory.Delete(directory.FullName, true);
+        public void DontCopyCoverletDependency()
+        { 
+            // Arrange
+            var module = Path.Combine(_tempDirectory.FullName, "coverlet.core.dll");
+            // Act
+            InstrumentationHelper.CopyCoverletDependency(module);
+            // Assert
+            var copiedFile = Path.Combine(_tempDirectory.FullName, "coverlet.core.dll");
+            Assert.False(File.Exists(copiedFile));
         }
 
         [Fact]
-        public void TestReadHitsFile()
+        public void ReadHitsFile__TempFileIsExists__AfterReadingFromHitsFileLinesIsNotNull()
         {
+            // Arrange
             var tempFile = Path.GetTempFileName();
-            Assert.True(File.Exists(tempFile));
-
+            // Act
             var lines = InstrumentationHelper.ReadHitsFile(tempFile);
+            // Assert
+            Assert.True(File.Exists(tempFile));
             Assert.NotNull(lines);
         }
-
+        
         [Fact]
-        public void TestDeleteHitsFile()
+        public void DeleteHitsFile__TempFileIsExists__AfterDeletingTempFileWasRemoved()
         {
             var tempFile = Path.GetTempFileName();
             Assert.True(File.Exists(tempFile));
-
+            // Act
             InstrumentationHelper.DeleteHitsFile(tempFile);
+            // Assert
             Assert.False(File.Exists(tempFile));
+        }
+
+        public void Dispose()
+        {
+            Directory.Delete(_tempDirectory.FullName, true);
         }
     }
 }

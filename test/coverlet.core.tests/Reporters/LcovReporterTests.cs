@@ -8,27 +8,96 @@ namespace Coverlet.Core.Reporters.Tests
     public class LcovReporterTests
     {
         [Fact]
-        public void TestReport()
+        public void Ctor__FormatIsValid()
         {
-            CoverageResult result = new CoverageResult();
-            result.Identifier = Guid.NewGuid().ToString();
-            Lines lines = new Lines();
-            lines.Add(1, new LineInfo { Hits = 1 });
-            lines.Add(2, new LineInfo { Hits = 0 });
-            Methods methods = new Methods();
-            methods.Add("System.Void Coverlet.Core.Reporters.Tests.LcovReporterTests.TestReport()", lines);
-            Classes classes = new Classes();
-            classes.Add("Coverlet.Core.Reporters.Tests.LcovReporterTests", methods);
-            Documents documents = new Documents();
-            documents.Add("doc.cs", classes);
-            result.Modules = new Modules();
-            result.Modules.Add("module", documents);
+            // Arrange
+            // Act
+            var reporter = new LcovReporter();
+            // Assert
+            Assert.Equal("lcov", reporter.Format);
+        }
+        [Fact]
+        public void Ctor__ExtensionIsValid()
+        {
+            // Arrange
+            // Act
+            var reporter = new LcovReporter();
+            // Assert
+            Assert.Equal("info", reporter.Extension);
+        }
 
-            LcovReporter reporter = new LcovReporter();
-            string report = reporter.Report(result);
-
+        [Fact]
+        public void Report__ResultIsNotEmpty()
+        {
+            // Arrange
+            var result = new CoverageResult
+            {
+                Identifier = Guid.NewGuid().ToString()
+            };
+            var lines = new Lines
+            {
+                {1, new LineInfo {Hits = 1}},
+                {2, new LineInfo {Hits = 0}}
+            };
+            var methods = new Methods
+            {
+                {"System.Void Coverlet.Core.Reporters.Tests.LcovReporterTests.TestReport()", lines}
+            };
+            var classes = new Classes
+            {
+                {"Coverlet.Core.Reporters.Tests.LcovReporterTests", methods}
+            };
+            var documents = new Documents
+            {
+                {"doc.cs", classes}
+            };
+            result.Modules = new Modules
+            {
+                {"module", documents}
+            };
+            var reporter = new LcovReporter();
+            // Act
+            var report = reporter.Report(result);
+            // Assert
             Assert.NotEmpty(report);
-            Assert.Equal("SF:doc.cs", report.Split(Environment.NewLine)[0]);
+        }
+
+        [Fact]
+        public void Report__ResultContainsValidClassNameWithPrefix()
+        {
+            // Arrange
+            var result = new CoverageResult
+            {
+                Identifier = Guid.NewGuid().ToString()
+            };
+            var lines = new Lines
+            {
+                {1, new LineInfo {Hits = 1}},
+                {2, new LineInfo {Hits = 0}}
+            };
+            var methods = new Methods
+            {
+                {"System.Void Coverlet.Core.Reporters.Tests.LcovReporterTests.TestReport()", lines}
+            };
+            var classes = new Classes
+            {
+                {"Coverlet.Core.Reporters.Tests.LcovReporterTests", methods}
+            };
+            var classFileName = "doc.cs";
+            var documents = new Documents
+            {
+                {classFileName, classes}
+            };
+            result.Modules = new Modules
+            {
+                {"module", documents}
+            };
+            var reporter = new LcovReporter();
+            // Act
+            var report = reporter.Report(result);
+            // Assert
+            var validClassNameWithPrefix = $"SF:{classFileName}";
+            Assert.Equal(validClassNameWithPrefix, report.Split(Environment.NewLine)[0]);
         }
     }
 }
