@@ -49,7 +49,7 @@ namespace Coverlet.MSbuild.Tasks
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
-                IReporter reporter = new ReporterFactory(_format).CreateReporter();
+                IReporter reporter = new ReporterFactory().CreateReporter(_format);
                 if (reporter == null)
                     throw new Exception($"Specified output format '{_format}' is not supported");
 

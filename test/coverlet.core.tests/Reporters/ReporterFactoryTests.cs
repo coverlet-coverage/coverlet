@@ -11,9 +11,9 @@ namespace Coverlet.Core.Reporters.Tests
         public void CreateReporter__JsonReporter__CreatedReporterHasValidType()
         {
             // Arrange
-            var reporterFactory = new ReporterFactory("json");
+            var reporterFactory = new ReporterFactory();
             // Act
-            var reporter = reporterFactory.CreateReporter();
+            var reporter = reporterFactory.CreateReporter("json");
             // Assert
             var validReporterType = typeof(JsonReporter);
             Assert.Equal(validReporterType, reporter.GetType());
@@ -23,9 +23,9 @@ namespace Coverlet.Core.Reporters.Tests
         public void CreateReporter__LcovReporter__CreatedReporterHasValidType()
         {
             // Arrange
-            var reporterFactory = new ReporterFactory("lcov");
+            var reporterFactory = new ReporterFactory();
             // Act
-            var reporter = reporterFactory.CreateReporter();
+            var reporter = reporterFactory.CreateReporter("lcov");
             // Assert
             var validReporterType = typeof(LcovReporter);
             Assert.Equal(validReporterType, reporter.GetType());
@@ -35,9 +35,9 @@ namespace Coverlet.Core.Reporters.Tests
         public void CreateReporter__OpenCoverReporter__CreatedReporterHasValidType()
         {
             // Arrange
-            var reporterFactory = new ReporterFactory("opencover");
+            var reporterFactory = new ReporterFactory();
             // Act
-            var reporter = reporterFactory.CreateReporter();
+            var reporter = reporterFactory.CreateReporter("opencover");
             // Assert
             var validReporterType = typeof(OpenCoverReporter);
             Assert.Equal(validReporterType, reporter.GetType());
@@ -47,9 +47,9 @@ namespace Coverlet.Core.Reporters.Tests
         public void CreateReporter__CoberturaReporter__CreatedReporterHasValidType()
         {
             // Arrange
-            var reporterFactory = new ReporterFactory("cobertura");
+            var reporterFactory = new ReporterFactory();
             // Act
-            var reporter = reporterFactory.CreateReporter();
+            var reporter = reporterFactory.CreateReporter("cobertura");
             // Assert
             var validReporterType = typeof(CoberturaReporter);
             Assert.Equal(validReporterType, reporter.GetType());
@@ -62,9 +62,9 @@ namespace Coverlet.Core.Reporters.Tests
         public void CreateReporter__EmptyReporter__CreatedReporterIsNull(string reporterType)
         {
             // Arrange
-            var reporterFactory = new ReporterFactory(reporterType);
+            var reporterFactory = new ReporterFactory();
             // Act
-            var reporter = reporterFactory.CreateReporter();
+            var reporter = reporterFactory.CreateReporter(reporterType);
             // Assert
             Assert.Null(reporter);
         }
