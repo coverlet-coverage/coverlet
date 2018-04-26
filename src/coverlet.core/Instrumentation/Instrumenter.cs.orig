@@ -13,9 +13,14 @@ namespace Coverlet.Core.Instrumentation
 {
     internal class Instrumenter
     {
+<<<<<<< HEAD
         private readonly string _module;
         private readonly string _identifier;
+=======
+        private string _module;
+        private string _identifier;
         private IEnumerable<string> _excludedFiles;
+>>>>>>> Implementation exclusion of files according to source file paths (including file globbing)
         private InstrumenterResult _result;
 
         public Instrumenter(string module, string identifier, IEnumerable<string> excludedFiles = null)
@@ -58,18 +63,23 @@ namespace Coverlet.Core.Instrumentation
                 {
                     foreach (var type in module.GetTypes())
                     {
+<<<<<<< HEAD
                         if (type.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
                             continue;
 
                         foreach (var method in type.Methods)
                         {
-	                        var sourceFiles = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).Distinct();
-	                        if (_excludedFiles != null && sourceFiles.Any(_excludedFiles.Contains)) {
-	                            continue;
-	                        }
                             if (!method.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
                                 InstrumentMethod(method);
                         }
+=======
+                        var sourceFiles = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).Distinct();
+                        if (_excludedFiles != null && sourceFiles.Any(_excludedFiles.Contains)) {
+                            continue;
+                        }
+                        if (!method.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
+                            InstrumentMethod(method);
+>>>>>>> Implementation exclusion of files according to source file paths (including file globbing)
                     }
 
                     module.Write(stream);
