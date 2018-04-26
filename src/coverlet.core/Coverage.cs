@@ -96,9 +96,9 @@ namespace Coverlet.Core
             {
                 if (!File.Exists(result.HitsFilePath)) { continue; }
                 var lines = InstrumentationHelper.ReadHitsFile(result.HitsFilePath);
-                for (int i = 0; i < lines.Length; i++)
+                foreach (var line in lines)
                 {
-                    var info = lines[i].Split(',');
+                    var info = line.Split(',');
                     // Ignore malformed lines
                     if (info.Length != 4)
                         continue;
@@ -113,11 +113,11 @@ namespace Coverlet.Core
 
                     for (int j = start; j <= end; j++)
                     {
-                        var line = document.Lines.First(l => l.Number == j);
-                        line.Hits = line.Hits + 1;
+                        var subLine = document.Lines.First(l => l.Number == j);
+                        subLine.Hits = subLine.Hits + 1;
 
                         if (j == start)
-                            line.IsBranchTarget = target;
+                            subLine.IsBranchTarget = target;
                     }
                 }
 
