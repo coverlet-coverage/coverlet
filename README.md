@@ -78,10 +78,15 @@ The above command will automatically fail the build if the average code coverage
 
 ### Excluding From Coverage
 
-You can ignore a method or an entire class from code coverage by creating and applying any of the following attributes:
+You can ignore a method or an entire class from code coverage: 
 
-* ExcludeFromCoverage
-* ExcludeFromCoverageAttribute
+* by applying `ExcludeFromCodeCoverageAttribute` (from `System.Diagnostics.CodeAnalysis` namespace) as:
+  * `[ExcludeFromCodeCoverage]`
+  * `[ExcludeFromCodeCoverageAttribute]`
+* by creating custom attribute with name `ExcludeFromCoverageAttribute` and applying his as:
+  * `[ExcludeFromCoverage]`  
+  * `[ExcludeFromCoverageAttribute]`
+  
 
 Coverlet just uses the type name, so the attributes can be created under any namespace of your choosing.
 
