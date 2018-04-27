@@ -3,7 +3,6 @@ using System.IO;
 
 using Xunit;
 using Coverlet.Core.Instrumentation;
-using Coverlet.MSbuild.Tasks;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {

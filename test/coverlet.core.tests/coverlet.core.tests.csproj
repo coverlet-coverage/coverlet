@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\coverlet.core\coverlet.core.csproj" />
-    <ProjectReference Include="..\..\src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)\..\..\build\$(Configuration)\coverlet.msbuild.targets" />

@@ -111,7 +111,7 @@ namespace Coverlet.Core.Helpers
         }
         
         public static string[] GetExcludedFiles(string[] exclusionRules, string parentDir) {
-            if (exclusionRules == null || exclusionRules.Length == 0 ) return null;
+            if (!(exclusionRules?.Length > 0) ) return null;
             var matcher = new Matcher();
             foreach (var exclusionRule in exclusionRules)
             {
@@ -122,11 +122,7 @@ namespace Coverlet.Core.Helpers
             
             var fileMatchResult = matcher.Execute(new DirectoryInfoWrapper(directoryInfo));
             return fileMatchResult.Files
-                .Select(
-                    f => System.IO.Path.GetFullPath(
-                        System.IO.Path.Combine(directoryInfo.ToString(), f.Path)
-                    )
-                )
+                .Select(f => Path.GetFullPath(Path.Combine(directoryInfo.ToString(), f.Path)))
                 .ToArray();
         }
     }

@@ -22,7 +22,7 @@ namespace Coverlet.Core.Instrumentation
         {
             _module = module;
             _identifier = identifier;
-            _excludedFiles = excludedFiles;
+            _excludedFiles = excludedFiles ?? Enumerable.Empty<string>();
         }
 
         public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
@@ -63,8 +63,8 @@ namespace Coverlet.Core.Instrumentation
 
                         foreach (var method in type.Methods)
                         {
-	                        var sourceFiles = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).Distinct();
-	                        if (_excludedFiles != null && sourceFiles.Any(_excludedFiles.Contains)) {
+	                        var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
+	                        if (!string.IsNullOrEmpty(sourceFile) && _excludedFiles.Contains(sourceFile)) {
 	                            continue;
 	                        }
                             if (!method.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))

@@ -15,7 +15,7 @@ namespace Coverlet.Core
         private IEnumerable<string> _excludedFiles;
         private List<InstrumenterResult> _results;
 
-        public Coverage(string module, string identifier, IEnumerable<string> excludedFiles)
+        public Coverage(string module, string identifier, IEnumerable<string> excludedFiles = null)
         {
             _module = module;
             _identifier = identifier;
