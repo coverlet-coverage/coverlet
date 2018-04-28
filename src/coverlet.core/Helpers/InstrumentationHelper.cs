@@ -19,7 +19,8 @@ namespace Coverlet.Core.Helpers
 
         public static bool HasPdb(string module)
         {
-            using (var peReader = new PEReader(File.OpenRead(module)))
+            using (var moduleStream = File.OpenRead(module))
+            using (var peReader = new PEReader(moduleStream))
             {
                 foreach (var entry in peReader.ReadDebugDirectory())
                 {
