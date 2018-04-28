@@ -10,7 +10,7 @@ using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
-    public static class InstrumentationHelper
+    internal static class InstrumentationHelper
     {
         public static string[] GetDependencies(string module)
         {
@@ -109,20 +109,22 @@ namespace Coverlet.Core.Helpers
             RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
         }
         
-        public static string[] GetExcludedFiles(string[] exclusionRules, string parentDir) {
-            if (!(exclusionRules?.Length > 0) ) return null;
+        public static IEnumerable<string> GetExcludedFiles(IEnumerable<string> excludeRules, 
+                                                           string parentDir = null) 
+        {
+            parentDir = string.IsNullOrWhiteSpace(parentDir)? Directory.GetCurrentDirectory() : parentDir;
+            if (excludeRules == null || !excludeRules.Any()) return Enumerable.Empty<string>();
             var matcher = new Matcher();
-            foreach (var exclusionRule in exclusionRules)
+            foreach (var excludeRule in excludeRules)
             {
-                matcher.AddInclude(exclusionRule);
+                matcher.AddInclude(excludeRule);
             }
         
             DirectoryInfo directoryInfo = new DirectoryInfo(parentDir);
             
             var fileMatchResult = matcher.Execute(new DirectoryInfoWrapper(directoryInfo));
             return fileMatchResult.Files
-                .Select(f => Path.GetFullPath(Path.Combine(directoryInfo.ToString(), f.Path)))
-                .ToArray();
+                .Select(f => Path.GetFullPath(Path.Combine(directoryInfo.ToString(), f.Path)));
         }
     }
 }
