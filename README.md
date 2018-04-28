@@ -83,7 +83,7 @@ You can ignore a method or an entire class from code coverage:
 * by applying `ExcludeFromCodeCoverageAttribute` (from `System.Diagnostics.CodeAnalysis` namespace) as:
   * `[ExcludeFromCodeCoverage]`
   * `[ExcludeFromCodeCoverageAttribute]`
-* by creating custom attribute with name `ExcludeFromCoverageAttribute` and applying his as:
+* by creating custom attribute with name `ExcludeFromCoverageAttribute` and applying it as:
   * `[ExcludeFromCoverage]`  
   * `[ExcludeFromCoverageAttribute]`
   
