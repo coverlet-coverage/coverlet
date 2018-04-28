@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Extensions;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -14,8 +13,8 @@ namespace Coverlet.Core.Instrumentation
 {
     internal class Instrumenter
     {
-        private string _module;
-        private string _identifier;
+        private readonly string _module;
+        private readonly string _identifier;
         private InstrumenterResult _result;
 
         public Instrumenter(string module, string identifier)
@@ -49,25 +48,26 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentModule()
         {
             using (var stream = new FileStream(_module, FileMode.Open, FileAccess.ReadWrite))
+            using (var resolver = new DefaultAssemblyResolver())
             {
-                var resolver = new DefaultAssemblyResolver();
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
-                ModuleDefinition module = ModuleDefinition.ReadModule(stream, parameters);
-                
-                foreach (var type in module.GetTypes())
+                using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
-                    if (type.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
-                        continue;
-
-                    foreach (var method in type.Methods)
+                    foreach (var type in module.GetTypes())
                     {
-                        if (!method.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
-                            InstrumentMethod(method);
-                    }
-                }
+                        if (type.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
+                            continue;
 
-                module.Write(stream);
+                        foreach (var method in type.Methods)
+                        {
+                            if (!method.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
+                                InstrumentMethod(method);
+                        }
+                    }
+
+                    module.Write(stream);
+                }
             }
         }
 
@@ -151,7 +151,7 @@ namespace Coverlet.Core.Instrumentation
             return pathInstr;
         }
 
-        private bool IsBranchTarget(ILProcessor processor, Instruction instruction)
+        private static bool IsBranchTarget(ILProcessor processor, Instruction instruction)
         {
             foreach (var _instruction in processor.Body.Instructions)
             {
@@ -168,7 +168,7 @@ namespace Coverlet.Core.Instrumentation
             return false;
         }
 
-        private void ReplaceInstructionTarget(Instruction instruction, Instruction oldTarget, Instruction newTarget)
+        private static void ReplaceInstructionTarget(Instruction instruction, Instruction oldTarget, Instruction newTarget)
         {
             if (instruction.Operand is Instruction _instruction)
             {
@@ -188,7 +188,7 @@ namespace Coverlet.Core.Instrumentation
             }
         }
 
-        private void ReplaceExceptionHandlerBoundary(ExceptionHandler handler, Instruction oldTarget, Instruction newTarget)
+        private static void ReplaceExceptionHandlerBoundary(ExceptionHandler handler, Instruction oldTarget, Instruction newTarget)
         {
             if (handler.FilterStart == oldTarget)
                 handler.FilterStart = newTarget;
