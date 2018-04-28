@@ -128,7 +128,7 @@ namespace Coverlet.Core.Reporters
         private string GetBasePath(Modules modules)
         {
             List<string> sources = new List<string>();
-            string source = string.Empty;
+            string path = string.Empty;
 
             foreach (var module in modules)
             {
@@ -141,17 +141,17 @@ namespace Coverlet.Core.Reporters
 
             foreach (var segment in segments)
             {
-                var startsWith = sources.All(s => s.StartsWith(source + segment));
+                var startsWith = sources.All(s => s.StartsWith(path + segment));
                 if (!startsWith)
                     break;
 
-                source += segment + Path.DirectorySeparatorChar;
+                path += segment + Path.DirectorySeparatorChar;
             }
 
-            return source;
+            return path;
         }
 
-        private string GetRelativePathFromBase(string source, string path)
-            => path.Replace(source, string.Empty);
+        private string GetRelativePathFromBase(string basePath, string path)
+            => basePath == string.Empty ? path : path.Replace(basePath, string.Empty);
     }
 }
