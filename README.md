@@ -78,12 +78,23 @@ The above command will automatically fail the build if the average code coverage
 
 ### Excluding From Coverage
 
+#### Attributes  
 You can ignore a method or an entire class from code coverage by creating and applying any of the following attributes:
 
 * ExcludeFromCoverage
 * ExcludeFromCoverageAttribute
 
 Coverlet just uses the type name, so the attributes can be created under any namespace of your choosing.
+
+#### File Path  
+You can also ignore specific source files from code coverage using the `Exclude` property
+ - Use single or multiple paths (separate by comma)
+ - Use absolute or relative paths (relative to the project directory)
+ - Use file path or directory path with globbing (e.g `dir1/*.cs`)
+
+```bash
+dotnet test /p:CollectCoverage=true /p:Exclude=\"../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs,\"
+```
 
 ## Roadmap
 
