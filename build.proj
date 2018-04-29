@@ -24,10 +24,14 @@
   </Target>
 
   <Target Name="RunTests" AfterTargets="CopyMSBuildScripts">
-    <Exec Command="dotnet test $(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover" />
+    <Exec Command="dotnet test $(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover"/>
+  </Target>
+  
+  <Target Name="RunTestsWithExclude" AfterTargets="RunTests">
+    <Exec Command="dotnet test --no-build $(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude=\&quot;../../src/coverlet.core/Instrumentation/**/*.cs,../../src/coverlet.core/Reporters/**/*.cs\&quot;"/>
   </Target>
 
-  <Target Name="CreateNuGetPackage" AfterTargets="RunTests" Condition="$(Configuration) == 'Release'">
+  <Target Name="CreateNuGetPackage" AfterTargets="RunTestsWithExclude" Condition="$(Configuration) == 'Release'">
     <Exec Command="dotnet pack $(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj -c $(Configuration) -o $(OutputPath) /p:NuspecFile=$(NuspecFile)" />
   </Target>
 

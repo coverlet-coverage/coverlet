@@ -12,14 +12,14 @@ namespace Coverlet.MSbuild.Tasks
         [Required]
         public string Path { get; set; }
         
-        [Required]
-        public string[] Exclude { get; set; }
+        public string Exclude { get; set; }
                 
         public override bool Execute()
         {
             try
             {
-                Coverage = new Coverage(Path, Guid.NewGuid().ToString(), Exclude);
+                var excludeRules = Exclude?.Split(',');
+                Coverage = new Coverage(Path, Guid.NewGuid().ToString(), excludeRules);
                 Coverage.PrepareModules();
             }
             catch(Exception ex)
