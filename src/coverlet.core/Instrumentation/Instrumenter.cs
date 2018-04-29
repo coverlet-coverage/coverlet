@@ -6,6 +6,7 @@ using Coverlet.Core.Helpers;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
+using System.Collections.Generic;
 
 namespace Coverlet.Core.Instrumentation
 {
@@ -13,12 +14,14 @@ namespace Coverlet.Core.Instrumentation
     {
         private readonly string _module;
         private readonly string _identifier;
+        private IEnumerable<string> _excludedFiles;
         private InstrumenterResult _result;
 
-        public Instrumenter(string module, string identifier)
+        public Instrumenter(string module, string identifier, IEnumerable<string> excludedFiles = null)
         {
             _module = module;
             _identifier = identifier;
+            _excludedFiles = excludedFiles ?? Enumerable.Empty<string>();
         }
 
         public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
@@ -59,6 +62,10 @@ namespace Coverlet.Core.Instrumentation
 
                         foreach (var method in type.Methods)
                         {
+	                        var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
+	                        if (!string.IsNullOrEmpty(sourceFile) && _excludedFiles.Contains(sourceFile)) {
+	                            continue;
+	                        }
                             if (!method.CustomAttributes.Any(a => a.AttributeType.Name == "ExcludeFromCoverageAttribute" || a.AttributeType.Name == "ExcludeFromCoverage"))
                                 InstrumentMethod(method);
                         }
