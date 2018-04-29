@@ -113,19 +113,39 @@ namespace Coverlet.Core.Helpers
         public static IEnumerable<string> GetExcludedFiles(IEnumerable<string> excludeRules, 
                                                            string parentDir = null) 
         {
+            const string RELATIVE_KEY = nameof(RELATIVE_KEY);
             parentDir = string.IsNullOrWhiteSpace(parentDir)? Directory.GetCurrentDirectory() : parentDir;
+            
             if (excludeRules == null || !excludeRules.Any()) return Enumerable.Empty<string>();
-            var matcher = new Matcher();
+            
+            var matcherDict = new Dictionary<string, Matcher>(){ {RELATIVE_KEY, new Matcher()}};
             foreach (var excludeRule in excludeRules)
             {
-                matcher.AddInclude(excludeRule);
+                if (Path.IsPathRooted(excludeRule)) {
+                    var root = Path.GetPathRoot(excludeRule);
+                    if (!matcherDict.ContainsKey(root)) {
+                        matcherDict.Add(root, new Matcher());
+                    } 
+                    matcherDict[root].AddInclude(excludeRule.Substring(root.Length));
+                } else {
+                    matcherDict[RELATIVE_KEY].AddInclude(excludeRule);
+                }
+                
             }
-        
-            DirectoryInfo directoryInfo = new DirectoryInfo(parentDir);
             
-            var fileMatchResult = matcher.Execute(new DirectoryInfoWrapper(directoryInfo));
-            return fileMatchResult.Files
-                .Select(f => Path.GetFullPath(Path.Combine(directoryInfo.ToString(), f.Path)));
+            var files = new List<string>();
+            foreach(var entry in matcherDict)
+            {
+                var root = entry.Key;
+                var matcher = entry.Value;
+                var directoryInfo = new DirectoryInfo(root.Equals(RELATIVE_KEY) ? parentDir : root);
+                var fileMatchResult = matcher.Execute(new DirectoryInfoWrapper(directoryInfo));
+                var currentFiles = fileMatchResult.Files
+                    .Select(f => Path.GetFullPath(Path.Combine(directoryInfo.ToString(), f.Path)));
+                files.AddRange(currentFiles);
+            }
+            
+            return files.Distinct();
         }
     }
 }

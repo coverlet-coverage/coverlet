@@ -28,7 +28,7 @@
   </Target>
   
   <Target Name="RunTestsWithExclude" AfterTargets="RunTests">
-    <Exec Command="dotnet test --no-build $(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude=\&quot;../../src/coverlet.core/Instrumentation/**/*.cs,../../src/coverlet.core/Reporters/**/*.cs\&quot;"/>
+    <Exec Command="dotnet test --no-build $(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude=\&quot;../../src/coverlet.core/Instrumentation/**/*.cs,$(MSBuildThisFileDirectory)/src/coverlet.core/Reporters/**/*.cs\&quot;"/>
   </Target>
 
   <Target Name="CreateNuGetPackage" AfterTargets="RunTestsWithExclude" Condition="$(Configuration) == 'Release'">
