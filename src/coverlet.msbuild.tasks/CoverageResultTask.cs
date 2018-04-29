@@ -59,12 +59,13 @@ namespace Coverlet.MSbuild.Tasks
 
                 double total = 0;
                 CoverageSummary summary = new CoverageSummary();
-                ConsoleTable table = new ConsoleTable("Module", "Coverage");
+                ConsoleTable table = new ConsoleTable("Module", "Line Coverage", "Branch Coverage");
 
                 foreach (var module in result.Modules)
                 {
                     double percent = summary.CalculateLineCoverage(module.Value) * 100;
-                    table.AddRow(System.IO.Path.GetFileNameWithoutExtension(module.Key), $"{percent}%");
+                    double branchPercent = summary.CalculateBranchCoverage(module.Value) * 100;
+                    table.AddRow(System.IO.Path.GetFileNameWithoutExtension(module.Key), $"{percent}%", $"{branchPercent}%");
                     total += percent;
                 }
 

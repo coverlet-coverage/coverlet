@@ -11,12 +11,23 @@ namespace Coverlet.Core.Instrumentation
         public int Hits;
     }
 
+    internal class Branch : Line
+    {
+        public int Path;
+        public uint Ordinal;
+    }
+
     internal class Document
     {
-        public Document() => Lines = new List<Line>();
+        public Document()
+        {
+            Lines = new List<Line>();
+            Branches = new List<Branch>();
+        }
 
         public string Path;
         public List<Line> Lines { get; private set; }
+        public List<Branch> Branches { get; private set; }
     }
 
     internal class InstrumenterResult
