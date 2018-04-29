@@ -6,8 +6,7 @@ using Coverlet.Core.Helpers;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
-using System;
-using System.Xml.Linq;
+using System.Collections.Generic;
 
 namespace Coverlet.Core.Instrumentation
 {
