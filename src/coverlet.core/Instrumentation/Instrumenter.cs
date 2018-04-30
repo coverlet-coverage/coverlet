@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Symbols;
@@ -10,9 +8,6 @@ using Coverlet.Core.Symbols;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
-using Mono.Collections.Generic;
-
-using Newtonsoft.Json;
 
 namespace Coverlet.Core.Instrumentation
 {
