@@ -68,7 +68,7 @@ namespace Coverlet.Core.Symbols.Tests
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
 
-            Assert.Equal(0, points.Count());
+            Assert.Empty(points);
         }
 
         [Fact]
@@ -230,7 +230,7 @@ namespace Coverlet.Core.Symbols.Tests
 
             // check that the method is laid out the way we discovered it to be during the defect
             // @see https://github.com/OpenCover/opencover/issues/243
-            Assert.Equal(1, method.Body.ExceptionHandlers.Count());
+            Assert.Single(method.Body.ExceptionHandlers);
             Assert.NotNull(method.Body.ExceptionHandlers[0].HandlerStart);
             Assert.Null(method.Body.ExceptionHandlers[0].HandlerEnd);
             Assert.Equal(1, method.Body.Instructions.Count(i => i.OpCode.FlowControl == FlowControl.Cond_Branch));
@@ -240,8 +240,7 @@ namespace Coverlet.Core.Symbols.Tests
             var points = CecilSymbolHelper.GetBranchPoints(method);
 
             // assert
-            Assert.NotNull(points);
-            Assert.Equal(0, points.Count());
+            Assert.Empty(points);
         }
 
         [Fact]
@@ -257,7 +256,7 @@ namespace Coverlet.Core.Symbols.Tests
             var points = CecilSymbolHelper.GetBranchPoints(method);
 
             // assert
-            Assert.Equal(0, points.Count());
+            Assert.Empty(points);
 
         }
     }

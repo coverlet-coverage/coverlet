@@ -154,14 +154,14 @@ namespace Coverlet.Core
             {
                 if (!File.Exists(result.HitsFilePath)) { continue; }
                 var lines = InstrumentationHelper.ReadHitsFile(result.HitsFilePath);
-                foreach (var line in lines)
+                foreach (var row in lines)
                 {
-                    var info = line.Split(',');
+                    var info = row.Split(',');
                     // Ignore malformed lines
                     if (info.Length != 4)
                         continue;
 
-                    bool branch = info[0] == "B";
+                    bool isBranch = info[0] == "B";
 
                     var document = result.Documents.FirstOrDefault(d => d.Path == info[1]);
                     if (document == null)
@@ -169,19 +169,21 @@ namespace Coverlet.Core
 
                     int start = int.Parse(info[2]);
 
-                    if (branch)
+                    if (isBranch)
                     {
                         uint ordinal = uint.Parse(info[3]);
-                        var subBranch = document.Branches.First(b => b.Number == start && b.Ordinal == ordinal);
-                        subBranch.Hits += subBranch.Hits + 1;
+                        var branch = document.Branches.First(b => b.Number == start && b.Ordinal == ordinal);
+                        if (branch.Hits != int.MaxValue)
+                            branch.Hits += branch.Hits + 1;
                     }
                     else
                     {
                         int end = int.Parse(info[3]);
                         for (int j = start; j <= end; j++)
                         {
-                            var subLine = document.Lines.First(l => l.Number == j);
-                            subLine.Hits = subLine.Hits + 1;
+                            var line = document.Lines.First(l => l.Number == j);
+                            if (line.Hits != int.MaxValue)
+                                line.Hits = line.Hits + 1;
                         }
                     }
                 }

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-using Coverlet.Core.Helpers;
+using Coverlet.Core.Extensions;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;

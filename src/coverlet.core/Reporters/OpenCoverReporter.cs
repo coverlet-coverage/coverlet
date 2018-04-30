@@ -83,7 +83,7 @@ namespace Coverlet.Core.Reporters
                             fileRef.Add(new XAttribute("uid", i.ToString()));
 
                             XElement methodPoint = new XElement("MethodPoint");
-                            methodPoint.Add(new XAttribute("vc", meth.Value.Lines.Select(l => l.Value.Hits).Sum().ToString()));
+                            methodPoint.Add(new XAttribute("vc", meth.Value.Lines.Sum(l => l.Value.Hits).ToString()));
                             methodPoint.Add(new XAttribute("upsid", "0"));
                             methodPoint.Add(new XAttribute(XName.Get("type", "xsi"), "SequencePoint"));
                             methodPoint.Add(new XAttribute("ordinal", j.ToString()));
@@ -185,7 +185,7 @@ namespace Coverlet.Core.Reporters
 
                         classSummary.Add(new XAttribute("numSequencePoints", cls.Value.Select(c => c.Value.Lines.Count).Sum().ToString()));
                         classSummary.Add(new XAttribute("visitedSequencePoints", cls.Value.Select(c => c.Value.Lines.Where(l => l.Value.Hits > 0).Count()).Sum().ToString()));
-                        classSummary.Add(new XAttribute("numBranchPoints", cls.Value.Select(c => c.Value.Branches.Sum(b => b.Value.Count())).ToString()));
+                        classSummary.Add(new XAttribute("numBranchPoints", cls.Value.Select(c => c.Value.Branches.Sum(b => b.Value.Count())).Sum().ToString()));
                         classSummary.Add(new XAttribute("visitedBranchPoints", cls.Value.Select(c => c.Value.Branches.Sum(b => b.Value.Where(bi => bi.Hits > 0).Count())).Sum().ToString()));
                         classSummary.Add(new XAttribute("sequenceCoverage", summary.CalculateLineCoverage(cls.Value).ToString()));
                         classSummary.Add(new XAttribute("branchCoverage", summary.CalculateBranchCoverage(cls.Value).ToString()));
