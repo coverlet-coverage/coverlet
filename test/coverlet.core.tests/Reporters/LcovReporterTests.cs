@@ -14,7 +14,9 @@ namespace Coverlet.Core.Reporters.Tests
             lines.Add(1, new LineInfo { Hits = 1 });
             lines.Add(2, new LineInfo { Hits = 0 });
             Methods methods = new Methods();
-            methods.Add("System.Void Coverlet.Core.Reporters.Tests.LcovReporterTests.TestReport()", lines);
+            var methodString = "System.Void Coverlet.Core.Reporters.Tests.LcovReporterTests.TestReport()";
+            methods.Add(methodString, new Method());
+            methods[methodString].Lines = lines;
             Classes classes = new Classes();
             classes.Add("Coverlet.Core.Reporters.Tests.LcovReporterTests", methods);
             Documents documents = new Documents();

@@ -17,7 +17,7 @@ namespace Coverlet.Core
         {
             double total = 0, average = 0;
             foreach (var method in methods)
-                total += CalculateLineCoverage(method.Value);
+                total += CalculateLineCoverage(method.Value.Lines);
 
             average = total / methods.Count;
             return Math.Round(average, 3);
@@ -53,10 +53,10 @@ namespace Coverlet.Core
             return Math.Round(average, 3);
         }
 
-        public double CalculateBranchCoverage(Lines lines)
+        public double CalculateBranchCoverage(Branches branches)
         {
-            double pointsCovered = lines.Where(l => l.Value.Hits > 0 && l.Value.IsBranchPoint).Count();
-            double totalPoints = lines.Where(l => l.Value.IsBranchPoint).Count();
+            double pointsCovered = branches.Sum(b => b.Value.Where(bi => bi.Hits > 0).Count());
+            double totalPoints = branches.Sum(b => b.Value.Count());
             double coverage = totalPoints == 0 ? totalPoints : pointsCovered / totalPoints;
             return Math.Round(coverage, 3);
         }
@@ -65,7 +65,7 @@ namespace Coverlet.Core
         {
             double total = 0, average = 0;
             foreach (var method in methods)
-                total += CalculateBranchCoverage(method.Value);
+                total += CalculateBranchCoverage(method.Value.Branches);
 
             average = total / methods.Count;
             return Math.Round(average, 3);
@@ -113,7 +113,7 @@ namespace Coverlet.Core
         {
             double total = 0, average = 0;
             foreach (var method in methods)
-                total += CalculateMethodCoverage(method.Value);
+                total += CalculateMethodCoverage(method.Value.Lines);
 
             average = total / methods.Count;
             return Math.Round(average, 3);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Coverlet.Core;
@@ -14,11 +15,18 @@ namespace Coverlet.Core.Tests
         public CoverageSummaryTests()
         {
             Lines lines = new Lines();
-            lines.Add(1, new LineInfo { Hits = 1, IsBranchPoint = true });
+            lines.Add(1, new LineInfo { Hits = 1 });
             lines.Add(2, new LineInfo { Hits = 0 });
+            Branches branches = new Branches();
+            branches.Add(1, new List<BranchInfo>());
+            branches[1].Add(new BranchInfo { Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
+            branches[1].Add(new BranchInfo { Hits = 1, Offset = 1, Path = 1, Ordinal = 2 });
 
             Methods methods = new Methods();
-            methods.Add("System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()", lines);
+            var methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
+            methods.Add(methodString, new Method());
+            methods[methodString].Lines = lines;
+            methods[methodString].Branches = branches;
 
             Classes classes = new Classes();
             classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
@@ -43,7 +51,7 @@ namespace Coverlet.Core.Tests
             Assert.Equal(0.5, summary.CalculateLineCoverage(module.Value));
             Assert.Equal(0.5, summary.CalculateLineCoverage(document.Value));
             Assert.Equal(0.5, summary.CalculateLineCoverage(@class.Value));
-            Assert.Equal(0.5, summary.CalculateLineCoverage(method.Value));
+            Assert.Equal(0.5, summary.CalculateLineCoverage(method.Value.Lines));
         }
 
         [Fact]
@@ -59,7 +67,7 @@ namespace Coverlet.Core.Tests
             Assert.Equal(1, summary.CalculateBranchCoverage(module.Value));
             Assert.Equal(1, summary.CalculateBranchCoverage(document.Value));
             Assert.Equal(1, summary.CalculateBranchCoverage(@class.Value));
-            Assert.Equal(1, summary.CalculateBranchCoverage(method.Value));
+            Assert.Equal(1, summary.CalculateBranchCoverage(method.Value.Branches));
         }
 
         [Fact]
@@ -75,7 +83,7 @@ namespace Coverlet.Core.Tests
             Assert.Equal(1, summary.CalculateMethodCoverage(module.Value));
             Assert.Equal(1, summary.CalculateMethodCoverage(document.Value));
             Assert.Equal(1, summary.CalculateMethodCoverage(@class.Value));
-            Assert.Equal(1, summary.CalculateMethodCoverage(method.Value));
+            Assert.Equal(1, summary.CalculateMethodCoverage(method.Value.Lines));
         }
     }
 }

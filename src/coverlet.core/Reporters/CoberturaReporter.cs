@@ -57,25 +57,29 @@ namespace Coverlet.Core.Reporters
 
                         foreach (var meth in cls.Value)
                         {
+                            // Skip all methods with no lines
+                            if (meth.Value.Lines.Count == 0)
+                                continue;
+
                             XElement method = new XElement("method");
                             method.Add(new XAttribute("name", meth.Key.Split(':')[2].Split('(')[0]));
                             method.Add(new XAttribute("signature", "(" + meth.Key.Split(':')[2].Split('(')[1]));
-                            method.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(meth.Value).ToString()));
-                            method.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(meth.Value).ToString()));
+                            method.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(meth.Value.Lines).ToString()));
+                            method.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(meth.Value.Branches).ToString()));
 
                             XElement lines = new XElement("lines");
-                            foreach (var ln in meth.Value)
+                            foreach (var ln in meth.Value.Lines)
                             {
                                 XElement line = new XElement("line");
                                 line.Add(new XAttribute("number", ln.Key.ToString()));
                                 line.Add(new XAttribute("hits", ln.Value.Hits.ToString()));
-                                line.Add(new XAttribute("branch", ln.Value.IsBranchPoint.ToString()));
+                                // line.Add(new XAttribute("branch", ln.Value.IsBranchPoint.ToString()));
 
                                 totalLines++;
                                 if (ln.Value.Hits > 0) coveredLines++;
 
 
-                                if (ln.Value.IsBranchPoint)
+                                if (meth.Value.Branches.TryGetValue(ln.Key, out List<BranchInfo> branches))
                                 {
                                     line.Add(new XAttribute("condition-coverage", "100% (1/1)"));
                                     XElement conditions = new XElement("conditions");
