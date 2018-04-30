@@ -11,7 +11,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument()
         {
-            string module = typeof(InstrumenterTests).Assembly.Location;
+            string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
             string identifier = Guid.NewGuid().ToString();
 

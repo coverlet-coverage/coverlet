@@ -33,6 +33,7 @@ namespace Coverlet.Core
             }
         }
 
+        [ExcludeFromCoverage]
         public static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             foreach (var kvp in _markers)
