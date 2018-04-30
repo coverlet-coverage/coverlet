@@ -7,7 +7,6 @@ namespace Coverlet.Core.Instrumentation
         public int Number;
         public string Class;
         public string Method;
-        public bool IsBranchTarget;
         public int Hits;
     }
 
