@@ -20,33 +20,48 @@ namespace Coverlet.Core.Reporters
             {
                 foreach (var doc in module.Value)
                 {
+                    numMethods = 0;
+                    visitedMethods = 0;
+                    numSequencePoints = 0;
+                    visitedSequencePoints = 0;
+                    numBranchPoints = 0;
+                    visitedBranchPoints = 0;
                     lcov.Add("SF:" + doc.Key);
                     foreach (var @class in doc.Value)
                     {
                         bool methodVisited = false;
                         foreach (var method in @class.Value)
                         {
-                            lcov.Add($"FN:{method.Value.First().Key - 1},{method.Key}");
-                            lcov.Add($"FNDA:{method.Value.First().Value.Hits},{method.Key}");
+                            // Skip all methods with no lines
+                            if (method.Value.Lines.Count == 0)
+                                continue;
 
-                            foreach (var line in method.Value)
+                            lcov.Add($"FN:{method.Value.Lines.First().Key - 1},{method.Key}");
+                            lcov.Add($"FNDA:{method.Value.Lines.First().Value.Hits},{method.Key}");
+
+                            foreach (var line in method.Value.Lines)
                             {
                                 lcov.Add($"DA:{line.Key},{line.Value.Hits}");
                                 numSequencePoints++;
-
-                                if (line.Value.IsBranchPoint)
-                                {
-                                    lcov.Add($"BRDA:{line.Key},{numBlockBranch},{numBlockBranch},{line.Value.Hits}");
-                                    numBlockBranch++;
-                                    numBranchPoints++;
-                                }
 
                                 if (line.Value.Hits > 0)
                                 {
                                     visitedSequencePoints++;
                                     methodVisited = true;
-                                    if (line.Value.IsBranchPoint)
+                                }
+                            }
+
+                            foreach (var branchs in method.Value.Branches)
+                            {
+                                foreach (var branch in branchs.Value)
+                                {
+                                    lcov.Add($"BRDA:{branchs.Key},{branch.Offset},{branch.Path},{branch.Hits}");
+                                    numBlockBranch++;
+                                    numBranchPoints++;
+                                    if (branch.Hits > 0)
+                                    {
                                         visitedBranchPoints++;
+                                    }
                                 }
                             }
 

@@ -95,14 +95,6 @@ namespace Coverlet.Core.Instrumentation
             method.Body.SimplifyMacros();
             ILProcessor processor = method.Body.GetILProcessor();
 
-            // Write All Instructions
-            if(method.Name.Contains("CreateAddress"))
-            {
-                Console.WriteLine($"All Instructions: {processor.Body.Instructions.Count}");
-                foreach (var instruction in processor.Body.Instructions)
-                    Console.WriteLine($"{instruction} // Offset: {instruction.Offset}");
-            }
-
             var index = 0;
             var count = processor.Body.Instructions.Count;
 
@@ -144,18 +136,6 @@ namespace Coverlet.Core.Instrumentation
                 index++;
             }
 
-            // Write New Instructions
-            if(method.Name.Contains("CreateAddress"))
-            {
-                Console.WriteLine($"New Instructions: {processor.Body.Instructions.Count}");
-                foreach (var instruction in processor.Body.Instructions)
-                    Console.WriteLine($"{instruction} // Offset: {instruction.Offset}");
-            }
-
-            // Write All Branches
-            if(method.Name.Contains("CreateAddress"))
-                Console.WriteLine(JsonConvert.SerializeObject(branchPoints));
-
             method.Body.OptimizeMacros();
         }
 
@@ -175,7 +155,7 @@ namespace Coverlet.Core.Instrumentation
             }
 
             // string flag = branchPoints.Count > 0 ? "B" : "L";
-            string marker = $"{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine},L";
+            string marker = $"{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine},L,0,0";
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
@@ -198,7 +178,7 @@ namespace Coverlet.Core.Instrumentation
             }
 
             if (!document.Branches.Exists(l => l.Number == branchPoint.StartLine && l.Path == branchPoint.Path && l.Ordinal == branchPoint.Ordinal))
-                document.Branches.Add(new Branch { Number = branchPoint.StartLine, Class = method.DeclaringType.FullName, Method = method.FullName, Path = branchPoint.Path, Ordinal = branchPoint.Ordinal });
+                document.Branches.Add(new Branch { Number = branchPoint.StartLine, Class = method.DeclaringType.FullName, Method = method.FullName, Offset = branchPoint.Offset, Path = branchPoint.Path, Ordinal = branchPoint.Ordinal });
 
             string marker = $"{document.Path},{branchPoint.StartLine},{branchPoint.StartLine},B,{branchPoint.Path},{branchPoint.Ordinal}";
 

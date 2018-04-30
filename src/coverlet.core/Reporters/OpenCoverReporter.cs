@@ -62,12 +62,16 @@ namespace Coverlet.Core.Reporters
 
                         foreach (var meth in cls.Value)
                         {
+                            // Skip all methods with no lines
+                            if (meth.Value.Lines.Count == 0)
+                                continue;
+                            
                             XElement method = new XElement("Method");
 
                             method.Add(new XAttribute("cyclomaticComplexity", "0"));
                             method.Add(new XAttribute("nPathComplexity", "0"));
-                            method.Add(new XAttribute("sequenceCoverage", summary.CalculateLineCoverage(meth.Value).ToString()));
-                            method.Add(new XAttribute("branchCoverage", summary.CalculateBranchCoverage(meth.Value).ToString()));
+                            method.Add(new XAttribute("sequenceCoverage", summary.CalculateLineCoverage(meth.Value.Lines).ToString()));
+                            method.Add(new XAttribute("branchCoverage", summary.CalculateBranchCoverage(meth.Value.Branches).ToString()));
                             method.Add(new XAttribute("isConstructor", meth.Key.Contains("ctor").ToString()));
                             method.Add(new XAttribute("isGetter", meth.Key.Contains("get_").ToString()));
                             method.Add(new XAttribute("isSetter", meth.Key.Contains("set_").ToString()));
@@ -79,15 +83,15 @@ namespace Coverlet.Core.Reporters
                             fileRef.Add(new XAttribute("uid", i.ToString()));
 
                             XElement methodPoint = new XElement("MethodPoint");
-                            methodPoint.Add(new XAttribute("vc", meth.Value.Select(l => l.Value.Hits).Sum().ToString()));
+                            methodPoint.Add(new XAttribute("vc", meth.Value.Lines.Select(l => l.Value.Hits).Sum().ToString()));
                             methodPoint.Add(new XAttribute("upsid", "0"));
                             methodPoint.Add(new XAttribute(XName.Get("type", "xsi"), "SequencePoint"));
                             methodPoint.Add(new XAttribute("ordinal", j.ToString()));
                             methodPoint.Add(new XAttribute("offset", j.ToString()));
                             methodPoint.Add(new XAttribute("sc", "0"));
-                            methodPoint.Add(new XAttribute("sl", meth.Value.First().Key.ToString()));
+                            methodPoint.Add(new XAttribute("sl", meth.Value.Lines.First().Key.ToString()));
                             methodPoint.Add(new XAttribute("ec", "1"));
-                            methodPoint.Add(new XAttribute("el", meth.Value.Last().Key.ToString()));
+                            methodPoint.Add(new XAttribute("el", meth.Value.Lines.Last().Key.ToString()));
                             methodPoint.Add(new XAttribute("bec", "0"));
                             methodPoint.Add(new XAttribute("bev", "0"));
                             methodPoint.Add(new XAttribute("fileid", i.ToString()));
@@ -100,7 +104,7 @@ namespace Coverlet.Core.Reporters
                             int kBr = 0;
                             var methodVisited = false;
 
-                            foreach (var lines in meth.Value)
+                            foreach (var lines in meth.Value.Lines)
                             {
                                 XElement sequencePoint = new XElement("SequencePoint");
                                 sequencePoint.Add(new XAttribute("vc", lines.Value.Hits.ToString()));
@@ -115,45 +119,48 @@ namespace Coverlet.Core.Reporters
                                 sequencePoint.Add(new XAttribute("fileid", i.ToString()));
                                 sequencePoints.Add(sequencePoint);
 
-                                if (lines.Value.IsBranchPoint)
-                                {
-                                    XElement branchPoint = new XElement("BranchPoint");
-                                    branchPoint.Add(new XAttribute("vc", lines.Value.Hits.ToString()));
-                                    branchPoint.Add(new XAttribute("upsid", lines.Key.ToString()));
-                                    branchPoint.Add(new XAttribute("ordinal", kBr.ToString()));
-                                    branchPoint.Add(new XAttribute("path", ""));
-                                    branchPoint.Add(new XAttribute("offset", kBr.ToString()));
-                                    branchPoint.Add(new XAttribute("offsetend", kBr.ToString()));
-                                    branchPoint.Add(new XAttribute("sl", lines.Key.ToString()));
-                                    branchPoint.Add(new XAttribute("fileid", i.ToString()));
-                                    branchPoints.Add(branchPoint);
-                                    kBr++;
-                                    numBranchPoints++;
-                                }
-
                                 numSequencePoints++;
                                 if (lines.Value.Hits > 0)
                                 {
                                     visitedSequencePoints++;
                                     classVisited = true;
                                     methodVisited = true;
-                                    if (lines.Value.IsBranchPoint)
-                                        visitedBranchPoints++;
                                 }
 
                                 k++;
+                            }
+
+                            foreach (var branches in meth.Value.Branches)
+                            {
+                                foreach (var branch in branches.Value)
+                                {
+                                    XElement branchPoint = new XElement("BranchPoint");
+                                    branchPoint.Add(new XAttribute("vc", branch.Hits.ToString()));
+                                    branchPoint.Add(new XAttribute("upsid", branches.Key.ToString()));
+                                    branchPoint.Add(new XAttribute("ordinal", branch.Ordinal.ToString()));
+                                    branchPoint.Add(new XAttribute("path", branch.Path.ToString()));
+                                    branchPoint.Add(new XAttribute("offset", branch.Offset.ToString()));
+                                    branchPoint.Add(new XAttribute("offsetend", branch.Offset.ToString()));
+                                    branchPoint.Add(new XAttribute("sl", branches.Key.ToString()));
+                                    branchPoint.Add(new XAttribute("fileid", i.ToString()));
+                                    branchPoints.Add(branchPoint);
+                                    kBr++;
+                                    numBranchPoints++;
+                                    if (branch.Hits > 0)
+                                        visitedBranchPoints++;
+                                }
                             }
 
                             numMethods++;
                             if (methodVisited)
                                 visitedMethods++;
 
-                            methodSummary.Add(new XAttribute("numSequencePoints", meth.Value.Count().ToString()));
-                            methodSummary.Add(new XAttribute("visitedSequencePoints", meth.Value.Where(l => l.Value.Hits > 0).Count().ToString()));
-                            methodSummary.Add(new XAttribute("numBranchPoints", meth.Value.Where(l => l.Value.IsBranchPoint).Count().ToString()));
-                            methodSummary.Add(new XAttribute("visitedBranchPoints", meth.Value.Where(l => l.Value.IsBranchPoint && l.Value.Hits > 0).Count().ToString()));
-                            methodSummary.Add(new XAttribute("sequenceCoverage", summary.CalculateLineCoverage(meth.Value).ToString()));
-                            methodSummary.Add(new XAttribute("branchCoverage", summary.CalculateBranchCoverage(meth.Value).ToString()));
+                            methodSummary.Add(new XAttribute("numSequencePoints", meth.Value.Lines.Count().ToString()));
+                            methodSummary.Add(new XAttribute("visitedSequencePoints", meth.Value.Lines.Where(l => l.Value.Hits > 0).Count().ToString()));
+                            methodSummary.Add(new XAttribute("numBranchPoints", meth.Value.Branches.Sum(b => b.Value.Count()).ToString()));
+                            methodSummary.Add(new XAttribute("visitedBranchPoints", meth.Value.Branches.Sum(b => b.Value.Where(bi => bi.Hits > 0).Count()).ToString()));
+                            methodSummary.Add(new XAttribute("sequenceCoverage", summary.CalculateLineCoverage(meth.Value.Lines).ToString()));
+                            methodSummary.Add(new XAttribute("branchCoverage", summary.CalculateBranchCoverage(meth.Value.Branches).ToString()));
                             methodSummary.Add(new XAttribute("maxCyclomaticComplexity", "0"));
                             methodSummary.Add(new XAttribute("minCyclomaticComplexity", "0"));
                             methodSummary.Add(new XAttribute("visitedClasses", "0"));
@@ -176,10 +183,10 @@ namespace Coverlet.Core.Reporters
                         if (classVisited)
                             visitedClasses++;
 
-                        classSummary.Add(new XAttribute("numSequencePoints", cls.Value.Select(c => c.Value.Count).Sum().ToString()));
-                        classSummary.Add(new XAttribute("visitedSequencePoints", cls.Value.Select(c => c.Value.Where(l => l.Value.Hits > 0).Count()).Sum().ToString()));
-                        classSummary.Add(new XAttribute("numBranchPoints", cls.Value.Select(c => c.Value.Count(l => l.Value.IsBranchPoint)).Sum().ToString()));
-                        classSummary.Add(new XAttribute("visitedBranchPoints", cls.Value.Select(c => c.Value.Where(l => l.Value.Hits > 0 && l.Value.IsBranchPoint).Count()).Sum().ToString()));
+                        classSummary.Add(new XAttribute("numSequencePoints", cls.Value.Select(c => c.Value.Lines.Count).Sum().ToString()));
+                        classSummary.Add(new XAttribute("visitedSequencePoints", cls.Value.Select(c => c.Value.Lines.Where(l => l.Value.Hits > 0).Count()).Sum().ToString()));
+                        classSummary.Add(new XAttribute("numBranchPoints", cls.Value.Select(c => c.Value.Branches.Sum(b => b.Value.Count())).ToString()));
+                        classSummary.Add(new XAttribute("visitedBranchPoints", cls.Value.Select(c => c.Value.Branches.Sum(b => b.Value.Where(bi => bi.Hits > 0).Count())).Sum().ToString()));
                         classSummary.Add(new XAttribute("sequenceCoverage", summary.CalculateLineCoverage(cls.Value).ToString()));
                         classSummary.Add(new XAttribute("branchCoverage", summary.CalculateBranchCoverage(cls.Value).ToString()));
                         classSummary.Add(new XAttribute("maxCyclomaticComplexity", "0"));
