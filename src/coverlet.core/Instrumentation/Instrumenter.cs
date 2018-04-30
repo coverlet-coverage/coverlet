@@ -117,6 +117,15 @@ namespace Coverlet.Core.Instrumentation
                 {
                     foreach (var _branchTarget in targetedBranchPoints)
                     {
+                        /*
+                         * Skip branches with no sequence point reference for now.
+                         * In this case for an anonymous class the compiler will dynamically create an Equals 'utility' method.
+                         * The CecilSymbolHelper will create branch points with a start line of -1 and no document, which
+                         * I am currently not sure how to handle.
+                         */
+                        if (_branchTarget.StartLine == -1 || _branchTarget.Document == null)
+                            continue;
+                        
                         var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
                         foreach (var _instruction in processor.Body.Instructions)
                             ReplaceInstructionTarget(_instruction, instruction, target);
@@ -150,7 +159,7 @@ namespace Coverlet.Core.Instrumentation
             }
 
             // string flag = branchPoints.Count > 0 ? "B" : "L";
-            string marker = $"{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine},L,0,0";
+            string marker = $"L,{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine}";
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
@@ -172,7 +181,7 @@ namespace Coverlet.Core.Instrumentation
                 _result.Documents.Add(document);
             }
 
-            if (!document.Branches.Exists(l => l.Number == branchPoint.StartLine && l.Path == branchPoint.Path && l.Ordinal == branchPoint.Ordinal))
+            if (!document.Branches.Exists(l => l.Number == branchPoint.StartLine && l.Ordinal == branchPoint.Ordinal))
                 document.Branches.Add(
                     new Branch
                     {
@@ -186,7 +195,7 @@ namespace Coverlet.Core.Instrumentation
                     }
                 );
 
-            string marker = $"{document.Path},{branchPoint.StartLine},{branchPoint.StartLine},B,{branchPoint.Path},{branchPoint.Ordinal}";
+            string marker = $"B,{document.Path},{branchPoint.StartLine},{branchPoint.Ordinal}";
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
