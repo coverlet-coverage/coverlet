@@ -123,7 +123,6 @@ namespace Coverlet.Core
                             documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                             documents[doc.Path][branch.Class][branch.Method].Branches.Add(branch.Number, new List<BranchInfo>());
                             documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo { Hits = branch.Hits, Offset = branch.Offset, Path = branch.Path, Ordinal = branch.Ordinal });
-
                         }
                     }
                 }
