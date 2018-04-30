@@ -14,10 +14,11 @@ namespace Coverlet.Core.Instrumentation.Tests
         }
 
         [Fact]
-        public void TestEnsureLinesPropertyNotNull()
+        public void TestEnsureLinesAndBranchesPropertyNotNull()
         {
             Document document = new Document();
             Assert.NotNull(document.Lines);
+            Assert.NotNull(document.Branches);
         }
     }
 }
