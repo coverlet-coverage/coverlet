@@ -40,11 +40,6 @@ namespace Coverlet.Core.Symbols
         public int EndOffset { get; set; }
 
         /// <summary>
-        /// The file associated with the supplied startline 
-        /// </summary>
-        public uint FileId { get; set; }
-
-        /// <summary>
         /// The url to the document if an entry was not mapped to an id
         /// </summary>
         public string Document { get; set; }

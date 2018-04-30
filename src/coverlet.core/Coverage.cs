@@ -158,26 +158,26 @@ namespace Coverlet.Core
                 {
                     var info = line.Split(',');
                     // Ignore malformed lines
-                    if (info.Length != 6)
+                    if (info.Length != 4)
                         continue;
 
-                    var document = result.Documents.FirstOrDefault(d => d.Path == info[0]);
+                    bool branch = info[0] == "B";
+
+                    var document = result.Documents.FirstOrDefault(d => d.Path == info[1]);
                     if (document == null)
                         continue;
 
-                    int start = int.Parse(info[1]);
-                    int end = int.Parse(info[2]);
-                    bool branch = info[3] == "B";
-                    int path = int.Parse(info[4]);
-                    uint ordinal = uint.Parse(info[5]);
+                    int start = int.Parse(info[2]);
 
                     if (branch)
                     {
-                        var subBranch = document.Branches.First(b => b.Number == start && b.Path == path && b.Ordinal == ordinal);
+                        uint ordinal = uint.Parse(info[3]);
+                        var subBranch = document.Branches.First(b => b.Number == start && b.Ordinal == ordinal);
                         subBranch.Hits += subBranch.Hits + 1;
                     }
                     else
                     {
+                        int end = int.Parse(info[3]);
                         for (int j = start; j <= end; j++)
                         {
                             var subLine = document.Lines.First(l => l.Number == j);

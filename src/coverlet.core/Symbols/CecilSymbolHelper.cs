@@ -56,9 +56,6 @@ namespace Coverlet.Core.Symbols
                     var branchingInstructionLine = closestSeqPt.Maybe(x => x.StartLine, -1);
                     var document = closestSeqPt.Maybe(x => x.Document.Url);
 
-                    if (document == null || branchingInstructionLine < 0)
-                        continue;
-
                     if (null == instruction.Next)
                         return;
 
