@@ -53,6 +53,14 @@ namespace Coverlet.Core
             return Math.Round(average, 3);
         }
 
+        public double CalculateBranchCoverage(List<BranchInfo> branchInfo)
+        {
+            double pointsCovered = branchInfo.Count(bi => bi.Hits > 0);
+            double totalPoints = branchInfo.Count;
+            double coverage = totalPoints == 0 ? totalPoints : pointsCovered / totalPoints;
+            return Math.Round(coverage, 3);
+        }
+
         public double CalculateBranchCoverage(Branches branches)
         {
             double pointsCovered = branches.Sum(b => b.Value.Where(bi => bi.Hits > 0).Count());

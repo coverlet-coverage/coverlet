@@ -73,7 +73,7 @@ namespace Coverlet.Core.Reporters
                                 XElement line = new XElement("line");
                                 line.Add(new XAttribute("number", ln.Key.ToString()));
                                 line.Add(new XAttribute("hits", ln.Value.Hits.ToString()));
-                                // line.Add(new XAttribute("branch", ln.Value.IsBranchPoint.ToString()));
+                                line.Add(new XAttribute("branch", meth.Value.Branches.ContainsKey(ln.Key).ToString()));
 
                                 totalLines++;
                                 if (ln.Value.Hits > 0) coveredLines++;
@@ -81,17 +81,23 @@ namespace Coverlet.Core.Reporters
 
                                 if (meth.Value.Branches.TryGetValue(ln.Key, out List<BranchInfo> branches))
                                 {
-                                    line.Add(new XAttribute("condition-coverage", "100% (1/1)"));
+                                    var hit = branches.Count(b => b.Hits > 0);
+                                    var total = branches.Count();
+                                    line.Add(new XAttribute("condition-coverage", $"{summary.CalculateBranchCoverage(branches)}% ({hit}/{total})"));
                                     XElement conditions = new XElement("conditions");
-                                    XElement condition = new XElement("condition");
-                                    condition.Add(new XAttribute("number", "0"));
-                                    condition.Add(new XAttribute("type", "jump"));
-                                    condition.Add(new XAttribute("coverage", "100%"));
+                                    var byOffset = branches.GroupBy(b => b.Offset).ToDictionary(b => b.Key, b => b.ToList());
+                                    foreach (var entry in byOffset)
+                                    {
+                                        XElement condition = new XElement("condition");
+                                        condition.Add(new XAttribute("number", entry.Key));
+                                        condition.Add(new XAttribute("type", entry.Value.Count() > 2 ? "switch" : "jump"));
+                                        condition.Add(new XAttribute("coverage", $"{summary.CalculateBranchCoverage(entry.Value)}%"));
+                                        conditions.Add(condition);
+                                    }
 
                                     totalBranches++;
                                     if (ln.Value.Hits > 0) coveredBranches++;
 
-                                    conditions.Add(condition);
                                     line.Add(conditions);
                                 }
 
