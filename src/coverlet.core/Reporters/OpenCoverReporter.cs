@@ -140,7 +140,7 @@ namespace Coverlet.Core.Reporters
                                     branchPoint.Add(new XAttribute("ordinal", branch.Ordinal.ToString()));
                                     branchPoint.Add(new XAttribute("path", branch.Path.ToString()));
                                     branchPoint.Add(new XAttribute("offset", branch.Offset.ToString()));
-                                    branchPoint.Add(new XAttribute("offsetend", branch.Offset.ToString()));
+                                    branchPoint.Add(new XAttribute("offsetend", branch.EndOffset.ToString()));
                                     branchPoint.Add(new XAttribute("sl", branches.Key.ToString()));
                                     branchPoint.Add(new XAttribute("fileid", i.ToString()));
                                     branchPoints.Add(branchPoint);

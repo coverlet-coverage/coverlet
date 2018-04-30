@@ -13,6 +13,7 @@ namespace Coverlet.Core.Instrumentation
     internal class Branch : Line
     {
         public int Offset;
+        public int EndOffset;
         public int Path;
         public uint Ordinal;
     }

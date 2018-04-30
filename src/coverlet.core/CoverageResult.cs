@@ -13,6 +13,7 @@ namespace Coverlet.Core
     public class BranchInfo : LineInfo
     {
         public int Offset { get; set; }
+        public int EndOffset { get; set; }
         public int Path { get; set; }
         public uint Ordinal { get; set; }
     }
