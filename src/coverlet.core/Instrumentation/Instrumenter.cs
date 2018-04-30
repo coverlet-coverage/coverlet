@@ -173,7 +173,18 @@ namespace Coverlet.Core.Instrumentation
             }
 
             if (!document.Branches.Exists(l => l.Number == branchPoint.StartLine && l.Path == branchPoint.Path && l.Ordinal == branchPoint.Ordinal))
-                document.Branches.Add(new Branch { Number = branchPoint.StartLine, Class = method.DeclaringType.FullName, Method = method.FullName, Offset = branchPoint.Offset, Path = branchPoint.Path, Ordinal = branchPoint.Ordinal });
+                document.Branches.Add(
+                    new Branch
+                    {
+                        Number = branchPoint.StartLine,
+                        Class = method.DeclaringType.FullName,
+                        Method = method.FullName,
+                        Offset = branchPoint.Offset,
+                        EndOffset = branchPoint.EndOffset,
+                        Path = branchPoint.Path,
+                        Ordinal = branchPoint.Ordinal
+                    }
+                );
 
             string marker = $"{document.Path},{branchPoint.StartLine},{branchPoint.StartLine},B,{branchPoint.Path},{branchPoint.Ordinal}";
 
