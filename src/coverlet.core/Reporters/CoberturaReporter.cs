@@ -22,8 +22,8 @@ namespace Coverlet.Core.Reporters
 
             XDocument xml = new XDocument();
             XElement coverage = new XElement("coverage");
-            coverage.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(result.Modules).ToString()));
-            coverage.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(result.Modules).ToString()));
+            coverage.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(result.Modules).Percent.ToString()));
+            coverage.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(result.Modules).Percent.ToString()));
             coverage.Add(new XAttribute("version", "1.9"));
             coverage.Add(new XAttribute("timestamp", ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString()));
 
@@ -36,8 +36,8 @@ namespace Coverlet.Core.Reporters
             {
                 XElement package = new XElement("package");
                 package.Add(new XAttribute("name", Path.GetFileNameWithoutExtension(module.Key)));
-                package.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(module.Value).ToString()));
-                package.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(module.Value).ToString()));
+                package.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(module.Value).Percent.ToString()));
+                package.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(module.Value).Percent.ToString()));
                 package.Add(new XAttribute("complexity", "0"));
 
                 XElement classes = new XElement("classes");
@@ -48,8 +48,8 @@ namespace Coverlet.Core.Reporters
                         XElement @class = new XElement("class");
                         @class.Add(new XAttribute("name", cls.Key));
                         @class.Add(new XAttribute("filename", GetRelativePathFromBase(basePath, document.Key)));
-                        @class.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(cls.Value).ToString()));
-                        @class.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(cls.Value).ToString()));
+                        @class.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(cls.Value).Percent.ToString()));
+                        @class.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(cls.Value).Percent.ToString()));
                         @class.Add(new XAttribute("complexity", "0"));
 
                         XElement classLines = new XElement("lines");
