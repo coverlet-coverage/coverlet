@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.PortableExecutable;
-using Microsoft.Extensions.FileSystemGlobbing;
 
-using Coverlet.Core.Instrumentation;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 
 namespace Coverlet.Core.Helpers
@@ -15,7 +15,7 @@ namespace Coverlet.Core.Helpers
         public static string[] GetDependencies(string module)
         {
             IEnumerable<string> modules = Directory.GetFiles(Path.GetDirectoryName(module), "*.dll");
-            modules = modules.Where(a => Path.GetFileName(a) != Path.GetFileName(module));
+            modules = modules.Where(a => IsAssembly(a) && Path.GetFileName(a) != Path.GetFileName(module));
             return modules.ToArray();
         }
 
@@ -41,39 +41,35 @@ namespace Coverlet.Core.Helpers
         public static void CopyCoverletDependency(string module)
         {
             var directory = Path.GetDirectoryName(module);
-            if (Path.GetFileNameWithoutExtension(module) == "coverlet.core")
-                return;
+            var moduleFileName = Path.GetFileName(module);
 
             var assembly = typeof(Coverage).Assembly;
             string name = Path.GetFileName(assembly.Location);
+            if (name == moduleFileName)
+                return;
+
             File.Copy(assembly.Location, Path.Combine(directory, name), true);
         }
 
         public static void BackupOriginalModule(string module, string identifier)
         {
-            var backupPath = Path.Combine(
-                Path.GetTempPath(),
-                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
-            );
-
+            var backupPath = GetBackupPath(module, identifier);
             File.Copy(module, backupPath);
         }
 
         public static void RestoreOriginalModule(string module, string identifier)
         {
-            var backupPath = Path.Combine(
-                Path.GetTempPath(),
-                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
-            );
+            var backupPath = GetBackupPath(module, identifier);
 
             // Restore the original module - retry up to 10 times, since the destination file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
             var currentSleep = 6;
-            Func<TimeSpan> retryStrategy = () => {
+            TimeSpan retryStrategy()
+            {
                 var sleep = TimeSpan.FromMilliseconds(currentSleep);
                 currentSleep *= 2;
                 return sleep;
-            };
+            }
 
             RetryHelper.Retry(() => {
                 File.Copy(backupPath, module, true);
@@ -86,12 +82,12 @@ namespace Coverlet.Core.Helpers
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
             var currentSleep = 6;
-            Func<TimeSpan> retryStrategy = () =>
+            TimeSpan retryStrategy()
             {
                 var sleep = TimeSpan.FromMilliseconds(currentSleep);
                 currentSleep *= 2;
                 return sleep;
-            };
+            }
 
             return RetryHelper.Do(() => File.ReadLines(path), retryStrategy, 10);
         }
@@ -101,23 +97,24 @@ namespace Coverlet.Core.Helpers
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
             var currentSleep = 6;
-            Func<TimeSpan> retryStrategy = () => {
+            TimeSpan retryStrategy()
+            {
                 var sleep = TimeSpan.FromMilliseconds(currentSleep);
                 currentSleep *= 2;
                 return sleep;
-            };
+            }
 
             RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
         }
-        
-        public static IEnumerable<string> GetExcludedFiles(IEnumerable<string> excludeRules, 
-                                                           string parentDir = null) 
+
+        public static IEnumerable<string> GetExcludedFiles(IEnumerable<string> excludeRules,
+                                                           string parentDir = null)
         {
             const string RELATIVE_KEY = nameof(RELATIVE_KEY);
             parentDir = string.IsNullOrWhiteSpace(parentDir)? Directory.GetCurrentDirectory() : parentDir;
-            
+
             if (excludeRules == null || !excludeRules.Any()) return Enumerable.Empty<string>();
-            
+
             var matcherDict = new Dictionary<string, Matcher>(){ {RELATIVE_KEY, new Matcher()}};
             foreach (var excludeRule in excludeRules)
             {
@@ -125,14 +122,13 @@ namespace Coverlet.Core.Helpers
                     var root = Path.GetPathRoot(excludeRule);
                     if (!matcherDict.ContainsKey(root)) {
                         matcherDict.Add(root, new Matcher());
-                    } 
+                    }
                     matcherDict[root].AddInclude(excludeRule.Substring(root.Length));
                 } else {
                     matcherDict[RELATIVE_KEY].AddInclude(excludeRule);
                 }
-                
             }
-            
+
             var files = new List<string>();
             foreach(var entry in matcherDict)
             {
@@ -144,8 +140,29 @@ namespace Coverlet.Core.Helpers
                     .Select(f => Path.GetFullPath(Path.Combine(directoryInfo.ToString(), f.Path)));
                 files.AddRange(currentFiles);
             }
-            
+
             return files.Distinct();
+        }
+
+        private static bool IsAssembly(string filePath)
+        {
+            try
+            {
+                AssemblyName.GetAssemblyName(filePath);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string GetBackupPath(string module, string identifier)
+        {
+            return Path.Combine(
+                Path.GetTempPath(),
+                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
+            );
         }
     }
 }
