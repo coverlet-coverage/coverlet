@@ -183,6 +183,7 @@ namespace Coverlet.Core.Reporters
 
                         var classLineCoverage = summary.CalculateLineCoverage(cls.Value);
                         var classBranchCoverage = summary.CalculateBranchCoverage(cls.Value);
+                        var classMethodCoverage = summary.CalculateMethodCoverage(cls.Value);
 
                         classSummary.Add(new XAttribute("numSequencePoints", classLineCoverage.Total.ToString()));
                         classSummary.Add(new XAttribute("visitedSequencePoints", classLineCoverage.Covered.ToString()));
@@ -194,8 +195,8 @@ namespace Coverlet.Core.Reporters
                         classSummary.Add(new XAttribute("minCyclomaticComplexity", "0"));
                         classSummary.Add(new XAttribute("visitedClasses", classVisited ? "1" : "0"));
                         classSummary.Add(new XAttribute("numClasses", "1"));
-                        classSummary.Add(new XAttribute("visitedMethods", "0"));
-                        classSummary.Add(new XAttribute("numMethods", cls.Value.Count.ToString()));
+                        classSummary.Add(new XAttribute("visitedMethods", classMethodCoverage.Covered.ToString()));
+                        classSummary.Add(new XAttribute("numMethods", classMethodCoverage.Total.ToString()));
 
                         @class.Add(classSummary);
                         @class.Add(className);

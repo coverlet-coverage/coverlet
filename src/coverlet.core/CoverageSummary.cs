@@ -174,12 +174,13 @@ namespace Coverlet.Core
         public CoverageDetails CalculateMethodCoverage(Methods methods)
         {
             var details = new CoverageDetails();
-            foreach (var method in methods)
+            var methodsWithLines = methods.Where(m => m.Value.Lines.Count > 0);
+            foreach (var method in methodsWithLines)
             {
                 var methodCoverage = CalculateMethodCoverage(method.Value.Lines);
                 details.Covered += methodCoverage.Covered;
-                details.Total += methodCoverage.Total;
             }
+            details.Total = methodsWithLines.Count();
 
             double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
             details.Percent = Math.Round(coverage, 3);
