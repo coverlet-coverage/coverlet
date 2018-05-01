@@ -58,3 +58,4 @@ namespace Coverlet.Core
             throw new AggregateException(exceptions);
         }
     }
+}
