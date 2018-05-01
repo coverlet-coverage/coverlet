@@ -37,7 +37,7 @@ _Note: The assembly you'd like to get coverage for must be different from the as
 
 ## Usage
 
-Coverlet doesn't require any additional setup other than including the NuGet package. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
+Coverlet doesn't require any additional setup other than including the NuGet package to the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
 
 ### Code Coverage
 
