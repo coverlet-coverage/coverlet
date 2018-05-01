@@ -79,31 +79,6 @@ namespace Coverlet.Core.Instrumentation
                 if (!method.CustomAttributes.Any(IsExcludeAttribute))
                     InstrumentMethod(method);
             }
-
-            foreach (var property in type.Properties)
-            {
-                if (!property.CustomAttributes.Any(IsExcludeAttribute))
-                    InstrumentProperty(property);
-            }
-
-            if (type.HasNestedTypes)
-            {
-                foreach (var nestedType in type.NestedTypes)
-                    InstrumentType(nestedType);
-            }
-        }
-
-        private void InstrumentProperty(PropertyDefinition property)
-        {
-            if (property.GetMethod != null && !property.GetMethod.IsAbstract)
-            {
-                InstrumentMethod(property.GetMethod);
-            }
-
-            if (property.SetMethod != null && !property.SetMethod.IsAbstract)
-            {
-                InstrumentMethod(property.SetMethod);
-            }
         }
 
         private void InstrumentMethod(MethodDefinition method)
