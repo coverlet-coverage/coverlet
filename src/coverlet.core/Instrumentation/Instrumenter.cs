@@ -212,7 +212,7 @@ namespace Coverlet.Core.Instrumentation
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
-            var callInstr = Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(typeof(CoverageTracker).GetMethod("MarkExecuted")));
+            var callInstr = Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(_markExecutedMethodLoader.Value));
 
             processor.InsertBefore(instruction, callInstr);
             processor.InsertBefore(callInstr, markInstr);
