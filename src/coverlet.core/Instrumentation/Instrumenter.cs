@@ -133,7 +133,7 @@ namespace Coverlet.Core.Instrumentation
             {
                 var instruction = processor.Body.Instructions[index];
                 var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
-                if (sequencePoint == null || sequencePoint.StartLine == HiddenSequencePoint)
+                if (sequencePoint == null || sequencePoint.IsHidden)
                 {
                     index++;
                     continue;
@@ -258,7 +258,5 @@ namespace Coverlet.Core.Instrumentation
         {
             return typeof(CoverageTracker).GetMethod(nameof(CoverageTracker.MarkExecuted));
         }
-
-        private const int HiddenSequencePoint = 0xFEEFEE;
     }
 }
