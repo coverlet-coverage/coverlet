@@ -18,7 +18,8 @@ namespace Coverlet.Core.Reporters
         {
             CoverageSummary summary = new CoverageSummary();
 
-            int totalLines = 0, coveredLines = 0, totalBranches = 0, coveredBranches = 0;
+            var lineCoverage = summary.CalculateLineCoverage(result.Modules);
+            var branchCoverage = summary.CalculateBranchCoverage(result.Modules);
 
             XDocument xml = new XDocument();
             XElement coverage = new XElement("coverage");
@@ -64,8 +65,8 @@ namespace Coverlet.Core.Reporters
                             XElement method = new XElement("method");
                             method.Add(new XAttribute("name", meth.Key.Split(':')[2].Split('(')[0]));
                             method.Add(new XAttribute("signature", "(" + meth.Key.Split(':')[2].Split('(')[1]));
-                            method.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(meth.Value.Lines).ToString()));
-                            method.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(meth.Value.Branches).ToString()));
+                            method.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(meth.Value.Lines).Percent.ToString()));
+                            method.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(meth.Value.Branches).Percent.ToString()));
 
                             XElement lines = new XElement("lines");
                             foreach (var ln in meth.Value.Lines)
@@ -75,28 +76,20 @@ namespace Coverlet.Core.Reporters
                                 line.Add(new XAttribute("hits", ln.Value.Hits.ToString()));
                                 line.Add(new XAttribute("branch", meth.Value.Branches.ContainsKey(ln.Key).ToString()));
 
-                                totalLines++;
-                                if (ln.Value.Hits > 0) coveredLines++;
-
-
                                 if (meth.Value.Branches.TryGetValue(ln.Key, out List<BranchInfo> branches))
                                 {
-                                    var hit = branches.Count(b => b.Hits > 0);
-                                    var total = branches.Count();
-                                    line.Add(new XAttribute("condition-coverage", $"{summary.CalculateBranchCoverage(branches)}% ({hit}/{total})"));
+                                    var branchInfoCoverage = summary.CalculateBranchCoverage(branches);
+                                    line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent*100}% ({branchInfoCoverage.Covered}/{branchInfoCoverage.Total})"));
                                     XElement conditions = new XElement("conditions");
                                     var byOffset = branches.GroupBy(b => b.Offset).ToDictionary(b => b.Key, b => b.ToList());
                                     foreach (var entry in byOffset)
                                     {
                                         XElement condition = new XElement("condition");
                                         condition.Add(new XAttribute("number", entry.Key));
-                                        condition.Add(new XAttribute("type", entry.Value.Count() > 2 ? "switch" : "jump"));
-                                        condition.Add(new XAttribute("coverage", $"{summary.CalculateBranchCoverage(entry.Value)}%"));
+                                        condition.Add(new XAttribute("type", entry.Value.Count() > 2 ? "switch" : "jump")); // Just guessing here
+                                        condition.Add(new XAttribute("coverage", $"{summary.CalculateBranchCoverage(entry.Value).Percent * 100}%"));
                                         conditions.Add(condition);
                                     }
-
-                                    totalBranches++;
-                                    if (ln.Value.Hits > 0) coveredBranches++;
 
                                     line.Add(conditions);
                                 }
@@ -120,10 +113,10 @@ namespace Coverlet.Core.Reporters
                 packages.Add(package);
             }
 
-            coverage.Add(new XAttribute("lines-covered", coveredLines.ToString()));
-            coverage.Add(new XAttribute("lines-valid", totalLines.ToString()));
-            coverage.Add(new XAttribute("branches-covered", coveredBranches.ToString()));
-            coverage.Add(new XAttribute("branches-valid", totalBranches.ToString()));
+            coverage.Add(new XAttribute("lines-covered", lineCoverage.Covered.ToString()));
+            coverage.Add(new XAttribute("lines-valid", lineCoverage.Total.ToString()));
+            coverage.Add(new XAttribute("branches-covered", branchCoverage.Covered.ToString()));
+            coverage.Add(new XAttribute("branches-valid", branchCoverage.Total.ToString()));
 
             coverage.Add(sources);
             coverage.Add(packages);
