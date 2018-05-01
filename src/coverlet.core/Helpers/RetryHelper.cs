@@ -2,56 +2,60 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-// A slightly amended version of the code found here: https://stackoverflow.com/a/1563234/186184
-// This code allows for varying backoff strategies through the use of Func<TimeSpan>.
-public static class RetryHelper
+namespace Coverlet.Core
 {
-    /// <summary>
-    /// Retry a void method.
-    /// </summary>
-    /// <param name="action">The action to perform</param>
-    /// <param name="backoffStrategy">A function returning a Timespan defining the backoff strategy to use.</param>
-    /// <param name="maxAttemptCount">The maximum number of retries before bailing out. Defaults to 3.</param>
-    public static void Retry(
-        Action action,
-        Func<TimeSpan> backoffStrategy,
-        int maxAttemptCount = 3)
+    // A slightly amended version of the code found here: https://stackoverflow.com/a/1563234/186184
+    // This code allows for varying backoff strategies through the use of Func<TimeSpan>.
+    public static class RetryHelper
     {
-        Do<object>(() =>
+        /// <summary>
+        /// Retry a void method.
+        /// </summary>
+        /// <param name="action">The action to perform</param>
+        /// <param name="backoffStrategy">A function returning a Timespan defining the backoff strategy to use.</param>
+        /// <param name="maxAttemptCount">The maximum number of retries before bailing out. Defaults to 3.</param>
+        public static void Retry(
+            Action action,
+            Func<TimeSpan> backoffStrategy,
+            int maxAttemptCount = 3)
         {
-            action();
-            return null;
-        }, backoffStrategy, maxAttemptCount);
-    }
-
-    /// <summary>
-    /// Retry a method returning type T.
-    /// </summary>
-    /// <param name="action">The action to perform</param>
-    /// <param name="backoffStrategy">A function returning a Timespan defining the backoff strategy to use.</param>
-    /// <param name="maxAttemptCount">The maximum number of retries before bailing out. Defaults to 3.</param>
-    public static T Do<T>(
-        Func<T> action,
-        Func<TimeSpan> backoffStrategy,
-        int maxAttemptCount = 3)
-    {
-        var exceptions = new List<Exception>();
-
-        for (int attempted = 0; attempted < maxAttemptCount; attempted++)
-        {
-            try
+            Do<object>(() =>
             {
-                if (attempted > 0)
-                {
-                    Thread.Sleep(backoffStrategy());
-                }
-                return action();
-            }
-            catch (Exception ex)
-            {
-                exceptions.Add(ex);
-            }
+                action();
+                return null;
+            }, backoffStrategy, maxAttemptCount);
         }
-        throw new AggregateException(exceptions);
+
+        /// <summary>
+        /// Retry a method returning type T.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to return</typeparam>
+        /// <param name="action">The action to perform</param>
+        /// <param name="backoffStrategy">A function returning a Timespan defining the backoff strategy to use.</param>
+        /// <param name="maxAttemptCount">The maximum number of retries before bailing out. Defaults to 3.</param>
+        public static T Do<T>(
+            Func<T> action,
+            Func<TimeSpan> backoffStrategy,
+            int maxAttemptCount = 3)
+        {
+            var exceptions = new List<Exception>();
+
+            for (int attempted = 0; attempted < maxAttemptCount; attempted++)
+            {
+                try
+                {
+                    if (attempted > 0)
+                    {
+                        Thread.Sleep(backoffStrategy());
+                    }
+                    return action();
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+            }
+            throw new AggregateException(exceptions);
+        }
     }
 }
