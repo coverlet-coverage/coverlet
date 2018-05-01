@@ -63,13 +63,7 @@ namespace Coverlet.Core.Helpers
 
             // Restore the original module - retry up to 10 times, since the destination file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
-            var currentSleep = 6;
-            TimeSpan retryStrategy()
-            {
-                var sleep = TimeSpan.FromMilliseconds(currentSleep);
-                currentSleep *= 2;
-                return sleep;
-            }
+            var retryStrategy = CreateRetryStrategy();
 
             RetryHelper.Retry(() => {
                 File.Copy(backupPath, module, true);
@@ -81,13 +75,7 @@ namespace Coverlet.Core.Helpers
         {
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
-            var currentSleep = 6;
-            TimeSpan retryStrategy()
-            {
-                var sleep = TimeSpan.FromMilliseconds(currentSleep);
-                currentSleep *= 2;
-                return sleep;
-            }
+            var retryStrategy = CreateRetryStrategy();
 
             return RetryHelper.Do(() => File.ReadLines(path), retryStrategy, 10);
         }
@@ -96,13 +84,7 @@ namespace Coverlet.Core.Helpers
         {
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
-            var currentSleep = 6;
-            TimeSpan retryStrategy()
-            {
-                var sleep = TimeSpan.FromMilliseconds(currentSleep);
-                currentSleep *= 2;
-                return sleep;
-            }
+            var retryStrategy = CreateRetryStrategy();
 
             RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
         }
@@ -163,6 +145,18 @@ namespace Coverlet.Core.Helpers
                 Path.GetTempPath(),
                 Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
             );
+        }
+
+        private static Func<TimeSpan> CreateRetryStrategy(int initialSleepSeconds = 6)
+        {
+            TimeSpan retryStrategy()
+            {
+                var sleep = TimeSpan.FromMilliseconds(initialSleepSeconds);
+                initialSleepSeconds *= 2;
+                return sleep;
+            }
+
+            return retryStrategy;
         }
     }
 }
