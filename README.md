@@ -86,7 +86,7 @@ You can ignore a method or an entire class from code coverage by creating and ap
 
 Coverlet just uses the type name, so the attributes can be created under any namespace of your choosing.
 
-#### File Path  
+#### Source Files  
 You can also ignore specific source files from code coverage using the `Exclude` property
  - Use single or multiple paths (separate by comma)
  - Use absolute or relative paths (relative to the project directory)
