@@ -49,35 +49,90 @@ namespace Coverlet.Core
                 Documents documents = new Documents();
                 foreach (var doc in result.Documents)
                 {
+                    // Construct Line Results
                     foreach (var line in doc.Lines)
                     {
                         if (documents.TryGetValue(doc.Path, out Classes classes))
                         {
                             if (classes.TryGetValue(line.Class, out Methods methods))
                             {
-                                if (methods.TryGetValue(line.Method, out Lines lines))
+                                if (methods.TryGetValue(line.Method, out Method method))
                                 {
-                                    documents[doc.Path][line.Class][line.Method].Add(line.Number, new LineInfo { Hits = line.Hits, IsBranchPoint = line.IsBranchTarget });
+                                    documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, new LineInfo { Hits = line.Hits });
                                 }
                                 else
                                 {
-                                    documents[doc.Path][line.Class].Add(line.Method, new Lines());
-                                    documents[doc.Path][line.Class][line.Method].Add(line.Number,  new LineInfo { Hits = line.Hits, IsBranchPoint = line.IsBranchTarget });
+                                    documents[doc.Path][line.Class].Add(line.Method, new Method());
+                                    documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number,  new LineInfo { Hits = line.Hits });
                                 }
                             }
                             else
                             {
                                 documents[doc.Path].Add(line.Class, new Methods());
-                                documents[doc.Path][line.Class].Add(line.Method, new Lines());
-                                documents[doc.Path][line.Class][line.Method].Add(line.Number,  new LineInfo { Hits = line.Hits, IsBranchPoint = line.IsBranchTarget });
+                                documents[doc.Path][line.Class].Add(line.Method, new Method());
+                                documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number,  new LineInfo { Hits = line.Hits });
                             }
                         }
                         else
                         {
                             documents.Add(doc.Path, new Classes());
                             documents[doc.Path].Add(line.Class, new Methods());
-                            documents[doc.Path][line.Class].Add(line.Method, new Lines());
-                            documents[doc.Path][line.Class][line.Method].Add(line.Number,  new LineInfo { Hits = line.Hits, IsBranchPoint = line.IsBranchTarget });
+                            documents[doc.Path][line.Class].Add(line.Method, new Method());
+                            documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number,  new LineInfo { Hits = line.Hits });
+                        }
+                    }
+
+                    // Construct Branch Results
+                    foreach (var branch in doc.Branches)
+                    {
+                        if (documents.TryGetValue(doc.Path, out Classes classes))
+                        {
+                            if (classes.TryGetValue(branch.Class, out Methods methods))
+                            {
+                                if (methods.TryGetValue(branch.Method, out Method method))
+                                {
+                                    if (method.Branches.TryGetValue(branch.Number, out List<BranchInfo> branchInfo))
+                                    {
+                                        documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
+                                            { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                        );
+                                    }
+                                    else
+                                    {
+                                        documents[doc.Path][branch.Class][branch.Method].Branches.Add(branch.Number, new List<BranchInfo>());
+                                        documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
+                                            { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                        );
+                                    }
+                                }
+                                else
+                                {
+                                    documents[doc.Path][branch.Class].Add(branch.Method, new Method());
+                                    documents[doc.Path][branch.Class][branch.Method].Branches.Add(branch.Number, new List<BranchInfo>());
+                                    documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
+                                        { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                    );
+                                }
+                            }
+                            else
+                            {
+                                documents[doc.Path].Add(branch.Class, new Methods());
+                                documents[doc.Path][branch.Class].Add(branch.Method, new Method());
+                                documents[doc.Path][branch.Class][branch.Method].Branches.Add(branch.Number, new List<BranchInfo>());
+                                documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
+                                    { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                );
+                            }
+                        }
+                        else
+                        {
+                            documents.Add(doc.Path, new Classes());
+                            documents[doc.Path].Add(branch.Class, new Methods());
+                            documents[doc.Path][branch.Class].Add(branch.Method, new Method());
+                            documents[doc.Path][branch.Class][branch.Method].Branches.Add(branch.Number, new List<BranchInfo>());
+                            documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
+                                { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                            );
                         }
                     }
                 }
@@ -99,28 +154,37 @@ namespace Coverlet.Core
             {
                 if (!File.Exists(result.HitsFilePath)) { continue; }
                 var lines = InstrumentationHelper.ReadHitsFile(result.HitsFilePath);
-                foreach (var line in lines)
+                foreach (var row in lines)
                 {
-                    var info = line.Split(',');
+                    var info = row.Split(',');
                     // Ignore malformed lines
                     if (info.Length != 4)
                         continue;
 
-                    var document = result.Documents.FirstOrDefault(d => d.Path == info[0]);
+                    bool isBranch = info[0] == "B";
+
+                    var document = result.Documents.FirstOrDefault(d => d.Path == info[1]);
                     if (document == null)
                         continue;
 
-                    int start = int.Parse(info[1]);
-                    int end = int.Parse(info[2]);
-                    bool target = info[3] == "B";
+                    int start = int.Parse(info[2]);
 
-                    for (int j = start; j <= end; j++)
+                    if (isBranch)
                     {
-                        var subLine = document.Lines.First(l => l.Number == j);
-                        subLine.Hits = subLine.Hits + 1;
-
-                        if (j == start)
-                            subLine.IsBranchTarget = target;
+                        uint ordinal = uint.Parse(info[3]);
+                        var branch = document.Branches.First(b => b.Number == start && b.Ordinal == ordinal);
+                        if (branch.Hits != int.MaxValue)
+                            branch.Hits += branch.Hits + 1;
+                    }
+                    else
+                    {
+                        int end = int.Parse(info[3]);
+                        for (int j = start; j <= end; j++)
+                        {
+                            var line = document.Lines.First(l => l.Number == j);
+                            if (line.Hits != int.MaxValue)
+                                line.Hits = line.Hits + 1;
+                        }
                     }
                 }
 
