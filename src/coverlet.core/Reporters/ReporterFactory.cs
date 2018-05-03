@@ -1,22 +1,25 @@
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Coverlet.Core.Reporters
 {
     public class ReporterFactory
     {
-        private string _format;
+        private IEnumerable<string> _formats;
         private IReporter[] _reporters;
 
-        public ReporterFactory(string format)
+        public ReporterFactory(string formats)
         {
-            _format = format;
+            _formats = formats.Split(',');
             _reporters = new IReporter[] {
                 new JsonReporter(), new LcovReporter(),
                 new OpenCoverReporter(), new CoberturaReporter()
             };
         }
 
-        public IReporter CreateReporter()
-            => _reporters.FirstOrDefault(r => r.Format == _format);
+        public IEnumerable<IReporter> CreateReporters()
+        {
+            return _reporters.Where(r => _formats.Contains(r.Format));
+        }
     }
 }
