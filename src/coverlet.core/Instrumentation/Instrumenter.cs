@@ -1,8 +1,8 @@
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
+using Coverlet.Core.Attributes;
 using Coverlet.Core.Helpers;
 
 using Mono.Cecil;
@@ -15,12 +15,15 @@ namespace Coverlet.Core.Instrumentation
     {
         private readonly string _module;
         private readonly string _identifier;
+        private readonly IEnumerable<string> _excludedFiles;
+        private readonly static Lazy<MethodInfo> _markExecutedMethodLoader = new Lazy<MethodInfo>(GetMarkExecutedMethod);
         private InstrumenterResult _result;
 
-        public Instrumenter(string module, string identifier)
+        public Instrumenter(string module, string identifier, IEnumerable<string> excludedFiles = null)
         {
             _module = module;
             _identifier = identifier;
+            _excludedFiles = excludedFiles ?? Enumerable.Empty<string>();
         }
 
         public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
@@ -56,18 +59,31 @@ namespace Coverlet.Core.Instrumentation
                 {
                     foreach (var type in module.GetTypes())
                     {
-                        if (type.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
-                            continue;
-
-                        foreach (var method in type.Methods)
-                        {
-                            if (!method.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
-                                InstrumentMethod(method);
-                        }
+                        InstrumentType(type);
                     }
 
                     module.Write(stream);
                 }
+            }
+        }
+
+        private void InstrumentType(TypeDefinition type)
+        {
+            //if (type.CustomAttributes.Any(IsExcludeAttribute))
+            //    return;
+
+            //foreach (var method in type.Methods)
+            //{
+            //    if (!method.CustomAttributes.Any(IsExcludeAttribute))
+            //        InstrumentMethod(method);
+            //}
+            if (type.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
+                return;
+
+            foreach (var method in type.Methods)
+            {
+                if (!method.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
+                    InstrumentMethod(method);
             }
         }
 
@@ -85,7 +101,15 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentMethod(MethodDefinition method)
         {
-            if (!method.HasBody)
+            var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
+            if (!string.IsNullOrEmpty(sourceFile) && _excludedFiles.Contains(sourceFile))
+                return;
+
+            var methodBody = GetMethodBody(method);
+            if (methodBody == null)
+                return;
+
+            if (method.IsNative)
                 return;
 
             InstrumentIL(method);
@@ -102,7 +126,7 @@ namespace Coverlet.Core.Instrumentation
             {
                 var instruction = processor.Body.Instructions[index];
                 var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
-                if (sequencePoint == null || sequencePoint.StartLine == 16707566)
+                if (sequencePoint == null || sequencePoint.IsHidden)
                 {
                     index++;
                     continue;
@@ -142,7 +166,7 @@ namespace Coverlet.Core.Instrumentation
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
-            var callInstr = Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(typeof(CoverageTracker).GetMethod("MarkExecuted")));
+            var callInstr = Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(_markExecutedMethodLoader.Value));
 
             processor.InsertBefore(instruction, callInstr);
             processor.InsertBefore(callInstr, markInstr);
@@ -204,6 +228,28 @@ namespace Coverlet.Core.Instrumentation
 
             if (handler.TryStart == oldTarget)
                 handler.TryStart = newTarget;
+        }
+
+        private static bool IsExcludeAttribute(CustomAttribute customAttribute)
+        {
+            return customAttribute.AttributeType.Name == nameof(ExcludeFromCoverageAttribute) || customAttribute.AttributeType.Name == "ExcludeFromCoverage";
+        }
+
+        private static Mono.Cecil.Cil.MethodBody GetMethodBody(MethodDefinition method)
+        {
+            try
+            {
+                return method.HasBody ? method.Body : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static MethodInfo GetMarkExecutedMethod()
+        {
+            return typeof(CoverageTracker).GetMethod(nameof(CoverageTracker.MarkExecuted));
         }
     }
 }

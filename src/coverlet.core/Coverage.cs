@@ -10,23 +10,26 @@ namespace Coverlet.Core
 {
     public class Coverage
     {
-        private readonly string _module;
-        private readonly string _identifier;
-        private readonly List<InstrumenterResult> _results;
+        private string _module;
+        private string _identifier;
+        private IEnumerable<string> _excludeRules;
+        private List<InstrumenterResult> _results;
 
-        public Coverage(string module, string identifier)
+        public Coverage(string module, string identifier, IEnumerable<string> excludeRules = null)
         {
             _module = module;
             _identifier = identifier;
+            _excludeRules = excludeRules;
             _results = new List<InstrumenterResult>();
         }
 
         public void PrepareModules()
         {
             string[] modules = InstrumentationHelper.GetDependencies(_module);
+            var excludedFiles =  InstrumentationHelper.GetExcludedFiles(_excludeRules);
             foreach (var module in modules)
             {
-                var instrumenter = new Instrumenter(module, _identifier);
+                var instrumenter = new Instrumenter(module, _identifier, excludedFiles);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);
