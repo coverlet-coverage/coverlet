@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -69,14 +71,6 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentType(TypeDefinition type)
         {
-            //if (type.CustomAttributes.Any(IsExcludeAttribute))
-            //    return;
-
-            //foreach (var method in type.Methods)
-            //{
-            //    if (!method.CustomAttributes.Any(IsExcludeAttribute))
-            //        InstrumentMethod(method);
-            //}
             if (type.CustomAttributes.Any(a => IsExcludeFromCoverageAttribute(a.AttributeType.Name)))
                 return;
 
@@ -228,11 +222,6 @@ namespace Coverlet.Core.Instrumentation
 
             if (handler.TryStart == oldTarget)
                 handler.TryStart = newTarget;
-        }
-
-        private static bool IsExcludeAttribute(CustomAttribute customAttribute)
-        {
-            return customAttribute.AttributeType.Name == nameof(ExcludeFromCoverageAttribute) || customAttribute.AttributeType.Name == "ExcludeFromCoverage";
         }
 
         private static Mono.Cecil.Cil.MethodBody GetMethodBody(MethodDefinition method)
