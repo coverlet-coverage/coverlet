@@ -121,45 +121,51 @@ namespace Coverlet.Core.Helpers.Tests
 
         [Theory]
         [MemberData(nameof(GetExcludedFilesReturnsEmptyArgs))]
-        public void TestGetExcludedFilesReturnsEmpty(IEnumerable<string> excludedFiles)
+        public void GetExcludedFiles__ReturnsEmpty(IEnumerable<string> excludedFiles)
         {
-            Assert.False(InstrumentationHelper.GetExcludedFiles(excludedFiles)?.Any());
+            // Arrange
+            // Act
+            var excludedFilesFromInstrument = InstrumentationHelper.GetExcludedFiles(excludedFiles);
+            // Assert
+            Assert.False(excludedFilesFromInstrument?.Any());
         }
 
         [Fact]
-        public void TestGetExcludedFilesUsingAbsFile()
+        public void GetExcludedFiles__UsingRandomLocalFile__ReturnSingleExcludedFileAfterItWasDeleted()
         {
+            // Arrange
             var file = Path.GetRandomFileName();
             File.Create(file).Dispose();
-            var excludeFiles = InstrumentationHelper.GetExcludedFiles(
+            // Act
+            var excludedFiles = InstrumentationHelper.GetExcludedFiles(
                 new List<string>() { Path.Combine(Directory.GetCurrentDirectory(), file) }
             );
             File.Delete(file);
-            Assert.Single(excludeFiles);
+            // Assert
+            Assert.Single(excludedFiles);
         }
 
         [Fact]
-        public void TestGetExcludedFilesUsingGlobbing()
+        public void GetExcludedFiles__UsingGlobbing__ReturnedItemsCountIsValid()
         {
+            // Arrange
             var fileExtension = Path.GetRandomFileName();
             var paths = new string[]{
                 $"{Path.GetRandomFileName()}.{fileExtension}",
                 $"{Path.GetRandomFileName()}.{fileExtension}"
             };
-
             foreach (var path in paths)
             {
                 File.Create(path).Dispose();
             }
-
+            // Act
             var excludeFiles = InstrumentationHelper.GetExcludedFiles(
                 new List<string>() { $"*.{fileExtension}" });
-
             foreach (var path in paths)
             {
                 File.Delete(path);
             }
-
+            // Assert
             Assert.Equal(paths.Length, excludeFiles.Count());
         }
 
