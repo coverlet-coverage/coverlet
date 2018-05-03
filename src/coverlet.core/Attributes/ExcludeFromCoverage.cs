@@ -2,6 +2,6 @@ using System;
 
 namespace Coverlet.Core.Attributes
 {
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor)]
-    public class ExcludeFromCoverageAttribute : Attribute { }
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Constructor)]
+    public sealed class ExcludeFromCoverageAttribute : Attribute { }
 }
