@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using ConsoleTables;
 
@@ -49,13 +50,16 @@ namespace Coverlet.MSbuild.Tasks
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
-                IReporter reporter = new ReporterFactory(_format).CreateReporter();
-                if (reporter == null)
+                var reporters = new List<IReporter>(new ReporterFactory(_format).CreateReporters());
+                if (reporters.Count != _format.Split(',').Length)
                     throw new Exception($"Specified output format '{_format}' is not supported");
 
-                _filename = _filename + "." + reporter.Extension;
-                Console.WriteLine($"  Generating report '{_filename}'");
-                File.WriteAllText(_filename, reporter.Report(result));
+                foreach(var reporter in reporters)
+                {
+                    var reportFilename = _filename + "." + reporter.Extension;
+                    Console.WriteLine($"  Generating report '{reportFilename}'");
+                    File.WriteAllText(reportFilename, reporter.Report(result));
+                }
 
                 double total = 0;
                 CoverageSummary summary = new CoverageSummary();
