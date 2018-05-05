@@ -6,147 +6,181 @@ namespace Coverlet.Core
 {
     public class CoverageSummary
     {
-        public double CalculateLineCoverage(Lines lines)
+        public CoverageDetails CalculateLineCoverage(Lines lines)
         {
-            double linesCovered = lines.Where(l => l.Value.Hits > 0).Count();
-            double coverage = lines.Count == 0 ? lines.Count : linesCovered / lines.Count;
-            return Math.Round(coverage, 3);
+            var details = new CoverageDetails();
+            details.Covered = lines.Where(l => l.Value.Hits > 0).Count();
+            details.Total = lines.Count;
+            return details;
         }
 
-        public double CalculateLineCoverage(Methods methods)
+        public CoverageDetails CalculateLineCoverage(Methods methods)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var method in methods)
-                total += CalculateLineCoverage(method.Value);
-
-            average = total / methods.Count;
-            return Math.Round(average, 3);
+            {
+                var methodCoverage = CalculateLineCoverage(method.Value.Lines);
+                details.Covered += methodCoverage.Covered;
+                details.Total += methodCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateLineCoverage(Classes classes)
+        public CoverageDetails CalculateLineCoverage(Classes classes)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var @class in classes)
-                total += CalculateLineCoverage(@class.Value);
-
-            average = total / classes.Count;
-            return Math.Round(average, 3);
+            {
+                var classCoverage = CalculateLineCoverage(@class.Value);
+                details.Covered += classCoverage.Covered;
+                details.Total += classCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateLineCoverage(Documents documents)
+        public CoverageDetails CalculateLineCoverage(Documents documents)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var document in documents)
-                total += CalculateLineCoverage(document.Value);
-
-            average = total / documents.Count;
-            return Math.Round(average, 3);
+            {
+                var documentCoverage = CalculateLineCoverage(document.Value);
+                details.Covered += documentCoverage.Covered;
+                details.Total += documentCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateLineCoverage(Modules modules)
+        public CoverageDetails CalculateLineCoverage(Modules modules)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var module in modules)
-                total += CalculateLineCoverage(module.Value);
-
-            average = total / modules.Count;
-            return Math.Round(average, 3);
+            {
+                var moduleCoverage = CalculateLineCoverage(module.Value);
+                details.Covered += moduleCoverage.Covered;
+                details.Total += moduleCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateBranchCoverage(Lines lines)
+        public CoverageDetails CalculateBranchCoverage(List<BranchInfo> branchInfo)
         {
-            double pointsCovered = lines.Where(l => l.Value.Hits > 0 && l.Value.IsBranchPoint).Count();
-            double totalPoints = lines.Where(l => l.Value.IsBranchPoint).Count();
-            double coverage = totalPoints == 0 ? totalPoints : pointsCovered / totalPoints;
-            return Math.Round(coverage, 3);
+            var details = new CoverageDetails();
+            details.Covered = branchInfo.Count(bi => bi.Hits > 0);
+            details.Total = branchInfo.Count;
+            return details;
         }
 
-        public double CalculateBranchCoverage(Methods methods)
+        public CoverageDetails CalculateBranchCoverage(Branches branches)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
+            details.Covered = branches.Sum(b => b.Value.Where(bi => bi.Hits > 0).Count());
+            details.Total = branches.Sum(b => b.Value.Count());
+            return details;
+        }
+
+        public CoverageDetails CalculateBranchCoverage(Methods methods)
+        {
+            var details = new CoverageDetails();
             foreach (var method in methods)
-                total += CalculateBranchCoverage(method.Value);
-
-            average = total / methods.Count;
-            return Math.Round(average, 3);
+            {
+                var methodCoverage = CalculateBranchCoverage(method.Value.Branches);
+                details.Covered += methodCoverage.Covered;
+                details.Total += methodCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateBranchCoverage(Classes classes)
+        public CoverageDetails CalculateBranchCoverage(Classes classes)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var @class in classes)
-                total += CalculateBranchCoverage(@class.Value);
-
-            average = total / classes.Count;
-            return Math.Round(average, 3);
+            {
+                var classCoverage = CalculateBranchCoverage(@class.Value);
+                details.Covered += classCoverage.Covered;
+                details.Total += classCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateBranchCoverage(Documents documents)
+        public CoverageDetails CalculateBranchCoverage(Documents documents)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var document in documents)
-                total += CalculateBranchCoverage(document.Value);
-
-            average = total / documents.Count;
-            return Math.Round(average, 3);
+            {
+                var documentCoverage = CalculateBranchCoverage(document.Value);
+                details.Covered += documentCoverage.Covered;
+                details.Total += documentCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateBranchCoverage(Modules modules)
+        public CoverageDetails CalculateBranchCoverage(Modules modules)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var module in modules)
-                total += CalculateBranchCoverage(module.Value);
-
-            average = total / modules.Count;
-            return Math.Round(average, 3);
+            {
+                var moduleCoverage = CalculateBranchCoverage(module.Value);
+                details.Covered += moduleCoverage.Covered;
+                details.Total += moduleCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateMethodCoverage(Lines lines)
+        public CoverageDetails CalculateMethodCoverage(Lines lines)
         {
-            if (lines.Any(l => l.Value.Hits > 0))
-                return 1;
-
-            return 0;
+            var details = new CoverageDetails();
+            details.Covered = lines.Any(l => l.Value.Hits > 0) ? 1 : 0;
+            details.Total = 1;
+            return details;
         }
 
-        public double CalculateMethodCoverage(Methods methods)
+        public CoverageDetails CalculateMethodCoverage(Methods methods)
         {
-            double total = 0, average = 0;
-            foreach (var method in methods)
-                total += CalculateMethodCoverage(method.Value);
-
-            average = total / methods.Count;
-            return Math.Round(average, 3);
+            var details = new CoverageDetails();
+            var methodsWithLines = methods.Where(m => m.Value.Lines.Count > 0);
+            foreach (var method in methodsWithLines)
+            {
+                var methodCoverage = CalculateMethodCoverage(method.Value.Lines);
+                details.Covered += methodCoverage.Covered;
+            }
+            details.Total = methodsWithLines.Count();
+            return details;
         }
 
-        public double CalculateMethodCoverage(Classes classes)
+        public CoverageDetails CalculateMethodCoverage(Classes classes)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var @class in classes)
-                total += CalculateMethodCoverage(@class.Value);
-
-            average = total / classes.Count;
-            return Math.Round(average, 3);
+            {
+                var classCoverage = CalculateMethodCoverage(@class.Value);
+                details.Covered += classCoverage.Covered;
+                details.Total += classCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateMethodCoverage(Documents documents)
+        public CoverageDetails CalculateMethodCoverage(Documents documents)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var document in documents)
-                total += CalculateMethodCoverage(document.Value);
-
-            average = total / documents.Count;
-            return Math.Round(average, 3);
+            {
+                var documentCoverage = CalculateMethodCoverage(document.Value);
+                details.Covered += documentCoverage.Covered;
+                details.Total += documentCoverage.Total;
+            }
+            return details;
         }
 
-        public double CalculateMethodCoverage(Modules modules)
+        public CoverageDetails CalculateMethodCoverage(Modules modules)
         {
-            double total = 0, average = 0;
+            var details = new CoverageDetails();
             foreach (var module in modules)
-                total += CalculateMethodCoverage(module.Value);
-
-            average = total / modules.Count;
-            return Math.Round(average, 3);
+            {
+                var moduleCoverage = CalculateMethodCoverage(module.Value);
+                details.Covered += moduleCoverage.Covered;
+                details.Total += moduleCoverage.Total;
+            }
+            return details;
         }
     }
 }

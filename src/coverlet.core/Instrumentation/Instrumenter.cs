@@ -6,6 +6,7 @@ using System.Reflection;
 
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Helpers;
+using Coverlet.Core.Symbols;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -99,32 +100,56 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentIL(MethodDefinition method)
         {
+            method.Body.SimplifyMacros();
             ILProcessor processor = method.Body.GetILProcessor();
 
             var index = 0;
             var count = processor.Body.Instructions.Count;
 
+            var branchPoints = CecilSymbolHelper.GetBranchPoints(method);
+
             for (int n = 0; n < count; n++)
             {
                 var instruction = processor.Body.Instructions[index];
                 var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
-                if (sequencePoint == null || sequencePoint.IsHidden)
+                var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
+                
+                if (sequencePoint != null && !sequencePoint.IsHidden)
                 {
-                    index++;
-                    continue;
+                    var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);
+                    foreach (var _instruction in processor.Body.Instructions)
+                        ReplaceInstructionTarget(_instruction, instruction, target);
+
+                    foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
+                        ReplaceExceptionHandlerBoundary(handler, instruction, target);
+
+                    index += 3;
                 }
 
-                var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);
-                foreach (var _instruction in processor.Body.Instructions)
-                    ReplaceInstructionTarget(_instruction, instruction, target);
+                foreach (var _branchTarget in targetedBranchPoints)
+                {
+                    /*
+                        * Skip branches with no sequence point reference for now.
+                        * In this case for an anonymous class the compiler will dynamically create an Equals 'utility' method.
+                        * The CecilSymbolHelper will create branch points with a start line of -1 and no document, which
+                        * I am currently not sure how to handle.
+                        */
+                    if (_branchTarget.StartLine == -1 || _branchTarget.Document == null)
+                        continue;
+                    
+                    var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
+                    foreach (var _instruction in processor.Body.Instructions)
+                        ReplaceInstructionTarget(_instruction, instruction, target);
 
-                foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
-                    ReplaceExceptionHandlerBoundary(handler, instruction, target);
+                    foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
+                        ReplaceExceptionHandlerBoundary(handler, instruction, target);
 
-                index += 4;
+                    index += 3;
+                }
+
+                index++;
             }
 
-            method.Body.SimplifyMacros();
             method.Body.OptimizeMacros();
         }
 
@@ -143,8 +168,7 @@ namespace Coverlet.Core.Instrumentation
                     document.Lines.Add(new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
 
-            string flag = IsBranchTarget(processor, instruction) ? "B" : "L";
-            string marker = $"{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine},{flag}";
+            string marker = $"L,{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine}";
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
@@ -157,21 +181,40 @@ namespace Coverlet.Core.Instrumentation
             return pathInstr;
         }
 
-        private static bool IsBranchTarget(ILProcessor processor, Instruction instruction)
+        private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, BranchPoint branchPoint)
         {
-            foreach (var _instruction in processor.Body.Instructions)
+            var document = _result.Documents.FirstOrDefault(d => d.Path == branchPoint.Document);
+            if (document == null)
             {
-                if (_instruction.Operand is Instruction target)
-                {
-                    if (target == instruction)
-                        return true;
-                }
-
-                if (_instruction.Operand is Instruction[] targets)
-                    return targets.Any(t => t == instruction);
+                document = new Document { Path = branchPoint.Document };
+                _result.Documents.Add(document);
             }
 
-            return false;
+            if (!document.Branches.Exists(l => l.Number == branchPoint.StartLine && l.Ordinal == branchPoint.Ordinal))
+                document.Branches.Add(
+                    new Branch
+                    {
+                        Number = branchPoint.StartLine,
+                        Class = method.DeclaringType.FullName,
+                        Method = method.FullName,
+                        Offset = branchPoint.Offset,
+                        EndOffset = branchPoint.EndOffset,
+                        Path = branchPoint.Path,
+                        Ordinal = branchPoint.Ordinal
+                    }
+                );
+
+            string marker = $"B,{document.Path},{branchPoint.StartLine},{branchPoint.Ordinal}";
+
+            var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
+            var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
+            var callInstr = Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(_markExecutedMethodLoader.Value));
+
+            processor.InsertBefore(instruction, callInstr);
+            processor.InsertBefore(callInstr, markInstr);
+            processor.InsertBefore(markInstr, pathInstr);
+
+            return pathInstr;
         }
 
         private static void ReplaceInstructionTarget(Instruction instruction, Instruction oldTarget, Instruction newTarget)

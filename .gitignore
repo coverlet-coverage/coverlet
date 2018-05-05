@@ -118,6 +118,7 @@ _TeamCity*
 # Visual Studio code coverage results
 *.coverage
 *.coveragexml
+lcov.info
 
 # NCrunch
 _NCrunch_*

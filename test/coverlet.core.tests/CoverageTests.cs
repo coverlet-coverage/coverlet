@@ -5,6 +5,7 @@ using Xunit;
 using Moq;
 
 using Coverlet.Core;
+using System.Collections.Generic;
 
 namespace Coverlet.Core.Tests
 {
@@ -13,19 +14,26 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCoverage()
         {
-            string module = typeof(CoverageTests).Assembly.Location;
+            string module = GetType().Assembly.Location;
+            string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
             string identifier = Guid.NewGuid().ToString();
 
             var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
-            var tempModule = Path.Combine(directory.FullName, Path.GetFileName(module));
 
-            File.Copy(module, tempModule, true);
+            File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
+            File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-            var coverage = new Coverage(tempModule, identifier);
+            // TODO: Find a way to mimick hits
+
+            // Since Coverage only instruments dependancies, we need a fake module here
+            var testModule = Path.Combine(directory.FullName, "test.module.dll");
+
+            var coverage = new Coverage(testModule, identifier);
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
-            Assert.Empty(result.Modules);
+
+            Assert.NotEmpty(result.Modules);
 
             directory.Delete(true);
         }
