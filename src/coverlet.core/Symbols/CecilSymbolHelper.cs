@@ -19,6 +19,7 @@ namespace Coverlet.Core.Symbols
     {
         private const int StepOverLineCode = 0xFEEFEE;
         private static readonly Regex IsMovenext = new Regex(@"\<[^\s>]+\>\w__\w(\w)?::MoveNext\(\)$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
@@ -56,7 +57,7 @@ namespace Coverlet.Core.Symbols
                     var branchingInstructionLine = closestSeqPt.Maybe(x => x.StartLine, -1);
                     var document = closestSeqPt.Maybe(x => x.Document.Url);
 
-                    if (null == instruction.Next)
+                    if (instruction.Next == null)
                         return;
 
                     if (!BuildPointsForConditionalBranch(list, instruction, branchingInstructionLine, document, branchOffset, pathCounter, instructions, ref ordinal, methodDefinition)) 

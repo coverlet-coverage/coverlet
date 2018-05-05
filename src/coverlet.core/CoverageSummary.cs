@@ -4,12 +4,6 @@ using System.Linq;
 
 namespace Coverlet.Core
 {
-    public class CoverageDetails
-    {
-        public double Covered { get; set; }
-        public int Total { get; set; }
-        public double Percent { get; set; }
-    }
     public class CoverageSummary
     {
         public CoverageDetails CalculateLineCoverage(Lines lines)
@@ -17,8 +11,6 @@ namespace Coverlet.Core
             var details = new CoverageDetails();
             details.Covered = lines.Where(l => l.Value.Hits > 0).Count();
             details.Total = lines.Count;
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -31,9 +23,6 @@ namespace Coverlet.Core
                 details.Covered += methodCoverage.Covered;
                 details.Total += methodCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -46,9 +35,6 @@ namespace Coverlet.Core
                 details.Covered += classCoverage.Covered;
                 details.Total += classCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -61,9 +47,6 @@ namespace Coverlet.Core
                 details.Covered += documentCoverage.Covered;
                 details.Total += documentCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -76,9 +59,6 @@ namespace Coverlet.Core
                 details.Covered += moduleCoverage.Covered;
                 details.Total += moduleCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -87,8 +67,6 @@ namespace Coverlet.Core
             var details = new CoverageDetails();
             details.Covered = branchInfo.Count(bi => bi.Hits > 0);
             details.Total = branchInfo.Count;
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -97,8 +75,6 @@ namespace Coverlet.Core
             var details = new CoverageDetails();
             details.Covered = branches.Sum(b => b.Value.Where(bi => bi.Hits > 0).Count());
             details.Total = branches.Sum(b => b.Value.Count());
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -111,9 +87,6 @@ namespace Coverlet.Core
                 details.Covered += methodCoverage.Covered;
                 details.Total += methodCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -126,9 +99,6 @@ namespace Coverlet.Core
                 details.Covered += classCoverage.Covered;
                 details.Total += classCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -141,9 +111,6 @@ namespace Coverlet.Core
                 details.Covered += documentCoverage.Covered;
                 details.Total += documentCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -156,9 +123,6 @@ namespace Coverlet.Core
                 details.Covered += moduleCoverage.Covered;
                 details.Total += moduleCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -167,7 +131,6 @@ namespace Coverlet.Core
             var details = new CoverageDetails();
             details.Covered = lines.Any(l => l.Value.Hits > 0) ? 1 : 0;
             details.Total = 1;
-            details.Percent = details.Covered;
             return details;
         }
 
@@ -181,9 +144,6 @@ namespace Coverlet.Core
                 details.Covered += methodCoverage.Covered;
             }
             details.Total = methodsWithLines.Count();
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -196,9 +156,6 @@ namespace Coverlet.Core
                 details.Covered += classCoverage.Covered;
                 details.Total += classCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -211,9 +168,6 @@ namespace Coverlet.Core
                 details.Covered += documentCoverage.Covered;
                 details.Total += documentCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
 
@@ -226,9 +180,6 @@ namespace Coverlet.Core
                 details.Covered += moduleCoverage.Covered;
                 details.Total += moduleCoverage.Total;
             }
-
-            double coverage = details.Total == 0 ? details.Total : details.Covered / details.Total;
-            details.Percent = Math.Round(coverage, 3);
             return details;
         }
     }
