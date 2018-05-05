@@ -23,22 +23,18 @@ namespace Coverlet.Core.Symbols
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
-            GetBranchPoints(methodDefinition, list);
-            return list;
-        }
-        private static void GetBranchPoints(MethodDefinition methodDefinition, List<BranchPoint> list)
-        {
             if (methodDefinition == null) 
-                return;
-            try
-            {
-                UInt32 ordinal = 0;
-                var instructions = methodDefinition.Body.Instructions;
-                
-                // if method is a generated MoveNext skip first branch (could be a switch or a branch)
-                var skipFirstBranch = IsMovenext.IsMatch(methodDefinition.FullName);
+                return list;
 
-                foreach (var instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
+            UInt32 ordinal = 0;
+            var instructions = methodDefinition.Body.Instructions;
+            
+            // if method is a generated MoveNext skip first branch (could be a switch or a branch)
+            var skipFirstBranch = IsMovenext.IsMatch(methodDefinition.FullName);
+
+            foreach (var instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
+            {
+                try
                 {
                     if (skipFirstBranch)
                     {
@@ -58,17 +54,17 @@ namespace Coverlet.Core.Symbols
                     var document = closestSeqPt.Maybe(x => x.Document.Url);
 
                     if (instruction.Next == null)
-                        return;
+                        return list;
 
                     if (!BuildPointsForConditionalBranch(list, instruction, branchingInstructionLine, document, branchOffset, pathCounter, instructions, ref ordinal, methodDefinition)) 
-                        return;
+                        return list;
+                }
+                catch (Exception)
+                {
+                    continue;
                 }
             }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException(
-                    $"An error occurred with 'GetBranchPointsForToken' for method '{methodDefinition.FullName}'", ex);
-            }
+            return list;
         }
 
         private static bool BuildPointsForConditionalBranch(List<BranchPoint> list, Instruction instruction,
