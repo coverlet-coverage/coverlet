@@ -51,7 +51,7 @@ namespace Coverlet.MSbuild.Tasks
                     Directory.CreateDirectory(directory);
 
                 var formats = _format.Split(',');
-                foreach(var format in formats)
+                foreach (var format in formats)
                 {
                     var reporter = new ReporterFactory(format).CreateReporter();
                     if (reporter == null)
@@ -64,18 +64,19 @@ namespace Coverlet.MSbuild.Tasks
 
                 double total = 0;
                 CoverageSummary summary = new CoverageSummary();
-                ConsoleTable table = new ConsoleTable("Module", "Line Coverage", "Branch Coverage");
+                ConsoleTable table = new ConsoleTable("Module", "Line", "Branch", "Method");
 
                 foreach (var module in result.Modules)
                 {
-                    double percent = summary.CalculateLineCoverage(module.Value).Percent * 100;
+                    double linePercent = summary.CalculateLineCoverage(module.Value).Percent * 100;
                     double branchPercent = summary.CalculateBranchCoverage(module.Value).Percent * 100;
-                    table.AddRow(System.IO.Path.GetFileNameWithoutExtension(module.Key), $"{percent}%", $"{branchPercent}%");
-                    total += percent;
+                    double methodPercent = summary.CalculateMethodCoverage(module.Value).Percent * 100;
+                    table.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
+                    total += linePercent;
                 }
 
                 Console.WriteLine();
-                Console.WriteLine(table.ToMarkDownString());
+                Console.WriteLine(table.ToStringAlternative());
 
                 double average = total / result.Modules.Count;
                 if (average < _threshold)
