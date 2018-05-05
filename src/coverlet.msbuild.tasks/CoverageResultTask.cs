@@ -50,15 +50,16 @@ namespace Coverlet.MSbuild.Tasks
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
-                var reporters = new List<IReporter>(new ReporterFactory(_format).CreateReporters());
-                if (reporters.Count != _format.Split(',').Length)
-                    throw new Exception($"Specified output format '{_format}' is not supported");
-
-                foreach(var reporter in reporters)
+                var formats = _format.Split(',');
+                foreach(var format in formats)
                 {
-                    var reportFilename = _filename + "." + reporter.Extension;
-                    Console.WriteLine($"  Generating report '{reportFilename}'");
-                    File.WriteAllText(reportFilename, reporter.Report(result));
+                    var reporter = new ReporterFactory(format).CreateReporter();
+                    if (reporter == null)
+                        throw new Exception($"Specified output format '{format}' is not supported");
+
+                    var report = _filename + "." + reporter.Extension;
+                    Console.WriteLine($"  Generating report '{report}'");
+                    File.WriteAllText(report, reporter.Report(result));
                 }
 
                 double total = 0;
