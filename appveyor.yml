@@ -7,4 +7,3 @@ build_script:
   - dotnet msbuild build.proj /p:Configuration=%CONFIGURATION%
 test_script:
   - ps: if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode) }
-  - cmd: IF "%CONFIGURATION%"=="Release" ( %USERPROFILE%\.nuget\packages\coveralls.net\0.7.0\tools\csmacnz.Coveralls.exe --opencover -i test\coverlet.core.tests\coverage.xml --useRelativePaths )
