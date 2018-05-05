@@ -126,28 +126,25 @@ namespace Coverlet.Core.Instrumentation
                     index += 3;
                 }
 
-                if (targetedBranchPoints.Count() > 0)
+                foreach (var _branchTarget in targetedBranchPoints)
                 {
-                    foreach (var _branchTarget in targetedBranchPoints)
-                    {
-                        /*
-                         * Skip branches with no sequence point reference for now.
-                         * In this case for an anonymous class the compiler will dynamically create an Equals 'utility' method.
-                         * The CecilSymbolHelper will create branch points with a start line of -1 and no document, which
-                         * I am currently not sure how to handle.
-                         */
-                        if (_branchTarget.StartLine == -1 || _branchTarget.Document == null)
-                            continue;
-                        
-                        var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
-                        foreach (var _instruction in processor.Body.Instructions)
-                            ReplaceInstructionTarget(_instruction, instruction, target);
+                    /*
+                        * Skip branches with no sequence point reference for now.
+                        * In this case for an anonymous class the compiler will dynamically create an Equals 'utility' method.
+                        * The CecilSymbolHelper will create branch points with a start line of -1 and no document, which
+                        * I am currently not sure how to handle.
+                        */
+                    if (_branchTarget.StartLine == -1 || _branchTarget.Document == null)
+                        continue;
+                    
+                    var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
+                    foreach (var _instruction in processor.Body.Instructions)
+                        ReplaceInstructionTarget(_instruction, instruction, target);
 
-                        foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
-                            ReplaceExceptionHandlerBoundary(handler, instruction, target);
+                    foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
+                        ReplaceExceptionHandlerBoundary(handler, instruction, target);
 
-                        index += 3;
-                    }
+                    index += 3;
                 }
 
                 index++;
@@ -171,7 +168,6 @@ namespace Coverlet.Core.Instrumentation
                     document.Lines.Add(new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
 
-            // string flag = branchPoints.Count > 0 ? "B" : "L";
             string marker = $"L,{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine}";
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);

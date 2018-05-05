@@ -1,7 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
     <CoverletOutputDirectory Condition="$(CoverletOutputDirectory) == ''">$(MSBuildProjectDirectory)</CoverletOutputDirectory>
     <CoverletOutputName Condition=" '$(CoverletOutputName)' == '' ">coverage</CoverletOutputName>
@@ -9,7 +8,6 @@
     <Exclude Condition="$(Exclude) == ''"></Exclude>
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>
-
   </PropertyGroup>
 
 </Project>

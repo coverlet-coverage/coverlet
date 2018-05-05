@@ -1,4 +1,4 @@
-# coverlet [![Build Status](https://www.travis-ci.org/tonerdo/coverlet.svg?branch=master)](https://www.travis-ci.org/tonerdo/coverlet) [![Build status](https://ci.appveyor.com/api/projects/status/6rdf00wufospr4r8/branch/master?svg=true)](https://ci.appveyor.com/project/tonerdo/coverlet) [![Coverage Status](https://coveralls.io/repos/github/tonerdo/coverlet/badge.svg?branch=master)](https://coveralls.io/github/tonerdo/coverlet?branch=master) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+# coverlet [![Build Status](https://www.travis-ci.org/tonerdo/coverlet.svg?branch=master)](https://www.travis-ci.org/tonerdo/coverlet) [![Build status](https://ci.appveyor.com/api/projects/status/6rdf00wufospr4r8/branch/master?svg=true)](https://ci.appveyor.com/project/tonerdo/coverlet) [![codecov](https://codecov.io/gh/tonerdo/coverlet/branch/master/graph/badge.svg)](https://codecov.io/gh/tonerdo/coverlet) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.
 
@@ -86,7 +86,7 @@ You can ignore a method or an entire class from code coverage by creating and ap
 
 Coverlet just uses the type name, so the attributes can be created under any namespace of your choosing.
 
-#### File Path  
+#### Source Files  
 You can also ignore specific source files from code coverage using the `Exclude` property
  - Use single or multiple paths (separate by comma)
  - Use absolute or relative paths (relative to the project directory)
