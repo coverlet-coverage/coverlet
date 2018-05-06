@@ -50,7 +50,6 @@ namespace Coverlet.Core
         {
             foreach (var kvp in _markers)
             {
-                _markerFileCount.TryAdd(kvp.Key, 0);
                 using (var fs = new FileStream($"{kvp.Key}_compressed_{_markerFileCount[kvp.Key]}", FileMode.OpenOrCreate))
                 using (var gz = new GZipStream(fs, CompressionMode.Compress))
                 using (var sw = new StreamWriter(gz))
