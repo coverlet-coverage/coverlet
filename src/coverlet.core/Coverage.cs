@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 
 using Coverlet.Core.Helpers;
@@ -152,43 +153,55 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                if (!File.Exists(result.HitsFilePath)) { continue; }
-                var lines = InstrumentationHelper.ReadHitsFile(result.HitsFilePath);
-                foreach (var row in lines)
+                var i = 0;
+                while (true)
                 {
-                    var info = row.Split(',');
-                    // Ignore malformed lines
-                    if (info.Length != 4)
-                        continue;
-
-                    bool isBranch = info[0] == "B";
-
-                    var document = result.Documents.FirstOrDefault(d => d.Path == info[1]);
-                    if (document == null)
-                        continue;
-
-                    int start = int.Parse(info[2]);
-
-                    if (isBranch)
+                    var file = $"{result.HitsFilePath}_compressed_{i}";
+                    if(!File.Exists(file)) break;
+                    
+                    using (var fs = new FileStream(file, FileMode.Open))
+                    using (var gz = new GZipStream(fs, CompressionMode.Decompress))
+                    using (var sr = new StreamReader(gz))
                     {
-                        uint ordinal = uint.Parse(info[3]);
-                        var branch = document.Branches.First(b => b.Number == start && b.Ordinal == ordinal);
-                        if (branch.Hits != int.MaxValue)
-                            branch.Hits += branch.Hits + 1;
-                    }
-                    else
-                    {
-                        int end = int.Parse(info[3]);
-                        for (int j = start; j <= end; j++)
+                        string row;
+                        while ((row = sr.ReadLine()) != null)
                         {
-                            var line = document.Lines.First(l => l.Number == j);
-                            if (line.Hits != int.MaxValue)
-                                line.Hits = line.Hits + 1;
+                            var info = row.Split(',');
+                            // Ignore malformed lines
+                            if (info.Length != 4)
+                                continue;
+
+                            bool isBranch = info[0] == "B";
+
+                            var document = result.Documents.FirstOrDefault(d => d.Path == info[1]);
+                            if (document == null)
+                                continue;
+
+                            int start = int.Parse(info[2]);
+
+                            if (isBranch)
+                            {
+                                uint ordinal = uint.Parse(info[3]);
+                                var branch = document.Branches.First(b => b.Number == start && b.Ordinal == ordinal);
+                                if (branch.Hits != int.MaxValue)
+                                    branch.Hits += branch.Hits + 1;
+                            }
+                            else
+                            {
+                                int end = int.Parse(info[3]);
+                                for (int j = start; j <= end; j++)
+                                {
+                                    var line = document.Lines.First(l => l.Number == j);
+                                    if (line.Hits != int.MaxValue)
+                                        line.Hits = line.Hits + 1;
+                                }
+                            }
                         }
                     }
-                }
 
-                InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+                    InstrumentationHelper.DeleteHitsFile(file);
+                    i++;
+                }
             }
         }
     }
