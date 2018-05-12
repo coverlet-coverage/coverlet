@@ -22,7 +22,8 @@
       Condition="$(CollectCoverage) == 'true'"
       Output="$(CoverletOutput)"
       OutputFormat="$(CoverletOutputFormat)"
-      Threshold="$(Threshold)" />
+      Threshold="$(Threshold)"
+      ThresholdType="$(ThresholdType)" />
   </Target>
 
 </Project>
