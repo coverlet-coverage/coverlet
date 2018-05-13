@@ -75,7 +75,7 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentType(TypeDefinition type)
         {
             if (type.CustomAttributes.Any(IsExcludeAttribute)
-                && InstrumentationHelper.IsTypeExcluded(type.FullName, _filters))
+                || InstrumentationHelper.IsTypeExcluded(_module, type.FullName, _filters))
                 return;
 
             foreach (var method in type.Methods)

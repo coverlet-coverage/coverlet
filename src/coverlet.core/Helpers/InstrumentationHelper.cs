@@ -83,44 +83,49 @@ namespace Coverlet.Core.Helpers
 
         public static bool IsModuleExcluded(string module, string[] filters)
         {
-            if (filters == null || !filters.Any())
+            if (filters == null)
                 return false;
 
-            module = Path.GetFileNameWithoutExtension(module);
             bool isMatch = false;
+            module = Path.GetFileNameWithoutExtension(module);
 
             foreach (var filter in filters)
             {
                 if (!IsValidFilterExpression(filter))
                     continue;
 
-                string pattern = filter.Substring(1, filter.IndexOf(']') - 1);
-                pattern = WildcardToRegex(pattern);
+                string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+                string typePattern = filter.Substring(filter.IndexOf(']') + 1);
 
-                var regex = new Regex(pattern);
-                isMatch = regex.IsMatch(module);
+                modulePattern = WildcardToRegex(modulePattern);
+
+                var regex = new Regex(modulePattern);
+                isMatch = regex.IsMatch(module) && typePattern == "*";
             }
 
             return isMatch;
         }
 
-        public static bool IsTypeExcluded(string type, string[] filters)
+        public static bool IsTypeExcluded(string module, string type, string[] filters)
         {
-            if (filters == null || !filters.Any())
+            if (filters == null)
                 return false;
 
             bool isMatch = false;
+            module = Path.GetFileNameWithoutExtension(module);
 
             foreach (var filter in filters)
             {
                 if (!IsValidFilterExpression(filter))
                     continue;
 
-                string pattern = filter.Substring(filter.IndexOf(']') + 1);
-                pattern = WildcardToRegex(pattern);
+                string typePattern = filter.Substring(filter.IndexOf(']') + 1);
+                string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
 
-                var regex = new Regex(pattern);
-                isMatch = regex.IsMatch(type);
+                typePattern = WildcardToRegex(typePattern);
+                modulePattern = WildcardToRegex(modulePattern);
+
+                isMatch = new Regex(typePattern).IsMatch(type) && new Regex(modulePattern).IsMatch(module);
             }
 
             return isMatch;
@@ -206,7 +211,10 @@ namespace Coverlet.Core.Helpers
             if (filter.IndexOf(']') - filter.IndexOf('[') == 1)
                 return false;
 
-            if (new Regex(@"[^\w*]").IsMatch(filter.Replace("[", "").Replace("]", "")))
+            if (filter.EndsWith("]"))
+                return false;
+
+            if (new Regex(@"[^\w*]").IsMatch(filter.Replace(".", "").Replace("[", "").Replace("]", "")))
                 return false;
 
             return true;
