@@ -6,23 +6,38 @@ using Microsoft.Build.Utilities;
 namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : Task
-    {        
-        internal static Coverage Coverage { get; private set; }
+    {
+        private static Coverage _coverage;
+        private string _path;
+        private string _exclude;
+
+        internal static Coverage Coverage
+        {
+            get { return _coverage; }
+        }
 
         [Required]
-        public string Path { get; set; }
-        
-        public string Exclude { get; set; }
-                
+        public string Path
+        {
+            get { return _path; }
+            set { _path = value; }
+        }
+
+        public string Exclude
+        {
+            get { return _path; }
+            set { _path = value; }
+        }
+
         public override bool Execute()
         {
             try
             {
-                var excludeRules = Exclude?.Split(',');
-                Coverage = new Coverage(Path, Guid.NewGuid().ToString(), excludeRules);
-                Coverage.PrepareModules();
+                var excludeRules = _exclude?.Split(',');
+                _coverage = new Coverage(_path, Guid.NewGuid().ToString(), excludeRules);
+                _coverage.PrepareModules();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.LogErrorFromException(ex);
                 return false;
