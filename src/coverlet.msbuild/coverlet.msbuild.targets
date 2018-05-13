@@ -6,7 +6,7 @@
   <Target Name="InstrumentModulesNoBuild" BeforeTargets="VSTest">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'"
-      Exclude="$(Exclude)"
+      ExcludeByFile="$(ExcludeByFile)"
       Path="$(TargetPath)" />
   </Target>
 
@@ -14,7 +14,7 @@
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
       Filter="$(Filter)"
-      Exclude="$(Exclude)"
+      ExcludeByFile="$(ExcludeByFile)"
       Path="$(TargetPath)" />
   </Target>
 
