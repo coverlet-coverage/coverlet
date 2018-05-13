@@ -9,7 +9,7 @@ namespace Coverlet.MSbuild.Tasks
     {
         private static Coverage _coverage;
         private string _path;
-        private string _filter;
+        private string _exclude;
         private string _excludeByFile;
 
         internal static Coverage Coverage
@@ -24,10 +24,10 @@ namespace Coverlet.MSbuild.Tasks
             set { _path = value; }
         }
         
-        public string Filter
+        public string Exclude
         {
-            get { return _filter; }
-            set { _filter = value; }
+            get { return _exclude; }
+            set { _exclude = value; }
         }
 
         public string ExcludeByFile
@@ -40,10 +40,10 @@ namespace Coverlet.MSbuild.Tasks
         {
             try
             {
-                var excludes = _excludeByFile?.Split(',');
-                var filters = _filter?.Split(',');
+                var rules = _excludeByFile?.Split(',');
+                var filters = _exclude?.Split(',');
 
-                _coverage = new Coverage(_path, Guid.NewGuid().ToString(), filters, excludes);
+                _coverage = new Coverage(_path, Guid.NewGuid().ToString(), filters, rules);
                 _coverage.PrepareModules();
             }
             catch (Exception ex)

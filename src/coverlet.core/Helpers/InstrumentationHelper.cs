@@ -131,15 +131,15 @@ namespace Coverlet.Core.Helpers
             return isMatch;
         }
 
-        public static string[] GetExcludedFiles(string[] excludes)
+        public static string[] GetExcludedFiles(string[] rules)
         {
             const string RELATIVE_KEY = nameof(RELATIVE_KEY);
             string parentDir = Directory.GetCurrentDirectory();
 
-            if (excludes == null || !excludes.Any()) return Array.Empty<string>();
+            if (rules == null || !rules.Any()) return Array.Empty<string>();
 
             var matcherDict = new Dictionary<string, Matcher>() { { RELATIVE_KEY, new Matcher() } };
-            foreach (var excludeRule in excludes)
+            foreach (var excludeRule in rules)
             {
                 if (Path.IsPathRooted(excludeRule))
                 {

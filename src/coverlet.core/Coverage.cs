@@ -14,22 +14,22 @@ namespace Coverlet.Core
         private string _module;
         private string _identifier;
         private string[] _filters;
-        private string[] _excludes;
+        private string[] _rules;
         private List<InstrumenterResult> _results;
 
-        public Coverage(string module, string identifier, string[] filters, string[] excludes)
+        public Coverage(string module, string identifier, string[] filters, string[] rules)
         {
             _module = module;
             _identifier = identifier;
             _filters = filters;
-            _excludes = excludes;
+            _rules = rules;
             _results = new List<InstrumenterResult>();
         }
 
         public void PrepareModules()
         {
             string[] modules = InstrumentationHelper.GetCoverableModules(_module);
-            string[] excludedFiles =  InstrumentationHelper.GetExcludedFiles(_excludes);
+            string[] excludedFiles =  InstrumentationHelper.GetExcludedFiles(_rules);
 
             foreach (var module in modules)
             {

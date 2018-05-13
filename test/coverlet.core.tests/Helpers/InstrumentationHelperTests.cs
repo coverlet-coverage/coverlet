@@ -95,11 +95,11 @@ namespace Coverlet.Core.Helpers.Tests
         {
             var file = Path.GetRandomFileName();
             File.Create(file).Dispose();
-            var excludeFiles = InstrumentationHelper.GetExcludedFiles(
+            var excludedFiles = InstrumentationHelper.GetExcludedFiles(
                 new string[] { Path.Combine(Directory.GetCurrentDirectory(), file) }
             );
             File.Delete(file);
-            Assert.Single(excludeFiles);
+            Assert.Single(excludedFiles);
         }
 
         [Fact]
@@ -116,7 +116,7 @@ namespace Coverlet.Core.Helpers.Tests
                 File.Create(path).Dispose();
             }
 
-            var excludeFiles = InstrumentationHelper.GetExcludedFiles(
+            var excludedFiles = InstrumentationHelper.GetExcludedFiles(
                 new string[] { $"*.{fileExtension}" });
 
             foreach (var path in paths)
@@ -124,7 +124,7 @@ namespace Coverlet.Core.Helpers.Tests
                 File.Delete(path);
             }
 
-            Assert.Equal(paths.Length, excludeFiles.Count());
+            Assert.Equal(paths.Length, excludedFiles.Count());
         }
     }
 }
