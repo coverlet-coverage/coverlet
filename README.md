@@ -87,18 +87,34 @@ You can ignore a method or an entire class from code coverage by creating and ap
 Coverlet just uses the type name, so the attributes can be created under any namespace of your choosing.
 
 #### Source Files  
-You can also ignore specific source files from code coverage using the `Exclude` property
+You can also ignore specific source files from code coverage using the `ExcludeByFile` property
  - Use single or multiple paths (separate by comma)
  - Use absolute or relative paths (relative to the project directory)
  - Use file path or directory path with globbing (e.g `dir1/*.cs`)
 
 ```bash
-dotnet test /p:CollectCoverage=true /p:Exclude=\"../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs,\"
+dotnet test /p:CollectCoverage=true /p:ExcludeByFile=\"../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs,\"
 ```
+
+#### Filters 
+Coverlet gives the ability to have fine grained control over what gets excluded using "filter expressions".
+
+Syntax: `/p:Exclude=[Assembly-Filter]Type-Filter`
+
+Examples
+ - `/p:Exclude="[*]*"` => Excludes all types in all assemblies (nothing is instrumented)
+ - `/p:Exclude="[coverlet.*]Coverlet.Core.Coverage"` => Excludes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
+ - `/p:Exclude="[*]Coverlet.Core.Instrumentation.*"` => Excludes all types belonging to `Coverlet.Core.Instrumentation` namespace in any assembly
+
+```bash
+dotnet test /p:CollectCoverage=true /p:Exclude="[coverlet.*]Coverlet.Core.Coverage"
+```
+
+You can specify multiple fiter expressions by separting them with a comma (`,`).
 
 ## Roadmap
 
-* Filter modules to be instrumented
+* Merging outputs (multiple test projects, one coverage result)
 * Support for more output formats (e.g. JaCoCo)
 * Console runner (removes the need for requiring a NuGet package)
 
