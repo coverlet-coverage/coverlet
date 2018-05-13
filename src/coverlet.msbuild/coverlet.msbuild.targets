@@ -13,6 +13,7 @@
   <Target Name="InstrumentModulesAfterBuild" AfterTargets="BuildProject">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
+      Filter="$(Filter)"
       Exclude="$(Exclude)"
       Path="$(TargetPath)" />
   </Target>

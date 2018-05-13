@@ -5,6 +5,7 @@
     <CoverletOutputDirectory Condition="$(CoverletOutputDirectory) == ''">$(MSBuildProjectDirectory)</CoverletOutputDirectory>
     <CoverletOutputName Condition=" '$(CoverletOutputName)' == '' ">coverage</CoverletOutputName>
     <CoverletOutput>$([MSBuild]::EnsureTrailingSlash('$(CoverletOutputDirectory)'))$(CoverletOutputName)</CoverletOutput>
+    <Filter Condition="$(Filter) == ''"></Filter>
     <Exclude Condition="$(Exclude) == ''"></Exclude>
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <ThresholdType Condition="$(ThresholdType) == ''">line,branch,method</ThresholdType>

@@ -28,7 +28,7 @@ namespace Coverlet.Core.Tests
             // Since Coverage only instruments dependancies, we need a fake module here
             var testModule = Path.Combine(directory.FullName, "test.module.dll");
 
-            var coverage = new Coverage(testModule, identifier);
+            var coverage = new Coverage(testModule, identifier, Array.Empty<string>(), Array.Empty<string>());
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();

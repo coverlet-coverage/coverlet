@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
+using System.Text.RegularExpressions;
 
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
@@ -12,10 +13,10 @@ namespace Coverlet.Core.Helpers
 {
     internal static class InstrumentationHelper
     {
-        public static string[] GetDependencies(string module)
+        public static string[] GetCoverableModules(string module)
         {
             IEnumerable<string> modules = Directory.GetFiles(Path.GetDirectoryName(module), "*.dll");
-            modules = modules.Where(a => IsAssembly(a) && Path.GetFileName(a) != Path.GetFileName(module));
+            modules = modules.Where(m => IsAssembly(m) && Path.GetFileName(m) != Path.GetFileName(module));
             return modules.ToArray();
         }
 
@@ -65,7 +66,8 @@ namespace Coverlet.Core.Helpers
             // See: https://github.com/tonerdo/coverlet/issues/25
             var retryStrategy = CreateRetryStrategy();
 
-            RetryHelper.Retry(() => {
+            RetryHelper.Retry(() =>
+            {
                 File.Copy(backupPath, module, true);
                 File.Delete(backupPath);
             }, retryStrategy, 10);
@@ -76,34 +78,81 @@ namespace Coverlet.Core.Helpers
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
             var retryStrategy = CreateRetryStrategy();
-
             RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
         }
 
-        public static IEnumerable<string> GetExcludedFiles(IEnumerable<string> excludeRules,
-                                                           string parentDir = null)
+        public static bool IsModuleExcluded(string module, string[] filters)
+        {
+            if (filters == null || !filters.Any())
+                return false;
+
+            module = Path.GetFileNameWithoutExtension(module);
+            bool isMatch = false;
+
+            foreach (var filter in filters)
+            {
+                if (!IsValidFilterExpression(filter))
+                    continue;
+
+                string pattern = filter.Substring(1, filter.IndexOf(']') - 1);
+                pattern = WildcardToRegex(pattern);
+
+                var regex = new Regex(pattern);
+                isMatch = regex.IsMatch(module);
+            }
+
+            return isMatch;
+        }
+
+        public static bool IsTypeExcluded(string type, string[] filters)
+        {
+            if (filters == null || !filters.Any())
+                return false;
+
+            bool isMatch = false;
+
+            foreach (var filter in filters)
+            {
+                if (!IsValidFilterExpression(filter))
+                    continue;
+
+                string pattern = filter.Substring(filter.IndexOf(']') + 1);
+                pattern = WildcardToRegex(pattern);
+
+                var regex = new Regex(pattern);
+                isMatch = regex.IsMatch(type);
+            }
+
+            return isMatch;
+        }
+
+        public static string[] GetExcludedFiles(string[] excludes)
         {
             const string RELATIVE_KEY = nameof(RELATIVE_KEY);
-            parentDir = string.IsNullOrWhiteSpace(parentDir)? Directory.GetCurrentDirectory() : parentDir;
+            string parentDir = Directory.GetCurrentDirectory();
 
-            if (excludeRules == null || !excludeRules.Any()) return Enumerable.Empty<string>();
+            if (excludes == null || !excludes.Any()) return Array.Empty<string>();
 
-            var matcherDict = new Dictionary<string, Matcher>(){ {RELATIVE_KEY, new Matcher()}};
-            foreach (var excludeRule in excludeRules)
+            var matcherDict = new Dictionary<string, Matcher>() { { RELATIVE_KEY, new Matcher() } };
+            foreach (var excludeRule in excludes)
             {
-                if (Path.IsPathRooted(excludeRule)) {
+                if (Path.IsPathRooted(excludeRule))
+                {
                     var root = Path.GetPathRoot(excludeRule);
-                    if (!matcherDict.ContainsKey(root)) {
+                    if (!matcherDict.ContainsKey(root))
+                    {
                         matcherDict.Add(root, new Matcher());
                     }
                     matcherDict[root].AddInclude(excludeRule.Substring(root.Length));
-                } else {
+                }
+                else
+                {
                     matcherDict[RELATIVE_KEY].AddInclude(excludeRule);
                 }
             }
 
             var files = new List<string>();
-            foreach(var entry in matcherDict)
+            foreach (var entry in matcherDict)
             {
                 var root = entry.Key;
                 var matcher = entry.Value;
@@ -114,20 +163,7 @@ namespace Coverlet.Core.Helpers
                 files.AddRange(currentFiles);
             }
 
-            return files.Distinct();
-        }
-
-        private static bool IsAssembly(string filePath)
-        {
-            try
-            {
-                AssemblyName.GetAssemblyName(filePath);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return files.Distinct().ToArray();
         }
 
         private static string GetBackupPath(string module, string identifier)
@@ -148,6 +184,52 @@ namespace Coverlet.Core.Helpers
             }
 
             return retryStrategy;
+        }
+
+        private static bool IsValidFilterExpression(string filter)
+        {
+            if (!filter.StartsWith("["))
+                return false;
+
+            if (!filter.Contains("]"))
+                return false;
+
+            if (filter.Count(f => f == '[') > 1)
+                return false;
+
+            if (filter.Count(f => f == ']') > 1)
+                return false;
+
+            if (filter.IndexOf(']') < filter.IndexOf('['))
+                return false;
+
+            if (filter.IndexOf(']') - filter.IndexOf('[') == 1)
+                return false;
+
+            if (new Regex(@"[^\w*]").IsMatch(filter.Replace("[", "").Replace("]", "")))
+                return false;
+
+            return true;
+        }
+
+        private static string WildcardToRegex(string pattern)
+        {
+            return "^" + Regex.Escape(pattern).
+            Replace("\\*", ".*").
+            Replace("\\?", ".") + "$";
+        }
+
+        private static bool IsAssembly(string filePath)
+        {
+            try
+            {
+                AssemblyName.GetAssemblyName(filePath);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
