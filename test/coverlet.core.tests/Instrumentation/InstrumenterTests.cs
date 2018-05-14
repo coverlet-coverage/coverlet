@@ -21,7 +21,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
             module = Path.Combine(directory.FullName, Path.GetFileName(module));
-            Instrumenter instrumenter = new Instrumenter(module, identifier);
+            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>());
             var result = instrumenter.Instrument();
 
             Assert.Equal(Path.GetFileNameWithoutExtension(module), result.Module);

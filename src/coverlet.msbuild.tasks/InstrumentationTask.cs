@@ -6,23 +6,47 @@ using Microsoft.Build.Utilities;
 namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : Task
-    {        
-        internal static Coverage Coverage { get; private set; }
+    {
+        private static Coverage _coverage;
+        private string _path;
+        private string _exclude;
+        private string _excludeByFile;
+
+        internal static Coverage Coverage
+        {
+            get { return _coverage; }
+        }
 
         [Required]
-        public string Path { get; set; }
+        public string Path
+        {
+            get { return _path; }
+            set { _path = value; }
+        }
         
-        public string Exclude { get; set; }
-                
+        public string Exclude
+        {
+            get { return _exclude; }
+            set { _exclude = value; }
+        }
+
+        public string ExcludeByFile
+        {
+            get { return _excludeByFile; }
+            set { _excludeByFile = value; }
+        }
+
         public override bool Execute()
         {
             try
             {
-                var excludeRules = Exclude?.Split(',');
-                Coverage = new Coverage(Path, Guid.NewGuid().ToString(), excludeRules);
-                Coverage.PrepareModules();
+                var rules = _excludeByFile?.Split(',');
+                var filters = _exclude?.Split(',');
+
+                _coverage = new Coverage(_path, Guid.NewGuid().ToString(), filters, rules);
+                _coverage.PrepareModules();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.LogErrorFromException(ex);
                 return false;
