@@ -110,7 +110,7 @@ Examples
  - `/p:Exclude="[coverlet.*]Coverlet.Core.Coverage"` => Excludes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
  - `/p:Exclude="[*]Coverlet.Core.Instrumentation.*"` => Excludes all types belonging to `Coverlet.Core.Instrumentation` namespace in any assembly
  - `/p:Exclude="[coverlet.*.tests?]*"` => Excludes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
- - `/p:Exclude="[coverlet.*]*,[*]Coverlet..Core*"` => Excludes assemblies matching `coverlet.*` and excludes all types belonging to the `Coverlet.Core` namespace in any assembly
+ - `/p:Exclude="[coverlet.*]*,[*]Coverlet.Core*"` => Excludes assemblies matching `coverlet.*` and excludes all types belonging to the `Coverlet.Core` namespace in any assembly
 
 ```bash
 dotnet test /p:CollectCoverage=true /p:Exclude="[coverlet.*]Coverlet.Core.Coverage"
