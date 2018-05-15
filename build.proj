@@ -8,11 +8,11 @@
 
   <Target Name="BuildAllProjects">
     <RemoveDir Directories="$(OutputPath)" Condition="Exists('$(MSBuildThisFileDirectory)\build')" />
-    <Exec Command="dotnet build $(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration)" />
   </Target>
 
   <Target Name="PublishMSBuildTaskProject" AfterTargets="BuildAllProjects">
-    <Exec Command="dotnet publish $(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj -c $(Configuration) -o $(OutputPath)" />
+    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o &quot;$(OutputPath)&quot;" />
   </Target>
 
   <Target Name="CopyMSBuildScripts" AfterTargets="PublishMSBuildTaskProject">
@@ -24,11 +24,11 @@
   </Target>
 
   <Target Name="RunTests" AfterTargets="CopyMSBuildScripts">
-    <Exec Command="dotnet test $(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover"/>
+    <Exec Command="dotnet test &quot;$(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj&quot; -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover"/>
   </Target>
 
   <Target Name="CreateNuGetPackage" AfterTargets="RunTests" Condition="$(Configuration) == 'Release'">
-    <Exec Command="dotnet pack $(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj -c $(Configuration) -o $(OutputPath) /p:NuspecFile=$(NuspecFile)" />
+    <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o $(OutputPath) /p:NuspecFile=$(NuspecFile)" />
   </Target>
 
 </Project>
