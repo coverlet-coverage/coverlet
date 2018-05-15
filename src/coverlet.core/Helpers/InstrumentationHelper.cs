@@ -81,6 +81,38 @@ namespace Coverlet.Core.Helpers
             RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
         }
 
+        public static bool IsValidFilterExpression(string filter)
+        {
+            if (filter == null)
+                return false;
+
+            if (!filter.StartsWith("["))
+                return false;
+
+            if (!filter.Contains("]"))
+                return false;
+
+            if (filter.Count(f => f == '[') > 1)
+                return false;
+
+            if (filter.Count(f => f == ']') > 1)
+                return false;
+
+            if (filter.IndexOf(']') < filter.IndexOf('['))
+                return false;
+
+            if (filter.IndexOf(']') - filter.IndexOf('[') == 1)
+                return false;
+
+            if (filter.EndsWith("]"))
+                return false;
+
+            if (new Regex(@"[^\w*]").IsMatch(filter.Replace(".", "").Replace("[", "").Replace("]", "")))
+                return false;
+
+            return true;
+        }
+
         public static bool IsModuleExcluded(string module, string[] filters)
         {
             if (filters == null)
@@ -91,9 +123,6 @@ namespace Coverlet.Core.Helpers
 
             foreach (var filter in filters)
             {
-                if (!IsValidFilterExpression(filter))
-                    continue;
-
                 string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
                 string typePattern = filter.Substring(filter.IndexOf(']') + 1);
 
@@ -116,9 +145,6 @@ namespace Coverlet.Core.Helpers
 
             foreach (var filter in filters)
             {
-                if (!IsValidFilterExpression(filter))
-                    continue;
-
                 string typePattern = filter.Substring(filter.IndexOf(']') + 1);
                 string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
 
@@ -189,35 +215,6 @@ namespace Coverlet.Core.Helpers
             }
 
             return retryStrategy;
-        }
-
-        private static bool IsValidFilterExpression(string filter)
-        {
-            if (!filter.StartsWith("["))
-                return false;
-
-            if (!filter.Contains("]"))
-                return false;
-
-            if (filter.Count(f => f == '[') > 1)
-                return false;
-
-            if (filter.Count(f => f == ']') > 1)
-                return false;
-
-            if (filter.IndexOf(']') < filter.IndexOf('['))
-                return false;
-
-            if (filter.IndexOf(']') - filter.IndexOf('[') == 1)
-                return false;
-
-            if (filter.EndsWith("]"))
-                return false;
-
-            if (new Regex(@"[^\w*]").IsMatch(filter.Replace(".", "").Replace("[", "").Replace("]", "")))
-                return false;
-
-            return true;
         }
 
         private static string WildcardToRegex(string pattern)

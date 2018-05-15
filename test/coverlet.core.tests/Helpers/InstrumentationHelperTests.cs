@@ -51,6 +51,21 @@ namespace Coverlet.Core.Helpers.Tests
         }
 
         [Fact]
+        public void TestIsValidFilterExpression()
+        {
+            Assert.True(InstrumentationHelper.IsValidFilterExpression("[*]*"));
+            Assert.True(InstrumentationHelper.IsValidFilterExpression("[*]*core"));
+            Assert.True(InstrumentationHelper.IsValidFilterExpression("[assembly]*"));
+            Assert.True(InstrumentationHelper.IsValidFilterExpression("[*]type"));
+            Assert.True(InstrumentationHelper.IsValidFilterExpression("[assembly]type"));
+            Assert.False(InstrumentationHelper.IsValidFilterExpression("[*]"));
+            Assert.False(InstrumentationHelper.IsValidFilterExpression("[-]*"));
+            Assert.False(InstrumentationHelper.IsValidFilterExpression("*"));
+            Assert.False(InstrumentationHelper.IsValidFilterExpression("]["));
+            Assert.False(InstrumentationHelper.IsValidFilterExpression(null));
+        }
+
+        [Fact]
         public void TestDontCopyCoverletDependency()
         {
             var tempPath = Path.GetTempPath();
