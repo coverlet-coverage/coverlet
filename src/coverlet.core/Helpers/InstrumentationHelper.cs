@@ -118,21 +118,27 @@ namespace Coverlet.Core.Helpers
             if (filters == null)
                 return false;
 
-            bool isMatch = false;
             module = Path.GetFileNameWithoutExtension(module);
+            if (module == null)
+                return false;
 
             foreach (var filter in filters)
             {
                 string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
                 string typePattern = filter.Substring(filter.IndexOf(']') + 1);
 
+                if (typePattern != "*")
+                    continue;
+
                 modulePattern = WildcardToRegex(modulePattern);
 
                 var regex = new Regex(modulePattern);
-                isMatch = regex.IsMatch(module) && typePattern == "*";
+
+                if (regex.IsMatch(module))
+                    return true;
             }
 
-            return isMatch;
+            return false;
         }
 
         public static bool IsTypeExcluded(string module, string type, string[] filters)
@@ -140,8 +146,9 @@ namespace Coverlet.Core.Helpers
             if (filters == null)
                 return false;
 
-            bool isMatch = false;
             module = Path.GetFileNameWithoutExtension(module);
+            if (module == null)
+                return false;
 
             foreach (var filter in filters)
             {
@@ -151,10 +158,11 @@ namespace Coverlet.Core.Helpers
                 typePattern = WildcardToRegex(typePattern);
                 modulePattern = WildcardToRegex(modulePattern);
 
-                isMatch = new Regex(typePattern).IsMatch(type) && new Regex(modulePattern).IsMatch(module);
+                if (new Regex(typePattern).IsMatch(type) && new Regex(modulePattern).IsMatch(module))
+                    return true;
             }
 
-            return isMatch;
+            return false;
         }
 
         public static string[] GetExcludedFiles(string[] rules)
