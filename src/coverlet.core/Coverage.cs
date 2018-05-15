@@ -30,6 +30,7 @@ namespace Coverlet.Core
         {
             string[] modules = InstrumentationHelper.GetCoverableModules(_module);
             string[] excludedFiles =  InstrumentationHelper.GetExcludedFiles(_rules);
+            _filters = _filters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
             foreach (var module in modules)
             {
