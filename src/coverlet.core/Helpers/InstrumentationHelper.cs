@@ -107,7 +107,7 @@ namespace Coverlet.Core.Helpers
             if (filter.EndsWith("]"))
                 return false;
 
-            if (new Regex(@"[^\w*]").IsMatch(filter.Replace(".", "").Replace("[", "").Replace("]", "")))
+            if (new Regex(@"[^\w*]").IsMatch(filter.Replace(".", "").Replace("?", "").Replace("[", "").Replace("]", "")))
                 return false;
 
             return true;
@@ -229,7 +229,7 @@ namespace Coverlet.Core.Helpers
         {
             return "^" + Regex.Escape(pattern).
             Replace("\\*", ".*").
-            Replace("\\?", ".") + "$";
+            Replace("\\?", "?") + "$";
         }
 
         private static bool IsAssembly(string filePath)
