@@ -141,6 +141,106 @@ namespace Coverlet.Core.Helpers.Tests
 
             Assert.Equal(paths.Length, excludedFiles.Count());
         }
+
+        [Fact]
+        public void TestIsModuleExcludedWithoutFilter()
+        {
+            var result = InstrumentationHelper.IsModuleExcluded("Module.dll", new string[0]);
+
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData("[Module]mismatch")]
+        [InlineData("[Mismatch]*")]
+        public void TestIsModuleExcludedWithSingleMismatchFilter(string filter)
+        {
+            var result = InstrumentationHelper.IsModuleExcluded("Module.dll", new[] { filter });
+
+            Assert.False(result);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidModuleFilterData))]
+        public void TestIsModuleExcludedWithFilter(string filter)
+        {
+            var result = InstrumentationHelper.IsModuleExcluded("Module.dll", new[] { filter });
+
+            Assert.True(result);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidModuleFilterData))]
+        public void TestIsModuleExcludedWithMatchingAndMismatchingFilter(string filter)
+        {
+            var filters = new[] { "[Mismatch]*", filter, "[Mismatch]*" };
+
+            var result = InstrumentationHelper.IsModuleExcluded("Module.dll", filters);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void TestIsTypeExcludedWithoutFilter()
+        {
+            var result = InstrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new string[0]);
+
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData("[Module]mismatch")]
+        [InlineData("[Mismatch]*")]
+        [InlineData("[Mismatch]a.b.Dto")]
+        public void TestIsTypeExcludedWithSingleMismatchFilter(string filter)
+        {
+            var result = InstrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new[] { filter });
+
+            Assert.False(result);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidModuleAndNamespaceFilterData))]
+        public void TestIsTypeExcludedWithFilter(string filter)
+        {
+            var result = InstrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new[] { filter });
+
+            Assert.True(result);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidModuleAndNamespaceFilterData))]
+        public void TestIsTypeExcludedWithMatchingAndMismatchingFilter(string filter)
+        {
+            var filters = new[] { "[Mismatch]*", filter, "[Mismatch]*" };
+
+            var result = InstrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", filters);
+
+            Assert.True(result);
+        }
+
+        public static IEnumerable<object[]> ValidModuleFilterData =>
+            new List<object[]>
+                {
+                    new object[] { "[Module]*" },
+                    new object[] { "[Module*]*" },
+                    new object[] { "[Mod*ule]*" },
+                    new object[] { "[M*e]*" },
+                    new object[] { "[Mod*le*]*" },
+                    new object[] { "[Module?]*" },
+                    new object[] { "[ModuleX?]*" },
+                };
+
+        public static IEnumerable<object[]> ValidModuleAndNamespaceFilterData =>
+            new List<object[]>
+                    {
+                        new object[] { "[Module]a.b.Dto" },
+                        new object[] { "[Module]a.b.Dtos?" },
+                        new object[] { "[Module]a.*" },
+                        new object[] { "[Module]a*" },
+                        new object[] { "[Module]*b.*" },
+                    }
+                .Concat(ValidModuleFilterData);
     }
 }
 
