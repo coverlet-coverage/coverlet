@@ -15,7 +15,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _filename;
         private string _format;
         private int _threshold;
-        private string _thresholdTypes;
+        private string _thresholdType;
 
         [Required]
         public string Output
@@ -41,8 +41,8 @@ namespace Coverlet.MSbuild.Tasks
         [Required]
         public string ThresholdType
         {
-            get { return _thresholdTypes; }
-            set { _thresholdTypes = value; }
+            get { return _thresholdType; }
+            set { _thresholdType = value; }
         }
 
         public override bool Execute()
@@ -71,10 +71,11 @@ namespace Coverlet.MSbuild.Tasks
                     File.WriteAllText(report, reporter.Report(result));
                 }
 
-                var branchTotal = 0d;
-                var methodTotal = 0d;
-                var lineTotal = 0d;
+                var thresholdFailed = false;
+                var thresholdTypes = _thresholdType.Split(',').Select(t => t.Trim());
+
                 var summary = new CoverageSummary();
+                var exceptionBuilder = new StringBuilder();
                 var table = new ConsoleTable("Module", "Line", "Branch", "Method");
 
                 foreach (var module in result.Modules)
@@ -84,53 +85,32 @@ namespace Coverlet.MSbuild.Tasks
                     var methodPercent = summary.CalculateMethodCoverage(module.Value).Percent * 100;
                     table.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
 
-                    lineTotal += linePercent;
-                    branchTotal += branchPercent;
-                    methodTotal += methodPercent;
+                    if (_threshold > 0)
+                    {
+                        if (linePercent < _threshold && thresholdTypes.Contains("line"))
+                        {
+                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a line coverage '{linePercent}%' below specified threshold '{_threshold}%'");
+                            thresholdFailed = true;
+                        }
+
+                        if (branchPercent < _threshold && thresholdTypes.Contains("branch"))
+                        {
+                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a branch coverage '{branchPercent}%' below specified threshold '{_threshold}%'");
+                            thresholdFailed = true;
+                        }
+
+                        if (methodPercent < _threshold && thresholdTypes.Contains("method"))
+                        {
+                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a method coverage '{methodPercent}%' below specified threshold '{_threshold}%'");
+                            thresholdFailed = true;
+                        }
+                    }
                 }
 
                 Console.WriteLine();
                 Console.WriteLine(table.ToStringAlternative());
-
-                if (_threshold > 0)
-                {
-                    var thresholdFailed = false;
-                    var exceptionBuilder = new StringBuilder();
-                    var lineAverage = lineTotal / result.Modules.Count;
-                    var branchAverage = branchTotal / result.Modules.Count;
-                    var methodAverage = methodTotal / result.Modules.Count;
-                    var thresholdTypes = _thresholdTypes.Split(',').Select(t => t.ToLower());
-                    foreach (var thresholdType in thresholdTypes)
-                    {
-                        if (thresholdType == "line" && lineAverage < _threshold)
-                        {
-                            thresholdFailed = true;
-                            exceptionBuilder.AppendLine($"Overall average '{thresholdType}' coverage '{lineAverage}%' is lower than specified threshold '{_threshold}%'");
-                        }
-
-                        else if (thresholdType == "branch" && branchAverage < _threshold)
-                        {
-                            thresholdFailed = true;
-                            exceptionBuilder.AppendLine($"Overall average '{thresholdType}' coverage '{branchAverage}%' is lower than specified threshold '{_threshold}%'");
-                        }
-
-                        else if (thresholdType == "method" && methodAverage < _threshold)
-                        {
-                            thresholdFailed = true;
-                            exceptionBuilder.AppendLine($"Overall average '{thresholdType}' coverage '{methodAverage}%' is lower than specified threshold '{_threshold}%'");
-                        }
-
-                        else if (thresholdType != "line" && thresholdType != "branch" && thresholdType != "method")
-                        {
-                            Console.WriteLine($"Threshold type of {thresholdType} is not recognized/supported and will be ignored.");
-                        }
-                    }
-
-                    if (thresholdFailed)
-                    {
-                        throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
-                    }
-                }
+                if (thresholdFailed)
+                    throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
             }
             catch (Exception ex)
             {

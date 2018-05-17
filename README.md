@@ -74,11 +74,17 @@ Coverlet allows you to specify a coverage threshold below which it fails the bui
 dotnet test /p:CollectCoverage=true /p:Threshold=80
 ```
 
-The above command will automatically fail the build if the average code coverage of all instrumented modules falls below 80%.
+The above command will automatically fail the build if the line, branch or method coverage of _any_ of the instrumented modules falls below 80%. You can specify what type of coverage to apply the threshold value to using the `ThresholdType` property. For example to apply the threshold check to only **line** coverage:
+
+```bash
+dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
+```
+
+You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`.
 
 ### Excluding From Coverage
 
-#### Attributes  
+#### Attributes
 You can ignore a method or an entire class from code coverage by creating and applying any of the following attributes:
 
 * ExcludeFromCoverage
@@ -86,7 +92,7 @@ You can ignore a method or an entire class from code coverage by creating and ap
 
 Coverlet just uses the type name, so the attributes can be created under any namespace of your choosing.
 
-#### Source Files  
+#### Source Files
 You can also ignore specific source files from code coverage using the `ExcludeByFile` property
  - Use single or multiple paths (separate by comma)
  - Use absolute or relative paths (relative to the project directory)
