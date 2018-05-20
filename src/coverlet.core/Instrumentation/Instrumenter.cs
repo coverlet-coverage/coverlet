@@ -74,8 +74,12 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentType(TypeDefinition type)
         {
-            if (type.CustomAttributes.Any(IsExcludeAttribute)
-                || InstrumentationHelper.IsTypeExcluded(_module, type.FullName, _filters))
+            TypeDefinition actualType = type;
+            if (type.FullName.Contains("/"))
+                actualType = type.Module.GetTypes().FirstOrDefault(t => t.FullName == type.FullName.Split('/')[0]);
+
+            if (actualType.CustomAttributes.Any(IsExcludeAttribute)
+                || InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _filters))
                 return;
 
             foreach (var method in type.Methods)
@@ -116,7 +120,7 @@ namespace Coverlet.Core.Instrumentation
                 var instruction = processor.Body.Instructions[index];
                 var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
                 var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
-                
+
                 if (sequencePoint != null && !sequencePoint.IsHidden)
                 {
                     var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);
@@ -139,7 +143,7 @@ namespace Coverlet.Core.Instrumentation
                         */
                     if (_branchTarget.StartLine == -1 || _branchTarget.Document == null)
                         continue;
-                    
+
                     var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
                     foreach (var _instruction in processor.Body.Instructions)
                         ReplaceInstructionTarget(_instruction, instruction, target);
