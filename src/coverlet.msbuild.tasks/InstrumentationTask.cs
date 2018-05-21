@@ -1,4 +1,5 @@
 ﻿using System;
+using coverlet.core.Logging;
 using Coverlet.Core;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -23,7 +24,7 @@ namespace Coverlet.MSbuild.Tasks
             get { return _path; }
             set { _path = value; }
         }
-        
+
         public string Exclude
         {
             get { return _exclude; }
@@ -36,12 +37,17 @@ namespace Coverlet.MSbuild.Tasks
             set { _excludeByFile = value; }
         }
 
+        public bool Verbose { get; set; }
+
         public override bool Execute()
         {
             try
             {
                 var rules = _excludeByFile?.Split(',');
                 var filters = _exclude?.Split(',');
+
+                if (Verbose)
+                    EnableLogging.Execute();
 
                 _coverage = new Coverage(_path, Guid.NewGuid().ToString(), filters, rules);
                 _coverage.PrepareModules();

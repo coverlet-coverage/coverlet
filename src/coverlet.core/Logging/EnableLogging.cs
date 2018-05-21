@@ -8,6 +8,7 @@ namespace coverlet.core.Logging
     {
         public static void Execute()
         {
+            LoggerFactory.GetLogger().Log("Logging enabled.");
             InstrumenterFactory.RegisterDecorator(instrumenter => new InstrumenterLoggerDecorator(instrumenter, LoggerFactory.GetLogger()));
         }
     }
