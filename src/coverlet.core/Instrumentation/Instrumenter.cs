@@ -14,7 +14,14 @@ using Mono.Cecil.Rocks;
 
 namespace Coverlet.Core.Instrumentation
 {
-    internal class Instrumenter
+    internal interface IInstrumenter
+    {
+        bool CanInstrument();
+
+        InstrumenterResult Instrument();
+    }
+
+    internal class Instrumenter  : IInstrumenter
     {
         private readonly string _module;
         private readonly string _identifier;
