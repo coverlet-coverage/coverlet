@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,37 +13,6 @@ using Mono.Cecil.Rocks;
 
 namespace Coverlet.Core.Instrumentation
 {
-    internal interface IInstrumenter
-    {
-        bool CanInstrument();
-
-        InstrumenterResult Instrument();
-    }
-
-    internal static class InstrumenterFactory
-    {
-        private static readonly List<Func<IInstrumenter, IInstrumenter>>  DecoratorFunctions = new List<Func<IInstrumenter, IInstrumenter>>();
-
-        public static IInstrumenter Create(string module, string identifier, string[] filters, string[] excludedFiles)
-        {
-            IInstrumenter result = new Instrumenter(module, identifier, filters, excludedFiles);
-
-            // Decorate the real Instrumenter instance
-            foreach (var decoratorFunc in DecoratorFunctions)
-                result = decoratorFunc.Invoke(result);
-
-            return result;
-        }
-
-        public static void RegisterDecorator(Func<IInstrumenter, IInstrumenter> decoratingFunc)
-        {
-            if (decoratingFunc == null)
-                throw new ArgumentNullException(nameof(decoratingFunc));
-
-            DecoratorFunctions.Add(decoratingFunc);
-        }
-    }
-
     internal class Instrumenter  : IInstrumenter
     {
         private readonly string _module;
@@ -147,7 +115,7 @@ namespace Coverlet.Core.Instrumentation
                 var instruction = processor.Body.Instructions[index];
                 var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
                 var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
-                
+
                 if (sequencePoint != null && !sequencePoint.IsHidden)
                 {
                     var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);
@@ -170,7 +138,7 @@ namespace Coverlet.Core.Instrumentation
                         */
                     if (_branchTarget.StartLine == -1 || _branchTarget.Document == null)
                         continue;
-                    
+
                     var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
                     foreach (var _instruction in processor.Body.Instructions)
                         ReplaceInstructionTarget(_instruction, instruction, target);
