@@ -7,6 +7,7 @@ using Coverlet.Core;
 using Coverlet.Core.Reporters;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Palmmedia.ReportGenerator.Core;
 
 namespace Coverlet.MSbuild.Tasks
 {
@@ -14,6 +15,7 @@ namespace Coverlet.MSbuild.Tasks
     {
         private string _filename;
         private string _format;
+        private string _reportTypes;
         private int _threshold;
         private string _thresholdType;
 
@@ -29,6 +31,12 @@ namespace Coverlet.MSbuild.Tasks
         {
             get { return _format; }
             set { _format = value; }
+        }
+
+        public string ReportTypes
+        {
+            get { return _reportTypes; }
+            set { _reportTypes = value; }
         }
 
         [Required]
@@ -69,6 +77,40 @@ namespace Coverlet.MSbuild.Tasks
                     var report = _filename + "." + reporter.Extension;
                     Console.WriteLine($"  Generating report '{report}'");
                     File.WriteAllText(report, reporter.Report(result));
+                }
+
+                // Use Report Generator to generate HTML reports
+                if (!string.IsNullOrWhiteSpace(_reportTypes))
+                {
+                    var reportFile = $"{_filename}.xml";
+
+                    // Check to see if we need to create a report in the correct format for ReportGenerator
+                    var createNewReport = !formats.Contains("opencover") && !formats.Contains("cobertura");
+                    if (createNewReport)
+                    {
+                        IReporter tmpReporter = new ReporterFactory("opencover").CreateReporter();
+                        reportFile = Path.Combine(Path.GetTempPath(), $"reportGenerator.{tmpReporter.Extension}");
+                        File.WriteAllText(reportFile, tmpReporter.Report(result));
+                    }
+
+                    var reportTypes = _reportTypes.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    new Generator().GenerateReport(new ReportConfiguration(
+                        reportFilePatterns: new string[] { reportFile },
+                        targetDirectory: Path.Combine(Path.GetDirectoryName(_filename), "report"),
+                        historyDirectory: null,
+                        reportTypes: reportTypes,
+                        assemblyFilters: new string[] { },
+                        classFilters: new string[] { },
+                        fileFilters: new string[] { },
+                        verbosityLevel: null,
+                        tag: null
+                    ));
+
+                    // If we created a new report, delete it.
+                    if (createNewReport)
+                    {
+                        File.Delete(reportFile);
+                    }
                 }
 
                 var thresholdFailed = false;

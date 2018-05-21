@@ -24,7 +24,7 @@
   </Target>
 
   <Target Name="RunTests" AfterTargets="CopyMSBuildScripts">
-    <Exec Command="dotnet test &quot;$(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj&quot; -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover"/>
+    <Exec Command="dotnet test &quot;$(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj&quot; -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ReportTypes=HTML"/>
   </Target>
 
   <Target Name="CreateNuGetPackage" AfterTargets="RunTests" Condition="$(Configuration) == 'Release'">

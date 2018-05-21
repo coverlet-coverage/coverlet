@@ -24,6 +24,7 @@
       Condition="$(CollectCoverage) == 'true'"
       Output="$(CoverletOutput)"
       OutputFormat="$(CoverletOutputFormat)"
+      ReportTypes="$(ReportTypes)"
       Threshold="$(Threshold)"
       ThresholdType="$(ThresholdType)" />
   </Target>

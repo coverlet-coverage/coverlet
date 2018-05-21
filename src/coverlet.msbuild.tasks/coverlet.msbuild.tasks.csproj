@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="ConsoleTables" Version="2.1.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" />
+    <PackageReference Include="ReportGenerator.Core" Version="4.0.0-alpha6" />
   </ItemGroup>
 
   <ItemGroup>

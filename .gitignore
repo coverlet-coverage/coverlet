@@ -119,6 +119,7 @@ _TeamCity*
 *.coverage
 *.coveragexml
 lcov.info
+test/coverlet.core.tests/report/
 
 # NCrunch
 _NCrunch_*

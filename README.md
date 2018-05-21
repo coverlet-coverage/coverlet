@@ -66,6 +66,16 @@ Supported Formats:
 
 The output folder of the coverage result file can also be specified using the `CoverletOutputDirectory` property.
 
+### Generating Coverage Reports
+
+On top of supporting multiple coverage output formats, static reports can be generated in any of the output formats supported by [ReportGenerator](https://github.com/danielpalme/ReportGenerator/wiki/Output-formats).
+
+```bash
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ReportTypes=HTML
+```
+
+The output folder of these reports will be a `report` subdirectory inside the output directory specified by the `CoverletOutputDirectory` property.
+
 ### Threshold
 
 Coverlet allows you to specify a coverage threshold below which it fails the build. This allows you to enforce a minimum coverage percent on all changes to your project.
