@@ -10,11 +10,12 @@ namespace Coverlet.Core.Logging
 
         public static ILogger Instance { get; } = new ConsoleLogger();
 
-        public void Log(string s)
+        public void Log(string text)
         {
-            if (s == null)
+            if (text == null)
                 return;
-            Console.WriteLine(s);
+
+            Console.WriteLine(text);
         }
     }
 }
