@@ -21,6 +21,17 @@ namespace Coverlet.Core.Instrumentation
         InstrumenterResult Instrument();
     }
 
+    internal static class InstrumenterFactory
+    {
+
+        public static IInstrumenter Create(string module, string identifier, string[] filters, string[] excludedFiles)
+        {
+            IInstrumenter result = new Instrumenter(module, identifier, filters, excludedFiles);
+
+            return result;
+        }
+    }
+
     internal class Instrumenter  : IInstrumenter
     {
         private readonly string _module;

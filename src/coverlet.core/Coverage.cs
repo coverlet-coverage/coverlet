@@ -37,7 +37,7 @@ namespace Coverlet.Core
                 if (InstrumentationHelper.IsModuleExcluded(module, _filters))
                     continue;
 
-                var instrumenter = new Instrumenter(module, _identifier, _filters, excludedFiles);
+                var instrumenter = InstrumenterFactory.Create(module, _identifier, _filters, excludedFiles);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);
