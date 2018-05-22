@@ -18,6 +18,7 @@ namespace Coverlet.Core
             _markers = new Dictionary<string, List<string>>();
             _markerFileCount = new Dictionary<string, int>();
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
+            AppDomain.CurrentDomain.DomainUnload += new EventHandler(CurrentDomain_ProcessExit);
         }
 
         [ExcludeFromCoverage]
@@ -48,17 +49,22 @@ namespace Coverlet.Core
         [ExcludeFromCoverage]
         public static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
-            foreach (var kvp in _markers)
+            lock (_markers)
             {
-                using (var fs = new FileStream($"{kvp.Key}_compressed_{_markerFileCount[kvp.Key]}", FileMode.OpenOrCreate))
-                using (var gz = new GZipStream(fs, CompressionMode.Compress))
-                using (var sw = new StreamWriter(gz))
+                foreach (var kvp in _markers)
                 {
-                    foreach(var line in kvp.Value)
+                    using (var fs = new FileStream($"{kvp.Key}_compressed_{_markerFileCount[kvp.Key]}", FileMode.OpenOrCreate))
+                    using (var gz = new GZipStream(fs, CompressionMode.Compress))
+                    using (var sw = new StreamWriter(gz))
                     {
-                        sw.WriteLine(line);
+                        foreach(var line in kvp.Value)
+                        {
+                            sw.WriteLine(line);
+                        }
                     }
                 }
+
+                _markers.Clear();
             }
         }
     }
