@@ -73,7 +73,6 @@ namespace Coverlet.MSbuild.Tasks
 
                 var thresholdFailed = false;
                 var thresholdTypes = _thresholdType.Split(',').Select(t => t.Trim());
-
                 var summary = new CoverageSummary();
                 var exceptionBuilder = new StringBuilder();
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
