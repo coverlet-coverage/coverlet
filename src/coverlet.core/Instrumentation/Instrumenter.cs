@@ -60,11 +60,19 @@ namespace Coverlet.Core.Instrumentation
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
+
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
-                    foreach (var type in module.GetTypes())
+                    var types = module.GetTypes();
+                    foreach (var type in types)
                     {
-                        InstrumentType(type);
+                        TypeDefinition actualType = type;
+                        if (type.FullName.Contains("/"))
+                            actualType = types.FirstOrDefault(t => t.FullName == type.FullName.Split('/')[0]);
+
+                        if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
+                            && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _filters))
+                            InstrumentType(type);
                     }
 
                     module.Write(stream);
@@ -74,13 +82,14 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentType(TypeDefinition type)
         {
-            if (type.CustomAttributes.Any(IsExcludeAttribute)
-                || InstrumentationHelper.IsTypeExcluded(_module, type.FullName, _filters))
-                return;
-
-            foreach (var method in type.Methods)
+            var methods = type.GetMethods();
+            foreach (var method in methods)
             {
-                if (!method.CustomAttributes.Any(IsExcludeAttribute))
+                MethodDefinition actualMethod = method;
+                if (InstrumentationHelper.IsLocalMethod(method.Name))
+                    actualMethod = methods.FirstOrDefault(m => m.Name == method.Name.Split('>')[0].Substring(1)) ?? method;
+
+                if (!actualMethod.CustomAttributes.Any(IsExcludeAttribute))
                     InstrumentMethod(method);
             }
         }
@@ -116,7 +125,7 @@ namespace Coverlet.Core.Instrumentation
                 var instruction = processor.Body.Instructions[index];
                 var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
                 var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
-                
+
                 if (sequencePoint != null && !sequencePoint.IsHidden)
                 {
                     var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);
@@ -139,7 +148,7 @@ namespace Coverlet.Core.Instrumentation
                         */
                     if (_branchTarget.StartLine == -1 || _branchTarget.Document == null)
                         continue;
-                    
+
                     var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
                     foreach (var _instruction in processor.Body.Instructions)
                         ReplaceInstructionTarget(_instruction, instruction, target);

@@ -165,6 +165,9 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
+        public static bool IsLocalMethod(string method)
+            => new Regex(WildcardToRegex("<*>*__*|*")).IsMatch(method);
+
         public static string[] GetExcludedFiles(string[] rules)
         {
             const string RELATIVE_KEY = nameof(RELATIVE_KEY);
