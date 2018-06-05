@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -269,7 +270,16 @@ namespace Coverlet.Core.Instrumentation
 
         private static bool IsExcludeAttribute(CustomAttribute customAttribute)
         {
-            return customAttribute.AttributeType.Name == nameof(ExcludeFromCoverageAttribute) || customAttribute.AttributeType.Name == "ExcludeFromCoverage";
+            var excludeAttributeNames = new[]
+            {
+                nameof(ExcludeFromCoverageAttribute),
+                "ExcludeFromCoverage",
+                nameof(ExcludeFromCodeCoverageAttribute),
+                "ExcludeFromCodeCoverage"
+            };
+
+            var attributeName = customAttribute.AttributeType.Name;
+            return excludeAttributeNames.Any(a => a.Equals(attributeName));
         }
 
         private static Mono.Cecil.Cil.MethodBody GetMethodBody(MethodDefinition method)

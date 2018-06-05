@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Coverlet.Core.Attributes;
 
 namespace Coverlet.Core.Samples.Tests
 {
@@ -161,4 +163,32 @@ namespace Coverlet.Core.Samples.Tests
             yield return "two";
         } 
     }
+
+    [ExcludeFromCoverage]
+    public class ClassExcludedByCoverletCodeCoverageAttr
+    {
+
+        public string Method(string input)
+        {
+            if(string.IsNullOrEmpty(input))
+                throw new ArgumentException("Cannot be empty", nameof(input));
+
+            return input;
+        }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class ClassExcludedByCodeAnalysisCodeCoverageAttr
+    {
+
+        public string Method(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                throw new ArgumentException("Cannot be empty", nameof(input));
+
+            return input;
+        }
+    }
+
+
 }

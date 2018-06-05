@@ -89,6 +89,8 @@ You can ignore a method or an entire class from code coverage by creating and ap
 
 * ExcludeFromCoverage
 * ExcludeFromCoverageAttribute
+* ExcludeFromCodeCoverage
+* ExcludeFromCodeCoverageAttribute
 
 Coverlet just uses the type name, so the attributes can be created under any namespace of your choosing.
 
