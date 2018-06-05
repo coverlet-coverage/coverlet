@@ -24,6 +24,14 @@ namespace Coverlet.Core.Instrumentation
         private readonly static Lazy<MethodInfo> _markExecutedMethodLoader = new Lazy<MethodInfo>(GetMarkExecutedMethod);
         private InstrumenterResult _result;
 
+        private static readonly string[] _excludeAttributeNames = new[]
+        {
+            nameof(ExcludeFromCoverageAttribute),
+            "ExcludeFromCoverage",
+            nameof(ExcludeFromCodeCoverageAttribute),
+            "ExcludeFromCodeCoverage"
+        };
+
         public Instrumenter(string module, string identifier, string[] filters, string[] excludedFiles)
         {
             _module = module;
@@ -271,9 +279,7 @@ namespace Coverlet.Core.Instrumentation
         private static bool IsExcludeAttribute(CustomAttribute customAttribute)
         {
             var attributeName = customAttribute.AttributeType.Name;
-
-            return attributeName == nameof(ExcludeFromCoverageAttribute) || attributeName == "ExcludeFromCoverage"
-                || attributeName == nameof(ExcludeFromCodeCoverageAttribute) || attributeName == "ExcludeFromCodeCoverage";
+            return _excludeAttributeNames.Any(a => a.Equals(attributeName));
         }
 
         private static Mono.Cecil.Cil.MethodBody GetMethodBody(MethodDefinition method)
