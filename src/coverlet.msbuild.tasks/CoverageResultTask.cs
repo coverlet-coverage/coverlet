@@ -73,17 +73,25 @@ namespace Coverlet.MSbuild.Tasks
 
                 var thresholdFailed = false;
                 var thresholdTypes = _thresholdType.Split(',').Select(t => t.Trim());
-
                 var summary = new CoverageSummary();
                 var exceptionBuilder = new StringBuilder();
-                var table = new ConsoleTable("Module", "Line", "Branch", "Method");
+                var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
+                var averageTable = new ConsoleTable("", "Line", "Branch", "Method");
+                var lineAverage = 0d;
+                var branchAverage = 0d;
+                var methodAverage = 0d;
 
                 foreach (var module in result.Modules)
                 {
                     var linePercent = summary.CalculateLineCoverage(module.Value).Percent * 100;
                     var branchPercent = summary.CalculateBranchCoverage(module.Value).Percent * 100;
                     var methodPercent = summary.CalculateMethodCoverage(module.Value).Percent * 100;
-                    table.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
+
+                    lineAverage += linePercent;
+                    branchAverage += branchPercent;
+                    methodAverage += methodPercent;
+
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
 
                     if (_threshold > 0)
                     {
@@ -107,8 +115,15 @@ namespace Coverlet.MSbuild.Tasks
                     }
                 }
 
+                lineAverage = lineAverage / result.Modules.Count;
+                branchAverage = branchAverage / result.Modules.Count;
+                methodAverage = methodAverage / result.Modules.Count;
+                averageTable.AddRow("Average", $"{lineAverage}%", $"{branchAverage}%", $"{methodAverage}%");
+
                 Console.WriteLine();
-                Console.WriteLine(table.ToStringAlternative());
+                Console.WriteLine(coverageTable.ToStringAlternative());
+                Console.WriteLine(averageTable.ToStringAlternative());
+
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
             }
