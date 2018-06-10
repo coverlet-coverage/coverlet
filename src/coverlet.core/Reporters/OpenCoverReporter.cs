@@ -11,7 +11,7 @@ namespace Coverlet.Core.Reporters
     {
         public string Format => "opencover";
 
-        public string Extension => "xml";
+        public string Extension => "opencover.xml";
 
         public string Report(CoverageResult result)
         {

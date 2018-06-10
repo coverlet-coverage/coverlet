@@ -12,7 +12,7 @@ namespace Coverlet.Core.Reporters
     {
         public string Format => "cobertura";
 
-        public string Extension => "xml";
+        public string Extension => "cobertura.xml";
 
         public string Report(CoverageResult result)
         {
