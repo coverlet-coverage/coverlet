@@ -85,14 +85,8 @@ You can specify multiple values for `ThresholdType` by separating them with comm
 ### Excluding From Coverage
 
 #### Attributes
-You can ignore a method or an entire class from code coverage by creating and applying any of the following attributes:
 
-* ExcludeFromCoverage
-* ExcludeFromCoverageAttribute
-* ExcludeFromCodeCoverage
-* ExcludeFromCodeCoverageAttribute
-
-Coverlet just uses the type name, so the attributes can be created under any namespace of your choosing.
+You can ignore a method or an entire class from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
 
 #### Source Files
 You can also ignore specific source files from code coverage using the `ExcludeByFile` property
