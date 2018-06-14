@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using coverlet.core.Extensions;
 using ConsoleTables;
 using Coverlet.Core;
 using Coverlet.Core.Reporters;
@@ -13,9 +14,16 @@ namespace Coverlet.MSbuild.Tasks
     public class CoverageResultTask : Task
     {
         private string _filename;
+        private string _intermediateResult;
         private string _format;
         private int _threshold;
         private string _thresholdType;
+
+        public string IntermediateResult
+        {
+            get { return _intermediateResult; }
+            set { _intermediateResult = value; }
+        }
 
         [Required]
         public string Output
@@ -59,6 +67,36 @@ namespace Coverlet.MSbuild.Tasks
                     Directory.CreateDirectory(directory);
                 }
 
+                if (!string.IsNullOrEmpty(_intermediateResult))
+                {
+                    Console.WriteLine("\nMerging with intermediate result...");
+                    var reporter = new ReporterFactory("json").CreateReporter();
+
+                    if (File.Exists(_intermediateResult))
+                    {
+                        try
+                        {
+                            result.Merge(reporter.Read(File.ReadAllText(_intermediateResult)));
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine("  Unable to read intermediate results, ignoring");
+                        }
+                    }
+
+                    try
+                    {
+                        File.WriteAllText(_intermediateResult, reporter.Report(result));
+                    }
+                    catch (IOException e)
+                    {
+                        throw new Exception("Unable to write intermediate results", e);
+                    }
+
+                    Console.WriteLine($"  Intermediate result written to '{_intermediateResult}'");
+                }
+
+                Console.WriteLine($"\nWriting report(s)...");
                 var formats = _format.Split(',');
                 foreach (var format in formats)
                 {

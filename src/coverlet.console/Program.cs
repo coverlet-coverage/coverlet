@@ -18,6 +18,7 @@ namespace coverlet.console
 
             CommandArgument project = app.Argument("<PROJECT>", "The project to test. Defaults to the current directory.");
             CommandOption config = app.Option("-c|--configuration", "Configuration to use for building the project.", CommandOptionType.SingleValue);
+            CommandOption intermediateResult = app.Option("-i|--coverage-intermediate-result", "The output path of intermediate result (for merging multiple runs).", CommandOptionType.SingleValue);
             CommandOption output = app.Option("-o|--coverage-output", "The output path of the generated coverage report", CommandOptionType.SingleValue);
             CommandOption format = app.Option("-f|--coverage-format", "The format of the coverage report", CommandOptionType.SingleValue);
 
@@ -34,6 +35,9 @@ namespace coverlet.console
                     dotnetTestArgs.Add($"-c {config.Value()}");
 
                 dotnetTestArgs.Add("/p:CollectCoverage=true");
+
+                if (intermediateResult.HasValue())
+                    dotnetTestArgs.Add($"/p:CoverletIntermediateResult={intermediateResult.Value()}");
 
                 if (output.HasValue())
                     dotnetTestArgs.Add($"/p:CoverletOutput={output.Value()}");

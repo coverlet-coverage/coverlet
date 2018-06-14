@@ -233,5 +233,10 @@ namespace Coverlet.Core.Reporters
 
             return Encoding.UTF8.GetString(stream.ToArray());
         }
+
+        public CoverageResult Read(string data)
+        {
+            throw new NotSupportedException("Not supported by this reporter.");
+        }
     }
 }

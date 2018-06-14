@@ -126,7 +126,8 @@ namespace Coverlet.Core
                     }
                 }
 
-                modules.Add(result.ModulePath, documents);
+                // TODO: Module path is not generic across multiple projects referencing the same assemblies.
+                modules.Add(Path.GetFileName(result.ModulePath), documents);
                 InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 

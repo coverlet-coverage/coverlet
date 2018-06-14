@@ -60,5 +60,10 @@ namespace Coverlet.Core.Reporters
 
             return string.Join(Environment.NewLine, lcov);
         }
+
+        public CoverageResult Read(string data)
+        {
+            throw new NotSupportedException("Not supported by this reporter.");
+        }
     }
 }
