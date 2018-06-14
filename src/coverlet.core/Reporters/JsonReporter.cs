@@ -1,5 +1,4 @@
-using System.IO;
-using Jil;
+using Newtonsoft.Json;
 
 namespace Coverlet.Core.Reporters
 {
@@ -11,11 +10,7 @@ namespace Coverlet.Core.Reporters
 
         public string Report(CoverageResult result)
         {
-            using (var writer = new StringWriter())
-            {
-                JSON.Serialize(result.Modules, writer, Options.PrettyPrint);
-                return writer.ToString();
-            }
+            return JsonConvert.SerializeObject(result.Modules, Formatting.Indented);
         }
     }
 }

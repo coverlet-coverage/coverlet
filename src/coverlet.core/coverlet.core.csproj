@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jil" Version="2.15.4" />
     <PackageReference Include="Mono.Cecil" Version="0.10.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
   </ItemGroup>

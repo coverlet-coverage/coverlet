@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -5,21 +6,13 @@ using Jil;
 
 namespace Coverlet.Core
 {
-    public class LineInfo
+    public class HitInfo
     {
         public int Hits { get; set; }
     }
 
-    public class BranchInfo : LineInfo
-    {
-        public int Offset { get; set; }
-        public int EndOffset { get; set; }
-        public int Path { get; set; }
-        public uint Ordinal { get; set; }
-    }
-
-    public class Lines : SortedDictionary<int, LineInfo> { }
-    public class Branches : SortedDictionary<int, List<BranchInfo>> { }
+    public class Lines : SortedDictionary<int, HitInfo> { }
+    public class Branches : SortedDictionary<(int Number, int Offset, int EndOffset, int Path, uint Ordinal), HitInfo> { }
     public class Method
     {
         internal Method()

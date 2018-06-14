@@ -12,13 +12,11 @@ namespace Coverlet.Core.Reporters.Tests
             CoverageResult result = new CoverageResult();
             result.Identifier = Guid.NewGuid().ToString();
             Lines lines = new Lines();
-            lines.Add(1, new LineInfo { Hits = 1 });
-            lines.Add(2, new LineInfo { Hits = 0 });
+            lines.Add(1, new HitInfo { Hits = 1 });
+            lines.Add(2, new HitInfo { Hits = 0 });
             Branches branches = new Branches();
-            branches.Add(1, new List<BranchInfo> {
-                new BranchInfo{ Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 },
-                new BranchInfo{ Hits = 0, Offset = 23, EndOffset = 27, Path = 1, Ordinal = 2 }
-            });
+            branches[(Number: 1, Offset: 23, EndOffset: 24, Path: 0, Ordinal: 1)] = new HitInfo { Hits = 1 };
+            branches[(Number: 1, Offset: 23, EndOffset: 27, Path: 0, Ordinal: 2)] = new HitInfo { Hits = 0 };
             Methods methods = new Methods();
             var methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestReport()";
             methods.Add(methodString, new Method());

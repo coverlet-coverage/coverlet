@@ -38,10 +38,9 @@ namespace Coverlet.Core.Reporters
                             foreach (var line in method.Value.Lines)
                                 lcov.Add($"DA:{line.Key},{line.Value.Hits}");
 
-                            foreach (var branchs in method.Value.Branches)
+                            foreach (var branch in method.Value.Branches)
                             {
-                                foreach (var branch in branchs.Value)
-                                    lcov.Add($"BRDA:{branchs.Key},{branch.Offset},{branch.Path},{branch.Hits}");
+                                lcov.Add($"BRDA:{branch.Key},{branch.Key.Offset},{branch.Key.Path},{branch.Value.Hits}");
                             }
                         }
                     }
