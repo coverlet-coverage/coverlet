@@ -1,9 +1,12 @@
 version: '{build}'
+image:
+  - Visual Studio 2015
+  - Ubuntu
 configuration:
   - Debug
   - Release
 build_script:
-  - echo "Building for %CONFIGURATION%"
-  - dotnet msbuild build.proj /p:Configuration=%CONFIGURATION%
+  - ps: echo "Building for $env:CONFIGURATION"
+  - ps: dotnet msbuild build.proj /p:Configuration=$env:CONFIGURATION
 test_script:
   - ps: if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode) }
