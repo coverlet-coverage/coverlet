@@ -1,4 +1,7 @@
 version: '{build}'
+image:
+  - Visual Studio 2015
+  - Ubuntu
 configuration:
   - Debug
   - Release
