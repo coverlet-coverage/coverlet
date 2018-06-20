@@ -82,6 +82,16 @@ dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
 
 You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`.
 
+### Intermediate Result
+
+For combining the results of multiple projects, it is possible to use an intermediate result by using the `CoverletIntermediateResult` property. Coverage output will be merged with an intermediate result before generating the report(s). Ensure that all test runs point to the same intermediate result file.
+
+```bash
+dotnet test /p:CollectCoverage=true /p:CoverletIntermediateResult=intermediate.json
+```
+
+_Note: When using build automation, ensure that this intermediate result file is removed first. It doesn't make sense to merge with an intermediate result from a different build!_
+
 ### Excluding From Coverage
 
 #### Attributes

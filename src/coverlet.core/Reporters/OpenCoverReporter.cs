@@ -133,20 +133,17 @@ namespace Coverlet.Core.Reporters
 
                             foreach (var branches in meth.Value.Branches)
                             {
-                                foreach (var branch in branches.Value)
-                                {
-                                    XElement branchPoint = new XElement("BranchPoint");
-                                    branchPoint.Add(new XAttribute("vc", branch.Hits.ToString()));
-                                    branchPoint.Add(new XAttribute("upsid", branches.Key.ToString()));
-                                    branchPoint.Add(new XAttribute("ordinal", branch.Ordinal.ToString()));
-                                    branchPoint.Add(new XAttribute("path", branch.Path.ToString()));
-                                    branchPoint.Add(new XAttribute("offset", branch.Offset.ToString()));
-                                    branchPoint.Add(new XAttribute("offsetend", branch.EndOffset.ToString()));
-                                    branchPoint.Add(new XAttribute("sl", branches.Key.ToString()));
-                                    branchPoint.Add(new XAttribute("fileid", i.ToString()));
-                                    branchPoints.Add(branchPoint);
-                                    kBr++;
-                                }
+                                XElement branchPoint = new XElement("BranchPoint");
+                                branchPoint.Add(new XAttribute("vc", branches.Value.Hits.ToString()));
+                                branchPoint.Add(new XAttribute("upsid", branches.Key.Number.ToString()));
+                                branchPoint.Add(new XAttribute("ordinal", branches.Key.Ordinal.ToString()));
+                                branchPoint.Add(new XAttribute("path", branches.Key.Path.ToString()));
+                                branchPoint.Add(new XAttribute("offset", branches.Key.Offset.ToString()));
+                                branchPoint.Add(new XAttribute("offsetend", branches.Key.EndOffset.ToString()));
+                                branchPoint.Add(new XAttribute("sl", branches.Key.Number.ToString()));
+                                branchPoint.Add(new XAttribute("fileid", i.ToString()));
+                                branchPoints.Add(branchPoint);
+                                kBr++;
                             }
 
                             numMethods++;
@@ -235,6 +232,11 @@ namespace Coverlet.Core.Reporters
             xml.Save(stream);
 
             return Encoding.UTF8.GetString(stream.ToArray());
+        }
+
+        public CoverageResult Read(string data)
+        {
+            throw new NotSupportedException("Not supported by this reporter.");
         }
     }
 }

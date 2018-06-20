@@ -5,5 +5,6 @@ namespace Coverlet.Core.Reporters
         string Format { get; }
         string Extension { get; }
         string Report(CoverageResult result);
+        CoverageResult Read(string data);
     }
 }

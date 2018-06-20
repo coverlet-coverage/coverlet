@@ -72,16 +72,18 @@ namespace Coverlet.Core.Reporters
                             foreach (var ln in meth.Value.Lines)
                             {
                                 XElement line = new XElement("line");
+                                var branches = meth.Value.Branches.Where(kv => kv.Key.Number == ln.Key).ToList();
+
                                 line.Add(new XAttribute("number", ln.Key.ToString()));
                                 line.Add(new XAttribute("hits", ln.Value.Hits.ToString()));
-                                line.Add(new XAttribute("branch", meth.Value.Branches.ContainsKey(ln.Key).ToString()));
+                                line.Add(new XAttribute("branch", branches.Any().ToString()));
 
-                                if (meth.Value.Branches.TryGetValue(ln.Key, out List<BranchInfo> branches))
+                                if (branches.Any())
                                 {
                                     var branchInfoCoverage = summary.CalculateBranchCoverage(branches);
                                     line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent*100}% ({branchInfoCoverage.Covered}/{branchInfoCoverage.Total})"));
                                     XElement conditions = new XElement("conditions");
-                                    var byOffset = branches.GroupBy(b => b.Offset).ToDictionary(b => b.Key, b => b.ToList());
+                                    var byOffset = branches.GroupBy(kv => kv.Key.Offset).ToDictionary(b => b.Key, b => b.ToList());
                                     foreach (var entry in byOffset)
                                     {
                                         XElement condition = new XElement("condition");
@@ -126,6 +128,11 @@ namespace Coverlet.Core.Reporters
             xml.Save(stream);
 
             return Encoding.UTF8.GetString(stream.ToArray());
+        }
+
+        public CoverageResult Read(string data)
+        {
+            throw new NotSupportedException("Not supported by this reporter.");
         }
 
         private string GetBasePath(Modules modules)

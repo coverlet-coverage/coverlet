@@ -22,6 +22,7 @@
   <Target Name="GenerateCoverageResult" AfterTargets="VSTest">
     <Coverlet.MSbuild.Tasks.CoverageResultTask
       Condition="$(CollectCoverage) == 'true'"
+      IntermediateResult="$(CoverletIntermediateResult)"
       Output="$(CoverletOutput)"
       OutputFormat="$(CoverletOutputFormat)"
       Threshold="$(Threshold)"
