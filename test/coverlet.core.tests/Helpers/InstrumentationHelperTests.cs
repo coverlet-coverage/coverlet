@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-
 using Xunit;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +14,21 @@ namespace Coverlet.Core.Helpers.Tests
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
             var modules = InstrumentationHelper.GetCoverableModules(module);
             Assert.False(Array.Exists(modules, m => m == module));
+        }
+
+        [Fact]
+        public void TestExeModulesCoverage()
+        {
+            string module = typeof(InstrumentationHelperTests).Assembly.Location;
+            string exeModule = Path.ChangeExtension(module, ".exe");
+            string noExtModule = Path.ChangeExtension(module, "").TrimEnd('.');
+            File.Delete(exeModule);
+            File.Copy(module, exeModule);
+            File.Delete(noExtModule);
+            File.Copy(module, noExtModule);
+            var modules = InstrumentationHelper.GetCoverableModules(module);
+            Assert.True(Array.Exists(modules, m => m == exeModule));
+            Assert.False(Array.Exists(modules, m => m == noExtModule));
         }
 
         [Fact]
