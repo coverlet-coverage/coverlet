@@ -15,12 +15,11 @@ namespace Coverlet.Core.Tests
         public CoverageSummaryTests()
         {
             Lines lines = new Lines();
-            lines.Add(1, new LineInfo { Hits = 1 });
-            lines.Add(2, new LineInfo { Hits = 0 });
+            lines.Add(1, 1);
+            lines.Add(2, 0);
             Branches branches = new Branches();
-            branches.Add(1, new List<BranchInfo>());
-            branches[1].Add(new BranchInfo { Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
-            branches[1].Add(new BranchInfo { Hits = 1, Offset = 1, Path = 1, Ordinal = 2 });
+            branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
+            branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 });
 
             Methods methods = new Methods();
             var methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";

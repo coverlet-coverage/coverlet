@@ -66,19 +66,19 @@ namespace Coverlet.Core
                             {
                                 if (methods.TryGetValue(line.Method, out Method method))
                                 {
-                                    documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, new LineInfo { Hits = line.Hits });
+                                    documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
                                 }
                                 else
                                 {
                                     documents[doc.Path][line.Class].Add(line.Method, new Method());
-                                    documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number,  new LineInfo { Hits = line.Hits });
+                                    documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
                                 }
                             }
                             else
                             {
                                 documents[doc.Path].Add(line.Class, new Methods());
                                 documents[doc.Path][line.Class].Add(line.Method, new Method());
-                                documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number,  new LineInfo { Hits = line.Hits });
+                                documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
                             }
                         }
                         else
@@ -86,7 +86,7 @@ namespace Coverlet.Core
                             documents.Add(doc.Path, new Classes());
                             documents[doc.Path].Add(line.Class, new Methods());
                             documents[doc.Path][line.Class].Add(line.Method, new Method());
-                            documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number,  new LineInfo { Hits = line.Hits });
+                            documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
                         }
                     }
 
@@ -99,26 +99,15 @@ namespace Coverlet.Core
                             {
                                 if (methods.TryGetValue(branch.Method, out Method method))
                                 {
-                                    if (method.Branches.TryGetValue(branch.Number, out List<BranchInfo> branchInfo))
-                                    {
-                                        documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
-                                            { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
-                                        );
-                                    }
-                                    else
-                                    {
-                                        documents[doc.Path][branch.Class][branch.Method].Branches.Add(branch.Number, new List<BranchInfo>());
-                                        documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
-                                            { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
-                                        );
-                                    }
+                                    method.Branches.Add(new BranchInfo
+                                        { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                    );
                                 }
                                 else
                                 {
                                     documents[doc.Path][branch.Class].Add(branch.Method, new Method());
-                                    documents[doc.Path][branch.Class][branch.Method].Branches.Add(branch.Number, new List<BranchInfo>());
-                                    documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
-                                        { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                    documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
+                                        { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                                     );
                                 }
                             }
@@ -126,9 +115,8 @@ namespace Coverlet.Core
                             {
                                 documents[doc.Path].Add(branch.Class, new Methods());
                                 documents[doc.Path][branch.Class].Add(branch.Method, new Method());
-                                documents[doc.Path][branch.Class][branch.Method].Branches.Add(branch.Number, new List<BranchInfo>());
-                                documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
-                                    { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
+                                    { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                                 );
                             }
                         }
@@ -137,9 +125,8 @@ namespace Coverlet.Core
                             documents.Add(doc.Path, new Classes());
                             documents[doc.Path].Add(branch.Class, new Methods());
                             documents[doc.Path][branch.Class].Add(branch.Method, new Method());
-                            documents[doc.Path][branch.Class][branch.Method].Branches.Add(branch.Number, new List<BranchInfo>());
-                            documents[doc.Path][branch.Class][branch.Method].Branches[branch.Number].Add(new BranchInfo
-                                { Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                            documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
+                                { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                             );
                         }
                     }

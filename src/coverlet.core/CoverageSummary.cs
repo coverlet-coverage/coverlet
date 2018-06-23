@@ -9,7 +9,7 @@ namespace Coverlet.Core
         public CoverageDetails CalculateLineCoverage(Lines lines)
         {
             var details = new CoverageDetails();
-            details.Covered = lines.Where(l => l.Value.Hits > 0).Count();
+            details.Covered = lines.Where(l => l.Value > 0).Count();
             details.Total = lines.Count;
             return details;
         }
@@ -62,19 +62,11 @@ namespace Coverlet.Core
             return details;
         }
 
-        public CoverageDetails CalculateBranchCoverage(List<BranchInfo> branchInfo)
+        public CoverageDetails CalculateBranchCoverage(IList<BranchInfo> branches)
         {
             var details = new CoverageDetails();
-            details.Covered = branchInfo.Count(bi => bi.Hits > 0);
-            details.Total = branchInfo.Count;
-            return details;
-        }
-
-        public CoverageDetails CalculateBranchCoverage(Branches branches)
-        {
-            var details = new CoverageDetails();
-            details.Covered = branches.Sum(b => b.Value.Where(bi => bi.Hits > 0).Count());
-            details.Total = branches.Sum(b => b.Value.Count());
+            details.Covered = branches.Count(bi => bi.Hits > 0);
+            details.Total = branches.Count;
             return details;
         }
 
@@ -129,7 +121,7 @@ namespace Coverlet.Core
         public CoverageDetails CalculateMethodCoverage(Lines lines)
         {
             var details = new CoverageDetails();
-            details.Covered = lines.Any(l => l.Value.Hits > 0) ? 1 : 0;
+            details.Covered = lines.Any(l => l.Value > 0) ? 1 : 0;
             details.Total = 1;
             return details;
         }

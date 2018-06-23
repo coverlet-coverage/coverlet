@@ -33,15 +33,14 @@ namespace Coverlet.Core.Reporters
                                 continue;
 
                             lcov.Add($"FN:{method.Value.Lines.First().Key - 1},{method.Key}");
-                            lcov.Add($"FNDA:{method.Value.Lines.First().Value.Hits},{method.Key}");
+                            lcov.Add($"FNDA:{method.Value.Lines.First().Value},{method.Key}");
 
                             foreach (var line in method.Value.Lines)
-                                lcov.Add($"DA:{line.Key},{line.Value.Hits}");
+                                lcov.Add($"DA:{line.Key},{line.Value}");
 
-                            foreach (var branchs in method.Value.Branches)
+                            foreach (var branch in method.Value.Branches)
                             {
-                                foreach (var branch in branchs.Value)
-                                    lcov.Add($"BRDA:{branchs.Key},{branch.Offset},{branch.Path},{branch.Hits}");
+                                lcov.Add($"BRDA:{branch.Line},{branch.Offset},{branch.Path},{branch.Hits}");
                             }
                         }
                     }

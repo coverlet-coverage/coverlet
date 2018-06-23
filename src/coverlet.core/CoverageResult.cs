@@ -5,21 +5,20 @@ using Jil;
 
 namespace Coverlet.Core
 {
-    public class LineInfo
+    public class BranchInfo
     {
-        public int Hits { get; set; }
-    }
-
-    public class BranchInfo : LineInfo
-    {
+        public int Line { get; set; }
         public int Offset { get; set; }
         public int EndOffset { get; set; }
         public int Path { get; set; }
         public uint Ordinal { get; set; }
+        public int Hits { get; set; }
     }
 
-    public class Lines : SortedDictionary<int, LineInfo> { }
-    public class Branches : SortedDictionary<int, List<BranchInfo>> { }
+    public class Lines : SortedDictionary<int, int> { }
+
+    public class Branches : List<BranchInfo> { }
+
     public class Method
     {
         internal Method()

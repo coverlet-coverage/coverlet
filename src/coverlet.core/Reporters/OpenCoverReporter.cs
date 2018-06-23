@@ -110,7 +110,7 @@ namespace Coverlet.Core.Reporters
                             foreach (var lines in meth.Value.Lines)
                             {
                                 XElement sequencePoint = new XElement("SequencePoint");
-                                sequencePoint.Add(new XAttribute("vc", lines.Value.Hits.ToString()));
+                                sequencePoint.Add(new XAttribute("vc", lines.Value.ToString()));
                                 sequencePoint.Add(new XAttribute("upsid", lines.Key.ToString()));
                                 sequencePoint.Add(new XAttribute("ordinal", k.ToString()));
                                 sequencePoint.Add(new XAttribute("sl", lines.Key.ToString()));
@@ -122,7 +122,7 @@ namespace Coverlet.Core.Reporters
                                 sequencePoint.Add(new XAttribute("fileid", i.ToString()));
                                 sequencePoints.Add(sequencePoint);
 
-                                if (lines.Value.Hits > 0)
+                                if (lines.Value > 0)
                                 {
                                     classVisited = true;
                                     methodVisited = true;
@@ -131,22 +131,19 @@ namespace Coverlet.Core.Reporters
                                 k++;
                             }
 
-                            foreach (var branches in meth.Value.Branches)
+                            foreach (var branche in meth.Value.Branches)
                             {
-                                foreach (var branch in branches.Value)
-                                {
-                                    XElement branchPoint = new XElement("BranchPoint");
-                                    branchPoint.Add(new XAttribute("vc", branch.Hits.ToString()));
-                                    branchPoint.Add(new XAttribute("upsid", branches.Key.ToString()));
-                                    branchPoint.Add(new XAttribute("ordinal", branch.Ordinal.ToString()));
-                                    branchPoint.Add(new XAttribute("path", branch.Path.ToString()));
-                                    branchPoint.Add(new XAttribute("offset", branch.Offset.ToString()));
-                                    branchPoint.Add(new XAttribute("offsetend", branch.EndOffset.ToString()));
-                                    branchPoint.Add(new XAttribute("sl", branches.Key.ToString()));
-                                    branchPoint.Add(new XAttribute("fileid", i.ToString()));
-                                    branchPoints.Add(branchPoint);
-                                    kBr++;
-                                }
+                                XElement branchPoint = new XElement("BranchPoint");
+                                branchPoint.Add(new XAttribute("vc", branche.Hits.ToString()));
+                                branchPoint.Add(new XAttribute("upsid", branche.Line.ToString()));
+                                branchPoint.Add(new XAttribute("ordinal", branche.Ordinal.ToString()));
+                                branchPoint.Add(new XAttribute("path", branche.Path.ToString()));
+                                branchPoint.Add(new XAttribute("offset", branche.Offset.ToString()));
+                                branchPoint.Add(new XAttribute("offsetend", branche.EndOffset.ToString()));
+                                branchPoint.Add(new XAttribute("sl", branche.Line.ToString()));
+                                branchPoint.Add(new XAttribute("fileid", i.ToString()));
+                                branchPoints.Add(branchPoint);
+                                kBr++;
                             }
 
                             numMethods++;
