@@ -40,8 +40,8 @@ namespace Coverlet.Core.Reporters.Tests
         private static Documents CreateFirstDocuments()
         {
             Lines lines = new Lines();
-            lines.Add(1, new LineInfo { Hits = 1 });
-            lines.Add(2, new LineInfo { Hits = 0 });
+            lines.Add(1, 1);
+            lines.Add(2, 0);
             Branches branches = new Branches();
             branches.Add(1, new List<BranchInfo> {
                 new BranchInfo{ Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 },
@@ -62,8 +62,8 @@ namespace Coverlet.Core.Reporters.Tests
         private static Documents CreateSecondDocuments()
         {            
             Lines lines = new Lines();
-            lines.Add(1, new LineInfo { Hits = 1 });
-            lines.Add(2, new LineInfo { Hits = 0 });
+            lines.Add(1, 1);
+            lines.Add(2, 0);
 
             Methods methods = new Methods();
             var methodString = "System.Void Some.Other.Module.TestClass.TestMethod()";

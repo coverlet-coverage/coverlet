@@ -73,7 +73,7 @@ namespace Coverlet.Core.Reporters
                             {
                                 XElement line = new XElement("line");
                                 line.Add(new XAttribute("number", ln.Key.ToString()));
-                                line.Add(new XAttribute("hits", ln.Value.Hits.ToString()));
+                                line.Add(new XAttribute("hits", ln.Value.ToString()));
                                 line.Add(new XAttribute("branch", meth.Value.Branches.ContainsKey(ln.Key).ToString()));
 
                                 if (meth.Value.Branches.TryGetValue(ln.Key, out List<BranchInfo> branches))

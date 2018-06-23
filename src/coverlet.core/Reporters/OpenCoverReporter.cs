@@ -110,7 +110,7 @@ namespace Coverlet.Core.Reporters
                             foreach (var lines in meth.Value.Lines)
                             {
                                 XElement sequencePoint = new XElement("SequencePoint");
-                                sequencePoint.Add(new XAttribute("vc", lines.Value.Hits.ToString()));
+                                sequencePoint.Add(new XAttribute("vc", lines.Value.ToString()));
                                 sequencePoint.Add(new XAttribute("upsid", lines.Key.ToString()));
                                 sequencePoint.Add(new XAttribute("ordinal", k.ToString()));
                                 sequencePoint.Add(new XAttribute("sl", lines.Key.ToString()));
@@ -122,7 +122,7 @@ namespace Coverlet.Core.Reporters
                                 sequencePoint.Add(new XAttribute("fileid", i.ToString()));
                                 sequencePoints.Add(sequencePoint);
 
-                                if (lines.Value.Hits > 0)
+                                if (lines.Value > 0)
                                 {
                                     classVisited = true;
                                     methodVisited = true;
