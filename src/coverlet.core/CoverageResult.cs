@@ -7,6 +7,7 @@ namespace Coverlet.Core
 {
     public class BranchInfo
     {
+        public int Line { get; set; }
         public int Offset { get; set; }
         public int EndOffset { get; set; }
         public int Path { get; set; }
@@ -15,7 +16,9 @@ namespace Coverlet.Core
     }
 
     public class Lines : SortedDictionary<int, int> { }
-    public class Branches : SortedDictionary<int, List<BranchInfo>> { }
+
+    public class Branches : List<BranchInfo> { }
+
     public class Method
     {
         internal Method()
