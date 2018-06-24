@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using Coverlet.Core.Attributes;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Coverlet.Core.Extensions
+namespace Coverlet.Tracker.Extensions
 {
     internal static class DictionaryExtensions
     {
-        [ExcludeFromCoverage]
+        [ExcludeFromCodeCoverage]
         public static bool TryAdd<T, U>(this Dictionary<T, U> dictionary, T key, U value)
         {
             if (dictionary.ContainsKey(key))

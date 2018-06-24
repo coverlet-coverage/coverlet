@@ -189,6 +189,4 @@ namespace Coverlet.Core.Samples.Tests
             return input;
         }
     }
-
-
 }

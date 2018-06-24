@@ -8,6 +8,7 @@ using System.Reflection;
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Symbols;
+using Coverlet.Tracker;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;

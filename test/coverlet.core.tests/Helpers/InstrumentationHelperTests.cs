@@ -46,7 +46,7 @@ namespace Coverlet.Core.Helpers.Tests
             var directory = Directory.CreateDirectory(Path.Combine(tempPath, "tempdir"));
             InstrumentationHelper.CopyCoverletDependency(Path.Combine(directory.FullName, "somemodule.dll"));
 
-            Assert.True(File.Exists(Path.Combine(directory.FullName, "coverlet.core.dll")));
+            Assert.True(File.Exists(Path.Combine(directory.FullName, "coverlet.tracker.dll")));
             Directory.Delete(directory.FullName, true);
         }
 

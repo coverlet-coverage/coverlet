@@ -12,4 +12,8 @@
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.tracker\coverlet.tracker.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
-using Coverlet.Core.Attributes;
-using Coverlet.Core.Extensions;
 
-namespace Coverlet.Core
+using Coverlet.Tracker.Extensions;
+
+namespace Coverlet.Tracker
 {
     public static class CoverageTracker
     {
         private static Dictionary<string, List<string>> _markers;
         private static Dictionary<string, int> _markerFileCount;
 
-        [ExcludeFromCoverage]
+        [ExcludeFromCodeCoverage]
         static CoverageTracker()
         {
             _markers = new Dictionary<string, List<string>>();
@@ -21,7 +22,7 @@ namespace Coverlet.Core
             AppDomain.CurrentDomain.DomainUnload += new EventHandler(CurrentDomain_ProcessExit);
         }
 
-        [ExcludeFromCoverage]
+        [ExcludeFromCodeCoverage]
         public static void MarkExecuted(string path, string marker)
         {
             lock (_markers)
@@ -35,7 +36,7 @@ namespace Coverlet.Core
                     using (var gz = new GZipStream(fs, CompressionMode.Compress))
                     using (var sw = new StreamWriter(gz))
                     {
-                        foreach(var line in _markers[path])
+                        foreach (var line in _markers[path])
                         {
                             sw.WriteLine(line);
                         }
@@ -46,7 +47,7 @@ namespace Coverlet.Core
             }
         }
 
-        [ExcludeFromCoverage]
+        [ExcludeFromCodeCoverage]
         public static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             lock (_markers)
@@ -57,7 +58,7 @@ namespace Coverlet.Core
                     using (var gz = new GZipStream(fs, CompressionMode.Compress))
                     using (var sw = new StreamWriter(gz))
                     {
-                        foreach(var line in kvp.Value)
+                        foreach (var line in kvp.Value)
                         {
                             sw.WriteLine(line);
                         }
