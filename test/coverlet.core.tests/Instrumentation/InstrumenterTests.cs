@@ -30,10 +30,10 @@ namespace Coverlet.Core.Instrumentation.Tests
             var instrumenterTest = CreateInstrumentor();
             var result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
 
-            var found = doc.Lines.Any(l => l.Class == excludedType.FullName);
+            var found = doc.Lines.Values.Any(l => l.Class == excludedType.FullName);
             Assert.False(found, "Class decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);

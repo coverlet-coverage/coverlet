@@ -2,47 +2,39 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.IO.Compression;
-
-using Coverlet.Tracker.Extensions;
 
 namespace Coverlet.Tracker
 {
     public static class CoverageTracker
     {
-        private static Dictionary<string, List<string>> _markers;
-        private static Dictionary<string, int> _markerFileCount;
+        private static Dictionary<string, Dictionary<string, int>> _events;
 
         [ExcludeFromCodeCoverage]
         static CoverageTracker()
         {
-            _markers = new Dictionary<string, List<string>>();
-            _markerFileCount = new Dictionary<string, int>();
+            _events = new Dictionary<string, Dictionary<string, int>>();
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
             AppDomain.CurrentDomain.DomainUnload += new EventHandler(CurrentDomain_ProcessExit);
         }
 
         [ExcludeFromCodeCoverage]
-        public static void MarkExecuted(string path, string marker)
+        public static void MarkExecuted(string file, string evt)
         {
-            lock (_markers)
+            lock (_events)
             {
-                _markers.TryAdd(path, new List<string>());
-                _markers[path].Add(marker);
-                _markerFileCount.TryAdd(path, 0);
-                if (_markers[path].Count >= 100000)
+                if (!_events.TryGetValue(file, out var fileEvents))
                 {
-                    using (var fs = new FileStream($"{path}_compressed_{_markerFileCount[path]}", FileMode.OpenOrCreate))
-                    using (var gz = new GZipStream(fs, CompressionMode.Compress))
-                    using (var sw = new StreamWriter(gz))
-                    {
-                        foreach (var line in _markers[path])
-                        {
-                            sw.WriteLine(line);
-                        }
-                    }
-                    _markers[path].Clear();
-                    _markerFileCount[path] = _markerFileCount[path] + 1;
+                    fileEvents = new Dictionary<string, int>();
+                    _events.Add(file, fileEvents);
+                }
+
+                if (!fileEvents.TryGetValue(evt, out var count))
+                {
+                    fileEvents.Add(evt, 1);
+                }
+                else if (count < int.MaxValue)
+                {
+                    fileEvents[evt] = count + 1;
                 }
             }
         }
@@ -50,22 +42,21 @@ namespace Coverlet.Tracker
         [ExcludeFromCodeCoverage]
         public static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
-            lock (_markers)
+            lock (_events)
             {
-                foreach (var kvp in _markers)
+                foreach (var files in _events)
                 {
-                    using (var fs = new FileStream($"{kvp.Key}_compressed_{_markerFileCount[kvp.Key]}", FileMode.OpenOrCreate))
-                    using (var gz = new GZipStream(fs, CompressionMode.Compress))
-                    using (var sw = new StreamWriter(gz))
+                    using (var fs = new FileStream(files.Key, FileMode.Create))
+                    using (var sw = new StreamWriter(fs))
                     {
-                        foreach (var line in kvp.Value)
+                        foreach (var evt in files.Value)
                         {
-                            sw.WriteLine(line);
+                            sw.WriteLine($"{evt.Key},{evt.Value}");
                         }
                     }
                 }
 
-                _markers.Clear();
+                _events.Clear();
             }
         }
     }
