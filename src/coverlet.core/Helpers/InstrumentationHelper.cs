@@ -15,7 +15,7 @@ namespace Coverlet.Core.Helpers
     {
         public static string[] GetCoverableModules(string module)
         {
-            IEnumerable<string> modules = Directory.EnumerateFiles(Path.GetDirectoryName(module)).Where(fileName => Path.HasExtension(fileName) && (Path.GetExtension(fileName) == ".exe" || Path.GetExtension(fileName) == ".dll"));
+            IEnumerable<string> modules = Directory.EnumerateFiles(Path.GetDirectoryName(module)).Where(f => f.EndsWith(".exe") || f.EndsWith(".dll"));
             modules = modules.Where(m => IsAssembly(m) && Path.GetFileName(m) != Path.GetFileName(module));
             return modules.ToArray();
         }
