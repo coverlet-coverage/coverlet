@@ -66,12 +66,9 @@ namespace Coverlet.Core.Instrumentation
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
                     var types = module.GetTypes();
-                    foreach (var type in types)
+                    foreach (TypeDefinition type in types)
                     {
-                        TypeDefinition actualType = type;
-                        if (type.FullName.Contains("/"))
-                            actualType = types.FirstOrDefault(t => t.FullName == type.FullName.Split('/')[0]);
-
+                        var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
                             && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _filters))
                             InstrumentType(type);
