@@ -122,6 +122,9 @@ dotnet test /p:CollectCoverage=true /p:Exclude="[coverlet.*]Coverlet.Core.Covera
 You can specify multiple filter expressions by separting them with a comma (`,`). If you specify multiple filters, then [you'll have to escape the surrounding quotes](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this:
 `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`.
 
+### Cake Addin
+If you're using [Cake Build](https://cakebuild.net) for your build script you can use the [Cake.Coverlet](https://github.com/Romanx/Cake.Coverlet) addin to provide you extensions to dotnet test for passing coverlet arguments in a strongly typed manner.
+
 ## Roadmap
 
 * Merging outputs (multiple test projects, one coverage result)
