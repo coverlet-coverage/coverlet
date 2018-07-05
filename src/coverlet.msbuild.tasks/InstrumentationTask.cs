@@ -43,7 +43,7 @@ namespace Coverlet.MSbuild.Tasks
                 var rules = _excludeByFile?.Split(',');
                 var filters = _exclude?.Split(',');
 
-                _coverage = new Coverage(_path, Guid.NewGuid().ToString(), filters, rules);
+                _coverage = new Coverage(_path, filters, rules);
                 _coverage.PrepareModules();
             }
             catch (Exception ex)

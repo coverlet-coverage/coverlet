@@ -17,12 +17,17 @@ namespace Coverlet.Core
         private string[] _rules;
         private List<InstrumenterResult> _results;
 
-        public Coverage(string module, string identifier, string[] filters, string[] rules)
+        public string Identifier
+        {
+            get { return _identifier; }
+        }
+
+        public Coverage(string module, string[] filters, string[] rules)
         {
             _module = module;
-            _identifier = identifier;
             _filters = filters;
             _rules = rules;
+            _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
 

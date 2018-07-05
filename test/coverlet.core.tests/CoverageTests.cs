@@ -16,9 +16,8 @@ namespace Coverlet.Core.Tests
         {
             string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
-            string identifier = Guid.NewGuid().ToString();
 
-            var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
+            var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
 
             File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
@@ -28,7 +27,7 @@ namespace Coverlet.Core.Tests
             // Since Coverage only instruments dependancies, we need a fake module here
             var testModule = Path.Combine(directory.FullName, "test.module.dll");
 
-            var coverage = new Coverage(testModule, identifier, Array.Empty<string>(), Array.Empty<string>());
+            var coverage = new Coverage(testModule, Array.Empty<string>(), Array.Empty<string>());
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
