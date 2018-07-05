@@ -166,15 +166,15 @@ namespace Coverlet.Core.Helpers
         public static bool IsLocalMethod(string method)
             => new Regex(WildcardToRegex("<*>*__*|*")).IsMatch(method);
 
-        public static string[] GetExcludedFiles(string[] rules)
+        public static string[] GetExcludedFiles(string[] excludes)
         {
             const string RELATIVE_KEY = nameof(RELATIVE_KEY);
             string parentDir = Directory.GetCurrentDirectory();
 
-            if (rules == null || !rules.Any()) return Array.Empty<string>();
+            if (excludes == null || !excludes.Any()) return Array.Empty<string>();
 
             var matcherDict = new Dictionary<string, Matcher>() { { RELATIVE_KEY, new Matcher() } };
-            foreach (var excludeRule in rules)
+            foreach (var excludeRule in excludes)
             {
                 if (Path.IsPathRooted(excludeRule))
                 {
