@@ -12,7 +12,7 @@ namespace Coverlet.MSbuild.Tasks
 {
     public class CoverageResultTask : Task
     {
-        private string _filename;
+        private string _output;
         private string _format;
         private int _threshold;
         private string _thresholdType;
@@ -20,8 +20,8 @@ namespace Coverlet.MSbuild.Tasks
         [Required]
         public string Output
         {
-            get { return _filename; }
-            set { _filename = value; }
+            get { return _output; }
+            set { _output = value; }
         }
 
         [Required]
@@ -54,11 +54,9 @@ namespace Coverlet.MSbuild.Tasks
                 var coverage = InstrumentationTask.Coverage;
                 var result = coverage.GetCoverageResult();
 
-                var directory = Path.GetDirectoryName(_filename);
+                var directory = Path.GetDirectoryName(_output);
                 if (!Directory.Exists(directory))
-                {
                     Directory.CreateDirectory(directory);
-                }
 
                 var formats = _format.Split(',');
                 foreach (var format in formats)
@@ -67,7 +65,10 @@ namespace Coverlet.MSbuild.Tasks
                     if (reporter == null)
                         throw new Exception($"Specified output format '{format}' is not supported");
 
-                    var report = _filename + "." + reporter.Extension;
+                    var filename = Path.GetFileName(_output);
+                    filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+
+                    var report = Path.Combine(directory, filename);
                     Console.WriteLine($"  Generating report '{report}'");
                     File.WriteAllText(report, reporter.Report(result));
                 }
