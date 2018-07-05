@@ -81,20 +81,12 @@ namespace Coverlet.MSbuild.Tasks
                 var summary = new CoverageSummary();
                 var exceptionBuilder = new StringBuilder();
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-                var averageTable = new ConsoleTable("", "Line", "Branch", "Method");
-                var lineAverage = 0d;
-                var branchAverage = 0d;
-                var methodAverage = 0d;
 
                 foreach (var module in result.Modules)
                 {
                     var linePercent = summary.CalculateLineCoverage(module.Value).Percent * 100;
                     var branchPercent = summary.CalculateBranchCoverage(module.Value).Percent * 100;
                     var methodPercent = summary.CalculateMethodCoverage(module.Value).Percent * 100;
-
-                    lineAverage += linePercent;
-                    branchAverage += branchPercent;
-                    methodAverage += methodPercent;
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
 
@@ -120,14 +112,8 @@ namespace Coverlet.MSbuild.Tasks
                     }
                 }
 
-                lineAverage = lineAverage / result.Modules.Count;
-                branchAverage = branchAverage / result.Modules.Count;
-                methodAverage = methodAverage / result.Modules.Count;
-                averageTable.AddRow("Average", $"{lineAverage}%", $"{branchAverage}%", $"{methodAverage}%");
-
                 Console.WriteLine();
                 Console.WriteLine(coverageTable.ToStringAlternative());
-                Console.WriteLine(averageTable.ToStringAlternative());
 
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
