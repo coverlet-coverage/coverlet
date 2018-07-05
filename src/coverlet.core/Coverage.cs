@@ -55,10 +55,10 @@ namespace Coverlet.Core
             foreach (var result in _results)
             {
                 Documents documents = new Documents();
-                foreach (var doc in result.Documents)
+                foreach (var doc in result.Documents.Values)
                 {
                     // Construct Line Results
-                    foreach (var line in doc.Lines)
+                    foreach (var line in doc.Lines.Values)
                     {
                         if (documents.TryGetValue(doc.Path, out Classes classes))
                         {
@@ -91,7 +91,7 @@ namespace Coverlet.Core
                     }
 
                     // Construct Branch Results
-                    foreach (var branch in doc.Branches)
+                    foreach (var branch in doc.Branches.Values)
                     {
                         if (documents.TryGetValue(doc.Path, out Classes classes))
                         {
@@ -147,55 +147,52 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                var i = 0;
-                while (true)
+                if (!File.Exists(result.HitsFilePath))
                 {
-                    var file = $"{result.HitsFilePath}_compressed_{i}";
-                    if(!File.Exists(file)) break;
-                    
-                    using (var fs = new FileStream(file, FileMode.Open))
-                    using (var gz = new GZipStream(fs, CompressionMode.Decompress))
-                    using (var sr = new StreamReader(gz))
+                    // File not instrumented, or nothing in it called.  Warn about this?
+                    continue;
+                }
+
+                using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
+                using (var sr = new StreamReader(fs))
+                {
+                    string row;
+                    while ((row = sr.ReadLine()) != null)
                     {
-                        string row;
-                        while ((row = sr.ReadLine()) != null)
+                        var info = row.Split(',');
+                        // Ignore malformed lines
+                        if (info.Length != 5)
+                            continue;
+
+                        bool isBranch = info[0] == "B";
+
+                        if (!result.Documents.TryGetValue(info[1], out var document))
                         {
-                            var info = row.Split(',');
-                            // Ignore malformed lines
-                            if (info.Length != 4)
-                                continue;
+                            continue;
+                        }
 
-                            bool isBranch = info[0] == "B";
+                        int start = int.Parse(info[2]);
+                        int hits = int.Parse(info[4]);
 
-                            var document = result.Documents.FirstOrDefault(d => d.Path == info[1]);
-                            if (document == null)
-                                continue;
-
-                            int start = int.Parse(info[2]);
-
-                            if (isBranch)
+                        if (isBranch)
+                        {
+                            int ordinal = int.Parse(info[3]);
+                            var branch = document.Branches[(start, ordinal)];
+                            branch.Hits = hits;
+                        }
+                        else
+                        {
+                            int end = int.Parse(info[3]);
+                            for (int j = start; j <= end; j++)
                             {
-                                uint ordinal = uint.Parse(info[3]);
-                                var branch = document.Branches.First(b => b.Number == start && b.Ordinal == ordinal);
-                                if (branch.Hits != int.MaxValue)
-                                    branch.Hits += branch.Hits + 1;
-                            }
-                            else
-                            {
-                                int end = int.Parse(info[3]);
-                                for (int j = start; j <= end; j++)
-                                {
-                                    var line = document.Lines.First(l => l.Number == j);
-                                    if (line.Hits != int.MaxValue)
-                                        line.Hits = line.Hits + 1;
-                                }
+                                var line = document.Lines[j];
+                                line.Hits = hits;
                             }
                         }
                     }
-
-                    InstrumentationHelper.DeleteHitsFile(file);
-                    i++;
                 }
+
+                InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
             }
         }
     }
