@@ -64,7 +64,7 @@ Supported Formats:
 * opencover
 * cobertura
 
-The output folder of the coverage result file can also be specified using the `CoverletOutputDirectory` property.
+The output of the coverage result can also be specified using the `CoverletOutput` property.
 
 ### Threshold
 

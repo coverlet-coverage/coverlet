@@ -66,12 +66,9 @@ namespace Coverlet.Core.Instrumentation
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
                     var types = module.GetTypes();
-                    foreach (var type in types)
+                    foreach (TypeDefinition type in types)
                     {
-                        TypeDefinition actualType = type;
-                        if (type.FullName.Contains("/"))
-                            actualType = types.FirstOrDefault(t => t.FullName == type.FullName.Split('/')[0]);
-
+                        var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
                             && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _filters))
                             InstrumentType(type);
@@ -169,17 +166,16 @@ namespace Coverlet.Core.Instrumentation
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
         {
-            var document = _result.Documents.FirstOrDefault(d => d.Path == sequencePoint.Document.Url);
-            if (document == null)
-            {
+            if (!_result.Documents.TryGetValue(sequencePoint.Document.Url, out var document))
+            { 
                 document = new Document { Path = sequencePoint.Document.Url };
-                _result.Documents.Add(document);
+                _result.Documents.Add(document.Path, document);
             }
 
             for (int i = sequencePoint.StartLine; i <= sequencePoint.EndLine; i++)
             {
-                if (!document.Lines.Exists(l => l.Number == i))
-                    document.Lines.Add(new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
+                if (!document.Lines.ContainsKey(i))
+                    document.Lines.Add(i, new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
 
             string marker = $"L,{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine}";
@@ -197,15 +193,15 @@ namespace Coverlet.Core.Instrumentation
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, BranchPoint branchPoint)
         {
-            var document = _result.Documents.FirstOrDefault(d => d.Path == branchPoint.Document);
-            if (document == null)
-            {
+            if (!_result.Documents.TryGetValue(branchPoint.Document, out var document))
+            { 
                 document = new Document { Path = branchPoint.Document };
-                _result.Documents.Add(document);
+                _result.Documents.Add(document.Path, document);
             }
 
-            if (!document.Branches.Exists(l => l.Number == branchPoint.StartLine && l.Ordinal == branchPoint.Ordinal))
-                document.Branches.Add(
+            var key = (branchPoint.StartLine, (int)branchPoint.Ordinal);
+            if (!document.Branches.ContainsKey(key))
+                document.Branches.Add(key,
                     new Branch
                     {
                         Number = branchPoint.StartLine,
