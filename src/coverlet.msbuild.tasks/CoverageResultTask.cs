@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -51,12 +50,9 @@ namespace Coverlet.MSbuild.Tasks
             try
             {
                 Console.WriteLine("\nCalculating coverage result...");
-                var duration = new Stopwatch();
-                duration.Start();
+
                 var coverage = InstrumentationTask.Coverage;
                 var result = coverage.GetCoverageResult();
-                duration.Stop();
-                Console.WriteLine($"Results calculated in {duration.Elapsed.TotalSeconds} seconds");
 
                 var directory = Path.GetDirectoryName(_filename);
                 if (!Directory.Exists(directory))
