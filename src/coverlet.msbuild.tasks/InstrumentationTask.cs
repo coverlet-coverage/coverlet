@@ -40,10 +40,10 @@ namespace Coverlet.MSbuild.Tasks
         {
             try
             {
-                var rules = _excludeByFile?.Split(',');
+                var excludes = _excludeByFile?.Split(',');
                 var filters = _exclude?.Split(',');
 
-                _coverage = new Coverage(_path, Guid.NewGuid().ToString(), filters, rules);
+                _coverage = new Coverage(_path, filters, excludes);
                 _coverage.PrepareModules();
             }
             catch (Exception ex)
