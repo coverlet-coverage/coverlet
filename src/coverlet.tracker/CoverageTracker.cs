@@ -66,7 +66,7 @@ namespace Coverlet.Tracker
                     {
                         foreach (var files in localEvents)
                         {
-                            FileMode mode = FileMode.Open;
+                            FileMode mode = FileMode.Append;
                             if (!encounteredFile.TryGetValue(files.Key, out bool b))
                             {
                                 encounteredFile.Add(files.Key, true);
