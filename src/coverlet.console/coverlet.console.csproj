@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ConsoleTables" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
   </ItemGroup>
 

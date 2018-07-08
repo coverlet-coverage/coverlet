@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
+using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Reporters;
@@ -25,9 +28,9 @@ namespace Coverlet.Console
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
             CommandOption targs = app.Option("-a|--targetargs", "Arguments to be passed to the test runner.", CommandOptionType.SingleValue);
             CommandOption output = app.Option("-o|--output", "Output of the generated coverage report", CommandOptionType.SingleValue);
-            CommandOption format = app.Option("-f|--format", "Format of the generated coverage report.", CommandOptionType.MultipleValue);
+            CommandOption formats = app.Option("-f|--format", "Format of the generated coverage report.", CommandOptionType.MultipleValue);
             CommandOption threshold = app.Option("--threshold", "Exits with error if the coverage % is below value.", CommandOptionType.SingleValue);
-            CommandOption thresholdType = app.Option("--threshold-type", "Coverage type to apply the threshold to.", CommandOptionType.MultipleValue);
+            CommandOption thresholdTypes = app.Option("--threshold-type", "Coverage type to apply the threshold to.", CommandOptionType.MultipleValue);
             CommandOption filters = app.Option("--exclude", "Filter expressions to exclude specific modules and types.", CommandOptionType.MultipleValue);
             CommandOption excludes = app.Option("--exclude-by-file", "Glob patterns specifying source files to exclude.", CommandOptionType.MultipleValue);
 
@@ -49,6 +52,72 @@ namespace Coverlet.Console
                 process.Start();
                 process.WaitForExit();
 
+                var dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
+                var dThreshold = threshold.HasValue() ? int.Parse(threshold.Value()) : 0;
+                var dThresholdTypes = thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" });
+
+                logger.LogInformation("\nCalculating coverage result...");
+
+                var result = coverage.GetCoverageResult();
+                var directory = Path.GetDirectoryName(dOutput);
+                if (!Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
+
+                foreach (var format in (formats.HasValue() ? formats.Values : new List<string>(new string[] { "json" })))
+                {
+                    var reporter = new ReporterFactory(format).CreateReporter();
+                    if (reporter == null)
+                        throw new Exception($"Specified output format '{format}' is not supported");
+
+                    var filename = Path.GetFileName(dOutput);
+                    filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+
+                    var report = Path.Combine(directory, filename);
+                    logger.LogInformation($"  Generating report '{report}'");
+                    File.WriteAllText(report, reporter.Report(result));
+                }
+
+                var summary = new CoverageSummary();
+                var exceptionBuilder = new StringBuilder();
+                var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
+                var thresholdFailed = false;
+
+                foreach (var _module in result.Modules)
+                {
+                    var linePercent = summary.CalculateLineCoverage(_module.Value).Percent * 100;
+                    var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent * 100;
+                    var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent * 100;
+
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
+
+                    if (dThreshold > 0)
+                    {
+                        if (linePercent < dThreshold && dThresholdTypes.Contains("line"))
+                        {
+                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(_module.Key)}' has a line coverage '{linePercent}%' below specified threshold '{dThreshold}%'");
+                            thresholdFailed = true;
+                        }
+
+                        if (branchPercent < dThreshold && dThresholdTypes.Contains("branch"))
+                        {
+                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(_module.Key)}' has a branch coverage '{branchPercent}%' below specified threshold '{dThreshold}%'");
+                            thresholdFailed = true;
+                        }
+
+                        if (methodPercent < dThreshold && dThresholdTypes.Contains("method"))
+                        {
+                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(_module.Key)}' has a method coverage '{methodPercent}%' below specified threshold '{dThreshold}%'");
+                            thresholdFailed = true;
+                        }
+                    }
+                }
+
+                logger.LogInformation(string.Empty);
+                logger.LogInformation(coverageTable.ToStringAlternative());
+
+                if (thresholdFailed)
+                    throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
+
                 return 0;
             });
 
@@ -60,6 +129,11 @@ namespace Coverlet.Console
             {
                 logger.LogError(ex.Message);
                 app.ShowHelp();
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message);
                 return 1;
             }
         }
