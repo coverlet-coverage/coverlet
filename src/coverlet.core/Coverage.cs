@@ -183,7 +183,7 @@ namespace Coverlet.Core
                         {
                             int ordinal = int.Parse(info[3]);
                             var branch = document.Branches[(start, ordinal)];
-                            branch.Hits = hits;
+                            branch.Hits += hits;
                         }
                         else
                         {
@@ -191,7 +191,7 @@ namespace Coverlet.Core
                             for (int j = start; j <= end; j++)
                             {
                                 var line = document.Lines[j];
-                                line.Hits = hits;
+                                line.Hits += hits;
                             }
                         }
                     }
