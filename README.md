@@ -64,7 +64,19 @@ Supported Formats:
 * opencover
 * cobertura
 
-The output of the coverage result can also be specified using the `CoverletOutput` property.
+You can specify multiple output formats by separating them with a comma (`,`).
+
+The output of the coverage result can be specified using the `CoverletOutput` property.
+
+```bash
+dotnet test /p:CollectCoverage=true /p:CoverletOutput='./result.json'
+```
+
+To specify a directory where all results will be written to (especially if using multiple formats), end the value with a `/`.
+
+```bash
+dotnet test /p:CollectCoverage=true /p:CoverletOutput='./results/'
+```
 
 ### Threshold
 
