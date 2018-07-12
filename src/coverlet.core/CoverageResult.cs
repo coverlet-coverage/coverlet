@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 
-using Jil;
-
 namespace Coverlet.Core
 {
     public class BranchInfo
