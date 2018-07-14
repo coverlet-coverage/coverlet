@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -91,6 +90,13 @@ namespace Coverlet.Core.Instrumentation
                 if (!actualMethod.CustomAttributes.Any(IsExcludeAttribute))
                     InstrumentMethod(method);
             }
+
+            var ctors = type.GetConstructors();
+            foreach (var ctor in ctors)
+            {
+                if (!ctor.CustomAttributes.Any(IsExcludeAttribute))
+                    InstrumentMethod(ctor);
+            }
         }
 
         private void InstrumentMethod(MethodDefinition method)
@@ -167,7 +173,7 @@ namespace Coverlet.Core.Instrumentation
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
         {
             if (!_result.Documents.TryGetValue(sequencePoint.Document.Url, out var document))
-            { 
+            {
                 document = new Document { Path = sequencePoint.Document.Url };
                 _result.Documents.Add(document.Path, document);
             }
@@ -194,7 +200,7 @@ namespace Coverlet.Core.Instrumentation
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, BranchPoint branchPoint)
         {
             if (!_result.Documents.TryGetValue(branchPoint.Document, out var document))
-            { 
+            {
                 document = new Document { Path = branchPoint.Document };
                 _result.Documents.Add(document.Path, document);
             }
