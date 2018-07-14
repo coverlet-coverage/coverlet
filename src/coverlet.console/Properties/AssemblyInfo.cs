@@ -1,0 +1,1 @@
+[assembly: System.Reflection.AssemblyKeyFileAttribute("coverlet.console.snk")]
