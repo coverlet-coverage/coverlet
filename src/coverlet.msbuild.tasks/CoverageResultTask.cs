@@ -67,6 +67,7 @@ namespace Coverlet.MSbuild.Tasks
 
                     var filename = Path.GetFileName(_output);
                     filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+                    filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
                     var report = Path.Combine(directory, filename);
                     Console.WriteLine($"  Generating report '{report}'");

@@ -71,6 +71,7 @@ namespace Coverlet.Console
 
                     var filename = Path.GetFileName(dOutput);
                     filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+                    filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
                     var report = Path.Combine(directory, filename);
                     logger.LogInformation($"  Generating report '{report}'");
