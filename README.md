@@ -109,15 +109,15 @@ By default, Coverlet will output the coverage results file(s) in the current wor
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custom/path/result.json"
 ```
 
-The above command will write the results to the supplied path. To specify a directory instead simply append a `/` to the end of the value.
+The above command will write the results to the supplied path, if no file extension is specified it'll use the standard extension of the selected output format. To specify a directory instead, simply append a `/` to the end of the value.
 
 ```bash
-coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custom/path/" -f json -f lcov
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custom/directory/" -f json -f lcov
 ```
 
 #### Threshold
 
-Coverlet allows you to specify a coverage threshold below which it fails the build. This allows you to enforce a minimum coverage percent on all changes to your project.
+Coverlet allows you to specify a coverage threshold below which it returns a non-zero exit code. This allows you to enforce a minimum coverage percent on all changes to your project.
 
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --threshold 80
@@ -142,6 +142,7 @@ coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --threshold 80 -
 You can ignore a method or an entire class from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
 
 ##### Source Files
+
 You can also ignore specific source files from code coverage using the `--exclude-by-file` option
  - Can be specified multiple times
  - Use absolute or relative paths (relative to the project directory)
@@ -151,7 +152,8 @@ You can also ignore specific source files from code coverage using the `--exclud
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-file "../dir1/class1.cs"
 ```
 
-##### Filters 
+##### Filters
+
 Coverlet gives the ability to have fine grained control over what gets excluded using "filter expressions".
 
 Syntax: `--exclude '[Assembly-Filter]Type-Filter'`
@@ -165,7 +167,7 @@ Examples
  - `--exclude "[coverlet.*]Coverlet.Core.Coverage"` => Excludes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
  - `--exclude "[*]Coverlet.Core.Instrumentation.*"` => Excludes all types belonging to `Coverlet.Core.Instrumentation` namespace in any assembly
  - `--exclude "[coverlet.*.tests?]*"` => Excludes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
- - `--exclude \"[coverlet.*]*,[*]Coverlet.Core*\"` => Excludes assemblies matching `coverlet.*` and excludes all types belonging to the `Coverlet.Core` namespace in any assembly
+ - `--exclude "[coverlet.*]*" --exclude "[*]Coverlet.Core*"` => Excludes assemblies matching `coverlet.*` and excludes all types belonging to the `Coverlet.Core` namespace in any assembly
 
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude "[coverlet.*]Coverlet.Core.Coverage"
