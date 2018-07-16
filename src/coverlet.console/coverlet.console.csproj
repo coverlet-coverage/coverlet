@@ -7,10 +7,10 @@
     <PackAsTool>true</PackAsTool>
     <AssemblyTitle>coverlet.console</AssemblyTitle>
     <AssemblyVersion>1.0.0</AssemblyVersion>
-    <AssemblyDescription>Coverlet is a cross platform code coverage tool for .NET Core, with support for line, branch and method coverage.</AssemblyDescription>
     <Authors>tonerdo</Authors>
     <PackageId>$(AssemblyTitle)</PackageId>
-    <PackageTitle>$(AssemblyTitle)</PackageTitle>
+    <Title>$(AssemblyTitle)</Title>
+    <Description>Coverlet is a cross platform code coverage tool for .NET Core, with support for line, branch and method coverage.</Description>
     <PackageVersion>$(AssemblyVersion)</PackageVersion>
     <PackageTags>coverage;testing;unit-test;lcov;opencover;quality</PackageTags>
     <PackageProjectUrl>https://github.com/tonerdo/coverlet</PackageProjectUrl>
