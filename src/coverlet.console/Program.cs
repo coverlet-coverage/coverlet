@@ -49,7 +49,9 @@ namespace Coverlet.Console
                 process.StartInfo.FileName = target.Value();
                 process.StartInfo.Arguments = targs.HasValue() ? targs.Value() : string.Empty;
                 process.StartInfo.CreateNoWindow = true;
+                process.StartInfo.RedirectStandardOutput = true;
                 process.Start();
+                logger.LogInformation(process.StandardOutput.ReadToEnd());
                 process.WaitForExit();
 
                 var dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
@@ -119,7 +121,7 @@ namespace Coverlet.Console
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
 
-                return 0;
+                return process.ExitCode == 0 ? 0 : process.ExitCode;
             });
 
             try
