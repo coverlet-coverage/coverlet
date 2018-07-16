@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -18,6 +19,6 @@ namespace Coverlet.Core.Reporters
         }
 
         public IReporter CreateReporter()
-            => _reporters.FirstOrDefault(r => r.Format == _format);
+            => _reporters.FirstOrDefault(r => string.Equals(r.Format, _format, StringComparison.OrdinalIgnoreCase));
     }
 }
