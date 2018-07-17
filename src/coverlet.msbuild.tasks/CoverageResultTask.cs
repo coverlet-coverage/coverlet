@@ -71,7 +71,9 @@ namespace Coverlet.MSbuild.Tasks
 
                     var report = Path.Combine(directory, filename);
                     Console.WriteLine($"  Generating report '{report}'");
-                    File.WriteAllText(report, reporter.Report(result));
+                    using (var fileStream = new FileStream(report, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
+                        reporter.Report(result, streamWriter);
                 }
 
                 var thresholdFailed = false;

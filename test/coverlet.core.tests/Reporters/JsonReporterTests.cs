@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Text;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -30,8 +32,15 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("module", documents);
 
             JsonReporter reporter = new JsonReporter();
-            Assert.NotEqual("{\n}", reporter.Report(result));
-            Assert.NotEqual(string.Empty, reporter.Report(result));
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(memoryStream))
+                    reporter.Report(result, streamWriter);
+
+                var reportString = Encoding.UTF8.GetString(memoryStream.ToArray());
+                Assert.NotEqual("{\n}", reportString);
+                Assert.NotEqual(string.Empty, reportString);
+            }
         }
     }
 }

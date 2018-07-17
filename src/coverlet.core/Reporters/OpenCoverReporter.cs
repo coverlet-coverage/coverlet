@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 
 namespace Coverlet.Core.Reporters
@@ -13,7 +12,7 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => "opencover.xml";
 
-        public string Report(CoverageResult result)
+        public void Report(CoverageResult result, StreamWriter streamWriter)
         {
             CoverageSummary summary = new CoverageSummary();
             XDocument xml = new XDocument();
@@ -227,11 +226,7 @@ namespace Coverlet.Core.Reporters
             coverage.Add(coverageSummary);
             coverage.Add(modules);
             xml.Add(coverage);
-
-            var stream = new MemoryStream();
-            xml.Save(stream);
-
-            return Encoding.UTF8.GetString(stream.ToArray());
+            xml.Save(streamWriter);
         }
     }
 }

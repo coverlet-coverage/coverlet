@@ -1,6 +1,5 @@
-using System;
 using System.Linq;
-using System.Collections.Generic;
+using System.IO;
 
 namespace Coverlet.Core.Reporters
 {
@@ -10,10 +9,9 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => "info";
 
-        public string Report(CoverageResult result)
+        public void Report(CoverageResult result, StreamWriter streamWriter)
         {
             CoverageSummary summary = new CoverageSummary();
-            List<string> lcov = new List<string>();
 
             foreach (var module in result.Modules)
             {
@@ -23,7 +21,7 @@ namespace Coverlet.Core.Reporters
                     var docBranchCoverage = summary.CalculateBranchCoverage(doc.Value);
                     var docMethodCoverage = summary.CalculateMethodCoverage(doc.Value);
 
-                    lcov.Add("SF:" + doc.Key);
+                    streamWriter.WriteLine("SF:" + doc.Key);
                     foreach (var @class in doc.Value)
                     {
                         foreach (var method in @class.Value)
@@ -32,33 +30,31 @@ namespace Coverlet.Core.Reporters
                             if (method.Value.Lines.Count == 0)
                                 continue;
 
-                            lcov.Add($"FN:{method.Value.Lines.First().Key - 1},{method.Key}");
-                            lcov.Add($"FNDA:{method.Value.Lines.First().Value},{method.Key}");
+                            streamWriter.WriteLine($"FN:{method.Value.Lines.First().Key - 1},{method.Key}");
+                            streamWriter.WriteLine($"FNDA:{method.Value.Lines.First().Value},{method.Key}");
 
                             foreach (var line in method.Value.Lines)
-                                lcov.Add($"DA:{line.Key},{line.Value}");
+                                streamWriter.WriteLine($"DA:{line.Key},{line.Value}");
 
                             foreach (var branch in method.Value.Branches)
                             {
-                                lcov.Add($"BRDA:{branch.Line},{branch.Offset},{branch.Path},{branch.Hits}");
+                                streamWriter.WriteLine($"BRDA:{branch.Line},{branch.Offset},{branch.Path},{branch.Hits}");
                             }
                         }
                     }
 
-                    lcov.Add($"LF:{docLineCoverage.Total}");
-                    lcov.Add($"LH:{docLineCoverage.Covered}");
+                    streamWriter.WriteLine($"LF:{docLineCoverage.Total}");
+                    streamWriter.WriteLine($"LH:{docLineCoverage.Covered}");
 
-                    lcov.Add($"BRF:{docBranchCoverage.Total}");
-                    lcov.Add($"BRH:{docBranchCoverage.Covered}");
+                    streamWriter.WriteLine($"BRF:{docBranchCoverage.Total}");
+                    streamWriter.WriteLine($"BRH:{docBranchCoverage.Covered}");
 
-                    lcov.Add($"FNF:{docMethodCoverage.Total}");
-                    lcov.Add($"FNH:{docMethodCoverage.Covered}");
+                    streamWriter.WriteLine($"FNF:{docMethodCoverage.Total}");
+                    streamWriter.WriteLine($"FNH:{docMethodCoverage.Covered}");
 
-                    lcov.Add("end_of_record");
+                    streamWriter.WriteLine("end_of_record");
                 }
             }
-
-            return string.Join(Environment.NewLine, lcov);
         }
     }
 }
