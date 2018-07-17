@@ -77,8 +77,7 @@ namespace Coverlet.Console
 
                     var report = Path.Combine(directory, filename);
                     logger.LogInformation($"  Generating report '{report}'");
-                    using (var fileStream = new FileStream(report, FileMode.Create, FileAccess.Write, FileShare.Read))
-                    using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
+                    using (var streamWriter = File.CreateText(report))
                         reporter.Report(result, streamWriter);
                 }
 

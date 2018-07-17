@@ -71,8 +71,7 @@ namespace Coverlet.MSbuild.Tasks
 
                     var report = Path.Combine(directory, filename);
                     Console.WriteLine($"  Generating report '{report}'");
-                    using (var fileStream = new FileStream(report, FileMode.Create, FileAccess.Write, FileShare.Read))
-                    using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
+                    using (var streamWriter = File.CreateText(report))
                         reporter.Report(result, streamWriter);
                 }
 
