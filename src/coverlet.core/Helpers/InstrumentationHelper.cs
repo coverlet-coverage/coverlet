@@ -246,5 +246,50 @@ namespace Coverlet.Core.Helpers
             }
         }
     }
+
+    internal class ExcludedFilesHelper
+    {
+        const string RELATIVE_KEY = nameof(RELATIVE_KEY);
+        Dictionary<string, Matcher> _matcherDict;
+        public ExcludedFilesHelper(string[] excludes)
+        {
+            if (excludes != null && excludes.Length > 0)
+            {
+                _matcherDict = new Dictionary<string, Matcher>() { { RELATIVE_KEY, new Matcher() } };
+                foreach (var excludeRule in excludes)
+                {
+                    if (Path.IsPathRooted(excludeRule))
+                    {
+                        var root = Path.GetPathRoot(excludeRule);
+                        if (!_matcherDict.ContainsKey(root))
+                        {
+                            _matcherDict.Add(root, new Matcher());
+                        }
+                        _matcherDict[root].AddInclude(excludeRule.Substring(root.Length));
+                    }
+                    else
+                    {
+                        _matcherDict[RELATIVE_KEY].AddInclude(excludeRule);
+                    }
+                }
+            }
+        }
+
+        public bool Exclude(string sourceFile)
+        {
+            if (_matcherDict == null)
+                return false;
+
+            foreach (var entry in _matcherDict)
+            {
+                if (entry.Value.Match(Path.IsPathRooted(sourceFile) ?
+                    sourceFile.Substring(Path.GetPathRoot(sourceFile).Length) :
+                    sourceFile).HasMatches)
+                    return true;
+            }
+
+            return false;
+        }
+    }
 }
 

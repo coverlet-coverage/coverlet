@@ -20,16 +20,16 @@ namespace Coverlet.Core.Instrumentation
         private readonly string _module;
         private readonly string _identifier;
         private readonly string[] _filters;
-        private readonly string[] _excludedFiles;
         private readonly static Lazy<MethodInfo> _markExecutedMethodLoader = new Lazy<MethodInfo>(GetMarkExecutedMethod);
+        private readonly ExcludedFilesHelper _excludedFilesHelper;
         private InstrumenterResult _result;
 
-        public Instrumenter(string module, string identifier, string[] filters, string[] excludedFiles)
+        public Instrumenter(string module, string identifier, string[] filters, ExcludedFilesHelper excludedFilesHelper)
         {
             _module = module;
             _identifier = identifier;
             _filters = filters;
-            _excludedFiles = excludedFiles ?? Array.Empty<string>();
+            _excludedFilesHelper = excludedFilesHelper ?? new ExcludedFilesHelper(null);
         }
 
         public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
@@ -102,7 +102,7 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentMethod(MethodDefinition method)
         {
             var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
-            if (!string.IsNullOrEmpty(sourceFile) && _excludedFiles.Contains(sourceFile))
+            if (!string.IsNullOrEmpty(sourceFile) && _excludedFilesHelper.Exclude(sourceFile))
                 return;
 
             var methodBody = GetMethodBody(method);

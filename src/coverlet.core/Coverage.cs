@@ -34,7 +34,8 @@ namespace Coverlet.Core
         public void PrepareModules()
         {
             string[] modules = InstrumentationHelper.GetCoverableModules(_module);
-            string[] excludes =  InstrumentationHelper.GetExcludedFiles(_excludes);
+            //var ef = InstrumentationHelper.GetExcludedFiles(_excludes);
+            var excludedFilesHelper = new ExcludedFilesHelper(_excludes);
             _filters = _filters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
             foreach (var module in modules)
@@ -42,7 +43,7 @@ namespace Coverlet.Core
                 if (InstrumentationHelper.IsModuleExcluded(module, _filters))
                     continue;
 
-                var instrumenter = new Instrumenter(module, _identifier, _filters, excludes);
+                var instrumenter = new Instrumenter(module, _identifier, _filters, excludedFilesHelper);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);

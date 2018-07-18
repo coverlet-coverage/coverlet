@@ -40,6 +40,7 @@ namespace Coverlet.MSbuild.Tasks
         {
             try
             {
+                //System.Diagnostics.Debugger.Launch();
                 var excludes = _excludeByFile?.Split(',');
                 var filters = _exclude?.Split(',');
 
