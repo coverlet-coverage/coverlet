@@ -20,6 +20,11 @@ namespace Coverlet.Core.Symbols
         private const int StepOverLineCode = 0xFEEFEE;
         private static readonly Regex IsMovenext = new Regex(@"\<[^\s>]+\>\w__\w(\w)?::MoveNext\(\)$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
+        public static bool IsMoveNext(string fullName)
+        {
+            return IsMovenext.IsMatch(fullName);
+        }
+
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
