@@ -90,19 +90,19 @@ namespace Coverlet.MSbuild.Tasks
 
                     if (_threshold > 0)
                     {
-                        if (linePercent < _threshold && thresholdTypes.Contains("line"))
+                        if (linePercent < _threshold && thresholdTypes.Contains("line", StringComparer.OrdinalIgnoreCase))
                         {
                             exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a line coverage '{linePercent}%' below specified threshold '{_threshold}%'");
                             thresholdFailed = true;
                         }
 
-                        if (branchPercent < _threshold && thresholdTypes.Contains("branch"))
+                        if (branchPercent < _threshold && thresholdTypes.Contains("branch", StringComparer.OrdinalIgnoreCase))
                         {
                             exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a branch coverage '{branchPercent}%' below specified threshold '{_threshold}%'");
                             thresholdFailed = true;
                         }
 
-                        if (methodPercent < _threshold && thresholdTypes.Contains("method"))
+                        if (methodPercent < _threshold && thresholdTypes.Contains("method", StringComparer.OrdinalIgnoreCase))
                         {
                             exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a method coverage '{methodPercent}%' below specified threshold '{_threshold}%'");
                             thresholdFailed = true;
