@@ -19,16 +19,18 @@ namespace Coverlet.Core.Instrumentation
     {
         private readonly string _module;
         private readonly string _identifier;
-        private readonly string[] _filters;
+        private readonly string[] _excludeFilters;
+        private readonly string[] _includeFilters;
         private readonly string[] _excludedFiles;
         private readonly static Lazy<MethodInfo> _markExecutedMethodLoader = new Lazy<MethodInfo>(GetMarkExecutedMethod);
         private InstrumenterResult _result;
 
-        public Instrumenter(string module, string identifier, string[] filters, string[] excludedFiles)
+        public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles)
         {
             _module = module;
             _identifier = identifier;
-            _filters = filters;
+            _excludeFilters = excludeFilters;
+            _includeFilters = includeFilters;
             _excludedFiles = excludedFiles ?? Array.Empty<string>();
         }
 
@@ -69,7 +71,8 @@ namespace Coverlet.Core.Instrumentation
                     {
                         var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
-                            && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _filters))
+                            && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
+                            && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
                     }
 

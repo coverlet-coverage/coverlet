@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 
 using Coverlet.Core.Helpers;
@@ -13,8 +12,9 @@ namespace Coverlet.Core
     {
         private string _module;
         private string _identifier;
-        private string[] _filters;
-        private string[] _excludes;
+        private string[] _excludeFilters;
+        private string[] _includeFilters;
+        private string[] _excludedSourceFiles;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -22,11 +22,12 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] filters, string[] excludes)
+        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles)
         {
             _module = module;
-            _filters = filters;
-            _excludes = excludes;
+            _excludeFilters = excludeFilters;
+            _includeFilters = includeFilters;
+            _excludedSourceFiles = excludedSourceFiles;
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
@@ -34,15 +35,17 @@ namespace Coverlet.Core
         public void PrepareModules()
         {
             string[] modules = InstrumentationHelper.GetCoverableModules(_module);
-            string[] excludes =  InstrumentationHelper.GetExcludedFiles(_excludes);
-            _filters = _filters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            string[] excludes =  InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
+            _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
             foreach (var module in modules)
             {
-                if (InstrumentationHelper.IsModuleExcluded(module, _filters))
+                if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters)
+                    || !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
                     continue;
 
-                var instrumenter = new Instrumenter(module, _identifier, _filters, excludes);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);
