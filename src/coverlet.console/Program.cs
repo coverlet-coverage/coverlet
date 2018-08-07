@@ -31,8 +31,9 @@ namespace Coverlet.Console
             CommandOption formats = app.Option("-f|--format", "Format of the generated coverage report.", CommandOptionType.MultipleValue);
             CommandOption threshold = app.Option("--threshold", "Exits with error if the coverage % is below value.", CommandOptionType.SingleValue);
             CommandOption thresholdTypes = app.Option("--threshold-type", "Coverage type to apply the threshold to.", CommandOptionType.MultipleValue);
-            CommandOption filters = app.Option("--exclude", "Filter expressions to exclude specific modules and types.", CommandOptionType.MultipleValue);
-            CommandOption excludes = app.Option("--exclude-by-file", "Glob patterns specifying source files to exclude.", CommandOptionType.MultipleValue);
+            CommandOption excludeFilters = app.Option("--exclude", "Filter expressions to exclude specific modules and types.", CommandOptionType.MultipleValue);
+            CommandOption includeFilters = app.Option("--include", "Filter expressions to include only specific modules and types.", CommandOptionType.MultipleValue);
+            CommandOption excludedSourceFiles = app.Option("--exclude-by-file", "Glob patterns specifying source files to exclude.", CommandOptionType.MultipleValue);
 
             app.OnExecute(() =>
             {
@@ -42,7 +43,7 @@ namespace Coverlet.Console
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
 
-                Coverage coverage = new Coverage(module.Value, filters.Values.ToArray(), excludes.Values.ToArray());
+                Coverage coverage = new Coverage(module.Value, excludeFilters.Values.ToArray(), includeFilters.Values.ToArray(), excludedSourceFiles.Values.ToArray());
                 coverage.PrepareModules();
 
                 Process process = new Process();
