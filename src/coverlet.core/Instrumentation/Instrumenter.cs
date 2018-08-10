@@ -175,10 +175,16 @@ namespace Coverlet.Core.Instrumentation
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
         {
+            int documentIndex = 0;
             if (!_result.Documents.TryGetValue(sequencePoint.Document.Url, out var document))
             {
                 document = new Document { Path = sequencePoint.Document.Url };
+                documentIndex = _result.Documents.Count;
                 _result.Documents.Add(document.Path, document);
+            }
+            else
+            {
+                documentIndex = _result.Documents.Keys.ToList().IndexOf(document.Path);
             }
 
             for (int i = sequencePoint.StartLine; i <= sequencePoint.EndLine; i++)
@@ -187,7 +193,7 @@ namespace Coverlet.Core.Instrumentation
                     document.Lines.Add(i, new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
 
-            string marker = $"L,{document.Path},{sequencePoint.StartLine},{sequencePoint.EndLine}";
+            string marker = $"L,{documentIndex},{sequencePoint.StartLine},{sequencePoint.EndLine}";
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
@@ -202,10 +208,16 @@ namespace Coverlet.Core.Instrumentation
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, BranchPoint branchPoint)
         {
+            int documentIndex = 0;
             if (!_result.Documents.TryGetValue(branchPoint.Document, out var document))
             {
                 document = new Document { Path = branchPoint.Document };
+                documentIndex = _result.Documents.Count;
                 _result.Documents.Add(document.Path, document);
+            }
+            else
+            {
+                documentIndex = _result.Documents.Keys.ToList().IndexOf(document.Path);
             }
 
             var key = (branchPoint.StartLine, (int)branchPoint.Ordinal);
@@ -223,7 +235,7 @@ namespace Coverlet.Core.Instrumentation
                     }
                 );
 
-            string marker = $"B,{document.Path},{branchPoint.StartLine},{branchPoint.Ordinal}";
+            string marker = $"B,{documentIndex},{branchPoint.StartLine},{branchPoint.Ordinal}";
 
             var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
             var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
