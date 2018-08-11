@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -35,10 +37,15 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("module", documents);
 
             LcovReporter reporter = new LcovReporter();
-            string report = reporter.Report(result);
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(memoryStream))
+                    reporter.Report(result, streamWriter);
 
-            Assert.NotEmpty(report);
-            Assert.Equal("SF:doc.cs", report.Split(Environment.NewLine)[0]);
+                var reportString = Encoding.UTF8.GetString(memoryStream.ToArray());
+                Assert.NotEmpty(reportString);
+                Assert.Equal("SF:doc.cs", reportString.Split(Environment.NewLine)[0]);
+            }
         }
     }
 }

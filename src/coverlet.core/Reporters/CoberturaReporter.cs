@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -14,7 +13,7 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => "cobertura.xml";
 
-        public string Report(CoverageResult result)
+        public void Report(CoverageResult result, StreamWriter streamWriter)
         {
             CoverageSummary summary = new CoverageSummary();
 
@@ -123,11 +122,7 @@ namespace Coverlet.Core.Reporters
             coverage.Add(sources);
             coverage.Add(packages);
             xml.Add(coverage);
-
-            var stream = new MemoryStream();
-            xml.Save(stream);
-
-            return Encoding.UTF8.GetString(stream.ToArray());
+            xml.Save(streamWriter);
         }
 
         private string GetBasePath(Modules modules)

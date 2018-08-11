@@ -1,16 +1,19 @@
+using System.IO;
 using Newtonsoft.Json;
 
 namespace Coverlet.Core.Reporters
 {
     public class JsonReporter : IReporter
     {
+        private static readonly JsonSerializer _jsonSerializer = JsonSerializer.CreateDefault(new JsonSerializerSettings { Formatting = Formatting.Indented });
+
         public string Format => "json";
 
         public string Extension => "json";
 
-        public string Report(CoverageResult result)
+        public void Report(CoverageResult result, StreamWriter streamWriter)
         {
-            return JsonConvert.SerializeObject(result.Modules, Formatting.Indented);
+            _jsonSerializer.Serialize(streamWriter, result.Modules);
         }
     }
 }

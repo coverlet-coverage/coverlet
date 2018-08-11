@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -16,7 +18,14 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
 
             OpenCoverReporter reporter = new OpenCoverReporter();
-            Assert.NotEqual(string.Empty, reporter.Report(result));
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(memoryStream))
+                    reporter.Report(result, streamWriter);
+
+                var reportString = Encoding.UTF8.GetString(memoryStream.ToArray());
+                Assert.NotEqual(string.Empty, reportString);
+            }
         }
 
         [Fact]
@@ -30,11 +39,16 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("Some.Other.Module", CreateSecondDocuments());
 
             OpenCoverReporter reporter = new OpenCoverReporter();
-            var xml = reporter.Report(result);
-            Assert.NotEqual(string.Empty, xml);
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(memoryStream))
+                    reporter.Report(result, streamWriter);
 
-            Assert.Contains(@"<FileRef uid=""1"" />", xml);
-            Assert.Contains(@"<FileRef uid=""2"" />", xml);
+                var reportString = Encoding.UTF8.GetString(memoryStream.ToArray());
+                Assert.NotEqual(string.Empty, reportString);
+                Assert.Contains(@"<FileRef uid=""1"" />", reportString);
+                Assert.Contains(@"<FileRef uid=""2"" />", reportString);
+            }
         }
 
         private static Documents CreateFirstDocuments()
