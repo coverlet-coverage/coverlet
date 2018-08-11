@@ -7,6 +7,7 @@ namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : Task
     {
+        private static readonly char[] _separators = new[] { ',', ';' };
         private static Coverage _coverage;
         private string _path;
         private string _exclude;
@@ -47,9 +48,9 @@ namespace Coverlet.MSbuild.Tasks
         {
             try
             {
-                var excludedSourceFiles = _excludeByFile?.Split(',');
-                var excludeFilters = _exclude?.Split(',');
-                var includeFilters = _include?.Split(',');
+                var excludedSourceFiles = _excludeByFile?.Split(_separators);
+                var excludeFilters = _exclude?.Split(_separators);
+                var includeFilters = _include?.Split(_separators);
 
                 _coverage = new Coverage(_path, excludeFilters, includeFilters, excludedSourceFiles);
                 _coverage.PrepareModules();

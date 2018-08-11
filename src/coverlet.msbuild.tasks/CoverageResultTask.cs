@@ -12,6 +12,7 @@ namespace Coverlet.MSbuild.Tasks
 {
     public class CoverageResultTask : Task
     {
+        private static readonly char[] _separators = new[] { ',', ';' };
         private string _output;
         private string _format;
         private int _threshold;
@@ -58,7 +59,7 @@ namespace Coverlet.MSbuild.Tasks
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
-                var formats = _format.Split(',');
+                var formats = _format.Split(_separators);
                 foreach (var format in formats)
                 {
                     var reporter = new ReporterFactory(format).CreateReporter();
@@ -75,7 +76,7 @@ namespace Coverlet.MSbuild.Tasks
                 }
 
                 var thresholdFailed = false;
-                var thresholdTypes = _thresholdType.Split(',').Select(t => t.Trim());
+                var thresholdTypes = _thresholdType.Split(_separators).Select(t => t.Trim());
                 var summary = new CoverageSummary();
                 var exceptionBuilder = new StringBuilder();
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
