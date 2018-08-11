@@ -65,6 +65,7 @@ Options:
   --threshold        Exits with error if the coverage % is below value.
   --threshold-type   Coverage type to apply the threshold to.
   --exclude          Filter expressions to exclude specific modules and types.
+  --include          Filter expressions to include specific modules and types.
   --exclude-by-file  Glob patterns specifying source files to exclude.
 ```
 
@@ -173,7 +174,14 @@ Examples
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude "[coverlet.*]Coverlet.Core.Coverage"
 ```
 
-You can specify the `--exclude` option multiple times to allow for multiple filter expressions.
+Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `--include` option. 
+
+Examples
+ - `--include "[*]*"` => INcludes all types in all assemblies (nothing is instrumented)
+ - `--include "[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
+  - `--include "[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
+
+Both `--exclude` and `--include` options can be used together but `--exclude` takes precedence. You can specify the `--exclude` and `--include` options multiple times to allow for multiple filter expressions.
 
 ### MSBuild
 
@@ -270,9 +278,16 @@ Examples
 dotnet test /p:CollectCoverage=true /p:Exclude="[coverlet.*]Coverlet.Core.Coverage"
 ```
 
+Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `Include` property. 
 
-You can specify multiple filter expressions by separting them with a comma (`,`). If you specify multiple filters, then [you'll have to escape the surrounding quotes](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this:
-`/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`.
+Examples
+ - `/p:Include="[*]*"` => INcludes all types in all assemblies (nothing is instrumented)
+ - `/p:Include="[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
+  - `/p:Include="[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
+
+Both `Exclude` and `Include` properties can be used together but `Exclude` takes precedence.
+
+You can specify multiple filter expressions by separting them with a comma (`,`). If you specify multiple filters, then [you'll have to escape the surrounding quotes](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"` or `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`.
 
 ### Cake Addin
 If you're using [Cake Build](https://cakebuild.net) for your build script you can use the [Cake.Coverlet](https://github.com/Romanx/Cake.Coverlet) addin to provide you extensions to dotnet test for passing coverlet arguments in a strongly typed manner.
