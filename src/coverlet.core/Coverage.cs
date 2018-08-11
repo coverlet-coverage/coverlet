@@ -173,11 +173,7 @@ namespace Coverlet.Core
                             continue;
 
                         bool isBranch = info[0] == "B";
-
-                        if (!result.Documents.TryGetValue(info[1], out var document))
-                        {
-                            continue;
-                        }
+                        var document = result.Documents.ElementAt(int.Parse(info[1])).Value;
 
                         int start = int.Parse(info[2]);
                         int hits = int.Parse(info[4]);
