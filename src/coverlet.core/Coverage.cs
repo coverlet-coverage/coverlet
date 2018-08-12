@@ -161,6 +161,8 @@ namespace Coverlet.Core
                     continue;
                 }
 
+                List<Document> documents = result.Documents.Values.ToList();
+
                 using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
                 using (var sr = new StreamReader(fs))
                 {
@@ -173,7 +175,7 @@ namespace Coverlet.Core
                             continue;
 
                         bool isBranch = info[0] == "B";
-                        var document = result.Documents.ElementAt(int.Parse(info[1])).Value;
+                        var document = documents[int.Parse(info[1])];
 
                         int start = int.Parse(info[2]);
                         int hits = int.Parse(info[4]);

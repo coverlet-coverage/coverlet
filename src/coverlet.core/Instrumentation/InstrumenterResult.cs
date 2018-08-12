@@ -27,6 +27,7 @@ namespace Coverlet.Core.Instrumentation
         }
 
         public string Path;
+        public int Index;
 
         public Dictionary<int, Line> Lines { get; private set; }
         public Dictionary<(int Line, int Ordinal), Branch> Branches { get; private set; }

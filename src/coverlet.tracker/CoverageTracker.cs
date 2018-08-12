@@ -8,6 +8,7 @@ namespace Coverlet.Tracker
     public static class CoverageTracker
     {
         private static List<Dictionary<string, Dictionary<string, int>>> _events;
+        private static readonly StringHashSuffixComparer _stringHashSuffixComparer = new StringHashSuffixComparer();
 
         [ThreadStatic]
         private static Dictionary<string, Dictionary<string, int>> t_events;
@@ -25,7 +26,7 @@ namespace Coverlet.Tracker
         {
             if (t_events == null)
             {
-                t_events = new Dictionary<string, Dictionary<string, int>>();
+                t_events = new Dictionary<string, Dictionary<string, int>>(_stringHashSuffixComparer);
                 lock (_events)
                 {
                     _events.Add(t_events);
@@ -38,7 +39,7 @@ namespace Coverlet.Tracker
             {
                 if (!t_events.TryGetValue(file, out var fileEvents))
                 {
-                    fileEvents = new Dictionary<string, int>();
+                    fileEvents = new Dictionary<string, int>(_stringHashSuffixComparer);
                     t_events.Add(file, fileEvents);
                 }
 
