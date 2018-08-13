@@ -187,6 +187,8 @@ Both `--exclude` and `--include` options can be used together but `--exclude` ta
 
 In this mode, Coverlet doesn't require any additional setup other than including the NuGet package in the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
 
+If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
+
 #### Code Coverage
 
 Enabling code coverage is as simple as setting the `CollectCoverage` property to `true`
@@ -287,7 +289,7 @@ Examples
 
 Both `Exclude` and `Include` properties can be used together but `Exclude` takes precedence.
 
-You can specify multiple filter expressions by separting them with a comma (`,`). If you specify multiple filters, then [you'll have to escape the surrounding quotes](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"` or `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`.
+You can specify multiple filter expressions by separting them with a comma (`,`).
 
 ### Cake Addin
 If you're using [Cake Build](https://cakebuild.net) for your build script you can use the [Cake.Coverlet](https://github.com/Romanx/Cake.Coverlet) addin to provide you extensions to dotnet test for passing coverlet arguments in a strongly typed manner.
