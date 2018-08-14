@@ -14,10 +14,14 @@ namespace Coverlet.Core.Helpers
 {
     internal static class InstrumentationHelper
     {
-        public static string[] GetCoverableModules(string module)
+        public static string[] GetCoverableModules(string module, bool excludeModuleItself = true)
         {
             IEnumerable<string> modules = Directory.EnumerateFiles(Path.GetDirectoryName(module)).Where(f => f.EndsWith(".exe") || f.EndsWith(".dll"));
-            modules = modules.Where(m => IsAssembly(m) && Path.GetFileName(m) != Path.GetFileName(module));
+            modules = modules.Where(IsAssembly);
+            if (excludeModuleItself)
+            {
+                modules = modules.Where(m => Path.GetFileName(m) != Path.GetFileName(module));
+            }
             return modules.ToArray();
         }
 

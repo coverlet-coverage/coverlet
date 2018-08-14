@@ -25,6 +25,8 @@ namespace Coverlet.Console
             app.VersionOption("-v|--version", GetAssemblyVersion());
 
             CommandArgument module = app.Argument("<ASSEMBLY>", "Path to the test assembly.");
+
+            CommandOption selfRun = app.Option("--self-run", "Runs module itself. Useful for running tests via API.", CommandOptionType.NoValue);
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
             CommandOption targs = app.Option("-a|--targetargs", "Arguments to be passed to the test runner.", CommandOptionType.SingleValue);
             CommandOption output = app.Option("-o|--output", "Output of the generated coverage report", CommandOptionType.SingleValue);
@@ -43,8 +45,20 @@ namespace Coverlet.Console
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
 
-                Coverage coverage = new Coverage(module.Value, excludeFilters.Values.ToArray(), includeFilters.Values.ToArray(), excludedSourceFiles.Values.ToArray());
+                Coverage coverage = new Coverage(module.Value, excludeFilters.Values.ToArray(), includeFilters.Values.ToArray(), excludedSourceFiles.Values.ToArray(), selfRun.HasValue());
                 coverage.PrepareModules();
+
+                Process selfProcess = null;
+                if (selfRun.HasValue())
+                {
+                    selfProcess = new Process();
+                    selfProcess.StartInfo.FileName = module.Value;
+                    selfProcess.StartInfo.RedirectStandardOutput = true;
+                    //selfProcess.StartInfo.CreateNoWindow = true;
+                    selfProcess.Start();
+                    
+                    logger.LogInformation("Process of tested module started");
+                }
 
                 Process process = new Process();
                 process.StartInfo.FileName = target.Value();
@@ -54,6 +68,11 @@ namespace Coverlet.Console
                 process.Start();
                 logger.LogInformation(process.StandardOutput.ReadToEnd());
                 process.WaitForExit();
+
+                if (selfProcess != null)
+                {
+                    selfProcess.Kill();
+                }
 
                 var dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
                 var dThreshold = threshold.HasValue() ? int.Parse(threshold.Value()) : 0;
