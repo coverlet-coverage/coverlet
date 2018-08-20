@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
@@ -15,11 +16,17 @@ namespace Coverlet.Core.Instrumentation
     public static class ModuleTrackerTemplate
     {
         public static string HitsFilePath;
+        public static int[] HitsArray;
 
-        public readonly static int[] HitsArray;
+        [ThreadStatic]
+        private static int[] threadHits;
+
+        private static List<int[]> threads;
 
         static ModuleTrackerTemplate()
         {
+            threads = new List<int[]>(2 * Environment.ProcessorCount);
+
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(UnloadModule);
             AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
             // At the end of the instrumentation of a module, the instrumenter needs to add code here
@@ -27,8 +34,32 @@ namespace Coverlet.Core.Instrumentation
             // the module.
         }
 
+        public static void RecordHit(int hitLocationIndex)
+        {
+            if (threadHits == null)
+            {
+                lock (threads)
+                {
+                    threadHits = new int[HitsArray.Length];
+                    threads.Add(threadHits);
+                }
+            }
+
+            ++threadHits[hitLocationIndex];
+        }
+
         public static void UnloadModule(object sender, EventArgs e)
         {
+            // Update the global hits array from data from all the threads
+            lock (threads)
+            {
+                foreach (var threadHits in threads)
+                {
+                    for (int i = 0; i < HitsArray.Length; ++i)
+                        HitsArray[i] += threadHits[i];
+                }
+            }
+
             // TODO: same module can be unloaded multiple times in the same process. Need to check and handle this case.
             // TODO: perhaps some kind of global mutex based on the name of the modules hits file, and after the first
             // TODO: they update the hit count from the file already created. Something like this, (minus the read stuff):

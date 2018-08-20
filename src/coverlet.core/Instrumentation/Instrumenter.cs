@@ -26,6 +26,7 @@ namespace Coverlet.Core.Instrumentation
         private FieldDefinition _customModuleTrackerHitsArray;
         private FieldDefinition _customModuleTrackerHitsFilePath;
         private ILProcessor _customModuleTrackerClassConstructorIl;
+        private TypeDefinition _customTrackerTypeDef;
         private MethodReference _cachedInterlockedIncMethod;
 
         public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles)
@@ -101,14 +102,16 @@ namespace Coverlet.Core.Instrumentation
                 TypeDefinition moduleTrackerTemplate = xad.MainModule.GetType(
                     "Coverlet.Core.Instrumentation", nameof(ModuleTrackerTemplate));
 
-                TypeDefinition customTrackerTypeDef = new TypeDefinition(
+                _customTrackerTypeDef = new TypeDefinition(
                     "Coverlet.Core.Instrumentation.Tracker", Path.GetFileNameWithoutExtension(module.Name) + "_" + _identifier, moduleTrackerTemplate.Attributes);
 
-                customTrackerTypeDef.BaseType = module.TypeSystem.Object;
+                _customTrackerTypeDef.BaseType = module.TypeSystem.Object;
                 foreach (FieldDefinition fieldDef in moduleTrackerTemplate.Fields)
                 {
                     var fieldClone = new FieldDefinition(fieldDef.Name, fieldDef.Attributes, fieldDef.FieldType);
-                    customTrackerTypeDef.Fields.Add(fieldClone);
+                    fieldClone.FieldType = module.ImportReference(fieldClone.FieldType);
+
+                    _customTrackerTypeDef.Fields.Add(fieldClone);
 
                     if (fieldClone.Name == "HitsArray")
                         _customModuleTrackerHitsArray = fieldClone;
@@ -119,6 +122,14 @@ namespace Coverlet.Core.Instrumentation
                 foreach (MethodDefinition methodDef in moduleTrackerTemplate.Methods)
                 {
                     MethodDefinition methodOnCustomType = new MethodDefinition(methodDef.Name, methodDef.Attributes, methodDef.ReturnType);
+
+                    if (methodDef.Name == "RecordHit")
+                    {
+                        foreach (var parameter in methodDef.Parameters)
+                        {
+                            methodOnCustomType.Parameters.Add(new ParameterDefinition(module.ImportReference(parameter.ParameterType)));
+                        }
+                    }
 
                     foreach (var variable in methodDef.Body.Variables)
                     {
@@ -144,12 +155,12 @@ namespace Coverlet.Core.Instrumentation
                             {
                                 // Move to the custom type
                                 instr.Operand = new MethodReference(
-                                    methodReference.Name, methodReference.ReturnType, customTrackerTypeDef);
+                                    methodReference.Name, methodReference.ReturnType, _customTrackerTypeDef);
                             }
                         }
                         else if (instr.Operand is FieldReference fieldReference)
                         {
-                            instr.Operand = customTrackerTypeDef.Fields.Single(fd => fd.Name == fieldReference.Name);
+                            instr.Operand = _customTrackerTypeDef.Fields.Single(fd => fd.Name == fieldReference.Name);
                         }
                         else if (instr.Operand is TypeReference typeReference)
                         {
@@ -162,10 +173,10 @@ namespace Coverlet.Core.Instrumentation
                     foreach (var handler in methodDef.Body.ExceptionHandlers)
                         methodOnCustomType.Body.ExceptionHandlers.Add(handler);
 
-                    customTrackerTypeDef.Methods.Add(methodOnCustomType);
+                    _customTrackerTypeDef.Methods.Add(methodOnCustomType);
                 }
 
-                module.Types.Add(customTrackerTypeDef);
+                module.Types.Add(_customTrackerTypeDef);
             }
 
             Debug.Assert(_customModuleTrackerHitsArray != null);
@@ -234,7 +245,7 @@ namespace Coverlet.Core.Instrumentation
                     foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
                         ReplaceExceptionHandlerBoundary(handler, instruction, target);
 
-                    index += 5;
+                    index += 2;
                 }
 
                 foreach (var _branchTarget in targetedBranchPoints)
@@ -255,7 +266,7 @@ namespace Coverlet.Core.Instrumentation
                     foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
                         ReplaceExceptionHandlerBoundary(handler, instruction, target);
 
-                    index += 5;
+                    index += 2;
                 }
 
                 index++;
@@ -282,7 +293,7 @@ namespace Coverlet.Core.Instrumentation
             var entry = (false, document.Index, sequencePoint.StartLine, sequencePoint.EndLine);
             _result.HitCandidates.Add(entry);
 
-            return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count);
+            return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
         }
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, BranchPoint branchPoint)
@@ -312,7 +323,7 @@ namespace Coverlet.Core.Instrumentation
             var entry = (true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal);
             _result.HitCandidates.Add(entry);
 
-            return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count);
+            return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
         }
 
         private Instruction AddInstrumentationInstructions(MethodDefinition method, ILProcessor processor, Instruction instruction, int hitEntryIndex)
@@ -320,23 +331,37 @@ namespace Coverlet.Core.Instrumentation
             if (_cachedInterlockedIncMethod == null)
             {
                 _cachedInterlockedIncMethod = new MethodReference(
-                    "Increment", method.Module.TypeSystem.Int32, method.Module.ImportReference(typeof(System.Threading.Interlocked)));
-                _cachedInterlockedIncMethod.Parameters.Add(new ParameterDefinition(new ByReferenceType(method.Module.TypeSystem.Int32)));
+                    "RecordHit", method.Module.TypeSystem.Void, _customTrackerTypeDef);
+                _cachedInterlockedIncMethod.Parameters.Add(new ParameterDefinition(method.Module.TypeSystem.Int32));
             }
 
-            var sfldInstr = Instruction.Create(OpCodes.Ldsfld, _customModuleTrackerHitsArray);
             var indxInstr = Instruction.Create(OpCodes.Ldc_I4, hitEntryIndex);
-            var arefInstr = Instruction.Create(OpCodes.Ldelema, method.Module.TypeSystem.Int32);
             var callInstr = Instruction.Create(OpCodes.Call, _cachedInterlockedIncMethod);
-            var popInstr = Instruction.Create(OpCodes.Pop);
 
-            processor.InsertBefore(instruction, popInstr);
-            processor.InsertBefore(popInstr, callInstr);
-            processor.InsertBefore(callInstr, arefInstr);
-            processor.InsertBefore(arefInstr, indxInstr);
-            processor.InsertBefore(indxInstr, sfldInstr);
+            processor.InsertBefore(instruction, callInstr);
+            processor.InsertBefore(callInstr, indxInstr);
 
-            return sfldInstr;
+            return indxInstr;
+            //if (_cachedInterlockedIncMethod == null)
+            //{
+            //    _cachedInterlockedIncMethod = new MethodReference(
+            //        "Increment", method.Module.TypeSystem.Int32, method.Module.ImportReference(typeof(System.Threading.Interlocked)));
+            //    _cachedInterlockedIncMethod.Parameters.Add(new ParameterDefinition(new ByReferenceType(method.Module.TypeSystem.Int32)));
+            //}
+
+            //var sfldInstr = Instruction.Create(OpCodes.Ldsfld, _customModuleTrackerHitsArray);
+            //var indxInstr = Instruction.Create(OpCodes.Ldc_I4, hitEntryIndex);
+            //var arefInstr = Instruction.Create(OpCodes.Ldelema, method.Module.TypeSystem.Int32);
+            //var callInstr = Instruction.Create(OpCodes.Call, _cachedInterlockedIncMethod);
+            //var popInstr = Instruction.Create(OpCodes.Pop);
+
+            //processor.InsertBefore(instruction, popInstr);
+            //processor.InsertBefore(popInstr, callInstr);
+            //processor.InsertBefore(callInstr, arefInstr);
+            //processor.InsertBefore(arefInstr, indxInstr);
+            //processor.InsertBefore(indxInstr, sfldInstr);
+
+            //return sfldInstr;
         }
 
         private static void ReplaceInstructionTarget(Instruction instruction, Instruction oldTarget, Instruction newTarget)
