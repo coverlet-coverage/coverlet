@@ -14,8 +14,9 @@ namespace coverlet.core.performancetest
     /// </summary>
     public class PerformanceTest
     {
-        [Theory(Skip = "Only enabled when explicitly testing performance.")]
+        [Theory(/*Skip = "Only enabled when explicitly testing performance."*/)]
         [InlineData(150)]
+        // [InlineData(20_000)]
         public void TestPerformance(int iterations)
         {
             var big = new BigClass();

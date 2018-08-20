@@ -39,17 +39,6 @@ namespace Coverlet.Core.Helpers.Tests
         }
 
         [Fact]
-        public void TestCopyCoverletDependency()
-        {
-            var tempPath = Path.GetTempPath();
-            var directory = Directory.CreateDirectory(Path.Combine(tempPath, "tempdir"));
-            InstrumentationHelper.CopyCoverletDependency(Path.Combine(directory.FullName, "somemodule.dll"));
-
-            Assert.True(File.Exists(Path.Combine(directory.FullName, "coverlet.tracker.dll")));
-            Directory.Delete(directory.FullName, true);
-        }
-
-        [Fact]
         public void TestIsValidFilterExpression()
         {
             Assert.True(InstrumentationHelper.IsValidFilterExpression("[*]*"));
@@ -62,17 +51,6 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.False(InstrumentationHelper.IsValidFilterExpression("*"));
             Assert.False(InstrumentationHelper.IsValidFilterExpression("]["));
             Assert.False(InstrumentationHelper.IsValidFilterExpression(null));
-        }
-
-        [Fact]
-        public void TestDontCopyCoverletDependency()
-        {
-            var tempPath = Path.GetTempPath();
-            var directory = Directory.CreateDirectory(Path.Combine(tempPath, "tempdir"));
-            InstrumentationHelper.CopyCoverletDependency(Path.Combine(directory.FullName, "coverlet.core.dll"));
-
-            Assert.False(File.Exists(Path.Combine(directory.FullName, "coverlet.core.dll")));
-            Directory.Delete(directory.FullName, true);
         }
 
         [Fact]

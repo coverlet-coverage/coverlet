@@ -28,7 +28,6 @@ namespace Coverlet.Core.Instrumentation
 
         public string Path;
         public int Index;
-
         public Dictionary<int, Line> Lines { get; private set; }
         public Dictionary<(int Line, int Ordinal), Branch> Branches { get; private set; }
     }
@@ -38,11 +37,13 @@ namespace Coverlet.Core.Instrumentation
         public InstrumenterResult()
         {
             Documents = new Dictionary<string, Document>();
-        } 
+            HitCandidates = new List<(bool isBranch, int docIndex, int start, int end)>();
+        }
 
         public string Module;
         public string HitsFilePath;
         public string ModulePath;
         public Dictionary<string, Document> Documents { get; private set; }
+        public List<(bool isBranch, int docIndex, int start, int end)> HitCandidates { get; private set; }
     }
 }
