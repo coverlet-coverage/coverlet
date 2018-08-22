@@ -7,11 +7,11 @@ namespace Coverlet.Core.Instrumentation
 {
     /// <summary>
     /// This static class will be injected on a module being instrumented in order to direct on module hits
-    /// 'to a single location.
+    /// to a single location.
     /// </summary>
     /// <remarks>
-    /// As this type is going to be customized on each module it doesn't follow typical practices regarding
-    /// visibility of members, etc.
+    /// As this type is going to be customized for each instrumeted module it doesn't follow typical practices
+    /// regarding visibility of members, etc.
     /// </remarks>
     public static class ModuleTrackerTemplate
     {
@@ -19,13 +19,13 @@ namespace Coverlet.Core.Instrumentation
         public static int[] HitsArray;
 
         [ThreadStatic]
-        private static int[] threadHits;
+        private static int[] t_threadHits;
 
-        private static List<int[]> threads;
+        private static List<int[]> _threads;
 
         static ModuleTrackerTemplate()
         {
-            threads = new List<int[]>(2 * Environment.ProcessorCount);
+            _threads = new List<int[]>(2 * Environment.ProcessorCount);
 
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(UnloadModule);
             AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
@@ -36,33 +36,39 @@ namespace Coverlet.Core.Instrumentation
 
         public static void RecordHit(int hitLocationIndex)
         {
-            if (threadHits == null)
+            if (t_threadHits == null)
             {
-                lock (threads)
+                lock (_threads)
                 {
-                    threadHits = new int[HitsArray.Length];
-                    threads.Add(threadHits);
+                    if (t_threadHits == null)
+                    {
+                        t_threadHits = new int[HitsArray.Length];
+                        _threads.Add(t_threadHits);
+                    }
                 }
             }
 
-            ++threadHits[hitLocationIndex];
+            ++t_threadHits[hitLocationIndex];
         }
 
         public static void UnloadModule(object sender, EventArgs e)
         {
             // Update the global hits array from data from all the threads
-            lock (threads)
+            lock (_threads)
             {
-                foreach (var threadHits in threads)
+                foreach (var threadHits in _threads)
                 {
                     for (int i = 0; i < HitsArray.Length; ++i)
                         HitsArray[i] += threadHits[i];
                 }
+
+                // Prevent any double counting scenario, i.e.: UnloadModule called twice (not sure if this can happen in practice ...)
+                // Only an issue if DomainUnload and ProcessExit can both happens, perhaps can be removed...
+                _threads.Clear();
             }
 
-            // TODO: same module can be unloaded multiple times in the same process. Need to check and handle this case.
-            // TODO: perhaps some kind of global mutex based on the name of the modules hits file, and after the first
-            // TODO: they update the hit count from the file already created. Something like this, (minus the read stuff):
+            // The same module can be unloaded multiple times in the same process via different app domains.
+            // Use a global mutex to ensure no concurrent access.
             using (var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew))
             {
                 if (!createdNew)
@@ -83,12 +89,18 @@ namespace Coverlet.Core.Instrumentation
                 }
                 else
                 {
+                    // Update the number of hits by adding value on disk with the ones on memory.
+                    // This path should be triggered only in the case of multiple AppDomain unloads.
                     using (var fs = File.Open(HitsFilePath, FileMode.Open))
                     using (var br = new BinaryReader(fs))
                     using (var bw = new BinaryWriter(fs))
                     {
                         int hitsLength = br.ReadInt32();
-                        // TODO: check hits length match
+                        if (hitsLength != HitsArray.Length)
+                        {
+                            throw new InvalidDataException(
+                                $"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {HitsArray.Length}");
+                        }
 
                         for (int i = 0; i < hitsLength; ++i)
                         {
@@ -98,6 +110,10 @@ namespace Coverlet.Core.Instrumentation
                         }
                     }
                 }
+
+                // Prevent any double counting scenario, i.e.: UnloadModule called twice (not sure if this can happen in practice ...)
+                // Only an issue if DomainUnload and ProcessExit can both happens, perhaps can be removed...
+                Array.Clear(HitsArray, 0, HitsArray.Length);
             }
         }
     }
