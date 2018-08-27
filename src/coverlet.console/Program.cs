@@ -53,8 +53,9 @@ namespace Coverlet.Console
                 {
                     selfProcess = new Process();
                     selfProcess.StartInfo.FileName = module.Value;
+                    selfProcess.StartInfo.CreateNoWindow = true;
                     selfProcess.StartInfo.RedirectStandardOutput = true;
-                    //selfProcess.StartInfo.CreateNoWindow = true;
+                    selfProcess.StartInfo.RedirectStandardError = true;
                     selfProcess.Start();
                     
                     logger.LogInformation("Process of tested module started");
@@ -65,13 +66,42 @@ namespace Coverlet.Console
                 process.StartInfo.Arguments = targs.HasValue() ? targs.Value() : string.Empty;
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
+                
                 process.Start();
-                logger.LogInformation(process.StandardOutput.ReadToEnd());
                 process.WaitForExit();
+
+                logger.LogInformation(process.StandardOutput.ReadToEnd());
+                var processErrorOutput = process.StandardError.ReadToEnd();
+                if (!string.IsNullOrWhiteSpace(processErrorOutput))
+                {
+                    logger.LogError(processErrorOutput);
+                }
 
                 if (selfProcess != null)
                 {
-                    selfProcess.Kill();
+                    logger.LogInformation(selfProcess.StandardOutput.ReadToEnd());
+                    var selfErrorOutput = selfProcess.StandardError.ReadToEnd();
+                    if (!string.IsNullOrWhiteSpace(selfErrorOutput))
+                    {
+                        logger.LogError(selfErrorOutput);
+                    }
+                    
+                    if (selfProcess.HasExited)
+                    {
+                        if (selfProcess.ExitCode != 0)
+                        {
+                            logger.LogError("Self process crashed while testing");
+                        }
+                        else
+                        {
+                            logger.LogInformation("Self process has been closed gracefuly while testing");
+                        }
+                    }
+                    else
+                    {
+                        selfProcess.Kill();
+                    }
                 }
 
                 var dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
@@ -156,7 +186,7 @@ namespace Coverlet.Console
             }
             catch (Exception ex)
             {
-                logger.LogError(ex.Message);
+                logger.LogError(ex.Message + Environment.NewLine + ex.StackTrace);
                 return 1;
             }
         }
