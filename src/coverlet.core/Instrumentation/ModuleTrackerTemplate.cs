@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 
@@ -13,6 +14,7 @@ namespace Coverlet.Core.Instrumentation
     /// As this type is going to be customized for each instrumeted module it doesn't follow typical practices
     /// regarding visibility of members, etc.
     /// </remarks>
+    [ExcludeFromCodeCoverage]
     public static class ModuleTrackerTemplate
     {
         public static string HitsFilePath;
