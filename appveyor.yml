@@ -11,7 +11,7 @@ build_script:
 test_script:
   - ps: if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode) }
   - ps: |
-      if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Ubuntu") {
+      if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Ubuntu" -and $env:CONFIGURATION -eq "Release") {
         curl -s https://codecov.io/bash > codecov
         chmod +x codecov
         ./codecov -f ./test/coverlet.core.tests/coverage.opencover.xml
