@@ -40,17 +40,6 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public static void CopyCoverletDependency(string module)
-        {
-            var moduleFileName = Path.GetFileName(module);
-            if (Path.GetFileName(typeof(Coverage).Assembly.Location) == moduleFileName)
-                return;
-
-            var directory = Path.GetDirectoryName(module);
-            var assembly = typeof(Coverlet.Tracker.CoverageTracker).Assembly;
-            File.Copy(assembly.Location, Path.Combine(directory, Path.GetFileName(assembly.Location)), true);
-        }
-
         public static void BackupOriginalModule(string module, string identifier)
         {
             var backupPath = GetBackupPath(module, identifier);

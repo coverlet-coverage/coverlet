@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -7,7 +8,6 @@ using System.Reflection;
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Symbols;
-using Coverlet.Tracker;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -22,8 +22,12 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _excludeFilters;
         private readonly string[] _includeFilters;
         private readonly string[] _excludedFiles;
-        private readonly static Lazy<MethodInfo> _markExecutedMethodLoader = new Lazy<MethodInfo>(GetMarkExecutedMethod);
         private InstrumenterResult _result;
+        private FieldDefinition _customTrackerHitsArray;
+        private FieldDefinition _customTrackerHitsFilePath;
+        private ILProcessor _customTrackerClassConstructorIl;
+        private TypeDefinition _customTrackerTypeDef;
+        private MethodReference _customTrackerRecordHitMethod;
 
         public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles)
         {
@@ -51,7 +55,6 @@ namespace Coverlet.Core.Instrumentation
             };
 
             InstrumentModule();
-            InstrumentationHelper.CopyCoverletDependency(_module);
 
             return _result;
         }
@@ -67,18 +70,117 @@ namespace Coverlet.Core.Instrumentation
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
                     var types = module.GetTypes();
+                    AddCustomModuleTrackerToModule(module);
+
                     foreach (TypeDefinition type in types)
                     {
                         var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
+                            && actualType.Namespace != "Coverlet.Core.Instrumentation.Tracker"
                             && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
                             && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
                     }
 
+                    // Fixup the custom tracker class constructor, according to all instrumented types
+                    Instruction lastInstr = _customTrackerClassConstructorIl.Body.Instructions.Last();
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Newarr, module.TypeSystem.Int32));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
+
                     module.Write(stream);
                 }
             }
+        }
+
+        private void AddCustomModuleTrackerToModule(ModuleDefinition module)
+        {
+            using (AssemblyDefinition coverletInstrumentationAssembly = AssemblyDefinition.ReadAssembly(typeof(Instrumenter).Assembly.Location))
+            {
+                TypeDefinition moduleTrackerTemplate = coverletInstrumentationAssembly.MainModule.GetType(
+                    "Coverlet.Core.Instrumentation", nameof(ModuleTrackerTemplate));
+
+                _customTrackerTypeDef = new TypeDefinition(
+                    "Coverlet.Core.Instrumentation.Tracker", Path.GetFileNameWithoutExtension(module.Name) + "_" + _identifier, moduleTrackerTemplate.Attributes);
+
+                _customTrackerTypeDef.BaseType = module.TypeSystem.Object;
+                foreach (FieldDefinition fieldDef in moduleTrackerTemplate.Fields)
+                {
+                    var fieldClone = new FieldDefinition(fieldDef.Name, fieldDef.Attributes, fieldDef.FieldType);
+                    fieldClone.FieldType = module.ImportReference(fieldClone.FieldType);
+
+                    _customTrackerTypeDef.Fields.Add(fieldClone);
+
+                    if (fieldClone.Name == "HitsArray")
+                        _customTrackerHitsArray = fieldClone;
+                    else if (fieldClone.Name == "HitsFilePath")
+                        _customTrackerHitsFilePath = fieldClone;
+                }
+
+                foreach (MethodDefinition methodDef in moduleTrackerTemplate.Methods)
+                {
+                    MethodDefinition methodOnCustomType = new MethodDefinition(methodDef.Name, methodDef.Attributes, methodDef.ReturnType);
+
+                    if (methodDef.Name == "RecordHit")
+                    {
+                        foreach (var parameter in methodDef.Parameters)
+                        {
+                            methodOnCustomType.Parameters.Add(new ParameterDefinition(module.ImportReference(parameter.ParameterType)));
+                        }
+                    }
+
+                    foreach (var variable in methodDef.Body.Variables)
+                    {
+                        methodOnCustomType.Body.Variables.Add(new VariableDefinition(module.ImportReference(variable.VariableType)));
+                    }
+
+                    methodOnCustomType.Body.InitLocals = methodDef.Body.InitLocals;
+
+                    ILProcessor ilProcessor = methodOnCustomType.Body.GetILProcessor();
+                    if (methodDef.Name == ".cctor")
+                        _customTrackerClassConstructorIl = ilProcessor;
+
+                    foreach (Instruction instr in methodDef.Body.Instructions)
+                    {
+                        if (instr.Operand is MethodReference methodReference)
+                        {
+                            if (!methodReference.FullName.Contains(moduleTrackerTemplate.Namespace))
+                            {
+                                // External method references, just import then
+                                instr.Operand = module.ImportReference(methodReference);
+                            }
+                            else
+                            {
+                                // Move to the custom type
+                                instr.Operand = new MethodReference(
+                                    methodReference.Name, methodReference.ReturnType, _customTrackerTypeDef);
+                            }
+                        }
+                        else if (instr.Operand is FieldReference fieldReference)
+                        {
+                            instr.Operand = _customTrackerTypeDef.Fields.Single(fd => fd.Name == fieldReference.Name);
+                        }
+                        else if (instr.Operand is TypeReference typeReference)
+                        {
+                            instr.Operand = module.ImportReference(typeReference);
+                        }
+
+                        ilProcessor.Append(instr);
+                    }
+
+                    foreach (var handler in methodDef.Body.ExceptionHandlers)
+                        methodOnCustomType.Body.ExceptionHandlers.Add(handler);
+
+                    _customTrackerTypeDef.Methods.Add(methodOnCustomType);
+                }
+
+                module.Types.Add(_customTrackerTypeDef);
+            }
+
+            Debug.Assert(_customTrackerHitsArray != null);
+            Debug.Assert(_customTrackerClassConstructorIl != null);
         }
 
         private void InstrumentType(TypeDefinition type)
@@ -143,7 +245,7 @@ namespace Coverlet.Core.Instrumentation
                     foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
                         ReplaceExceptionHandlerBoundary(handler, instruction, target);
 
-                    index += 3;
+                    index += 2;
                 }
 
                 foreach (var _branchTarget in targetedBranchPoints)
@@ -164,7 +266,7 @@ namespace Coverlet.Core.Instrumentation
                     foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
                         ReplaceExceptionHandlerBoundary(handler, instruction, target);
 
-                    index += 3;
+                    index += 2;
                 }
 
                 index++;
@@ -188,17 +290,10 @@ namespace Coverlet.Core.Instrumentation
                     document.Lines.Add(i, new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
 
-            string marker = $"L,{document.Index},{sequencePoint.StartLine},{sequencePoint.EndLine}";
+            var entry = (false, document.Index, sequencePoint.StartLine, sequencePoint.EndLine);
+            _result.HitCandidates.Add(entry);
 
-            var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
-            var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
-            var callInstr = Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(_markExecutedMethodLoader.Value));
-
-            processor.InsertBefore(instruction, callInstr);
-            processor.InsertBefore(callInstr, markInstr);
-            processor.InsertBefore(markInstr, pathInstr);
-
-            return pathInstr;
+            return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
         }
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, BranchPoint branchPoint)
@@ -225,17 +320,28 @@ namespace Coverlet.Core.Instrumentation
                     }
                 );
 
-            string marker = $"B,{document.Index},{branchPoint.StartLine},{branchPoint.Ordinal}";
+            var entry = (true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal);
+            _result.HitCandidates.Add(entry);
 
-            var pathInstr = Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath);
-            var markInstr = Instruction.Create(OpCodes.Ldstr, marker);
-            var callInstr = Instruction.Create(OpCodes.Call, processor.Body.Method.Module.ImportReference(_markExecutedMethodLoader.Value));
+            return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
+        }
+
+        private Instruction AddInstrumentationInstructions(MethodDefinition method, ILProcessor processor, Instruction instruction, int hitEntryIndex)
+        {
+            if (_customTrackerRecordHitMethod == null)
+            {
+                _customTrackerRecordHitMethod = new MethodReference(
+                    "RecordHit", method.Module.TypeSystem.Void, _customTrackerTypeDef);
+                _customTrackerRecordHitMethod.Parameters.Add(new ParameterDefinition(method.Module.TypeSystem.Int32));
+            }
+
+            var indxInstr = Instruction.Create(OpCodes.Ldc_I4, hitEntryIndex);
+            var callInstr = Instruction.Create(OpCodes.Call, _customTrackerRecordHitMethod);
 
             processor.InsertBefore(instruction, callInstr);
-            processor.InsertBefore(callInstr, markInstr);
-            processor.InsertBefore(markInstr, pathInstr);
+            processor.InsertBefore(callInstr, indxInstr);
 
-            return pathInstr;
+            return indxInstr;
         }
 
         private static void ReplaceInstructionTarget(Instruction instruction, Instruction oldTarget, Instruction newTarget)
@@ -300,11 +406,6 @@ namespace Coverlet.Core.Instrumentation
             {
                 return null;
             }
-        }
-
-        private static MethodInfo GetMarkExecutedMethod()
-        {
-            return typeof(CoverageTracker).GetMethod(nameof(CoverageTracker.MarkExecuted));
         }
     }
 }

@@ -164,32 +164,30 @@ namespace Coverlet.Core
                 List<Document> documents = result.Documents.Values.ToList();
 
                 using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
-                using (var sr = new StreamReader(fs))
+                using (var br = new BinaryReader(fs))
                 {
-                    string row;
-                    while ((row = sr.ReadLine()) != null)
+                    int hitCandidatesCount = br.ReadInt32();
+
+                    // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
+
+                    var documentsList = result.Documents.Values.ToList();
+
+                    for (int i = 0; i < hitCandidatesCount; ++i)
                     {
-                        var info = row.Split(',');
-                        // Ignore malformed lines
-                        if (info.Length != 5)
-                            continue;
+                        var hitLocation = result.HitCandidates[i];
 
-                        bool isBranch = info[0] == "B";
-                        var document = documents[int.Parse(info[1])];
+                        var document = documentsList[hitLocation.docIndex];
 
-                        int start = int.Parse(info[2]);
-                        int hits = int.Parse(info[4]);
+                        int hits = br.ReadInt32();
 
-                        if (isBranch)
+                        if (hitLocation.isBranch)
                         {
-                            int ordinal = int.Parse(info[3]);
-                            var branch = document.Branches[(start, ordinal)];
+                            var branch = document.Branches[(hitLocation.start, hitLocation.end)];
                             branch.Hits += hits;
                         }
                         else
                         {
-                            int end = int.Parse(info[3]);
-                            for (int j = start; j <= end; j++)
+                            for (int j = hitLocation.start; j <= hitLocation.end; j++)
                             {
                                 var line = document.Lines[j];
                                 line.Hits += hits;
