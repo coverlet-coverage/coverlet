@@ -76,7 +76,6 @@ namespace Coverlet.Core.Instrumentation
                     {
                         var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
-                            && actualType.Namespace != "Coverlet.Core.Instrumentation.Tracker"
                             && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
                             && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
