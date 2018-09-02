@@ -5,6 +5,7 @@
     <CoverletOutput Condition="$(CoverletOutput) == ''">$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))</CoverletOutput>
     <Exclude Condition="$(Exclude) == ''"></Exclude>
     <ExcludeByFile Condition="$(ExcludeByFile) == ''"></ExcludeByFile>
+    <MergeWith Condition="$(MergeWith) == ''"></MergeWith>
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <ThresholdType Condition="$(ThresholdType) == ''">line,branch,method</ThresholdType>
   </PropertyGroup>
