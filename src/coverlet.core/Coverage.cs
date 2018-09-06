@@ -6,6 +6,8 @@ using System.Linq;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 
+using Newtonsoft.Json;
+
 namespace Coverlet.Core
 {
     public class Coverage
@@ -15,6 +17,7 @@ namespace Coverlet.Core
         private string[] _excludeFilters;
         private string[] _includeFilters;
         private string[] _excludedSourceFiles;
+        private string _mergeWith;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -22,12 +25,14 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles)
+        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles, string mergeWith)
         {
             _module = module;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
             _excludedSourceFiles = excludedSourceFiles;
+            _mergeWith = mergeWith;
+
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
@@ -144,11 +149,14 @@ namespace Coverlet.Core
                 InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
-            return new CoverageResult
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules };
+            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith))
             {
-                Identifier = _identifier,
-                Modules = modules
-            };
+                string json = File.ReadAllText(_mergeWith);
+                coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
+            }
+
+            return coverageResult;
         }
 
         private void CalculateCoverage()
