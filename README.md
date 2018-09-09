@@ -67,6 +67,7 @@ Options:
   --exclude          Filter expressions to exclude specific modules and types.
   --include          Filter expressions to include specific modules and types.
   --exclude-by-file  Glob patterns specifying source files to exclude.
+  --merge-with       Path to existing coverage result to merge.
 ```
 
 #### Code Coverage
@@ -115,6 +116,16 @@ The above command will write the results to the supplied path, if no file extens
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custom/directory/" -f json -f lcov
 ```
+
+#### Merging Results
+
+With Coverlet you can combine the output of multiple coverage runs into a single result.
+
+```bash
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --merge-with "/path/to/result.json" --format opencover
+```
+
+The value given to `--merge-with` **must** be a path to Coverlet's own json result format.
 
 #### Threshold
 
@@ -227,6 +238,16 @@ To specify a directory where all results will be written to (especially if using
 ```bash
 dotnet test /p:CollectCoverage=true /p:CoverletOutput='./results/'
 ```
+
+#### Merging Results
+
+With Coverlet you can combine the output of multiple coverage runs into a single result.
+
+```bash
+dotnet test /p:CollectCoverage=true /p:MergeWith='/path/to/result.json'
+```
+
+The value given to `/p:MergeWith` **must** be a path to Coverlet's own json result format.
 
 #### Threshold
 
