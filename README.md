@@ -194,8 +194,7 @@ Examples
 
 Both `--exclude` and `--include` options can be used together but `--exclude` takes precedence. You can specify the `--exclude` and `--include` options multiple times to allow for multiple filter expressions.
 
-Note for Powershell / VSTS users
-
+##### Note for Powershell / VSTS users
 To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```. 
 
 ```/p:Exclude="[*]*Examples?%2c[*]*Startup"```
