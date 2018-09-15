@@ -86,6 +86,9 @@ namespace Coverlet.Console
                 var exceptionBuilder = new StringBuilder();
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
                 var thresholdFailed = false;
+                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules).Percent * 100;
+                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
+                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
 
                 foreach (var _module in result.Modules)
                 {
@@ -119,6 +122,10 @@ namespace Coverlet.Console
 
                 logger.LogInformation(string.Empty);
                 logger.LogInformation(coverageTable.ToStringAlternative());
+                logger.LogInformation(string.Empty);
+                logger.LogInformation($"Total Line {overallLineCoverage}%");
+                logger.LogInformation($"Total Branch {overallBranchCoverage}%");
+                logger.LogInformation($"Total Method {overallMethodCoverage}%");
 
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
