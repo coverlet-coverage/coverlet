@@ -10,7 +10,7 @@ using Coverlet.Core.Attributes;
 namespace Coverlet.Core.Samples.Tests
 {
     class ConstructorNotDeclaredClass
-    {        
+    {
     }
     class DeclaredConstructorClass
     {
@@ -20,7 +20,7 @@ namespace Coverlet.Core.Samples.Tests
         {
             if (input.Contains("test")) return true;
             return false;
-        }        
+        }
 
         public bool HasTwoDecisions(string input)
         {
@@ -109,7 +109,7 @@ namespace Coverlet.Core.Samples.Tests
             string value;
             try
             {
-                
+
             }
             finally
             {
@@ -161,7 +161,7 @@ namespace Coverlet.Core.Samples.Tests
         {
             yield return "one";
             yield return "two";
-        } 
+        }
     }
 
     [ExcludeFromCoverage]
@@ -184,6 +184,19 @@ namespace Coverlet.Core.Samples.Tests
         public string Method(string input)
         {
             if (string.IsNullOrEmpty(input))
+                throw new ArgumentException("Cannot be empty", nameof(input));
+
+            return input;
+        }
+    }
+
+    [Obsolete]
+    public class ClassExcludedByObsoleteAttr
+    {
+
+        public string Method(string input)
+        {
+            if(string.IsNullOrEmpty(input))
                 throw new ArgumentException("Cannot be empty", nameof(input));
 
             return input;

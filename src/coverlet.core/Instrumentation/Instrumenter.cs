@@ -388,7 +388,9 @@ namespace Coverlet.Core.Instrumentation
                 nameof(ExcludeFromCoverageAttribute),
                 "ExcludeFromCoverage",
                 nameof(ExcludeFromCodeCoverageAttribute),
-                "ExcludeFromCodeCoverage"
+                "ExcludeFromCodeCoverage",
+                nameof(ObsoleteAttribute),
+                "Obsolete"
             };
 
             var attributeName = customAttribute.AttributeType.Name;
