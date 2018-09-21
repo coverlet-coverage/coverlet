@@ -194,6 +194,12 @@ Examples
 
 Both `--exclude` and `--include` options can be used together but `--exclude` takes precedence. You can specify the `--exclude` and `--include` options multiple times to allow for multiple filter expressions.
 
+### MSBuild
+
+In this mode, Coverlet doesn't require any additional setup other than including the NuGet package in the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
+
+If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
+
 ##### Note for Powershell / VSTS users
 To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```. 
 
@@ -203,12 +209,6 @@ VSTS builds do not require double quotes to be unescaped:
 ```
 dotnet test --configuration $(buildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/ /p:Exclude="[MyAppName.DebugHost]*%2c[MyAppNamet.WebHost]*%2c[MyAppName.App]*"
 ```
-
-### MSBuild
-
-In this mode, Coverlet doesn't require any additional setup other than including the NuGet package in the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
-
-If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
 
 #### Code Coverage
 
