@@ -200,6 +200,16 @@ In this mode, Coverlet doesn't require any additional setup other than including
 
 If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
 
+##### Note for Powershell / VSTS users
+To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```. 
+
+```/p:Exclude="[*]*Examples?%2c[*]*Startup"```
+
+VSTS builds do not require double quotes to be unescaped:
+```
+dotnet test --configuration $(buildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/ /p:Exclude="[MyAppName.DebugHost]*%2c[MyAppNamet.WebHost]*%2c[MyAppName.App]*"
+```
+
 #### Code Coverage
 
 Enabling code coverage is as simple as setting the `CollectCoverage` property to `true`
