@@ -79,6 +79,9 @@ namespace Coverlet.MSbuild.Tasks
                 var summary = new CoverageSummary();
                 var exceptionBuilder = new StringBuilder();
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
+                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules).Percent * 100;
+                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
+                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
 
                 foreach (var module in result.Modules)
                 {
@@ -90,19 +93,19 @@ namespace Coverlet.MSbuild.Tasks
 
                     if (_threshold > 0)
                     {
-                        if (linePercent < _threshold && thresholdTypes.Contains("line"))
+                        if (linePercent < _threshold && thresholdTypes.Contains("line", StringComparer.OrdinalIgnoreCase))
                         {
                             exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a line coverage '{linePercent}%' below specified threshold '{_threshold}%'");
                             thresholdFailed = true;
                         }
 
-                        if (branchPercent < _threshold && thresholdTypes.Contains("branch"))
+                        if (branchPercent < _threshold && thresholdTypes.Contains("branch", StringComparer.OrdinalIgnoreCase))
                         {
                             exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a branch coverage '{branchPercent}%' below specified threshold '{_threshold}%'");
                             thresholdFailed = true;
                         }
 
-                        if (methodPercent < _threshold && thresholdTypes.Contains("method"))
+                        if (methodPercent < _threshold && thresholdTypes.Contains("method", StringComparer.OrdinalIgnoreCase))
                         {
                             exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a method coverage '{methodPercent}%' below specified threshold '{_threshold}%'");
                             thresholdFailed = true;
@@ -112,6 +115,10 @@ namespace Coverlet.MSbuild.Tasks
 
                 Console.WriteLine();
                 Console.WriteLine(coverageTable.ToStringAlternative());
+                Console.WriteLine();
+                Console.WriteLine($"Total Line {overallLineCoverage}%");
+                Console.WriteLine($"Total Branch {overallBranchCoverage}%");
+                Console.WriteLine($"Total Method {overallMethodCoverage}%");
 
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));

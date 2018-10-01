@@ -65,7 +65,9 @@ Options:
   --threshold        Exits with error if the coverage % is below value.
   --threshold-type   Coverage type to apply the threshold to.
   --exclude          Filter expressions to exclude specific modules and types.
+  --include          Filter expressions to include specific modules and types.
   --exclude-by-file  Glob patterns specifying source files to exclude.
+  --merge-with       Path to existing coverage result to merge.
 ```
 
 #### Code Coverage
@@ -114,6 +116,16 @@ The above command will write the results to the supplied path, if no file extens
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custom/directory/" -f json -f lcov
 ```
+
+#### Merging Results
+
+With Coverlet you can combine the output of multiple coverage runs into a single result.
+
+```bash
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --merge-with "/path/to/result.json" --format opencover
+```
+
+The value given to `--merge-with` **must** be a path to Coverlet's own json result format.
 
 #### Threshold
 
@@ -173,11 +185,30 @@ Examples
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude "[coverlet.*]Coverlet.Core.Coverage"
 ```
 
-You can specify the `--exclude` option multiple times to allow for multiple filter expressions.
+Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `--include` option. 
+
+Examples
+ - `--include "[*]*"` => INcludes all types in all assemblies (nothing is instrumented)
+ - `--include "[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
+  - `--include "[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
+
+Both `--exclude` and `--include` options can be used together but `--exclude` takes precedence. You can specify the `--exclude` and `--include` options multiple times to allow for multiple filter expressions.
 
 ### MSBuild
 
 In this mode, Coverlet doesn't require any additional setup other than including the NuGet package in the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
+
+If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
+
+##### Note for Powershell / VSTS users
+To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```. 
+
+```/p:Exclude="[*]*Examples?%2c[*]*Startup"```
+
+VSTS builds do not require double quotes to be unescaped:
+```
+dotnet test --configuration $(buildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/ /p:Exclude="[MyAppName.DebugHost]*%2c[MyAppNamet.WebHost]*%2c[MyAppName.App]*"
+```
 
 #### Code Coverage
 
@@ -217,6 +248,16 @@ To specify a directory where all results will be written to (especially if using
 ```bash
 dotnet test /p:CollectCoverage=true /p:CoverletOutput='./results/'
 ```
+
+#### Merging Results
+
+With Coverlet you can combine the output of multiple coverage runs into a single result.
+
+```bash
+dotnet test /p:CollectCoverage=true /p:MergeWith='/path/to/result.json'
+```
+
+The value given to `/p:MergeWith` **must** be a path to Coverlet's own json result format.
 
 #### Threshold
 
@@ -270,9 +311,16 @@ Examples
 dotnet test /p:CollectCoverage=true /p:Exclude="[coverlet.*]Coverlet.Core.Coverage"
 ```
 
+Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `Include` property. 
 
-You can specify multiple filter expressions by separting them with a comma (`,`). If you specify multiple filters, then [you'll have to escape the surrounding quotes](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this:
-`/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`.
+Examples
+ - `/p:Include="[*]*"` => INcludes all types in all assemblies (nothing is instrumented)
+ - `/p:Include="[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
+  - `/p:Include="[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
+
+Both `Exclude` and `Include` properties can be used together but `Exclude` takes precedence.
+
+You can specify multiple filter expressions by separting them with a comma (`,`).
 
 ### Cake Addin
 If you're using [Cake Build](https://cakebuild.net) for your build script you can use the [Cake.Coverlet](https://github.com/Romanx/Cake.Coverlet) addin to provide you extensions to dotnet test for passing coverlet arguments in a strongly typed manner.

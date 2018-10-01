@@ -9,6 +9,7 @@
   <Target Name="BuildAllProjects">
     <RemoveDir Directories="$(OutputPath)" Condition="Exists('$(MSBuildThisFileDirectory)\build')" />
     <Exec Command="dotnet build &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;$(MSBuildThisFileDirectory)src\coverlet.console\coverlet.console.csproj&quot; -c $(Configuration)" />
   </Target>
 
   <Target Name="PublishMSBuildTaskProject" AfterTargets="BuildAllProjects">

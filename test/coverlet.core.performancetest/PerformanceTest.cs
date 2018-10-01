@@ -9,13 +9,14 @@ namespace coverlet.core.performancetest
     /// Test the performance of coverlet by running a unit test that calls a reasonably big and complex test class.
     /// Enable the test, compile, then run the test in the command line:
     /// <code>
-    /// dotnet test -p:CollectCoverage=true -p:CoverletOutputFormat=opencover test/coverlet.core.performa ncetest/
+    /// dotnet test -p:CollectCoverage=true -p:CoverletOutputFormat=opencover test/coverlet.core.performancetest/
     /// </code>
     /// </summary>
     public class PerformanceTest
     {
-        [Theory(Skip = "Only enabled when explicitly testing performance.")]
-        [InlineData(150)]
+        [Theory(/*Skip = "Only enabled when explicitly testing performance."*/)]
+        // [InlineData(150)]
+        [InlineData(20_000)]
         public void TestPerformance(int iterations)
         {
             var big = new BigClass();

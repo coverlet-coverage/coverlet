@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>3.0.0</AssemblyVersion>
+    <AssemblyVersion>3.2.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,10 +10,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.tracker\coverlet.tracker.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -37,17 +38,6 @@ namespace Coverlet.Core.Helpers
 
                 return false;
             }
-        }
-
-        public static void CopyCoverletDependency(string module)
-        {
-            var moduleFileName = Path.GetFileName(module);
-            if (Path.GetFileName(typeof(Coverage).Assembly.Location) == moduleFileName)
-                return;
-
-            var directory = Path.GetDirectoryName(module);
-            var assembly = typeof(Coverlet.Tracker.CoverageTracker).Assembly;
-            File.Copy(assembly.Location, Path.Combine(directory, Path.GetFileName(assembly.Location)), true);
         }
 
         public static void BackupOriginalModule(string module, string identifier)
@@ -111,22 +101,49 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        public static bool IsModuleExcluded(string module, string[] filters)
+        public static bool IsModuleExcluded(string module, string[] excludeFilters)
         {
-            if (filters == null)
+            if (excludeFilters == null || excludeFilters.Length == 0)
                 return false;
 
             module = Path.GetFileNameWithoutExtension(module);
             if (module == null)
                 return false;
 
-            foreach (var filter in filters)
+            foreach (var filter in excludeFilters)
             {
-                string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
                 string typePattern = filter.Substring(filter.IndexOf(']') + 1);
 
                 if (typePattern != "*")
                     continue;
+
+                string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+                modulePattern = WildcardToRegex(modulePattern);
+
+                var regex = new Regex(modulePattern);
+
+                if (regex.IsMatch(module))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsModuleIncluded(string module, string[] includeFilters)
+        {
+            if (includeFilters == null || includeFilters.Length == 0)
+                return true;
+
+            module = Path.GetFileNameWithoutExtension(module);
+            if (module == null)
+                return false;
+
+            foreach (var filter in includeFilters)
+            {
+                string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+
+                if (modulePattern == "*")
+                    return true;
 
                 modulePattern = WildcardToRegex(modulePattern);
 
@@ -139,28 +156,28 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
-        public static bool IsTypeExcluded(string module, string type, string[] filters)
+        public static bool IsTypeExcluded(string module, string type, string[] excludeFilters)
         {
-            if (filters == null)
+            if (excludeFilters == null || excludeFilters.Length == 0)
                 return false;
 
             module = Path.GetFileNameWithoutExtension(module);
             if (module == null)
                 return false;
 
-            foreach (var filter in filters)
-            {
-                string typePattern = filter.Substring(filter.IndexOf(']') + 1);
-                string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+            return IsTypeFilterMatch(module, type, excludeFilters);
+        }
 
-                typePattern = WildcardToRegex(typePattern);
-                modulePattern = WildcardToRegex(modulePattern);
+        public static bool IsTypeIncluded(string module, string type, string[] includeFilters)
+        {
+            if (includeFilters == null || includeFilters.Length == 0)
+                return true;
 
-                if (new Regex(typePattern).IsMatch(type) && new Regex(modulePattern).IsMatch(module))
-                    return true;
-            }
+            module = Path.GetFileNameWithoutExtension(module);
+            if (module == null)
+                return true;
 
-            return false;
+            return IsTypeFilterMatch(module, type, includeFilters);
         }
 
         public static bool IsLocalMethod(string method)
@@ -204,6 +221,26 @@ namespace Coverlet.Core.Helpers
             }
 
             return files.Distinct().ToArray();
+        }
+
+        private static bool IsTypeFilterMatch(string module, string type, string[] filters)
+        {
+            Debug.Assert(module != null);
+            Debug.Assert(filters != null);
+
+            foreach (var filter in filters)
+            {
+                string typePattern = filter.Substring(filter.IndexOf(']') + 1);
+                string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+
+                typePattern = WildcardToRegex(typePattern);
+                modulePattern = WildcardToRegex(modulePattern);
+
+                if (new Regex(typePattern).IsMatch(type) && new Regex(modulePattern).IsMatch(module))
+                    return true;
+            }
+
+            return false;
         }
 
         private static string GetBackupPath(string module, string identifier)

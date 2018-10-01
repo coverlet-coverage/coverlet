@@ -1,10 +1,12 @@
-using Coverlet.Core.Helpers;
-using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Symbols;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
+using Coverlet.Core.Helpers;
+using Coverlet.Core.Instrumentation;
+
+using Newtonsoft.Json;
 
 namespace Coverlet.Core
 {
@@ -12,8 +14,10 @@ namespace Coverlet.Core
     {
         private string _module;
         private string _identifier;
-        private string[] _filters;
-        private string[] _excludes;
+        private string[] _excludeFilters;
+        private string[] _includeFilters;
+        private string[] _excludedSourceFiles;
+        private string _mergeWith;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -21,11 +25,14 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] filters, string[] excludes)
+        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles, string mergeWith)
         {
             _module = module;
-            _filters = filters;
-            _excludes = excludes;
+            _excludeFilters = excludeFilters;
+            _includeFilters = includeFilters;
+            _excludedSourceFiles = excludedSourceFiles;
+            _mergeWith = mergeWith;
+
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
@@ -33,15 +40,17 @@ namespace Coverlet.Core
         public void PrepareModules()
         {
             string[] modules = InstrumentationHelper.GetCoverableModules(_module);
-            string[] excludes =  InstrumentationHelper.GetExcludedFiles(_excludes);
-            _filters = _filters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            string[] excludes =  InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
+            _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
             foreach (var module in modules)
             {
-                if (InstrumentationHelper.IsModuleExcluded(module, _filters))
+                if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters)
+                    || !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
                     continue;
 
-                var instrumenter = new Instrumenter(module, _identifier, _filters, excludes);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);
@@ -140,11 +149,14 @@ namespace Coverlet.Core
                 InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
-            return new CoverageResult
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules };
+            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith))
             {
-                Identifier = _identifier,
-                Modules = modules
-            };
+                string json = File.ReadAllText(_mergeWith);
+                coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
+            }
+
+            return coverageResult;
         }
 
         private void CalculateCoverage()
@@ -157,67 +169,38 @@ namespace Coverlet.Core
                     continue;
                 }
 
+                List<Document> documents = result.Documents.Values.ToList();
+
                 using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
-                using (var sr = new StreamReader(fs))
+                using (var br = new BinaryReader(fs))
                 {
-                    string row;
-                    while ((row = sr.ReadLine()) != null)
+                    int hitCandidatesCount = br.ReadInt32();
+
+                    // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
+
+                    var documentsList = result.Documents.Values.ToList();
+
+                    for (int i = 0; i < hitCandidatesCount; ++i)
                     {
-                        var info = row.Split(',');
-                        // Ignore malformed lines
-                        if (info.Length != 5)
-                            continue;
+                        var hitLocation = result.HitCandidates[i];
 
-                        bool isBranch = info[0] == "B";
+                        var document = documentsList[hitLocation.docIndex];
 
-                        if (!result.Documents.TryGetValue(info[1], out var document))
+                        int hits = br.ReadInt32();
+
+                        if (hitLocation.isBranch)
                         {
-                            continue;
-                        }
-
-                        int start = int.Parse(info[2]);
-                        int hits = int.Parse(info[4]);
-
-                        if (isBranch)
-                        {
-                            int ordinal = int.Parse(info[3]);
-                            var branch = document.Branches[(start, ordinal)];
+                            var branch = document.Branches[(hitLocation.start, hitLocation.end)];
                             branch.Hits += hits;
                         }
                         else
                         {
-                            int end = int.Parse(info[3]);
-                            for (int j = start; j <= end; j++)
+                            for (int j = hitLocation.start; j <= hitLocation.end; j++)
                             {
                                 var line = document.Lines[j];
                                 line.Hits += hits;
                             }
                         }
-                    }
-                }
-
-                // for MoveNext() compiler autogenerated method we need to patch false positive (IAsyncStateMachine for instance) 
-                // we'll remove all MoveNext() not covered branch              
-                foreach (var document in result.Documents)
-                {
-                    List<KeyValuePair<(int, int), Branch>> branchesToRemove = new List<KeyValuePair<(int, int), Branch>>();
-                    foreach (var branch in document.Value.Branches)
-                    {
-                        //if one branch is covered we search the other one only if it's not covered
-                        if (CecilSymbolHelper.IsMoveNext(branch.Value.Method) && branch.Value.Hits > 0)
-                        {
-                            foreach (var moveNextBranch in document.Value.Branches)
-                            {
-                                if (moveNextBranch.Value.Method == branch.Value.Method && moveNextBranch.Value != branch.Value && moveNextBranch.Value.Hits == 0)
-                                {
-                                    branchesToRemove.Add(moveNextBranch);
-                                }
-                            }
-                        }
-                    }
-                    foreach (var branchToRemove in branchesToRemove)
-                    {
-                        document.Value.Branches.Remove(branchToRemove.Key);
                     }
                 }
 

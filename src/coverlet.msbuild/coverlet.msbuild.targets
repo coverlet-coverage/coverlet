@@ -8,6 +8,7 @@
       Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'"
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
+      MergeWith="$(MergeWith)"
       Path="$(TargetPath)" />
   </Target>
 
@@ -16,6 +17,7 @@
       Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
+      MergeWith="$(MergeWith)"
       Path="$(TargetPath)" />
   </Target>
 
