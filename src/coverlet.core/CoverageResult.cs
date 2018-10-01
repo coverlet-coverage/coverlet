@@ -44,7 +44,7 @@ namespace Coverlet.Core
         {
             foreach (var module in modules)
             {
-                if (!this.Modules.ContainsKey(module.Key))
+                if (!this.Modules.Keys.Select(Path.GetFileName).Contains(Path.GetFileName(module.Key)))
                 {
                     this.Modules.Add(module.Key, module.Value);
                 }
