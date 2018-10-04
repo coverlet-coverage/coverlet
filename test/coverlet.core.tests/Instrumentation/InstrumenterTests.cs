@@ -12,6 +12,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact(Skip = "To be used only validating System.Private.CoreLib instrumentation")]
         public void TestCoreLibInstrumentation()
         {
+            // Attention: to run this test adjust the paths and copy the IL only version of corelib
             const string OriginalFilesDir = @"c:\s\tmp\Coverlet-CoreLib\Original\";
             const string TestFilesDir = @"c:\s\tmp\Coverlet-CoreLib\Test\";
 

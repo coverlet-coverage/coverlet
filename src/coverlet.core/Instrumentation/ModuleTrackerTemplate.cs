@@ -48,10 +48,9 @@ namespace Coverlet.Core.Instrumentation
             if (t_isTracking)
                 return;
 
-            t_isTracking = true;
-
             if (t_threadHits == null)
             {
+                t_isTracking = true;
                 lock (_threads)
                 {
                     if (t_threadHits == null)
@@ -60,10 +59,10 @@ namespace Coverlet.Core.Instrumentation
                         _threads.Add(t_threadHits);
                     }
                 }
+                t_isTracking = false;
             }
 
             ++t_threadHits[hitLocationIndex];
-            t_isTracking = false;
         }
 
         public static void UnloadModule(object sender, EventArgs e)
@@ -136,6 +135,10 @@ namespace Coverlet.Core.Instrumentation
                 // Prevent any double counting scenario, i.e.: UnloadModule called twice (not sure if this can happen in practice ...)
                 // Only an issue if DomainUnload and ProcessExit can both happens, perhaps can be removed...
                 Array.Clear(HitsArray, 0, HitsArray.Length);
+
+                // On purpose this is not under a try-finally: it is better to have an exception if there was any error writing the hits file
+                // this case is relevant when instrumenting corelib since multiple processes can be running against the same instrumented dll.
+                mutex.ReleaseMutex();
             }
         }
     }
