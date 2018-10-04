@@ -9,6 +9,29 @@ namespace Coverlet.Core.Instrumentation.Tests
 {
     public class InstrumenterTests
     {
+        [Fact(Skip = "To be used only validating System.Private.CoreLib instrumentation")]
+        public void TestCoreLibInstrumentation()
+        {
+            const string OriginalFilesDir = @"c:\s\tmp\Coverlet-CoreLib\Original\";
+            const string TestFilesDir = @"c:\s\tmp\Coverlet-CoreLib\Test\";
+
+            Directory.CreateDirectory(TestFilesDir);
+
+            string[] files = new[]
+            {
+                "System.Private.CoreLib.dll",
+                "System.Private.CoreLib.pdb"
+            };
+
+            foreach (var file in files)
+                File.Copy(Path.Combine(OriginalFilesDir, file), Path.Combine(TestFilesDir, file), overwrite: true);
+
+            Instrumenter instrumenter = new Instrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            Assert.True(instrumenter.CanInstrument());
+            var result = instrumenter.Instrument();
+            Assert.NotNull(result);
+        }
+
         [Fact]
         public void TestInstrument()
         {

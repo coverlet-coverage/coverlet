@@ -20,6 +20,11 @@ namespace Coverlet.Core.Instrumentation
         public static string HitsFilePath;
         public static int[] HitsArray;
 
+        // Special case when instrumenting CoreLib, the thread static below prevents infinite loop in CoreLib
+        // while allowing the tracker template to call any of its types and functions.
+        [ThreadStatic]
+        private static bool t_isTracking;
+
         [ThreadStatic]
         private static int[] t_threadHits;
 
@@ -27,10 +32,12 @@ namespace Coverlet.Core.Instrumentation
 
         static ModuleTrackerTemplate()
         {
+            t_isTracking = true;
             _threads = new List<int[]>(2 * Environment.ProcessorCount);
 
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(UnloadModule);
             AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
+            t_isTracking = false;
             // At the end of the instrumentation of a module, the instrumenter needs to add code here
             // to initialize the static fields according to the values derived from the instrumentation of
             // the module.
@@ -38,6 +45,11 @@ namespace Coverlet.Core.Instrumentation
 
         public static void RecordHit(int hitLocationIndex)
         {
+            if (t_isTracking)
+                return;
+
+            t_isTracking = true;
+
             if (t_threadHits == null)
             {
                 lock (_threads)
@@ -51,10 +63,13 @@ namespace Coverlet.Core.Instrumentation
             }
 
             ++t_threadHits[hitLocationIndex];
+            t_isTracking = false;
         }
 
         public static void UnloadModule(object sender, EventArgs e)
         {
+            t_isTracking = true;
+
             // Update the global hits array from data from all the threads
             lock (_threads)
             {
@@ -76,10 +91,10 @@ namespace Coverlet.Core.Instrumentation
                 if (!createdNew)
                     mutex.WaitOne();
 
-                if (!File.Exists(HitsFilePath))
+                bool failedToCreateNewHitsFile = false;
+                try
                 {
-                    // File not created yet, just write it
-                    using (var fs = new FileStream(HitsFilePath, FileMode.Create))
+                    using (var fs = new FileStream(HitsFilePath, FileMode.CreateNew))
                     using (var bw = new BinaryWriter(fs))
                     {
                         bw.Write(HitsArray.Length);
@@ -89,18 +104,23 @@ namespace Coverlet.Core.Instrumentation
                         }
                     }
                 }
-                else
+                catch
+                {
+                    failedToCreateNewHitsFile = true;
+                }
+
+                if (failedToCreateNewHitsFile)
                 {
                     // Update the number of hits by adding value on disk with the ones on memory.
                     // This path should be triggered only in the case of multiple AppDomain unloads.
-                    using (var fs = File.Open(HitsFilePath, FileMode.Open))
+                    using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
                     using (var br = new BinaryReader(fs))
                     using (var bw = new BinaryWriter(fs))
                     {
                         int hitsLength = br.ReadInt32();
                         if (hitsLength != HitsArray.Length)
                         {
-                            throw new InvalidDataException(
+                            throw new InvalidOperationException(
                                 $"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {HitsArray.Length}");
                         }
 
