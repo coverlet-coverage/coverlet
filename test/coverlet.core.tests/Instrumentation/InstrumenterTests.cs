@@ -46,6 +46,19 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
+        [Fact]
+        public void TestInstrumentCoreLib()
+        {
+            var instrumenterTest = CreateInstrumentor(fakeCoreLibModule: true);
+
+            var result = instrumenterTest.Instrumenter.Instrument();
+
+            Assert.Equal(Path.GetFileNameWithoutExtension(instrumenterTest.Module), result.Module);
+            Assert.Equal(instrumenterTest.Module, result.ModulePath);
+
+            instrumenterTest.Directory.Delete(true);
+        }
+
         [Theory]
         [InlineData(typeof(ClassExcludedByCodeAnalysisCodeCoverageAttr))]
         [InlineData(typeof(ClassExcludedByCoverletCodeCoverageAttr))]
@@ -63,7 +76,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
-        private InstrumenterTest CreateInstrumentor()
+        private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false)
         {
             string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
@@ -71,10 +84,22 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
 
-            File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
-            File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
+            string destModule, destPdb;
+            if (fakeCoreLibModule)
+            {
+                destModule = "System.Private.CoreLib.dll";
+                destPdb = "System.Private.CoreLib.pdb";
+            }
+            else
+            {
+                destModule = Path.GetFileName(module);
+                destPdb = Path.GetFileName(pdb);
+            }
 
-            module = Path.Combine(directory.FullName, Path.GetFileName(module));
+            File.Copy(module, Path.Combine(directory.FullName, destModule), true);
+            File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
+
+            module = Path.Combine(directory.FullName, destModule);
             Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
             return new InstrumenterTest
             {
