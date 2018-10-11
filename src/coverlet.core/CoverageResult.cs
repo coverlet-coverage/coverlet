@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace Coverlet.Core
         {
             foreach (var module in modules)
             {
-                if (!this.Modules.Keys.Select(Path.GetFileName).Contains(Path.GetFileName(module.Key)))
+                if (!this.Modules.Keys.Contains(module.Key))
                 {
                     this.Modules.Add(module.Key, module.Value);
                 }
