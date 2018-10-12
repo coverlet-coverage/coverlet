@@ -12,7 +12,7 @@ namespace Coverlet.Core.Helpers.Tests
         public void TestGetDependencies()
         {
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
-            var modules = InstrumentationHelper.GetCoverableModules(module);
+            var modules = InstrumentationHelper.GetCoverableModules(module, null);
             Assert.False(Array.Exists(modules, m => m == module));
         }
 
@@ -28,12 +28,7 @@ namespace Coverlet.Core.Helpers.Tests
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
             string identifier = Guid.NewGuid().ToString();
 
-            InstrumentationHelper.BackupOriginalModule(module, identifier);
-
-            var backupPath = Path.Combine(
-                Path.GetTempPath(),
-                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
-            );
+            var backupPath = InstrumentationHelper.BackupOriginalModule(module, identifier);
 
             Assert.True(File.Exists(backupPath));
         }
@@ -228,6 +223,35 @@ namespace Coverlet.Core.Helpers.Tests
 
             result = InstrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", filters);
             Assert.True(result);
+        }
+
+        [Fact]
+        public void TestIncludeDirectoryInvalidThrowsDirectoryNotFoundException()
+        {
+            string module = typeof(InstrumentationHelperTests).Assembly.Location;
+            Assert.Throws<DirectoryNotFoundException>(() =>
+                InstrumentationHelper.GetCoverableModules(module, new[] {"Foobar"}));
+        }
+
+        [Fact]
+        public void TestIncludeDirectories()
+        {
+            string module = typeof(InstrumentationHelperTests).Assembly.Location;
+
+            var currentDirModules = InstrumentationHelper.GetCoverableModules(module,
+                new[] {Environment.CurrentDirectory});
+            
+            var parentDirWildcardModules = InstrumentationHelper.GetCoverableModules(module,
+                new[] {Path.Combine(Directory.GetParent(Environment.CurrentDirectory).FullName, "*")});
+
+            // There are at least as many modules found when searching the parent directory's subdirectories
+            Assert.True(parentDirWildcardModules.Length >= currentDirModules.Length);
+
+            var relativePathModules = InstrumentationHelper.GetCoverableModules(module,
+                new[] {"."});
+
+            // Same number of modules found when using a relative path
+            Assert.Equal(currentDirModules.Length, relativePathModules.Length);
         }
 
         public static IEnumerable<object[]> ValidModuleFilterData =>

@@ -8,5 +8,6 @@
     <MergeWith Condition="$(MergeWith) == ''"></MergeWith>
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <ThresholdType Condition="$(ThresholdType) == ''">line,branch,method</ThresholdType>
+    <IncludeDirectories Condition="$(IncludeDirectories) == ''"></IncludeDirectories>
   </PropertyGroup>
 </Project>
