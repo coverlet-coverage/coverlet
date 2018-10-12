@@ -29,7 +29,6 @@ namespace Coverlet.Core
 
         public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] includeDirectories, string[] excludedSourceFiles, string mergeWith)
         {
-            Console.WriteLine(module);
             _module = module;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
@@ -153,8 +152,10 @@ namespace Coverlet.Core
                 InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
-            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules };
-            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = new Modules() };
+            coverageResult.Merge(modules);
+
+            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith))
             {
                 string json = File.ReadAllText(_mergeWith);
                 coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
