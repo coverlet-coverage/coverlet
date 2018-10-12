@@ -1,10 +1,14 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 
 using Microsoft.Extensions.FileSystemGlobbing;
@@ -14,11 +18,17 @@ namespace Coverlet.Core.Helpers
 {
     internal static class InstrumentationHelper
     {
-        public static string[] GetCoverableModules(string module)
+        public static string[] GetCoverableModules(string module, string[] includeDirectories)
         {
-            IEnumerable<string> modules = Directory.EnumerateFiles(Path.GetDirectoryName(module)).Where(f => f.EndsWith(".exe") || f.EndsWith(".dll"));
-            modules = modules.Where(m => IsAssembly(m) && Path.GetFileName(m) != Path.GetFileName(module));
-            return modules.ToArray();
+            var moduleDirectory = Path.GetDirectoryName(module);
+            var files = new List<string>(Directory.GetFiles(moduleDirectory));
+
+            if (includeDirectories != null)
+                foreach (var includeDirectory in ExpandIncludeDirectories(includeDirectories, moduleDirectory))
+                    files.AddRange(Directory.GetFiles(includeDirectory));
+
+            return files.Where(m => IsAssembly(m) && Path.GetFileName(m) != Path.GetFileName(module))
+                .Distinct().ToArray();
         }
 
         public static bool HasPdb(string module)
@@ -40,10 +50,11 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public static void BackupOriginalModule(string module, string identifier)
+        public static string BackupOriginalModule(string module, string identifier)
         {
             var backupPath = GetBackupPath(module, identifier);
             File.Copy(module, backupPath);
+            return backupPath;
         }
 
         public static void RestoreOriginalModule(string module, string identifier)
@@ -243,11 +254,33 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
+        private static IEnumerable<string> ExpandIncludeDirectories(string[] includeDirectories, string moduleDirectory)
+        {
+            var result = new List<string>(includeDirectories.Length);
+
+            foreach (var includeDirectory in includeDirectories.Where(d => d != null))
+            {
+                var fullPath = (!Path.IsPathRooted(includeDirectory)
+                    ? Path.GetFullPath(Path.Combine(moduleDirectory, includeDirectory))
+                    : includeDirectory).TrimEnd('*');
+
+                if (!Directory.Exists(fullPath))
+                    throw new DirectoryNotFoundException($"The included directory '{fullPath}' does not exist.");
+
+                if (includeDirectory.EndsWith("*", StringComparison.Ordinal))
+                    result.AddRange(Directory.GetDirectories(fullPath));
+                else
+                    result.Add(fullPath);
+            }
+
+            return result;
+        }
+
         private static string GetBackupPath(string module, string identifier)
         {
             return Path.Combine(
                 Path.GetTempPath(),
-                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
+                Path.GetFileNameWithoutExtension(module) + "_" + GetPathHash(Path.GetDirectoryName(module)) + "_" + identifier + ".dll"
             );
         }
 
@@ -274,6 +307,9 @@ namespace Coverlet.Core.Helpers
         {
             try
             {
+                if (!(filePath.EndsWith(".exe") || filePath.EndsWith(".dll")))
+                    return false;
+
                 AssemblyName.GetAssemblyName(filePath);
                 return true;
             }
@@ -281,6 +317,13 @@ namespace Coverlet.Core.Helpers
             {
                 return false;
             }
+        }
+
+        private static string GetPathHash(string path)
+        {
+            using (var md5 = MD5.Create())
+                return BitConverter.ToString(md5.ComputeHash(Encoding.Unicode.GetBytes(path)))
+                    .Replace("-", string.Empty);
         }
     }
 }

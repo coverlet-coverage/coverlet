@@ -7,6 +7,7 @@
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'"
       Include="$(Include)"
+      IncludeDirectories="$(IncludeDirectories)"
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       MergeWith="$(MergeWith)"
@@ -17,6 +18,7 @@
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
       Include="$(Include)"
+      IncludeDirectories="$(IncludeDirectories)"
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       MergeWith="$(MergeWith)"

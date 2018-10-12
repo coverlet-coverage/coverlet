@@ -17,6 +17,7 @@ namespace Coverlet.Core
         private string _identifier;
         private string[] _excludeFilters;
         private string[] _includeFilters;
+        private string[] _includeDirectories;
         private string[] _excludedSourceFiles;
         private string _mergeWith;
         private List<InstrumenterResult> _results;
@@ -26,11 +27,13 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles, string mergeWith)
+        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] includeDirectories, string[] excludedSourceFiles, string mergeWith)
         {
+            Console.WriteLine(module);
             _module = module;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
+            _includeDirectories = includeDirectories;
             _excludedSourceFiles = excludedSourceFiles;
             _mergeWith = mergeWith;
 
@@ -40,7 +43,7 @@ namespace Coverlet.Core
 
         public void PrepareModules()
         {
-            string[] modules = InstrumentationHelper.GetCoverableModules(_module);
+            string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories);
             string[] excludes =  InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
             _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
             _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
