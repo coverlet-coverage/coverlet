@@ -29,7 +29,6 @@ namespace Coverlet.Core
 
         public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] includeDirectories, string[] excludedSourceFiles, string mergeWith)
         {
-            Console.WriteLine(module);
             _module = module;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
