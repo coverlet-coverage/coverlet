@@ -3,6 +3,7 @@
     <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
     <CoverletOutput Condition="$(CoverletOutput) == ''">$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))</CoverletOutput>
+    <Include Condition="$(Include) == ''"></Include>
     <Exclude Condition="$(Exclude) == ''"></Exclude>
     <ExcludeByFile Condition="$(ExcludeByFile) == ''"></ExcludeByFile>
     <MergeWith Condition="$(MergeWith) == ''"></MergeWith>
