@@ -6,6 +6,7 @@
   <Target Name="InstrumentModulesNoBuild" BeforeTargets="VSTest">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'"
+      Include="$(Include)"
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       MergeWith="$(MergeWith)"
@@ -15,6 +16,7 @@
   <Target Name="InstrumentModulesAfterBuild" AfterTargets="BuildProject">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
+      Include="$(Include)"
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       MergeWith="$(MergeWith)"
