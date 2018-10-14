@@ -66,6 +66,10 @@ namespace Coverlet.Core.Instrumentation
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
+                if (Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib")
+                {
+                    parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
+                }
 
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
@@ -108,7 +112,7 @@ namespace Coverlet.Core.Instrumentation
                 foreach (FieldDefinition fieldDef in moduleTrackerTemplate.Fields)
                 {
                     var fieldClone = new FieldDefinition(fieldDef.Name, fieldDef.Attributes, fieldDef.FieldType);
-                    fieldClone.FieldType = module.ImportReference(fieldClone.FieldType);
+                    fieldClone.FieldType = module.ImportReference(fieldDef.FieldType);
 
                     _customTrackerTypeDef.Fields.Add(fieldClone);
 
@@ -170,7 +174,14 @@ namespace Coverlet.Core.Instrumentation
                     }
 
                     foreach (var handler in methodDef.Body.ExceptionHandlers)
+                    {
+                        if (handler.CatchType != null)
+                        {
+                            handler.CatchType = module.ImportReference(handler.CatchType);
+                        }
+                        
                         methodOnCustomType.Body.ExceptionHandlers.Add(handler);
+                    }
 
                     _customTrackerTypeDef.Methods.Add(methodOnCustomType);
                 }
@@ -404,6 +415,73 @@ namespace Coverlet.Core.Instrumentation
             catch
             {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// A custom importer created specifically to allow the instrumentation of System.Private.CoreLib by
+        /// removing the external references to netstandard that are generated when instrumenting a typical
+        /// assembly.
+        /// </summary>
+        private class CoreLibMetadataImporterProvider : IMetadataImporterProvider
+        {
+            public IMetadataImporter GetMetadataImporter(ModuleDefinition module)
+            {
+                return new CoreLibMetadataImporter(module);
+            }
+
+            private class CoreLibMetadataImporter : IMetadataImporter
+            {
+                private readonly ModuleDefinition module;
+                private readonly DefaultMetadataImporter defaultMetadataImporter;
+
+                public CoreLibMetadataImporter(ModuleDefinition module)
+                {
+                    this.module = module;
+                    this.defaultMetadataImporter = new DefaultMetadataImporter(module);
+                }
+
+                public AssemblyNameReference ImportReference(AssemblyNameReference reference)
+                {
+                    return this.defaultMetadataImporter.ImportReference(reference);
+                }
+
+                public TypeReference ImportReference(TypeReference type, IGenericParameterProvider context)
+                {
+                    var importedRef = this.defaultMetadataImporter.ImportReference(type, context);
+                    importedRef.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+                    return importedRef;
+                }
+
+                public FieldReference ImportReference(FieldReference field, IGenericParameterProvider context)
+                {
+                    var importedRef = this.defaultMetadataImporter.ImportReference(field, context);
+                    importedRef.FieldType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+                    return importedRef;
+                }
+
+                public MethodReference ImportReference(MethodReference method, IGenericParameterProvider context)
+                {
+                    var importedRef = this.defaultMetadataImporter.ImportReference(method, context);
+                    importedRef.DeclaringType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+
+                    foreach (var parameter in importedRef.Parameters)
+                    {
+                        if (parameter.ParameterType.Scope == module.TypeSystem.CoreLibrary)
+                        {
+                            continue;
+                        }
+
+                        parameter.ParameterType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+                    }
+
+                    if (importedRef.ReturnType.Scope != module.TypeSystem.CoreLibrary)
+                    {
+                        importedRef.ReturnType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+                    }
+
+                    return importedRef;
+                }
             }
         }
     }
