@@ -49,7 +49,7 @@ namespace coverlet.core.tests.Instrumentation
         {
             WriteHitsFile(new[] { 1, 2, 3 });
             ModuleTrackerTemplate.HitsArray = new[] { 1 };
-            Assert.Throws<InvalidDataException>(() => ModuleTrackerTemplate.UnloadModule(null, null));
+            Assert.Throws<InvalidOperationException>(() => ModuleTrackerTemplate.UnloadModule(null, null));
         }
 
         [Fact]
