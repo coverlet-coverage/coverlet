@@ -314,7 +314,7 @@ dotnet test /p:CollectCoverage=true /p:Exclude="[coverlet.*]Coverlet.Core.Covera
 Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `Include` property. 
 
 Examples
- - `/p:Include="[*]*"` => INcludes all types in all assemblies (nothing is instrumented)
+ - `/p:Include="[*]*"` => Includes all types in all assemblies (everything is instrumented)
  - `/p:Include="[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
   - `/p:Include="[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
 
