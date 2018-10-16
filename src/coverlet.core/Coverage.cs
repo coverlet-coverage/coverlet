@@ -148,7 +148,7 @@ namespace Coverlet.Core
                     }
                 }
 
-                modules.Add(Path.GetFileName(result.ModulePath), documents);
+                modules.Add(result.ModulePath, documents);
                 InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
