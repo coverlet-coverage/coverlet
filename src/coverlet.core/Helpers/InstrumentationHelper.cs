@@ -264,8 +264,7 @@ namespace Coverlet.Core.Helpers
                     ? Path.GetFullPath(Path.Combine(moduleDirectory, includeDirectory))
                     : includeDirectory).TrimEnd('*');
 
-                if (!Directory.Exists(fullPath))
-                    throw new DirectoryNotFoundException($"The included directory '{fullPath}' does not exist.");
+                if (!Directory.Exists(fullPath)) continue;
 
                 if (includeDirectory.EndsWith("*", StringComparison.Ordinal))
                     result.AddRange(Directory.GetDirectories(fullPath));

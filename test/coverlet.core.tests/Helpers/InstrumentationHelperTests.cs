@@ -226,14 +226,6 @@ namespace Coverlet.Core.Helpers.Tests
         }
 
         [Fact]
-        public void TestIncludeDirectoryInvalidThrowsDirectoryNotFoundException()
-        {
-            string module = typeof(InstrumentationHelperTests).Assembly.Location;
-            Assert.Throws<DirectoryNotFoundException>(() =>
-                InstrumentationHelper.GetCoverableModules(module, new[] {"Foobar"}));
-        }
-
-        [Fact]
         public void TestIncludeDirectories()
         {
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
