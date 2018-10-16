@@ -115,10 +115,9 @@ namespace Coverlet.MSbuild.Tasks
 
                 Console.WriteLine();
                 Console.WriteLine(coverageTable.ToStringAlternative());
-                Console.WriteLine();
-                Console.WriteLine($"Total Line {overallLineCoverage}%");
-                Console.WriteLine($"Total Branch {overallBranchCoverage}%");
-                Console.WriteLine($"Total Method {overallMethodCoverage}%");
+                Console.WriteLine($"Total Line: {overallLineCoverage}%");
+                Console.WriteLine($"Total Branch: {overallBranchCoverage}%");
+                Console.WriteLine($"Total Method: {overallMethodCoverage}%");
 
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
