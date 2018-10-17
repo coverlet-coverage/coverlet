@@ -123,10 +123,9 @@ namespace Coverlet.Console
 
                 logger.LogInformation(string.Empty);
                 logger.LogInformation(coverageTable.ToStringAlternative());
-                logger.LogInformation(string.Empty);
-                logger.LogInformation($"Total Line {overallLineCoverage}%");
-                logger.LogInformation($"Total Branch {overallBranchCoverage}%");
-                logger.LogInformation($"Total Method {overallMethodCoverage}%");
+                logger.LogInformation($"Total Line: {overallLineCoverage}%");
+                logger.LogInformation($"Total Branch: {overallBranchCoverage}%");
+                logger.LogInformation($"Total Method: {overallMethodCoverage}%");
 
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
