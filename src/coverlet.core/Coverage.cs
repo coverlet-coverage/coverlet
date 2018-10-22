@@ -151,7 +151,7 @@ namespace Coverlet.Core
             }
 
             var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules };
-            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith))
+            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
             {
                 string json = File.ReadAllText(_mergeWith);
                 coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
