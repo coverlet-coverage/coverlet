@@ -162,11 +162,14 @@ namespace Coverlet.Core
 
         private void CalculateCoverage()
         {
+            var resultsToRemove = new List<InstrumenterResult>();
             foreach (var result in _results)
             {
                 if (!File.Exists(result.HitsFilePath))
                 {
-                    // File not instrumented, or nothing in it called.  Warn about this?
+                    // File not instrumented, or nothing in it called.
+                    // Mark to be removed so no non used modules are included in coverage file
+                    resultsToRemove.Add(result);
                     continue;
                 }
 
@@ -231,6 +234,11 @@ namespace Coverlet.Core
                 }
 
                 InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+            }
+
+            foreach (var resultToRemove in resultsToRemove)
+            {
+                _results.Remove(resultToRemove);
             }
         }
     }
