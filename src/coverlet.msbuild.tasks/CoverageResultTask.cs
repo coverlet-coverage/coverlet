@@ -1,7 +1,9 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using coverlet.core;
 using ConsoleTables;
 using Coverlet.Core;
 using Coverlet.Core.Reporters;
@@ -16,6 +18,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _format;
         private int _threshold;
         private string _thresholdType;
+        private bool _teamCityOutput;
 
         [Required]
         public string Output
@@ -43,6 +46,13 @@ namespace Coverlet.MSbuild.Tasks
         {
             get { return _thresholdType; }
             set { _thresholdType = value; }
+        }
+
+        [Required]
+        public bool TeamCityOutput
+        {
+            get { return _teamCityOutput; }
+            set { _teamCityOutput = value; }
         }
 
         public override bool Execute()
@@ -79,9 +89,9 @@ namespace Coverlet.MSbuild.Tasks
                 var summary = new CoverageSummary();
                 var exceptionBuilder = new StringBuilder();
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules).Percent * 100;
-                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
-                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
+                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
+                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
+                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
 
                 foreach (var module in result.Modules)
                 {
@@ -115,9 +125,18 @@ namespace Coverlet.MSbuild.Tasks
 
                 Console.WriteLine();
                 Console.WriteLine(coverageTable.ToStringAlternative());
-                Console.WriteLine($"Total Line: {overallLineCoverage}%");
-                Console.WriteLine($"Total Branch: {overallBranchCoverage}%");
-                Console.WriteLine($"Total Method: {overallMethodCoverage}%");
+                Console.WriteLine($"Total Line: {overallLineCoverage.Percent * 100}%");
+                Console.WriteLine($"Total Branch: {overallBranchCoverage.Percent * 100}%");
+                Console.WriteLine($"Total Method: {overallMethodCoverage.Percent * 100}%");
+
+                if (_teamCityOutput)
+                {
+                    Console.WriteLine();
+                    var teamCityServiceMessageWriter = new TeamCityServiceMessageWriter(Console.WriteLine);
+                    teamCityServiceMessageWriter.OutputLineCoverage(overallLineCoverage);
+                    teamCityServiceMessageWriter.OutputBranchCoverage(overallBranchCoverage);
+                    teamCityServiceMessageWriter.OutputMethodCoverage(overallMethodCoverage);
+                }
 
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));

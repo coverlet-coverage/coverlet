@@ -29,7 +29,8 @@
       Output="$(CoverletOutput)"
       OutputFormat="$(CoverletOutputFormat)"
       Threshold="$(Threshold)"
-      ThresholdType="$(ThresholdType)" />
+      ThresholdType="$(ThresholdType)"
+      TeamCityOutput="$(TeamCityOutput)" />
   </Target>
 
 </Project>
