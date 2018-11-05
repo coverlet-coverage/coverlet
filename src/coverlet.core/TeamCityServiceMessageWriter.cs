@@ -62,7 +62,7 @@ namespace coverlet.core
 
         private void OutputTeamCityServiceMessage(string key, object value)
         {
-            _writer($"##teamcity[buildStatisticValue key='{key}' value='{value}']");
+            _writer?.Invoke($"##teamcity[buildStatisticValue key='{key}' value='{value}']");
         }
     }
 }

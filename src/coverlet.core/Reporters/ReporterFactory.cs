@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using coverlet.core.Reporters;
 
 namespace Coverlet.Core.Reporters
 {
@@ -14,7 +15,8 @@ namespace Coverlet.Core.Reporters
             _format = format;
             _reporters = new IReporter[] {
                 new JsonReporter(), new LcovReporter(),
-                new OpenCoverReporter(), new CoberturaReporter()
+                new OpenCoverReporter(), new CoberturaReporter(),
+                new TeamCityReporter()
             };
         }
 

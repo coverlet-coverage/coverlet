@@ -9,6 +9,8 @@ namespace Coverlet.Core.Reporters
 {
     public class OpenCoverReporter : IReporter
     {
+        public bool UseConsoleOutput => false;
+        
         public string Format => "opencover";
 
         public string Extension => "opencover.xml";

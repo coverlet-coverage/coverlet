@@ -74,13 +74,23 @@ namespace Coverlet.Console
                     if (reporter == null)
                         throw new Exception($"Specified output format '{format}' is not supported");
 
-                    var filename = Path.GetFileName(dOutput);
-                    filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
-                    filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
+                    if (reporter.UseConsoleOutput)
+                    {
+                        // Output to console
+                        logger.LogInformation("  Outputting results to console");
+                        logger.LogInformation(reporter.Report(result));
+                    }
+                    else
+                    {
+                        // Output to file
+                        var filename = Path.GetFileName(dOutput);
+                        filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+                        filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
-                    var report = Path.Combine(directory, filename);
-                    logger.LogInformation($"  Generating report '{report}'");
-                    File.WriteAllText(report, reporter.Report(result));
+                        var report = Path.Combine(directory, filename);
+                        logger.LogInformation($"  Generating report '{report}'");
+                        File.WriteAllText(report, reporter.Report(result));
+                    }
                 }
 
                 var summary = new CoverageSummary();

@@ -75,13 +75,23 @@ namespace Coverlet.MSbuild.Tasks
                     if (reporter == null)
                         throw new Exception($"Specified output format '{format}' is not supported");
 
-                    var filename = Path.GetFileName(_output);
-                    filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
-                    filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
+                    if (reporter.UseConsoleOutput)
+                    {
+                        // Output to console
+                        Console.WriteLine("  Outputting results to console");
+                        Console.WriteLine(reporter.Report(result));
+                    }
+                    else
+                    {
+                        // Output to file
+                        var filename = Path.GetFileName(_output);
+                        filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+                        filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
-                    var report = Path.Combine(directory, filename);
-                    Console.WriteLine($"  Generating report '{report}'");
-                    File.WriteAllText(report, reporter.Report(result));
+                        var report = Path.Combine(directory, filename);
+                        Console.WriteLine($"  Generating report '{report}'");
+                        File.WriteAllText(report, reporter.Report(result));
+                    }
                 }
 
                 var thresholdFailed = false;
