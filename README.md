@@ -68,7 +68,6 @@ Options:
   --include          Filter expressions to include specific modules and types.
   --exclude-by-file  Glob patterns specifying source files to exclude.
   --merge-with       Path to existing coverage result to merge.
-  --teamcity-output  Output coverage results to console using TeamCity service messages.
 ```
 
 #### Code Coverage
@@ -99,6 +98,7 @@ Supported Formats:
 * lcov
 * opencover
 * cobertura
+* teamcity
 
 The `--format` option can be specified multiple times to output multiple formats in a single run:
 
@@ -117,6 +117,28 @@ The above command will write the results to the supplied path, if no file extens
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custom/directory/" -f json -f lcov
 ```
+
+#### TeamCity Output
+
+Coverlet can output basic code coverage statistics using [TeamCity service messages](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages).
+
+```bash
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output teamcity
+```
+
+The currently supported [TeamCity statistics](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages) are:
+
+| TeamCity Statistic Key  | Description                    |
+| :---                    | :---                           |
+| CodeCoverageL           | Line-level code coverage       |
+| CodeCoverageC           | Class-level code coverage      |
+| CodeCoverageM           | Method-level code coverage     |
+| CodeCoverageAbsLTotal   | The total number of lines      |
+| CodeCoverageAbsLCovered | The number of covered lines    |
+| CodeCoverageAbsCTotal   | The total number of classes    |
+| CodeCoverageAbsCCovered | The number of covered classes  |
+| CodeCoverageAbsMTotal   | The total number of methods    |
+| CodeCoverageAbsMCovered | The number of covered methods  |
 
 #### Merging Results
 
@@ -195,27 +217,6 @@ Examples
 
 Both `--exclude` and `--include` options can be used together but `--exclude` takes precedence. You can specify the `--exclude` and `--include` options multiple times to allow for multiple filter expressions.
 
-#### TeamCity Output
-
-Coverlet can output basic code coverage statistics using [TeamCity service messages](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages).
-
-```bash
-coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --teamcity-output
-```
-
-The currently supported [TeamCity statistics](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages) are:
-| TeamCity Statistic Key  | Description                    |
-| :---                    | :---                           |
-| CodeCoverageL           | Line-level code coverage       |
-| CodeCoverageC           | Class-level code coverage      |
-| CodeCoverageM           | Method-level code coverage     |
-| CodeCoverageAbsLTotal   | The total number of lines      |
-| CodeCoverageAbsLCovered | The number of covered lines    |
-| CodeCoverageAbsCTotal   | The total number of classes    |
-| CodeCoverageAbsCCovered | The number of covered classes  |
-| CodeCoverageAbsMTotal   | The total number of methods    |
-| CodeCoverageAbsMCovered | The number of covered methods  |
-
 ### MSBuild
 
 In this mode, Coverlet doesn't require any additional setup other than including the NuGet package in the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
@@ -256,6 +257,7 @@ Supported Formats:
 * lcov
 * opencover
 * cobertura
+* teamcity
 
 You can specify multiple output formats by separating them with a comma (`,`).
 
@@ -296,27 +298,6 @@ dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
 ```
 
 You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`.
-
-#### TeamCity Output
-
-Coverlet can output basic code coverage statistics using [TeamCity service messages](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages).
-
-```bash
-dotnet test /p:CollectCoverage=true /p:TeamCityOutput=true
-```
-
-The currently supported [TeamCity statistics](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages) are:
-| TeamCity Statistic Key  | Description                    |
-| :---                    | :---                           |
-| CodeCoverageL           | Line-level code coverage       |
-| CodeCoverageC           | Class-level code coverage      |
-| CodeCoverageM           | Method-level code coverage     |
-| CodeCoverageAbsLTotal   | The total number of lines      |
-| CodeCoverageAbsLCovered | The number of covered lines    |
-| CodeCoverageAbsCTotal   | The total number of classes    |
-| CodeCoverageAbsCCovered | The number of covered classes  |
-| CodeCoverageAbsMTotal   | The total number of methods    |
-| CodeCoverageAbsMCovered | The number of covered methods  |
 
 #### Excluding From Coverage
 
