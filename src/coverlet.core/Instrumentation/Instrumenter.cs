@@ -405,7 +405,10 @@ namespace Coverlet.Core.Instrumentation
             };
 
             // Include the other attributes to exclude based on incoming parameters.
-            excludeAttributeNames = _excludedAttributes?.Union(excludeAttributeNames);
+            if (_excludedAttributes != null)
+            {
+                excludeAttributeNames = _excludedAttributes.Union(excludeAttributeNames);
+            }
 
             return excludeAttributeNames.Any(a => a.Equals(customAttribute.AttributeType.Name));
         }

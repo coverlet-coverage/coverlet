@@ -62,9 +62,6 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Theory]
         [InlineData(typeof(ClassExcludedByCodeAnalysisCodeCoverageAttr))]
         [InlineData(typeof(ClassExcludedByCoverletCodeCoverageAttr))]
-#pragma warning disable CS0612 // Type or member is obsolete
-        [InlineData(typeof(ClassExcludedByObsoleteAttr))]
-#pragma warning restore CS0612 // Type or member is obsolete
         public void TestInstrument_ClassesWithExcludeAttributeAreExcluded(Type excludedType)
         {
             var instrumenterTest = CreateInstrumentor();
@@ -79,7 +76,23 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
-        private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false)
+        [Fact]
+        public void TestInstrument_ClassesWithCustomExcludeAttributeAreExcluded()
+        {
+            var obsoleteAttribute = typeof(ObsoleteAttribute);
+            var instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { nameof(obsoleteAttribute) });
+            var result = instrumenterTest.Instrumenter.Instrument();
+
+            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            Assert.NotNull(doc);
+
+            var found = doc.Lines.Values.Any(l => l.Class == obsoleteAttribute.FullName);
+            Assert.False(found, "Class decorated with with exclude attribute should be excluded");
+
+            instrumenterTest.Directory.Delete(true);
+        }
+
+        private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false, string[] attributesToIgnore = null)
         {
             string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
@@ -101,8 +114,6 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             File.Copy(module, Path.Combine(directory.FullName, destModule), true);
             File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
-
-            var attributesToIgnore = new string[] { nameof(ObsoleteAttribute) };
 
             module = Path.Combine(directory.FullName, destModule);
             Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore);
