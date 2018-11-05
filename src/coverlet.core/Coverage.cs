@@ -19,6 +19,7 @@ namespace Coverlet.Core
         private string[] _includeFilters;
         private string[] _excludedSourceFiles;
         private string _mergeWith;
+        private string[] _excludeAttributes;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -26,13 +27,14 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles, string mergeWith)
+        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles, string mergeWith, string[] excludeAttributes)
         {
             _module = module;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
             _excludedSourceFiles = excludedSourceFiles;
             _mergeWith = mergeWith;
+            _excludeAttributes = excludeAttributes;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
@@ -51,7 +53,7 @@ namespace Coverlet.Core
                     || !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
                     continue;
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);

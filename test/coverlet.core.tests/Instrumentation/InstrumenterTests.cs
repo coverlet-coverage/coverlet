@@ -27,7 +27,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             foreach (var file in files)
                 File.Copy(Path.Combine(OriginalFilesDir, file), Path.Combine(TestFilesDir, file), overwrite: true);
 
-            Instrumenter instrumenter = new Instrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            Instrumenter instrumenter = new Instrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
             Assert.True(instrumenter.CanInstrument());
             var result = instrumenter.Instrument();
             Assert.NotNull(result);
@@ -62,6 +62,9 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Theory]
         [InlineData(typeof(ClassExcludedByCodeAnalysisCodeCoverageAttr))]
         [InlineData(typeof(ClassExcludedByCoverletCodeCoverageAttr))]
+#pragma warning disable CS0612 // Type or member is obsolete
+        [InlineData(typeof(ClassExcludedByObsoleteAttr))]
+#pragma warning restore CS0612 // Type or member is obsolete
         public void TestInstrument_ClassesWithExcludeAttributeAreExcluded(Type excludedType)
         {
             var instrumenterTest = CreateInstrumentor();
@@ -99,8 +102,10 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(module, Path.Combine(directory.FullName, destModule), true);
             File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
 
+            var attributesToIgnore = new string[] { nameof(ObsoleteAttribute) };
+
             module = Path.Combine(directory.FullName, destModule);
-            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore);
             return new InstrumenterTest
             {
                 Instrumenter = instrumenter,

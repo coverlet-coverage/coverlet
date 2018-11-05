@@ -189,4 +189,17 @@ namespace Coverlet.Core.Samples.Tests
             return input;
         }
     }
+
+    [Obsolete]
+    public class ClassExcludedByObsoleteAttr
+    {
+
+        public string Method(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                throw new ArgumentException("Cannot be empty", nameof(input));
+
+            return input;
+        }
+    }
 }
