@@ -70,6 +70,46 @@ namespace Coverlet.Core
             return details;
         }
 
+        public int CalculateCyclomaticComplexity(IList<BranchInfo> branches)
+        {
+            return Math.Max(1, branches.Count);
+        }
+
+        public int CalculateCyclomaticComplexity(Methods methods)
+        {
+            return methods.Values.Select(m => CalculateCyclomaticComplexity(m.Branches)).Sum();
+        }
+
+        public int CalculateMaxCyclomaticComplexity(Methods methods)
+        {
+            return methods.Values.Select(m => CalculateCyclomaticComplexity(m.Branches)).DefaultIfEmpty(1).Max();
+        }
+
+        public int CalculateMinCyclomaticComplexity(Methods methods)
+        {
+            return methods.Values.Select(m => CalculateCyclomaticComplexity(m.Branches)).DefaultIfEmpty(1).Min();
+        }
+
+        public int CalculateCyclomaticComplexity(Modules modules)
+        {
+            return modules.Values.Select(CalculateCyclomaticComplexity).Sum();
+        }
+
+        public int CalculateMaxCyclomaticComplexity(Modules modules)
+        {
+            return modules.Values.Select(CalculateCyclomaticComplexity).DefaultIfEmpty(1).Max();
+        }
+
+        public int CalculateMinCyclomaticComplexity(Modules modules)
+        {
+            return modules.Values.Select(CalculateCyclomaticComplexity).DefaultIfEmpty(1).Min();
+        }
+
+        public int CalculateCyclomaticComplexity(Documents documents)
+        {
+            return documents.Values.SelectMany(c => c.Values.Select(CalculateCyclomaticComplexity)).Sum();
+        }
+
         public CoverageDetails CalculateBranchCoverage(Methods methods)
         {
             var details = new CoverageDetails();
