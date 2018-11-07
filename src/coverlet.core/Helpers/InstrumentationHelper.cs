@@ -200,7 +200,7 @@ namespace Coverlet.Core.Helpers
                     {
                         matcherDict.Add(root, new Matcher());
                     }
-                    matcherDict[root].AddInclude(excludeRule.Substring(root.Length));
+                    matcherDict[root].AddInclude(Path.GetFullPath(excludeRule).Substring(root.Length));
                 }
                 else
                 {
