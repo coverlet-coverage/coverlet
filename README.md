@@ -185,7 +185,7 @@ Examples
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude "[coverlet.*]Coverlet.Core.Coverage"
 ```
 
-Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `--include` option. 
+Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `--include` option.
 
 Examples
  - `--include "[*]*"` => INcludes all types in all assemblies (nothing is instrumented)
@@ -201,7 +201,7 @@ In this mode, Coverlet doesn't require any additional setup other than including
 If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
 
 ##### Note for Powershell / VSTS users
-To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```. 
+To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```.
 
 ```/p:Exclude="[*]*Examples?%2c[*]*Startup"```
 
@@ -281,6 +281,12 @@ You can specify multiple values for `ThresholdType` by separating them with comm
 
 You can ignore a method or an entire class from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
 
+You can also ignore additional attributes by using the `ExcludeByAttribute` property:
+
+```bash
+dotnet test /p:CollectCoverage=true /p:ExcludeByAttribute="ObsoleteAttribute,GeneratedCodeAttribute,CompilerGeneratedAttribute"
+```
+
 #### Source Files
 You can also ignore specific source files from code coverage using the `ExcludeByFile` property
  - Use single or multiple paths (separate by comma)
@@ -291,7 +297,7 @@ You can also ignore specific source files from code coverage using the `ExcludeB
 dotnet test /p:CollectCoverage=true /p:ExcludeByFile=\"../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs,\"
 ```
 
-##### Filters 
+##### Filters
 Coverlet gives the ability to have fine grained control over what gets excluded using "filter expressions".
 
 Syntax: `/p:Exclude=[Assembly-Filter]Type-Filter`
@@ -311,7 +317,7 @@ Examples
 dotnet test /p:CollectCoverage=true /p:Exclude="[coverlet.*]Coverlet.Core.Coverage"
 ```
 
-Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `Include` property. 
+Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `Include` property.
 
 Examples
  - `/p:Include="[*]*"` => Includes all types in all assemblies (everything is instrumented)
