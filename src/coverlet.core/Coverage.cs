@@ -19,6 +19,7 @@ namespace Coverlet.Core
         private string[] _includeFilters;
         private string[] _excludedSourceFiles;
         private string _mergeWith;
+        private bool _excludeNonCalledFiles;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -26,13 +27,14 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles, string mergeWith)
+        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles, string mergeWith, bool excludeNonCalledFiles)
         {
             _module = module;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
             _excludedSourceFiles = excludedSourceFiles;
             _mergeWith = mergeWith;
+            _excludeNonCalledFiles = excludeNonCalledFiles;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
@@ -63,7 +65,7 @@ namespace Coverlet.Core
 
         public CoverageResult GetCoverageResult()
         {
-            CalculateCoverage();
+            CalculateCoverage(_excludeNonCalledFiles);
 
             Modules modules = new Modules();
             foreach (var result in _results)
@@ -160,7 +162,7 @@ namespace Coverlet.Core
             return coverageResult;
         }
 
-        private void CalculateCoverage()
+        private void CalculateCoverage(bool excludeNonCalledFiles)
         {
             var resultsToRemove = new List<InstrumenterResult>();
             foreach (var result in _results)
@@ -168,8 +170,12 @@ namespace Coverlet.Core
                 if (!File.Exists(result.HitsFilePath))
                 {
                     // File not instrumented, or nothing in it called.
-                    // Mark to be removed so no non used modules are included in coverage file
-                    resultsToRemove.Add(result);
+                    // Mark to be removed so no non used modules are included in coverage file?
+                    if (excludeNonCalledFiles)
+                    {
+                        resultsToRemove.Add(result);
+                    }
+
                     continue;
                 }
 

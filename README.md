@@ -68,6 +68,7 @@ Options:
   --include          Filter expressions to include specific modules and types.
   --exclude-by-file  Glob patterns specifying source files to exclude.
   --merge-with       Path to existing coverage result to merge.
+  --exclude-non-called-files	Exclude non called/non instrumented files from coverage.
 ```
 
 #### Code Coverage
