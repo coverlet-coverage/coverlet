@@ -39,7 +39,7 @@ namespace Coverlet.Core.Reporters
                 package.Add(new XAttribute("name", Path.GetFileNameWithoutExtension(module.Key)));
                 package.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(module.Value).Percent.ToString()));
                 package.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(module.Value).Percent.ToString()));
-                package.Add(new XAttribute("complexity", "0"));
+                package.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(module.Value).ToString()));
 
                 XElement classes = new XElement("classes");
                 foreach (var document in module.Value)
@@ -51,7 +51,7 @@ namespace Coverlet.Core.Reporters
                         @class.Add(new XAttribute("filename", GetRelativePathFromBase(basePath, document.Key)));
                         @class.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(cls.Value).Percent.ToString()));
                         @class.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(cls.Value).Percent.ToString()));
-                        @class.Add(new XAttribute("complexity", "0"));
+                        @class.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(cls.Value).ToString()));
 
                         XElement classLines = new XElement("lines");
                         XElement methods = new XElement("methods");
