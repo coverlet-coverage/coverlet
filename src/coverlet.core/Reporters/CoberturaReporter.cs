@@ -10,6 +10,8 @@ namespace Coverlet.Core.Reporters
 {
     public class CoberturaReporter : IReporter
     {
+        public ReporterOutputType OutputType => ReporterOutputType.File;
+
         public string Format => "cobertura";
 
         public string Extension => "cobertura.xml";

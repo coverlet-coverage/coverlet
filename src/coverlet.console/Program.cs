@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
@@ -73,22 +72,32 @@ namespace Coverlet.Console
                     if (reporter == null)
                         throw new Exception($"Specified output format '{format}' is not supported");
 
-                    var filename = Path.GetFileName(dOutput);
-                    filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
-                    filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
+                    if (reporter.OutputType == ReporterOutputType.Console)
+                    {
+                        // Output to console
+                        logger.LogInformation("  Outputting results to console");
+                        logger.LogInformation(reporter.Report(result));
+                    }
+                    else
+                    {
+                        // Output to file
+                        var filename = Path.GetFileName(dOutput);
+                        filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+                        filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
-                    var report = Path.Combine(directory, filename);
-                    logger.LogInformation($"  Generating report '{report}'");
-                    File.WriteAllText(report, reporter.Report(result));
+                        var report = Path.Combine(directory, filename);
+                        logger.LogInformation($"  Generating report '{report}'");
+                        File.WriteAllText(report, reporter.Report(result));
+                    }
                 }
 
                 var summary = new CoverageSummary();
                 var exceptionBuilder = new StringBuilder();
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
                 var thresholdFailed = false;
-                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules).Percent * 100;
-                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
-                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
+                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
+                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
+                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
 
                 foreach (var _module in result.Modules)
                 {
@@ -122,9 +131,9 @@ namespace Coverlet.Console
 
                 logger.LogInformation(string.Empty);
                 logger.LogInformation(coverageTable.ToStringAlternative());
-                logger.LogInformation($"Total Line: {overallLineCoverage}%");
-                logger.LogInformation($"Total Branch: {overallBranchCoverage}%");
-                logger.LogInformation($"Total Method: {overallMethodCoverage}%");
+                logger.LogInformation($"Total Line: {overallLineCoverage.Percent * 100}%");
+                logger.LogInformation($"Total Branch: {overallBranchCoverage.Percent * 100}%");
+                logger.LogInformation($"Total Method: {overallMethodCoverage.Percent * 100}%");
 
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
