@@ -10,7 +10,7 @@ namespace Coverlet.Core.Reporters
 {
     public class CoberturaReporter : IReporter
     {
-        public bool UseConsoleOutput => false;
+        public ReporterOutputType OutputType => ReporterOutputType.File;
 
         public string Format => "cobertura";
 

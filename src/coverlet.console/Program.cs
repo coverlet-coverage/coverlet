@@ -72,7 +72,7 @@ namespace Coverlet.Console
                     if (reporter == null)
                         throw new Exception($"Specified output format '{format}' is not supported");
 
-                    if (reporter.UseConsoleOutput)
+                    if (reporter.OutputType == ReporterOutputType.Console)
                     {
                         // Output to console
                         logger.LogInformation("  Outputting results to console");

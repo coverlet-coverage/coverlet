@@ -65,7 +65,7 @@ namespace Coverlet.MSbuild.Tasks
                     if (reporter == null)
                         throw new Exception($"Specified output format '{format}' is not supported");
 
-                    if (reporter.UseConsoleOutput)
+                    if (reporter.OutputType == ReporterOutputType.Console)
                     {
                         // Output to console
                         Console.WriteLine("  Outputting results to console");

@@ -6,7 +6,7 @@ namespace coverlet.core.Reporters
 {
     public class TeamCityReporter : IReporter
     {
-        public bool UseConsoleOutput => true;
+        public ReporterOutputType OutputType => ReporterOutputType.Console;
 
         public string Format => "teamcity";
 

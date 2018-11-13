@@ -2,9 +2,15 @@ namespace Coverlet.Core.Reporters
 {
     public interface IReporter
     {
-        bool UseConsoleOutput { get; }
+        ReporterOutputType OutputType { get; }
         string Format { get; }
         string Extension { get; }
         string Report(CoverageResult result);
+    }
+
+    public enum ReporterOutputType
+    {
+        File,
+        Console,
     }
 }
