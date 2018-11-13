@@ -76,8 +76,12 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
-        [Fact]
-        public void TestInstrument_ClassesWithCustomExcludeAttributeAreExcluded()
+#pragma warning disable CS0612 // Type or member is obsolete
+        [Theory]
+        [InlineData(nameof(ClassExcludedByObsoleteAttr))]
+        [InlineData("Obsolete")]
+#pragma warning restore CS0612 // Type or member is obsolete
+        public void TestInstrument_ClassesWithCustomExcludeAttributeAreExcluded(string excludedAttribute)
         {
             var instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { nameof(ObsoleteAttribute) });
             var result = instrumenterTest.Instrumenter.Instrument();
@@ -85,9 +89,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
 
-#pragma warning disable CS0612 // Type or member is obsolete
-            var found = doc.Lines.Values.Any(l => l.Class == nameof(ClassExcludedByObsoleteAttr));
-#pragma warning restore CS0612 // Type or member is obsolete
+            var found = doc.Lines.Values.Any(l => l.Class.Equals(excludedAttribute));
             Assert.False(found, "Class decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);

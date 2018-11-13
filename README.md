@@ -153,6 +153,12 @@ coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --threshold 80 -
 
 You can ignore a method or an entire class from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
 
+You can also ignore additional attributes by using the `ExcludeByAttribute` property (short name or full name supported):
+
+```bash
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-attributes "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute"
+```
+
 ##### Source Files
 
 You can also ignore specific source files from code coverage using the `--exclude-by-file` option
@@ -281,10 +287,10 @@ You can specify multiple values for `ThresholdType` by separating them with comm
 
 You can ignore a method or an entire class from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
 
-You can also ignore additional attributes by using the `ExcludeByAttribute` property:
+You can also ignore additional attributes by using the `ExcludeByAttribute` property (short name or full name supported):
 
 ```bash
-dotnet test /p:CollectCoverage=true /p:ExcludeByAttribute="ObsoleteAttribute,GeneratedCodeAttribute,CompilerGeneratedAttribute"
+dotnet test /p:CollectCoverage=true /p:ExcludeByAttribute="Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute"
 ```
 
 #### Source Files

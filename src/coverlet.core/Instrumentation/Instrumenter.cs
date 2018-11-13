@@ -182,7 +182,7 @@ namespace Coverlet.Core.Instrumentation
                         {
                             handler.CatchType = module.ImportReference(handler.CatchType);
                         }
-                        
+
                         methodOnCustomType.Body.ExceptionHandlers.Add(handler);
                     }
 
@@ -410,8 +410,9 @@ namespace Coverlet.Core.Instrumentation
                 excludeAttributeNames = _excludedAttributes.Union(excludeAttributeNames);
             }
 
-            return excludeAttributeNames.Any(a => a.Equals(customAttribute.AttributeType.Name));
-        }
+			return excludeAttributeNames.Any(a =>
+                customAttribute.AttributeType.Name.Equals(a.EndsWith("Attribute")? a : $"{a}Attribute"));
+		}
 
         private static Mono.Cecil.Cil.MethodBody GetMethodBody(MethodDefinition method)
         {
