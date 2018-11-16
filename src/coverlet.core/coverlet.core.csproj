@@ -3,8 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyVersion>3.2.1</AssemblyVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />

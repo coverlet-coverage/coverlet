@@ -23,7 +23,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _includeFilters;
         private readonly string[] _excludedFiles;
         private InstrumenterResult _result;
-        private FieldDefinition _customTrackerHitsArray;
+        private FieldDefinition _customTrackerHitsArraySize;
         private FieldDefinition _customTrackerHitsFilePath;
         private ILProcessor _customTrackerClassConstructorIl;
         private TypeDefinition _customTrackerTypeDef;
@@ -86,10 +86,9 @@ namespace Coverlet.Core.Instrumentation
                     }
 
                     // Fixup the custom tracker class constructor, according to all instrumented types
-                    Instruction lastInstr = _customTrackerClassConstructorIl.Body.Instructions.Last();
+                    Instruction lastInstr = _customTrackerClassConstructorIl.Body.Instructions.First();
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Newarr, module.TypeSystem.Int32));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArraySize));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
 
@@ -116,9 +115,9 @@ namespace Coverlet.Core.Instrumentation
 
                     _customTrackerTypeDef.Fields.Add(fieldClone);
 
-                    if (fieldClone.Name == "HitsArray")
-                        _customTrackerHitsArray = fieldClone;
-                    else if (fieldClone.Name == "HitsFilePath")
+                    if (fieldClone.Name == nameof(ModuleTrackerTemplate.DefaultHitsArraySize))
+                        _customTrackerHitsArraySize = fieldClone;
+                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.DefaultHitsFilePath))
                         _customTrackerHitsFilePath = fieldClone;
                 }
 
@@ -189,7 +188,7 @@ namespace Coverlet.Core.Instrumentation
                 module.Types.Add(_customTrackerTypeDef);
             }
 
-            Debug.Assert(_customTrackerHitsArray != null);
+            Debug.Assert(_customTrackerHitsArraySize != null);
             Debug.Assert(_customTrackerClassConstructorIl != null);
         }
 

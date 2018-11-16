@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.IO.MemoryMappedFiles;
+using System.Text;
 using System.Threading;
 
 namespace Coverlet.Core.Instrumentation
@@ -15,130 +16,133 @@ namespace Coverlet.Core.Instrumentation
     /// regarding visibility of members, etc.
     /// </remarks>
     [ExcludeFromCodeCoverage]
-    public static class ModuleTrackerTemplate
+    public sealed class ModuleTrackerTemplate : IDisposable
     {
-        public static string HitsFilePath;
-        public static int[] HitsArray;
+        public static string DefaultHitsFilePath;
+        public static int DefaultHitsArraySize;
 
-        // Special case when instrumenting CoreLib, the thread static below prevents infinite loop in CoreLib
-        // while allowing the tracker template to call any of its types and functions.
-        [ThreadStatic]
-        private static bool t_isTracking;
+        public static ModuleTrackerTemplate Singleton { get; }
 
-        [ThreadStatic]
-        private static int[] t_threadHits;
+        private const string MemoryMappedFileNamePostfix = ".coverlet_memory_mapped";
 
-        private static List<int[]> _threads;
+        private readonly MemoryMappedFile memoryMappedFile;
+        private readonly MemoryMappedViewAccessor memoryMappedViewAccessor;
+        private readonly int hitsArraySize;
 
         static ModuleTrackerTemplate()
         {
-            t_isTracking = true;
-            _threads = new List<int[]>(2 * Environment.ProcessorCount);
-
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(UnloadModule);
-            AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
-            t_isTracking = false;
             // At the end of the instrumentation of a module, the instrumenter needs to add code here
-            // to initialize the static fields according to the values derived from the instrumentation of
+            // to initialize the static setup fields according to the values derived from the instrumentation of
             // the module.
+
+            if (DefaultHitsFilePath != null)
+                Singleton = new ModuleTrackerTemplate(DefaultHitsFilePath, DefaultHitsArraySize);
+
+            //we always keep the view accessor around without disposing it. So, regardless of what happens, be it the module unloading or the process terminating, it will close properly when the finalizers are run and, failing that, when the kernel does process cleanup
         }
 
         public static void RecordHit(int hitLocationIndex)
         {
-            if (t_isTracking)
-                return;
-
-            if (t_threadHits == null)
-            {
-                t_isTracking = true;
-                lock (_threads)
-                {
-                    if (t_threadHits == null)
-                    {
-                        t_threadHits = new int[HitsArray.Length];
-                        _threads.Add(t_threadHits);
-                    }
-                }
-                t_isTracking = false;
-            }
-
-            ++t_threadHits[hitLocationIndex];
+            if (Singleton == null)
+                throw new InvalidOperationException("Singleton not initialized!");
+            Singleton.InstanceRecordHit(hitLocationIndex);
         }
 
-        public static void UnloadModule(object sender, EventArgs e)
+        public ModuleTrackerTemplate(string hitsFilePath, int hitsArraySize)
         {
-            t_isTracking = true;
+            if (hitsFilePath == null)
+                throw new ArgumentNullException(nameof(hitsFilePath));
 
-            // Update the global hits array from data from all the threads
-            lock (_threads)
+            if (hitsArraySize < 0)
+                throw new ArgumentOutOfRangeException(nameof(hitsArraySize), hitsArraySize, "hitsArraySize must not be less than 0!");
+
+            this.hitsArraySize = hitsArraySize;
+
+            //now HitsFilePath and HitsArraySize should be populated
+
+            //first, try to create the hits file if it doesn't exist already
+            FileStream fileStream = null;
+            try
             {
-                foreach (var threadHits in _threads)
-                {
-                    for (int i = 0; i < HitsArray.Length; ++i)
-                        HitsArray[i] += threadHits[i];
-                }
-
-                // Prevent any double counting scenario, i.e.: UnloadModule called twice (not sure if this can happen in practice ...)
-                // Only an issue if DomainUnload and ProcessExit can both happens, perhaps can be removed...
-                _threads.Clear();
+                fileStream = new FileStream(hitsFilePath, FileMode.CreateNew, FileAccess.ReadWrite);
+            }
+            catch (IOException)
+            {
+                //likely failed to create a new file
             }
 
-            // The same module can be unloaded multiple times in the same process via different app domains.
-            // Use a global mutex to ensure no concurrent access.
-            using (var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew))
-            {
-                if (!createdNew)
-                    mutex.WaitOne();
+            var bytesRequired = (hitsArraySize + 1) * sizeof(int);
+            var memoryMappedFileName = (hitsFilePath + MemoryMappedFileNamePostfix).Replace('\\', '/'); //backslashes can't be used on windows
 
-                bool failedToCreateNewHitsFile = false;
+            if (fileStream != null)
+                //we can safely close the fileStream after creating the MMF since we don't use it directly
+                //The kernel file object remains open until all mapped files/views are closed
                 try
                 {
-                    using (var fs = new FileStream(HitsFilePath, FileMode.CreateNew))
-                    using (var bw = new BinaryWriter(fs))
+                    using (fileStream)
                     {
-                        bw.Write(HitsArray.Length);
-                        foreach (int hitCount in HitsArray)
-                        {
-                            bw.Write(hitCount);
-                        }
+                        //we're responsible initializing the file
+                        //no worries about race conditions here (unless the assembly being instrumented is really weird and loads itself during static initialization somehow)
+
+                        //write the header
+                        using (var writer = new BinaryWriter(fileStream, Encoding.Default, true))
+                            writer.Write(hitsArraySize);
+
+                        //write the zeros
+                        var zerosRequired = bytesRequired - sizeof(int);
+                        var zeroArray = new byte[zerosRequired];
+                        fileStream.Write(zeroArray, 0, zerosRequired);
+
+                        memoryMappedFile = MemoryMappedFile.CreateFromFile(fileStream, memoryMappedFileName, 0, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true);
                     }
                 }
                 catch
                 {
-                    failedToCreateNewHitsFile = true;
+                    File.Delete(hitsFilePath);
+                    throw;
                 }
+            else
+                //open the existing memory map that SHOULD exist
+                memoryMappedFile = MemoryMappedFile.OpenExisting(memoryMappedFileName, MemoryMappedFileRights.ReadWrite, HandleInheritability.None);
 
-                if (failedToCreateNewHitsFile)
+            //although the view accessor will keep the mapped file open, we need to not dispose the actual MMF handle
+            //doing so will cause the calls to MemoryMappedFile.OpenExisting above to fail
+            memoryMappedViewAccessor = memoryMappedFile.CreateViewAccessor();
+        }
+
+        /// <summary>
+        /// Disposes the <see cref="ModuleTrackerTemplate"/>. Mainly for the convienience of test code
+        /// </summary>
+        public void Dispose()
+        {
+            memoryMappedViewAccessor.Dispose();
+            memoryMappedFile.Dispose();
+        }
+
+        public void InstanceRecordHit(int hitLocationIndex)
+        {
+            if (hitLocationIndex < 0 || hitLocationIndex >= hitsArraySize)
+                throw new ArgumentOutOfRangeException(nameof(hitLocationIndex), hitLocationIndex, "hitLocationIndex falls outside of hitsArraySize!");
+
+            var buffer = memoryMappedViewAccessor.SafeMemoryMappedViewHandle;
+
+            //even though this is just template code, we have to compile with /unsafe ¯\_(ツ)_/¯
+            //anyway, this is so we can get proper cross-thread/process atomicity by using Interlocked on the MMF view directly
+            unsafe
+            {
+                byte* pointer = null;
+                buffer.AcquirePointer(ref pointer);
+                try
                 {
-                    // Update the number of hits by adding value on disk with the ones on memory.
-                    // This path should be triggered only in the case of multiple AppDomain unloads.
-                    using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-                    using (var br = new BinaryReader(fs))
-                    using (var bw = new BinaryWriter(fs))
-                    {
-                        int hitsLength = br.ReadInt32();
-                        if (hitsLength != HitsArray.Length)
-                        {
-                            throw new InvalidOperationException(
-                                $"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {HitsArray.Length}");
-                        }
-
-                        for (int i = 0; i < hitsLength; ++i)
-                        {
-                            int oldHitCount = br.ReadInt32();
-                            bw.Seek(-sizeof(int), SeekOrigin.Current);
-                            bw.Write(HitsArray[i] + oldHitCount);
-                        }
-                    }
+                    var intPointer = (int*)pointer;
+                    var hitLocationArrayOffset = intPointer + hitLocationIndex + 1;	//+1 for header
+                    Interlocked.Increment(ref *hitLocationArrayOffset);
                 }
-
-                // Prevent any double counting scenario, i.e.: UnloadModule called twice (not sure if this can happen in practice ...)
-                // Only an issue if DomainUnload and ProcessExit can both happens, perhaps can be removed...
-                Array.Clear(HitsArray, 0, HitsArray.Length);
-
-                // On purpose this is not under a try-finally: it is better to have an exception if there was any error writing the hits file
-                // this case is relevant when instrumenting corelib since multiple processes can be running against the same instrumented dll.
-                mutex.ReleaseMutex();
+                //finally mostly for show, cause if we segfault above it's already ogre
+                finally
+                {
+                    buffer.ReleasePointer();
+                }
             }
         }
     }
