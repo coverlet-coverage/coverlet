@@ -60,7 +60,9 @@ namespace Coverlet.Core.Instrumentation
             }
 
             if (needToOpenFilestream)
-                using (var fileStream = new FileStream(hitsFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                var fileStream = new FileStream(hitsFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                try
                 {
                     //we're responsible initializing the file
                     //no worries about race conditions here
@@ -73,8 +75,14 @@ namespace Coverlet.Core.Instrumentation
 
                     var bytesRequired = (hitsArraySize + 1) * sizeof(int);
                     var mapName = namedMapsSupported ? memoryMappedFileName : null;
-                    memoryMappedFile = MemoryMappedFile.CreateFromFile(fileStream, mapName, bytesRequired, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true);
+                    memoryMappedFile = MemoryMappedFile.CreateFromFile(fileStream, mapName, bytesRequired, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
                 }
+                catch
+                {
+                    fileStream.Dispose();
+                    throw;
+                }
+            }
 
             //although the view accessor will keep the mapped file open, we need to not dispose the actual MMF handle
             //doing so will cause the calls to MemoryMappedFile.OpenExisting above to fail
