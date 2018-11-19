@@ -40,11 +40,18 @@ namespace Coverlet.Core.Instrumentation
         {
             //first, try to mapped the file if it already has been
             var memoryMappedFileName = (hitsFilePath + MemoryMappedFileNamePostfix).Replace('\\', '/'); //backslashes can't be used on windows
+            var namedMapsSupported = true;
             bool needToOpenFilestream;
             try
             {
                 memoryMappedFile = MemoryMappedFile.OpenExisting(memoryMappedFileName, MemoryMappedFileRights.ReadWrite, HandleInheritability.None);
                 needToOpenFilestream = false;
+            }
+            catch (PlatformNotSupportedException)
+            {
+                //assume named maps aren't supported
+                namedMapsSupported = false;
+                needToOpenFilestream = true;
             }
             catch (FileNotFoundException)
             {
@@ -56,15 +63,17 @@ namespace Coverlet.Core.Instrumentation
                 using (var fileStream = new FileStream(hitsFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                 {
                     //we're responsible initializing the file
-                    //no worries about race conditions here (unless the assembly being instrumented is really weird and loads itself during static initialization somehow)
+                    //no worries about race conditions here
+                    //all copies of the running code will write the exact same first 4 bytes
+                    //then interlocked operations will properly handle incrementing the counters
 
                     //write the header
                     using (var writer = new BinaryWriter(fileStream, Encoding.Default, true))
                         writer.Write(hitsArraySize);
 
-
                     var bytesRequired = (hitsArraySize + 1) * sizeof(int);
-                    memoryMappedFile = MemoryMappedFile.CreateFromFile(fileStream, memoryMappedFileName, bytesRequired, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true);
+                    var mapName = namedMapsSupported ? memoryMappedFileName : null;
+                    memoryMappedFile = MemoryMappedFile.CreateFromFile(fileStream, mapName, bytesRequired, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true);
                 }
 
             //although the view accessor will keep the mapped file open, we need to not dispose the actual MMF handle
