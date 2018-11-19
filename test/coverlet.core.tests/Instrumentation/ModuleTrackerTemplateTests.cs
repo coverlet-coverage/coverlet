@@ -1,10 +1,9 @@
-﻿using Coverlet.Core.Instrumentation;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using Xunit;
 
-namespace coverlet.core.tests.Instrumentation
+namespace Coverlet.Core.Instrumentation.Tests
 {
     public class ModuleTrackerTemplateTests : IDisposable
     {
