@@ -21,7 +21,7 @@ namespace Coverlet.Core.Instrumentation
         public static string DefaultHitsFilePath;
         public static int DefaultHitsArraySize;
 
-        public static ModuleTrackerTemplate Singleton { get; }
+        private static readonly ModuleTrackerTemplate singleton;
 
         private const string MemoryMappedFileNamePostfix = ".coverlet_memory_mapped";
 
@@ -36,16 +36,16 @@ namespace Coverlet.Core.Instrumentation
             // the module.
 
             if (DefaultHitsFilePath != null)
-                Singleton = new ModuleTrackerTemplate(DefaultHitsFilePath, DefaultHitsArraySize);
+                singleton = new ModuleTrackerTemplate(DefaultHitsFilePath, DefaultHitsArraySize);
 
             //we always keep the view accessor around without disposing it. So, regardless of what happens, be it the module unloading or the process terminating, it will close properly when the finalizers are run and, failing that, when the kernel does process cleanup
         }
 
         public static void RecordHit(int hitLocationIndex)
         {
-            if (Singleton == null)
+            if (singleton == null)
                 throw new InvalidOperationException("Singleton not initialized!");
-            Singleton.InstanceRecordHit(hitLocationIndex);
+            singleton.InstanceRecordHit(hitLocationIndex);
         }
 
         public ModuleTrackerTemplate(string hitsFilePath, int hitsArraySize)

@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Helpers;
@@ -17,6 +16,8 @@ namespace Coverlet.Core.Instrumentation
 {
     internal class Instrumenter
     {
+        private const string customTrackerNamespace = "Coverlet.Core.Instrumentation.Tracker";
+
         private readonly string _module;
         private readonly string _identifier;
         private readonly string[] _excludeFilters;
@@ -80,6 +81,7 @@ namespace Coverlet.Core.Instrumentation
                     {
                         var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
+                            && actualType.Namespace != customTrackerNamespace
                             && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
                             && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
@@ -105,13 +107,16 @@ namespace Coverlet.Core.Instrumentation
                     "Coverlet.Core.Instrumentation", nameof(ModuleTrackerTemplate));
 
                 _customTrackerTypeDef = new TypeDefinition(
-                    "Coverlet.Core.Instrumentation.Tracker", Path.GetFileNameWithoutExtension(module.Name) + "_" + _identifier, moduleTrackerTemplate.Attributes);
+                    customTrackerNamespace, Path.GetFileNameWithoutExtension(module.Name) + "_" + _identifier, moduleTrackerTemplate.Attributes);
 
                 _customTrackerTypeDef.BaseType = module.TypeSystem.Object;
                 foreach (FieldDefinition fieldDef in moduleTrackerTemplate.Fields)
                 {
                     var fieldClone = new FieldDefinition(fieldDef.Name, fieldDef.Attributes, fieldDef.FieldType);
-                    fieldClone.FieldType = module.ImportReference(fieldDef.FieldType);
+                    if (fieldClone.FieldType == moduleTrackerTemplate)
+                        fieldClone.FieldType = _customTrackerTypeDef;
+                    else
+                        fieldClone.FieldType = module.ImportReference(fieldDef.FieldType);
 
                     _customTrackerTypeDef.Fields.Add(fieldClone);
 
@@ -178,7 +183,7 @@ namespace Coverlet.Core.Instrumentation
                         {
                             handler.CatchType = module.ImportReference(handler.CatchType);
                         }
-                        
+
                         methodOnCustomType.Body.ExceptionHandlers.Add(handler);
                     }
 
