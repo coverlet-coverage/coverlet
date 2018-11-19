@@ -36,7 +36,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             }
             finally
             {
-                ModuleTrackerTemplate.Dispose();
+                CloseMemoryMapping();
             }
 
             var expectedHitsArray = new[] { 1, 2, 0, 3 };
@@ -71,7 +71,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 }
                 finally
                 {
-                    ModuleTrackerTemplate.Dispose();
+                    CloseMemoryMapping();
                 }
 
                 semaphore.Wait();
@@ -95,7 +95,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             }
             finally
             {
-                ModuleTrackerTemplate.Dispose();
+                CloseMemoryMapping();
             }
             ModuleTrackerTemplate.Setup();
             try
@@ -110,7 +110,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             }
             finally
             {
-                ModuleTrackerTemplate.Dispose();
+                CloseMemoryMapping();
             }
 
             var expectedHitsArray = new[] { 0, 4, 4, 4 };
@@ -143,6 +143,12 @@ namespace Coverlet.Core.Instrumentation.Tests
 
                 return hitsArray;
             }
+        }
+
+        private void CloseMemoryMapping()
+        {
+            ModuleTrackerTemplate.memoryMappedViewAccessor?.Dispose();
+            ModuleTrackerTemplate.memoryMappedFile?.Dispose();
         }
     }
 }

@@ -18,10 +18,10 @@ namespace Coverlet.Core.Instrumentation
     [ExcludeFromCodeCoverage]
     public static class ModuleTrackerTemplate
     {
+        private const string MemoryMappedFileNamePostfix = ".coverlet_memory_mapped";
+
         public static string hitsFilePath;
         public static int hitsArraySize;
-        
-        private const string MemoryMappedFileNamePostfix = ".coverlet_memory_mapped";
 
         public static MemoryMappedFile memoryMappedFile;
         public static MemoryMappedViewAccessor memoryMappedViewAccessor;
@@ -70,12 +70,6 @@ namespace Coverlet.Core.Instrumentation
             //although the view accessor will keep the mapped file open, we need to not dispose the actual MMF handle
             //doing so will cause the calls to MemoryMappedFile.OpenExisting above to fail
             memoryMappedViewAccessor = memoryMappedFile.CreateViewAccessor();
-        }
-
-        public static void Dispose()
-        {
-            memoryMappedViewAccessor?.Dispose();
-            memoryMappedFile?.Dispose();
         }
 
         public static void RecordHit(int hitLocationIndex)

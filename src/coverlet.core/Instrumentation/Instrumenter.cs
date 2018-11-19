@@ -110,10 +110,7 @@ namespace Coverlet.Core.Instrumentation
                 foreach (FieldDefinition fieldDef in moduleTrackerTemplate.Fields)
                 {
                     var fieldClone = new FieldDefinition(fieldDef.Name, fieldDef.Attributes, fieldDef.FieldType);
-                    if (fieldClone.FieldType == moduleTrackerTemplate)
-                        fieldClone.FieldType = _customTrackerTypeDef;
-                    else
-                        fieldClone.FieldType = module.ImportReference(fieldDef.FieldType);
+                    fieldClone.FieldType = module.ImportReference(fieldDef.FieldType);
 
                     _customTrackerTypeDef.Fields.Add(fieldClone);
 
