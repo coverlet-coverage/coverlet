@@ -16,8 +16,6 @@ namespace Coverlet.Core.Instrumentation
 {
     internal class Instrumenter
     {
-        private const string customTrackerNamespace = "Coverlet.Core.Instrumentation.Tracker";
-
         private readonly string _module;
         private readonly string _identifier;
         private readonly string[] _excludeFilters;
@@ -81,7 +79,6 @@ namespace Coverlet.Core.Instrumentation
                     {
                         var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
-                            && actualType.Namespace != customTrackerNamespace
                             && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
                             && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
@@ -107,7 +104,7 @@ namespace Coverlet.Core.Instrumentation
                     "Coverlet.Core.Instrumentation", nameof(ModuleTrackerTemplate));
 
                 _customTrackerTypeDef = new TypeDefinition(
-                    customTrackerNamespace, Path.GetFileNameWithoutExtension(module.Name) + "_" + _identifier, moduleTrackerTemplate.Attributes);
+                    "Coverlet.Core.Instrumentation.Tracker", Path.GetFileNameWithoutExtension(module.Name) + "_" + _identifier, moduleTrackerTemplate.Attributes);
 
                 _customTrackerTypeDef.BaseType = module.TypeSystem.Object;
                 foreach (FieldDefinition fieldDef in moduleTrackerTemplate.Fields)
@@ -120,9 +117,9 @@ namespace Coverlet.Core.Instrumentation
 
                     _customTrackerTypeDef.Fields.Add(fieldClone);
 
-                    if (fieldClone.Name == nameof(ModuleTrackerTemplate.DefaultHitsArraySize))
+                    if (fieldClone.Name == nameof(ModuleTrackerTemplate.hitsArraySize))
                         _customTrackerHitsArraySize = fieldClone;
-                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.DefaultHitsFilePath))
+                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.hitsFilePath))
                         _customTrackerHitsFilePath = fieldClone;
                 }
 

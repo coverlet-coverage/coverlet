@@ -12,6 +12,8 @@ namespace Coverlet.Core.Instrumentation.Tests
         public ModuleTrackerTemplateTests()
         {
             Dispose();
+            ModuleTrackerTemplate.hitsFilePath = tempFileName;
+            ModuleTrackerTemplate.hitsArraySize = 4;
         }
 
         public void Dispose()
@@ -22,14 +24,19 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void HitsFileCorrectlyWritten()
         {
-            using (var tracker = new ModuleTrackerTemplate(tempFileName, 4))
+            ModuleTrackerTemplate.Setup();
+            try
             {
-                tracker.InstanceRecordHit(3);
-                tracker.InstanceRecordHit(3);
-                tracker.InstanceRecordHit(1);
-                tracker.InstanceRecordHit(1);
-                tracker.InstanceRecordHit(0);
-                tracker.InstanceRecordHit(3);
+                ModuleTrackerTemplate.RecordHit(3);
+                ModuleTrackerTemplate.RecordHit(3);
+                ModuleTrackerTemplate.RecordHit(1);
+                ModuleTrackerTemplate.RecordHit(1);
+                ModuleTrackerTemplate.RecordHit(0);
+                ModuleTrackerTemplate.RecordHit(3);
+            }
+            finally
+            {
+                ModuleTrackerTemplate.Dispose();
             }
 
             var expectedHitsArray = new[] { 1, 2, 0, 3 };
@@ -39,24 +46,32 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void HitsOnMultipleThreadsCorrectlyCounted()
         {
-            using (var semaphore = new SemaphoreSlim(1, 1))
-            using (var tracker = new ModuleTrackerTemplate(tempFileName, 4))
+            using (var semaphore = new SemaphoreSlim(1))
             {
+                semaphore.Wait();
                 int joinCount = 0;
-                void HitIndex(object index)
+                ModuleTrackerTemplate.Setup();
+                try
                 {
-                    var hitIndex = (int)index;
-                    for (int i = 0; i <= hitIndex; ++i)
-                        tracker.InstanceRecordHit(i);
+                    void HitIndex(object index)
+                    {
+                        var hitIndex = (int)index;
+                        for (int i = 0; i <= hitIndex; ++i)
+                            ModuleTrackerTemplate.RecordHit(i);
 
-                    if (Interlocked.Increment(ref joinCount) == 4)
-                        semaphore.Release();
+                        if (Interlocked.Increment(ref joinCount) == 4)
+                            semaphore.Release();
+                    }
+
+                    for (int i = 0; i < 4; ++i)
+                    {
+                        var t = new Thread(HitIndex);
+                        t.Start(i);
+                    }
                 }
-
-                for (int i = 0; i < 4; ++i)
+                finally
                 {
-                    var t = new Thread(HitIndex);
-                    t.Start(i);
+                    ModuleTrackerTemplate.Dispose();
                 }
 
                 semaphore.Wait();
@@ -67,23 +82,35 @@ namespace Coverlet.Core.Instrumentation.Tests
         }
 
         [Fact]
-        public void MultipleParallelRecordingsHaveCorrectTotalData()
+        public void MultipleRecordingsHaveCorrectTotalData()
         {
-            using (var tracker1 = new ModuleTrackerTemplate(tempFileName, 4))
-            using (var tracker2 = new ModuleTrackerTemplate(tempFileName, 4))
+            ModuleTrackerTemplate.Setup();
+            try
             {
-                tracker1.InstanceRecordHit(1);
-                tracker2.InstanceRecordHit(3);
-                tracker1.InstanceRecordHit(2);
-                tracker2.InstanceRecordHit(2);
-                tracker1.InstanceRecordHit(3);
-                tracker2.InstanceRecordHit(1);
-                tracker1.InstanceRecordHit(1);
-                tracker2.InstanceRecordHit(3);
-                tracker1.InstanceRecordHit(2);
-                tracker2.InstanceRecordHit(2);
-                tracker1.InstanceRecordHit(1);
-                tracker2.InstanceRecordHit(3);
+                ModuleTrackerTemplate.RecordHit(1);
+                ModuleTrackerTemplate.RecordHit(3);
+                ModuleTrackerTemplate.RecordHit(2);
+                ModuleTrackerTemplate.RecordHit(2);
+                ModuleTrackerTemplate.RecordHit(3);
+            }
+            finally
+            {
+                ModuleTrackerTemplate.Dispose();
+            }
+            ModuleTrackerTemplate.Setup();
+            try
+            {
+                ModuleTrackerTemplate.RecordHit(1);
+                ModuleTrackerTemplate.RecordHit(1);
+                ModuleTrackerTemplate.RecordHit(3);
+                ModuleTrackerTemplate.RecordHit(2);
+                ModuleTrackerTemplate.RecordHit(2);
+                ModuleTrackerTemplate.RecordHit(1);
+                ModuleTrackerTemplate.RecordHit(3);
+            }
+            finally
+            {
+                ModuleTrackerTemplate.Dispose();
             }
 
             var expectedHitsArray = new[] { 0, 4, 4, 4 };

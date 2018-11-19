@@ -16,18 +16,15 @@ namespace Coverlet.Core.Instrumentation
     /// regarding visibility of members, etc.
     /// </remarks>
     [ExcludeFromCodeCoverage]
-    public sealed class ModuleTrackerTemplate : IDisposable
+    public static class ModuleTrackerTemplate
     {
-        public static string DefaultHitsFilePath;
-        public static int DefaultHitsArraySize;
-
-        private static readonly ModuleTrackerTemplate singleton;
-
+        public static string hitsFilePath;
+        public static int hitsArraySize;
+        
         private const string MemoryMappedFileNamePostfix = ".coverlet_memory_mapped";
 
-        private readonly MemoryMappedFile memoryMappedFile;
-        private readonly MemoryMappedViewAccessor memoryMappedViewAccessor;
-        private readonly int hitsArraySize;
+        public static MemoryMappedFile memoryMappedFile;
+        public static MemoryMappedViewAccessor memoryMappedViewAccessor;
 
         static ModuleTrackerTemplate()
         {
@@ -35,41 +32,27 @@ namespace Coverlet.Core.Instrumentation
             // to initialize the static setup fields according to the values derived from the instrumentation of
             // the module.
 
-            if (DefaultHitsFilePath != null)
-                singleton = new ModuleTrackerTemplate(DefaultHitsFilePath, DefaultHitsArraySize);
-
-            //we always keep the view accessor around without disposing it. So, regardless of what happens, be it the module unloading or the process terminating, it will close properly when the finalizers are run and, failing that, when the kernel does process cleanup
+            if(hitsFilePath != null)
+                Setup();
         }
 
-        public static void RecordHit(int hitLocationIndex)
+        public static void Setup()
         {
-            if (singleton == null)
-                throw new InvalidOperationException("Singleton not initialized!");
-            singleton.InstanceRecordHit(hitLocationIndex);
-        }
-
-        public ModuleTrackerTemplate(string hitsFilePath, int hitsArraySize)
-        {
-            if (hitsFilePath == null)
-                throw new ArgumentNullException(nameof(hitsFilePath));
-
-            if (hitsArraySize < 0)
-                throw new ArgumentOutOfRangeException(nameof(hitsArraySize), hitsArraySize, "hitsArraySize must not be less than 0!");
-
-            this.hitsArraySize = hitsArraySize;
-
             //first, try to mapped the file if it already has been
             var memoryMappedFileName = (hitsFilePath + MemoryMappedFileNamePostfix).Replace('\\', '/'); //backslashes can't be used on windows
+            bool needToOpenFilestream;
             try
             {
                 memoryMappedFile = MemoryMappedFile.OpenExisting(memoryMappedFileName, MemoryMappedFileRights.ReadWrite, HandleInheritability.None);
+                needToOpenFilestream = false;
             }
             catch (FileNotFoundException)
             {
                 //if it hasn't been mapped it's on us to create it
+                needToOpenFilestream = true;
             }
 
-            if (memoryMappedFile == null)
+            if (needToOpenFilestream)
                 using (var fileStream = new FileStream(hitsFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                 {
                     //we're responsible initializing the file
@@ -89,16 +72,13 @@ namespace Coverlet.Core.Instrumentation
             memoryMappedViewAccessor = memoryMappedFile.CreateViewAccessor();
         }
 
-        /// <summary>
-        /// Disposes the <see cref="ModuleTrackerTemplate"/>. Mainly for the convienience of test code
-        /// </summary>
-        public void Dispose()
+        public static void Dispose()
         {
-            memoryMappedViewAccessor.Dispose();
-            memoryMappedFile.Dispose();
+            memoryMappedViewAccessor?.Dispose();
+            memoryMappedFile?.Dispose();
         }
 
-        public void InstanceRecordHit(int hitLocationIndex)
+        public static void RecordHit(int hitLocationIndex)
         {
             if (hitLocationIndex < 0 || hitLocationIndex >= hitsArraySize)
                 throw new ArgumentOutOfRangeException(nameof(hitLocationIndex), hitLocationIndex, "hitLocationIndex falls outside of hitsArraySize!");
@@ -114,7 +94,7 @@ namespace Coverlet.Core.Instrumentation
                 try
                 {
                     var intPointer = (int*)pointer;
-                    var hitLocationArrayOffset = intPointer + hitLocationIndex + 1;	//+1 for header
+                    var hitLocationArrayOffset = intPointer + hitLocationIndex + 1; //+1 for header
                     Interlocked.Increment(ref *hitLocationArrayOffset);
                 }
                 //finally mostly for show, cause if we segfault above it's already ogre
