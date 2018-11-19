@@ -58,52 +58,31 @@ namespace Coverlet.Core.Instrumentation
 
             this.hitsArraySize = hitsArraySize;
 
-            //now HitsFilePath and HitsArraySize should be populated
-
-            //first, try to create the hits file if it doesn't exist already
-            FileStream fileStream = null;
+            //first, try to mapped the file if it already has been
+            var memoryMappedFileName = (hitsFilePath + MemoryMappedFileNamePostfix).Replace('\\', '/'); //backslashes can't be used on windows
             try
             {
-                fileStream = new FileStream(hitsFilePath, FileMode.CreateNew, FileAccess.ReadWrite);
-            }
-            catch (IOException)
-            {
-                //likely failed to create a new file
-            }
-
-            var bytesRequired = (hitsArraySize + 1) * sizeof(int);
-            var memoryMappedFileName = (hitsFilePath + MemoryMappedFileNamePostfix).Replace('\\', '/'); //backslashes can't be used on windows
-
-            if (fileStream != null)
-                //we can safely close the fileStream after creating the MMF since we don't use it directly
-                //The kernel file object remains open until all mapped files/views are closed
-                try
-                {
-                    using (fileStream)
-                    {
-                        //we're responsible initializing the file
-                        //no worries about race conditions here (unless the assembly being instrumented is really weird and loads itself during static initialization somehow)
-
-                        //write the header
-                        using (var writer = new BinaryWriter(fileStream, Encoding.Default, true))
-                            writer.Write(hitsArraySize);
-
-                        //write the zeros
-                        var zerosRequired = bytesRequired - sizeof(int);
-                        var zeroArray = new byte[zerosRequired];
-                        fileStream.Write(zeroArray, 0, zerosRequired);
-
-                        memoryMappedFile = MemoryMappedFile.CreateFromFile(fileStream, memoryMappedFileName, 0, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true);
-                    }
-                }
-                catch
-                {
-                    File.Delete(hitsFilePath);
-                    throw;
-                }
-            else
-                //open the existing memory map that SHOULD exist
                 memoryMappedFile = MemoryMappedFile.OpenExisting(memoryMappedFileName, MemoryMappedFileRights.ReadWrite, HandleInheritability.None);
+            }
+            catch (FileNotFoundException)
+            {
+                //if it hasn't been mapped it's on us to create it
+            }
+
+            if (memoryMappedFile == null)
+                using (var fileStream = new FileStream(hitsFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                {
+                    //we're responsible initializing the file
+                    //no worries about race conditions here (unless the assembly being instrumented is really weird and loads itself during static initialization somehow)
+
+                    //write the header
+                    using (var writer = new BinaryWriter(fileStream, Encoding.Default, true))
+                        writer.Write(hitsArraySize);
+
+
+                    var bytesRequired = (hitsArraySize + 1) * sizeof(int);
+                    memoryMappedFile = MemoryMappedFile.CreateFromFile(fileStream, memoryMappedFileName, bytesRequired, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true);
+                }
 
             //although the view accessor will keep the mapped file open, we need to not dispose the actual MMF handle
             //doing so will cause the calls to MemoryMappedFile.OpenExisting above to fail
