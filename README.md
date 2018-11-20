@@ -156,7 +156,7 @@ You can ignore a method or an entire class from code coverage by creating and ap
 You can also ignore additional attributes by using the `ExcludeByAttribute` property (short name or full name supported):
 
 ```bash
-coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-attributes "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute"
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-attribute "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute"
 ```
 
 ##### Source Files
