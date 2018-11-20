@@ -33,37 +33,37 @@ namespace coverlet.core.Reporters
         private void OutputLineCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The total number of lines
-            OutputTeamCityServiceMessage("CodeCoverageL", coverageDetails.Total, builder);
+            OutputTeamCityServiceMessage("CodeCoverageL", coverageDetails.Percent * 100, builder);
 
             // The number of covered lines
             OutputTeamCityServiceMessage("CodeCoverageAbsLCovered", coverageDetails.Covered, builder);
 
             // Line-level code coverage
-            OutputTeamCityServiceMessage("CodeCoverageAbsLTotal", coverageDetails.Percent * 100, builder);
+            OutputTeamCityServiceMessage("CodeCoverageAbsLTotal", coverageDetails.Total, builder);
         }
 
         private void OutputBranchCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The total number of branches
-            OutputTeamCityServiceMessage("CodeCoverageR", coverageDetails.Total, builder);
+            OutputTeamCityServiceMessage("CodeCoverageR", coverageDetails.Percent * 100, builder);
 
             // The number of covered branches
             OutputTeamCityServiceMessage("CodeCoverageAbsRCovered", coverageDetails.Covered, builder);
 
             // Branch-level code coverage
-            OutputTeamCityServiceMessage("CodeCoverageAbsRTotal", coverageDetails.Percent * 100, builder);
+            OutputTeamCityServiceMessage("CodeCoverageAbsRTotal", coverageDetails.Total, builder);
         }
 
         private void OutputMethodCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The total number of methods
-            OutputTeamCityServiceMessage("CodeCoverageM", coverageDetails.Total, builder);
+            OutputTeamCityServiceMessage("CodeCoverageM", coverageDetails.Percent * 100, builder);
 
             // The number of covered methods
             OutputTeamCityServiceMessage("CodeCoverageAbsMCovered", coverageDetails.Covered, builder);
 
             // Method-level code coverage
-            OutputTeamCityServiceMessage("CodeCoverageAbsMTotal", coverageDetails.Percent * 100, builder);
+            OutputTeamCityServiceMessage("CodeCoverageAbsMTotal", coverageDetails.Total, builder);
         }
 
         private void OutputTeamCityServiceMessage(string key, object value, StringBuilder builder)

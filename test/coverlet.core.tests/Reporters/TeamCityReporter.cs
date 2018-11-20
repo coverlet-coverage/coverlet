@@ -90,9 +90,9 @@ namespace Coverlet.Core.Reporters.Tests
             var output = _reporter.Report(_result);
 
             // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageL' value='2']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageL' value='50']", output);
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLCovered' value='1']", output);
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLTotal' value='50']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLTotal' value='2']", output);
         }
 
         [Fact]
@@ -102,9 +102,9 @@ namespace Coverlet.Core.Reporters.Tests
             var output = _reporter.Report(_result);
 
             // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageR' value='2']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageR' value='50']", output);
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsRCovered' value='1']", output);
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsRTotal' value='50']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsRTotal' value='2']", output);
         }
 
         [Fact]
@@ -114,9 +114,9 @@ namespace Coverlet.Core.Reporters.Tests
             var output = _reporter.Report(_result);
 
             // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageM' value='1']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageM' value='100']", output);
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMCovered' value='1']", output);
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMTotal' value='100']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMTotal' value='1']", output);
         }
     }
 }
