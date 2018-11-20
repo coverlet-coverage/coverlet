@@ -13,7 +13,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _include;
         private string _excludeByFile;
         private string _mergeWith;
-        private string _excludeByAttributes;
+        private string _excludeByAttribute;
 
         internal static Coverage Coverage
         {
@@ -51,10 +51,10 @@ namespace Coverlet.MSbuild.Tasks
             set { _mergeWith = value; }
         }
 
-        public string ExcludeByAttributes
+        public string ExcludeByAttribute
         {
-            get { return _excludeByAttributes; }
-            set { _excludeByAttributes = value; }
+            get { return _excludeByAttribute; }
+            set { _excludeByAttribute = value; }
         }
 
         public override bool Execute()
@@ -64,7 +64,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeFilters = _exclude?.Split(',');
                 var includeFilters = _include?.Split(',');
-                var excludeAttributes = _excludeByAttributes?.Split(',');
+                var excludeAttributes = _excludeByAttribute?.Split(',');
 
                 _coverage = new Coverage(_path, excludeFilters, includeFilters, excludedSourceFiles, _mergeWith, excludeAttributes);
                 _coverage.PrepareModules();

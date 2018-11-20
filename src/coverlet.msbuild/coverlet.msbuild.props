@@ -9,6 +9,6 @@
     <MergeWith Condition="$(MergeWith) == ''"></MergeWith>
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <ThresholdType Condition="$(ThresholdType) == ''">line,branch,method</ThresholdType>
-    <ExcludeByAttributes Condition="$(ExcludeByAttributes) == ''"></ExcludeByAttributes>
+    <ExcludeByAttribute Condition="$(ExcludeByAttribute) == ''"></ExcludeByAttribute>
   </PropertyGroup>
 </Project>
