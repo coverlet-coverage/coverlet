@@ -55,8 +55,14 @@ namespace Coverlet.MSbuild.Tasks
                 var result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);
-                if (!Directory.Exists(directory))
+                if (directory == string.Empty)
+                {
+                    directory = Directory.GetCurrentDirectory();
+                }
+                else if (!Directory.Exists(directory))
+                {
                     Directory.CreateDirectory(directory);
+                }
 
                 var formats = _format.Split(',');
                 foreach (var format in formats)

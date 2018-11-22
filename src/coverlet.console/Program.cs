@@ -63,8 +63,14 @@ namespace Coverlet.Console
 
                 var result = coverage.GetCoverageResult();
                 var directory = Path.GetDirectoryName(dOutput);
-                if (!Directory.Exists(directory))
+                if (directory == string.Empty)
+                {
+                    directory = Directory.GetCurrentDirectory();
+                }
+                else if (!Directory.Exists(directory))
+                {
                     Directory.CreateDirectory(directory);
+                }
 
                 foreach (var format in (formats.HasValue() ? formats.Values : new List<string>(new string[] { "json" })))
                 {
