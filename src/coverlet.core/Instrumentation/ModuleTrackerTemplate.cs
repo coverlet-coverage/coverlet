@@ -18,12 +18,10 @@ namespace Coverlet.Core.Instrumentation
     [ExcludeFromCodeCoverage]
     public static class ModuleTrackerTemplate
     {
-        private const string MemoryMappedFileNamePostfix = ".coverlet_memory_mapped";
-
-        public static string hitsFilePath;
+        public static string hitsDirectoryPath;
         public static int hitsArraySize;
 
-        public static MemoryMappedFile memoryMappedFile;
+        [ThreadStatic]
         public static MemoryMappedViewAccessor memoryMappedViewAccessor;
 
         static ModuleTrackerTemplate()
@@ -31,89 +29,40 @@ namespace Coverlet.Core.Instrumentation
             // At the end of the instrumentation of a module, the instrumenter needs to add code here
             // to initialize the static setup fields according to the values derived from the instrumentation of
             // the module.
-
-            if(hitsFilePath != null)
-                Setup();
         }
 
-        public static void Setup()
+        static void SetupThread()
         {
-            //first, try to mapped the file if it already has been
-            var memoryMappedFileName = (hitsFilePath + MemoryMappedFileNamePostfix).Replace('\\', '/'); //backslashes can't be used on windows
-            var namedMapsSupported = true;
-            bool needToOpenFilestream;
+            var threadHitsFile = Path.Combine(hitsDirectoryPath, Guid.NewGuid().ToString());
+            var fileStream = new FileStream(threadHitsFile, FileMode.CreateNew, FileAccess.ReadWrite);
             try
             {
-                memoryMappedFile = MemoryMappedFile.OpenExisting(memoryMappedFileName, MemoryMappedFileRights.ReadWrite, HandleInheritability.None);
-                needToOpenFilestream = false;
+                //write the header
+                using (var writer = new BinaryWriter(fileStream, Encoding.Default, true))
+                    writer.Write(hitsArraySize);
+
+                var bytesRequired = (hitsArraySize + 1) * sizeof(int);
+                using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(fileStream, null, bytesRequired, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false))
+                    memoryMappedViewAccessor = memoryMappedFile.CreateViewAccessor();
             }
-            catch (PlatformNotSupportedException)
+            catch
             {
-                //assume named maps aren't supported
-                namedMapsSupported = false;
-                needToOpenFilestream = true;
+                fileStream.Dispose();
+                File.Delete(threadHitsFile);
+                throw;
             }
-            catch (FileNotFoundException)
-            {
-                //if it hasn't been mapped it's on us to create it
-                needToOpenFilestream = true;
-            }
-
-            if (needToOpenFilestream)
-            {
-                var fileStream = new FileStream(hitsFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                try
-                {
-                    //we're responsible initializing the file
-                    //no worries about race conditions here
-                    //all copies of the running code will write the exact same first 4 bytes
-                    //then interlocked operations will properly handle incrementing the counters
-
-                    //write the header
-                    using (var writer = new BinaryWriter(fileStream, Encoding.Default, true))
-                        writer.Write(hitsArraySize);
-
-                    var bytesRequired = (hitsArraySize + 1) * sizeof(int);
-                    var mapName = namedMapsSupported ? memoryMappedFileName : null;
-                    memoryMappedFile = MemoryMappedFile.CreateFromFile(fileStream, mapName, bytesRequired, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
-                }
-                catch
-                {
-                    fileStream.Dispose();
-                    throw;
-                }
-            }
-
-            //although the view accessor will keep the mapped file open, we need to not dispose the actual MMF handle
-            //doing so will cause the calls to MemoryMappedFile.OpenExisting above to fail
-            memoryMappedViewAccessor = memoryMappedFile.CreateViewAccessor();
         }
 
         public static void RecordHit(int hitLocationIndex)
         {
-            if (hitLocationIndex < 0 || hitLocationIndex >= hitsArraySize)
-                throw new ArgumentOutOfRangeException(nameof(hitLocationIndex), hitLocationIndex, "hitLocationIndex falls outside of hitsArraySize!");
+            if (memoryMappedViewAccessor == null)
+                SetupThread();
 
             var buffer = memoryMappedViewAccessor.SafeMemoryMappedViewHandle;
 
-            //even though this is just template code, we have to compile with /unsafe ¯\_(ツ)_/¯
-            //anyway, this is so we can get proper cross-thread/process atomicity by using Interlocked on the MMF view directly
-            unsafe
-            {
-                byte* pointer = null;
-                buffer.AcquirePointer(ref pointer);
-                try
-                {
-                    var intPointer = (int*)pointer;
-                    var hitLocationArrayOffset = intPointer + hitLocationIndex + 1; //+1 for header
-                    Interlocked.Increment(ref *hitLocationArrayOffset);
-                }
-                //finally mostly for show, cause if we segfault above it's already ogre
-                finally
-                {
-                    buffer.ReleasePointer();
-                }
-            }
+            //+1 for header
+            var locationIndex = ((uint)hitLocationIndex + 1) * sizeof(int);
+            buffer.Write(locationIndex, buffer.Read<int>(locationIndex) + 1);
         }
     }
 }

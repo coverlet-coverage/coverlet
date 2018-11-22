@@ -7,24 +7,25 @@ namespace Coverlet.Core.Instrumentation.Tests
 {
     public class ModuleTrackerTemplateTests : IDisposable
     {
-        readonly string tempFileName = Path.Combine(Path.GetTempPath(), nameof(ModuleTrackerTemplateTests));
+        readonly string tempDirName = Path.Combine(Path.GetTempPath(), nameof(ModuleTrackerTemplateTests));
 
         public ModuleTrackerTemplateTests()
         {
             Dispose();
-            ModuleTrackerTemplate.hitsFilePath = tempFileName;
+            Directory.CreateDirectory(tempDirName);
+            ModuleTrackerTemplate.hitsDirectoryPath = tempDirName;
             ModuleTrackerTemplate.hitsArraySize = 4;
         }
 
         public void Dispose()
         {
-            File.Delete(tempFileName);
+            if (Directory.Exists(tempDirName))
+                Directory.Delete(tempDirName, true);
         }
 
         [Fact]
         public void HitsFileCorrectlyWritten()
         {
-            ModuleTrackerTemplate.Setup();
             try
             {
                 ModuleTrackerTemplate.RecordHit(3);
@@ -40,7 +41,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             }
 
             var expectedHitsArray = new[] { 1, 2, 0, 3 };
-            Assert.Equal(expectedHitsArray, ReadHitsFile());
+            Assert.Equal(expectedHitsArray, ReadHitsFiles());
         }
 
         [Fact]
@@ -50,41 +51,38 @@ namespace Coverlet.Core.Instrumentation.Tests
             {
                 semaphore.Wait();
                 int joinCount = 0;
-                ModuleTrackerTemplate.Setup();
-                try
+                void HitIndex(object index)
                 {
-                    void HitIndex(object index)
+                    try
                     {
                         var hitIndex = (int)index;
                         for (int i = 0; i <= hitIndex; ++i)
                             ModuleTrackerTemplate.RecordHit(i);
-
-                        if (Interlocked.Increment(ref joinCount) == 4)
-                            semaphore.Release();
                     }
-
-                    for (int i = 0; i < 4; ++i)
+                    finally
                     {
-                        var t = new Thread(HitIndex);
-                        t.Start(i);
+                        CloseMemoryMapping();
                     }
+                    if (Interlocked.Increment(ref joinCount) == 4)
+                        semaphore.Release();
                 }
-                finally
+
+                for (int i = 0; i < 4; ++i)
                 {
-                    CloseMemoryMapping();
+                    var t = new Thread(HitIndex);
+                    t.Start(i);
                 }
 
                 semaphore.Wait();
             }
 
             var expectedHitsArray = new[] { 4, 3, 2, 1 };
-            Assert.Equal(expectedHitsArray, ReadHitsFile());
+            Assert.Equal(expectedHitsArray, ReadHitsFiles());
         }
 
         [Fact]
         public void MultipleRecordingsHaveCorrectTotalData()
         {
-            ModuleTrackerTemplate.Setup();
             try
             {
                 ModuleTrackerTemplate.RecordHit(1);
@@ -97,7 +95,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             {
                 CloseMemoryMapping();
             }
-            ModuleTrackerTemplate.Setup();
+
             try
             {
                 ModuleTrackerTemplate.RecordHit(1);
@@ -114,12 +112,12 @@ namespace Coverlet.Core.Instrumentation.Tests
             }
 
             var expectedHitsArray = new[] { 0, 4, 4, 4 };
-            Assert.Equal(expectedHitsArray, ReadHitsFile());
+            Assert.Equal(expectedHitsArray, ReadHitsFiles());
         }
 
         private void WriteHitsFile(int[] hitsArray)
         {
-            using (var fs = new FileStream(tempFileName, FileMode.Create))
+            using (var fs = new FileStream(Path.Combine(tempDirName, 1.ToString()), FileMode.Create))
             using (var bw = new BinaryWriter(fs))
             {
                 bw.Write(hitsArray.Length);
@@ -130,25 +128,34 @@ namespace Coverlet.Core.Instrumentation.Tests
             }
         }
 
-        private int[] ReadHitsFile()
+        private int[] ReadHitsFiles()
         {
-            using (var fs = new FileStream(tempFileName, FileMode.Open))
-            using (var br = new BinaryReader(fs))
-            {
-                var hitsArray = new int[br.ReadInt32()];
-                for (int i = 0; i < hitsArray.Length; ++i)
+            int[] hitsArray = null;
+            foreach (var file in Directory.EnumerateFiles(tempDirName))
+                using (var fs = new FileStream(Path.Combine(tempDirName, file), FileMode.Open))
+                using (var br = new BinaryReader(fs))
                 {
-                    hitsArray[i] = br.ReadInt32();
+                    var expectedHitsArraySize = br.ReadInt32();
+                    if (hitsArray == null)
+                        hitsArray = new int[expectedHitsArraySize];
+                    else
+                        Assert.Equal(hitsArray.Length, expectedHitsArraySize);
+
+                    Assert.Equal(fs.Length, sizeof(int) * (expectedHitsArraySize + 1));
+
+                    for (int i = 0; i < hitsArray.Length; ++i)
+                    {
+                        hitsArray[i] += br.ReadInt32();
+                    }
                 }
 
-                return hitsArray;
-            }
+            return hitsArray;
         }
 
         private void CloseMemoryMapping()
         {
             ModuleTrackerTemplate.memoryMappedViewAccessor?.Dispose();
-            ModuleTrackerTemplate.memoryMappedFile?.Dispose();
+            ModuleTrackerTemplate.memoryMappedViewAccessor = null;
         }
     }
 }

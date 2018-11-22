@@ -54,13 +54,14 @@ namespace Coverlet.Core.Helpers.Tests
         }
 
         [Fact]
-        public void TestDeleteHitsFile()
+        public void TestDeleteHitsDirectory()
         {
-            var tempFile = Path.GetTempFileName();
-            Assert.True(File.Exists(tempFile));
+            var tempDir = Path.GetTempFileName();
+            File.Delete(tempDir);
+            Directory.CreateDirectory(tempDir);
 
-            InstrumentationHelper.DeleteHitsFile(tempFile);
-            Assert.False(File.Exists(tempFile));
+            InstrumentationHelper.DeleteHitsDirectory(tempDir);
+            Assert.False(Directory.Exists(tempDir));
         }
 
 

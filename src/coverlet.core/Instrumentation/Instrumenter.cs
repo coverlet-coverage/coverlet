@@ -23,7 +23,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _excludedFiles;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArraySize;
-        private FieldDefinition _customTrackerHitsFilePath;
+        private FieldDefinition _customTrackerHitsDirectoryPath;
         private ILProcessor _customTrackerClassConstructorIl;
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRecordHitMethod;
@@ -41,15 +41,17 @@ namespace Coverlet.Core.Instrumentation
 
         public InstrumenterResult Instrument()
         {
-            string hitsFilePath = Path.Combine(
+            string hitsDirectoryPath = Path.Combine(
                 Path.GetTempPath(),
                 Path.GetFileNameWithoutExtension(_module) + "_" + _identifier
             );
 
+            Directory.CreateDirectory(hitsDirectoryPath);
+
             _result = new InstrumenterResult
             {
                 Module = Path.GetFileNameWithoutExtension(_module),
-                HitsFilePath = hitsFilePath,
+                HitsDirectoryPath = hitsDirectoryPath,
                 ModulePath = _module
             };
 
@@ -85,11 +87,11 @@ namespace Coverlet.Core.Instrumentation
                     }
 
                     // Fixup the custom tracker class constructor, according to all instrumented types
-                    Instruction lastInstr = _customTrackerClassConstructorIl.Body.Instructions.First();
+                    Instruction lastInstr = _customTrackerClassConstructorIl.Body.Instructions.Last();
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArraySize));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsDirectoryPath));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsDirectoryPath));
 
                     module.Write(stream);
                 }
@@ -116,8 +118,8 @@ namespace Coverlet.Core.Instrumentation
 
                     if (fieldClone.Name == nameof(ModuleTrackerTemplate.hitsArraySize))
                         _customTrackerHitsArraySize = fieldClone;
-                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.hitsFilePath))
-                        _customTrackerHitsFilePath = fieldClone;
+                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.hitsDirectoryPath))
+                        _customTrackerHitsDirectoryPath = fieldClone;
                 }
 
                 foreach (MethodDefinition methodDef in moduleTrackerTemplate.Methods)

@@ -164,42 +164,43 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                if (!File.Exists(result.HitsFilePath))
+                if (!Directory.Exists(result.HitsDirectoryPath))
                 {
-                    // File not instrumented, or nothing in it called.  Warn about this?
+                    // File not instrumented.  Warn about this?
                     continue;
                 }
 
                 List<Document> documents = result.Documents.Values.ToList();
 
-                using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
-                using (var br = new BinaryReader(fs))
+                foreach (var file in Directory.EnumerateFiles(result.HitsDirectoryPath))
                 {
-                    int hitCandidatesCount = br.ReadInt32();
-
-                    // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
-
-                    var documentsList = result.Documents.Values.ToList();
-
-                    for (int i = 0; i < hitCandidatesCount; ++i)
+                    using (var fs = new FileStream(Path.Combine(result.HitsDirectoryPath, file), FileMode.Open))
+                    using (var br = new BinaryReader(fs))
                     {
-                        var hitLocation = result.HitCandidates[i];
+                        int hitCandidatesCount = br.ReadInt32();
 
-                        var document = documentsList[hitLocation.docIndex];
+                        // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
 
-                        int hits = br.ReadInt32();
-
-                        if (hitLocation.isBranch)
+                        for (int i = 0; i < hitCandidatesCount; ++i)
                         {
-                            var branch = document.Branches[(hitLocation.start, hitLocation.end)];
-                            branch.Hits += hits;
-                        }
-                        else
-                        {
-                            for (int j = hitLocation.start; j <= hitLocation.end; j++)
+                            var hitLocation = result.HitCandidates[i];
+
+                            var document = documents[hitLocation.docIndex];
+
+                            int hits = br.ReadInt32();
+
+                            if (hitLocation.isBranch)
                             {
-                                var line = document.Lines[j];
-                                line.Hits += hits;
+                                var branch = document.Branches[(hitLocation.start, hitLocation.end)];
+                                branch.Hits += hits;
+                            }
+                            else
+                            {
+                                for (int j = hitLocation.start; j <= hitLocation.end; j++)
+                                {
+                                    var line = document.Lines[j];
+                                    line.Hits += hits;
+                                }
                             }
                         }
                     }
@@ -230,7 +231,7 @@ namespace Coverlet.Core
                     }
                 }
 
-                InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+                InstrumentationHelper.DeleteHitsDirectory(result.HitsDirectoryPath);
             }
         }
     }
