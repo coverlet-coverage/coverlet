@@ -126,7 +126,7 @@ namespace Coverlet.Core.Instrumentation
                 {
                     MethodDefinition methodOnCustomType = new MethodDefinition(methodDef.Name, methodDef.Attributes, methodDef.ReturnType);
 
-                    if (methodDef.Name == "RecordHit")
+                    if (methodDef.Name == nameof(ModuleTrackerTemplate.RecordHit))
                     {
                         foreach (var parameter in methodDef.Parameters)
                         {
