@@ -387,6 +387,15 @@ This will result in the following:
 
 These steps must be followed before you attempt to open the solution in an IDE (e.g. Visual Studio, Rider) for all projects to be loaded successfully.
 
+### Performance testing
+
+There is a performance test for the hit counting instrumentation in the test project `coverlet.core.performancetest`.  Build the project with the msbuild step above and then run:
+
+    dotnet test /p:CollectCoverage=true test/coverlet.core.performancetest/
+
+The duration of the test can be tweaked by changing the number of iterations in the `[InlineData]` in the `PerformanceTest` class.
+
+
 ## Code of Conduct
 
 This project enforces a code of conduct in line with the contributor covenant. See [CODE OF CONDUCT](CODE_OF_CONDUCT.md) for details.
