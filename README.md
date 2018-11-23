@@ -391,7 +391,7 @@ These steps must be followed before you attempt to open the solution in an IDE (
 
 There is a performance test for the hit counting instrumentation in the test project `coverlet.core.performancetest`.  Build the project with the msbuild step above and then run:
 
-    dotnet test -p:CollectCoverage=true test/coverlet.core.performancetest/
+    dotnet test /p:CollectCoverage=true test/coverlet.core.performancetest/
 
 The duration of the test can be tweaked by changing the number of iterations in the `[InlineData]` in the `PerformanceTest` class.
 

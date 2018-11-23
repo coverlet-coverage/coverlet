@@ -9,7 +9,7 @@ namespace coverlet.core.performancetest
     /// Test the performance of coverlet by running a unit test that calls a reasonably big and complex test class.
     /// Enable the test, compile, then run the test in the command line:
     /// <code>
-    /// dotnet test -p:CollectCoverage=true test/coverlet.core.performancetest/
+    /// dotnet test /p:CollectCoverage=true test/coverlet.core.performancetest/
     /// </code>
     /// </summary>
     public class PerformanceTest
