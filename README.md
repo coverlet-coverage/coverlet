@@ -211,7 +211,7 @@ coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude "[cove
 Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `--include` option. 
 
 Examples
- - `--include "[*]*"` => INcludes all types in all assemblies (nothing is instrumented)
+ - `--include "[*]*"` => Includes all types in all assemblies (everything is instrumented)
  - `--include "[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
   - `--include "[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
 
