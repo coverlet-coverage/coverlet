@@ -32,7 +32,7 @@ namespace Coverlet.Core
             _module = module;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
-            _includeDirectories = includeDirectories;
+            _includeDirectories = includeDirectories ?? Array.Empty<string>();
             _excludedSourceFiles = excludedSourceFiles;
             _mergeWith = mergeWith;
 
@@ -49,16 +49,26 @@ namespace Coverlet.Core
 
             foreach (var module in modules)
             {
-                if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters)
-                    || !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
+                if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
+                    !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
                     continue;
 
                 var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);
-                    var result = instrumenter.Instrument();
-                    _results.Add(result);
+
+                    // Guard code path and restore if instrumentation fails.
+                    try
+                    {
+                        var result = instrumenter.Instrument();
+                        _results.Add(result);
+                    }
+                    catch (Exception)
+                    {
+                        InstrumentationHelper.RestoreOriginalModule(module, _identifier);
+                        throw;
+                    }
                 }
             }
         }
@@ -148,12 +158,11 @@ namespace Coverlet.Core
                     }
                 }
 
-                modules.Add(result.ModulePath, documents);
+                modules.Add(Path.GetFileName(result.ModulePath), documents);
                 InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
-            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = new Modules() };
-            coverageResult.Merge(modules);
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules };
 
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
             {
