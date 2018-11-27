@@ -279,7 +279,7 @@ namespace Coverlet.Core.Helpers
         {
             return Path.Combine(
                 Path.GetTempPath(),
-                Path.GetFileNameWithoutExtension(module) + "_" + GetPathHash(Path.GetDirectoryName(module)) + "_" + identifier + ".dll"
+                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
             );
         }
 
@@ -316,13 +316,6 @@ namespace Coverlet.Core.Helpers
             {
                 return false;
             }
-        }
-
-        private static string GetPathHash(string path)
-        {
-            using (var md5 = MD5.Create())
-                return BitConverter.ToString(md5.ComputeHash(Encoding.Unicode.GetBytes(path)))
-                    .Replace("-", string.Empty);
         }
     }
 }
