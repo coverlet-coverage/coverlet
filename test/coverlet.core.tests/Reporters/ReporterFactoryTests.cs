@@ -1,4 +1,4 @@
-using System;
+using coverlet.core.Reporters;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -12,6 +12,7 @@ namespace Coverlet.Core.Reporters.Tests
             Assert.Equal(typeof(LcovReporter), new ReporterFactory("lcov").CreateReporter().GetType());
             Assert.Equal(typeof(OpenCoverReporter), new ReporterFactory("opencover").CreateReporter().GetType());
             Assert.Equal(typeof(CoberturaReporter), new ReporterFactory("cobertura").CreateReporter().GetType());
+            Assert.Equal(typeof(TeamCityReporter), new ReporterFactory("teamcity").CreateReporter().GetType());
             Assert.Null(new ReporterFactory("").CreateReporter());
         }
     }

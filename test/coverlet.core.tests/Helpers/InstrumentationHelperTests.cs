@@ -12,7 +12,7 @@ namespace Coverlet.Core.Helpers.Tests
         public void TestGetDependencies()
         {
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
-            var modules = InstrumentationHelper.GetCoverableModules(module, null);
+            var modules = InstrumentationHelper.GetCoverableModules(module, Array.Empty<string>());
             Assert.False(Array.Exists(modules, m => m == module));
         }
 

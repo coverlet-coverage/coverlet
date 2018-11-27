@@ -4,6 +4,8 @@ namespace Coverlet.Core.Reporters
 {
     public class JsonReporter : IReporter
     {
+        public ReporterOutputType OutputType => ReporterOutputType.File;
+        
         public string Format => "json";
 
         public string Extension => "json";

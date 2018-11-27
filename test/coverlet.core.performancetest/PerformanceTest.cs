@@ -9,7 +9,7 @@ namespace coverlet.core.performancetest
     /// Test the performance of coverlet by running a unit test that calls a reasonably big and complex test class.
     /// Enable the test, compile, then run the test in the command line:
     /// <code>
-    /// dotnet test -p:CollectCoverage=true -p:CoverletOutputFormat=opencover test/coverlet.core.performancetest/
+    /// dotnet test /p:CollectCoverage=true test/coverlet.core.performancetest/
     /// </code>
     /// </summary>
     public class PerformanceTest
@@ -20,11 +20,12 @@ namespace coverlet.core.performancetest
         {
             var big = new BigClass();
 
-            List<Task> tasks = new List<Task>();
+            var tasks = new List<Task>();
 
             for (var i = 0; i < iterations; i++)
             {
-                tasks.Add(Task.Run(() => big.Do(i)));
+                var j = i;
+                tasks.Add(Task.Run(() => big.Do(j)));
             }
 
             Task.WaitAll(tasks.ToArray());

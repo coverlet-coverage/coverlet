@@ -55,8 +55,14 @@ namespace Coverlet.MSbuild.Tasks
                 var result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);
-                if (!Directory.Exists(directory))
+                if (directory == string.Empty)
+                {
+                    directory = Directory.GetCurrentDirectory();
+                }
+                else if (!Directory.Exists(directory))
+                {
                     Directory.CreateDirectory(directory);
+                }
 
                 var formats = _format.Split(',');
                 foreach (var format in formats)
@@ -65,13 +71,23 @@ namespace Coverlet.MSbuild.Tasks
                     if (reporter == null)
                         throw new Exception($"Specified output format '{format}' is not supported");
 
-                    var filename = Path.GetFileName(_output);
-                    filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
-                    filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
+                    if (reporter.OutputType == ReporterOutputType.Console)
+                    {
+                        // Output to console
+                        Console.WriteLine("  Outputting results to console");
+                        Console.WriteLine(reporter.Report(result));
+                    }
+                    else
+                    {
+                        // Output to file
+                        var filename = Path.GetFileName(_output);
+                        filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+                        filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
-                    var report = Path.Combine(directory, filename);
-                    Console.WriteLine($"  Generating report '{report}'");
-                    File.WriteAllText(report, reporter.Report(result));
+                        var report = Path.Combine(directory, filename);
+                        Console.WriteLine($"  Generating report '{report}'");
+                        File.WriteAllText(report, reporter.Report(result));
+                    }
                 }
 
                 var thresholdFailed = false;
@@ -79,9 +95,9 @@ namespace Coverlet.MSbuild.Tasks
                 var summary = new CoverageSummary();
                 var exceptionBuilder = new StringBuilder();
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules).Percent * 100;
-                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
-                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
+                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
+                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
+                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
 
                 foreach (var module in result.Modules)
                 {
@@ -115,9 +131,9 @@ namespace Coverlet.MSbuild.Tasks
 
                 Console.WriteLine();
                 Console.WriteLine(coverageTable.ToStringAlternative());
-                Console.WriteLine($"Total Line: {overallLineCoverage}%");
-                Console.WriteLine($"Total Branch: {overallBranchCoverage}%");
-                Console.WriteLine($"Total Method: {overallMethodCoverage}%");
+                Console.WriteLine($"Total Line: {overallLineCoverage.Percent * 100}%");
+                Console.WriteLine($"Total Branch: {overallBranchCoverage.Percent * 100}%");
+                Console.WriteLine($"Total Method: {overallMethodCoverage.Percent * 100}%");
 
                 if (thresholdFailed)
                     throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));

@@ -6,6 +6,8 @@ namespace Coverlet.Core.Reporters
 {
     public class LcovReporter : IReporter
     {
+        public ReporterOutputType OutputType => ReporterOutputType.File;
+        
         public string Format => "lcov";
 
         public string Extension => "info";
