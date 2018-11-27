@@ -20,15 +20,45 @@ namespace Coverlet.Core.Helpers
     {
         public static string[] GetCoverableModules(string module, string[] includeDirectories)
         {
-            var moduleDirectory = Path.GetDirectoryName(module);
-            var files = new List<string>(Directory.GetFiles(moduleDirectory));
+            Debug.Assert(includeDirectories != null, "Parameter " + nameof(includeDirectories) + " in method " + 
+                nameof(InstrumentationHelper) + "." + nameof(GetCoverableModules) + " must not be null");
 
-            if (includeDirectories != null)
-                foreach (var includeDirectory in ExpandIncludeDirectories(includeDirectories, moduleDirectory))
-                    files.AddRange(Directory.GetFiles(includeDirectory));
+            string moduleDirectory = Path.GetDirectoryName(module);
+            if (moduleDirectory == string.Empty)
+            {
+                moduleDirectory = Directory.GetCurrentDirectory();
+            }
 
-            return files.Where(m => IsAssembly(m) && Path.GetFileName(m) != Path.GetFileName(module))
-                .Distinct().ToArray();
+            var dirs = new List<string>(1 + includeDirectories.Length)
+            {
+                // Add the test assembly's directory.
+                moduleDirectory
+            };
+
+            // Prepare all the directories in which we probe for modules.
+            foreach (var includeDirectory in includeDirectories.Where(d => d != null))
+            {
+                var fullPath = (!Path.IsPathRooted(includeDirectory)
+                    ? Path.GetFullPath(Path.Combine(moduleDirectory, includeDirectory))
+                    : includeDirectory).TrimEnd('*');
+
+                if (!Directory.Exists(fullPath)) continue;
+
+                if (includeDirectory.EndsWith("*", StringComparison.Ordinal))
+                    dirs.AddRange(Directory.GetDirectories(fullPath));
+                else
+                    dirs.Add(fullPath);
+            }
+
+            // The test module's name must be unique.
+            var uniqueModules = new HashSet<string>
+            {
+                Path.GetFileName(module)
+            };
+
+            return dirs.SelectMany(d => Directory.EnumerateFiles(d))
+                .Where(m => IsAssembly(m) && uniqueModules.Add(Path.GetFileName(m)))
+                .ToArray();
         }
 
         public static bool HasPdb(string module)
@@ -304,6 +334,12 @@ namespace Coverlet.Core.Helpers
 
         private static bool IsAssembly(string filePath)
         {
+            Debug.Assert(filePath != null, "Parameter " + nameof(filePath) + " in " + nameof(InstrumentationHelper) + 
+                "." + nameof(IsAssembly) + " must not be null.");
+
+            if (!(filePath.EndsWith(".exe") || filePath.EndsWith(".dll")))
+                return false;
+
             try
             {
                 if (!(filePath.EndsWith(".exe") || filePath.EndsWith(".dll")))

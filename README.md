@@ -98,6 +98,7 @@ Supported Formats:
 * lcov
 * opencover
 * cobertura
+* teamcity
 
 The `--format` option can be specified multiple times to output multiple formats in a single run:
 
@@ -116,6 +117,28 @@ The above command will write the results to the supplied path, if no file extens
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custom/directory/" -f json -f lcov
 ```
+
+#### TeamCity Output
+
+Coverlet can output basic code coverage statistics using [TeamCity service messages](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages).
+
+```bash
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output teamcity
+```
+
+The currently supported [TeamCity statistics](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages) are:
+
+| TeamCity Statistic Key  | Description                    |
+| :---                    | :---                           |
+| CodeCoverageL           | Line-level code coverage       |
+| CodeCoverageC           | Class-level code coverage      |
+| CodeCoverageM           | Method-level code coverage     |
+| CodeCoverageAbsLTotal   | The total number of lines      |
+| CodeCoverageAbsLCovered | The number of covered lines    |
+| CodeCoverageAbsCTotal   | The total number of classes    |
+| CodeCoverageAbsCCovered | The number of covered classes  |
+| CodeCoverageAbsMTotal   | The total number of methods    |
+| CodeCoverageAbsMCovered | The number of covered methods  |
 
 #### Merging Results
 
@@ -188,7 +211,7 @@ coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude "[cove
 Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `--include` option. 
 
 Examples
- - `--include "[*]*"` => INcludes all types in all assemblies (nothing is instrumented)
+ - `--include "[*]*"` => Includes all types in all assemblies (everything is instrumented)
  - `--include "[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
   - `--include "[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
 
@@ -234,6 +257,7 @@ Supported Formats:
 * lcov
 * opencover
 * cobertura
+* teamcity
 
 You can specify multiple output formats by separating them with a comma (`,`).
 
@@ -362,6 +386,15 @@ This will result in the following:
 * Build and run tests
 
 These steps must be followed before you attempt to open the solution in an IDE (e.g. Visual Studio, Rider) for all projects to be loaded successfully.
+
+### Performance testing
+
+There is a performance test for the hit counting instrumentation in the test project `coverlet.core.performancetest`.  Build the project with the msbuild step above and then run:
+
+    dotnet test /p:CollectCoverage=true test/coverlet.core.performancetest/
+
+The duration of the test can be tweaked by changing the number of iterations in the `[InlineData]` in the `PerformanceTest` class.
+
 
 ## Code of Conduct
 
