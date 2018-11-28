@@ -35,6 +35,7 @@ namespace Coverlet.Console
             CommandOption includeDirectories = app.Option("--include-directory", "Include directories containing additional assemblies to be instrumented.", CommandOptionType.MultipleValue);
             CommandOption excludedSourceFiles = app.Option("--exclude-by-file", "Glob patterns specifying source files to exclude.", CommandOptionType.MultipleValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
+            CommandOption excludeAttributes = app.Option("--exclude-by-attribute", "Attributes to exclude from code coverage.", CommandOptionType.MultipleValue);
 
             app.OnExecute(() =>
             {
@@ -44,7 +45,7 @@ namespace Coverlet.Console
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
 
-                Coverage coverage = new Coverage(module.Value, excludeFilters.Values.ToArray(), includeFilters.Values.ToArray(), includeDirectories.Values.ToArray(), excludedSourceFiles.Values.ToArray(), mergeWith.Value());
+                Coverage coverage = new Coverage(module.Value, excludeFilters.Values.ToArray(), includeFilters.Values.ToArray(), includeDirectories.Values.ToArray(), excludedSourceFiles.Values.ToArray(), mergeWith.Value(), excludeAttributes.Values.ToArray());
                 coverage.PrepareModules();
 
                 Process process = new Process();

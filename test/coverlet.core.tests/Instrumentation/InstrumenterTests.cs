@@ -27,7 +27,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             foreach (var file in files)
                 File.Copy(Path.Combine(OriginalFilesDir, file), Path.Combine(TestFilesDir, file), overwrite: true);
 
-            Instrumenter instrumenter = new Instrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            Instrumenter instrumenter = new Instrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
             Assert.True(instrumenter.CanInstrument());
             var result = instrumenter.Instrument();
             Assert.NotNull(result);
@@ -76,7 +76,26 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
-        private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false)
+
+        [Theory]
+        [InlineData(nameof(ObsoleteAttribute))]
+        [InlineData("Obsolete")]
+        public void TestInstrument_ClassesWithCustomExcludeAttributeAreExcluded(string excludedAttribute)
+        {
+            var instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
+            var result = instrumenterTest.Instrumenter.Instrument();
+
+            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            Assert.NotNull(doc);
+#pragma warning disable CS0612 // Type or member is obsolete
+            var found = doc.Lines.Values.Any(l => l.Class.Equals(nameof(ClassExcludedByObsoleteAttr)));
+#pragma warning restore CS0612 // Type or member is obsolete
+            Assert.False(found, "Class decorated with with exclude attribute should be excluded");
+
+            instrumenterTest.Directory.Delete(true);
+        }
+
+        private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false, string[] attributesToIgnore = null)
         {
             string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
@@ -100,7 +119,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
 
             module = Path.Combine(directory.FullName, destModule);
-            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore);
             return new InstrumenterTest
             {
                 Instrumenter = instrumenter,

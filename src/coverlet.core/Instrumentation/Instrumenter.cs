@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -22,6 +23,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _excludeFilters;
         private readonly string[] _includeFilters;
         private readonly string[] _excludedFiles;
+        private readonly string[] _excludedAttributes;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
@@ -29,13 +31,14 @@ namespace Coverlet.Core.Instrumentation
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRecordHitMethod;
 
-        public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles)
+        public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes)
         {
             _module = module;
             _identifier = identifier;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
             _excludedFiles = excludedFiles ?? Array.Empty<string>();
+            _excludedAttributes = excludedAttributes;
         }
 
         public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
@@ -179,7 +182,7 @@ namespace Coverlet.Core.Instrumentation
                         {
                             handler.CatchType = module.ImportReference(handler.CatchType);
                         }
-                        
+
                         methodOnCustomType.Body.ExceptionHandlers.Add(handler);
                     }
 
@@ -392,19 +395,24 @@ namespace Coverlet.Core.Instrumentation
                 handler.TryStart = newTarget;
         }
 
-        private static bool IsExcludeAttribute(CustomAttribute customAttribute)
+        private bool IsExcludeAttribute(CustomAttribute customAttribute)
         {
-            var excludeAttributeNames = new[]
+            // The default custom attributes used to exclude from coverage.
+            IEnumerable<string> excludeAttributeNames = new List<string>()
             {
                 nameof(ExcludeFromCoverageAttribute),
-                "ExcludeFromCoverage",
-                nameof(ExcludeFromCodeCoverageAttribute),
-                "ExcludeFromCodeCoverage"
+                nameof(ExcludeFromCodeCoverageAttribute)
             };
 
-            var attributeName = customAttribute.AttributeType.Name;
-            return excludeAttributeNames.Any(a => a.Equals(attributeName));
-        }
+            // Include the other attributes to exclude based on incoming parameters.
+            if (_excludedAttributes != null)
+            {
+                excludeAttributeNames = _excludedAttributes.Union(excludeAttributeNames);
+            }
+
+			return excludeAttributeNames.Any(a =>
+                customAttribute.AttributeType.Name.Equals(a.EndsWith("Attribute")? a : $"{a}Attribute"));
+		}
 
         private static Mono.Cecil.Cil.MethodBody GetMethodBody(MethodDefinition method)
         {

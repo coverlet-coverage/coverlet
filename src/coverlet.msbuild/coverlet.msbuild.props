@@ -10,5 +10,6 @@
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <ThresholdType Condition="$(ThresholdType) == ''">line,branch,method</ThresholdType>
     <IncludeDirectory Condition="$(IncludeDirectory) == ''"></IncludeDirectory>
+    <ExcludeByAttribute Condition="$(ExcludeByAttribute) == ''"></ExcludeByAttribute>
   </PropertyGroup>
 </Project>
