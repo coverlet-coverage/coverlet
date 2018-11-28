@@ -45,7 +45,7 @@ namespace Coverlet.Console
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
 
-                Coverage coverage = new Coverage(module.Value, excludeFilters.Values.ToArray(), includeFilters.Values.ToArray(), includeDirectories.Values.ToArray(), excludedSourceFiles.Values.ToArray(), mergeWith.Value(), excludeAttributes.Values.ToArray());
+                Coverage coverage = new Coverage(module.Value, includeFilters.Values.ToArray(), includeDirectories.Values.ToArray(), excludeFilters.Values.ToArray(), excludedSourceFiles.Values.ToArray(), excludeAttributes.Values.ToArray(), mergeWith.Value());
                 coverage.PrepareModules();
 
                 Process process = new Process();

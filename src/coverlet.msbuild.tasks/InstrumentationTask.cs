@@ -74,7 +74,7 @@ namespace Coverlet.MSbuild.Tasks
                 var includeDirectories = _includeDirectory?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
 
-                _coverage = new Coverage(_path, excludeFilters, includeFilters, includeDirectories, excludedSourceFiles, _mergeWith, excludeAttributes);
+                _coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _mergeWith);
                 _coverage.PrepareModules();
             }
             catch (Exception ex)
