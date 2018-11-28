@@ -56,19 +56,21 @@ Arguments:
   <ASSEMBLY>  Path to the test assembly.
 
 Options:
-  -h|--help            Show help information
-  -v|--version         Show version information
-  -t|--target          Path to the test runner application.
-  -a|--targetargs      Arguments to be passed to the test runner.
-  -o|--output          Output of the generated coverage report
-  -f|--format          Format of the generated coverage report.
-  --threshold          Exits with error if the coverage % is below value.
-  --threshold-type     Coverage type to apply the threshold to.
-  --exclude            Filter expressions to exclude specific modules and types.
-  --include            Filter expressions to include specific modules and types.
-  --include-directory  Include directories containing additional assemblies to be instrumented.
-  --exclude-by-file    Glob patterns specifying source files to exclude.
-  --merge-with         Path to existing coverage result to merge.
+  -h|--help               Show help information
+  -v|--version            Show version information
+  -t|--target             Path to the test runner application.
+  -a|--targetargs         Arguments to be passed to the test runner.
+  -o|--output             Output of the generated coverage report
+  -f|--format             Format of the generated coverage report.
+  --threshold             Exits with error if the coverage % is below value.
+  --threshold-type        Coverage type to apply the threshold to.
+  --exclude               Filter expressions to exclude specific modules and types.
+  --include               Filter expressions to include specific modules and types.
+  --include-directory     Include directories containing additional assemblies to be instrumented.
+  --exclude-by-file       Glob patterns specifying source files to exclude.
+  --include-directory     Include directories containing additional assemblies to be instrumented.
+  --exclude-by-attribute  Attributes to exclude from code coverage.
+  --merge-with            Path to existing coverage result to merge.
 ```
 
 #### Code Coverage
