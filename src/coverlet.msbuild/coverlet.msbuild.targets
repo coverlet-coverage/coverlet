@@ -10,6 +10,7 @@
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       MergeWith="$(MergeWith)"
+      ExcludeByAttribute="$(ExcludeByAttribute)"
       Path="$(TargetPath)" />
   </Target>
 
@@ -20,6 +21,7 @@
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       MergeWith="$(MergeWith)"
+      ExcludeByAttribute="$(ExcludeByAttribute)"
       Path="$(TargetPath)" />
   </Target>
 
