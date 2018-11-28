@@ -78,11 +78,10 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public static string BackupOriginalModule(string module, string identifier)
+        public static void BackupOriginalModule(string module, string identifier)
         {
             var backupPath = GetBackupPath(module, identifier);
-            File.Copy(module, backupPath);
-            return backupPath;
+            File.Copy(module, backupPath, true);
         }
 
         public static void RestoreOriginalModule(string module, string identifier)

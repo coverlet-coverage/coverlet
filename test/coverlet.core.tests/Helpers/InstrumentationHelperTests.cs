@@ -28,7 +28,12 @@ namespace Coverlet.Core.Helpers.Tests
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
             string identifier = Guid.NewGuid().ToString();
 
-            var backupPath = InstrumentationHelper.BackupOriginalModule(module, identifier);
+            InstrumentationHelper.BackupOriginalModule(module, identifier);
+
+            var backupPath = Path.Combine(
+                Path.GetTempPath(),
+                Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
+            );
 
             Assert.True(File.Exists(backupPath));
         }
