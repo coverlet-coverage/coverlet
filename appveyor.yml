@@ -1,6 +1,6 @@
 version: '{build}'
 image:
-  - Visual Studio 2015
+  - Visual Studio 2017
   - Ubuntu
 configuration:
   - Debug
