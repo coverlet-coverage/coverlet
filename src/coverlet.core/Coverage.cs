@@ -66,8 +66,8 @@ namespace Coverlet.Core
                     }
                     catch (Exception)
                     {
+                        // TODO: With verbose logging we should note that instrumentation failed.
                         InstrumentationHelper.RestoreOriginalModule(module, _identifier);
-                        throw;
                     }
                 }
             }
