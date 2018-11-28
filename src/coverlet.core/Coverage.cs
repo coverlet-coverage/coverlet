@@ -17,6 +17,7 @@ namespace Coverlet.Core
         private string _identifier;
         private string[] _excludeFilters;
         private string[] _includeFilters;
+        private string[] _includeDirectories;
         private string[] _excludedSourceFiles;
         private string _mergeWith;
         private string[] _excludeAttributes;
@@ -27,11 +28,12 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] excludedSourceFiles, string mergeWith, string[] excludeAttributes)
+        public Coverage(string module, string[] excludeFilters, string[] includeFilters, string[] includeDirectories, string[] excludedSourceFiles, string mergeWith, string[] excludeAttributes)
         {
             _module = module;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
+            _includeDirectories = includeDirectories ?? Array.Empty<string>();
             _excludedSourceFiles = excludedSourceFiles;
             _mergeWith = mergeWith;
             _excludeAttributes = excludeAttributes;
@@ -42,23 +44,33 @@ namespace Coverlet.Core
 
         public void PrepareModules()
         {
-            string[] modules = InstrumentationHelper.GetCoverableModules(_module);
+            string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories);
             string[] excludes =  InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
             _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
             _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
             foreach (var module in modules)
             {
-                if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters)
-                    || !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
+                if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
+                    !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
                     continue;
 
                 var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);
-                    var result = instrumenter.Instrument();
-                    _results.Add(result);
+
+                    // Guard code path and restore if instrumentation fails.
+                    try
+                    {
+                        var result = instrumenter.Instrument();
+                        _results.Add(result);
+                    }
+                    catch (Exception)
+                    {
+                        // TODO: With verbose logging we should note that instrumentation failed.
+                        InstrumentationHelper.RestoreOriginalModule(module, _identifier);
+                    }
                 }
             }
         }
@@ -153,6 +165,7 @@ namespace Coverlet.Core
             }
 
             var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules };
+
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
             {
                 string json = File.ReadAllText(_mergeWith);

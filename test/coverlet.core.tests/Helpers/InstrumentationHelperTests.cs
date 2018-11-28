@@ -12,7 +12,7 @@ namespace Coverlet.Core.Helpers.Tests
         public void TestGetDependencies()
         {
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
-            var modules = InstrumentationHelper.GetCoverableModules(module);
+            var modules = InstrumentationHelper.GetCoverableModules(module, Array.Empty<string>());
             Assert.False(Array.Exists(modules, m => m == module));
         }
 
@@ -228,6 +228,27 @@ namespace Coverlet.Core.Helpers.Tests
 
             result = InstrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", filters);
             Assert.True(result);
+        }
+
+        [Fact]
+        public void TestIncludeDirectories()
+        {
+            string module = typeof(InstrumentationHelperTests).Assembly.Location;
+
+            var currentDirModules = InstrumentationHelper.GetCoverableModules(module,
+                new[] {Environment.CurrentDirectory});
+            
+            var parentDirWildcardModules = InstrumentationHelper.GetCoverableModules(module,
+                new[] {Path.Combine(Directory.GetParent(Environment.CurrentDirectory).FullName, "*")});
+
+            // There are at least as many modules found when searching the parent directory's subdirectories
+            Assert.True(parentDirWildcardModules.Length >= currentDirModules.Length);
+
+            var relativePathModules = InstrumentationHelper.GetCoverableModules(module,
+                new[] {"."});
+
+            // Same number of modules found when using a relative path
+            Assert.Equal(currentDirModules.Length, relativePathModules.Length);
         }
 
         public static IEnumerable<object[]> ValidModuleFilterData =>

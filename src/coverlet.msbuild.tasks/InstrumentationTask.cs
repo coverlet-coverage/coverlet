@@ -11,6 +11,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _path;
         private string _exclude;
         private string _include;
+        private string _includeDirectory;
         private string _excludeByFile;
         private string _mergeWith;
         private string _excludeByAttribute;
@@ -39,6 +40,12 @@ namespace Coverlet.MSbuild.Tasks
             set { _include = value; }
         }
 
+        public string IncludeDirectory
+        {
+            get { return _includeDirectory; }
+            set { _includeDirectory = value; }
+        }
+
         public string ExcludeByFile
         {
             get { return _excludeByFile; }
@@ -64,9 +71,10 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeFilters = _exclude?.Split(',');
                 var includeFilters = _include?.Split(',');
+                var includeDirectories = _includeDirectory?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
 
-                _coverage = new Coverage(_path, excludeFilters, includeFilters, excludedSourceFiles, _mergeWith, excludeAttributes);
+                _coverage = new Coverage(_path, excludeFilters, includeFilters, includeDirectories, excludedSourceFiles, _mergeWith, excludeAttributes);
                 _coverage.PrepareModules();
             }
             catch (Exception ex)
