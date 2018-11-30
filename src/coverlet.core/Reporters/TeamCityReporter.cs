@@ -1,4 +1,5 @@
-﻿using Coverlet.Core;
+﻿using System.Globalization;
+using Coverlet.Core;
 using Coverlet.Core.Reporters;
 using System.Text;
 
@@ -66,9 +67,9 @@ namespace coverlet.core.Reporters
             OutputTeamCityServiceMessage("CodeCoverageAbsMTotal", coverageDetails.Total, builder);
         }
 
-        private void OutputTeamCityServiceMessage(string key, object value, StringBuilder builder)
+        private void OutputTeamCityServiceMessage(string key, double value, StringBuilder builder)
         {
-            builder.AppendLine($"##teamcity[buildStatisticValue key='{key}' value='{value}']");
+            builder.AppendLine($"##teamcity[buildStatisticValue key='{key}' value='{value.ToString("0.##", new CultureInfo("en-US"))}']");
         }
     }
 }
