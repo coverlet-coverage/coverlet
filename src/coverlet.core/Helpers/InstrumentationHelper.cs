@@ -69,8 +69,13 @@ namespace Coverlet.Core.Helpers
                     if (entry.Type == DebugDirectoryEntryType.CodeView)
                     {
                         var codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                        var peDirectory = Path.GetDirectoryName(module);
-                        return File.Exists(Path.Combine(peDirectory, Path.GetFileName(codeViewData.Path)));
+                        if (codeViewData.Path == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
+                        {
+                            // PDB is embedded
+                            return true;
+                        }
+
+                        return File.Exists(codeViewData.Path);
                     }
                 }
 
