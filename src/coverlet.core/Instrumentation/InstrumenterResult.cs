@@ -43,6 +43,7 @@ namespace Coverlet.Core.Instrumentation
         public string Module;
         public string HitsFilePath;
         public string ModulePath;
+        public string SourceLink;
         public Dictionary<string, Document> Documents { get; private set; }
         public List<(bool isBranch, int docIndex, int start, int end)> HitCandidates { get; private set; }
     }

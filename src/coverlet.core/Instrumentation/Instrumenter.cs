@@ -79,6 +79,12 @@ namespace Coverlet.Core.Instrumentation
                     var types = module.GetTypes();
                     AddCustomModuleTrackerToModule(module);
 
+                    var sourceLinkDebugInfo = module.CustomDebugInformations.FirstOrDefault(c => c.Kind == CustomDebugInformationKind.SourceLink);
+                    if (sourceLinkDebugInfo != null)
+                    {
+                        _result.SourceLink = ((SourceLinkDebugInformation)sourceLinkDebugInfo).Content;
+                    }
+
                     foreach (TypeDefinition type in types)
                     {
                         var actualType = type.DeclaringType ?? type;
