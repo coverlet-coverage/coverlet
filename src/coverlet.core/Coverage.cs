@@ -248,5 +248,46 @@ namespace Coverlet.Core
                 InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
             }
         }
+
+        private string GetSourceLinkUrl(Dictionary<string, string> sourceLinkDocuments, string document)
+        {
+            if (sourceLinkDocuments.TryGetValue(document, out string url))
+            {
+                return url;
+            }
+
+            var keyWithBestMatch = string.Empty;
+            var relativePathOfBestMatch = string.Empty;
+
+            foreach (var sourceLinkDocument in sourceLinkDocuments)
+            {
+                string key = sourceLinkDocument.Key;
+                if (Path.GetFileName(key) != "*") continue;
+
+                string relativePath = Path.GetRelativePath(Path.GetDirectoryName(key), Path.GetDirectoryName(document));
+
+                if (relativePath.Contains("..")) continue;
+
+                if (relativePathOfBestMatch.Length == 0)
+                {
+                    keyWithBestMatch = sourceLinkDocument.Key;
+                    relativePathOfBestMatch = relativePath;
+                }
+
+                if (relativePath.Length < relativePathOfBestMatch.Length)
+                {
+                    keyWithBestMatch = sourceLinkDocument.Key;
+                    relativePathOfBestMatch = relativePath;
+                }
+            }
+
+            relativePathOfBestMatch = relativePathOfBestMatch == "." ? string.Empty : relativePathOfBestMatch;
+            
+            string replacement = Path.Combine(relativePathOfBestMatch, Path.GetFileName(document));
+            replacement = replacement.Replace('\\', '/');
+
+            url = sourceLinkDocuments[keyWithBestMatch];
+            return url.Replace("*", replacement);
+        }
     }
 }
