@@ -31,8 +31,6 @@ namespace Coverlet.Core.Reporters
             coverage.Add(new XAttribute("timestamp", ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString()));
 
             XElement sources = new XElement("sources");
-            var basePath = GetBasePath(result.Modules);
-            sources.Add(new XElement("source", basePath));
 
             XElement packages = new XElement("packages");
             foreach (var module in result.Modules)
@@ -50,7 +48,7 @@ namespace Coverlet.Core.Reporters
                     {
                         XElement @class = new XElement("class");
                         @class.Add(new XAttribute("name", cls.Key));
-                        @class.Add(new XAttribute("filename", GetRelativePathFromBase(basePath, document.Key)));
+                        @class.Add(new XAttribute("filename", document.Key));
                         @class.Add(new XAttribute("line-rate", summary.CalculateLineCoverage(cls.Value).Percent.ToString()));
                         @class.Add(new XAttribute("branch-rate", summary.CalculateBranchCoverage(cls.Value).Percent.ToString()));
                         @class.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(cls.Value).ToString()));
@@ -131,34 +129,5 @@ namespace Coverlet.Core.Reporters
 
             return Encoding.UTF8.GetString(stream.ToArray());
         }
-
-        private string GetBasePath(Modules modules)
-        {
-            List<string> sources = new List<string>();
-            string path = string.Empty;
-
-            foreach (var module in modules)
-            {
-                sources.AddRange(
-                    module.Value.Select(d => Path.GetDirectoryName(d.Key)));
-            }
-
-            sources = sources.Distinct().ToList();
-            var segments = sources[0].Split(Path.DirectorySeparatorChar);
-
-            foreach (var segment in segments)
-            {
-                var startsWith = sources.All(s => s.StartsWith(path + segment));
-                if (!startsWith)
-                    break;
-
-                path += segment + Path.DirectorySeparatorChar;
-            }
-
-            return path;
-        }
-
-        private string GetRelativePathFromBase(string basePath, string path)
-            => basePath == string.Empty ? path : path.Replace(basePath, string.Empty);
     }
 }

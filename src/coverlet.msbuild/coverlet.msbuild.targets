@@ -6,25 +6,27 @@
   <Target Name="InstrumentModulesNoBuild" BeforeTargets="VSTest">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'"
+      Path="$(TargetPath)"
       Include="$(Include)"
       IncludeDirectory="$(IncludeDirectory)"
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
-      MergeWith="$(MergeWith)"
       ExcludeByAttribute="$(ExcludeByAttribute)"
-      Path="$(TargetPath)" />
+      MergeWith="$(MergeWith)"
+      UseSourceLink="$(UseSourceLink)" />
   </Target>
 
   <Target Name="InstrumentModulesAfterBuild" AfterTargets="BuildProject">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
+      Path="$(TargetPath)"
       Include="$(Include)"
       IncludeDirectory="$(IncludeDirectory)"
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
-      MergeWith="$(MergeWith)"
       ExcludeByAttribute="$(ExcludeByAttribute)"
-      Path="$(TargetPath)" />
+      MergeWith="$(MergeWith)"
+      UseSourceLink="$(UseSourceLink)" />
   </Target>
 
   <Target Name="GenerateCoverageResult" AfterTargets="VSTest">
