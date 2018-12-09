@@ -8,6 +8,7 @@ using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Symbols;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core
 {
@@ -15,12 +16,13 @@ namespace Coverlet.Core
     {
         private string _module;
         private string _identifier;
-        private string[] _excludeFilters;
         private string[] _includeFilters;
         private string[] _includeDirectories;
+        private string[] _excludeFilters;
         private string[] _excludedSourceFiles;
-        private string _mergeWith;
         private string[] _excludeAttributes;
+        private string _mergeWith;
+        private bool _useSourceLink;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -28,15 +30,16 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, string mergeWith)
+        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, string mergeWith, bool useSourceLink)
         {
             _module = module;
-            _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
             _includeDirectories = includeDirectories ?? Array.Empty<string>();
+            _excludeFilters = excludeFilters;
             _excludedSourceFiles = excludedSourceFiles;
-            _mergeWith = mergeWith;
             _excludeAttributes = excludeAttributes;
+            _mergeWith = mergeWith;
+            _useSourceLink = useSourceLink;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
@@ -186,6 +189,15 @@ namespace Coverlet.Core
                 }
 
                 List<Document> documents = result.Documents.Values.ToList();
+                if (_useSourceLink && result.SourceLink != null)
+                {
+                    var jObject = JObject.Parse(result.SourceLink)["documents"];
+                    var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
+                    foreach (var document in documents)
+                    {
+                        document.Path = GetSourceLinkUrl(sourceLinkDocuments, document.Path);
+                    }
+                }
 
                 using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
                 using (var br = new BinaryReader(fs))
@@ -199,9 +211,7 @@ namespace Coverlet.Core
                     for (int i = 0; i < hitCandidatesCount; ++i)
                     {
                         var hitLocation = result.HitCandidates[i];
-
                         var document = documentsList[hitLocation.docIndex];
-
                         int hits = br.ReadInt32();
 
                         if (hitLocation.isBranch)

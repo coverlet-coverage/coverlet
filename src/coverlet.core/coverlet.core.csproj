@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyVersion>4.0.0</AssemblyVersion>
   </PropertyGroup>
 
@@ -9,6 +10,7 @@
     <PackageReference Include="Mono.Cecil" Version="0.10.1" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
   </ItemGroup>
 
