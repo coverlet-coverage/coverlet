@@ -8,7 +8,7 @@ namespace Coverlet.Core
         public int Total { get; internal set; }
         public double Percent
         {
-            get => Math.Round(Total == 0 ? Total : Covered / Total, 3);
+            get => Math.Round(Total == 0 ? 1 : Covered / Total, 3);
         }
     }
 }
