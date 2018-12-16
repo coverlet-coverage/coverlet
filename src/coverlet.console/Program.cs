@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using ConsoleTables;
 using Coverlet.Console.Logging;
@@ -107,6 +108,31 @@ namespace Coverlet.Console
                 var overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
                 var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
                 var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
+
+                if (dThreshold > 0)
+                {
+                    var overallLinePercent = overallLineCoverage.Percent * 100;
+                    var overallBranchPercent = overallBranchCoverage.Percent * 100;
+                    var overallMethodPercent = overallMethodCoverage.Percent * 100;
+
+                    if (overallLinePercent < dThreshold && dThresholdTypes.Contains("total-line", StringComparer.OrdinalIgnoreCase))
+                    {
+                        exceptionBuilder.AppendLine($"Project has a overall line coverage '{overallLinePercent}%' below specified threshold '{dThreshold}%'");
+                        thresholdFailed = true;
+                    }
+
+                    if (overallBranchPercent < dThreshold && dThresholdTypes.Contains("total-branch", StringComparer.OrdinalIgnoreCase))
+                    {
+                        exceptionBuilder.AppendLine($"Project has a overall branch coverage '{overallBranchPercent}%' below specified threshold '{dThreshold}%'");
+                        thresholdFailed = true;
+                    }
+
+                    if (overallMethodPercent < dThreshold && dThresholdTypes.Contains("total-method", StringComparer.OrdinalIgnoreCase))
+                    {
+                        exceptionBuilder.AppendLine($"Project has a overall method coverage '{overallMethodPercent}%' below specified threshold '{dThreshold}%'");
+                        thresholdFailed = true;
+                    }
+                }
 
                 foreach (var _module in result.Modules)
                 {

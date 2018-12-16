@@ -99,6 +99,31 @@ namespace Coverlet.MSbuild.Tasks
                 var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
                 var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
 
+                if (_threshold > 0)
+                {
+                    var overallLinePercent = overallLineCoverage.Percent * 100;
+                    var overallBranchPercent = overallBranchCoverage.Percent * 100;
+                    var overallMethodPercent = overallMethodCoverage.Percent * 100;
+
+                    if (overallLinePercent < _threshold && thresholdTypes.Contains("total-line", StringComparer.OrdinalIgnoreCase))
+                    {
+                        exceptionBuilder.AppendLine($"Project has a overall line coverage '{overallLinePercent}%' below specified threshold '{_threshold}%'");
+                        thresholdFailed = true;
+                    }
+
+                    if (overallBranchPercent < _threshold && thresholdTypes.Contains("total-branch", StringComparer.OrdinalIgnoreCase))
+                    {
+                        exceptionBuilder.AppendLine($"Project has a overall branch coverage '{overallBranchPercent}%' below specified threshold '{_threshold}%'");
+                        thresholdFailed = true;
+                    }
+
+                    if (overallMethodPercent < _threshold && thresholdTypes.Contains("total-method", StringComparer.OrdinalIgnoreCase))
+                    {
+                        exceptionBuilder.AppendLine($"Project has a overall method coverage '{overallMethodPercent}%' below specified threshold '{_threshold}%'");
+                        thresholdFailed = true;
+                    }
+                }
+                
                 foreach (var module in result.Modules)
                 {
                     var linePercent = summary.CalculateLineCoverage(module.Value).Percent * 100;

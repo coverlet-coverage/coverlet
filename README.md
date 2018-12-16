@@ -306,7 +306,7 @@ The above command will automatically fail the build if the line, branch or metho
 dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
 ```
 
-You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`.
+You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method` as well as `total-line`, `total-branch` and `total-method`.
 
 #### Excluding From Coverage
 
