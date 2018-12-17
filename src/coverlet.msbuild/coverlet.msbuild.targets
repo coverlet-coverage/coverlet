@@ -35,7 +35,8 @@
       Output="$(CoverletOutput)"
       OutputFormat="$(CoverletOutputFormat)"
       Threshold="$(Threshold)"
-      ThresholdType="$(ThresholdType)" />
+      ThresholdType="$(ThresholdType)"
+      ThresholdStat="$(ThresholdStat)" />
   </Target>
 
 </Project>

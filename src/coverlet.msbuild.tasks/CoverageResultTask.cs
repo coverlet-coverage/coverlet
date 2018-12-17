@@ -16,6 +16,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _format;
         private int _threshold;
         private string _thresholdType;
+        private string _thresholdStat;
 
         [Required]
         public string Output
@@ -43,6 +44,13 @@ namespace Coverlet.MSbuild.Tasks
         {
             get { return _thresholdType; }
             set { _thresholdType = value; }
+        }
+
+        [Required]
+        public string ThresholdStat
+        {
+            get { return _thresholdStat; }
+            set { _thresholdStat = value; }
         }
 
         public override bool Execute()
