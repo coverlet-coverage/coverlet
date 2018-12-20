@@ -64,6 +64,7 @@ Options:
   -f|--format             Format of the generated coverage report.
   --threshold             Exits with error if the coverage % is below value.
   --threshold-type        Coverage type to apply the threshold to.
+  --threshold-stat        Coverage statistic used to enforce the threshold value.
   --exclude               Filter expressions to exclude specific modules and types.
   --include               Filter expressions to include specific modules and types.
   --include-directory     Include directories containing additional assemblies to be instrumented.
@@ -71,6 +72,7 @@ Options:
   --include-directory     Include directories containing additional assemblies to be instrumented.
   --exclude-by-attribute  Attributes to exclude from code coverage.
   --merge-with            Path to existing coverage result to merge.
+  --use-source-link       Specifies whether to use SourceLink URIs in place of file system paths.
 ```
 
 #### Code Coverage
@@ -171,6 +173,18 @@ You can specify the `--threshold-type` option multiple times. Valid values inclu
 
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --threshold 80 --threshold-type line --threshold-type method
+```
+
+By default, Coverlet will validate the threshold value against the coverage result of each module. The `--threshold-stat` option allows you to change this behaviour and can have any of the following values:
+
+* Minimum (Default): Ensures the coverage result of each module isn't less than the threshold
+* Total: Ensures the total combined coverage result of all modules isn't less than the threshold
+* Average: Ensures the average coverage result of all modules isn't less than the threshold
+
+The following command will compare the threshold value with the overall total coverage of all modules:
+
+```bash
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --threshold 80 --threshold-type line --threshold-stat total
 ```
 
 #### Excluding From Coverage
@@ -308,6 +322,18 @@ dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
 
 You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`.
 
+By default, Coverlet will validate the threshold value against the coverage result of each module. The `/p:ThresholdStat` option allows you to change this behaviour and can have any of the following values:
+
+* Minimum (Default): Ensures the coverage result of each module isn't less than the threshold
+* Total: Ensures the total combined coverage result of all modules isn't less than the threshold
+* Average: Ensures the average coverage result of all modules isn't less than the threshold
+
+The following command will compare the threshold value with the overall total coverage of all modules:
+
+```bash
+dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line /p:ThresholdStat=total
+```
+
 #### Excluding From Coverage
 
 ##### Attributes
@@ -360,6 +386,10 @@ Examples
 Both `Exclude` and `Include` properties can be used together but `Exclude` takes precedence.
 
 You can specify multiple filter expressions by separting them with a comma (`,`).
+
+### SourceLink
+
+Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `--use-source-link` flag in the global tool or `/p:UseSourceLink=true` property in the MSBuild command, Coverlet will generate results that contain the URL to the source files in your source control instead of absolute file paths.
 
 ### Cake Addin
 If you're using [Cake Build](https://cakebuild.net) for your build script you can use the [Cake.Coverlet](https://github.com/Romanx/Cake.Coverlet) addin to provide you extensions to dotnet test for passing coverlet arguments in a strongly typed manner.
