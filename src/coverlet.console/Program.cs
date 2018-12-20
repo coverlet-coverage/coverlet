@@ -6,6 +6,7 @@ using System.Text;
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
+using Coverlet.Core.Enums;
 using Coverlet.Core.Reporters;
 
 using Microsoft.Extensions.CommandLineUtils;
@@ -60,8 +61,9 @@ namespace Coverlet.Console
                 process.WaitForExit();
 
                 var dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
-                var dThreshold = threshold.HasValue() ? int.Parse(threshold.Value()) : 0;
+                var dThreshold = threshold.HasValue() ? double.Parse(threshold.Value()) : 0;
                 var dThresholdTypes = thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" });
+                var dThresholdStat = thresholdStat.HasValue() ? Enum.Parse<ThresholdStatistic>(thresholdStat.Value(), true) : Enum.Parse<ThresholdStatistic>("minimum", true);
 
                 logger.LogInformation("\nCalculating coverage result...");
 
@@ -80,7 +82,9 @@ namespace Coverlet.Console
                 {
                     var reporter = new ReporterFactory(format).CreateReporter();
                     if (reporter == null)
+                    {
                         throw new Exception($"Specified output format '{format}' is not supported");
+                    }
 
                     if (reporter.OutputType == ReporterOutputType.Console)
                     {
@@ -101,13 +105,31 @@ namespace Coverlet.Console
                     }
                 }
 
-                var summary = new CoverageSummary();
-                var exceptionBuilder = new StringBuilder();
+                var thresholdTypeFlags = ThresholdTypeFlags.None;
+
+                foreach (var thresholdType in dThresholdTypes)
+                {
+                    if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
+                    {
+                        thresholdTypeFlags |= ThresholdTypeFlags.Line;
+                    }
+                    else if (thresholdType.Equals("branch", StringComparison.OrdinalIgnoreCase))
+                    {
+                        thresholdTypeFlags |= ThresholdTypeFlags.Branch;
+                    }
+                    else if (thresholdType.Equals("method", StringComparison.OrdinalIgnoreCase))
+                    {
+                        thresholdTypeFlags |= ThresholdTypeFlags.Method;
+                    }
+                }
+
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-                var thresholdFailed = false;
-                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
-                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
-                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
+                var summary = new CoverageSummary();
+                int numModules = result.Modules.Count;
+
+                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
+                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
+                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
 
                 foreach (var _module in result.Modules)
                 {
@@ -116,37 +138,40 @@ namespace Coverlet.Console
                     var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent * 100;
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
-
-                    if (dThreshold > 0)
-                    {
-                        if (linePercent < dThreshold && dThresholdTypes.Contains("line"))
-                        {
-                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(_module.Key)}' has a line coverage '{linePercent}%' below specified threshold '{dThreshold}%'");
-                            thresholdFailed = true;
-                        }
-
-                        if (branchPercent < dThreshold && dThresholdTypes.Contains("branch"))
-                        {
-                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(_module.Key)}' has a branch coverage '{branchPercent}%' below specified threshold '{dThreshold}%'");
-                            thresholdFailed = true;
-                        }
-
-                        if (methodPercent < dThreshold && dThresholdTypes.Contains("method"))
-                        {
-                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(_module.Key)}' has a method coverage '{methodPercent}%' below specified threshold '{dThreshold}%'");
-                            thresholdFailed = true;
-                        }
-                    }
                 }
 
-                logger.LogInformation(string.Empty);
                 logger.LogInformation(coverageTable.ToStringAlternative());
-                logger.LogInformation($"Total Line: {overallLineCoverage.Percent * 100}%");
-                logger.LogInformation($"Total Branch: {overallBranchCoverage.Percent * 100}%");
-                logger.LogInformation($"Total Method: {overallMethodCoverage.Percent * 100}%");
 
-                if (thresholdFailed)
-                    throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
+                coverageTable.Columns.Clear();
+                coverageTable.Rows.Clear();
+
+                coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
+                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
+                coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
+
+                logger.LogInformation(coverageTable.ToStringAlternative());
+
+                thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, dThreshold, thresholdTypeFlags, dThresholdStat);
+                if (thresholdTypeFlags != ThresholdTypeFlags.None)
+                {
+                    var exceptionMessageBuilder = new StringBuilder();
+                    if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
+                    {
+                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} line coverage is below the specified {dThreshold}");
+                    }
+
+                    if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
+                    {
+                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} branch coverage is below the specified {dThreshold}");
+                    }
+
+                    if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
+                    {
+                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} method coverage is below the specified {dThreshold}");
+                    }
+
+                    throw new Exception(exceptionMessageBuilder.ToString());
+                }
 
                 return process.ExitCode == 0 ? 0 : process.ExitCode;
             });
