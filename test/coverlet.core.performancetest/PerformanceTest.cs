@@ -3,13 +3,13 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xunit;
 
-namespace coverlet.core.performancetest
+namespace Coverlet.Core.PerformanceTest
 {
     /// <summary>
     /// Test the performance of coverlet by running a unit test that calls a reasonably big and complex test class.
     /// Enable the test, compile, then run the test in the command line:
     /// <code>
-    /// dotnet test /p:CollectCoverage=true test/coverlet.core.performancetest/
+    /// dotnet test /p:CollectCoverage=true test/Coverlet.Core.PerformanceTest/
     /// </code>
     /// </summary>
     public class PerformanceTest

@@ -3,7 +3,7 @@ using Coverlet.Core;
 using Coverlet.Core.Reporters;
 using System.Text;
 
-namespace coverlet.core.Reporters
+namespace Coverlet.Core.Reporters
 {
     public class TeamCityReporter : IReporter
     {
