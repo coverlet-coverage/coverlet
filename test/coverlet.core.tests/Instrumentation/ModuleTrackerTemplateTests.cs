@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace coverlet.core.tests.Instrumentation
+namespace Coverlet.Core.Tests.Instrumentation
 {
     public class ModuleTrackerTemplateTestsFixture : IDisposable
     {

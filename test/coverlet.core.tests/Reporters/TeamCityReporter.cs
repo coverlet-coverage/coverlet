@@ -1,5 +1,5 @@
-﻿using coverlet.core.Reporters;
-using System;
+﻿using System;
+using Coverlet.Core.Reporters;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests

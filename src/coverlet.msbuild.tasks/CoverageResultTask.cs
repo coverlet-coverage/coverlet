@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ConsoleTables;
 using Coverlet.Core;
+using Coverlet.Core.Enums;
 using Coverlet.Core.Reporters;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -14,8 +15,9 @@ namespace Coverlet.MSbuild.Tasks
     {
         private string _output;
         private string _format;
-        private int _threshold;
+        private double _threshold;
         private string _thresholdType;
+        private string _thresholdStat;
 
         [Required]
         public string Output
@@ -32,7 +34,7 @@ namespace Coverlet.MSbuild.Tasks
         }
 
         [Required]
-        public int Threshold
+        public double Threshold
         {
             get { return _threshold; }
             set { _threshold = value; }
@@ -43,6 +45,13 @@ namespace Coverlet.MSbuild.Tasks
         {
             get { return _thresholdType; }
             set { _thresholdType = value; }
+        }
+
+        [Required]
+        public string ThresholdStat
+        {
+            get { return _thresholdStat; }
+            set { _thresholdStat = value; }
         }
 
         public override bool Execute()
@@ -69,7 +78,9 @@ namespace Coverlet.MSbuild.Tasks
                 {
                     var reporter = new ReporterFactory(format).CreateReporter();
                     if (reporter == null)
+                    {
                         throw new Exception($"Specified output format '{format}' is not supported");
+                    }
 
                     if (reporter.OutputType == ReporterOutputType.Console)
                     {
@@ -90,14 +101,41 @@ namespace Coverlet.MSbuild.Tasks
                     }
                 }
 
-                var thresholdFailed = false;
-                var thresholdTypes = _thresholdType.Split(',').Select(t => t.Trim());
-                var summary = new CoverageSummary();
-                var exceptionBuilder = new StringBuilder();
+                var thresholdTypeFlags = ThresholdTypeFlags.None;
+                var thresholdStat = ThresholdStatistic.Minimum;
+                
+                foreach (var thresholdType in _thresholdType.Split(',').Select(t => t.Trim()))
+                {
+                    if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
+                    {
+                        thresholdTypeFlags |= ThresholdTypeFlags.Line;
+                    }
+                    else if (thresholdType.Equals("branch", StringComparison.OrdinalIgnoreCase))
+                    {
+                        thresholdTypeFlags |= ThresholdTypeFlags.Branch;
+                    }
+                    else if (thresholdType.Equals("method", StringComparison.OrdinalIgnoreCase))
+                    {
+                        thresholdTypeFlags |= ThresholdTypeFlags.Method;
+                    }
+                }
+
+                if (_thresholdStat.Equals("average", StringComparison.OrdinalIgnoreCase))
+                {
+                    thresholdStat = ThresholdStatistic.Average;
+                }
+                else if (_thresholdStat.Equals("total", StringComparison.OrdinalIgnoreCase))
+                {
+                    thresholdStat = ThresholdStatistic.Total;
+                }
+
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-                var overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
-                var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
-                var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
+                var summary = new CoverageSummary();
+                int numModules = result.Modules.Count;
+                
+                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
+                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
+                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
 
                 foreach (var module in result.Modules)
                 {
@@ -106,37 +144,41 @@ namespace Coverlet.MSbuild.Tasks
                     var methodPercent = summary.CalculateMethodCoverage(module.Value).Percent * 100;
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
-
-                    if (_threshold > 0)
-                    {
-                        if (linePercent < _threshold && thresholdTypes.Contains("line", StringComparer.OrdinalIgnoreCase))
-                        {
-                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a line coverage '{linePercent}%' below specified threshold '{_threshold}%'");
-                            thresholdFailed = true;
-                        }
-
-                        if (branchPercent < _threshold && thresholdTypes.Contains("branch", StringComparer.OrdinalIgnoreCase))
-                        {
-                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a branch coverage '{branchPercent}%' below specified threshold '{_threshold}%'");
-                            thresholdFailed = true;
-                        }
-
-                        if (methodPercent < _threshold && thresholdTypes.Contains("method", StringComparer.OrdinalIgnoreCase))
-                        {
-                            exceptionBuilder.AppendLine($"'{Path.GetFileNameWithoutExtension(module.Key)}' has a method coverage '{methodPercent}%' below specified threshold '{_threshold}%'");
-                            thresholdFailed = true;
-                        }
-                    }
                 }
 
                 Console.WriteLine();
                 Console.WriteLine(coverageTable.ToStringAlternative());
-                Console.WriteLine($"Total Line: {overallLineCoverage.Percent * 100}%");
-                Console.WriteLine($"Total Branch: {overallBranchCoverage.Percent * 100}%");
-                Console.WriteLine($"Total Method: {overallMethodCoverage.Percent * 100}%");
 
-                if (thresholdFailed)
-                    throw new Exception(exceptionBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
+                coverageTable.Columns.Clear();
+                coverageTable.Rows.Clear();
+
+                coverageTable.AddColumn(new [] { "", "Line", "Branch", "Method"});
+                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
+                coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
+                
+                Console.WriteLine(coverageTable.ToStringAlternative());
+
+                thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, _threshold, thresholdTypeFlags, thresholdStat);
+                if (thresholdTypeFlags != ThresholdTypeFlags.None)
+                {
+                    var exceptionMessageBuilder = new StringBuilder();
+                    if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
+                    {
+                        exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {_threshold}");
+                    }
+
+                    if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
+                    {
+                        exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {_threshold}");
+                    }
+
+                    if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
+                    {
+                        exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {_threshold}");
+                    }
+
+                    throw new Exception(exceptionMessageBuilder.ToString());
+                }
             }
             catch (Exception ex)
             {

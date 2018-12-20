@@ -1,4 +1,4 @@
-using coverlet.core.Reporters;
+using Coverlet.Core.Reporters;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests

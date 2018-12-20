@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Symbols;
@@ -48,7 +49,7 @@ namespace Coverlet.Core
         public void PrepareModules()
         {
             string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories);
-            string[] excludes =  InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
+            string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
             _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
             _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
@@ -131,14 +132,14 @@ namespace Coverlet.Core
                                 if (methods.TryGetValue(branch.Method, out Method method))
                                 {
                                     method.Branches.Add(new BranchInfo
-                                        { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                    { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                                     );
                                 }
                                 else
                                 {
                                     documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                                     documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                                        { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                    { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                                     );
                                 }
                             }
@@ -147,7 +148,7 @@ namespace Coverlet.Core
                                 documents[doc.Path].Add(branch.Class, new Methods());
                                 documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                                 documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                                    { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                                { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                                 );
                             }
                         }
@@ -157,7 +158,7 @@ namespace Coverlet.Core
                             documents[doc.Path].Add(branch.Class, new Methods());
                             documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                             documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                                { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                            { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                             );
                         }
                     }
@@ -292,7 +293,7 @@ namespace Coverlet.Core
             }
 
             relativePathOfBestMatch = relativePathOfBestMatch == "." ? string.Empty : relativePathOfBestMatch;
-            
+
             string replacement = Path.Combine(relativePathOfBestMatch, Path.GetFileName(document));
             replacement = replacement.Replace('\\', '/');
 

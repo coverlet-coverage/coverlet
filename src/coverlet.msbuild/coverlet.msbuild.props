@@ -12,5 +12,6 @@
     <CoverletOutput Condition="$(CoverletOutput) == ''">$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))</CoverletOutput>
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <ThresholdType Condition="$(ThresholdType) == ''">line,branch,method</ThresholdType>
+    <ThresholdStat Condition="$(ThresholdStat) == ''">minimum</ThresholdStat>
   </PropertyGroup>
 </Project>

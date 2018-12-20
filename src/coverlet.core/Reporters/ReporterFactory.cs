@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using coverlet.core.Reporters;
+using Coverlet.Core.Reporters;
 
 namespace Coverlet.Core.Reporters
 {
