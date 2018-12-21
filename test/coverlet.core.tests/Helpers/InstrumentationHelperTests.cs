@@ -53,16 +53,6 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.False(InstrumentationHelper.IsValidFilterExpression(null));
         }
 
-        [Fact]
-        public void TestDeleteHitsFile()
-        {
-            var tempFile = Path.GetTempFileName();
-            Assert.True(File.Exists(tempFile));
-
-            InstrumentationHelper.DeleteHitsFile(tempFile);
-            Assert.False(File.Exists(tempFile));
-        }
-
 
         public static IEnumerable<object[]> GetExcludedFilesReturnsEmptyArgs =>
         new[]

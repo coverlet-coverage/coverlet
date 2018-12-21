@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
 
 using Coverlet.Core.Enums;
@@ -15,6 +16,10 @@ namespace Coverlet.Core
 {
     public class Coverage
     {
+        public const int HitsResultHeaderSize = 2;
+        public const int HitsResultUnloadStarted = 0;
+        public const int HitsResultUnloadFinished = 1;
+
         private string _module;
         private string _identifier;
         private string[] _includeFilters;
@@ -26,10 +31,14 @@ namespace Coverlet.Core
         private bool _useSourceLink;
         private List<InstrumenterResult> _results;
 
+        private readonly Dictionary<string, MemoryMappedFile> _resultMemoryMaps = new Dictionary<string, MemoryMappedFile>();
+
         public string Identifier
         {
             get { return _identifier; }
         }
+
+        internal IEnumerable<InstrumenterResult> Results => _results;
 
         public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, string mergeWith, bool useSourceLink)
         {
@@ -76,6 +85,12 @@ namespace Coverlet.Core
                         InstrumentationHelper.RestoreOriginalModule(module, _identifier);
                     }
                 }
+            }
+
+            foreach (var result in _results)
+            {
+                var count = result.HitCandidates.Count + HitsResultHeaderSize;
+                _resultMemoryMaps.Add(result.HitsResultGuid, MemoryMappedFile.CreateNew(result.HitsResultGuid, count * sizeof(int)));
             }
         }
 
@@ -183,12 +198,6 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                if (!File.Exists(result.HitsFilePath))
-                {
-                    // File not instrumented, or nothing in it called.  Warn about this?
-                    continue;
-                }
-
                 List<Document> documents = result.Documents.Values.ToList();
                 if (_useSourceLink && result.SourceLink != null)
                 {
@@ -200,20 +209,26 @@ namespace Coverlet.Core
                     }
                 }
 
-                using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
-                using (var br = new BinaryReader(fs))
+                // Read hit counts from the memory mapped area, disposing it when done
+                using (var mmapFile = _resultMemoryMaps[result.HitsResultGuid])
                 {
-                    int hitCandidatesCount = br.ReadInt32();
+                    var mmapAccessor = mmapFile.CreateViewAccessor();
 
-                    // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
+                    var unloadStarted = mmapAccessor.ReadInt32(HitsResultUnloadStarted * sizeof(int));
+                    var unloadFinished = mmapAccessor.ReadInt32(HitsResultUnloadFinished * sizeof(int));
+
+                    if (unloadFinished < unloadStarted)
+                    {
+                        throw new Exception($"Hit counts only partially reported for {result.Module}");
+                    }
 
                     var documentsList = result.Documents.Values.ToList();
 
-                    for (int i = 0; i < hitCandidatesCount; ++i)
+                    for (int i = 0; i < result.HitCandidates.Count; ++i)
                     {
                         var hitLocation = result.HitCandidates[i];
                         var document = documentsList[hitLocation.docIndex];
-                        int hits = br.ReadInt32();
+                        var hits = mmapAccessor.ReadInt32((i + HitsResultHeaderSize) * sizeof(int));
 
                         if (hitLocation.isBranch)
                         {
@@ -255,8 +270,6 @@ namespace Coverlet.Core
                         document.Value.Branches.Remove(branchToRemove.Key);
                     }
                 }
-
-                InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
             }
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.Threading;
 
 namespace Coverlet.Core.Instrumentation
@@ -11,14 +12,14 @@ namespace Coverlet.Core.Instrumentation
     /// to a single location.
     /// </summary>
     /// <remarks>
-    /// As this type is going to be customized for each instrumeted module it doesn't follow typical practices
+    /// As this type is going to be customized for each instrumented module it doesn't follow typical practices
     /// regarding visibility of members, etc.
     /// </remarks>
     [ExcludeFromCodeCoverage]
     public static class ModuleTrackerTemplate
     {
-        public static string HitsFilePath;
-        public static int[] HitsArray;
+        public static string HitsMemoryMapName;
+        public static int HitsArraySize;
 
         // Special case when instrumenting CoreLib, the thread static below prevents infinite loop in CoreLib
         // while allowing the tracker template to call any of its types and functions.
@@ -28,7 +29,7 @@ namespace Coverlet.Core.Instrumentation
         [ThreadStatic]
         private static int[] t_threadHits;
 
-        private static List<int[]> _threads;
+        private static readonly List<int[]> _threads;
 
         static ModuleTrackerTemplate()
         {
@@ -51,14 +52,16 @@ namespace Coverlet.Core.Instrumentation
             if (t_threadHits == null)
             {
                 t_isTracking = true;
+
                 lock (_threads)
                 {
                     if (t_threadHits == null)
                     {
-                        t_threadHits = new int[HitsArray.Length];
+                        t_threadHits = new int[HitsArraySize];
                         _threads.Add(t_threadHits);
                     }
                 }
+
                 t_isTracking = false;
             }
 
@@ -69,77 +72,81 @@ namespace Coverlet.Core.Instrumentation
         {
             t_isTracking = true;
 
-            // Update the global hits array from data from all the threads
+            int[][] threads;
             lock (_threads)
             {
-                foreach (var threadHits in _threads)
-                {
-                    for (int i = 0; i < HitsArray.Length; ++i)
-                        HitsArray[i] += threadHits[i];
-                }
+                threads = _threads.ToArray();
 
-                // Prevent any double counting scenario, i.e.: UnloadModule called twice (not sure if this can happen in practice ...)
-                // Only an issue if DomainUnload and ProcessExit can both happens, perhaps can be removed...
+                // Don't double-count if UnloadModule is called more than once
                 _threads.Clear();
             }
 
             // The same module can be unloaded multiple times in the same process via different app domains.
             // Use a global mutex to ensure no concurrent access.
-            using (var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew))
+            using (var mutex = new Mutex(true, HitsMemoryMapName + "_Mutex", out bool createdNew))
             {
                 if (!createdNew)
                     mutex.WaitOne();
 
-                bool failedToCreateNewHitsFile = false;
                 try
                 {
-                    using (var fs = new FileStream(HitsFilePath, FileMode.CreateNew))
-                    using (var bw = new BinaryWriter(fs))
+                    // Tally hit counts from all threads in memory mapped area
+                    using (var memoryMap = MemoryMappedFile.OpenExisting(HitsMemoryMapName))
                     {
-                        bw.Write(HitsArray.Length);
-                        foreach (int hitCount in HitsArray)
+                        var accessor = memoryMap.CreateViewAccessor();
+                        using (var buffer = accessor.SafeMemoryMappedViewHandle)
                         {
-                            bw.Write(hitCount);
+                            unsafe
+                            {
+                                byte* pointer = null;
+                                buffer.AcquirePointer(ref pointer);
+                                try
+                                {
+                                    var intPointer = (int*) pointer;
+
+                                    // Signal back to coverage analysis that we've started transferring hit counts.
+                                    // Use interlocked here to ensure a memory barrier before the Coverage class reads
+                                    // the shared data.
+                                    Interlocked.Increment(ref *(intPointer + Coverage.HitsResultUnloadStarted));
+
+                                    for (var i = 0; i < HitsArraySize; i++)
+                                    {
+                                        var count = 0;
+
+                                        foreach (var threadHits in threads)
+                                        {
+                                            count += threadHits[i];
+                                        }
+
+                                        if (count > 0)
+                                        {
+                                            // There's a header of one int before the hit counts
+                                            var hitLocationArrayOffset = intPointer + i + Coverage.HitsResultHeaderSize;
+
+                                            // No need to use Interlocked here since the mutex ensures only one thread updates 
+                                            // the shared memory map.
+                                            *hitLocationArrayOffset += count;
+                                        }
+                                    }
+
+                                    // Signal back to coverage analysis that all hit counts were successfully tallied.
+                                    Interlocked.Increment(ref *(intPointer + Coverage.HitsResultUnloadFinished));
+                                }
+                                finally
+                                {
+                                    buffer.ReleasePointer();
+                                }
+                            }
                         }
                     }
                 }
-                catch
+                finally
                 {
-                    failedToCreateNewHitsFile = true;
+                    mutex.ReleaseMutex();
                 }
-
-                if (failedToCreateNewHitsFile)
-                {
-                    // Update the number of hits by adding value on disk with the ones on memory.
-                    // This path should be triggered only in the case of multiple AppDomain unloads.
-                    using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-                    using (var br = new BinaryReader(fs))
-                    using (var bw = new BinaryWriter(fs))
-                    {
-                        int hitsLength = br.ReadInt32();
-                        if (hitsLength != HitsArray.Length)
-                        {
-                            throw new InvalidOperationException(
-                                $"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {HitsArray.Length}");
-                        }
-
-                        for (int i = 0; i < hitsLength; ++i)
-                        {
-                            int oldHitCount = br.ReadInt32();
-                            bw.Seek(-sizeof(int), SeekOrigin.Current);
-                            bw.Write(HitsArray[i] + oldHitCount);
-                        }
-                    }
-                }
-
-                // Prevent any double counting scenario, i.e.: UnloadModule called twice (not sure if this can happen in practice ...)
-                // Only an issue if DomainUnload and ProcessExit can both happens, perhaps can be removed...
-                Array.Clear(HitsArray, 0, HitsArray.Length);
-
-                // On purpose this is not under a try-finally: it is better to have an exception if there was any error writing the hits file
-                // this case is relevant when instrumenting corelib since multiple processes can be running against the same instrumented dll.
-                mutex.ReleaseMutex();
             }
+
+            t_isTracking = false;
         }
     }
 }

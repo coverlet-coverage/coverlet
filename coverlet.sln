@@ -15,9 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.tests", "test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.console", "src\coverlet.console\coverlet.console.csproj", "{F3DBE7C3-ABBB-4B8B-A6CB-A1D3D607163E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.testsubject", "test\coverlet.testsubject\coverlet.testsubject.csproj", "{AE117FAA-C21D-4F23-917E-0C8050614750}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.testsubject", "test\coverlet.testsubject\coverlet.testsubject.csproj", "{AE117FAA-C21D-4F23-917E-0C8050614750}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.core.performancetest", "test\coverlet.core.performancetest\coverlet.core.performancetest.csproj", "{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.performancetest", "test\coverlet.core.performancetest\coverlet.core.performancetest.csproj", "{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -6,10 +6,13 @@ using Moq;
 
 using Coverlet.Core;
 using System.Collections.Generic;
+using System.Linq;
+using Coverlet.Core.Instrumentation;
+using Coverlet.Core.Tests.Instrumentation;
 
 namespace Coverlet.Core.Tests
 {
-    public class CoverageTests
+    public class CoverageTests : IClassFixture<ModuleTrackerTemplateTestsFixture>
     {
         [Fact]
         public void TestCoverage()
@@ -22,13 +25,17 @@ namespace Coverlet.Core.Tests
             File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-            // TODO: Find a way to mimick hits
+            // TODO: Mimic hits by calling ModuleTrackerTemplate.RecordHit before Unload
 
             // Since Coverage only instruments dependancies, we need a fake module here
             var testModule = Path.Combine(directory.FullName, "test.module.dll");
 
             var coverage = new Coverage(testModule, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), string.Empty, false);
             coverage.PrepareModules();
+
+            // The module hit tracker must signal to Coverage that it has done its job, so call it manually
+            ModuleTrackerTemplate.HitsMemoryMapName = coverage.Results.Single().HitsResultGuid;
+            ModuleTrackerTemplate.UnloadModule(null, null);
 
             var result = coverage.GetCoverageResult();
 
