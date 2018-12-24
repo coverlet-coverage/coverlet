@@ -262,6 +262,11 @@ namespace Coverlet.Core
 
         private bool IsAsyncStateMachineMethod(string method)
         {
+            if (!method.EndsWith("::MoveNext()"))
+            {
+                return false;
+            }
+
             foreach (var instrumentationResult in _results)
             {
                 if (instrumentationResult.AsyncMachineStateMethod.Contains(method))

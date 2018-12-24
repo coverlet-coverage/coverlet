@@ -365,9 +365,14 @@ namespace Coverlet.Core.Instrumentation
 
         private bool IsAsyncStateMachineBranch(TypeDefinition typeDef, MethodDefinition method)
         {
+            if (!method.FullName.EndsWith("::MoveNext()"))
+            {
+                return false;
+            }
+
             foreach (InterfaceImplementation implementedInterface in typeDef.Interfaces)
             {
-                if (implementedInterface.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine" && method.FullName.EndsWith("::MoveNext()"))
+                if (implementedInterface.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine")
                 {
                     return true;
                 }
