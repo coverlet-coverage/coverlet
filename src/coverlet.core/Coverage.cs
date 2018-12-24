@@ -132,7 +132,7 @@ namespace Coverlet.Core
                                 if (methods.TryGetValue(branch.Method, out Method method))
                                 {
                                     method.Branches.Add(new BranchInfo
-                                    { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal, IsAsyncStateMachineBranch = branch.IsAsyncStateMachineBranch }
+                                    { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                                     );
                                 }
                                 else
@@ -168,7 +168,7 @@ namespace Coverlet.Core
                 InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
-            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules };
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
 
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
             {
@@ -239,7 +239,7 @@ namespace Coverlet.Core
                     foreach (var branch in document.Value.Branches)
                     {
                         //if one branch is covered we search the other one only if it's not covered
-                        if (branch.Value.IsAsyncStateMachineBranch && branch.Value.Method.EndsWith("::MoveNext()") && branch.Value.Hits > 0)
+                        if (IsAsyncStateMachineMethod(branch.Value.Method) && branch.Value.Hits > 0)
                         {
                             foreach (var moveNextBranch in document.Value.Branches)
                             {
@@ -258,6 +258,18 @@ namespace Coverlet.Core
 
                 InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
             }
+        }
+
+        private bool IsAsyncStateMachineMethod(string method)
+        {
+            foreach (var instrumentationResult in _results)
+            {
+                if (instrumentationResult.AsyncMachineStateMethod.Contains(method))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private string GetSourceLinkUrl(Dictionary<string, string> sourceLinkDocuments, string document)

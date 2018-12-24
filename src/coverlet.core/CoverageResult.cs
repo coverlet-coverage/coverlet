@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Coverlet.Core.Enums;
+using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Symbols;
 
 namespace Coverlet.Core
@@ -15,7 +16,6 @@ namespace Coverlet.Core
         public int Path { get; set; }
         public uint Ordinal { get; set; }
         public int Hits { get; set; }
-        public bool IsAsyncStateMachineBranch { get; set; }
     }
 
     public class Lines : SortedDictionary<int, int> { }
@@ -41,6 +41,7 @@ namespace Coverlet.Core
     {
         public string Identifier;
         public Modules Modules;
+        internal List<InstrumenterResult> InstrumentedResults;
 
         internal CoverageResult() { }
 
@@ -121,7 +122,7 @@ namespace Coverlet.Core
                         {
                             foreach (var branch in method.Value.Branches)
                             {
-                                if (branch.IsAsyncStateMachineBranch && method.Key.EndsWith("::MoveNext()") && branch.Hits > 0)
+                                if (IsAsyncStateMachineMethod(method.Key))
                                 {
                                     foreach (var moveNextBranch in method.Value.Branches)
                                     {
@@ -140,6 +141,18 @@ namespace Coverlet.Core
                     }
                 }
             }
+        }
+
+        private bool IsAsyncStateMachineMethod(string method)
+        {
+            foreach (var instrumentedResult in InstrumentedResults)
+            {
+                if (instrumentedResult.AsyncMachineStateMethod.Contains(method))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public ThresholdTypeFlags GetThresholdTypesBelowThreshold(CoverageSummary summary, double threshold, ThresholdTypeFlags thresholdTypes, ThresholdStatistic thresholdStat)
