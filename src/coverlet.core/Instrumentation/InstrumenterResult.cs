@@ -16,6 +16,7 @@ namespace Coverlet.Core.Instrumentation
         public int EndOffset;
         public int Path;
         public uint Ordinal;
+        public bool IsAsyncStateMachineBranch;
     }
 
     internal class Document

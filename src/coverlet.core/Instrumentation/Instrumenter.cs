@@ -335,7 +335,8 @@ namespace Coverlet.Core.Instrumentation
                         Offset = branchPoint.Offset,
                         EndOffset = branchPoint.EndOffset,
                         Path = branchPoint.Path,
-                        Ordinal = branchPoint.Ordinal
+                        Ordinal = branchPoint.Ordinal,
+                        IsAsyncStateMachineBranch = IsAsyncStateMachineBranch(method.DeclaringType, method)
                     }
                 );
 
@@ -343,6 +344,18 @@ namespace Coverlet.Core.Instrumentation
             _result.HitCandidates.Add(entry);
 
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
+        }
+
+        private bool IsAsyncStateMachineBranch(TypeDefinition typeDef, MethodDefinition method)
+        {
+            foreach (InterfaceImplementation implementedInterface in typeDef.Interfaces)
+            {
+                if (implementedInterface.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine" && method.FullName.EndsWith("::MoveNext()"))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private Instruction AddInstrumentationInstructions(MethodDefinition method, ILProcessor processor, Instruction instruction, int hitEntryIndex)
