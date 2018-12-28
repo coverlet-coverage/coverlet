@@ -24,6 +24,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _excludedFiles;
         private readonly string[] _excludedAttributes;
         private InstrumenterResult _result;
+        private FieldDefinition _customTrackerHitsFilePath;
         private FieldDefinition _customTrackerHitsArraySize;
         private FieldDefinition _customTrackerHitsMemoryMapName;
         private ILProcessor _customTrackerClassConstructorIl;
@@ -44,9 +45,15 @@ namespace Coverlet.Core.Instrumentation
 
         public InstrumenterResult Instrument()
         {
+            string hitsFilePath = Path.Combine(
+                Path.GetTempPath(),
+                Path.GetFileNameWithoutExtension(_module) + "_" + _identifier
+            );
+
             _result = new InstrumenterResult
             {
                 Module = Path.GetFileNameWithoutExtension(_module),
+                HitsFilePath = hitsFilePath,
                 HitsResultGuid = Guid.NewGuid().ToString(),
                 ModulePath = _module
             };
@@ -91,6 +98,8 @@ namespace Coverlet.Core.Instrumentation
                     // Fixup the custom tracker class constructor, according to all instrumented types
                     Instruction firstInstr = _customTrackerClassConstructorIl.Body.Instructions.First();
                     _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Nop));
+                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
+                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
                     _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count));
                     _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArraySize));
                     _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsResultGuid));
@@ -119,7 +128,9 @@ namespace Coverlet.Core.Instrumentation
 
                     _customTrackerTypeDef.Fields.Add(fieldClone);
 
-                    if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsMemoryMapName))
+                    if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsFilePath))
+                        _customTrackerHitsFilePath = fieldClone;
+                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsMemoryMapName))
                         _customTrackerHitsMemoryMapName = fieldClone;
                     else if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsArraySize))
                         _customTrackerHitsArraySize = fieldClone;

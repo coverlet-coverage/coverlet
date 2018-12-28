@@ -41,6 +41,7 @@ namespace Coverlet.Core.Instrumentation
         }
 
         public string Module;
+        public string HitsFilePath;
         public string HitsResultGuid;
         public string ModulePath;
         public string SourceLink;

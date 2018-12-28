@@ -89,8 +89,22 @@ namespace Coverlet.Core
 
             foreach (var result in _results)
             {
-                var count = result.HitCandidates.Count + HitsResultHeaderSize;
-                _resultMemoryMaps.Add(result.HitsResultGuid, MemoryMappedFile.CreateNew(result.HitsResultGuid, count * sizeof(int)));
+                var size = (result.HitCandidates.Count + HitsResultHeaderSize) * sizeof(int);
+
+                MemoryMappedFile mmap;
+
+                try
+                {
+                    // Try using a named memory map not backed by a file (currently only supported on Windows)
+                    mmap = MemoryMappedFile.CreateNew(result.HitsResultGuid, size);
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    // Fall back on a file-backed memory map
+                    mmap = MemoryMappedFile.CreateFromFile(result.HitsFilePath, FileMode.CreateNew, null, size);
+                }
+
+                _resultMemoryMaps.Add(result.HitsResultGuid, mmap);
             }
         }
 
@@ -270,6 +284,9 @@ namespace Coverlet.Core
                         document.Value.Branches.Remove(branchToRemove.Key);
                     }
                 }
+
+                // There's only a hits file on Linux, but if the file doesn't exist this is just a no-op
+                InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
             }
         }
 

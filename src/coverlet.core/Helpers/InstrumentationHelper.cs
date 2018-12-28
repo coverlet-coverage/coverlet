@@ -104,6 +104,13 @@ namespace Coverlet.Core.Helpers
             }, retryStrategy, 10);
         }
 
+        public static void DeleteHitsFile(string path)
+        {
+            // Retry hitting the hits file - retry up to 10 times, since the file could be locked
+            // See: https://github.com/tonerdo/coverlet/issues/25
+            var retryStrategy = CreateRetryStrategy();
+            RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
+        }
 
         public static bool IsValidFilterExpression(string filter)
         {

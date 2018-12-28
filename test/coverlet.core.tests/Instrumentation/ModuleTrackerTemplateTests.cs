@@ -1,4 +1,5 @@
 ﻿using Coverlet.Core.Instrumentation;
+using Coverlet.Core.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +18,6 @@ namespace Coverlet.Core.Tests.Instrumentation
         public ModuleTrackerTemplateTestsFixture()
         {
             _semaphore.Wait();
-            ModuleTrackerTemplate.HitsMemoryMapName = Guid.NewGuid().ToString();
         }
 
         public void Dispose()
@@ -33,18 +33,36 @@ namespace Coverlet.Core.Tests.Instrumentation
         // Prevent parallel execution of these tests
         private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
 
-        private MemoryMappedFile _mmap;
+        private readonly MemoryMappedFile _mmap;
 
         public ModuleTrackerTemplateTests()
         {
             _semaphore.Wait();
-            _mmap = MemoryMappedFile.CreateNew(ModuleTrackerTemplate.HitsMemoryMapName, 100 * sizeof(int));
+         
+            ModuleTrackerTemplate.HitsArraySize = 4;
+            ModuleTrackerTemplate.HitsMemoryMapName = Guid.NewGuid().ToString();
+            ModuleTrackerTemplate.HitsFilePath = Path.Combine(Path.GetTempPath(), $"coverlet.test_{ModuleTrackerTemplate.HitsMemoryMapName}");
+
+            var size = (ModuleTrackerTemplate.HitsArraySize + Coverage.HitsResultHeaderSize) * sizeof(int);
+
+            try
+            {
+                _mmap = MemoryMappedFile.CreateNew(ModuleTrackerTemplate.HitsMemoryMapName, size);
+            } 
+            catch (PlatformNotSupportedException)
+            {
+                _mmap = MemoryMappedFile.CreateFromFile(ModuleTrackerTemplate.HitsFilePath, FileMode.CreateNew, null, size);
+            }
         }
 
         public void Dispose()
         {
-            _mmap.Dispose();
+            var hitsFilePath = ModuleTrackerTemplate.HitsFilePath;
+            
             _semaphore.Release();
+            _mmap.Dispose();
+
+            InstrumentationHelper.DeleteHitsFile(hitsFilePath);
         }
 
         [Fact]
@@ -125,7 +143,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             // then dropped by UnloadModule the hit counting must be done
             // in a new thread for each test
 
-            ModuleTrackerTemplate.HitsArraySize = hitCounts.Length;
+            Assert.Equal(ModuleTrackerTemplate.HitsArraySize, hitCounts.Length);
 
             var thread = new Thread(() =>
             {

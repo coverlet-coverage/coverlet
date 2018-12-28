@@ -18,6 +18,7 @@ namespace Coverlet.Core.Instrumentation
     [ExcludeFromCodeCoverage]
     public static class ModuleTrackerTemplate
     {
+        public static string HitsFilePath;
         public static string HitsMemoryMapName;
         public static int HitsArraySize;
 
@@ -88,54 +89,62 @@ namespace Coverlet.Core.Instrumentation
                 if (!createdNew)
                     mutex.WaitOne();
 
+                MemoryMappedFile memoryMap = null;
+
                 try
                 {
-                    // Tally hit counts from all threads in memory mapped area
-                    using (var memoryMap = MemoryMappedFile.OpenExisting(HitsMemoryMapName))
+                    try
                     {
-                        var accessor = memoryMap.CreateViewAccessor();
-                        using (var buffer = accessor.SafeMemoryMappedViewHandle)
+                        memoryMap = MemoryMappedFile.OpenExisting(HitsMemoryMapName);
+                    }
+                    catch (PlatformNotSupportedException)
+                    {
+                        memoryMap = MemoryMappedFile.CreateFromFile(HitsFilePath, FileMode.Open, null, (HitsArraySize + Coverage.HitsResultHeaderSize) * sizeof(int));
+                    }
+
+                    // Tally hit counts from all threads in memory mapped area
+                    var accessor = memoryMap.CreateViewAccessor();
+                    using (var buffer = accessor.SafeMemoryMappedViewHandle)
+                    {
+                        unsafe
                         {
-                            unsafe
+                            byte* pointer = null;
+                            buffer.AcquirePointer(ref pointer);
+                            try
                             {
-                                byte* pointer = null;
-                                buffer.AcquirePointer(ref pointer);
-                                try
+                                var intPointer = (int*) pointer;
+
+                                // Signal back to coverage analysis that we've started transferring hit counts.
+                                // Use interlocked here to ensure a memory barrier before the Coverage class reads
+                                // the shared data.
+                                Interlocked.Increment(ref *(intPointer + Coverage.HitsResultUnloadStarted));
+
+                                for (var i = 0; i < HitsArraySize; i++)
                                 {
-                                    var intPointer = (int*) pointer;
+                                    var count = 0;
 
-                                    // Signal back to coverage analysis that we've started transferring hit counts.
-                                    // Use interlocked here to ensure a memory barrier before the Coverage class reads
-                                    // the shared data.
-                                    Interlocked.Increment(ref *(intPointer + Coverage.HitsResultUnloadStarted));
-
-                                    for (var i = 0; i < HitsArraySize; i++)
+                                    foreach (var threadHits in threads)
                                     {
-                                        var count = 0;
-
-                                        foreach (var threadHits in threads)
-                                        {
-                                            count += threadHits[i];
-                                        }
-
-                                        if (count > 0)
-                                        {
-                                            // There's a header of one int before the hit counts
-                                            var hitLocationArrayOffset = intPointer + i + Coverage.HitsResultHeaderSize;
-
-                                            // No need to use Interlocked here since the mutex ensures only one thread updates 
-                                            // the shared memory map.
-                                            *hitLocationArrayOffset += count;
-                                        }
+                                        count += threadHits[i];
                                     }
 
-                                    // Signal back to coverage analysis that all hit counts were successfully tallied.
-                                    Interlocked.Increment(ref *(intPointer + Coverage.HitsResultUnloadFinished));
+                                    if (count > 0)
+                                    {
+                                        // There's a header of one int before the hit counts
+                                        var hitLocationArrayOffset = intPointer + i + Coverage.HitsResultHeaderSize;
+
+                                        // No need to use Interlocked here since the mutex ensures only one thread updates 
+                                        // the shared memory map.
+                                        *hitLocationArrayOffset += count;
+                                    }
                                 }
-                                finally
-                                {
-                                    buffer.ReleasePointer();
-                                }
+
+                                // Signal back to coverage analysis that all hit counts were successfully tallied.
+                                Interlocked.Increment(ref *(intPointer + Coverage.HitsResultUnloadFinished));
+                            }
+                            finally
+                            {
+                                buffer.ReleasePointer();
                             }
                         }
                     }
@@ -143,6 +152,7 @@ namespace Coverlet.Core.Instrumentation
                 finally
                 {
                     mutex.ReleaseMutex();
+                    memoryMap?.Dispose();
                 }
             }
 
