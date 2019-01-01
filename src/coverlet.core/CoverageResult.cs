@@ -122,7 +122,8 @@ namespace Coverlet.Core
                         {
                             foreach (var branch in method.Value.Branches)
                             {
-                                if (IsAsyncStateMachineMethod(method.Key))
+                                //if one branch is covered we search the other one only if it's not covered
+                                if (IsAsyncStateMachineMethod(method.Key) && branch.Hits > 0)
                                 {
                                     foreach (var moveNextBranch in method.Value.Branches)
                                     {
