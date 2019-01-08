@@ -109,7 +109,7 @@ namespace Coverlet.Core.Instrumentation
 
         private void AddCustomModuleTrackerToModule(ModuleDefinition module)
         {
-            using (AssemblyDefinition coverletInstrumentationAssembly = AssemblyDefinition.ReadAssembly(typeof(Instrumenter).Assembly.Location))
+            using (AssemblyDefinition coverletInstrumentationAssembly = AssemblyDefinition.ReadAssembly(typeof(ModuleTrackerTemplate).Assembly.Location))
             {
                 TypeDefinition moduleTrackerTemplate = coverletInstrumentationAssembly.MainModule.GetType(
                     "Coverlet.Core.Instrumentation", nameof(ModuleTrackerTemplate));
