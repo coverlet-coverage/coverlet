@@ -12,33 +12,20 @@ namespace Coverlet.Core.Tests.Instrumentation
 {
     public class ModuleTrackerTemplateTestsFixture : IDisposable
     {
-        // Prevent parallel execution of tests using the ModuleTrackerTemplate static class
-        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
-
-        public ModuleTrackerTemplateTestsFixture()
-        {
-            _semaphore.Wait();
-        }
-
         public void Dispose()
         {
             AppDomain.CurrentDomain.ProcessExit -= ModuleTrackerTemplate.UnloadModule;
             AppDomain.CurrentDomain.DomainUnload -= ModuleTrackerTemplate.UnloadModule;
-            _semaphore.Release();
         }
     }
 
+    [Collection(nameof(ModuleTrackerTemplate))]
     public class ModuleTrackerTemplateTests : IClassFixture<ModuleTrackerTemplateTestsFixture>, IDisposable
     {
-        // Prevent parallel execution of these tests
-        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
-
         private readonly MemoryMappedFile _mmap;
 
         public ModuleTrackerTemplateTests()
         {
-            _semaphore.Wait();
-         
             ModuleTrackerTemplate.HitsArraySize = 4;
             ModuleTrackerTemplate.HitsMemoryMapName = Guid.NewGuid().ToString();
             ModuleTrackerTemplate.HitsFilePath = Path.Combine(Path.GetTempPath(), $"coverlet.test_{ModuleTrackerTemplate.HitsMemoryMapName}");
@@ -58,10 +45,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         public void Dispose()
         {
             var hitsFilePath = ModuleTrackerTemplate.HitsFilePath;
-            
-            _semaphore.Release();
             _mmap.Dispose();
-
             InstrumentationHelper.DeleteHitsFile(hitsFilePath);
         }
 
