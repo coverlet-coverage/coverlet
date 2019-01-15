@@ -16,10 +16,6 @@ namespace Coverlet.Core
 {
     public class Coverage
     {
-        public const int HitsResultHeaderSize = 2;
-        public const int HitsResultUnloadStarted = 0;
-        public const int HitsResultUnloadFinished = 1;
-
         private string _module;
         private string _identifier;
         private string[] _includeFilters;
@@ -89,7 +85,7 @@ namespace Coverlet.Core
 
             foreach (var result in _results)
             {
-                var size = (result.HitCandidates.Count + HitsResultHeaderSize) * sizeof(int);
+                var size = (result.HitCandidates.Count + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int);
 
                 MemoryMappedFile mmap;
 
@@ -228,8 +224,8 @@ namespace Coverlet.Core
                 {
                     var mmapAccessor = mmapFile.CreateViewAccessor();
 
-                    var unloadStarted = mmapAccessor.ReadInt32(HitsResultUnloadStarted * sizeof(int));
-                    var unloadFinished = mmapAccessor.ReadInt32(HitsResultUnloadFinished * sizeof(int));
+                    var unloadStarted = mmapAccessor.ReadInt32(ModuleTrackerTemplate.HitsResultUnloadStarted * sizeof(int));
+                    var unloadFinished = mmapAccessor.ReadInt32(ModuleTrackerTemplate.HitsResultUnloadFinished * sizeof(int));
 
                     if (unloadFinished < unloadStarted)
                     {
@@ -242,7 +238,7 @@ namespace Coverlet.Core
                     {
                         var hitLocation = result.HitCandidates[i];
                         var document = documentsList[hitLocation.docIndex];
-                        var hits = mmapAccessor.ReadInt32((i + HitsResultHeaderSize) * sizeof(int));
+                        var hits = mmapAccessor.ReadInt32((i + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int));
 
                         if (hitLocation.isBranch)
                         {

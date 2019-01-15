@@ -36,7 +36,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             ModuleTrackerTemplate.HitsMemoryMapName = Guid.NewGuid().ToString();
             ModuleTrackerTemplate.HitsFilePath = Path.Combine(Path.GetTempPath(), $"coverlet.test_{ModuleTrackerTemplate.HitsMemoryMapName}");
 
-            var size = (ModuleTrackerTemplate.HitsArraySize + Coverage.HitsResultHeaderSize) * sizeof(int);
+            var size = (ModuleTrackerTemplate.HitsArraySize + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int);
 
             try
             {
@@ -154,8 +154,8 @@ namespace Coverlet.Core.Tests.Instrumentation
         {
             var mmapAccessor = _mmap.CreateViewAccessor();
 
-            var unloadStarted = mmapAccessor.ReadInt32(Coverage.HitsResultUnloadStarted * sizeof(int));
-            var unloadFinished = mmapAccessor.ReadInt32(Coverage.HitsResultUnloadFinished * sizeof(int));
+            var unloadStarted = mmapAccessor.ReadInt32(ModuleTrackerTemplate.HitsResultUnloadStarted * sizeof(int));
+            var unloadFinished = mmapAccessor.ReadInt32(ModuleTrackerTemplate.HitsResultUnloadFinished * sizeof(int));
 
             Assert.Equal(expectedUnloads, unloadStarted);
             Assert.Equal(expectedUnloads, unloadFinished);
@@ -164,7 +164,7 @@ namespace Coverlet.Core.Tests.Instrumentation
 
             for (int i = 0; i < ModuleTrackerTemplate.HitsArraySize; ++i)
             {
-                hits.Add(mmapAccessor.ReadInt32((i + Coverage.HitsResultHeaderSize) * sizeof(int)));
+                hits.Add(mmapAccessor.ReadInt32((i + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int)));
             }
 
             return hits.ToArray();
