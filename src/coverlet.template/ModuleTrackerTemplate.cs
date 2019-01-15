@@ -22,12 +22,18 @@ namespace Coverlet.Core.Instrumentation
 
         static ModuleTrackerTemplate()
         {
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(UnloadModule);
-            AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
-
             // At the end of the instrumentation of a module, the instrumenter needs to add code here
             // to initialize the static fields according to the values derived from the instrumentation of
             // the module.
+        }
+
+        // A call to this method will be injected in the static constructor above for most cases. However, if the
+        // current assembly is System.Private.CoreLib (or more specifically, defines System.AppDomain), a call directly
+        // to UnloadModule will be injected in System.AppContext.OnProcessExit.
+        public static void RegisterUnloadEvents()
+        {
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(UnloadModule);
+            AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
         }
 
         public static void RecordHit(int hitLocationIndex)
