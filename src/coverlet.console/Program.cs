@@ -56,8 +56,10 @@ namespace Coverlet.Console
                 process.StartInfo.Arguments = targs.HasValue() ? targs.Value() : string.Empty;
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
                 process.Start();
                 logger.LogInformation(process.StandardOutput.ReadToEnd());
+                logger.LogError(process.StandardError.ReadToEnd());
                 process.WaitForExit();
 
                 var dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
