@@ -13,7 +13,7 @@ using Coverlet.Core.Tests.Instrumentation;
 namespace Coverlet.Core.Tests
 {
     [Collection(nameof(ModuleTrackerTemplate))]
-    public class CoverageTests : IClassFixture<ModuleTrackerTemplateTestsFixture>
+    public class CoverageTests
     {
         [Fact]
         public void TestCoverage()

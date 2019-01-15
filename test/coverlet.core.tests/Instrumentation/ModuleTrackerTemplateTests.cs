@@ -19,8 +19,14 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
     }
 
+    [CollectionDefinition(nameof(ModuleTrackerTemplate))]
+    public class ModuleTrackerTemplateCollection : ICollectionFixture<ModuleTrackerTemplateTestsFixture>
+    {
+
+    }
+
     [Collection(nameof(ModuleTrackerTemplate))]
-    public class ModuleTrackerTemplateTests : IClassFixture<ModuleTrackerTemplateTestsFixture>, IDisposable
+    public class ModuleTrackerTemplateTests : IDisposable
     {
         private readonly MemoryMappedFile _mmap;
 
