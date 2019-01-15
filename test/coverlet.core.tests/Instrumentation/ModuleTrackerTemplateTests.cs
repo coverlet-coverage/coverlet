@@ -32,11 +32,11 @@ namespace Coverlet.Core.Tests.Instrumentation
 
         public ModuleTrackerTemplateTests()
         {
-            ModuleTrackerTemplate.HitsArraySize = 4;
+            ModuleTrackerTemplate.HitsArray = new int[4 + ModuleTrackerTemplate.HitsResultHeaderSize];
             ModuleTrackerTemplate.HitsMemoryMapName = Guid.NewGuid().ToString();
             ModuleTrackerTemplate.HitsFilePath = Path.Combine(Path.GetTempPath(), $"coverlet.test_{ModuleTrackerTemplate.HitsMemoryMapName}");
 
-            var size = (ModuleTrackerTemplate.HitsArraySize + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int);
+            var size = (ModuleTrackerTemplate.HitsArray.Length + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int);
 
             try
             {
@@ -68,8 +68,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         [Fact]
         public void HitsOnMultipleThreadsCorrectlyCounted()
         {
-            ModuleTrackerTemplate.HitsArraySize = 4;
-            for (int i = 0; i < ModuleTrackerTemplate.HitsArraySize; ++i)
+            for (int i = 0; i < 4; ++i)
             {
                 var t = new Thread(HitIndex);
                 t.Start(i);
@@ -133,7 +132,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             // then dropped by UnloadModule the hit counting must be done
             // in a new thread for each test
 
-            Assert.Equal(ModuleTrackerTemplate.HitsArraySize, hitCounts.Length);
+            Assert.Equal(ModuleTrackerTemplate.HitsArray.Length, hitCounts.Length + ModuleTrackerTemplate.HitsResultHeaderSize);
 
             var thread = new Thread(() =>
             {
@@ -162,9 +161,9 @@ namespace Coverlet.Core.Tests.Instrumentation
 
             var hits = new List<int>();
 
-            for (int i = 0; i < ModuleTrackerTemplate.HitsArraySize; ++i)
+            for (int i = ModuleTrackerTemplate.HitsResultHeaderSize; i < ModuleTrackerTemplate.HitsArray.Length; ++i)
             {
-                hits.Add(mmapAccessor.ReadInt32((i + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int)));
+                hits.Add(mmapAccessor.ReadInt32(i * sizeof(int)));
             }
 
             return hits.ToArray();

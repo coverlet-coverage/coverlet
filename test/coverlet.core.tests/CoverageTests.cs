@@ -36,7 +36,7 @@ namespace Coverlet.Core.Tests
 
             // The module hit tracker must signal to Coverage that it has done its job, so call it manually
             var instrumenterResult = coverage.Results.Single();
-            ModuleTrackerTemplate.HitsArraySize = instrumenterResult.HitCandidates.Count;
+            ModuleTrackerTemplate.HitsArray = new int[instrumenterResult.HitCandidates.Count + ModuleTrackerTemplate.HitsResultHeaderSize];
             ModuleTrackerTemplate.HitsFilePath = instrumenterResult.HitsFilePath;
             ModuleTrackerTemplate.HitsMemoryMapName = instrumenterResult.HitsResultGuid;
             ModuleTrackerTemplate.UnloadModule(null, null);

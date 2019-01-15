@@ -24,26 +24,19 @@ namespace Coverlet.Core.Instrumentation
 
         public static string HitsFilePath;
         public static string HitsMemoryMapName;
-        public static int HitsArraySize;
+        public static int[] HitsArray;
 
-        // Special case when instrumenting CoreLib, the thread static below prevents infinite loop in CoreLib
+        // Special case when instrumenting CoreLib, the static below prevents infinite loop in CoreLib
         // while allowing the tracker template to call any of its types and functions.
-        [ThreadStatic]
-        private static bool t_isTracking;
-
-        [ThreadStatic]
-        private static int[] t_threadHits;
-
-        private static readonly List<int[]> _threads;
+        private static bool s_isTracking;
 
         static ModuleTrackerTemplate()
         {
-            t_isTracking = true;
-            _threads = new List<int[]>(2 * Environment.ProcessorCount);
-
+            s_isTracking = true;
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(UnloadModule);
             AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
-            t_isTracking = false;
+            s_isTracking = false;
+
             // At the end of the instrumentation of a module, the instrumenter needs to add code here
             // to initialize the static fields according to the values derived from the instrumentation of
             // the module.
@@ -51,40 +44,15 @@ namespace Coverlet.Core.Instrumentation
 
         public static void RecordHit(int hitLocationIndex)
         {
-            if (t_isTracking)
+            if (s_isTracking)
                 return;
 
-            if (t_threadHits == null)
-            {
-                t_isTracking = true;
-
-                lock (_threads)
-                {
-                    if (t_threadHits == null)
-                    {
-                        t_threadHits = new int[HitsArraySize];
-                        _threads.Add(t_threadHits);
-                    }
-                }
-
-                t_isTracking = false;
-            }
-
-            ++t_threadHits[hitLocationIndex];
+            Interlocked.Increment(ref HitsArray[hitLocationIndex]);
         }
 
         public static void UnloadModule(object sender, EventArgs e)
         {
-            t_isTracking = true;
-
-            int[][] threads;
-            lock (_threads)
-            {
-                threads = _threads.ToArray();
-
-                // Don't double-count if UnloadModule is called more than once
-                _threads.Clear();
-            }
+            s_isTracking = true;
 
             // The same module can be unloaded multiple times in the same process via different app domains.
             // Use a global mutex to ensure no concurrent access.
@@ -103,7 +71,7 @@ namespace Coverlet.Core.Instrumentation
                     }
                     catch (PlatformNotSupportedException)
                     {
-                        memoryMap = MemoryMappedFile.CreateFromFile(HitsFilePath, FileMode.Open, null, (HitsArraySize + HitsResultHeaderSize) * sizeof(int));
+                        memoryMap = MemoryMappedFile.CreateFromFile(HitsFilePath, FileMode.Open, null, (HitsArray.Length + HitsResultHeaderSize) * sizeof(int));
                     }
 
                     // Tally hit counts from all threads in memory mapped area
@@ -123,18 +91,12 @@ namespace Coverlet.Core.Instrumentation
                                 // the shared data.
                                 Interlocked.Increment(ref *(intPointer + HitsResultUnloadStarted));
 
-                                for (var i = 0; i < HitsArraySize; i++)
+                                for (var i = 0; i < HitsArray.Length; i++)
                                 {
-                                    var count = 0;
-
-                                    foreach (var threadHits in threads)
-                                    {
-                                        count += threadHits[i];
-                                    }
+                                    var count = HitsArray[i];
 
                                     if (count > 0)
                                     {
-                                        // There's a header of one int before the hit counts
                                         var hitLocationArrayOffset = intPointer + i + HitsResultHeaderSize;
 
                                         // No need to use Interlocked here since the mutex ensures only one thread updates 
@@ -155,12 +117,15 @@ namespace Coverlet.Core.Instrumentation
                 }
                 finally
                 {
+                    // Avoid double counting if unloaded multiple times (if that can happen?)
+                    HitsArray = new int[HitsArray.Length];
+                    
                     mutex.ReleaseMutex();
                     memoryMap?.Dispose();
                 }
             }
 
-            t_isTracking = false;
+            s_isTracking = false;
         }
     }
 }
