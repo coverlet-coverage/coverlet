@@ -63,7 +63,6 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.False(File.Exists(tempFile));
         }
 
-
         public static IEnumerable<object[]> GetExcludedFilesReturnsEmptyArgs =>
         new[]
         {
