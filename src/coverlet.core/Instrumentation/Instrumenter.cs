@@ -29,6 +29,7 @@ namespace Coverlet.Core.Instrumentation
         private FieldDefinition _customTrackerHitsMemoryMapName;
         private ILProcessor _customTrackerClassConstructorIl;
         private TypeDefinition _customTrackerTypeDef;
+        private MethodReference _customTrackerRegisterUnloadEventsMethod;
         private MethodReference _customTrackerRecordHitMethod;
 
         public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes)
@@ -77,6 +78,7 @@ namespace Coverlet.Core.Instrumentation
 
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
+                    var containsAppContext = module.GetType(nameof(System), nameof(AppContext)) != null;
                     var types = module.GetTypes();
                     AddCustomModuleTrackerToModule(module);
 
@@ -96,15 +98,50 @@ namespace Coverlet.Core.Instrumentation
                     }
 
                     // Fixup the custom tracker class constructor, according to all instrumented types
-                    Instruction firstInstr = _customTrackerClassConstructorIl.Body.Instructions.First();
-                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Nop));
-                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
-                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
-                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count));
-                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Newarr, module.TypeSystem.Int32));
-                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
-                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsResultGuid));
-                    _customTrackerClassConstructorIl.InsertBefore(firstInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsMemoryMapName));
+                    if (_customTrackerRegisterUnloadEventsMethod == null)
+                    {
+                        _customTrackerRegisterUnloadEventsMethod = new MethodReference(
+                            nameof(ModuleTrackerTemplate.RegisterUnloadEvents), module.TypeSystem.Void, _customTrackerTypeDef);
+                    }
+
+                    Instruction lastInstr = _customTrackerClassConstructorIl.Body.Instructions.Last();
+
+                    if (!containsAppContext)
+                    {
+                        // For "normal" cases, where the instrumented assembly is not the core library, we add a call to
+                        // RegisterUnloadEvents to the static constructor of the generated custom tracker. Due to static
+                        // initialization constraints, the core library is handled separately below.
+                        _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Call, _customTrackerRegisterUnloadEventsMethod));
+                    }
+
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Newarr, module.TypeSystem.Int32));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsResultGuid));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsMemoryMapName));
+
+                    if (containsAppContext)
+                    {
+                        // Handle the core library by instrumenting System.AppContext.OnProcessExit to directly call
+                        // the UnloadModule method of the custom tracker type. This avoids loops between the static
+                        // initialization of the custom tracker and the static initialization of the hosting AppDomain
+                        // (which for the core library case will be instrumented code).
+                        var eventArgsType = new TypeReference(nameof(System), nameof(EventArgs), module, module.TypeSystem.CoreLibrary);
+                        var customTrackerUnloadModule = new MethodReference(nameof(ModuleTrackerTemplate.UnloadModule), module.TypeSystem.Void, _customTrackerTypeDef);
+                        customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(module.TypeSystem.Object));
+                        customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(eventArgsType));
+
+                        var appContextType = new TypeReference(nameof(System), nameof(AppContext), module, module.TypeSystem.CoreLibrary);
+                        var onProcessExitMethod = new MethodReference("OnProcessExit", module.TypeSystem.Void, appContextType).Resolve();
+                        var onProcessExitIl = onProcessExitMethod.Body.GetILProcessor();
+
+                        lastInstr = onProcessExitIl.Body.Instructions.Last();
+                        onProcessExitIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldnull));
+                        onProcessExitIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldnull));
+                        onProcessExitIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Call, customTrackerUnloadModule));
+                    }
 
                     module.Write(stream);
                 }
@@ -141,12 +178,9 @@ namespace Coverlet.Core.Instrumentation
                 {
                     MethodDefinition methodOnCustomType = new MethodDefinition(methodDef.Name, methodDef.Attributes, methodDef.ReturnType);
 
-                    if (methodDef.Name == nameof(ModuleTrackerTemplate.RecordHit))
+                    foreach (var parameter in methodDef.Parameters)
                     {
-                        foreach (var parameter in methodDef.Parameters)
-                        {
-                            methodOnCustomType.Parameters.Add(new ParameterDefinition(module.ImportReference(parameter.ParameterType)));
-                        }
+                        methodOnCustomType.Parameters.Add(new ParameterDefinition(module.ImportReference(parameter.ParameterType)));
                     }
 
                     foreach (var variable in methodDef.Body.Variables)
@@ -172,8 +206,11 @@ namespace Coverlet.Core.Instrumentation
                             else
                             {
                                 // Move to the custom type
-                                instr.Operand = new MethodReference(
-                                    methodReference.Name, methodReference.ReturnType, _customTrackerTypeDef);
+                                var updatedMethodReference = new MethodReference(methodReference.Name, methodReference.ReturnType, _customTrackerTypeDef);
+                                foreach (var parameter in methodReference.Parameters)
+                                    updatedMethodReference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, module.ImportReference(parameter.ParameterType)));
+
+                                instr.Operand = updatedMethodReference;
                             }
                         }
                         else if (instr.Operand is FieldReference fieldReference)
@@ -204,6 +241,7 @@ namespace Coverlet.Core.Instrumentation
                 module.Types.Add(_customTrackerTypeDef);
             }
 
+            Debug.Assert(_customTrackerHitsArray != null);
             Debug.Assert(_customTrackerClassConstructorIl != null);
         }
 
