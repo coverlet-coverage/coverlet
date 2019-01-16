@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFrameworks>netcoreapp2.0;net472</TargetFrameworks>
     <AssemblyVersion>4.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.1" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.6.0" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
   </ItemGroup>
 
