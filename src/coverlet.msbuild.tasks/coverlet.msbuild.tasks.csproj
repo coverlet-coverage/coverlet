@@ -29,12 +29,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ConsoleTables" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" />
+    <PackageReference Include="ConsoleTables" Version="2.1.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
