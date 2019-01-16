@@ -1,7 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <NuspecFile>$(MSBuildThisFileDirectory)coverlet.msbuild.nuspec</NuspecFile>
     <Configuration Condition="$(Configuration) == ''">Debug</Configuration>
     <OutputPath>$(MSBuildThisFileDirectory)build\$(Configuration)</OutputPath>
   </PropertyGroup>
@@ -13,7 +12,7 @@
   </Target>
 
   <Target Name="PublishMSBuildTaskProject" AfterTargets="BuildAllProjects">
-    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o &quot;$(OutputPath)&quot;" />
+    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o &quot;$(OutputPath)\netcoreapp2.0&quot;" />
   </Target>
 
   <Target Name="CopyMSBuildScripts" AfterTargets="PublishMSBuildTaskProject">
@@ -29,7 +28,6 @@
   </Target>
 
   <Target Name="CreateNuGetPackage" AfterTargets="RunTests" Condition="$(Configuration) == 'Release'">
-    <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o $(OutputPath) /p:NuspecFile=$(NuspecFile)" />
     <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.console\coverlet.console.csproj&quot; -c $(Configuration) -o $(OutputPath)" />
   </Target>
 
