@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -7,12 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ConsoleTables" Version="2.1.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\coverlet.console\ConsoleTables\ConsoleTable.cs" Link="ConsoleTables\ConsoleTable.cs" />
   </ItemGroup>
 
 </Project>
