@@ -5,6 +5,7 @@ image:
 configuration:
   - Debug
   - Release
+skip_tags: true
 build_script:
   - ps: echo "Building for $env:CONFIGURATION on $env:APPVEYOR_BUILD_WORKER_IMAGE"
   - ps: dotnet msbuild build.proj /p:Configuration=$env:CONFIGURATION
