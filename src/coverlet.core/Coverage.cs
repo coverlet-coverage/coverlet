@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
 
 using Coverlet.Core.Enums;
@@ -26,10 +27,14 @@ namespace Coverlet.Core
         private bool _useSourceLink;
         private List<InstrumenterResult> _results;
 
+        private readonly Dictionary<string, MemoryMappedFile> _resultMemoryMaps = new Dictionary<string, MemoryMappedFile>();
+
         public string Identifier
         {
             get { return _identifier; }
         }
+
+        internal IEnumerable<InstrumenterResult> Results => _results;
 
         public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, string mergeWith, bool useSourceLink)
         {
@@ -76,6 +81,26 @@ namespace Coverlet.Core
                         InstrumentationHelper.RestoreOriginalModule(module, _identifier);
                     }
                 }
+            }
+
+            foreach (var result in _results)
+            {
+                var size = (result.HitCandidates.Count + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int);
+
+                MemoryMappedFile mmap;
+
+                try
+                {
+                    // Try using a named memory map not backed by a file (currently only supported on Windows)
+                    mmap = MemoryMappedFile.CreateNew(result.HitsResultGuid, size);
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    // Fall back on a file-backed memory map
+                    mmap = MemoryMappedFile.CreateFromFile(result.HitsFilePath, FileMode.CreateNew, null, size);
+                }
+
+                _resultMemoryMaps.Add(result.HitsResultGuid, mmap);
             }
         }
 
@@ -183,12 +208,6 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                if (!File.Exists(result.HitsFilePath))
-                {
-                    // File not instrumented, or nothing in it called.  Warn about this?
-                    continue;
-                }
-
                 List<Document> documents = result.Documents.Values.ToList();
                 if (_useSourceLink && result.SourceLink != null)
                 {
@@ -200,20 +219,26 @@ namespace Coverlet.Core
                     }
                 }
 
-                using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
-                using (var br = new BinaryReader(fs))
+                // Read hit counts from the memory mapped area, disposing it when done
+                using (var mmapFile = _resultMemoryMaps[result.HitsResultGuid])
                 {
-                    int hitCandidatesCount = br.ReadInt32();
+                    var mmapAccessor = mmapFile.CreateViewAccessor();
 
-                    // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
+                    var unloadStarted = mmapAccessor.ReadInt32(ModuleTrackerTemplate.HitsResultUnloadStarted * sizeof(int));
+                    var unloadFinished = mmapAccessor.ReadInt32(ModuleTrackerTemplate.HitsResultUnloadFinished * sizeof(int));
+
+                    if (unloadFinished < unloadStarted)
+                    {
+                        throw new Exception($"Hit counts only partially reported for {result.Module}");
+                    }
 
                     var documentsList = result.Documents.Values.ToList();
 
-                    for (int i = 0; i < hitCandidatesCount; ++i)
+                    for (int i = 0; i < result.HitCandidates.Count; ++i)
                     {
                         var hitLocation = result.HitCandidates[i];
                         var document = documentsList[hitLocation.docIndex];
-                        int hits = br.ReadInt32();
+                        var hits = mmapAccessor.ReadInt32((i + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int));
 
                         if (hitLocation.isBranch)
                         {
@@ -256,6 +281,7 @@ namespace Coverlet.Core
                     }
                 }
 
+                // There's only a hits file on Linux, but if the file doesn't exist this is just a no-op
                 InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
             }
         }
