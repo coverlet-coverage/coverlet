@@ -440,7 +440,7 @@ There is a simple performance test for the hit counting instrumentation in the t
 
 The duration of the test can be tweaked by changing the number of iterations in the `[InlineData]` in the `PerformanceTest` class.
 
-For more realistic testing it is recommended to try out any changes to the hit counting code paths on large, realistic projects.  If you don't have any handy https://github.com/dotnet/corefx is an excellent candidate.  [This page](https://github.com/dotnet/corefx/blob/master/Documentation/building/code-coverage.md) describes how to run code coverage tests for both the full solution and for individual projects with coverlet from nuget.  Suitable projects (listed in order of escalating test durations):
+For more realistic testing it is recommended to try out any changes to the hit counting code paths on large, realistic projects.  If you don't have any handy https://github.com/dotnet/corefx is an excellent candidate.  [This page](https://github.com/dotnet/corefx/blob/master/Documentation/building/code-coverage.md) describes how to run code coverage tests for both the full solution and for individual projects with coverlet from nuget. Suitable projects (listed in order of escalating test durations):
 
 * System.Collections.Concurrent.Tests
 * System.Collections.Tests
@@ -451,22 +451,10 @@ For more realistic testing it is recommended to try out any changes to the hit c
 Change to the directory of the library and run the msbuild code coverage command:
 
     dotnet msbuild /t:BuildAndTest /p:Coverage=true
-
-Look for a line like this:
-
-    ----- start 18:13:36,59 ===============  To repro directly: =====================================================
-
-It is followed by a `pushd` command into the artefact directory, and a command to run coverlet.  Run these to get to see the coverlet output and especially the test duration. E.g.:
-
-    C:\...\corefx\artifacts\tools\coverlet "System.Collections.Concurrent.Tests.dll" --target ...
-
+    
 To run with a development version of coverlet call `dotnet run` instead of the installed coverlet version, e.g.:
 
-    dotnet run -p C:\...\coverlet\src\coverlet.console\coverlet.console.csproj -c Release -- "System.Collections.Concurrent.Tests.dll" --target ...
-
-
-
-
+    dotnet msbuild /t:BuildAndTest /p:Coverage=true /p:CoverageExecutablePath="dotnet run -p C:\...\coverlet\src\coverlet.console\coverlet.console.csproj"
 
 ## Code of Conduct
 
