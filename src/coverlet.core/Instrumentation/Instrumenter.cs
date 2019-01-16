@@ -70,7 +70,8 @@ namespace Coverlet.Core.Instrumentation
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
-                if (Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib")
+                bool isCoreLib = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
+                if (isCoreLib)
                 {
                     parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
                 }
@@ -91,6 +92,8 @@ namespace Coverlet.Core.Instrumentation
                     {
                         var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
+                            // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
+                            && (!isCoreLib || actualType.FullName != "System.Threading.Interlocked")
                             && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
                             && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
