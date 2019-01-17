@@ -17,6 +17,8 @@
     <Description>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</Description>
     <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <!-- Items in the Content group are placed in this folder in the NuGet package. -->
     <ContentTargetFolders>build</ContentTargetFolders>
 
     <!-- Build tasks should not be added to the lib folder. -->
@@ -38,13 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\coverlet.msbuild\coverlet.msbuild.props">
-      <Link>build\coverlet.msbuild.props</Link>
-      <Pack>true</Pack>
-    </None>
-    <Content Include="..\coverlet.msbuild\coverlet.msbuild.targets">
-      <Link>build\coverlet.msbuild.targets</Link>
-    </Content>
+    <Content Include="coverlet.msbuild.props" />
+    <Content Include="coverlet.msbuild.targets" />
   </ItemGroup>
 
   <Target Name="PackBuildOutputs" DependsOnTargets="ResolveProjectReferences;SatelliteDllsProjectOutputGroup;DebugSymbolsProjectOutputGroup;SatelliteDllsProjectOutputGroupDependencies;ResolveAssemblyReferences">
