@@ -394,12 +394,6 @@ Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debu
 ### Cake Addin
 If you're using [Cake Build](https://cakebuild.net) for your build script you can use the [Cake.Coverlet](https://github.com/Romanx/Cake.Coverlet) addin to provide you extensions to dotnet test for passing coverlet arguments in a strongly typed manner.
 
-## Roadmap
-
-* Merging outputs (multiple test projects, one coverage result)
-* Support for more output formats (e.g. JaCoCo)
-* Console runner (removes the need for requiring a NuGet package)
-
 ## Issues & Contributions
 
 If you find a bug or have a feature request, please report them at this repository's issues section. See the [CONTRIBUTING GUIDE](CONTRIBUTING.md) for details on building and contributing to this project.
