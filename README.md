@@ -1,8 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/6rdf00wufospr4r8/branch/master?svg=true)](https://ci.appveyor.com/project/tonerdo/coverlet) [![codecov](https://codecov.io/gh/tonerdo/coverlet/branch/master/graph/badge.svg)](https://codecov.io/gh/tonerdo/coverlet) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![NuGet](https://img.shields.io/nuget/v/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild)
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet@0.5x.png" />
-</p>
+# coverlet [![Build status](https://ci.appveyor.com/api/projects/status/6rdf00wufospr4r8/branch/master?svg=true)](https://ci.appveyor.com/project/tonerdo/coverlet) [![codecov](https://codecov.io/gh/tonerdo/coverlet/branch/master/graph/badge.svg)](https://codecov.io/gh/tonerdo/coverlet) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![NuGet](https://img.shields.io/nuget/v/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild)
 
 Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.
 
