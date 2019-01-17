@@ -31,6 +31,7 @@ namespace Coverlet.Core.Instrumentation
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
         private MethodReference _customTrackerRecordHitMethod;
+        private List<string> _asyncMachineStateMethod;
 
         public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes)
         {
@@ -60,6 +61,8 @@ namespace Coverlet.Core.Instrumentation
             };
 
             InstrumentModule();
+
+            _result.AsyncMachineStateMethod = _asyncMachineStateMethod == null ? Array.Empty<string>() : _asyncMachineStateMethod.ToArray();
 
             return _result;
         }
@@ -372,6 +375,7 @@ namespace Coverlet.Core.Instrumentation
 
             var key = (branchPoint.StartLine, (int)branchPoint.Ordinal);
             if (!document.Branches.ContainsKey(key))
+            { 
                 document.Branches.Add(key,
                     new Branch
                     {
@@ -385,10 +389,41 @@ namespace Coverlet.Core.Instrumentation
                     }
                 );
 
+                if (IsAsyncStateMachineBranch(method.DeclaringType, method))
+                {
+                    if (_asyncMachineStateMethod == null)
+                    {
+                        _asyncMachineStateMethod = new List<string>();
+                    }
+
+                    if (!_asyncMachineStateMethod.Contains(method.FullName))
+                    {
+                        _asyncMachineStateMethod.Add(method.FullName);
+                    }
+                }
+            }
+
             var entry = (true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal);
             _result.HitCandidates.Add(entry);
 
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
+        }
+
+        private bool IsAsyncStateMachineBranch(TypeDefinition typeDef, MethodDefinition method)
+        {
+            if (!method.FullName.EndsWith("::MoveNext()"))
+            {
+                return false;
+            }
+
+            foreach (InterfaceImplementation implementedInterface in typeDef.Interfaces)
+            {
+                if (implementedInterface.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine")
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private Instruction AddInstrumentationInstructions(MethodDefinition method, ILProcessor processor, Instruction instruction, int hitEntryIndex)

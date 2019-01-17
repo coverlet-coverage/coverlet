@@ -3,15 +3,15 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFrameworks>netcoreapp2.0;net472</TargetFrameworks>
-    <AssemblyVersion>2.4.0</AssemblyVersion>
+    <AssemblyVersion>2.4.1</AssemblyVersion>
 
     <PackageId>coverlet.msbuild</PackageId>
-    <PackageVersion>2.5.0</PackageVersion>
+    <PackageVersion>2.5.1</PackageVersion>
     <Title>coverlet.msbuild</Title>
     <Authors>tonerdo</Authors>
     <PackageLicenseUrl>https://github.com/tonerdo/coverlet/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>http://github.com/tonerdo/coverlet</PackageProjectUrl>
-    <PackageIconUrl>https://nuget.org/Content/gallery/img/default-package-icon.svg</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <DevelopmentDependency>true</DevelopmentDependency>
     <Description>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</Description>

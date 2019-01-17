@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFrameworks>netcoreapp2.0;net472</TargetFrameworks>
-    <AssemblyVersion>4.1.0</AssemblyVersion>
+    <AssemblyVersion>4.1.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
