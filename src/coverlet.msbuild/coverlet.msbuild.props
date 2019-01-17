@@ -6,6 +6,7 @@
     <Exclude Condition="$(Exclude) == ''"></Exclude>
     <ExcludeByFile Condition="$(ExcludeByFile) == ''"></ExcludeByFile>
     <ExcludeByAttribute Condition="$(ExcludeByAttribute) == ''"></ExcludeByAttribute>
+    <CoverletSingleHit Condition="'$(CoverletSingleHit)' == ''">false</CoverletSingleHit>
     <MergeWith Condition="$(MergeWith) == ''"></MergeWith>
     <UseSourceLink Condition="$(UseSourceLink) == ''">false</UseSourceLink>
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
