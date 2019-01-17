@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.MemoryMappedFiles;
@@ -42,13 +41,18 @@ namespace Coverlet.Core.Instrumentation
             AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
         }
 
-        public static void RecordHit(int hitLocationIndex)
+        public static void RecordHitInCoreLibrary(int hitLocationIndex)
         {
             // Make sure to avoid recording if this is a call to RecordHit within the AppDomain setup code in an
             // instrumented build of System.Private.CoreLib.
             if (HitsArray is null)
                 return;
 
+            Interlocked.Increment(ref HitsArray[hitLocationIndex]);
+        }
+
+        public static void RecordHit(int hitLocationIndex)
+        {
             Interlocked.Increment(ref HitsArray[hitLocationIndex]);
         }
 

@@ -43,6 +43,14 @@ namespace Coverlet.Core.Instrumentation
             _excludedAttributes = excludedAttributes;
         }
 
+        private bool IsCoreLibrary
+        {
+            get
+            {
+                return Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
+            }
+        }
+
         public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
 
         public InstrumenterResult Instrument()
@@ -74,8 +82,7 @@ namespace Coverlet.Core.Instrumentation
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
-                bool isCoreLib = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
-                if (isCoreLib)
+                if (IsCoreLibrary)
                 {
                     parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
                 }
@@ -97,7 +104,7 @@ namespace Coverlet.Core.Instrumentation
                         var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
                             // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
-                            && (!isCoreLib || actualType.FullName != "System.Threading.Interlocked")
+                            && (!IsCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
                             && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
                             && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
@@ -430,9 +437,12 @@ namespace Coverlet.Core.Instrumentation
         {
             if (_customTrackerRecordHitMethod == null)
             {
+                var recordHitMethodName = IsCoreLibrary
+                    ? nameof(ModuleTrackerTemplate.RecordHitInCoreLibrary)
+                    : nameof(ModuleTrackerTemplate.RecordHit);
                 _customTrackerRecordHitMethod = new MethodReference(
-                    "RecordHit", method.Module.TypeSystem.Void, _customTrackerTypeDef);
-                _customTrackerRecordHitMethod.Parameters.Add(new ParameterDefinition(method.Module.TypeSystem.Int32));
+                    recordHitMethodName, method.Module.TypeSystem.Void, _customTrackerTypeDef);
+                _customTrackerRecordHitMethod.Parameters.Add(new ParameterDefinition("hitLocationIndex", ParameterAttributes.None, method.Module.TypeSystem.Int32));
             }
 
             var indxInstr = Instruction.Create(OpCodes.Ldc_I4, hitEntryIndex);
