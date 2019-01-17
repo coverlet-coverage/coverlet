@@ -8,7 +8,7 @@
     <owners>tonerdo</owners>
     <licenseUrl>https://github.com/tonerdo/coverlet/blob/master/LICENSE</licenseUrl>
     <projectUrl>http://github.com/tonerdo/coverlet</projectUrl>
-    <iconUrl>https://nuget.org/Content/gallery/img/default-package-icon.svg</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>true</developmentDependency>
     <description>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</description>
