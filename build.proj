@@ -3,6 +3,8 @@
   <PropertyGroup>
     <Configuration Condition="$(Configuration) == ''">Debug</Configuration>
     <OutputPath>$(MSBuildThisFileDirectory)build\$(Configuration)</OutputPath>
+
+    <!-- AppVeyor workaround for https://github.com/dotnet/sdk/issues/335 -->
     <TargetFrameworkOverride Condition="'$(APPVEYOR_BUILD_WORKER_IMAGE)' == 'Ubuntu'">-f netcoreapp2.0</TargetFrameworkOverride>
   </PropertyGroup>
 
