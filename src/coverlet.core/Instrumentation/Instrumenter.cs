@@ -41,15 +41,11 @@ namespace Coverlet.Core.Instrumentation
             _includeFilters = includeFilters;
             _excludedFiles = excludedFiles ?? Array.Empty<string>();
             _excludedAttributes = excludedAttributes;
+
+            IsCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
         }
 
-        private bool IsCoreLibrary
-        {
-            get
-            {
-                return Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
-            }
-        }
+        private bool IsCoreLibrary { get; }
 
         public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
 
