@@ -7,82 +7,40 @@ namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : Task
     {
-        private static Coverage _coverage;
-        private string _path;
-        private string _include;
-        private string _includeDirectory;
-        private string _exclude;
-        private string _excludeByFile;
-        private string _excludeByAttribute;
-        private string _mergeWith;
-        private bool _useSourceLink;
-
-        internal static Coverage Coverage
-        {
-            get { return _coverage; }
-        }
+        internal static Coverage Coverage { get; private set; }
 
         [Required]
-        public string Path
-        {
-            get { return _path; }
-            set { _path = value; }
-        }
+        public string Path { get; set; }
 
-        public string Include
-        {
-            get { return _include; }
-            set { _include = value; }
-        }
+        public string Include { get; set; }
 
-        public string IncludeDirectory
-        {
-            get { return _includeDirectory; }
-            set { _includeDirectory = value; }
-        }
+        public string IncludeDirectory { get; set; }
 
-        public string Exclude
-        {
-            get { return _exclude; }
-            set { _exclude = value; }
-        }
+        public string Exclude { get; set; }
 
-        public string ExcludeByFile
-        {
-            get { return _excludeByFile; }
-            set { _excludeByFile = value; }
-        }
+        public string ExcludeByFile { get; set; }
 
-        public string ExcludeByAttribute
-        {
-            get { return _excludeByAttribute; }
-            set { _excludeByAttribute = value; }
-        }
+        public string ExcludeByAttribute { get; set; }
 
-        public string MergeWith
-        {
-            get { return _mergeWith; }
-            set { _mergeWith = value; }
-        }
+        public string MergeWith { get; set; }
 
-        public bool UseSourceLink
-        {
-            get { return _useSourceLink; }
-            set { _useSourceLink = value; }
-        }
+        public bool UseSourceLink { get; set; }
+
+        public string SourceLinkFilter { get; set; }
 
         public override bool Execute()
         {
             try
             {
-                var includeFilters = _include?.Split(',');
-                var includeDirectories = _includeDirectory?.Split(',');
-                var excludeFilters = _exclude?.Split(',');
-                var excludedSourceFiles = _excludeByFile?.Split(',');
-                var excludeAttributes = _excludeByAttribute?.Split(',');
+                var includeFilters = Include?.Split(',');
+                var includeDirectories = IncludeDirectory?.Split(',');
+                var excludeFilters = Exclude?.Split(',');
+                var excludedSourceFiles = ExcludeByFile?.Split(',');
+                var excludeAttributes = ExcludeByAttribute?.Split(',');
+                var sourceLinkFilter = SourceLinkFilter?.Split(',');
 
-                _coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _mergeWith, _useSourceLink);
-                _coverage.PrepareModules();
+                Coverage = new Coverage(Path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, MergeWith, UseSourceLink, sourceLinkFilter);
+                Coverage.PrepareModules();
             }
             catch (Exception ex)
             {

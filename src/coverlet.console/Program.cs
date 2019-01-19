@@ -39,6 +39,7 @@ namespace Coverlet.Console
             CommandOption excludeAttributes = app.Option("--exclude-by-attribute", "Attributes to exclude from code coverage.", CommandOptionType.MultipleValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
+            CommandOption sourceLinkFilter = app.Option("--source-link-filter", "Filter assemblies to probe for source link information.", CommandOptionType.MultipleValue);
 
             app.OnExecute(() =>
             {
@@ -48,7 +49,7 @@ namespace Coverlet.Console
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
 
-                Coverage coverage = new Coverage(module.Value, includeFilters.Values.ToArray(), includeDirectories.Values.ToArray(), excludeFilters.Values.ToArray(), excludedSourceFiles.Values.ToArray(), excludeAttributes.Values.ToArray(), mergeWith.Value(), useSourceLink.HasValue());
+                Coverage coverage = new Coverage(module.Value, includeFilters.Values.ToArray(), includeDirectories.Values.ToArray(), excludeFilters.Values.ToArray(), excludedSourceFiles.Values.ToArray(), excludeAttributes.Values.ToArray(), mergeWith.Value(), useSourceLink.HasValue(), sourceLinkFilter.HasValue() ? sourceLinkFilter.Values.ToArray() : null);
                 coverage.PrepareModules();
 
                 Process process = new Process();

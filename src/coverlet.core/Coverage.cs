@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
-
-using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Symbols;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,27 +13,24 @@ namespace Coverlet.Core
 {
     public class Coverage
     {
-        private string _module;
-        private string _identifier;
+        private readonly string _module;
         private string[] _includeFilters;
-        private string[] _includeDirectories;
+        private readonly string[] _includeDirectories;
         private string[] _excludeFilters;
-        private string[] _excludedSourceFiles;
-        private string[] _excludeAttributes;
-        private string _mergeWith;
-        private bool _useSourceLink;
-        private List<InstrumenterResult> _results;
+        private readonly string[] _excludedSourceFiles;
+        private readonly string[] _excludeAttributes;
+        private readonly string[] _sourceLinkFilter;
+        private readonly string _mergeWith;
+        private readonly bool _useSourceLink;
+        private readonly List<InstrumenterResult> _results = new List<InstrumenterResult>();
 
         private readonly Dictionary<string, MemoryMappedFile> _resultMemoryMaps = new Dictionary<string, MemoryMappedFile>();
 
-        public string Identifier
-        {
-            get { return _identifier; }
-        }
+        public string Identifier { get; } = Guid.NewGuid().ToString();
 
         internal IEnumerable<InstrumenterResult> Results => _results;
 
-        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, string mergeWith, bool useSourceLink)
+        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, string mergeWith, bool useSourceLink, string[] sourceLinkFilter)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -46,9 +40,7 @@ namespace Coverlet.Core
             _excludeAttributes = excludeAttributes;
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
-
-            _identifier = Guid.NewGuid().ToString();
-            _results = new List<InstrumenterResult>();
+            _sourceLinkFilter = sourceLinkFilter;
         }
 
         public void PrepareModules()
@@ -64,10 +56,10 @@ namespace Coverlet.Core
                     !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
                     continue;
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes);
+                var instrumenter = new Instrumenter(module, Identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes);
                 if (instrumenter.CanInstrument())
                 {
-                    InstrumentationHelper.BackupOriginalModule(module, _identifier);
+                    InstrumentationHelper.BackupOriginalModule(module, Identifier);
 
                     // Guard code path and restore if instrumentation fails.
                     try
@@ -78,7 +70,7 @@ namespace Coverlet.Core
                     catch (Exception)
                     {
                         // TODO: With verbose logging we should note that instrumentation failed.
-                        InstrumentationHelper.RestoreOriginalModule(module, _identifier);
+                        InstrumentationHelper.RestoreOriginalModule(module, Identifier);
                     }
                 }
             }
@@ -190,10 +182,10 @@ namespace Coverlet.Core
                 }
 
                 modules.Add(Path.GetFileName(result.ModulePath), documents);
-                InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
+                InstrumentationHelper.RestoreOriginalModule(result.ModulePath, Identifier);
             }
 
-            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
+            var coverageResult = new CoverageResult { Identifier = Identifier, Modules = modules, InstrumentedResults = _results };
 
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
             {
@@ -209,7 +201,7 @@ namespace Coverlet.Core
             foreach (var result in _results)
             {
                 List<Document> documents = result.Documents.Values.ToList();
-                if (_useSourceLink && result.SourceLink != null)
+                if (result.SourceLink != null && _useSourceLink && (_sourceLinkFilter == null || _sourceLinkFilter.Contains(result.Module)))
                 {
                     var jObject = JObject.Parse(result.SourceLink)["documents"];
                     var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());

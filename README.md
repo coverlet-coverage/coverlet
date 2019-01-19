@@ -73,6 +73,7 @@ Options:
   --exclude-by-attribute  Attributes to exclude from code coverage.
   --merge-with            Path to existing coverage result to merge.
   --use-source-link       Specifies whether to use SourceLink URIs in place of file system paths.
+  --source-link-filter    Filter assemblies to probe for source link information.
 ```
 
 #### Code Coverage

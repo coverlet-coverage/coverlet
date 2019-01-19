@@ -31,7 +31,7 @@ namespace Coverlet.Core.Tests
             // Since Coverage only instruments dependancies, we need a fake module here
             var testModule = Path.Combine(directory.FullName, "test.module.dll");
 
-            var coverage = new Coverage(testModule, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), string.Empty, false);
+            var coverage = new Coverage(testModule, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), string.Empty, false, null);
             coverage.PrepareModules();
 
             // The module hit tracker must signal to Coverage that it has done its job, so call it manually
