@@ -90,7 +90,7 @@ namespace Coverlet.Core.Reporters
 
                             XElement methodPoint = new XElement("MethodPoint");
                             methodPoint.Add(new XAttribute("vc", methLineCoverage.Covered.ToString()));
-                            methodPoint.Add(new XAttribute("upsid", "0"));
+                            methodPoint.Add(new XAttribute("uspid", "0"));
                             methodPoint.Add(new XAttribute(XName.Get("type", "xsi"), "SequencePoint"));
                             methodPoint.Add(new XAttribute("ordinal", j.ToString()));
                             methodPoint.Add(new XAttribute("offset", j.ToString()));
@@ -114,7 +114,7 @@ namespace Coverlet.Core.Reporters
                             {
                                 XElement sequencePoint = new XElement("SequencePoint");
                                 sequencePoint.Add(new XAttribute("vc", lines.Value.ToString()));
-                                sequencePoint.Add(new XAttribute("upsid", lines.Key.ToString()));
+                                sequencePoint.Add(new XAttribute("uspid", lines.Key.ToString()));
                                 sequencePoint.Add(new XAttribute("ordinal", k.ToString()));
                                 sequencePoint.Add(new XAttribute("sl", lines.Key.ToString()));
                                 sequencePoint.Add(new XAttribute("sc", "1"));
@@ -138,7 +138,7 @@ namespace Coverlet.Core.Reporters
                             {
                                 XElement branchPoint = new XElement("BranchPoint");
                                 branchPoint.Add(new XAttribute("vc", branche.Hits.ToString()));
-                                branchPoint.Add(new XAttribute("upsid", branche.Line.ToString()));
+                                branchPoint.Add(new XAttribute("uspid", branche.Line.ToString()));
                                 branchPoint.Add(new XAttribute("ordinal", branche.Ordinal.ToString()));
                                 branchPoint.Add(new XAttribute("path", branche.Path.ToString()));
                                 branchPoint.Add(new XAttribute("offset", branche.Offset.ToString()));
