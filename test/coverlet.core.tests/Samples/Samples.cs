@@ -122,6 +122,7 @@ namespace Coverlet.Core.Samples.Tests
             return value;
         }
 
+        [ExcludeFromCodeCoverage]
         public void HasSimpleTaskWithLambda()
         {
             var t = new Task(() => { });
