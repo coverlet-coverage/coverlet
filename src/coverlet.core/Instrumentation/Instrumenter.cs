@@ -23,6 +23,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _includeFilters;
         private readonly string[] _excludedFiles;
         private readonly string[] _excludedAttributes;
+        private readonly bool _isCoreLibrary;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsFilePath;
         private FieldDefinition _customTrackerHitsArray;
@@ -42,10 +43,8 @@ namespace Coverlet.Core.Instrumentation
             _excludedFiles = excludedFiles ?? Array.Empty<string>();
             _excludedAttributes = excludedAttributes;
 
-            IsCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
+            _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
         }
-
-        private bool IsCoreLibrary { get; }
 
         public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
 
@@ -78,7 +77,7 @@ namespace Coverlet.Core.Instrumentation
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
-                if (IsCoreLibrary)
+                if (_isCoreLibrary)
                 {
                     parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
                 }
@@ -100,7 +99,7 @@ namespace Coverlet.Core.Instrumentation
                         var actualType = type.DeclaringType ?? type;
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
                             // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
-                            && (!IsCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
+                            && (!_isCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
                             && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
                             && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
@@ -433,7 +432,7 @@ namespace Coverlet.Core.Instrumentation
         {
             if (_customTrackerRecordHitMethod == null)
             {
-                var recordHitMethodName = IsCoreLibrary
+                var recordHitMethodName = _isCoreLibrary
                     ? nameof(ModuleTrackerTemplate.RecordHitInCoreLibrary)
                     : nameof(ModuleTrackerTemplate.RecordHit);
                 _customTrackerRecordHitMethod = new MethodReference(
