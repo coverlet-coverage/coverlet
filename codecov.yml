@@ -9,7 +9,8 @@ coverage:
       default: false
 
 comment:
-  layout: "diff"
+  layout: "header, diff, changes"
+  behavior: default
 
 flags:
   production:
