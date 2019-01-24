@@ -149,7 +149,7 @@ namespace Coverlet.Core.Instrumentation
                         onProcessExitIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Call, customTrackerUnloadModule));
                     }
 
-                    module.Write(stream);
+                    module.Write(stream, new WriterParameters { WriteSymbols = true });
                 }
             }
         }
