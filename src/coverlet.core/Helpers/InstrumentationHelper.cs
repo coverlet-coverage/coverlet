@@ -48,11 +48,7 @@ namespace Coverlet.Core.Helpers
             }
 
             // The module's name must be unique.
-            // Add the test module itself to exclude it from the files enumeration.
-            var uniqueModules = new HashSet<string>
-            {
-                Path.GetFileName(module)
-            };
+            var uniqueModules = new HashSet<string>();
 
             return dirs.SelectMany(d => Directory.EnumerateFiles(d))
                 .Where(m => IsAssembly(m) && uniqueModules.Add(Path.GetFileName(m)))
