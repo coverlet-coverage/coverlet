@@ -25,9 +25,8 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _excludedAttributes;
         private readonly bool _isCoreLibrary;
         private InstrumenterResult _result;
-        private FieldDefinition _customTrackerHitsFilePath;
         private FieldDefinition _customTrackerHitsArray;
-        private FieldDefinition _customTrackerHitsMemoryMapName;
+        private FieldDefinition _customTrackerHitsFilePath;
         private ILProcessor _customTrackerClassConstructorIl;
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
@@ -59,7 +58,6 @@ namespace Coverlet.Core.Instrumentation
             {
                 Module = Path.GetFileNameWithoutExtension(_module),
                 HitsFilePath = hitsFilePath,
-                HitsResultGuid = Guid.NewGuid().ToString(),
                 ModulePath = _module
             };
 
@@ -127,8 +125,6 @@ namespace Coverlet.Core.Instrumentation
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsResultGuid));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsMemoryMapName));
 
                     if (containsAppContext)
                     {
@@ -174,12 +170,10 @@ namespace Coverlet.Core.Instrumentation
 
                     _customTrackerTypeDef.Fields.Add(fieldClone);
 
-                    if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsFilePath))
-                        _customTrackerHitsFilePath = fieldClone;
-                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsMemoryMapName))
-                        _customTrackerHitsMemoryMapName = fieldClone;
-                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsArray))
+                    if (fieldClone.Name == "HitsArray")
                         _customTrackerHitsArray = fieldClone;
+                    else if (fieldClone.Name == "HitsFilePath")
+                        _customTrackerHitsFilePath = fieldClone;
                 }
 
                 foreach (MethodDefinition methodDef in moduleTrackerTemplate.Methods)

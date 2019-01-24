@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Threading;
 
 namespace Coverlet.Core.Instrumentation
@@ -17,12 +16,7 @@ namespace Coverlet.Core.Instrumentation
     [ExcludeFromCodeCoverage]
     public static class ModuleTrackerTemplate
     {
-        public const int HitsResultHeaderSize = 2;
-        public const int HitsResultUnloadStarted = 0;
-        public const int HitsResultUnloadFinished = 1;
-
         public static string HitsFilePath;
-        public static string HitsMemoryMapName;
         public static int[] HitsArray;
 
         static ModuleTrackerTemplate()
@@ -63,72 +57,56 @@ namespace Coverlet.Core.Instrumentation
 
             // The same module can be unloaded multiple times in the same process via different app domains.
             // Use a global mutex to ensure no concurrent access.
-            using (var mutex = new Mutex(true, HitsMemoryMapName + "_Mutex", out bool createdNew))
+            using (var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew))
             {
                 if (!createdNew)
                     mutex.WaitOne();
 
-                MemoryMappedFile memoryMap = null;
-
+                bool failedToCreateNewHitsFile = false;
                 try
                 {
-                    try
+                    using (var fs = new FileStream(HitsFilePath, FileMode.CreateNew))
+                    using (var bw = new BinaryWriter(fs))
                     {
-                        memoryMap = MemoryMappedFile.OpenExisting(HitsMemoryMapName);
-                    }
-                    catch (PlatformNotSupportedException)
-                    {
-                        memoryMap = MemoryMappedFile.CreateFromFile(HitsFilePath, FileMode.Open, null, (HitsArray.Length + HitsResultHeaderSize) * sizeof(int));
-                    }
-
-                    // Tally hit counts from all threads in memory mapped area
-                    var accessor = memoryMap.CreateViewAccessor();
-                    using (var buffer = accessor.SafeMemoryMappedViewHandle)
-                    {
-                        unsafe
+                        bw.Write(hitsArray.Length);
+                        foreach (int hitCount in hitsArray)
                         {
-                            byte* pointer = null;
-                            buffer.AcquirePointer(ref pointer);
-                            try
-                            {
-                                var intPointer = (int*) pointer;
-
-                                // Signal back to coverage analysis that we've started transferring hit counts.
-                                // Use interlocked here to ensure a memory barrier before the Coverage class reads
-                                // the shared data.
-                                Interlocked.Increment(ref *(intPointer + HitsResultUnloadStarted));
-
-                                for (var i = 0; i < hitsArray.Length; i++)
-                                {
-                                    var count = hitsArray[i];
-
-                                    // By only modifying the memory map pages where there have been hits
-                                    // unnecessary allocation of all-zero pages is avoided.
-                                    if (count > 0)
-                                    {
-                                        var hitLocationArrayOffset = intPointer + i + HitsResultHeaderSize;
-
-                                        // No need to use Interlocked here since the mutex ensures only one thread updates 
-                                        // the shared memory map.
-                                        *hitLocationArrayOffset += count;
-                                    }
-                                }
-
-                                // Signal back to coverage analysis that all hit counts were successfully tallied.
-                                Interlocked.Increment(ref *(intPointer + HitsResultUnloadFinished));
-                            }
-                            finally
-                            {
-                                buffer.ReleasePointer();
-                            }
+                            bw.Write(hitCount);
                         }
                     }
                 }
-                finally
+                catch
                 {
-                    mutex.ReleaseMutex();
-                    memoryMap?.Dispose();
+                    failedToCreateNewHitsFile = true;
                 }
+
+                if (failedToCreateNewHitsFile)
+                {
+                    // Update the number of hits by adding value on disk with the ones on memory.
+                    // This path should be triggered only in the case of multiple AppDomain unloads.
+                    using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    using (var br = new BinaryReader(fs))
+                    using (var bw = new BinaryWriter(fs))
+                    {
+                        int hitsLength = br.ReadInt32();
+                        if (hitsLength != hitsArray.Length)
+                        {
+                            throw new InvalidOperationException(
+                                $"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {hitsArray.Length}");
+                        }
+
+                        for (int i = 0; i < hitsLength; ++i)
+                        {
+                            int oldHitCount = br.ReadInt32();
+                            bw.Seek(-sizeof(int), SeekOrigin.Current);
+                            bw.Write(hitsArray[i] + oldHitCount);
+                        }
+                    }
+                }
+
+                // On purpose this is not under a try-finally: it is better to have an exception if there was any error writing the hits file
+                // this case is relevant when instrumenting corelib since multiple processes can be running against the same instrumented dll.
+                mutex.ReleaseMutex();
             }
         }
     }

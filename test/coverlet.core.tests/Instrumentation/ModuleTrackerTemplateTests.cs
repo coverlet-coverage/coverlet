@@ -1,9 +1,6 @@
 ﻿using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Helpers;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -12,6 +9,11 @@ namespace Coverlet.Core.Tests.Instrumentation
 {
     public class ModuleTrackerTemplateTestsFixture : IDisposable
     {
+        public ModuleTrackerTemplateTestsFixture()
+        {
+            ModuleTrackerTemplate.HitsFilePath = Path.Combine(Path.GetTempPath(), nameof(ModuleTrackerTemplateTests));
+        }
+
         public void Dispose()
         {
             AppDomain.CurrentDomain.ProcessExit -= ModuleTrackerTemplate.UnloadModule;
@@ -19,65 +21,50 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
     }
 
-    [CollectionDefinition(nameof(ModuleTrackerTemplate))]
-    public class ModuleTrackerTemplateCollection : ICollectionFixture<ModuleTrackerTemplateTestsFixture>
+    public class ModuleTrackerTemplateTests : IClassFixture<ModuleTrackerTemplateTestsFixture>, IDisposable
     {
-
-    }
-
-    [Collection(nameof(ModuleTrackerTemplate))]
-    public class ModuleTrackerTemplateTests : IDisposable
-    {
-        private readonly MemoryMappedFile _mmap;
 
         public ModuleTrackerTemplateTests()
         {
-            ModuleTrackerTemplate.HitsArray = new int[4 + ModuleTrackerTemplate.HitsResultHeaderSize];
-            ModuleTrackerTemplate.HitsMemoryMapName = Guid.NewGuid().ToString();
-            ModuleTrackerTemplate.HitsFilePath = Path.Combine(Path.GetTempPath(), $"coverlet.test_{ModuleTrackerTemplate.HitsMemoryMapName}");
-
-            var size = (ModuleTrackerTemplate.HitsArray.Length + ModuleTrackerTemplate.HitsResultHeaderSize) * sizeof(int);
-
-            try
-            {
-                _mmap = MemoryMappedFile.CreateNew(ModuleTrackerTemplate.HitsMemoryMapName, size);
-            } 
-            catch (PlatformNotSupportedException)
-            {
-                _mmap = MemoryMappedFile.CreateFromFile(ModuleTrackerTemplate.HitsFilePath, FileMode.CreateNew, null, size);
-            }
+            File.Delete(ModuleTrackerTemplate.HitsFilePath);
         }
 
         public void Dispose()
         {
-            var hitsFilePath = ModuleTrackerTemplate.HitsFilePath;
-            _mmap.Dispose();
-            InstrumentationHelper.DeleteHitsFile(hitsFilePath);
+            File.Delete(ModuleTrackerTemplate.HitsFilePath);
         }
 
         [Fact]
         public void HitsFileCorrectlyWritten()
         {
-            RecordHits(1, 2, 0, 3);
+            ModuleTrackerTemplate.HitsArray = new[] { 1, 2, 0, 3 };
             ModuleTrackerTemplate.UnloadModule(null, null);
 
             var expectedHitsArray = new[] { 1, 2, 0, 3 };
-            Assert.Equal(expectedHitsArray, ReadHits());
+            Assert.Equal(expectedHitsArray, ReadHitsFile());
         }
 
         [Fact]
+        public void HitsFileWithDifferentNumberOfEntriesCausesExceptionOnUnload()
+        {
+            WriteHitsFile(new[] { 1, 2, 3 });
+            ModuleTrackerTemplate.HitsArray = new[] { 1 };
+            Assert.Throws<InvalidOperationException>(() => ModuleTrackerTemplate.UnloadModule(null, null));
+        }
+
+        [Fact(Skip="Failed CI Job: https://ci.appveyor.com/project/tonerdo/coverlet/builds/21145989/job/9gx5jnjs502vy1fv")]
         public void HitsOnMultipleThreadsCorrectlyCounted()
         {
-            for (int i = 0; i < 4; ++i)
+            ModuleTrackerTemplate.HitsArray = new[] { 0, 0, 0, 0 };
+            for (int i = 0; i < ModuleTrackerTemplate.HitsArray.Length; ++i)
             {
                 var t = new Thread(HitIndex);
                 t.Start(i);
-                t.Join();
             }
 
             ModuleTrackerTemplate.UnloadModule(null, null);
             var expectedHitsArray = new[] { 4, 3, 2, 1 };
-            Assert.Equal(expectedHitsArray, ReadHits());
+            Assert.Equal(expectedHitsArray, ReadHitsFile());
 
             void HitIndex(object index)
             {
@@ -92,81 +79,67 @@ namespace Coverlet.Core.Tests.Instrumentation
         [Fact]
         public void MultipleSequentialUnloadsHaveCorrectTotalData()
         {
-            RecordHits(0, 3, 2, 1);
+            ModuleTrackerTemplate.HitsArray = new[] { 0, 3, 2, 1 };
             ModuleTrackerTemplate.UnloadModule(null, null);
 
-            RecordHits(0, 1, 2, 3);
+            ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
             ModuleTrackerTemplate.UnloadModule(null, null);
 
             var expectedHitsArray = new[] { 0, 4, 4, 4 };
-            Assert.Equal(expectedHitsArray, ReadHits(2));
+            Assert.Equal(expectedHitsArray, ReadHitsFile());
         }
  
         [Fact]
         public async void MutexBlocksMultipleWriters()
         {
             using (var mutex = new Mutex(
-                true, Path.GetFileNameWithoutExtension(ModuleTrackerTemplate.HitsMemoryMapName) + "_Mutex", out bool createdNew))
+                true, Path.GetFileNameWithoutExtension(ModuleTrackerTemplate.HitsFilePath) + "_Mutex", out bool createdNew))
             {
                 Assert.True(createdNew);
 
-                RecordHits(0, 1, 2, 3);
+                ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
                 var unloadTask = Task.Run(() => ModuleTrackerTemplate.UnloadModule(null, null));
 
                 Assert.False(unloadTask.Wait(5));
 
-                var expectedHitsArray = new[] { 0, 0, 0, 0 };
-                Assert.Equal(expectedHitsArray, ReadHits(0));
+                WriteHitsFile(new[] { 0, 3, 2, 1 });
+
+                Assert.False(unloadTask.Wait(5));
 
                 mutex.ReleaseMutex();
                 await unloadTask;
 
-                expectedHitsArray = new[] { 0, 1, 2, 3 };
-                Assert.Equal(expectedHitsArray, ReadHits());
+                var expectedHitsArray = new[] { 0, 4, 4, 4 };
+                Assert.Equal(expectedHitsArray, ReadHitsFile());
             }
         }
 
-        private void RecordHits(params int[] hitCounts)
+        private void WriteHitsFile(int[] hitsArray)
         {
-            // Since the hit array is held in a thread local member that is
-            // then dropped by UnloadModule the hit counting must be done
-            // in a new thread for each test
-
-            Assert.Equal(ModuleTrackerTemplate.HitsArray.Length, hitCounts.Length + ModuleTrackerTemplate.HitsResultHeaderSize);
-
-            var thread = new Thread(() =>
+            using (var fs = new FileStream(ModuleTrackerTemplate.HitsFilePath, FileMode.Create))
+            using (var bw = new BinaryWriter(fs))
             {
-                for (var i = 0; i < hitCounts.Length; i++)
+                bw.Write(hitsArray.Length);
+                foreach (int hitCount in hitsArray)
                 {
-                    var count = hitCounts[i];
-                    while (count-- > 0)
-                    {
-                        ModuleTrackerTemplate.RecordHit(i);
-                    }
+                    bw.Write(hitCount);
                 }
-            });
-            thread.Start();
-            thread.Join();
+            }
         }
 
-        private int[] ReadHits(int expectedUnloads = 1)
+        private int[] ReadHitsFile()
         {
-            var mmapAccessor = _mmap.CreateViewAccessor();
-
-            var unloadStarted = mmapAccessor.ReadInt32(ModuleTrackerTemplate.HitsResultUnloadStarted * sizeof(int));
-            var unloadFinished = mmapAccessor.ReadInt32(ModuleTrackerTemplate.HitsResultUnloadFinished * sizeof(int));
-
-            Assert.Equal(expectedUnloads, unloadStarted);
-            Assert.Equal(expectedUnloads, unloadFinished);
-
-            var hits = new List<int>();
-
-            for (int i = ModuleTrackerTemplate.HitsResultHeaderSize; i < ModuleTrackerTemplate.HitsArray.Length; ++i)
+            using (var fs = new FileStream(ModuleTrackerTemplate.HitsFilePath, FileMode.Open))
+            using (var br = new BinaryReader(fs))
             {
-                hits.Add(mmapAccessor.ReadInt32(i * sizeof(int)));
-            }
+                var hitsArray = new int[br.ReadInt32()];
+                for (int i = 0; i < hitsArray.Length; ++i)
+                {
+                    hitsArray[i] = br.ReadInt32();
+                }
 
-            return hits.ToArray();
+                return hitsArray;
+            }
         }
     }
 }
