@@ -304,7 +304,7 @@ With Coverlet you can combine the output of multiple coverage runs into a single
 dotnet test /p:CollectCoverage=true /p:MergeWith='/path/to/result.json'
 ```
 
-The value given to `/p:MergeWith` **must** be a path to Coverlet's own json result format. The results in the file will be read, and added to the new results written to by Coverlet.
+The value given to `/p:MergeWith` **must** be a path to Coverlet's own json result format. The results in `result.json` will be read, and added to the new results written to by Coverlet.
 
 #### Threshold
 
