@@ -170,9 +170,9 @@ namespace Coverlet.Core.Instrumentation
 
                     _customTrackerTypeDef.Fields.Add(fieldClone);
 
-                    if (fieldClone.Name == "HitsArray")
+                    if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsArray))
                         _customTrackerHitsArray = fieldClone;
-                    else if (fieldClone.Name == "HitsFilePath")
+                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsFilePath))
                         _customTrackerHitsFilePath = fieldClone;
                 }
 
