@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.performancete
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.template", "src\coverlet.template\coverlet.template.csproj", "{FF16BD00-4BE7-41F3-95AE-F69B56E5E254}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.datacollector", "src\coverlet.datacollector\coverlet.datacollector.csproj", "{A207B2FD-9533-4F89-BCB9-86512E8743CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,18 @@ Global
 		{FF16BD00-4BE7-41F3-95AE-F69B56E5E254}.Release|x64.Build.0 = Release|Any CPU
 		{FF16BD00-4BE7-41F3-95AE-F69B56E5E254}.Release|x86.ActiveCfg = Release|Any CPU
 		{FF16BD00-4BE7-41F3-95AE-F69B56E5E254}.Release|x86.Build.0 = Release|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Debug|x64.Build.0 = Debug|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Debug|x86.Build.0 = Debug|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Release|x64.ActiveCfg = Release|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Release|x64.Build.0 = Release|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Release|x86.ActiveCfg = Release|Any CPU
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,6 +141,7 @@ Global
 		{AE117FAA-C21D-4F23-917E-0C8050614750} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{FF16BD00-4BE7-41F3-95AE-F69B56E5E254} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
+		{A207B2FD-9533-4F89-BCB9-86512E8743CB} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}
