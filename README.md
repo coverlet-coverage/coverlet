@@ -136,12 +136,12 @@ The currently supported [TeamCity statistics](https://confluence.jetbrains.com/d
 | TeamCity Statistic Key  | Description                    |
 | :---                    | :---                           |
 | CodeCoverageL           | Line-level code coverage       |
-| CodeCoverageC           | Class-level code coverage      |
+| CodeCoverageR           | Branch-level code coverage     |
 | CodeCoverageM           | Method-level code coverage     |
 | CodeCoverageAbsLTotal   | The total number of lines      |
 | CodeCoverageAbsLCovered | The number of covered lines    |
-| CodeCoverageAbsCTotal   | The total number of classes    |
-| CodeCoverageAbsCCovered | The number of covered classes  |
+| CodeCoverageAbsRTotal   | The total number of branches   |
+| CodeCoverageAbsRCovered | The number of covered branches |
 | CodeCoverageAbsMTotal   | The total number of methods    |
 | CodeCoverageAbsMCovered | The number of covered methods  |
 
