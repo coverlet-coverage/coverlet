@@ -18,6 +18,7 @@ namespace Coverlet.Core.Instrumentation
     {
         public static string HitsFilePath;
         public static int[] HitsArray;
+        public static bool SingleHit;
 
         static ModuleTrackerTemplate()
         {
@@ -48,6 +49,25 @@ namespace Coverlet.Core.Instrumentation
         public static void RecordHit(int hitLocationIndex)
         {
             Interlocked.Increment(ref HitsArray[hitLocationIndex]);
+        }
+
+        public static void RecordSingleHitInCoreLibrary(int hitLocationIndex)
+        {
+            // Make sure to avoid recording if this is a call to RecordHit within the AppDomain setup code in an
+            // instrumented build of System.Private.CoreLib.
+            if (HitsArray is null)
+                return;
+
+            ref int location = ref HitsArray[hitLocationIndex];
+            if (location == 0)
+                location = 1;
+        }
+
+        public static void RecordSingleHit(int hitLocationIndex)
+        {
+            ref int location = ref HitsArray[hitLocationIndex];
+            if (location == 0)
+                location = 1;
         }
 
         public static void UnloadModule(object sender, EventArgs e)
@@ -99,7 +119,10 @@ namespace Coverlet.Core.Instrumentation
                         {
                             int oldHitCount = br.ReadInt32();
                             bw.Seek(-sizeof(int), SeekOrigin.Current);
-                            bw.Write(hitsArray[i] + oldHitCount);
+                            if (SingleHit)
+                                bw.Write(hitsArray[i] + oldHitCount > 0 ? 1 : 0);
+                            else
+                                bw.Write(hitsArray[i] + oldHitCount);
                         }
                     }
                 }

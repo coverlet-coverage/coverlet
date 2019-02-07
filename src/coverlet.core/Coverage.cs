@@ -22,6 +22,7 @@ namespace Coverlet.Core
         private string[] _excludeFilters;
         private string[] _excludedSourceFiles;
         private string[] _excludeAttributes;
+        private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
         private List<InstrumenterResult> _results;
@@ -31,7 +32,7 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, string mergeWith, bool useSourceLink)
+        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, bool singleHit, string mergeWith, bool useSourceLink)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -39,6 +40,7 @@ namespace Coverlet.Core
             _excludeFilters = excludeFilters;
             _excludedSourceFiles = excludedSourceFiles;
             _excludeAttributes = excludeAttributes;
+            _singleHit = singleHit;
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
 
@@ -59,7 +61,7 @@ namespace Coverlet.Core
                     !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
                     continue;
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes, _singleHit);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);

@@ -23,17 +23,19 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _includeFilters;
         private readonly string[] _excludedFiles;
         private readonly string[] _excludedAttributes;
+        private readonly bool _singleHit;
         private readonly bool _isCoreLibrary;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
+        private FieldDefinition _customTrackerSingleHit;
         private ILProcessor _customTrackerClassConstructorIl;
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
         private MethodReference _customTrackerRecordHitMethod;
         private List<string> _asyncMachineStateMethod;
 
-        public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes)
+        public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes, bool singleHit)
         {
             _module = module;
             _identifier = identifier;
@@ -41,6 +43,7 @@ namespace Coverlet.Core.Instrumentation
             _includeFilters = includeFilters;
             _excludedFiles = excludedFiles ?? Array.Empty<string>();
             _excludedAttributes = excludedAttributes;
+            _singleHit = singleHit;
 
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
         }
@@ -125,6 +128,8 @@ namespace Coverlet.Core.Instrumentation
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(_singleHit ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerSingleHit));
 
                     if (containsAppContext)
                     {
@@ -174,6 +179,8 @@ namespace Coverlet.Core.Instrumentation
                         _customTrackerHitsArray = fieldClone;
                     else if (fieldClone.Name == nameof(ModuleTrackerTemplate.HitsFilePath))
                         _customTrackerHitsFilePath = fieldClone;
+                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.SingleHit))
+                        _customTrackerSingleHit = fieldClone;
                 }
 
                 foreach (MethodDefinition methodDef in moduleTrackerTemplate.Methods)
@@ -426,9 +433,20 @@ namespace Coverlet.Core.Instrumentation
         {
             if (_customTrackerRecordHitMethod == null)
             {
-                var recordHitMethodName = _isCoreLibrary
-                    ? nameof(ModuleTrackerTemplate.RecordHitInCoreLibrary)
-                    : nameof(ModuleTrackerTemplate.RecordHit);
+                string recordHitMethodName;
+                if (_singleHit)
+                {
+                    recordHitMethodName = _isCoreLibrary
+                        ? nameof(ModuleTrackerTemplate.RecordSingleHitInCoreLibrary)
+                        : nameof(ModuleTrackerTemplate.RecordSingleHit);
+                }
+                else
+                {
+                    recordHitMethodName = _isCoreLibrary
+                        ? nameof(ModuleTrackerTemplate.RecordHitInCoreLibrary)
+                        : nameof(ModuleTrackerTemplate.RecordHit);
+                }
+
                 _customTrackerRecordHitMethod = new MethodReference(
                     recordHitMethodName, method.Module.TypeSystem.Void, _customTrackerTypeDef);
                 _customTrackerRecordHitMethod.Parameters.Add(new ParameterDefinition("hitLocationIndex", ParameterAttributes.None, method.Module.TypeSystem.Int32));
