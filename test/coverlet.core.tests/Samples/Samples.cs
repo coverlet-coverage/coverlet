@@ -122,6 +122,14 @@ namespace Coverlet.Core.Samples.Tests
             return value;
         }
 
+        /// <summary>
+        /// This method is used by a unit test that verifies the behavior of the instrumentation process on an assembly
+        /// which is not instrumented. Excluding this method from code coverage prevents the bytecode for this reference
+        /// method from getting modified prior to test execution so it retains its original form for the test. This is
+        /// not a problem for the test because the instrumentation process only runs on assemblies which have not
+        /// already been instrumented.
+        /// </summary>
+        [ExcludeFromCodeCoverage]
         public void HasSimpleTaskWithLambda()
         {
             var t = new Task(() => { });

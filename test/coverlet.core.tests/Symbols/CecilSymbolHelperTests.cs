@@ -28,7 +28,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::HasSingleDecision"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSingleDecision)}"));
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
@@ -50,7 +50,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::HasSimpleUsingStatement"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSimpleUsingStatement)}"));
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
@@ -63,7 +63,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::HasSimpleTaskWithLambda"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSimpleTaskWithLambda)}"));
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
@@ -76,7 +76,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::HasTwoDecisions"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasTwoDecisions)}"));
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
@@ -95,7 +95,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::HasCompleteIf"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasCompleteIf)}"));
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
@@ -113,7 +113,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::HasSwitch"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitch)}"));
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
@@ -136,7 +136,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::HasSwitchWithDefault"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithDefault)}"));
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
@@ -159,7 +159,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::HasSwitchWithBreaks"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithBreaks)}"));
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
@@ -182,7 +182,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::HasSwitchWithMultipleCases"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithMultipleCases)}"));
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
@@ -226,7 +226,7 @@ namespace Coverlet.Core.Symbols.Tests
         {
             // arrange
             var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains("::UsingWithException_Issue243"));
+            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.UsingWithException_Issue243)}"));
 
             // check that the method is laid out the way we discovered it to be during the defect
             // @see https://github.com/OpenCover/opencover/issues/243

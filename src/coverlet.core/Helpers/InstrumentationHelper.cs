@@ -48,11 +48,7 @@ namespace Coverlet.Core.Helpers
             }
 
             // The module's name must be unique.
-            // Add the test module itself to exclude it from the files enumeration.
-            var uniqueModules = new HashSet<string>
-            {
-                Path.GetFileName(module)
-            };
+            var uniqueModules = new HashSet<string>();
 
             return dirs.SelectMany(d => Directory.EnumerateFiles(d))
                 .Where(m => IsAssembly(m) && uniqueModules.Add(Path.GetFileName(m)))
@@ -86,12 +82,20 @@ namespace Coverlet.Core.Helpers
         public static void BackupOriginalModule(string module, string identifier)
         {
             var backupPath = GetBackupPath(module, identifier);
+            var backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
             File.Copy(module, backupPath, true);
+
+            var symbolFile = Path.ChangeExtension(module, ".pdb");
+            if (File.Exists(symbolFile))
+            {
+                File.Copy(symbolFile, backupSymbolPath, true);
+            }
         }
 
         public static void RestoreOriginalModule(string module, string identifier)
         {
             var backupPath = GetBackupPath(module, identifier);
+            var backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
 
             // Restore the original module - retry up to 10 times, since the destination file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
@@ -101,6 +105,12 @@ namespace Coverlet.Core.Helpers
             {
                 File.Copy(backupPath, module, true);
                 File.Delete(backupPath);
+            }, retryStrategy, 10);
+
+            RetryHelper.Retry(() =>
+            {
+                File.Copy(backupSymbolPath, Path.ChangeExtension(module, ".pdb"), true);
+                File.Delete(backupSymbolPath);
             }, retryStrategy, 10);
         }
 
