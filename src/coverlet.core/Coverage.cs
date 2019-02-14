@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Symbols;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -25,6 +23,7 @@ namespace Coverlet.Core
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
+        private readonly ILogger _logger;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -32,7 +31,16 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, bool singleHit, string mergeWith, bool useSourceLink)
+        public Coverage(string module, 
+            string[] includeFilters, 
+            string[] includeDirectories, 
+            string[] excludeFilters, 
+            string[] excludedSourceFiles, 
+            string[] excludeAttributes, 
+            bool singleHit, 
+            string mergeWith, 
+            bool useSourceLink,
+            ILogger logger)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -43,6 +51,7 @@ namespace Coverlet.Core
             _singleHit = singleHit;
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
+            _logger = logger;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
@@ -72,9 +81,10 @@ namespace Coverlet.Core
                         var result = instrumenter.Instrument();
                         _results.Add(result);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         // TODO: With verbose logging we should note that instrumentation failed.
+                        _logger.LogWarning($"Unable to instrument module: {module} because : {ex.Message}");
                         InstrumentationHelper.RestoreOriginalModule(module, _identifier);
                     }
                 }

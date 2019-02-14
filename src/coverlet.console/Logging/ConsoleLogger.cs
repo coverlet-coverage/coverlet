@@ -1,27 +1,41 @@
 using System;
+using Coverlet.Core;
 using static System.Console;
 
 namespace Coverlet.Console.Logging
 {
     class ConsoleLogger : ILogger
     {
+        private static readonly object _sync = new object();
+
         public void LogError(string message)
         {
-            ForegroundColor = ConsoleColor.Red;
-            WriteLine(message);
-            ForegroundColor = ConsoleColor.White;
+            lock (_sync)
+            {
+                var previous = ForegroundColor;
+                ForegroundColor = ConsoleColor.Red;
+                WriteLine(message);
+                ForegroundColor = previous;
+            }
         }
 
         public void LogInformation(string message)
         {
-            WriteLine(message);
+            lock (_sync)
+            {
+                WriteLine(message);
+            }
         }
 
         public void LogSuccess(string message)
         {
-            ForegroundColor = ConsoleColor.Green;
-            WriteLine(message);
-            ForegroundColor = ConsoleColor.White;
+            lock (_sync)
+            {
+                var previous = ForegroundColor;
+                ForegroundColor = ConsoleColor.Green;
+                WriteLine(message);
+                ForegroundColor = previous;
+            }
         }
 
         public void LogVerbose(string message)
@@ -31,9 +45,13 @@ namespace Coverlet.Console.Logging
 
         public void LogWarning(string message)
         {
-            ForegroundColor = ConsoleColor.Yellow;
-            WriteLine(message);
-            ForegroundColor = ConsoleColor.White;
+            lock (_sync)
+            {
+                var previous = ForegroundColor;
+                ForegroundColor = ConsoleColor.Yellow;
+                WriteLine(message);
+                ForegroundColor = previous;
+            }
         }
     }
 }
