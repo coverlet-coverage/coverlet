@@ -1,3 +1,5 @@
+using System;
+
 namespace Coverlet.Core.Logging
 {
     public interface ILogger
@@ -11,5 +13,7 @@ namespace Coverlet.Core.Logging
         void LogWarning(string message);
 
         void LogError(string message);
+
+        void LogError(string message, Exception ex);
     }
 }

@@ -1,6 +1,7 @@
-﻿using Microsoft.Build.Framework;
+﻿using System;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using ILogger = Coverlet.Core.ILogger;
+using ILogger = Coverlet.Core.Logging.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
 {
@@ -8,34 +9,21 @@ namespace Coverlet.MSbuild.Tasks
     {
         private readonly TaskLoggingHelper _log;
 
-        public MSBuildLogger(TaskLoggingHelper _log)
+        public MSBuildLogger(TaskLoggingHelper log)
         {
-            this._log = _log;
+            _log = log;
         }
 
-        public void LogSuccess(string message)
-        {
-            LogInformation(message);
-        }
+        public void LogSuccess(string message) => LogInformation(message);
 
-        public void LogVerbose(string message)
-        {
-            _log.LogMessageFromText(message, MessageImportance.Low);
-        }
+        public void LogVerbose(string message) => _log.LogMessageFromText(message, MessageImportance.Low);
 
-        public void LogInformation(string message)
-        {
-            _log.LogMessageFromText(message, MessageImportance.Normal);
-        }
+        public void LogInformation(string message)=> _log.LogMessage(message);
 
-        public void LogWarning(string message)
-        {
-            _log.LogWarning(message);
-        }
+        public void LogWarning(string message) => _log.LogWarning(message);
 
-        public void LogError(string message)
-        {
-            _log.LogError(message);
-        }
+        public void LogError(string message) => _log.LogError(message);
+      
+        public void LogError(string message, Exception exception) => _log.LogErrorFromException(exception);
     }
 }

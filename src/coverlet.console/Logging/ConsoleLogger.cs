@@ -19,6 +19,11 @@ namespace Coverlet.Console.Logging
             }
         }
 
+        public void LogError(string message, Exception ex)
+        {
+            WriteLine($"{message}{Environment.NewLine}{ex}");
+        }
+
         public void LogInformation(string message)
         {
             lock (_sync)

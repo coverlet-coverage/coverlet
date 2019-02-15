@@ -1,12 +1,9 @@
 using System;
 using System.IO;
-
+using Coverlet.Core.Logging;
 using Xunit;
 using Moq;
 
-using Coverlet.Core;
-using System.Collections.Generic;
-using coverlet.console.Logging;
 
 namespace Coverlet.Core.Tests
 {
@@ -23,9 +20,11 @@ namespace Coverlet.Core.Tests
             File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
+            var logger = Mock.Of<ILogger>();
+
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, string.Empty, false, NullLogger.Instance);
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, string.Empty, false, logger);
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
