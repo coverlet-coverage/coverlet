@@ -4,8 +4,6 @@ namespace Coverlet.Core.Logging
 {
     public interface ILogger
     {
-        void LogSuccess(string message);
-
         void LogVerbose(string message);
 
         void LogInformation(string message);

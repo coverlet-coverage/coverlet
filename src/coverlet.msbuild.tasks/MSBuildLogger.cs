@@ -14,8 +14,6 @@ namespace Coverlet.MSbuild.Tasks
             _log = log;
         }
 
-        public void LogSuccess(string message) => LogInformation(message);
-
         public void LogVerbose(string message) => _log.LogMessageFromText(message, MessageImportance.Low);
 
         public void LogInformation(string message)=> _log.LogMessage(message);

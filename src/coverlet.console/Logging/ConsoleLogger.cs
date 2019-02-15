@@ -1,6 +1,6 @@
 using System;
 using Coverlet.Core.Logging;
-using static System.Console;
+using SystemConsole = System.Console;
 
 namespace Coverlet.Console.Logging
 {
@@ -8,54 +8,31 @@ namespace Coverlet.Console.Logging
     {
         private static readonly object _sync = new object();
 
-        public void LogError(string message)
+        public void LogError(string message) => WriteLine(message, ConsoleColor.Red);
+
+        public void LogError(string message, Exception ex) => LogError($"{message}{Environment.NewLine}{ex}");
+
+        public void LogInformation(string message) => WriteLine(message);
+
+        public void LogVerbose(string message) => throw new System.NotImplementedException();
+
+        public void LogWarning(string message) => WriteLine(message, ConsoleColor.Yellow);
+
+        private static void WriteLine(string message, ConsoleColor color  = ConsoleColor.White)
         {
-            lock (_sync)
+            ConsoleColor currentForegroundColor;
+            if (color != (currentForegroundColor = SystemConsole.ForegroundColor))
             {
-                var previous = ForegroundColor;
-                ForegroundColor = ConsoleColor.Red;
-                WriteLine(message);
-                ForegroundColor = previous;
+                lock (_sync)
+                {
+                    SystemConsole.ForegroundColor = color;
+                    SystemConsole.WriteLine(message);
+                    SystemConsole.ForegroundColor = currentForegroundColor;
+                }
             }
-        }
-
-        public void LogError(string message, Exception ex)
-        {
-            WriteLine($"{message}{Environment.NewLine}{ex}");
-        }
-
-        public void LogInformation(string message)
-        {
-            lock (_sync)
+            else
             {
-                WriteLine(message);
-            }
-        }
-
-        public void LogSuccess(string message)
-        {
-            lock (_sync)
-            {
-                var previous = ForegroundColor;
-                ForegroundColor = ConsoleColor.Green;
-                WriteLine(message);
-                ForegroundColor = previous;
-            }
-        }
-
-        public void LogVerbose(string message)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void LogWarning(string message)
-        {
-            lock (_sync)
-            {
-                var previous = ForegroundColor;
-                ForegroundColor = ConsoleColor.Yellow;
-                WriteLine(message);
-                ForegroundColor = previous;
+                SystemConsole.WriteLine(message);
             }
         }
     }
