@@ -9,10 +9,7 @@ namespace Coverlet.MSbuild.Tasks
     {
         private readonly TaskLoggingHelper _log;
 
-        public MSBuildLogger(TaskLoggingHelper log)
-        {
-            _log = log;
-        }
+        public MSBuildLogger(TaskLoggingHelper log) => _log = log;
 
         public void LogVerbose(string message) => _log.LogMessageFromText(message, MessageImportance.Low);
 

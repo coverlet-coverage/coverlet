@@ -14,17 +14,17 @@ namespace Coverlet.Core
 {
     public class Coverage
     {
-        private readonly string _module;
-        private readonly string _identifier;
+        private string _module;
+        private string _identifier;
         private string[] _includeFilters;
-        private readonly string[] _includeDirectories;
+        private string[] _includeDirectories;
         private string[] _excludeFilters;
-        private readonly string[] _excludedSourceFiles;
-        private readonly string[] _excludeAttributes;
-        private readonly bool _singleHit;
-        private readonly string _mergeWith;
-        private readonly bool _useSourceLink;
-        private readonly ILogger _logger;
+        private string[] _excludedSourceFiles;
+        private string[] _excludeAttributes;
+        private bool _singleHit;
+        private string _mergeWith;
+        private bool _useSourceLink;
+        private ILogger _logger;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -84,7 +84,6 @@ namespace Coverlet.Core
                     }
                     catch (Exception ex)
                     {
-                        // TODO: With verbose logging we should note that instrumentation failed.
                         _logger.LogWarning($"Unable to instrument module: {module} because : {ex.Message}");
                         InstrumentationHelper.RestoreOriginalModule(module, _identifier);
                     }
