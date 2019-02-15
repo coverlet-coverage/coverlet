@@ -61,10 +61,8 @@ namespace Coverlet.Console
                 process.StartInfo.RedirectStandardError = true;
                 process.Start();
 
-                process.StandardOutput.ReadToEndAsync()
-                    .ContinueWith(task => logger.LogInformation(task.Result), TaskContinuationOptions.OnlyOnRanToCompletion);
-                process.StandardError.ReadToEndAsync()
-                    .ContinueWith(task => logger.LogError(task.Result), TaskContinuationOptions.OnlyOnRanToCompletion);
+                process.OutputDataReceived += (sender, eventArgs) => logger.LogInformation(eventArgs.Data);
+                process.ErrorDataReceived += (sender, eventArgs) => logger.LogError(eventArgs.Data);
 
                 process.WaitForExit();
 
