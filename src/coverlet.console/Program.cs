@@ -59,10 +59,22 @@ namespace Coverlet.Console
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.RedirectStandardError = true;
+                process.OutputDataReceived += (sender, eventArgs) =>
+                {
+                    if(!string.IsNullOrEmpty(eventArgs.Data))
+                        logger.LogInformation(eventArgs.Data);
+                };
+
+                process.ErrorDataReceived += (sender, eventArgs) =>
+                {
+                    if (!string.IsNullOrEmpty(eventArgs.Data))
+                        logger.LogError(eventArgs.Data);
+                };
+
                 process.Start();
 
-                process.OutputDataReceived += (sender, eventArgs) => logger.LogInformation(eventArgs.Data);
-                process.ErrorDataReceived += (sender, eventArgs) => logger.LogError(eventArgs.Data);
+                process.BeginErrorReadLine();
+                process.BeginOutputReadLine();
 
                 process.WaitForExit();
 
