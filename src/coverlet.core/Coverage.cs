@@ -5,6 +5,7 @@ using System.Linq;
 
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
+using Coverlet.Core.Logging;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

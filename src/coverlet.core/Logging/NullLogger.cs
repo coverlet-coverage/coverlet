@@ -1,6 +1,5 @@
-﻿using Coverlet.Core;
-
-namespace coverlet.console.Logging
+﻿
+namespace Coverlet.Core.Logging
 {
     public sealed class NullLogger :ILogger
     {

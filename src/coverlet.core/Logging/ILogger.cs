@@ -1,4 +1,4 @@
-namespace Coverlet.Core
+namespace Coverlet.Core.Logging
 {
     public interface ILogger
     {
