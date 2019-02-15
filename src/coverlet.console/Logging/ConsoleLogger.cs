@@ -1,6 +1,6 @@
 using System;
 using Coverlet.Core.Logging;
-using SystemConsole = System.Console;
+using static System.Console;
 
 namespace Coverlet.Console.Logging
 {
@@ -8,30 +8,30 @@ namespace Coverlet.Console.Logging
     {
         private static readonly object _sync = new object();
 
-        public void LogError(string message) => WriteLine(message, ConsoleColor.Red);
+        public void LogError(string message) => Log(message, ConsoleColor.Red);
 
         public void LogError(Exception exception) => LogError(exception.ToString());
 
-        public void LogInformation(string message) => WriteLine(message, SystemConsole.ForegroundColor);
+        public void LogInformation(string message) => Log(message, ForegroundColor);
 
         public void LogVerbose(string message) => throw new NotImplementedException();
 
-        public void LogWarning(string message) => WriteLine(message, ConsoleColor.Yellow);
+        public void LogWarning(string message) => Log(message, ConsoleColor.Yellow);
 
-        private static void WriteLine(string message, ConsoleColor color)
+        private void Log(string message, ConsoleColor color)
         {
             lock (_sync)
             {
                 ConsoleColor currentForegroundColor;
-                if (color != (currentForegroundColor = SystemConsole.ForegroundColor))
+                if (color != (currentForegroundColor = ForegroundColor))
                 {
-                    SystemConsole.ForegroundColor = color;
-                    SystemConsole.WriteLine(message);
-                    SystemConsole.ForegroundColor = currentForegroundColor;
+                    ForegroundColor = color;
+                    WriteLine(message);
+                    ForegroundColor = currentForegroundColor;
                 }
                 else
                 {
-                    SystemConsole.WriteLine(message);
+                    WriteLine(message);
                 }
             }
         }
