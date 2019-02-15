@@ -12,6 +12,6 @@ namespace Coverlet.Core.Logging
 
         void LogError(string message);
 
-        void LogError(string message, Exception ex);
+        void LogError(Exception exception);
     }
 }

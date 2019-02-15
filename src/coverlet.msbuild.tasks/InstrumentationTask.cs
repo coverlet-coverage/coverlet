@@ -99,7 +99,7 @@ namespace Coverlet.MSbuild.Tasks
             }
             catch (Exception ex)
             {
-                _logger.LogError(string.Empty, ex);
+                _logger.LogError(ex);
                 return false;
             }
 

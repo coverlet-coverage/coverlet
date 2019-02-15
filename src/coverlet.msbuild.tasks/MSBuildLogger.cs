@@ -19,6 +19,6 @@ namespace Coverlet.MSbuild.Tasks
 
         public void LogError(string message) => _log.LogError(message);
       
-        public void LogError(string message, Exception exception) => _log.LogErrorFromException(exception);
+        public void LogError(Exception exception) => _log.LogErrorFromException(exception);
     }
 }

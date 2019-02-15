@@ -10,15 +10,15 @@ namespace Coverlet.Console.Logging
 
         public void LogError(string message) => WriteLine(message, ConsoleColor.Red);
 
-        public void LogError(string message, Exception ex) => LogError($"{message}{Environment.NewLine}{ex}");
+        public void LogError(Exception exception) => LogError(exception.ToString());
 
-        public void LogInformation(string message) => WriteLine(message);
+        public void LogInformation(string message) => WriteLine(message, SystemConsole.ForegroundColor);
 
         public void LogVerbose(string message) => throw new NotImplementedException();
 
         public void LogWarning(string message) => WriteLine(message, ConsoleColor.Yellow);
 
-        private static void WriteLine(string message, ConsoleColor color = ConsoleColor.White)
+        private static void WriteLine(string message, ConsoleColor color)
         {
             lock (_sync)
             {
