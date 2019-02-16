@@ -11,7 +11,7 @@ namespace Coverlet.MSbuild.Tasks
 
         public MSBuildLogger(TaskLoggingHelper log) => _log = log;
 
-        public void LogVerbose(string message) => _log.LogMessage(message, MessageImportance.Low);
+        public void LogVerbose(string message) => _log.LogMessage(MessageImportance.Low, message);
 
         public void LogInformation(string message)=> _log.LogMessage(message);
 
