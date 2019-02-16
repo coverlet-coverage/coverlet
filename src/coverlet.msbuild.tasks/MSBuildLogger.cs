@@ -13,7 +13,7 @@ namespace Coverlet.MSbuild.Tasks
 
         public void LogVerbose(string message) => _log.LogMessage(MessageImportance.Low, message);
 
-        public void LogInformation(string message)=> _log.LogMessage(message);
+        public void LogInformation(string message)=> _log.LogMessage(MessageImportance.High, message);
 
         public void LogWarning(string message) => _log.LogWarning(message);
 

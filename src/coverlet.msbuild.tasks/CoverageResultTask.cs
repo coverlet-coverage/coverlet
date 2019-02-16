@@ -18,6 +18,7 @@ namespace Coverlet.MSbuild.Tasks
         private double _threshold;
         private string _thresholdType;
         private string _thresholdStat;
+        private MSBuildLogger _logger;
 
         [Required]
         public string Output
@@ -54,11 +55,16 @@ namespace Coverlet.MSbuild.Tasks
             set { _thresholdStat = value; }
         }
 
+        public CoverageResultTask()
+        {
+            _logger = new MSBuildLogger(Log);
+        }
+
         public override bool Execute()
         {
             try
             {
-                Console.WriteLine("\nCalculating coverage result...");
+                _logger.LogInformation("Calculating coverage result...");
 
                 var coverage = InstrumentationTask.Coverage;
                 var result = coverage.GetCoverageResult();
@@ -85,8 +91,8 @@ namespace Coverlet.MSbuild.Tasks
                     if (reporter.OutputType == ReporterOutputType.Console)
                     {
                         // Output to console
-                        Console.WriteLine("  Outputting results to console");
-                        Console.WriteLine(reporter.Report(result));
+                        _logger.LogInformation("Outputting results to console");
+                        _logger.LogInformation(reporter.Report(result));
                     }
                     else
                     {
@@ -96,7 +102,7 @@ namespace Coverlet.MSbuild.Tasks
                         filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
                         var report = Path.Combine(directory, filename);
-                        Console.WriteLine($"  Generating report '{report}'");
+                        _logger.LogInformation($"Generating report '{report}'");
                         File.WriteAllText(report, reporter.Report(result));
                     }
                 }
@@ -146,8 +152,7 @@ namespace Coverlet.MSbuild.Tasks
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }
 
-                Console.WriteLine();
-                Console.WriteLine(coverageTable.ToStringAlternative());
+                _logger.LogInformation(coverageTable.ToStringAlternative());
 
                 coverageTable.Columns.Clear();
                 coverageTable.Rows.Clear();
@@ -155,8 +160,8 @@ namespace Coverlet.MSbuild.Tasks
                 coverageTable.AddColumn(new [] { "", "Line", "Branch", "Method"});
                 coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
                 coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
-                
-                Console.WriteLine(coverageTable.ToStringAlternative());
+
+                _logger.LogInformation(coverageTable.ToStringAlternative());
 
                 thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, _threshold, thresholdTypeFlags, thresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
@@ -182,7 +187,7 @@ namespace Coverlet.MSbuild.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromException(ex);
+                _logger.LogError(ex);
                 return false;
             }
 
