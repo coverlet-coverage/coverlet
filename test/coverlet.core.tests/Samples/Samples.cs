@@ -210,4 +210,31 @@ namespace Coverlet.Core.Samples.Tests
             return input;
         }
     }
+
+    public class ExceptionFilter
+    {
+        public void Test()
+        {
+            try
+            {
+                int a = 0;
+                int b = 1;
+                int c = b / a;
+            }
+            catch (Exception ex) when (True() && False())
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public bool True()
+        {
+            return true;
+        }
+
+        public bool False()
+        {
+            return false;
+        }
+    }
 }
