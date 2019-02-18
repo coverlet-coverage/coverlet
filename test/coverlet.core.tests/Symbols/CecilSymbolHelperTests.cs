@@ -264,8 +264,8 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_ExceptionFilter()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(ExceptionFilter).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(ExceptionFilter.Test)}"));
+            var type = _module.Types.Single(x => x.FullName == typeof(ExceptionFilter).FullName);
+            var method = type.Methods.Single(x => x.FullName.Contains($"::{nameof(ExceptionFilter.Test)}"));
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
             
