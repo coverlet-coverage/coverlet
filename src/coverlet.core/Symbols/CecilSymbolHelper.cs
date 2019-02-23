@@ -42,6 +42,9 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
+                    if (BranchIsInGeneratedExceptionFilter(instruction, methodDefinition))
+                        continue;
+
                     if (BranchIsInGeneratedFinallyBlock(instruction, methodDefinition)) 
                         continue;
 
@@ -195,6 +198,35 @@ namespace Coverlet.Core.Symbols
                 }));
             pathCounter = counter;
             return ordinal;
+        }
+
+        private static bool BranchIsInGeneratedExceptionFilter(Instruction branchInstruction, MethodDefinition methodDefinition)
+        {
+            if (!methodDefinition.Body.HasExceptionHandlers)
+                return false;
+
+            // a generated filter block will have no sequence points in its range
+            var handlers = methodDefinition.Body.ExceptionHandlers
+                .Where(e => e.HandlerType == ExceptionHandlerType.Filter)
+                .ToList();
+
+            foreach (var exceptionHandler in handlers)
+            {
+                Instruction startFilter = exceptionHandler.FilterStart;
+                Instruction endFilter = startFilter;
+
+                while(endFilter.OpCode != OpCodes.Endfilter && endFilter != null)
+                {
+                    endFilter = endFilter.Next;
+                }
+
+                if(branchInstruction.Offset >= startFilter.Offset && branchInstruction.Offset <= endFilter.Offset)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool BranchIsInGeneratedFinallyBlock(Instruction branchInstruction, MethodDefinition methodDefinition)
