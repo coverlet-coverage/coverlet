@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Symbols;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -30,9 +32,7 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters,
-            string[] excludedSourceFiles, string[] excludeAttributes, bool singleHit, string mergeWith,
-            bool useSourceLink)
+        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, bool singleHit, string mergeWith, bool useSourceLink)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -61,8 +61,7 @@ namespace Coverlet.Core
                     !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
                     continue;
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes,
-                    _excludeAttributes, _singleHit);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes, _singleHit);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);
@@ -135,20 +134,14 @@ namespace Coverlet.Core
                                 if (methods.TryGetValue(branch.Method, out Method method))
                                 {
                                     method.Branches.Add(new BranchInfo
-                                        {
-                                            Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset,
-                                            EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal
-                                        }
+                                    { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                                     );
                                 }
                                 else
                                 {
                                     documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                                     documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                                        {
-                                            Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset,
-                                            EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal
-                                        }
+                                    { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                                     );
                                 }
                             }
@@ -157,10 +150,7 @@ namespace Coverlet.Core
                                 documents[doc.Path].Add(branch.Class, new Methods());
                                 documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                                 documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                                    {
-                                        Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset,
-                                        EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal
-                                    }
+                                { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                                 );
                             }
                         }
@@ -170,10 +160,7 @@ namespace Coverlet.Core
                             documents[doc.Path].Add(branch.Class, new Methods());
                             documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                             documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                                {
-                                    Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset,
-                                    EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal
-                                }
+                            { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
                             );
                         }
                     }
@@ -183,22 +170,11 @@ namespace Coverlet.Core
                 InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
-            var coverageResult = new CoverageResult
-                {Identifier = _identifier, Modules = modules, InstrumentedResults = _results};
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
 
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
             {
-                var json = RetryHelper.Do(() =>
-                {
-                    using (var file = File.Open(_mergeWith, FileMode.Open, FileAccess.Read, FileShare.None))
-                    {
-                        using (var reader = new StreamReader(file))
-                        {
-                            return reader.ReadToEnd();
-                        }
-                    }
-                }, () => TimeSpan.FromMilliseconds(100), 5);
-
+                string json = File.ReadAllText(_mergeWith);
                 coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
             }
 
@@ -219,8 +195,7 @@ namespace Coverlet.Core
                 if (_useSourceLink && result.SourceLink != null)
                 {
                     var jObject = JObject.Parse(result.SourceLink)["documents"];
-                    var sourceLinkDocuments =
-                        JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
+                    var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
                     foreach (var document in documents)
                     {
                         document.Path = GetSourceLinkUrl(sourceLinkDocuments, document.Path);
@@ -262,8 +237,7 @@ namespace Coverlet.Core
                 // we'll remove all MoveNext() not covered branch
                 foreach (var document in result.Documents)
                 {
-                    List<KeyValuePair<(int, int), Branch>> branchesToRemove =
-                        new List<KeyValuePair<(int, int), Branch>>();
+                    List<KeyValuePair<(int, int), Branch>> branchesToRemove = new List<KeyValuePair<(int, int), Branch>>();
                     foreach (var branch in document.Value.Branches)
                     {
                         //if one branch is covered we search the other one only if it's not covered
@@ -271,15 +245,13 @@ namespace Coverlet.Core
                         {
                             foreach (var moveNextBranch in document.Value.Branches)
                             {
-                                if (moveNextBranch.Value.Method == branch.Value.Method &&
-                                    moveNextBranch.Value != branch.Value && moveNextBranch.Value.Hits == 0)
+                                if (moveNextBranch.Value.Method == branch.Value.Method && moveNextBranch.Value != branch.Value && moveNextBranch.Value.Hits == 0)
                                 {
                                     branchesToRemove.Add(moveNextBranch);
                                 }
                             }
                         }
                     }
-
                     foreach (var branchToRemove in branchesToRemove)
                     {
                         document.Value.Branches.Remove(branchToRemove.Key);
@@ -304,7 +276,6 @@ namespace Coverlet.Core
                     return true;
                 }
             }
-
             return false;
         }
 

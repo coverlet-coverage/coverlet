@@ -144,7 +144,7 @@ namespace Coverlet.MSbuild.Tasks
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
-
+                
                 var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
                 var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
                 var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
@@ -155,8 +155,7 @@ namespace Coverlet.MSbuild.Tasks
                     var branchPercent = summary.CalculateBranchCoverage(module.Value).Percent * 100;
                     var methodPercent = summary.CalculateMethodCoverage(module.Value).Percent * 100;
 
-                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%",
-                        $"{branchPercent}%", $"{methodPercent}%");
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }
 
                 Console.WriteLine();
@@ -165,35 +164,29 @@ namespace Coverlet.MSbuild.Tasks
                 coverageTable.Columns.Clear();
                 coverageTable.Rows.Clear();
 
-                coverageTable.AddColumn(new[] {"", "Line", "Branch", "Method"});
-                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%",
-                    $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%",
-                    $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
-
+                coverageTable.AddColumn(new [] { "", "Line", "Branch", "Method"});
+                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
+                coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
+                
                 Console.WriteLine(coverageTable.ToStringAlternative());
 
-                thresholdTypeFlags =
-                    result.GetThresholdTypesBelowThreshold(summary, _threshold, thresholdTypeFlags, thresholdStat);
+                thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, _threshold, thresholdTypeFlags, thresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
                     var exceptionMessageBuilder = new StringBuilder();
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine(
-                            $"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {_threshold}");
+                        exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {_threshold}");
                     }
 
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine(
-                            $"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {_threshold}");
+                        exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {_threshold}");
                     }
 
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine(
-                            $"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {_threshold}");
+                        exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {_threshold}");
                     }
 
                     throw new Exception(exceptionMessageBuilder.ToString());
