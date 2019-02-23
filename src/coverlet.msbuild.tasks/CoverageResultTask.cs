@@ -99,7 +99,8 @@ namespace Coverlet.MSbuild.Tasks
                         Console.WriteLine($"  Generating report '{report}'");
 
                         var resultContent = reporter.Report(result);
-
+                        
+                        // Possible concurrency access to merge file between write/read on parallel testing
                         RetryHelper.Retry(() =>
                         {
                             using (var file = File.Open(report, FileMode.Create, FileAccess.Write, FileShare.None))

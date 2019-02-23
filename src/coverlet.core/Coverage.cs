@@ -174,6 +174,7 @@ namespace Coverlet.Core
 
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
             {
+                // Possible concurrency access to merge file between write/read on parallel testing
                 var json = RetryHelper.Do(() =>
                 {
                     using (var file = File.Open(_mergeWith, FileMode.Open, FileAccess.Read, FileShare.None))
