@@ -174,7 +174,17 @@ namespace Coverlet.Core
 
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
             {
-                string json = File.ReadAllText(_mergeWith);
+                var json = RetryHelper.Do(() =>
+                {
+                    using (var file = File.Open(_mergeWith, FileMode.Open, FileAccess.Read, FileShare.None))
+                    {
+                        using (var reader = new StreamReader(file))
+                        {
+                            return reader.ReadToEnd();
+                        }
+                    }
+                }, () => TimeSpan.FromMilliseconds(100), 5);
+
                 coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
             }
 
