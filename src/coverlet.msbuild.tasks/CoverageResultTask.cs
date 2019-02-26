@@ -64,7 +64,7 @@ namespace Coverlet.MSbuild.Tasks
         {
             try
             {
-                _logger.LogInformation("Calculating coverage result...");
+                Console.WriteLine("Calculating coverage result...");
 
                 var coverage = InstrumentationTask.Coverage;
                 var result = coverage.GetCoverageResult();
@@ -91,8 +91,8 @@ namespace Coverlet.MSbuild.Tasks
                     if (reporter.OutputType == ReporterOutputType.Console)
                     {
                         // Output to console
-                        _logger.LogInformation("Outputting results to console");
-                        _logger.LogInformation(reporter.Report(result));
+                        Console.WriteLine("Outputting results to console");
+                        Console.WriteLine(reporter.Report(result));
                     }
                     else
                     {
@@ -102,7 +102,7 @@ namespace Coverlet.MSbuild.Tasks
                         filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
                         var report = Path.Combine(directory, filename);
-                        _logger.LogInformation($"Generating report '{report}'");
+                        Console.WriteLine($"Generating report '{report}'");
                         File.WriteAllText(report, reporter.Report(result));
                     }
                 }
@@ -152,7 +152,7 @@ namespace Coverlet.MSbuild.Tasks
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }
 
-                _logger.LogInformation(coverageTable.ToStringAlternative());
+                Console.WriteLine(coverageTable.ToStringAlternative());
 
                 coverageTable.Columns.Clear();
                 coverageTable.Rows.Clear();
@@ -161,7 +161,7 @@ namespace Coverlet.MSbuild.Tasks
                 coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
                 coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
 
-                _logger.LogInformation(coverageTable.ToStringAlternative());
+                Console.WriteLine(coverageTable.ToStringAlternative());
 
                 thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, _threshold, thresholdTypeFlags, thresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)

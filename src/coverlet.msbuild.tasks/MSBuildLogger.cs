@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using ILogger = Coverlet.Core.Logging.ILogger;
@@ -13,6 +13,7 @@ namespace Coverlet.MSbuild.Tasks
 
         public void LogVerbose(string message) => _log.LogMessage(MessageImportance.Low, message);
 
+        // We use `MessageImportance.High` because with `MessageImportance.Normal` doesn't show anything
         public void LogInformation(string message)=> _log.LogMessage(MessageImportance.High, message);
 
         public void LogWarning(string message) => _log.LogWarning(message);
