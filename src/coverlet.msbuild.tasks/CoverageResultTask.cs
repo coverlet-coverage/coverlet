@@ -18,7 +18,7 @@ namespace Coverlet.MSbuild.Tasks
         private double _threshold;
         private string _thresholdType;
         private string _thresholdStat;
-        private MSBuildLogger _logger;
+        private ILogger _logger;
 
         [Required]
         public string Output
@@ -64,7 +64,7 @@ namespace Coverlet.MSbuild.Tasks
         {
             try
             {
-                Console.WriteLine("Calculating coverage result...");
+                Console.WriteLine("\nCalculating coverage result...");
 
                 var coverage = InstrumentationTask.Coverage;
                 var result = coverage.GetCoverageResult();
@@ -91,7 +91,7 @@ namespace Coverlet.MSbuild.Tasks
                     if (reporter.OutputType == ReporterOutputType.Console)
                     {
                         // Output to console
-                        Console.WriteLine("Outputting results to console");
+                        Console.WriteLine("  Outputting results to console");
                         Console.WriteLine(reporter.Report(result));
                     }
                     else
@@ -102,14 +102,14 @@ namespace Coverlet.MSbuild.Tasks
                         filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
                         var report = Path.Combine(directory, filename);
-                        Console.WriteLine($"Generating report '{report}'");
+                        Console.WriteLine($"  Generating report '{report}'");
                         File.WriteAllText(report, reporter.Report(result));
                     }
                 }
 
                 var thresholdTypeFlags = ThresholdTypeFlags.None;
                 var thresholdStat = ThresholdStatistic.Minimum;
-                
+
                 foreach (var thresholdType in _thresholdType.Split(',').Select(t => t.Trim()))
                 {
                     if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
@@ -138,7 +138,7 @@ namespace Coverlet.MSbuild.Tasks
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
-                
+
                 var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
                 var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
                 var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
@@ -152,12 +152,13 @@ namespace Coverlet.MSbuild.Tasks
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }
 
+                Console.WriteLine();
                 Console.WriteLine(coverageTable.ToStringAlternative());
 
                 coverageTable.Columns.Clear();
                 coverageTable.Rows.Clear();
 
-                coverageTable.AddColumn(new [] { "", "Line", "Branch", "Method"});
+                coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
                 coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
                 coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
 
