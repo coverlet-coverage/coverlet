@@ -18,7 +18,7 @@ namespace Coverlet.MSbuild.Tasks
         private double _threshold;
         private string _thresholdType;
         private string _thresholdStat;
-        private ILogger _logger;
+        private MSBuildLogger _logger;
 
         [Required]
         public string Output
