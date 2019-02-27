@@ -63,8 +63,9 @@ namespace Coverlet.Core
             string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories);
             string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
 
-            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Exclude filter '{filter}'"));
-            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Include filter '{filter}'"));
+            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded module filter '{filter}'"));
+            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Included module filter '{filter}'"));
+            Array.ForEach(excludes ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded source files '{filter}'"));
 
             _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
             _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
