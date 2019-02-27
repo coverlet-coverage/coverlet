@@ -32,14 +32,14 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, 
-            string[] includeFilters, 
-            string[] includeDirectories, 
-            string[] excludeFilters, 
-            string[] excludedSourceFiles, 
-            string[] excludeAttributes, 
-            bool singleHit, 
-            string mergeWith, 
+        public Coverage(string module,
+            string[] includeFilters,
+            string[] includeDirectories,
+            string[] excludeFilters,
+            string[] excludedSourceFiles,
+            string[] excludeAttributes,
+            bool singleHit,
+            string mergeWith,
             bool useSourceLink,
             ILogger logger)
         {
@@ -62,6 +62,10 @@ namespace Coverlet.Core
         {
             string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories);
             string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
+
+            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Exclude filter '{filter}'"));
+            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Include filter '{filter}'"));
+
             _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
             _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
@@ -69,7 +73,10 @@ namespace Coverlet.Core
             {
                 if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
                     !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
+                {
+                    _logger.LogInformation($"Excluded module: '{module}'");
                     continue;
+                }
 
                 var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes, _singleHit);
                 if (instrumenter.CanInstrument())
@@ -81,6 +88,7 @@ namespace Coverlet.Core
                     {
                         var result = instrumenter.Instrument();
                         _results.Add(result);
+                        _logger.LogInformation($"Instrumented module: '{module}'");
                     }
                     catch (Exception ex)
                     {
@@ -197,7 +205,7 @@ namespace Coverlet.Core
             {
                 if (!File.Exists(result.HitsFilePath))
                 {
-                    // File not instrumented, or nothing in it called.  Warn about this?
+                    _logger.LogWarning($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
                     continue;
                 }
 
