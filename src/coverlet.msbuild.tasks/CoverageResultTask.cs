@@ -18,6 +18,7 @@ namespace Coverlet.MSbuild.Tasks
         private double _threshold;
         private string _thresholdType;
         private string _thresholdStat;
+        private MSBuildLogger _logger;
 
         [Required]
         public string Output
@@ -52,6 +53,11 @@ namespace Coverlet.MSbuild.Tasks
         {
             get { return _thresholdStat; }
             set { _thresholdStat = value; }
+        }
+
+        public CoverageResultTask()
+        {
+            _logger = new MSBuildLogger(Log);
         }
 
         public override bool Execute()
@@ -103,7 +109,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 var thresholdTypeFlags = ThresholdTypeFlags.None;
                 var thresholdStat = ThresholdStatistic.Minimum;
-                
+
                 foreach (var thresholdType in _thresholdType.Split(',').Select(t => t.Trim()))
                 {
                     if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
@@ -132,7 +138,7 @@ namespace Coverlet.MSbuild.Tasks
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
-                
+
                 var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
                 var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
                 var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
@@ -152,10 +158,10 @@ namespace Coverlet.MSbuild.Tasks
                 coverageTable.Columns.Clear();
                 coverageTable.Rows.Clear();
 
-                coverageTable.AddColumn(new [] { "", "Line", "Branch", "Method"});
+                coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
                 coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
                 coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
-                
+
                 Console.WriteLine(coverageTable.ToStringAlternative());
 
                 thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, _threshold, thresholdTypeFlags, thresholdStat);
@@ -182,7 +188,7 @@ namespace Coverlet.MSbuild.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromException(ex);
+                _logger.LogError(ex);
                 return false;
             }
 

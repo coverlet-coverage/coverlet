@@ -1,11 +1,13 @@
-namespace Coverlet.Console.Logging
+using System;
+
+namespace Coverlet.Core.Logging
 {
-    interface ILogger
+    public interface ILogger
     {
-        void LogSuccess(string message);
         void LogVerbose(string message);
         void LogInformation(string message);
         void LogWarning(string message);
         void LogError(string message);
+        void LogError(Exception exception);
     }
 }

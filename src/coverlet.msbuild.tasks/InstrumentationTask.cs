@@ -17,6 +17,7 @@ namespace Coverlet.MSbuild.Tasks
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
+        private readonly MSBuildLogger _logger;
 
         internal static Coverage Coverage
         {
@@ -78,6 +79,11 @@ namespace Coverlet.MSbuild.Tasks
             set { _useSourceLink = value; }
         }
 
+        public InstrumentationTask()
+        {
+            _logger = new MSBuildLogger(Log);
+        }
+
         public override bool Execute()
         {
             try
@@ -88,12 +94,12 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
 
-                _coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _singleHit, _mergeWith, _useSourceLink);
+                _coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _singleHit, _mergeWith, _useSourceLink, _logger);
                 _coverage.PrepareModules();
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromException(ex);
+                _logger.LogError(ex);
                 return false;
             }
 

@@ -1,39 +1,39 @@
 using System;
+using Coverlet.Core.Logging;
 using static System.Console;
 
 namespace Coverlet.Console.Logging
 {
     class ConsoleLogger : ILogger
     {
-        public void LogError(string message)
-        {
-            ForegroundColor = ConsoleColor.Red;
-            WriteLine(message);
-            ForegroundColor = ConsoleColor.White;
-        }
+        private static readonly object _sync = new object();
 
-        public void LogInformation(string message)
-        {
-            WriteLine(message);
-        }
+        public void LogError(string message) => Log(message, ConsoleColor.Red);
 
-        public void LogSuccess(string message)
-        {
-            ForegroundColor = ConsoleColor.Green;
-            WriteLine(message);
-            ForegroundColor = ConsoleColor.White;
-        }
+        public void LogError(Exception exception) => LogError(exception.ToString());
 
-        public void LogVerbose(string message)
-        {
-            throw new System.NotImplementedException();
-        }
+        public void LogInformation(string message) => Log(message, ForegroundColor);
 
-        public void LogWarning(string message)
+        public void LogVerbose(string message) => throw new NotImplementedException();
+
+        public void LogWarning(string message) => Log(message, ConsoleColor.Yellow);
+
+        private void Log(string message, ConsoleColor color)
         {
-            ForegroundColor = ConsoleColor.Yellow;
-            WriteLine(message);
-            ForegroundColor = ConsoleColor.White;
+            lock (_sync)
+            {
+                ConsoleColor currentForegroundColor;
+                if (color != (currentForegroundColor = ForegroundColor))
+                {
+                    ForegroundColor = color;
+                    WriteLine(message);
+                    ForegroundColor = currentForegroundColor;
+                }
+                else
+                {
+                    WriteLine(message);
+                }
+            }
         }
     }
 }
