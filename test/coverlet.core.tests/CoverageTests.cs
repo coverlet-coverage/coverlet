@@ -20,11 +20,9 @@ namespace Coverlet.Core.Tests
             File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-            var logger = Mock.Of<ILogger>();
-
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, string.Empty, false, logger);
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, string.Empty, false, new Mock<ILogger>().Object);
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();

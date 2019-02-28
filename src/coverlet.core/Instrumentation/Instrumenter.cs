@@ -7,6 +7,7 @@ using System.Linq;
 
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Helpers;
+using Coverlet.Core.Logging;
 using Coverlet.Core.Symbols;
 
 using Mono.Cecil;
@@ -25,6 +26,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _excludedAttributes;
         private readonly bool _singleHit;
         private readonly bool _isCoreLibrary;
+        private readonly ILogger _logger;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
@@ -35,7 +37,7 @@ namespace Coverlet.Core.Instrumentation
         private MethodReference _customTrackerRecordHitMethod;
         private List<string> _asyncMachineStateMethod;
 
-        public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes, bool singleHit)
+        public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes, bool singleHit, ILogger logger)
         {
             _module = module;
             _identifier = identifier;
@@ -44,8 +46,8 @@ namespace Coverlet.Core.Instrumentation
             _excludedFiles = excludedFiles ?? Array.Empty<string>();
             _excludedAttributes = excludedAttributes;
             _singleHit = singleHit;
-
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
+            _logger = logger;
         }
 
         public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
@@ -279,7 +281,10 @@ namespace Coverlet.Core.Instrumentation
         {
             var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
             if (!string.IsNullOrEmpty(sourceFile) && _excludedFiles.Contains(sourceFile))
+            {
+                _logger.LogInformation($"Excluded source file: '{sourceFile}'");
                 return;
+            }
 
             var methodBody = GetMethodBody(method);
             if (methodBody == null)
