@@ -7,7 +7,7 @@ namespace Coverlet.MSbuild.Tasks
 {
     class MSBuildLogger : ILogger
     {
-        private const string LogPrefix = "[coverlet]";
+        private const string LogPrefix = "[coverlet] ";
 
         private readonly TaskLoggingHelper _log;
 
