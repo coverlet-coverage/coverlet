@@ -14,5 +14,8 @@
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <ThresholdType Condition="$(ThresholdType) == ''">line,branch,method</ThresholdType>
     <ThresholdStat Condition="$(ThresholdStat) == ''">minimum</ThresholdStat>
+
+    <CoverletBuildTaskPath Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)net472\</CoverletBuildTaskPath>
+    <CoverletBuildTaskPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)netcoreapp2.0\</CoverletBuildTaskPath>
   </PropertyGroup>
 </Project>

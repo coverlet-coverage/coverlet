@@ -313,9 +313,10 @@ namespace Coverlet.Core
                 string key = sourceLinkDocument.Key;
                 if (Path.GetFileName(key) != "*") continue;
 
-                string relativePath = Path.GetRelativePath(Path.GetDirectoryName(key), Path.GetDirectoryName(document));
+                if (!Path.GetDirectoryName(document).StartsWith(Path.GetDirectoryName(key) + Path.DirectorySeparatorChar))
+                    continue;
 
-                if (relativePath.Contains("..")) continue;
+                var relativePath = Path.GetDirectoryName(document).Substring(Path.GetDirectoryName(key).Length + 1);
 
                 if (relativePathOfBestMatch.Length == 0)
                 {
