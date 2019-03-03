@@ -31,6 +31,7 @@ namespace Coverlet.Core.Reporters
             coverage.Add(new XAttribute("timestamp", ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString()));
 
             XElement sources = new XElement("sources");
+            sources.Add(new XElement("source", string.Empty));
 
             XElement packages = new XElement("packages");
             foreach (var module in result.Modules)
