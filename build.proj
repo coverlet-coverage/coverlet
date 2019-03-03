@@ -3,19 +3,16 @@
   <PropertyGroup>
     <Configuration Condition="$(Configuration) == ''">Debug</Configuration>
     <OutputPath>$(MSBuildThisFileDirectory)build\$(Configuration)</OutputPath>
-
-    <!-- AppVeyor workaround for https://github.com/dotnet/sdk/issues/335 -->
-    <TargetFrameworkOverride Condition="'$(APPVEYOR_BUILD_WORKER_IMAGE)' == 'Ubuntu'">-f netcoreapp2.0</TargetFrameworkOverride>
   </PropertyGroup>
 
   <Target Name="BuildAllProjects">
     <RemoveDir Directories="$(OutputPath)" Condition="Exists('$(MSBuildThisFileDirectory)\build')" />
-    <Exec Command="dotnet build &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) $(TargetFrameworkOverride)" />
+    <Exec Command="dotnet build &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration)" />
     <Exec Command="dotnet build &quot;$(MSBuildThisFileDirectory)src\coverlet.console\coverlet.console.csproj&quot; -c $(Configuration)" />
   </Target>
 
   <Target Name="PublishMSBuildTaskProject" AfterTargets="BuildAllProjects">
-    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -f netcoreapp2.0 -o &quot;$(OutputPath)\netcoreapp2.0&quot;" />
+    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o &quot;$(OutputPath)&quot;" />
   </Target>
 
   <Target Name="CopyMSBuildScripts" AfterTargets="PublishMSBuildTaskProject">
@@ -31,6 +28,7 @@
   </Target>
 
   <Target Name="CreateNuGetPackage" AfterTargets="RunTests" Condition="$(Configuration) == 'Release'">
+    <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o $(OutputPath)" />
     <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.console\coverlet.console.csproj&quot; -c $(Configuration) -o $(OutputPath)" />
   </Target>
 

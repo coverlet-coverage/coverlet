@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netcoreapp2.0;net472</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyVersion>2.4.1</AssemblyVersion>
 
     <PackageId>coverlet.msbuild</PackageId>
@@ -16,18 +16,10 @@
     <DevelopmentDependency>true</DevelopmentDependency>
     <Description>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</Description>
     <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
-    <!-- Items in the Content group are placed in this folder in the NuGet package. -->
-    <ContentTargetFolders>build</ContentTargetFolders>
-
-    <!-- Build tasks should not be added to the lib folder. -->
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <IncludeSymbols>true</IncludeSymbols>
-    <IncludeSources>true</IncludeSources>
-
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
+    <ContentTargetFolders>build\$(TargetFramework)\</ContentTargetFolders>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -52,10 +44,7 @@
       <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="build\$(TargetFramework)\" />
       <TfmSpecificPackageFile Include="$(DepsFilePath)" PackagePath="build\$(TargetFramework)\" />
       <TfmSpecificPackageFile Include="@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="build\$(TargetFramework)\" />
-      <!--<TfmSpecificPackageFile Include="@(SatelliteDllsProjectOutputGroupDependency)" PackagePath="build\$(TargetFramework)\%(SatelliteDllsProjectOutputGroupDependency.DestinationSubDirectory)" />-->
-      <!--<TfmSpecificPackageFile Include="@(SatelliteDllsProjectOutputGroupOutput->'%(FinalOutputPath)')" PackagePath="build\$(TargetFramework)\%(SatelliteDllsProjectOutputGroupOutput.Culture)\" />-->
       <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="build\$(TargetFramework)\" />
-
       <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="build\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubPath)" />
     </ItemGroup>
   </Target>
