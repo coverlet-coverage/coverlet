@@ -12,7 +12,7 @@
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       ExcludeByAttribute="$(ExcludeByAttribute)"
-      SingleHit="$(CoverletSingleHit)"
+      SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
       UseSourceLink="$(UseSourceLink)" />
   </Target>
@@ -26,7 +26,7 @@
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       ExcludeByAttribute="$(ExcludeByAttribute)"
-      SingleHit="$(CoverletSingleHit)"
+      SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
       UseSourceLink="$(UseSourceLink)" />
   </Target>
