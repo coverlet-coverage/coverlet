@@ -11,7 +11,8 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestRetryWithFixedRetryBackoff()
         {
-            Func<TimeSpan> retryStrategy = () => {
+            Func<TimeSpan> retryStrategy = () =>
+            {
                 return TimeSpan.FromMilliseconds(1);
             };
 
@@ -30,14 +31,15 @@ namespace Coverlet.Core.Helpers.Tests
         public void TestRetryWithExponentialRetryBackoff()
         {
             var currentSleep = 6;
-            Func<TimeSpan> retryStrategy = () => {
+            Func<TimeSpan> retryStrategy = () =>
+            {
                 var sleep = TimeSpan.FromMilliseconds(currentSleep);
                 currentSleep *= 2;
                 return sleep;
             };
 
             var target = new RetryTarget();
-            try 
+            try
             {
                 RetryHelper.Retry(() => target.TargetActionThrows(), retryStrategy, 3);
             }
@@ -51,7 +53,8 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestRetryFinishesIfSuccessful()
         {
-            Func<TimeSpan> retryStrategy = () => {
+            Func<TimeSpan> retryStrategy = () =>
+            {
                 return TimeSpan.FromMilliseconds(1);
             };
 
@@ -65,12 +68,12 @@ namespace Coverlet.Core.Helpers.Tests
     public class RetryTarget
     {
         public int Calls { get; set; }
-        public void TargetActionThrows() 
+        public void TargetActionThrows()
         {
             Calls++;
             throw new Exception("Simulating Failure");
         }
-        public void TargetActionThrows5Times() 
+        public void TargetActionThrows5Times()
         {
             Calls++;
             if (Calls < 6) throw new Exception("Simulating Failure");

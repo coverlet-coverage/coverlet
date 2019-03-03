@@ -25,7 +25,7 @@ namespace Coverlet.Core.Reporters.Tests
 
             Documents documents = new Documents();
             documents.Add("doc.cs", classes);
-            
+
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
 

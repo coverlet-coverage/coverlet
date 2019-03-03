@@ -46,7 +46,7 @@ namespace Coverlet.Core.Tests
             var document = module.Value.First();
             var @class = document.Value.First();
             var method = @class.Value.First();
-            
+
             Assert.Equal(0.5, summary.CalculateLineCoverage(module.Value).Percent);
             Assert.Equal(0.5, summary.CalculateLineCoverage(document.Value).Percent);
             Assert.Equal(0.5, summary.CalculateLineCoverage(@class.Value).Percent);

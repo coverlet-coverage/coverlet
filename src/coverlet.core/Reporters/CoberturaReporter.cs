@@ -81,7 +81,7 @@ namespace Coverlet.Core.Reporters
                                 {
                                     var branches = meth.Value.Branches.Where(b => b.Line == ln.Key).ToList();
                                     var branchInfoCoverage = summary.CalculateBranchCoverage(branches);
-                                    line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent*100}% ({branchInfoCoverage.Covered}/{branchInfoCoverage.Total})"));
+                                    line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent * 100}% ({branchInfoCoverage.Covered}/{branchInfoCoverage.Total})"));
                                     XElement conditions = new XElement("conditions");
                                     var byOffset = branches.GroupBy(b => b.Offset).ToDictionary(b => b.Key, b => b.ToList());
                                     foreach (var entry in byOffset)

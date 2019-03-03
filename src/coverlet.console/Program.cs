@@ -61,7 +61,7 @@ namespace Coverlet.Console
                 process.StartInfo.RedirectStandardError = true;
                 process.OutputDataReceived += (sender, eventArgs) =>
                 {
-                    if(!string.IsNullOrEmpty(eventArgs.Data))
+                    if (!string.IsNullOrEmpty(eventArgs.Data))
                         logger.LogInformation(eventArgs.Data);
                 };
 

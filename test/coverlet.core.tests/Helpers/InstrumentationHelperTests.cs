@@ -235,16 +235,16 @@ namespace Coverlet.Core.Helpers.Tests
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
 
             var currentDirModules = InstrumentationHelper.GetCoverableModules(module,
-                new[] {Environment.CurrentDirectory});
-            
+                new[] { Environment.CurrentDirectory });
+
             var parentDirWildcardModules = InstrumentationHelper.GetCoverableModules(module,
-                new[] {Path.Combine(Directory.GetParent(Environment.CurrentDirectory).FullName, "*")});
+                new[] { Path.Combine(Directory.GetParent(Environment.CurrentDirectory).FullName, "*") });
 
             // There are at least as many modules found when searching the parent directory's subdirectories
             Assert.True(parentDirWildcardModules.Length >= currentDirModules.Length);
 
             var relativePathModules = InstrumentationHelper.GetCoverableModules(module,
-                new[] {"."});
+                new[] { "." });
 
             // Same number of modules found when using a relative path
             Assert.Equal(currentDirModules.Length, relativePathModules.Length);

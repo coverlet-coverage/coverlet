@@ -16,12 +16,12 @@ namespace Coverlet.MSbuild.Tasks
         public void LogVerbose(string message) => _log.LogMessage(MessageImportance.Low, $"{LogPrefix}{message}");
 
         // We use `MessageImportance.High` because with `MessageImportance.Normal` doesn't show anything
-        public void LogInformation(string message)=> _log.LogMessage(MessageImportance.High, $"{LogPrefix}{message}");
+        public void LogInformation(string message) => _log.LogMessage(MessageImportance.High, $"{LogPrefix}{message}");
 
         public void LogWarning(string message) => _log.LogWarning($"{LogPrefix}{message}");
 
         public void LogError(string message) => _log.LogError($"{LogPrefix}{message}");
-      
+
         public void LogError(Exception exception) => _log.LogErrorFromException(exception, true);
     }
 }

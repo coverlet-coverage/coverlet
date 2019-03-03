@@ -23,12 +23,12 @@ namespace Coverlet.Core.Symbols
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
-            if (methodDefinition == null) 
+            if (methodDefinition == null)
                 return list;
 
             UInt32 ordinal = 0;
             var instructions = methodDefinition.Body.Instructions;
-            
+
             // if method is a generated MoveNext skip first branch (could be a switch or a branch)
             var skipFirstBranch = IsMovenext.IsMatch(methodDefinition.FullName);
 
@@ -45,7 +45,7 @@ namespace Coverlet.Core.Symbols
                     if (BranchIsInGeneratedExceptionFilter(instruction, methodDefinition))
                         continue;
 
-                    if (BranchIsInGeneratedFinallyBlock(instruction, methodDefinition)) 
+                    if (BranchIsInGeneratedFinallyBlock(instruction, methodDefinition))
                         continue;
 
                     var pathCounter = 0;
@@ -59,7 +59,7 @@ namespace Coverlet.Core.Symbols
                     if (instruction.Next == null)
                         return list;
 
-                    if (!BuildPointsForConditionalBranch(list, instruction, branchingInstructionLine, document, branchOffset, pathCounter, instructions, ref ordinal, methodDefinition)) 
+                    if (!BuildPointsForConditionalBranch(list, instruction, branchingInstructionLine, document, branchOffset, pathCounter, instructions, ref ordinal, methodDefinition))
                         return list;
                 }
                 catch (Exception)
@@ -71,7 +71,7 @@ namespace Coverlet.Core.Symbols
         }
 
         private static bool BuildPointsForConditionalBranch(List<BranchPoint> list, Instruction instruction,
-            int branchingInstructionLine, string document, int branchOffset, int pathCounter, 
+            int branchingInstructionLine, string document, int branchOffset, int pathCounter,
             Collection<Instruction> instructions, ref uint ordinal, MethodDefinition methodDefinition)
         {
             // Add Default branch (Path=0)
@@ -215,12 +215,12 @@ namespace Coverlet.Core.Symbols
                 Instruction startFilter = exceptionHandler.FilterStart;
                 Instruction endFilter = startFilter;
 
-                while(endFilter.OpCode != OpCodes.Endfilter && endFilter != null)
+                while (endFilter.OpCode != OpCodes.Endfilter && endFilter != null)
                 {
                     endFilter = endFilter.Next;
                 }
 
-                if(branchInstruction.Offset >= startFilter.Offset && branchInstruction.Offset <= endFilter.Offset)
+                if (branchInstruction.Offset >= startFilter.Offset && branchInstruction.Offset <= endFilter.Offset)
                 {
                     return true;
                 }
@@ -231,9 +231,9 @@ namespace Coverlet.Core.Symbols
 
         private static bool BranchIsInGeneratedFinallyBlock(Instruction branchInstruction, MethodDefinition methodDefinition)
         {
-            if (!methodDefinition.Body.HasExceptionHandlers) 
+            if (!methodDefinition.Body.HasExceptionHandlers)
                 return false;
-            
+
             // a generated finally block will have no sequence points in its range
             var handlers = methodDefinition.Body.ExceptionHandlers
                 .Where(e => e.HandlerType == ExceptionHandlerType.Finally)
@@ -241,7 +241,7 @@ namespace Coverlet.Core.Symbols
 
             return handlers
                 .Where(e => branchInstruction.Offset >= e.HandlerStart.Offset)
-                .Where( e =>branchInstruction.Offset < e.HandlerEnd.Maybe(h => h.Offset, GetOffsetOfNextEndfinally(methodDefinition.Body, e.HandlerStart.Offset)))
+                .Where(e => branchInstruction.Offset < e.HandlerEnd.Maybe(h => h.Offset, GetOffsetOfNextEndfinally(methodDefinition.Body, e.HandlerStart.Offset)))
                 .OrderByDescending(h => h.HandlerStart.Offset) // we need to work inside out
                 .Any(eh => !(methodDefinition.DebugInformation.GetSequencePointMapping()
                     .Where(i => i.Value.StartLine != StepOverLineCode)
@@ -262,7 +262,7 @@ namespace Coverlet.Core.Symbols
             {
                 var point = instruction;
                 offsetList.Add(point.Offset);
-                while ( point.OpCode == OpCodes.Br || point.OpCode == OpCodes.Br_S )
+                while (point.OpCode == OpCodes.Br || point.OpCode == OpCodes.Br_S)
                 {
                     var nextPoint = point.Operand as Instruction;
                     if (nextPoint != null)
@@ -283,7 +283,7 @@ namespace Coverlet.Core.Symbols
         private static Instruction FindClosestInstructionWithSequencePoint(MethodBody methodBody, Instruction instruction)
         {
             var sequencePointsInMethod = methodBody.Instructions.Where(i => HasValidSequencePoint(i, methodBody.Method)).ToList();
-            if (!sequencePointsInMethod.Any()) 
+            if (!sequencePointsInMethod.Any())
                 return null;
             var idx = sequencePointsInMethod.BinarySearch(instruction, new InstructionByOffsetComparer());
             Instruction prev;

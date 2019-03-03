@@ -383,7 +383,7 @@ namespace Coverlet.Core.Instrumentation
 
             var key = (branchPoint.StartLine, (int)branchPoint.Ordinal);
             if (!document.Branches.ContainsKey(key))
-            { 
+            {
                 document.Branches.Add(key,
                     new Branch
                     {
@@ -519,9 +519,9 @@ namespace Coverlet.Core.Instrumentation
                 excludeAttributeNames = _excludedAttributes.Union(excludeAttributeNames);
             }
 
-			return excludeAttributeNames.Any(a =>
-                customAttribute.AttributeType.Name.Equals(a.EndsWith("Attribute")? a : $"{a}Attribute"));
-		}
+            return excludeAttributeNames.Any(a =>
+                customAttribute.AttributeType.Name.Equals(a.EndsWith("Attribute") ? a : $"{a}Attribute"));
+        }
 
         private static Mono.Cecil.Cil.MethodBody GetMethodBody(MethodDefinition method)
         {
