@@ -7,6 +7,7 @@
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'"
       Path="$(TargetPath)"
+      Identifier="$(CoverletIdentifier)"
       Include="$(Include)"
       IncludeDirectory="$(IncludeDirectory)"
       Exclude="$(Exclude)"
@@ -21,6 +22,7 @@
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
       Path="$(TargetPath)"
+      Identifier="$(CoverletIdentifier)"
       Include="$(Include)"
       IncludeDirectory="$(IncludeDirectory)"
       Exclude="$(Exclude)"
@@ -34,6 +36,7 @@
   <Target Name="GenerateCoverageResult" AfterTargets="VSTest">
     <Coverlet.MSbuild.Tasks.CoverageResultTask
       Condition="$(CollectCoverage) == 'true'"
+      Identifier="$(CoverletIdentifier)"
       Output="$(CoverletOutput)"
       OutputFormat="$(CoverletOutputFormat)"
       Threshold="$(Threshold)"

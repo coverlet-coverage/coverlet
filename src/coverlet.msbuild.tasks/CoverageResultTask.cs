@@ -13,12 +13,20 @@ namespace Coverlet.MSbuild.Tasks
 {
     public class CoverageResultTask : Task
     {
+        private string _identifier;
         private string _output;
         private string _format;
         private double _threshold;
         private string _thresholdType;
         private string _thresholdStat;
         private MSBuildLogger _logger;
+
+        [Required]
+        public string Identifier
+        {
+            get { return _identifier; }
+            set { _identifier = value; }
+        }
 
         [Required]
         public string Output
@@ -66,7 +74,7 @@ namespace Coverlet.MSbuild.Tasks
             {
                 Console.WriteLine("\nCalculating coverage result...");
 
-                var coverage = InstrumentationTask.Coverage;
+                var coverage = InstrumentationTask.Coverage[Identifier];
                 var result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);

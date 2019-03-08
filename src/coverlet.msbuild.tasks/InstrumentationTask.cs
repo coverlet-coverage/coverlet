@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using Coverlet.Core;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -7,7 +8,7 @@ namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : Task
     {
-        private static Coverage _coverage;
+        private static ImmutableDictionary<string, Coverage> _coverage;
         private string _path;
         private string _include;
         private string _includeDirectory;
@@ -19,7 +20,7 @@ namespace Coverlet.MSbuild.Tasks
         private bool _useSourceLink;
         private readonly MSBuildLogger _logger;
 
-        internal static Coverage Coverage
+        internal static ImmutableDictionary<string, Coverage> Coverage
         {
             get { return _coverage; }
         }
@@ -29,6 +30,13 @@ namespace Coverlet.MSbuild.Tasks
         {
             get { return _path; }
             set { _path = value; }
+        }
+
+        [Required]
+        public string Identifier
+        {
+            get;
+            set;
         }
 
         public string Include
@@ -94,8 +102,10 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
 
-                _coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _singleHit, _mergeWith, _useSourceLink, _logger);
-                _coverage.PrepareModules();
+                var coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _singleHit, _mergeWith, _useSourceLink, _logger, Identifier);
+                coverage.PrepareModules();
+
+                ImmutableInterlocked.AddOrUpdate(ref _coverage, Identifier, coverage, (_1, _2) => coverage);
             }
             catch (Exception ex)
             {

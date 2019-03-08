@@ -1,6 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <CollectCoverage Condition="$(CollectCoverage) == ''">false</CollectCoverage>
+    <CoverletIdentifier>$([System.Guid]::NewGuid())</CoverletIdentifier>
     <Include Condition="$(Include) == ''"></Include>
     <IncludeDirectory Condition="$(IncludeDirectory) == ''"></IncludeDirectory>
     <Exclude Condition="$(Exclude) == ''"></Exclude>

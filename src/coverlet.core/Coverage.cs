@@ -41,7 +41,8 @@ namespace Coverlet.Core
             bool singleHit,
             string mergeWith,
             bool useSourceLink,
-            ILogger logger)
+            ILogger logger,
+            string identifier)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -53,8 +54,8 @@ namespace Coverlet.Core
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
             _logger = logger;
+            _identifier = identifier;
 
-            _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
 
