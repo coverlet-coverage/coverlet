@@ -21,7 +21,7 @@
     <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
-    <ContentTargetFolders>build\$(TargetFramework)\</ContentTargetFolders>
+    <ContentTargetFolders>build\</ContentTargetFolders>
     <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
@@ -44,11 +44,11 @@
 
   <Target Name="PackBuildOutputs" DependsOnTargets="ResolveProjectReferences;SatelliteDllsProjectOutputGroup;DebugSymbolsProjectOutputGroup;SatelliteDllsProjectOutputGroupDependencies;ResolveAssemblyReferences">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="build\$(TargetFramework)\" />
-      <TfmSpecificPackageFile Include="$(DepsFilePath)" PackagePath="build\$(TargetFramework)\" />
-      <TfmSpecificPackageFile Include="@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="build\$(TargetFramework)\" />
-      <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="build\$(TargetFramework)\" />
-      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="build\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="build\" />
+      <TfmSpecificPackageFile Include="$(DepsFilePath)" PackagePath="build\" />
+      <TfmSpecificPackageFile Include="@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="build\" />
+      <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="build\" />
+      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="build\%(ReferenceCopyLocalPaths.DestinationSubPath)" />
     </ItemGroup>
   </Target>
 
