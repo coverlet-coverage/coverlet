@@ -50,7 +50,18 @@ namespace Coverlet.Core.Instrumentation
             _logger = logger;
         }
 
-        public bool CanInstrument() => InstrumentationHelper.HasPdb(_module);
+        public bool CanInstrument()
+        {
+            try
+            {
+                return InstrumentationHelper.HasPdb(_module);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Unable to instrument module: '{_module}' because : {ex.Message}");
+                return false;
+            }
+        }
 
         public InstrumenterResult Instrument()
         {
