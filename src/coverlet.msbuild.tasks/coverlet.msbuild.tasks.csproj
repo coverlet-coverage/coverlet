@@ -21,7 +21,7 @@
     <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
-    <ContentTargetFolders>build\</ContentTargetFolders>
+    <ContentTargetFolders>build</ContentTargetFolders>
     <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
