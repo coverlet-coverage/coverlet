@@ -1,7 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <NuspecFile>$(MSBuildThisFileDirectory)coverlet.msbuild.nuspec</NuspecFile>
     <Configuration Condition="$(Configuration) == ''">Debug</Configuration>
     <OutputPath>$(MSBuildThisFileDirectory)build\$(Configuration)</OutputPath>
   </PropertyGroup>
@@ -18,18 +17,18 @@
 
   <Target Name="CopyMSBuildScripts" AfterTargets="PublishMSBuildTaskProject">
     <ItemGroup>
-      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild\coverlet.msbuild.props" />
-      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild\coverlet.msbuild.targets" />
+      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
+      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />
     </ItemGroup>
     <Copy SourceFiles="@(BuildScript)" DestinationFolder="$(OutputPath)" />
   </Target>
 
   <Target Name="RunTests" AfterTargets="CopyMSBuildScripts">
-    <Exec Command="dotnet test &quot;$(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj&quot; -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]*"/>
+    <Exec Command="dotnet test &quot;$(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj&quot; -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]* -verbosity:minimal"/>
   </Target>
 
   <Target Name="CreateNuGetPackage" AfterTargets="RunTests" Condition="$(Configuration) == 'Release'">
-    <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o $(OutputPath) /p:NuspecFile=$(NuspecFile)" />
+    <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o $(OutputPath)" />
     <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.console\coverlet.console.csproj&quot; -c $(Configuration) -o $(OutputPath)" />
   </Target>
 

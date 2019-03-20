@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
@@ -49,7 +50,7 @@ namespace Coverlet.Console
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
 
-                Coverage coverage = new Coverage(module.Value, includeFilters.Values.ToArray(), includeDirectories.Values.ToArray(), excludeFilters.Values.ToArray(), excludedSourceFiles.Values.ToArray(), excludeAttributes.Values.ToArray(), singleHit.HasValue(), mergeWith.Value(), useSourceLink.HasValue());
+                Coverage coverage = new Coverage(module.Value, includeFilters.Values.ToArray(), includeDirectories.Values.ToArray(), excludeFilters.Values.ToArray(), excludedSourceFiles.Values.ToArray(), excludeAttributes.Values.ToArray(), singleHit.HasValue(), mergeWith.Value(), useSourceLink.HasValue(), logger);
                 coverage.PrepareModules();
 
                 Process process = new Process();
@@ -58,9 +59,23 @@ namespace Coverlet.Console
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.RedirectStandardError = true;
+                process.OutputDataReceived += (sender, eventArgs) =>
+                {
+                    if (!string.IsNullOrEmpty(eventArgs.Data))
+                        logger.LogInformation(eventArgs.Data);
+                };
+
+                process.ErrorDataReceived += (sender, eventArgs) =>
+                {
+                    if (!string.IsNullOrEmpty(eventArgs.Data))
+                        logger.LogError(eventArgs.Data);
+                };
+
                 process.Start();
-                logger.LogInformation(process.StandardOutput.ReadToEnd());
-                logger.LogError(process.StandardError.ReadToEnd());
+
+                process.BeginErrorReadLine();
+                process.BeginOutputReadLine();
+
                 process.WaitForExit();
 
                 var dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();

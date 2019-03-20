@@ -2,20 +2,54 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyVersion>2.4.1</AssemblyVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyTitle>coverlet.msbuild.tasks</AssemblyTitle>
+    <AssemblyVersion>2.6.0</AssemblyVersion>
+
+    <PackageId>coverlet.msbuild</PackageId>
+    <PackageVersion>$(AssemblyVersion)</PackageVersion>
+    <Title>coverlet.msbuild</Title>
+    <Authors>tonerdo</Authors>
+    <PackageLicenseUrl>https://github.com/tonerdo/coverlet/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>http://github.com/tonerdo/coverlet</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <Description>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</Description>
+    <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
+    <ContentTargetFolders>build</ContentTargetFolders>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\coverlet.console\ConsoleTables\ConsoleTable.cs" Link="ConsoleTables\ConsoleTable.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="coverlet.msbuild.props" />
+    <Content Include="coverlet.msbuild.targets" />
+  </ItemGroup>
+
+  <Target Name="PackBuildOutputs" DependsOnTargets="ResolveProjectReferences;SatelliteDllsProjectOutputGroup;DebugSymbolsProjectOutputGroup;SatelliteDllsProjectOutputGroupDependencies;ResolveAssemblyReferences">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="build\" />
+      <TfmSpecificPackageFile Include="$(DepsFilePath)" PackagePath="build\" />
+      <TfmSpecificPackageFile Include="@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="build\" />
+      <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="build\" />
+      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="build\%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+    </ItemGroup>
+  </Target>
 
 </Project>

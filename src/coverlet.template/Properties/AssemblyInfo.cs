@@ -1,1 +1,0 @@
-[assembly: System.Reflection.AssemblyKeyFileAttribute("coverlet.template.snk")]

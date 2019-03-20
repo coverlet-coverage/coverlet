@@ -16,3 +16,6 @@ test_script:
         chmod +x codecov
         ./codecov -f ./test/coverlet.core.tests/coverage.opencover.xml
       }
+artifacts:
+- path: src\coverlet.msbuild.tasks\bin\Release\*.nupkg
+- path: build\Release\*.nupkg

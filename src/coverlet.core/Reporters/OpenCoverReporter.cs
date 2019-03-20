@@ -11,7 +11,7 @@ namespace Coverlet.Core.Reporters
     public class OpenCoverReporter : IReporter
     {
         public ReporterOutputType OutputType => ReporterOutputType.File;
-        
+
         public string Format => "opencover";
 
         public string Extension => "opencover.xml";
@@ -72,7 +72,7 @@ namespace Coverlet.Core.Reporters
                             var methLineCoverage = summary.CalculateLineCoverage(meth.Value.Lines);
                             var methBranchCoverage = summary.CalculateBranchCoverage(meth.Value.Branches);
                             var methCyclomaticComplexity = summary.CalculateCyclomaticComplexity(meth.Value.Branches);
-                            
+
                             XElement method = new XElement("Method");
 
                             method.Add(new XAttribute("cyclomaticComplexity", methCyclomaticComplexity.ToString()));

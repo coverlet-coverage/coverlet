@@ -52,7 +52,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             Assert.Throws<InvalidOperationException>(() => ModuleTrackerTemplate.UnloadModule(null, null));
         }
 
-        [Fact(Skip="Failed CI Job: https://ci.appveyor.com/project/tonerdo/coverlet/builds/21145989/job/9gx5jnjs502vy1fv")]
+        [Fact(Skip = "Failed CI Job: https://ci.appveyor.com/project/tonerdo/coverlet/builds/21145989/job/9gx5jnjs502vy1fv")]
         public void HitsOnMultipleThreadsCorrectlyCounted()
         {
             ModuleTrackerTemplate.HitsArray = new[] { 0, 0, 0, 0 };
@@ -88,7 +88,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             var expectedHitsArray = new[] { 0, 4, 4, 4 };
             Assert.Equal(expectedHitsArray, ReadHitsFile());
         }
- 
+
         [Fact]
         public async void MutexBlocksMultipleWriters()
         {

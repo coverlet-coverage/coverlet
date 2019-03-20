@@ -353,7 +353,7 @@ You can also ignore specific source files from code coverage using the `ExcludeB
  - Use file path or directory path with globbing (e.g `dir1/*.cs`)
 
 ```bash
-dotnet test /p:CollectCoverage=true /p:ExcludeByFile=\"../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs,\"
+dotnet test /p:CollectCoverage=true /p:ExcludeByFile=\"../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs\"
 ```
 
 ##### Filters

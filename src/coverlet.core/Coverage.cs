@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Symbols;
+using Coverlet.Core.Logging;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -25,6 +24,7 @@ namespace Coverlet.Core
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
+        private ILogger _logger;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -32,7 +32,16 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module, string[] includeFilters, string[] includeDirectories, string[] excludeFilters, string[] excludedSourceFiles, string[] excludeAttributes, bool singleHit, string mergeWith, bool useSourceLink)
+        public Coverage(string module,
+            string[] includeFilters,
+            string[] includeDirectories,
+            string[] excludeFilters,
+            string[] excludedSourceFiles,
+            string[] excludeAttributes,
+            bool singleHit,
+            string mergeWith,
+            bool useSourceLink,
+            ILogger logger)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -43,6 +52,7 @@ namespace Coverlet.Core
             _singleHit = singleHit;
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
+            _logger = logger;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
@@ -52,6 +62,11 @@ namespace Coverlet.Core
         {
             string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories);
             string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
+
+            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded module filter '{filter}'"));
+            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Included module filter '{filter}'"));
+            Array.ForEach(excludes ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded source files '{filter}'"));
+
             _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
             _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
@@ -59,9 +74,12 @@ namespace Coverlet.Core
             {
                 if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
                     !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
+                {
+                    _logger.LogInformation($"Excluded module: '{module}'");
                     continue;
+                }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes, _singleHit);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes, _singleHit, _logger);
                 if (instrumenter.CanInstrument())
                 {
                     InstrumentationHelper.BackupOriginalModule(module, _identifier);
@@ -71,10 +89,11 @@ namespace Coverlet.Core
                     {
                         var result = instrumenter.Instrument();
                         _results.Add(result);
+                        _logger.LogInformation($"Instrumented module: '{module}'");
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        // TODO: With verbose logging we should note that instrumentation failed.
+                        _logger.LogWarning($"Unable to instrument module: {module} because : {ex.Message}");
                         InstrumentationHelper.RestoreOriginalModule(module, _identifier);
                     }
                 }
@@ -198,7 +217,7 @@ namespace Coverlet.Core
             {
                 if (!File.Exists(result.HitsFilePath))
                 {
-                    // File not instrumented, or nothing in it called.  Warn about this?
+                    _logger.LogWarning($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
                     continue;
                 }
 
@@ -305,9 +324,10 @@ namespace Coverlet.Core
                 string key = sourceLinkDocument.Key;
                 if (Path.GetFileName(key) != "*") continue;
 
-                string relativePath = Path.GetRelativePath(Path.GetDirectoryName(key), Path.GetDirectoryName(document));
+                if (!Path.GetDirectoryName(document).StartsWith(Path.GetDirectoryName(key) + Path.DirectorySeparatorChar))
+                    continue;
 
-                if (relativePath.Contains("..")) continue;
+                var relativePath = Path.GetDirectoryName(document).Substring(Path.GetDirectoryName(key).Length + 1);
 
                 if (relativePathOfBestMatch.Length == 0)
                 {

@@ -122,9 +122,9 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.NotNull(points);
             Assert.Equal(4, points.Count());
             Assert.Equal(points[0].Offset, points[1].Offset);
-            Assert.Equal(points[0].Offset, points[2].Offset);            
+            Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
-            
+
             Assert.Equal(46, points[0].StartLine);
             Assert.Equal(46, points[1].StartLine);
             Assert.Equal(46, points[2].StartLine);
@@ -147,7 +147,7 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
-            
+
             Assert.Equal(60, points[0].StartLine);
             Assert.Equal(60, points[1].StartLine);
             Assert.Equal(60, points[2].StartLine);
@@ -186,10 +186,10 @@ namespace Coverlet.Core.Symbols.Tests
 
             // act
             var points = CecilSymbolHelper.GetBranchPoints(method);
-            
+
             // assert
             Assert.NotNull(points);
-            Assert.Equal(4, points.Count()); 
+            Assert.Equal(4, points.Count());
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(points[0].Offset, points[3].Offset);
@@ -247,7 +247,7 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoresSwitchIn_GeneratedMoveNext()
         {
             // arrange
-            var nestedName = typeof (Iterator).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            var nestedName = typeof(Iterator).GetNestedTypes(BindingFlags.NonPublic).First().Name;
             var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(Iterator).FullName);
             var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
             var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -258,6 +258,18 @@ namespace Coverlet.Core.Symbols.Tests
             // assert
             Assert.Empty(points);
 
+        }
+
+        [Fact]
+        public void GetBranchPoints_ExceptionFilter()
+        {
+            // arrange
+            var type = _module.Types.Single(x => x.FullName == typeof(ExceptionFilter).FullName);
+            var method = type.Methods.Single(x => x.FullName.Contains($"::{nameof(ExceptionFilter.Test)}"));
+            // act
+            var points = CecilSymbolHelper.GetBranchPoints(method);
+
+            Assert.Empty(points);
         }
     }
 }

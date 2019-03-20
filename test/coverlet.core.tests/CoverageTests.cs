@@ -1,11 +1,9 @@
 using System;
 using System.IO;
-
+using Coverlet.Core.Logging;
 using Xunit;
 using Moq;
 
-using Coverlet.Core;
-using System.Collections.Generic;
 
 namespace Coverlet.Core.Tests
 {
@@ -24,7 +22,7 @@ namespace Coverlet.Core.Tests
 
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, string.Empty, false);
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, string.Empty, false, new Mock<ILogger>().Object);
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
