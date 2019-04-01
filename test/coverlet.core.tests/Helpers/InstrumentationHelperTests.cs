@@ -17,6 +17,14 @@ namespace Coverlet.Core.Helpers.Tests
         }
 
         [Fact]
+        public void TestGetDependenciesWithTestAssembly()
+        {
+            string module = typeof(InstrumentationHelperTests).Assembly.Location;
+            var modules = InstrumentationHelper.GetCoverableModules(module, Array.Empty<string>(), true);
+            Assert.True(Array.Exists(modules, m => m == module));
+        }
+
+        [Fact]
         public void TestHasPdb()
         {
             Assert.True(InstrumentationHelper.HasPdb(typeof(InstrumentationHelperTests).Assembly.Location));
