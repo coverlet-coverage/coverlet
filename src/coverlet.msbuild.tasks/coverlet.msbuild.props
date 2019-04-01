@@ -6,6 +6,7 @@
     <Exclude Condition="$(Exclude) == ''"></Exclude>
     <ExcludeByFile Condition="$(ExcludeByFile) == ''"></ExcludeByFile>
     <ExcludeByAttribute Condition="$(ExcludeByAttribute) == ''"></ExcludeByAttribute>
+    <IncludeTestAssembly Condition="'$(IncludeTestAssembly)' == ''">false</IncludeTestAssembly>
     <SingleHit Condition="'$(SingleHit)' == ''">false</SingleHit>
     <MergeWith Condition="$(MergeWith) == ''"></MergeWith>
     <UseSourceLink Condition="$(UseSourceLink) == ''">false</UseSourceLink>

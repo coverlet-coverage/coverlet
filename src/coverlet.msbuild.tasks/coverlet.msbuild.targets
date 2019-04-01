@@ -12,6 +12,7 @@
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       ExcludeByAttribute="$(ExcludeByAttribute)"
+      IncludeTestAssembly="$(IncludeTestAssembly)"
       SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
       UseSourceLink="$(UseSourceLink)" />
@@ -26,6 +27,7 @@
       Exclude="$(Exclude)"
       ExcludeByFile="$(ExcludeByFile)"
       ExcludeByAttribute="$(ExcludeByAttribute)"
+      IncludeTestAssembly="$(IncludeTestAssembly)"
       SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
       UseSourceLink="$(UseSourceLink)" />
