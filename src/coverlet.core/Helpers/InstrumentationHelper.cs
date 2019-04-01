@@ -109,8 +109,11 @@ namespace Coverlet.Core.Helpers
 
             RetryHelper.Retry(() =>
             {
-                File.Copy(backupSymbolPath, Path.ChangeExtension(module, ".pdb"), true);
-                File.Delete(backupSymbolPath);
+                if (File.Exists(backupSymbolPath))
+                {
+                    File.Copy(backupSymbolPath, Path.ChangeExtension(module, ".pdb"), true);
+                    File.Delete(backupSymbolPath);
+                }
             }, retryStrategy, 10);
         }
 
