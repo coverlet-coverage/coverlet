@@ -13,7 +13,7 @@ namespace Coverlet.Console.Logging
 
         public void LogError(Exception exception) => LogError(exception.ToString());
 
-        public void LogInformation(string message) => Log(LogLevel.Normal, message, ForegroundColor);
+        public void LogInformation(string message, bool important = false) => Log(important ? LogLevel.Minimal : LogLevel.Normal, message, ForegroundColor);
 
         public void LogVerbose(string message) => Log(LogLevel.Detailed, message, ForegroundColor);
 
