@@ -100,7 +100,7 @@ namespace Coverlet.Console
                 var dThresholdTypes = thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" });
                 var dThresholdStat = thresholdStat.HasValue() ? Enum.Parse<ThresholdStatistic>(thresholdStat.Value(), true) : Enum.Parse<ThresholdStatistic>("minimum", true);
 
-                logger.LogInformation("\nCalculating coverage result...");
+                logger.LogVerbose("\nCalculating coverage result...");
 
                 var result = coverage.GetCoverageResult();
                 var directory = Path.GetDirectoryName(dOutput);
@@ -124,7 +124,7 @@ namespace Coverlet.Console
                     if (reporter.OutputType == ReporterOutputType.Console)
                     {
                         // Output to console
-                        logger.LogInformation("  Outputting results to console");
+                        logger.LogVerbose("  Outputting results to console");
                         logger.LogInformation(reporter.Report(result));
                     }
                     else

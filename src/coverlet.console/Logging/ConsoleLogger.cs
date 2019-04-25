@@ -9,15 +9,15 @@ namespace Coverlet.Console.Logging
         private static readonly object _sync = new object();
         public LogLevel Level { get; set; } = LogLevel.Normal;
 
-        public void LogError(string message) => Log(LogLevel.Minimal, message, ConsoleColor.Red);
+        public void LogError(string message) => Log(LogLevel.Quiet, message, ConsoleColor.Red);
 
         public void LogError(Exception exception) => LogError(exception.ToString());
 
-        public void LogInformation(string message) => Log(LogLevel.Detailed, message, ForegroundColor);
+        public void LogInformation(string message) => Log(LogLevel.Normal, message, ForegroundColor);
 
-        public void LogVerbose(string message) => throw new NotImplementedException();
+        public void LogVerbose(string message) => Log(LogLevel.Detailed, message, ForegroundColor);
 
-        public void LogWarning(string message) => Log(LogLevel.Normal, message, ConsoleColor.Yellow);
+        public void LogWarning(string message) => Log(LogLevel.Quiet, message, ConsoleColor.Yellow);
 
         private void Log(LogLevel level, string message, ConsoleColor color)
         {
