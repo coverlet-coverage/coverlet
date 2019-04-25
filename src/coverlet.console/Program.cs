@@ -9,8 +9,7 @@ using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Reporters;
-
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace Coverlet.Console
 {
@@ -29,6 +28,7 @@ namespace Coverlet.Console
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
             CommandOption targs = app.Option("-a|--targetargs", "Arguments to be passed to the test runner.", CommandOptionType.SingleValue);
             CommandOption output = app.Option("-o|--output", "Output of the generated coverage report", CommandOptionType.SingleValue);
+            CommandOption<LogLevel> verbosity = app.Option<LogLevel>("-v|--verbosity", "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed].", CommandOptionType.SingleValue);
             CommandOption formats = app.Option("-f|--format", "Format of the generated coverage report.", CommandOptionType.MultipleValue);
             CommandOption threshold = app.Option("--threshold", "Exits with error if the coverage % is below value.", CommandOptionType.SingleValue);
             CommandOption thresholdTypes = app.Option("--threshold-type", "Coverage type to apply the threshold to.", CommandOptionType.MultipleValue);
@@ -50,6 +50,12 @@ namespace Coverlet.Console
 
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
+
+                if (verbosity.HasValue())
+                {
+                    // Adjust log level based on user input.
+                    logger.Level = verbosity.ParsedValue;
+                }
 
                 Coverage coverage = new Coverage(module.Value,
                     includeFilters.Values.ToArray(),
