@@ -61,7 +61,7 @@ Options:
   -t|--target             Path to the test runner application.
   -a|--targetargs         Arguments to be passed to the test runner.
   -o|--output             Output of the generated coverage report
-  -v|--verbosity          Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed].
+  -v|--verbosity          Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
   -f|--format             Format of the generated coverage report.
   --threshold             Exits with error if the coverage % is below value.
   --threshold-type        Coverage type to apply the threshold to.
