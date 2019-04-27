@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ConsoleTables;
@@ -14,6 +15,8 @@ using Microsoft.Extensions.CommandLineUtils;
 
 namespace Coverlet.Console
 {
+    using ThresholdTypeFlagValues = Dictionary<ThresholdTypeFlags, double>;
+
     class Program
     {
         static int Main(string[] args)
@@ -90,7 +93,6 @@ namespace Coverlet.Console
                 process.WaitForExit();
 
                 var dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
-                var dThreshold = threshold.HasValue() ? double.Parse(threshold.Value()) : 0;
                 var dThresholdTypes = thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" });
                 var dThresholdStat = thresholdStat.HasValue() ? Enum.Parse<ThresholdStatistic>(thresholdStat.Value(), true) : Enum.Parse<ThresholdStatistic>("minimum", true);
 
@@ -135,20 +137,47 @@ namespace Coverlet.Console
                 }
 
                 var thresholdTypeFlags = ThresholdTypeFlags.None;
-
+                var thresholdTypeFlagQueue = new Queue<ThresholdTypeFlags>();
                 foreach (var thresholdType in dThresholdTypes)
                 {
                     if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
                     {
                         thresholdTypeFlags |= ThresholdTypeFlags.Line;
+                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Line);
                     }
                     else if (thresholdType.Equals("branch", StringComparison.OrdinalIgnoreCase))
                     {
                         thresholdTypeFlags |= ThresholdTypeFlags.Branch;
+                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Branch);
                     }
                     else if (thresholdType.Equals("method", StringComparison.OrdinalIgnoreCase))
                     {
                         thresholdTypeFlags |= ThresholdTypeFlags.Method;
+                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Method);
+                    }
+                }
+
+                ThresholdTypeFlagValues thresholdTypeFlagValues = new ThresholdTypeFlagValues();
+                if (threshold.HasValue() && threshold.Value().Contains(','))
+                {
+                    var thresholdValues = threshold.Value().Split(',').Select(t => t.Trim());
+                    if (thresholdValues.Count() != thresholdTypeFlagQueue.Count())
+                    {
+                        throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count()}) and values count ({thresholdValues.Count()}) doesnt match");
+                    }
+
+                    foreach (var _threshold in thresholdValues)
+                    {
+                        thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = double.Parse(_threshold);
+                    }
+                }
+                else
+                {
+                    double thresholdValue = threshold.HasValue() ? double.Parse(threshold.Value()) : 0;
+
+                    while (thresholdTypeFlagQueue.Any())
+                    {
+                        thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = thresholdValue;
                     }
                 }
 
@@ -180,23 +209,23 @@ namespace Coverlet.Console
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
 
-                thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, dThreshold, thresholdTypeFlags, dThresholdStat);
+                thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdTypeFlags, dThresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
                     var exceptionMessageBuilder = new StringBuilder();
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} line coverage is below the specified {dThreshold}");
+                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line]}");
                     }
 
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} branch coverage is below the specified {dThreshold}");
+                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} branch coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Branch]}");
                     }
 
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} method coverage is below the specified {dThreshold}");
+                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
                     }
 
                     throw new Exception(exceptionMessageBuilder.ToString());
