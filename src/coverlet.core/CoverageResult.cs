@@ -8,8 +8,6 @@ using Coverlet.Core.Symbols;
 
 namespace Coverlet.Core
 {
-    using ThresholdTypeFlagValues = Dictionary<ThresholdTypeFlags, double>;
-
     public class BranchInfo
     {
         public int Line { get; set; }
@@ -163,7 +161,7 @@ namespace Coverlet.Core
             return false;
         }
 
-        public ThresholdTypeFlags GetThresholdTypesBelowThreshold(CoverageSummary summary, ThresholdTypeFlagValues thresholdTypeFlagValues, ThresholdTypeFlags thresholdTypes, ThresholdStatistic thresholdStat)
+        public ThresholdTypeFlags GetThresholdTypesBelowThreshold(CoverageSummary summary, Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues, ThresholdTypeFlags thresholdTypes, ThresholdStatistic thresholdStat)
         {
             var thresholdTypeFlags = ThresholdTypeFlags.None;
             switch (thresholdStat)

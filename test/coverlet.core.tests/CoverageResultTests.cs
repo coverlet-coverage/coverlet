@@ -9,8 +9,6 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    using ThresholdTypeFlagValues = Dictionary<ThresholdTypeFlags, double>;
-
     public class CoverageResultTests
     {
         private Modules _modules;
@@ -26,13 +24,14 @@ namespace Coverlet.Core.Tests
             branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 });
             branches.Add(new BranchInfo { Line = 2, Hits = 0, Offset = 1, Path = 0, Ordinal = 1 });
 
+            // System.Void Coverlet.Core.Tests.CoverageResultTests::CoverageResultTests - 3/3 100% line 2/3 66.7% branch coverage
             Methods methods = new Methods();
             var methodString = "System.Void Coverlet.Core.Tests.CoverageResultTests::CoverageResultTests()";
             methods.Add(methodString, new Method());
             methods[methodString].Lines = lines;
             methods[methodString].Branches = branches;
 
-
+            // System.Void Coverlet.Core.Tests.CoverageResultTests::GetThresholdTypesBelowThreshold - 0/2 0% line
             methodString = "System.Void Coverlet.Core.Tests.CoverageResultTests::GetThresholdTypesBelowThreshold()";
             methods.Add(methodString, new Method());
             methods[methodString].Lines = new Lines()
@@ -40,10 +39,12 @@ namespace Coverlet.Core.Tests
                 {1, 0},
                 {2, 0},
             };
-            methods[methodString].Branches = branches;
 
             Classes classes = new Classes();
             classes.Add("Coverlet.Core.Tests.CoverageResultTests", methods);
+            // Methods  - 1/2 (50%)
+            // Lines    - 3/5 (60%)
+            // Branches - 2/3 (66.67%)
 
             Documents documents = new Documents();
             documents.Add("doc.cs", classes);
@@ -59,7 +60,7 @@ namespace Coverlet.Core.Tests
             result.Modules = _modules;
 
             CoverageSummary summary = new CoverageSummary();
-            ThresholdTypeFlagValues thresholdTypeFlagValues = new ThresholdTypeFlagValues()
+            Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
             {
                 {  ThresholdTypeFlags.Line, 90 },
                 {  ThresholdTypeFlags.Method, 10 },
@@ -80,7 +81,7 @@ namespace Coverlet.Core.Tests
             result.Modules = _modules;
 
             CoverageSummary summary = new CoverageSummary();
-            ThresholdTypeFlagValues thresholdTypeFlagValues = new ThresholdTypeFlagValues()
+            Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
             {
                 {  ThresholdTypeFlags.Line, 50 },
                 {  ThresholdTypeFlags.Method, 75 },
@@ -101,7 +102,7 @@ namespace Coverlet.Core.Tests
             result.Modules = _modules;
 
             CoverageSummary summary = new CoverageSummary();
-            ThresholdTypeFlagValues thresholdTypeFlagValues = new ThresholdTypeFlagValues()
+            Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
             {
                 {  ThresholdTypeFlags.Line, 50 },
                 {  ThresholdTypeFlags.Method, 50 },
@@ -122,7 +123,7 @@ namespace Coverlet.Core.Tests
             result.Modules = _modules;
 
             CoverageSummary summary = new CoverageSummary();
-            ThresholdTypeFlagValues thresholdTypeFlagValues = new ThresholdTypeFlagValues()
+            Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
             {
                 {  ThresholdTypeFlags.Line, 50 },
                 {  ThresholdTypeFlags.Method, 50 },
@@ -143,7 +144,7 @@ namespace Coverlet.Core.Tests
             result.Modules = _modules;
 
             CoverageSummary summary = new CoverageSummary();
-            ThresholdTypeFlagValues thresholdTypeFlagValues = new ThresholdTypeFlagValues()
+            Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
             {
                 {  ThresholdTypeFlags.Line, 100 },
                 {  ThresholdTypeFlags.Method, 100 },

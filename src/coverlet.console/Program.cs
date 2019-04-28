@@ -15,8 +15,6 @@ using Microsoft.Extensions.CommandLineUtils;
 
 namespace Coverlet.Console
 {
-    using ThresholdTypeFlagValues = Dictionary<ThresholdTypeFlags, double>;
-
     class Program
     {
         static int Main(string[] args)
@@ -157,18 +155,18 @@ namespace Coverlet.Console
                     }
                 }
 
-                ThresholdTypeFlagValues thresholdTypeFlagValues = new ThresholdTypeFlagValues();
+                Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>();
                 if (threshold.HasValue() && threshold.Value().Contains(','))
                 {
-                    var thresholdValues = threshold.Value().Split(',').Select(t => t.Trim());
+                    var thresholdValues = threshold.Value().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
                     if (thresholdValues.Count() != thresholdTypeFlagQueue.Count())
                     {
                         throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count()}) and values count ({thresholdValues.Count()}) doesnt match");
                     }
 
-                    foreach (var _threshold in thresholdValues)
+                    foreach (var thresholdValue in thresholdValues)
                     {
-                        thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = double.Parse(_threshold);
+                        thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = double.Parse(thresholdValue);
                     }
                 }
                 else

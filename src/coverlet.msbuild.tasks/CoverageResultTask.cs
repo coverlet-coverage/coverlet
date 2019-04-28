@@ -12,8 +12,6 @@ using Microsoft.Build.Utilities;
 
 namespace Coverlet.MSbuild.Tasks
 {
-    using ThresholdTypeFlagValues = Dictionary<ThresholdTypeFlags, double>;
-
     public class CoverageResultTask : Task
     {
         private string _output;
@@ -131,10 +129,10 @@ namespace Coverlet.MSbuild.Tasks
                     }
                 }
 
-                ThresholdTypeFlagValues thresholdTypeFlagValues = new ThresholdTypeFlagValues();
+                Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>();
                 if (_threshold.Contains(','))
                 {
-                    var thresholdValues = _threshold.Split(',').Select(t => t.Trim());
+                    var thresholdValues = _threshold.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
                     if(thresholdValues.Count() != thresholdTypeFlagQueue.Count())
                     {
                         throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count()}) and values count ({thresholdValues.Count()}) doesnt match");
