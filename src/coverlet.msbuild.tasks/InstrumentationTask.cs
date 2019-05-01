@@ -14,6 +14,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _exclude;
         private string _excludeByFile;
         private string _excludeByAttribute;
+        private bool _includeTestAssembly;
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
@@ -61,6 +62,12 @@ namespace Coverlet.MSbuild.Tasks
             set { _excludeByAttribute = value; }
         }
 
+        public bool IncludeTestAssembly
+        {
+            get { return _includeTestAssembly; }
+            set { _includeTestAssembly = value; }
+        }
+
         public bool SingleHit
         {
             get { return _singleHit; }
@@ -94,7 +101,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
 
-                _coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _singleHit, _mergeWith, _useSourceLink, _logger);
+                _coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _includeTestAssembly, _singleHit, _mergeWith, _useSourceLink, _logger);
                 _coverage.PrepareModules();
             }
             catch (Exception ex)

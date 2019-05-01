@@ -14,7 +14,7 @@ namespace Coverlet.Core.Helpers
 {
     internal static class InstrumentationHelper
     {
-        public static string[] GetCoverableModules(string module, string[] directories)
+        public static string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly)
         {
             Debug.Assert(directories != null);
 
@@ -49,6 +49,9 @@ namespace Coverlet.Core.Helpers
 
             // The module's name must be unique.
             var uniqueModules = new HashSet<string>();
+
+            if (!includeTestAssembly)
+                uniqueModules.Add(Path.GetFileName(module));
 
             return dirs.SelectMany(d => Directory.EnumerateFiles(d))
                 .Where(m => IsAssembly(m) && uniqueModules.Add(Path.GetFileName(m)))
@@ -109,8 +112,11 @@ namespace Coverlet.Core.Helpers
 
             RetryHelper.Retry(() =>
             {
-                File.Copy(backupSymbolPath, Path.ChangeExtension(module, ".pdb"), true);
-                File.Delete(backupSymbolPath);
+                if (File.Exists(backupSymbolPath))
+                {
+                    File.Copy(backupSymbolPath, Path.ChangeExtension(module, ".pdb"), true);
+                    File.Delete(backupSymbolPath);
+                }
             }, retryStrategy, 10);
         }
 

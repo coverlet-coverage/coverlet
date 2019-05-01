@@ -21,6 +21,7 @@ namespace Coverlet.Core
         private string[] _excludeFilters;
         private string[] _excludedSourceFiles;
         private string[] _excludeAttributes;
+        private bool _includeTestAssembly;
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
@@ -38,6 +39,7 @@ namespace Coverlet.Core
             string[] excludeFilters,
             string[] excludedSourceFiles,
             string[] excludeAttributes,
+            bool includeTestAssembly,
             bool singleHit,
             string mergeWith,
             bool useSourceLink,
@@ -49,6 +51,7 @@ namespace Coverlet.Core
             _excludeFilters = excludeFilters;
             _excludedSourceFiles = excludedSourceFiles;
             _excludeAttributes = excludeAttributes;
+            _includeTestAssembly = includeTestAssembly;
             _singleHit = singleHit;
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
@@ -60,7 +63,7 @@ namespace Coverlet.Core
 
         public void PrepareModules()
         {
-            string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories);
+            string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories, _includeTestAssembly);
             string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
 
             Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded module filter '{filter}'"));
