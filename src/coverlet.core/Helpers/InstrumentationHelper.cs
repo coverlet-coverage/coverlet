@@ -97,7 +97,7 @@ namespace Coverlet.Core.Helpers
             File.Copy(module, backupPath, true);
             if (!_backupList.TryAdd(module, backupPath))
             {
-                throw new ArgumentException($"Key already found '{module}'");
+                throw new ArgumentException($"Key already added '{module}'");
             }
 
             var symbolFile = Path.ChangeExtension(module, ".pdb");
@@ -106,7 +106,7 @@ namespace Coverlet.Core.Helpers
                 File.Copy(symbolFile, backupSymbolPath, true);
                 if (!_backupList.TryAdd(symbolFile, backupSymbolPath))
                 {
-                    throw new ArgumentException($"Key already found '{module}'");
+                    throw new ArgumentException($"Key already added '{module}'");
                 }
             }
         }
