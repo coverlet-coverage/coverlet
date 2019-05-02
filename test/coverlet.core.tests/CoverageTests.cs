@@ -22,10 +22,11 @@ namespace Coverlet.Core.Tests
 
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, new Mock<ILogger>().Object);
-            coverage.PrepareModules();
+            IInstrumenter instrumenter = new Instrumenter(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, new Mock<ILogger>().Object);
+            InstrumenterState instrumenterState = instrumenter.PrepareModules();
 
-            var result = coverage.GetCoverageResult();
+            ICoverageCalculator coverageResult = new CoverageCalculator(instrumenterState, new Mock<ILogger>().Object);
+            var result = coverageResult.GetCoverageResult();
 
             Assert.Empty(result.Modules);
 
@@ -45,10 +46,11 @@ namespace Coverlet.Core.Tests
 
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, new Mock<ILogger>().Object);
-            coverage.PrepareModules();
+            IInstrumenter instrumenter = new Instrumenter(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, new Mock<ILogger>().Object);
+            InstrumenterState instrumenterState = instrumenter.PrepareModules();
 
-            var result = coverage.GetCoverageResult();
+            ICoverageCalculator coverageResult = new CoverageCalculator(instrumenterState, new Mock<ILogger>().Object);
+            var result = coverageResult.GetCoverageResult();
 
             Assert.NotEmpty(result.Modules);
 

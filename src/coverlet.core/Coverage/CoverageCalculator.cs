@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Logging;
 
 using Newtonsoft.Json;
@@ -12,103 +10,19 @@ using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core
 {
-    public class Coverage
+    public class CoverageCalculator : ICoverageCalculator
     {
-        private string _module;
-        private string _identifier;
-        private string[] _includeFilters;
-        private string[] _includeDirectories;
-        private string[] _excludeFilters;
-        private string[] _excludedSourceFiles;
-        private string[] _excludeAttributes;
-        private bool _includeTestAssembly;
-        private bool _singleHit;
-        private string _mergeWith;
-        private bool _useSourceLink;
-        private ILogger _logger;
-        private List<InstrumenterResult> _results;
+        private readonly InstrumenterState _instrumenterState;
+        private readonly ILogger _logger;
 
-        public string Identifier
-        {
-            get { return _identifier; }
-        }
-
-        public Coverage(string module,
-            string[] includeFilters,
-            string[] includeDirectories,
-            string[] excludeFilters,
-            string[] excludedSourceFiles,
-            string[] excludeAttributes,
-            bool includeTestAssembly,
-            bool singleHit,
-            string mergeWith,
-            bool useSourceLink,
-            ILogger logger)
-        {
-            _module = module;
-            _includeFilters = includeFilters;
-            _includeDirectories = includeDirectories ?? Array.Empty<string>();
-            _excludeFilters = excludeFilters;
-            _excludedSourceFiles = excludedSourceFiles;
-            _excludeAttributes = excludeAttributes;
-            _includeTestAssembly = includeTestAssembly;
-            _singleHit = singleHit;
-            _mergeWith = mergeWith;
-            _useSourceLink = useSourceLink;
-            _logger = logger;
-
-            _identifier = Guid.NewGuid().ToString();
-            _results = new List<InstrumenterResult>();
-        }
-
-        public void PrepareModules()
-        {
-            string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories, _includeTestAssembly);
-            string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
-
-            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded module filter '{filter}'"));
-            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Included module filter '{filter}'"));
-            Array.ForEach(excludes ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded source files '{filter}'"));
-
-            _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
-            _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
-
-            foreach (var module in modules)
-            {
-                if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
-                    !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
-                {
-                    _logger.LogInformation($"Excluded module: '{module}'");
-                    continue;
-                }
-
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes, _singleHit, _logger);
-                if (instrumenter.CanInstrument())
-                {
-                    InstrumentationHelper.BackupOriginalModule(module, _identifier);
-
-                    // Guard code path and restore if instrumentation fails.
-                    try
-                    {
-                        var result = instrumenter.Instrument();
-                        _results.Add(result);
-                        _logger.LogInformation($"Instrumented module: '{module}'");
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning($"Unable to instrument module: {module} because : {ex.Message}");
-                        InstrumentationHelper.RestoreOriginalModule(module, _identifier);
-                    }
-                }
-            }
-        }
+        public CoverageCalculator(InstrumenterState instrumenterState, ILogger logger) => (_instrumenterState, _logger) = (instrumenterState, logger);
 
         public CoverageResult GetCoverageResult()
         {
             CalculateCoverage();
 
             Modules modules = new Modules();
-            foreach (var result in _results)
+            foreach (InstrumenterResult result in _instrumenterState.InstrumenterResults)
             {
                 Documents documents = new Documents();
                 foreach (var doc in result.Documents.Values)
@@ -189,14 +103,14 @@ namespace Coverlet.Core
                 }
 
                 modules.Add(Path.GetFileName(result.ModulePath), documents);
-                InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
+                InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _instrumenterState.Identifier);
             }
 
-            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
+            var coverageResult = new CoverageResult { Identifier = _instrumenterState.Identifier, Modules = modules, InstrumentedResults = _instrumenterState.InstrumenterResults.ToList() };
 
-            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
+            if (!string.IsNullOrEmpty(_instrumenterState.MergeWith) && !string.IsNullOrWhiteSpace(_instrumenterState.MergeWith) && File.Exists(_instrumenterState.MergeWith))
             {
-                string json = File.ReadAllText(_mergeWith);
+                string json = File.ReadAllText(_instrumenterState.MergeWith);
                 coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
             }
 
@@ -205,7 +119,7 @@ namespace Coverlet.Core
 
         private void CalculateCoverage()
         {
-            foreach (var result in _results)
+            foreach (var result in _instrumenterState.InstrumenterResults)
             {
                 if (!File.Exists(result.HitsFilePath))
                 {
@@ -214,7 +128,7 @@ namespace Coverlet.Core
                 }
 
                 List<Document> documents = result.Documents.Values.ToList();
-                if (_useSourceLink && result.SourceLink != null)
+                if (_instrumenterState.UseSourceLink && result.SourceLink != null)
                 {
                     var jObject = JObject.Parse(result.SourceLink)["documents"];
                     var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
@@ -236,17 +150,17 @@ namespace Coverlet.Core
                     for (int i = 0; i < hitCandidatesCount; ++i)
                     {
                         var hitLocation = result.HitCandidates[i];
-                        var document = documentsList[hitLocation.docIndex];
+                        var document = documentsList[hitLocation.DocIndex];
                         int hits = br.ReadInt32();
 
-                        if (hitLocation.isBranch)
+                        if (hitLocation.IsBranch)
                         {
-                            var branch = document.Branches[(hitLocation.start, hitLocation.end)];
+                            var branch = document.Branches[new BranchKey(hitLocation.Start, hitLocation.End)];
                             branch.Hits += hits;
                         }
                         else
                         {
-                            for (int j = hitLocation.start; j <= hitLocation.end; j++)
+                            for (int j = hitLocation.Start; j <= hitLocation.End; j++)
                             {
                                 var line = document.Lines[j];
                                 line.Hits += hits;
@@ -259,7 +173,7 @@ namespace Coverlet.Core
                 // we'll remove all MoveNext() not covered branch
                 foreach (var document in result.Documents)
                 {
-                    List<KeyValuePair<(int, int), Branch>> branchesToRemove = new List<KeyValuePair<(int, int), Branch>>();
+                    List<KeyValuePair<BranchKey, Branch>> branchesToRemove = new List<KeyValuePair<BranchKey, Branch>>();
                     foreach (var branch in document.Value.Branches)
                     {
                         //if one branch is covered we search the other one only if it's not covered
@@ -291,7 +205,7 @@ namespace Coverlet.Core
                 return false;
             }
 
-            foreach (var instrumentationResult in _results)
+            foreach (var instrumentationResult in _instrumenterState.InstrumenterResults)
             {
                 if (instrumentationResult.AsyncMachineStateMethod.Contains(method))
                 {

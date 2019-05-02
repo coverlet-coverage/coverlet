@@ -29,7 +29,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             foreach (var file in files)
                 File.Copy(Path.Combine(OriginalFilesDir, file), Path.Combine(TestFilesDir, file), overwrite: true);
 
-            Instrumenter instrumenter = new Instrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, new Mock<ILogger>().Object);
+            ILInstrumenter instrumenter = new ILInstrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, new Mock<ILogger>().Object);
             Assert.True(instrumenter.CanInstrument());
             var result = instrumenter.Instrument();
             Assert.NotNull(result);
@@ -121,7 +121,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
 
             module = Path.Combine(directory.FullName, destModule);
-            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, false, new Mock<ILogger>().Object);
+            ILInstrumenter instrumenter = new ILInstrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, false, new Mock<ILogger>().Object);
             return new InstrumenterTest
             {
                 Instrumenter = instrumenter,
@@ -133,7 +133,7 @@ namespace Coverlet.Core.Instrumentation.Tests
 
         class InstrumenterTest
         {
-            public Instrumenter Instrumenter { get; set; }
+            public ILInstrumenter Instrumenter { get; set; }
 
             public string Module { get; set; }
 

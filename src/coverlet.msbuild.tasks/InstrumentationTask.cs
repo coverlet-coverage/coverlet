@@ -1,108 +1,65 @@
 ﻿using System;
+using System.IO;
 using Coverlet.Core;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Newtonsoft.Json;
 
 namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : Task
     {
-        private static Coverage _coverage;
-        private string _path;
-        private string _include;
-        private string _includeDirectory;
-        private string _exclude;
-        private string _excludeByFile;
-        private string _excludeByAttribute;
-        private bool _includeTestAssembly;
-        private bool _singleHit;
-        private string _mergeWith;
-        private bool _useSourceLink;
         private readonly MSBuildLogger _logger;
 
-        internal static Coverage Coverage
-        {
-            get { return _coverage; }
-        }
+        [Output]
+        public ITaskItem InstrumenterState { get; set; }
 
         [Required]
-        public string Path
-        {
-            get { return _path; }
-            set { _path = value; }
-        }
+        public string Path { get; set; }
 
-        public string Include
-        {
-            get { return _include; }
-            set { _include = value; }
-        }
+        public string Include { get; set; }
 
-        public string IncludeDirectory
-        {
-            get { return _includeDirectory; }
-            set { _includeDirectory = value; }
-        }
+        public string IncludeDirectory { get; set; }
 
-        public string Exclude
-        {
-            get { return _exclude; }
-            set { _exclude = value; }
-        }
+        public string Exclude { get; set; }
 
-        public string ExcludeByFile
-        {
-            get { return _excludeByFile; }
-            set { _excludeByFile = value; }
-        }
+        public string ExcludeByFile { get; set; }
 
-        public string ExcludeByAttribute
-        {
-            get { return _excludeByAttribute; }
-            set { _excludeByAttribute = value; }
-        }
+        public string ExcludeByAttribute { get; set; }
 
-        public bool IncludeTestAssembly
-        {
-            get { return _includeTestAssembly; }
-            set { _includeTestAssembly = value; }
-        }
+        public bool IncludeTestAssembly { get; set; }
 
-        public bool SingleHit
-        {
-            get { return _singleHit; }
-            set { _singleHit = value; }
-        }
+        public bool SingleHit { get; set; }
 
-        public string MergeWith
-        {
-            get { return _mergeWith; }
-            set { _mergeWith = value; }
-        }
+        public string MergeWith { get; set; }
 
-        public bool UseSourceLink
-        {
-            get { return _useSourceLink; }
-            set { _useSourceLink = value; }
-        }
+        public bool UseSourceLink { get; set; }
 
-        public InstrumentationTask()
-        {
-            _logger = new MSBuildLogger(Log);
-        }
+        public InstrumentationTask() => _logger = new MSBuildLogger(Log);
 
         public override bool Execute()
         {
             try
             {
-                var includeFilters = _include?.Split(',');
-                var includeDirectories = _includeDirectory?.Split(',');
-                var excludeFilters = _exclude?.Split(',');
-                var excludedSourceFiles = _excludeByFile?.Split(',');
-                var excludeAttributes = _excludeByAttribute?.Split(',');
+                var includeFilters = Include?.Split(',');
+                var includeDirectories = IncludeDirectory?.Split(',');
+                var excludeFilters = Exclude?.Split(',');
+                var excludedSourceFiles = ExcludeByFile?.Split(',');
+                var excludeAttributes = ExcludeByAttribute?.Split(',');
 
-                _coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _includeTestAssembly, _singleHit, _mergeWith, _useSourceLink, _logger);
-                _coverage.PrepareModules();
+                IInstrumenter instrumenter = new Instrumenter(Path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, IncludeTestAssembly, SingleHit, MergeWith, UseSourceLink, _logger);
+                InstrumenterState instrumenterState = instrumenter.PrepareModules();
+
+                // We pass instrumenter state throught msbuild output parameter
+                IInstrumentStateSerializer serializer = new JsonInstrumentStateSerializer();
+                InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());
+                using (var instrumentedStateFile = new FileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write))
+                {
+                    using (var serializedState = serializer.Serialize(instrumenterState))
+                    {
+                        serializedState.CopyTo(instrumentedStateFile);
+                    }
+                }
             }
             catch (Exception ex)
             {

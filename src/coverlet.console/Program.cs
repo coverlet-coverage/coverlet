@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
+
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
@@ -51,7 +51,7 @@ namespace Coverlet.Console
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
 
-                Coverage coverage = new Coverage(module.Value,
+                IInstrumenter coverage = new Instrumenter(module.Value,
                     includeFilters.Values.ToArray(),
                     includeDirectories.Values.ToArray(),
                     excludeFilters.Values.ToArray(),
@@ -62,7 +62,8 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger);
-                coverage.PrepareModules();
+
+                InstrumenterState instrumenterState = coverage.PrepareModules();
 
                 Process process = new Process();
                 process.StartInfo.FileName = target.Value();
@@ -96,7 +97,9 @@ namespace Coverlet.Console
 
                 logger.LogInformation("\nCalculating coverage result...");
 
-                var result = coverage.GetCoverageResult();
+                ICoverageCalculator coverageResult = new CoverageCalculator(instrumenterState, logger);
+
+                CoverageResult result = coverageResult.GetCoverageResult();
                 var directory = Path.GetDirectoryName(dOutput);
                 if (directory == string.Empty)
                 {

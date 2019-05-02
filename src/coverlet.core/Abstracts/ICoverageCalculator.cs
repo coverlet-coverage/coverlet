@@ -1,13 +1,21 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+
 using Coverlet.Core.Enums;
-using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Symbols;
 
 namespace Coverlet.Core
 {
+    public class CoverageDetails
+    {
+        public double Covered { get; internal set; }
+        public int Total { get; internal set; }
+        public double Percent
+        {
+            get => Math.Round(Total == 0 ? 1 : Covered / Total, 3);
+        }
+    }
+
     public class BranchInfo
     {
         public int Line { get; set; }
@@ -256,5 +264,10 @@ namespace Coverlet.Core
 
             return thresholdTypeFlags;
         }
+    }
+
+    public interface ICoverageCalculator
+    {
+        CoverageResult GetCoverageResult();
     }
 }
