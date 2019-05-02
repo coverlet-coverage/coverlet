@@ -108,7 +108,6 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(34, points[1].StartLine);
         }
 
-#if !RELEASE
         [Fact]
         public void GetBranchPoints_Switch()
         {
@@ -201,7 +200,6 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(94, points[2].StartLine);
             Assert.Equal(94, points[3].StartLine);
         }
-#endif
 
         [Fact]
         public void GetBranchPoints_AssignsNegativeLineNumberToBranchesInMethodsThatHaveNoInstrumentablePoints()
