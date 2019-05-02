@@ -125,10 +125,16 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
 
-            Assert.Equal(46, points[0].StartLine);
-            Assert.Equal(46, points[1].StartLine);
-            Assert.Equal(46, points[2].StartLine);
-            Assert.Equal(46, points[3].StartLine);
+#if RELEASE // Issue https://github.com/tonerdo/coverlet/issues/389
+            int expectedStartLine = 49;
+#else
+            int expectedStartLine = 46;
+#endif
+
+            Assert.Equal(expectedStartLine, points[0].StartLine);
+            Assert.Equal(expectedStartLine, points[1].StartLine);
+            Assert.Equal(expectedStartLine, points[2].StartLine);
+            Assert.Equal(expectedStartLine, points[3].StartLine);
         }
 
         [Fact]
@@ -148,10 +154,16 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
 
-            Assert.Equal(60, points[0].StartLine);
-            Assert.Equal(60, points[1].StartLine);
-            Assert.Equal(60, points[2].StartLine);
-            Assert.Equal(60, points[3].StartLine);
+#if RELEASE // Issue https://github.com/tonerdo/coverlet/issues/389
+            int expectedStartLine = 63;
+#else
+            int expectedStartLine = 60;
+#endif
+
+            Assert.Equal(expectedStartLine, points[0].StartLine);
+            Assert.Equal(expectedStartLine, points[1].StartLine);
+            Assert.Equal(expectedStartLine, points[2].StartLine);
+            Assert.Equal(expectedStartLine, points[3].StartLine);
         }
 
         [Fact]
@@ -171,10 +183,16 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
 
-            Assert.Equal(76, points[0].StartLine);
-            Assert.Equal(76, points[1].StartLine);
-            Assert.Equal(76, points[2].StartLine);
-            Assert.Equal(76, points[3].StartLine);
+#if RELEASE // Issue https://github.com/tonerdo/coverlet/issues/389
+            int expectedStartLine = 75;
+#else
+            int expectedStartLine = 76;
+#endif
+
+            Assert.Equal(expectedStartLine, points[0].StartLine);
+            Assert.Equal(expectedStartLine, points[1].StartLine);
+            Assert.Equal(expectedStartLine, points[2].StartLine);
+            Assert.Equal(expectedStartLine, points[3].StartLine);
         }
 
         [Fact]
@@ -195,10 +213,16 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[3].Offset);
             Assert.Equal(3, points[3].Path);
 
-            Assert.Equal(94, points[0].StartLine);
-            Assert.Equal(94, points[1].StartLine);
-            Assert.Equal(94, points[2].StartLine);
-            Assert.Equal(94, points[3].StartLine);
+#if RELEASE // Issue https://github.com/tonerdo/coverlet/issues/389
+            int expectedStartLine = 97;
+#else
+            int expectedStartLine = 94;
+#endif
+
+            Assert.Equal(expectedStartLine, points[0].StartLine);
+            Assert.Equal(expectedStartLine, points[1].StartLine);
+            Assert.Equal(expectedStartLine, points[2].StartLine);
+            Assert.Equal(expectedStartLine, points[3].StartLine);
         }
 
         [Fact]
