@@ -23,7 +23,7 @@ namespace Coverlet.Console.Logging
         Minimal = 2,
 
         /// <summary>
-        /// Not used for writing log messages. Specifies that a logging category should not write any messages.
+        /// Not used for writing log messages. Specifies that a logging category should not write any messages except warning and errors.
         /// </summary>
         Quiet = 3
     }
