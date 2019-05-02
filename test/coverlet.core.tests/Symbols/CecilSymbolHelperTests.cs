@@ -108,7 +108,7 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(34, points[1].StartLine);
         }
 
-#if !RELEASE
+#if !RELEASE // Issue https://github.com/tonerdo/coverlet/issues/389
         [Fact]
         public void GetBranchPoints_Switch()
         {
