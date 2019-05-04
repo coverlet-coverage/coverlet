@@ -15,7 +15,7 @@
     <PackageTags>coverage;testing;unit-test;lcov;opencover;quality</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageProjectUrl>https://github.com/tonerdo/coverlet</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/tonerdo/coverlet/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
   </PropertyGroup>
