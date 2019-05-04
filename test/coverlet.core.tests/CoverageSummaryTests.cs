@@ -11,8 +11,46 @@ namespace Coverlet.Core.Tests
     public class CoverageSummaryTests
     {
         private Modules _modules;
+        private Modules _moduleArithmeticPrecision;
 
         public CoverageSummaryTests()
+        {
+            SetupData();
+            SetupDataForArithmeticPrecision();
+        }
+
+        private void SetupDataForArithmeticPrecision()
+        {
+            Lines lines = new Lines();
+            lines.Add(1, 1);
+            for (int i = 2; i <= 6; i++)
+            {
+                lines.Add(i, 0);
+            }
+            Branches branches = new Branches();
+            branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
+            for (int i = 2; i <= 6; i++)
+            {
+                branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = (uint)i });
+            }
+
+            Methods methods = new Methods();
+            var methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
+            methods.Add(methodString, new Method());
+            methods[methodString].Lines = lines;
+            methods[methodString].Branches = branches;
+
+            Classes classes = new Classes();
+            classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
+
+            Documents documents = new Documents();
+            documents.Add("doc.cs", classes);
+
+            _moduleArithmeticPrecision = new Modules();
+            _moduleArithmeticPrecision.Add("module", documents);
+        }
+
+        private void SetupData()
         {
             Lines lines = new Lines();
             lines.Add(1, 1);
@@ -83,6 +121,86 @@ namespace Coverlet.Core.Tests
             Assert.Equal(1, summary.CalculateMethodCoverage(document.Value).Percent);
             Assert.Equal(1, summary.CalculateMethodCoverage(@class.Value).Percent);
             Assert.Equal(1, summary.CalculateMethodCoverage(method.Value.Lines).Percent);
+        }
+
+        [Fact]
+        public void TestCalculateLineCoveragePercentage()
+        {
+            CoverageSummary summary = new CoverageSummary();
+
+            var module = _modules.First();
+            var document = module.Value.First();
+            var @class = document.Value.First();
+            var method = @class.Value.First();
+
+            Assert.Equal(50, summary.CalculateLineCoverage(module.Value).GetCoveragePercentage());
+            Assert.Equal(50, summary.CalculateLineCoverage(document.Value).GetCoveragePercentage());
+            Assert.Equal(50, summary.CalculateLineCoverage(@class.Value).GetCoveragePercentage());
+            Assert.Equal(50, summary.CalculateLineCoverage(method.Value.Lines).GetCoveragePercentage());
+        }
+
+        [Fact]
+        public void TestCalculateBranchCoveragePercentage()
+        {
+            CoverageSummary summary = new CoverageSummary();
+
+            var module = _modules.First();
+            var document = module.Value.First();
+            var @class = document.Value.First();
+            var method = @class.Value.First();
+
+            Assert.Equal(100, summary.CalculateBranchCoverage(module.Value).GetCoveragePercentage());
+            Assert.Equal(100, summary.CalculateBranchCoverage(document.Value).GetCoveragePercentage());
+            Assert.Equal(100, summary.CalculateBranchCoverage(@class.Value).GetCoveragePercentage());
+            Assert.Equal(100, summary.CalculateBranchCoverage(method.Value.Branches).GetCoveragePercentage());
+        }
+
+        [Fact]
+        public void TestCalculateMethodCoveragePercentage()
+        {
+            CoverageSummary summary = new CoverageSummary();
+
+            var module = _modules.First();
+            var document = module.Value.First();
+            var @class = document.Value.First();
+            var method = @class.Value.First();
+
+            Assert.Equal(100, summary.CalculateMethodCoverage(module.Value).GetCoveragePercentage());
+            Assert.Equal(100, summary.CalculateMethodCoverage(document.Value).GetCoveragePercentage());
+            Assert.Equal(100, summary.CalculateMethodCoverage(@class.Value).GetCoveragePercentage());
+            Assert.Equal(100, summary.CalculateMethodCoverage(method.Value.Lines).GetCoveragePercentage());
+        }
+
+        [Fact]
+        public void TestCalculateLineCoveragePercentage_ArithmeticPrecisionCheck()
+        {
+            CoverageSummary summary = new CoverageSummary();
+
+            var module = _moduleArithmeticPrecision.First();
+            var document = module.Value.First();
+            var @class = document.Value.First();
+            var method = @class.Value.First();
+
+            Assert.Equal(16.66, summary.CalculateLineCoverage(module.Value).GetCoveragePercentage());
+            Assert.Equal(16.66, summary.CalculateLineCoverage(document.Value).GetCoveragePercentage());
+            Assert.Equal(16.66, summary.CalculateLineCoverage(@class.Value).GetCoveragePercentage());
+            Assert.Equal(16.66, summary.CalculateLineCoverage(method.Value.Lines).GetCoveragePercentage());
+        }
+
+        [Fact]
+        public void TestCalculateBranchCoveragePercentage_ArithmeticPrecisionCheck()
+        {
+            CoverageSummary summary = new CoverageSummary();
+
+            var module = _moduleArithmeticPrecision.First();
+            var document = module.Value.First();
+            var @class = document.Value.First();
+            var method = @class.Value.First();
+
+            Assert.Equal(16.66, summary.CalculateBranchCoverage(module.Value).GetCoveragePercentage());
+            Assert.Equal(16.66, summary.CalculateBranchCoverage(document.Value).GetCoveragePercentage());
+            Assert.Equal(16.66, summary.CalculateBranchCoverage(@class.Value).GetCoveragePercentage());
+            Assert.Equal(16.66, summary.CalculateBranchCoverage(method.Value.Branches).GetCoveragePercentage());
         }
     }
 }

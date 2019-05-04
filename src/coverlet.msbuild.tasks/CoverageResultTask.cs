@@ -139,15 +139,15 @@ namespace Coverlet.MSbuild.Tasks
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
 
-                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
-                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
-                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
+                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).GetCoveragePercentage();
+                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).GetCoveragePercentage();
+                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).GetCoveragePercentage();
 
                 foreach (var module in result.Modules)
                 {
-                    var linePercent = summary.CalculateLineCoverage(module.Value).Percent * 100;
-                    var branchPercent = summary.CalculateBranchCoverage(module.Value).Percent * 100;
-                    var methodPercent = summary.CalculateMethodCoverage(module.Value).Percent * 100;
+                    var linePercent = summary.CalculateLineCoverage(module.Value).GetCoveragePercentage();
+                    var branchPercent = summary.CalculateBranchCoverage(module.Value).GetCoveragePercentage();
+                    var methodPercent = summary.CalculateMethodCoverage(module.Value).GetCoveragePercentage();
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }

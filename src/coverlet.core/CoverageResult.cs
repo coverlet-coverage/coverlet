@@ -170,9 +170,9 @@ namespace Coverlet.Core
                     {
                         foreach (var module in Modules)
                         {
-                            var line = summary.CalculateLineCoverage(module.Value).Percent * 100;
-                            var branch = summary.CalculateBranchCoverage(module.Value).Percent * 100;
-                            var method = summary.CalculateMethodCoverage(module.Value).Percent * 100;
+                            var line = summary.CalculateLineCoverage(module.Value).GetCoveragePercentage();
+                            var branch = summary.CalculateBranchCoverage(module.Value).GetCoveragePercentage();
+                            var method = summary.CalculateMethodCoverage(module.Value).GetCoveragePercentage();
 
                             if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                             {
@@ -203,9 +203,9 @@ namespace Coverlet.Core
 
                         foreach (var module in Modules)
                         {
-                            line += summary.CalculateLineCoverage(module.Value).Percent * 100;
-                            branch += summary.CalculateBranchCoverage(module.Value).Percent * 100;
-                            method += summary.CalculateMethodCoverage(module.Value).Percent * 100;
+                            line += summary.CalculateLineCoverage(module.Value).GetCoveragePercentage();
+                            branch += summary.CalculateBranchCoverage(module.Value).GetCoveragePercentage();
+                            method += summary.CalculateMethodCoverage(module.Value).GetCoveragePercentage();
                         }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
@@ -229,9 +229,9 @@ namespace Coverlet.Core
                     break;
                 case ThresholdStatistic.Total:
                     {
-                        var line = summary.CalculateLineCoverage(Modules).Percent * 100;
-                        var branch = summary.CalculateBranchCoverage(Modules).Percent * 100;
-                        var method = summary.CalculateMethodCoverage(Modules).Percent * 100;
+                        var line = summary.CalculateLineCoverage(Modules).GetCoveragePercentage();
+                        var branch = summary.CalculateBranchCoverage(Modules).GetCoveragePercentage();
+                        var method = summary.CalculateMethodCoverage(Modules).GetCoveragePercentage();
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                         {

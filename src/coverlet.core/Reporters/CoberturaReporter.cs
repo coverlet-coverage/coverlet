@@ -82,7 +82,7 @@ namespace Coverlet.Core.Reporters
                                 {
                                     var branches = meth.Value.Branches.Where(b => b.Line == ln.Key).ToList();
                                     var branchInfoCoverage = summary.CalculateBranchCoverage(branches);
-                                    line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent * 100}% ({branchInfoCoverage.Covered}/{branchInfoCoverage.Total})"));
+                                    line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.GetCoveragePercentage()}% ({branchInfoCoverage.Covered}/{branchInfoCoverage.Total})"));
                                     XElement conditions = new XElement("conditions");
                                     var byOffset = branches.GroupBy(b => b.Offset).ToDictionary(b => b.Key, b => b.ToList());
                                     foreach (var entry in byOffset)
@@ -90,7 +90,7 @@ namespace Coverlet.Core.Reporters
                                         XElement condition = new XElement("condition");
                                         condition.Add(new XAttribute("number", entry.Key));
                                         condition.Add(new XAttribute("type", entry.Value.Count() > 2 ? "switch" : "jump")); // Just guessing here
-                                        condition.Add(new XAttribute("coverage", $"{summary.CalculateBranchCoverage(entry.Value).Percent * 100}%"));
+                                        condition.Add(new XAttribute("coverage", $"{summary.CalculateBranchCoverage(entry.Value).GetCoveragePercentage()}%"));
                                         conditions.Add(condition);
                                     }
 

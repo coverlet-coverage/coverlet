@@ -17,13 +17,13 @@ namespace Coverlet.Core.Reporters.Tests
             result.Identifier = Guid.NewGuid().ToString();
 
             result.Modules = new Modules();
-            result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
+            result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());            
 
             OpenCoverReporter reporter = new OpenCoverReporter();
             string report = reporter.Report(result);
             Assert.NotEmpty(report);
             XDocument doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
-            Assert.Empty(doc.Descendants().Attributes("sequenceCoverage").Where(v => v.Value != "33.3"));
+            Assert.Empty(doc.Descendants().Attributes("sequenceCoverage").Where(v => v.Value != "33.33"));
             Assert.Empty(doc.Descendants().Attributes("branchCoverage").Where(v => v.Value != "25"));
         }
 
