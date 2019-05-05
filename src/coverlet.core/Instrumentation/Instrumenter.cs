@@ -293,7 +293,7 @@ namespace Coverlet.Core.Instrumentation
             var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
             if (!string.IsNullOrEmpty(sourceFile) && _excludedFiles.Contains(sourceFile))
             {
-                _logger.LogInformation($"Excluded source file: '{sourceFile}'");
+                _logger.LogVerbose($"Excluded source file: '{sourceFile}'");
                 return;
             }
 

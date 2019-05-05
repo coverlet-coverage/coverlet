@@ -61,6 +61,7 @@ Options:
   -t|--target             Path to the test runner application.
   -a|--targetargs         Arguments to be passed to the test runner.
   -o|--output             Output of the generated coverage report
+  -v|--verbosity          Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
   -f|--format             Format of the generated coverage report.
   --threshold             Exits with error if the coverage % is below value.
   --threshold-type        Coverage type to apply the threshold to.
@@ -69,10 +70,10 @@ Options:
   --include               Filter expressions to include specific modules and types.
   --include-directory     Include directories containing additional assemblies to be instrumented.
   --exclude-by-file       Glob patterns specifying source files to exclude.
-  --include-directory     Include directories containing additional assemblies to be instrumented.
   --exclude-by-attribute  Attributes to exclude from code coverage.
   --merge-with            Path to existing coverage result to merge.
   --use-source-link       Specifies whether to use SourceLink URIs in place of file system paths.
+  --single-hit            Specifies whether to limit code coverage hit reporting to a single hit for each location.
 ```
 
 #### Code Coverage
