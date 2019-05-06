@@ -1,13 +1,15 @@
 version: '{build}'
 image:
   - Visual Studio 2017
-  - Ubuntu
+  - Ubuntu1804
 configuration:
   - Debug
   - Release
 build_script:
-  - ps: echo "Building for $env:CONFIGURATION on $env:APPVEYOR_BUILD_WORKER_IMAGE"
-  - ps: dotnet msbuild build.proj /p:Configuration=$env:CONFIGURATION
+  - cmd: build.cmd $env:CONFIGURATION
+  - sh: chmod +x build.sh
+  - sh: chmod +x ./eng/build.sh
+  - sh: ./build.sh $CONFIGURATION
 test_script:
   - ps: if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode) }
   - ps: |

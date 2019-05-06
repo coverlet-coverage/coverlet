@@ -297,3 +297,6 @@ __pycache__/
 
 # OSX
 .DS_Store
+
+# Build tools
+.tools

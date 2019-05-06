@@ -18,8 +18,16 @@ cd coverlet
 
 Execute build script:
 
+Windows
 ```bash
-dotnet msbuild build.proj
+build.cmd Debug
+build.cmd Release
+```
+
+Unix (Mac&Linux)
+```bash
+./build.sh Debug
+./build.sh Release
 ```
 
 This will result in the following:

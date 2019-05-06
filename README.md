@@ -396,11 +396,11 @@ If you're using [Cake Build](https://cakebuild.net) for your build script you ca
 
 ## Issues & Contributions
 
-If you find a bug or have a feature request, please report them at this repository's issues section. See the [CONTRIBUTING GUIDE](CONTRIBUTING.md) for details on building and contributing to this project.
+If you find a bug or have a feature request, please report them at this repository's issues section. See the [CONTRIBUTING GUIDE](Documentation/CONTRIBUTING.md) for details on building and contributing to this project.
 
 ## Code of Conduct
 
-This project enforces a code of conduct in line with the contributor covenant. See [CODE OF CONDUCT](CODE_OF_CONDUCT.md) for details.
+This project enforces a code of conduct in line with the contributor covenant. See [CODE OF CONDUCT](Documentation/CODE_OF_CONDUCT.md) for details.
 
 ## License
 
