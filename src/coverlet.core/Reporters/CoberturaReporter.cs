@@ -26,7 +26,7 @@ namespace Coverlet.Core.Reporters
             XDocument xml = new XDocument();
             XElement coverage = new XElement("coverage");
             coverage.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(result.Modules).Percent / 100).ToString()));
-            coverage.Add(new XAttribute("branch-rate", (summary.CalculateLineCoverage(result.Modules).Percent / 100).ToString()));
+            coverage.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(result.Modules).Percent / 100).ToString()));
             coverage.Add(new XAttribute("version", "1.9"));
             coverage.Add(new XAttribute("timestamp", ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString()));
 
