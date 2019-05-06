@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -14,6 +15,13 @@ namespace Coverlet.Core.Helpers
 {
     internal static class InstrumentationHelper
     {
+        private static readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
+
+        static InstrumentationHelper()
+        {
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => RestoreOriginalModules();
+        }
+
         public static string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly)
         {
             Debug.Assert(directories != null);
@@ -87,11 +95,19 @@ namespace Coverlet.Core.Helpers
             var backupPath = GetBackupPath(module, identifier);
             var backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
             File.Copy(module, backupPath, true);
+            if (!_backupList.TryAdd(module, backupPath))
+            {
+                throw new ArgumentException($"Key already added '{module}'");
+            }
 
             var symbolFile = Path.ChangeExtension(module, ".pdb");
             if (File.Exists(symbolFile))
             {
                 File.Copy(symbolFile, backupSymbolPath, true);
+                if (!_backupList.TryAdd(symbolFile, backupSymbolPath))
+                {
+                    throw new ArgumentException($"Key already added '{module}'");
+                }
             }
         }
 
@@ -108,16 +124,37 @@ namespace Coverlet.Core.Helpers
             {
                 File.Copy(backupPath, module, true);
                 File.Delete(backupPath);
+                _backupList.TryRemove(module, out string _);
             }, retryStrategy, 10);
 
             RetryHelper.Retry(() =>
             {
                 if (File.Exists(backupSymbolPath))
                 {
-                    File.Copy(backupSymbolPath, Path.ChangeExtension(module, ".pdb"), true);
+                    string symbolFile = Path.ChangeExtension(module, ".pdb");
+                    File.Copy(backupSymbolPath, symbolFile, true);
                     File.Delete(backupSymbolPath);
+                    _backupList.TryRemove(symbolFile, out string _);
                 }
             }, retryStrategy, 10);
+        }
+
+        public static void RestoreOriginalModules()
+        {
+            // Restore the original module - retry up to 10 times, since the destination file could be locked
+            // See: https://github.com/tonerdo/coverlet/issues/25
+            var retryStrategy = CreateRetryStrategy();
+
+            foreach (string key in _backupList.Keys.ToList())
+            {
+                string backupPath = _backupList[key];
+                RetryHelper.Retry(() =>
+                {
+                    File.Copy(backupPath, key, true);
+                    File.Delete(backupPath);
+                    _backupList.TryRemove(key, out string _);
+                }, retryStrategy, 10);
+            }
         }
 
         public static void DeleteHitsFile(string path)
