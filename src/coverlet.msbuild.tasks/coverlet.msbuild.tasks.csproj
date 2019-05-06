@@ -10,7 +10,7 @@
     <PackageVersion>$(AssemblyVersion)</PackageVersion>
     <Title>coverlet.msbuild</Title>
     <Authors>tonerdo</Authors>
-    <PackageLicenseUrl>https://github.com/tonerdo/coverlet/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>http://github.com/tonerdo/coverlet</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
