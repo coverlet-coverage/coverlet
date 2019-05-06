@@ -17,7 +17,7 @@ namespace Coverlet.Core.Reporters.Tests
             result.Identifier = Guid.NewGuid().ToString();
 
             result.Modules = new Modules();
-            result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());            
+            result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
 
             OpenCoverReporter reporter = new OpenCoverReporter();
             string report = reporter.Report(result);

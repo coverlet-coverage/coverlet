@@ -34,7 +34,7 @@ namespace Coverlet.Core.Reporters
         private void OutputLineCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The total number of lines
-            OutputTeamCityServiceMessage("CodeCoverageL", coverageDetails.GetCoveragePercentage(), builder);
+            OutputTeamCityServiceMessage("CodeCoverageL", coverageDetails.Percent, builder);
 
             // The number of covered lines
             OutputTeamCityServiceMessage("CodeCoverageAbsLCovered", coverageDetails.Covered, builder);
@@ -46,7 +46,7 @@ namespace Coverlet.Core.Reporters
         private void OutputBranchCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The total number of branches
-            OutputTeamCityServiceMessage("CodeCoverageR", coverageDetails.GetCoveragePercentage(), builder);
+            OutputTeamCityServiceMessage("CodeCoverageR", coverageDetails.Percent, builder);
 
             // The number of covered branches
             OutputTeamCityServiceMessage("CodeCoverageAbsRCovered", coverageDetails.Covered, builder);
@@ -58,7 +58,7 @@ namespace Coverlet.Core.Reporters
         private void OutputMethodCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The total number of methods
-            OutputTeamCityServiceMessage("CodeCoverageM", coverageDetails.GetCoveragePercentage(), builder);
+            OutputTeamCityServiceMessage("CodeCoverageM", coverageDetails.Percent, builder);
 
             // The number of covered methods
             OutputTeamCityServiceMessage("CodeCoverageAbsMCovered", coverageDetails.Covered, builder);

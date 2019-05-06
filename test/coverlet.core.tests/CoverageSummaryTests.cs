@@ -85,10 +85,10 @@ namespace Coverlet.Core.Tests
             var @class = document.Value.First();
             var method = @class.Value.First();
 
-            Assert.Equal(0.5, summary.CalculateLineCoverage(module.Value).Percent);
-            Assert.Equal(0.5, summary.CalculateLineCoverage(document.Value).Percent);
-            Assert.Equal(0.5, summary.CalculateLineCoverage(@class.Value).Percent);
-            Assert.Equal(0.5, summary.CalculateLineCoverage(method.Value.Lines).Percent);
+            Assert.Equal(50, summary.CalculateLineCoverage(module.Value).Percent);
+            Assert.Equal(50, summary.CalculateLineCoverage(document.Value).Percent);
+            Assert.Equal(50, summary.CalculateLineCoverage(@class.Value).Percent);
+            Assert.Equal(50, summary.CalculateLineCoverage(method.Value.Lines).Percent);
         }
 
         [Fact]
@@ -101,10 +101,10 @@ namespace Coverlet.Core.Tests
             var @class = document.Value.First();
             var method = @class.Value.First();
 
-            Assert.Equal(1, summary.CalculateBranchCoverage(module.Value).Percent);
-            Assert.Equal(1, summary.CalculateBranchCoverage(document.Value).Percent);
-            Assert.Equal(1, summary.CalculateBranchCoverage(@class.Value).Percent);
-            Assert.Equal(1, summary.CalculateBranchCoverage(method.Value.Branches).Percent);
+            Assert.Equal(100, summary.CalculateBranchCoverage(module.Value).Percent);
+            Assert.Equal(100, summary.CalculateBranchCoverage(document.Value).Percent);
+            Assert.Equal(100, summary.CalculateBranchCoverage(@class.Value).Percent);
+            Assert.Equal(100, summary.CalculateBranchCoverage(method.Value.Branches).Percent);
         }
 
         [Fact]
@@ -117,58 +117,10 @@ namespace Coverlet.Core.Tests
             var @class = document.Value.First();
             var method = @class.Value.First();
 
-            Assert.Equal(1, summary.CalculateMethodCoverage(module.Value).Percent);
-            Assert.Equal(1, summary.CalculateMethodCoverage(document.Value).Percent);
-            Assert.Equal(1, summary.CalculateMethodCoverage(@class.Value).Percent);
-            Assert.Equal(1, summary.CalculateMethodCoverage(method.Value.Lines).Percent);
-        }
-
-        [Fact]
-        public void TestCalculateLineCoveragePercentage()
-        {
-            CoverageSummary summary = new CoverageSummary();
-
-            var module = _modules.First();
-            var document = module.Value.First();
-            var @class = document.Value.First();
-            var method = @class.Value.First();
-
-            Assert.Equal(50, summary.CalculateLineCoverage(module.Value).GetCoveragePercentage());
-            Assert.Equal(50, summary.CalculateLineCoverage(document.Value).GetCoveragePercentage());
-            Assert.Equal(50, summary.CalculateLineCoverage(@class.Value).GetCoveragePercentage());
-            Assert.Equal(50, summary.CalculateLineCoverage(method.Value.Lines).GetCoveragePercentage());
-        }
-
-        [Fact]
-        public void TestCalculateBranchCoveragePercentage()
-        {
-            CoverageSummary summary = new CoverageSummary();
-
-            var module = _modules.First();
-            var document = module.Value.First();
-            var @class = document.Value.First();
-            var method = @class.Value.First();
-
-            Assert.Equal(100, summary.CalculateBranchCoverage(module.Value).GetCoveragePercentage());
-            Assert.Equal(100, summary.CalculateBranchCoverage(document.Value).GetCoveragePercentage());
-            Assert.Equal(100, summary.CalculateBranchCoverage(@class.Value).GetCoveragePercentage());
-            Assert.Equal(100, summary.CalculateBranchCoverage(method.Value.Branches).GetCoveragePercentage());
-        }
-
-        [Fact]
-        public void TestCalculateMethodCoveragePercentage()
-        {
-            CoverageSummary summary = new CoverageSummary();
-
-            var module = _modules.First();
-            var document = module.Value.First();
-            var @class = document.Value.First();
-            var method = @class.Value.First();
-
-            Assert.Equal(100, summary.CalculateMethodCoverage(module.Value).GetCoveragePercentage());
-            Assert.Equal(100, summary.CalculateMethodCoverage(document.Value).GetCoveragePercentage());
-            Assert.Equal(100, summary.CalculateMethodCoverage(@class.Value).GetCoveragePercentage());
-            Assert.Equal(100, summary.CalculateMethodCoverage(method.Value.Lines).GetCoveragePercentage());
+            Assert.Equal(100, summary.CalculateMethodCoverage(module.Value).Percent);
+            Assert.Equal(100, summary.CalculateMethodCoverage(document.Value).Percent);
+            Assert.Equal(100, summary.CalculateMethodCoverage(@class.Value).Percent);
+            Assert.Equal(100, summary.CalculateMethodCoverage(method.Value.Lines).Percent);
         }
 
         [Fact]
@@ -181,10 +133,10 @@ namespace Coverlet.Core.Tests
             var @class = document.Value.First();
             var method = @class.Value.First();
 
-            Assert.Equal(16.66, summary.CalculateLineCoverage(module.Value).GetCoveragePercentage());
-            Assert.Equal(16.66, summary.CalculateLineCoverage(document.Value).GetCoveragePercentage());
-            Assert.Equal(16.66, summary.CalculateLineCoverage(@class.Value).GetCoveragePercentage());
-            Assert.Equal(16.66, summary.CalculateLineCoverage(method.Value.Lines).GetCoveragePercentage());
+            Assert.Equal(16.66, summary.CalculateLineCoverage(module.Value).Percent);
+            Assert.Equal(16.66, summary.CalculateLineCoverage(document.Value).Percent);
+            Assert.Equal(16.66, summary.CalculateLineCoverage(@class.Value).Percent);
+            Assert.Equal(16.66, summary.CalculateLineCoverage(method.Value.Lines).Percent);
         }
 
         [Fact]
@@ -197,10 +149,10 @@ namespace Coverlet.Core.Tests
             var @class = document.Value.First();
             var method = @class.Value.First();
 
-            Assert.Equal(16.66, summary.CalculateBranchCoverage(module.Value).GetCoveragePercentage());
-            Assert.Equal(16.66, summary.CalculateBranchCoverage(document.Value).GetCoveragePercentage());
-            Assert.Equal(16.66, summary.CalculateBranchCoverage(@class.Value).GetCoveragePercentage());
-            Assert.Equal(16.66, summary.CalculateBranchCoverage(method.Value.Branches).GetCoveragePercentage());
+            Assert.Equal(16.66, summary.CalculateBranchCoverage(module.Value).Percent);
+            Assert.Equal(16.66, summary.CalculateBranchCoverage(document.Value).Percent);
+            Assert.Equal(16.66, summary.CalculateBranchCoverage(@class.Value).Percent);
+            Assert.Equal(16.66, summary.CalculateBranchCoverage(method.Value.Branches).Percent);
         }
     }
 }

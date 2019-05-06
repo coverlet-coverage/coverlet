@@ -6,20 +6,6 @@ namespace Coverlet.Core
     {
         public double Covered { get; internal set; }
         public int Total { get; internal set; }
-        public double Percent
-        {
-            get => Math.Round(Total == 0 ? 1 : Covered / Total, 4);
-        }
-
-        public double GetCoveragePercentage()
-        {
-            double percentage = Percent * 100;
-            return RoundDown(percentage);
-        }
-
-        private double RoundDown(double percentage)
-        {
-            return Math.Floor(percentage * 100) / 100;
-        }
+        public double Percent => Total == 0 ? 1D : Math.Floor((Covered / Total) * 10000) / 100;
     }
 }
