@@ -162,15 +162,15 @@ namespace Coverlet.Console
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
 
-                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
-                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
-                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
+                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent;
+                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent;
+                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent;
 
                 foreach (var _module in result.Modules)
                 {
-                    var linePercent = summary.CalculateLineCoverage(_module.Value).Percent * 100;
-                    var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent * 100;
-                    var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent * 100;
+                    var linePercent = summary.CalculateLineCoverage(_module.Value).Percent;
+                    var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
+                    var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }

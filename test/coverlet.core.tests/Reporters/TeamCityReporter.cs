@@ -111,7 +111,7 @@ namespace Coverlet.Core.Reporters.Tests
             var output = _reporter.Report(_result);
 
             // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageR' value='33.3']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageR' value='33.33']", output);
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsRCovered' value='1']", output);
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsRTotal' value='3']", output);
         }
