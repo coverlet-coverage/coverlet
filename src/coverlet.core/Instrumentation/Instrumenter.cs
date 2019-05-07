@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Logging;
+using Mono.Cecil;
 
 namespace Coverlet.Core
 {
@@ -81,7 +83,7 @@ namespace Coverlet.Core
                     // Guard code path and restore if instrumentation fails.
                     try
                     {
-                        var result = instrumenter.Instrument();
+                        InstrumenterResult result = instrumenter.Instrument();
                         _results.Add(result);
                         _logger.LogVerbose($"Instrumented module: '{module}'");
                     }
@@ -100,6 +102,96 @@ namespace Coverlet.Core
                 MergeWith = _mergeWith,
                 UseSourceLink = _useSourceLink
             };
+        }
+    }
+
+    /// <summary>
+    /// In case of testing different runtime i.e. netfx we could find netstandard.dll in folder.
+    /// netstandard.dll is a forward only lib, there is no IL but only forwards to "runtime" implementation.
+    /// For some classes implementation are in different assembly for different runtime for instance:
+    /// 
+    /// For NetFx 4.7
+    /// // Token: 0x2700072C RID: 1836
+    /// .class extern forwarder System.Security.Cryptography.X509Certificates.StoreName
+    /// {
+    ///    .assembly extern System
+    /// }    
+    /// 
+    /// For netcoreapp2.2
+    /// Token: 0x2700072C RID: 1836
+    /// .class extern forwarder System.Security.Cryptography.X509Certificates.StoreName
+    /// {
+    ///    .assembly extern System.Security.Cryptography.X509Certificates
+    /// }
+    /// 
+    /// There is a concrete possibility that Cecil cannot find implementation and throws StackOverflow exception https://github.com/jbevain/cecil/issues/575
+    /// This custom resolver check if requested lib is a "official" netstandard.dll and load once of "current runtime" with
+    /// correct forwards.
+    /// Check compares 'assembly name' and 'public key token', because versions could differ between runtimes.
+    /// </summary>
+    internal class NetstandardAwareAssemblyResolver : DefaultAssemblyResolver
+    {
+        private static System.Reflection.Assembly _netStandardAssembly;
+        private static string _name;
+        private static byte[] _publicKeyToken;
+        private static AssemblyDefinition _assemblyDefinition;
+
+        static NetstandardAwareAssemblyResolver()
+        {
+            try
+            {
+                // To be sure to load information of "real" runtime netstandard implementation
+                _netStandardAssembly = System.Reflection.Assembly.LoadFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll"));
+                System.Reflection.AssemblyName name = _netStandardAssembly.GetName();
+                _name = name.Name;
+                _publicKeyToken = name.GetPublicKeyToken();
+                _assemblyDefinition = AssemblyDefinition.ReadAssembly(_netStandardAssembly.Location);
+            }
+            catch (FileNotFoundException)
+            {
+                // netstandard not supported
+            }
+        }
+
+        // Check name and public key but not version that could be different
+        private bool CheckIfSearchingNetstandard(AssemblyNameReference name)
+        {
+            if (_netStandardAssembly is null)
+            {
+                return false;
+            }
+
+            if (_name != name.Name)
+            {
+                return false;
+            }
+
+            if (name.PublicKeyToken.Length != _publicKeyToken.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < name.PublicKeyToken.Length; i++)
+            {
+                if (_publicKeyToken[i] != name.PublicKeyToken[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public override AssemblyDefinition Resolve(AssemblyNameReference name)
+        {
+            if (CheckIfSearchingNetstandard(name))
+            {
+                return _assemblyDefinition;
+            }
+            else
+            {
+                return base.Resolve(name);
+            }
         }
     }
 }
