@@ -56,24 +56,25 @@ Arguments:
   <ASSEMBLY>  Path to the test assembly.
 
 Options:
-  -h|--help               Show help information
-  -v|--version            Show version information
-  -t|--target             Path to the test runner application.
-  -a|--targetargs         Arguments to be passed to the test runner.
-  -o|--output             Output of the generated coverage report
-  -v|--verbosity          Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
-  -f|--format             Format of the generated coverage report.
-  --threshold             Exits with error if the coverage % is below value.
-  --threshold-type        Coverage type to apply the threshold to.
-  --threshold-stat        Coverage statistic used to enforce the threshold value.
-  --exclude               Filter expressions to exclude specific modules and types.
-  --include               Filter expressions to include specific modules and types.
-  --include-directory     Include directories containing additional assemblies to be instrumented.
-  --exclude-by-file       Glob patterns specifying source files to exclude.
-  --exclude-by-attribute  Attributes to exclude from code coverage.
-  --merge-with            Path to existing coverage result to merge.
-  --use-source-link       Specifies whether to use SourceLink URIs in place of file system paths.
-  --single-hit            Specifies whether to limit code coverage hit reporting to a single hit for each location.
+  -h|--help                Show help information
+  -v|--version             Show version information
+  -t|--target              Path to the test runner application.
+  -a|--targetargs          Arguments to be passed to the test runner.
+  -o|--output              Output of the generated coverage report
+  -v|--verbosity           Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
+  -f|--format              Format of the generated coverage report.
+  --threshold              Exits with error if the coverage % is below value.
+  --threshold-type         Coverage type to apply the threshold to.
+  --threshold-stat         Coverage statistic used to enforce the threshold value.
+  --exclude                Filter expressions to exclude specific modules and types.
+  --include                Filter expressions to include specific modules and types.
+  --include-directory      Include directories containing additional assemblies to be instrumented.
+  --exclude-by-file        Glob patterns specifying source files to exclude.
+  --exclude-by-attribute   Attributes to exclude from code coverage.
+  --include-test-assembly  Specifies whether to report code coverage of the test assembly.
+  --single-hit             Specifies whether to limit code coverage hit reporting to a single hit for each location.
+  --merge-with             Path to existing coverage result to merge.
+  --use-source-link        Specifies whether to use SourceLink URIs in place of file system paths.
 ```
 
 #### Code Coverage
@@ -241,6 +242,8 @@ Examples
 
 Both `--exclude` and `--include` options can be used together but `--exclude` takes precedence. You can specify the `--exclude` and `--include` options multiple times to allow for multiple filter expressions.
 
+You can also include coverage of the test assembly itself by specifying the `--include-test-assembly` flag.
+
 ### MSBuild
 
 In this mode, Coverlet doesn't require any additional setup other than including the NuGet package in the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
@@ -384,9 +387,9 @@ Examples
  - `/p:Include="[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
   - `/p:Include="[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
 
-Both `Exclude` and `Include` properties can be used together but `Exclude` takes precedence.
+Both `Exclude` and `Include` properties can be used together but `Exclude` takes precedence. You can specify multiple filter expressions by separting them with a comma (`,`).
 
-You can specify multiple filter expressions by separting them with a comma (`,`).
+You can also include coverage of the test assembly itself by setting `/p:IncludeTestAssembly` to `true`.
 
 ### SourceLink
 
