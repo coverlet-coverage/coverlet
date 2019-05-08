@@ -15,7 +15,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <DevelopmentDependency>true</DevelopmentDependency>
-    <Description>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</Description>
+    <Description>Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.</Description>
     <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
