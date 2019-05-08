@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.1" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+     <!--Do not change System.Reflection.Metadata version since we need to support VSTest DataCollectors. Goto https://www.nuget.org/packages/System.Reflection.Metadata to check versions.-->
     <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
   </ItemGroup>
