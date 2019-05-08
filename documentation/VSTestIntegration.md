@@ -1,7 +1,7 @@
 # Coverlet Integration with VSTest
 
 ## Motivation
-The cross platform solution for Code Coverage generation for .NET Core projects(in a consistent manner).
+The cross platform solution for Code Coverage generation for .NET Core projects (in a consistent manner).
 The asks for Code Coverage support for .NET Core on Linux is the most commented issue on vstest repo:
 https://github.com/Microsoft/vstest/issues/981#issuecomment-320311552
 
