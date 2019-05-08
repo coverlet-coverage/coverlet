@@ -41,7 +41,7 @@ namespace Coverlet.Core.Instrumentation
         }
 
         public string Module;
-        public string[] AsyncMachineStateMethod;
+        public string[] BranchesInCompiledGeneratedClass;
         public string HitsFilePath;
         public string ModulePath;
         public string SourceLink;

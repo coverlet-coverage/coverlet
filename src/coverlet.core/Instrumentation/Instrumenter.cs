@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-
+using System.Runtime.CompilerServices;
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
@@ -35,7 +35,7 @@ namespace Coverlet.Core.Instrumentation
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
         private MethodReference _customTrackerRecordHitMethod;
-        private List<string> _asyncMachineStateMethod;
+        private List<string> _branchesInCompiledGeneratedClass;
 
         public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes, bool singleHit, ILogger logger)
         {
@@ -68,7 +68,7 @@ namespace Coverlet.Core.Instrumentation
 
             InstrumentModule();
 
-            _result.AsyncMachineStateMethod = _asyncMachineStateMethod == null ? Array.Empty<string>() : _asyncMachineStateMethod.ToArray();
+            _result.BranchesInCompiledGeneratedClass = _branchesInCompiledGeneratedClass == null ? Array.Empty<string>() : _branchesInCompiledGeneratedClass.ToArray();
 
             return _result;
         }
@@ -336,13 +336,17 @@ namespace Coverlet.Core.Instrumentation
                         continue;
 
                     var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
-                    foreach (var _instruction in processor.Body.Instructions)
-                        ReplaceInstructionTarget(_instruction, instruction, target);
 
-                    foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
-                        ReplaceExceptionHandlerBoundary(handler, instruction, target);
+                    if (!(target is null))
+                    {
+                        foreach (var _instruction in processor.Body.Instructions)
+                            ReplaceInstructionTarget(_instruction, instruction, target);
 
-                    index += 2;
+                        foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
+                            ReplaceExceptionHandlerBoundary(handler, instruction, target);
+
+                        index += 2;
+                    }
                 }
 
                 index++;
@@ -374,6 +378,12 @@ namespace Coverlet.Core.Instrumentation
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, BranchPoint branchPoint)
         {
+            // Skip to instrument async branch of async state machine
+            if (IsAsyncStateMachineAsyncBranch(method.DeclaringType, method, instruction, processor))
+            {
+                return null;
+            }
+
             if (!_result.Documents.TryGetValue(branchPoint.Document, out var document))
             {
                 document = new Document { Path = branchPoint.Document };
@@ -397,16 +407,16 @@ namespace Coverlet.Core.Instrumentation
                     }
                 );
 
-                if (IsAsyncStateMachineBranch(method.DeclaringType, method))
+                if (method.DeclaringType.CustomAttributes.Any(x => x.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
                 {
-                    if (_asyncMachineStateMethod == null)
+                    if (_branchesInCompiledGeneratedClass == null)
                     {
-                        _asyncMachineStateMethod = new List<string>();
+                        _branchesInCompiledGeneratedClass = new List<string>();
                     }
 
-                    if (!_asyncMachineStateMethod.Contains(method.FullName))
+                    if (!_branchesInCompiledGeneratedClass.Contains(method.FullName))
                     {
-                        _asyncMachineStateMethod.Add(method.FullName);
+                        _branchesInCompiledGeneratedClass.Add(method.FullName);
                     }
                 }
             }
@@ -417,8 +427,29 @@ namespace Coverlet.Core.Instrumentation
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
         }
 
-        private bool IsAsyncStateMachineBranch(TypeDefinition typeDef, MethodDefinition method)
+        private bool IsAsyncStateMachineAsyncBranch(TypeDefinition typeDef, MethodDefinition method, Instruction currentInstruction, ILProcessor processor)
         {
+            /*
+                We check if instruction is on async path branch of MoveNext()
+
+                ...
+                L_0043: call instance bool [System.Runtime]System.Runtime.CompilerServices.TaskAwaiter`1<!T>::get_IsCompleted()
+                L_0048: brtrue.s L_008d
+                ...enqueue callback that will be awakened
+                L_006c: leave L_0103 <- method returns
+                ...
+
+                If code run async callback will be enqued and method returns:
+
+                ...
+                this.<>t__builder.AwaitUnsafeOnCompleted<TaskAwaiter<T>, DemoAsyncClass.<DataAccessorAsync>d__3<T>>(ref awaiter, ref d__);
+                return;
+                ...
+
+                However we're not interested in this branch check and could lead to uncovered branch in case of sync run
+                so we skip to instrument async part of async state machine, here there is no interesting code only async callback enqued
+            */
+
             if (!method.FullName.EndsWith("::MoveNext()"))
             {
                 return false;
@@ -428,7 +459,30 @@ namespace Coverlet.Core.Instrumentation
             {
                 if (implementedInterface.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine")
                 {
-                    return true;
+                    Instruction startAsyncBranch = null;
+                    Instruction leaveAsyncBranch = null;
+                    foreach (var bodyInstruction in processor.Body.Instructions)
+                    {
+                        if (startAsyncBranch is null &&
+                            bodyInstruction.Operand is Mono.Cecil.MethodReference operand &&
+                            operand.Name == "get_IsCompleted" &&
+                            operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") &&
+                            operand.DeclaringType.Scope.Name == "System.Runtime")
+                        {
+                            startAsyncBranch = bodyInstruction;
+                        }
+                        if (!(startAsyncBranch is null) && bodyInstruction.OpCode == OpCodes.Leave)
+                        {
+                            leaveAsyncBranch = bodyInstruction;
+                        }
+                        if (!(startAsyncBranch is null) && !(leaveAsyncBranch is null))
+                        {
+                            if (currentInstruction.Offset >= startAsyncBranch.Offset && currentInstruction.Offset <= leaveAsyncBranch.Offset)
+                            {
+                                return true;
+                            }
+                        }
+                    }
                 }
             }
             return false;
