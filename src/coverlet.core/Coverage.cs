@@ -209,7 +209,11 @@ namespace Coverlet.Core
             {
                 if (!File.Exists(result.HitsFilePath))
                 {
-                    _logger.LogWarning($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
+                    // Hits file could be missed mainly for two reason
+                    // 1) Issue during module Unload()
+                    // 2) Instrumented module is never loaded or used so we don't have any hit to register and
+                    //    module tracker is never used
+                    _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
                     continue;
                 }
 
