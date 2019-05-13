@@ -9,8 +9,7 @@ using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Reporters;
-
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace Coverlet.Console
 {
@@ -29,6 +28,7 @@ namespace Coverlet.Console
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
             CommandOption targs = app.Option("-a|--targetargs", "Arguments to be passed to the test runner.", CommandOptionType.SingleValue);
             CommandOption output = app.Option("-o|--output", "Output of the generated coverage report", CommandOptionType.SingleValue);
+            CommandOption<LogLevel> verbosity = app.Option<LogLevel>("-v|--verbosity", "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.", CommandOptionType.SingleValue);
             CommandOption formats = app.Option("-f|--format", "Format of the generated coverage report.", CommandOptionType.MultipleValue);
             CommandOption threshold = app.Option("--threshold", "Exits with error if the coverage % is below value.", CommandOptionType.SingleValue);
             CommandOption thresholdTypes = app.Option("--threshold-type", "Coverage type to apply the threshold to.", CommandOptionType.MultipleValue);
@@ -38,7 +38,7 @@ namespace Coverlet.Console
             CommandOption excludedSourceFiles = app.Option("--exclude-by-file", "Glob patterns specifying source files to exclude.", CommandOptionType.MultipleValue);
             CommandOption includeDirectories = app.Option("--include-directory", "Include directories containing additional assemblies to be instrumented.", CommandOptionType.MultipleValue);
             CommandOption excludeAttributes = app.Option("--exclude-by-attribute", "Attributes to exclude from code coverage.", CommandOptionType.MultipleValue);
-            CommandOption includeTestAssembly = app.Option("--include-test-assembly", "Specifies whether to report code coverage of the test assembly", CommandOptionType.NoValue);
+            CommandOption includeTestAssembly = app.Option("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.", CommandOptionType.NoValue);
             CommandOption singleHit = app.Option("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location", CommandOptionType.NoValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
@@ -50,6 +50,12 @@ namespace Coverlet.Console
 
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
+
+                if (verbosity.HasValue())
+                {
+                    // Adjust log level based on user input.
+                    logger.Level = verbosity.ParsedValue;
+                }
 
                 Coverage coverage = new Coverage(module.Value,
                     includeFilters.Values.ToArray(),
@@ -73,7 +79,7 @@ namespace Coverlet.Console
                 process.OutputDataReceived += (sender, eventArgs) =>
                 {
                     if (!string.IsNullOrEmpty(eventArgs.Data))
-                        logger.LogInformation(eventArgs.Data);
+                        logger.LogInformation(eventArgs.Data, important: true);
                 };
 
                 process.ErrorDataReceived += (sender, eventArgs) =>
@@ -118,8 +124,8 @@ namespace Coverlet.Console
                     if (reporter.OutputType == ReporterOutputType.Console)
                     {
                         // Output to console
-                        logger.LogInformation("  Outputting results to console");
-                        logger.LogInformation(reporter.Report(result));
+                        logger.LogInformation("  Outputting results to console", important: true);
+                        logger.LogInformation(reporter.Report(result), important: true);
                     }
                     else
                     {
@@ -129,7 +135,7 @@ namespace Coverlet.Console
                         filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
                         var report = Path.Combine(directory, filename);
-                        logger.LogInformation($"  Generating report '{report}'");
+                        logger.LogInformation($"  Generating report '{report}'", important: true);
                         File.WriteAllText(report, reporter.Report(result));
                     }
                 }
@@ -156,15 +162,15 @@ namespace Coverlet.Console
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
 
-                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
-                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
-                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
+                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent;
+                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent;
+                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent;
 
                 foreach (var _module in result.Modules)
                 {
-                    var linePercent = summary.CalculateLineCoverage(_module.Value).Percent * 100;
-                    var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent * 100;
-                    var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent * 100;
+                    var linePercent = summary.CalculateLineCoverage(_module.Value).Percent;
+                    var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
+                    var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }

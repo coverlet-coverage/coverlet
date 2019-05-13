@@ -66,9 +66,9 @@ namespace Coverlet.Core
             string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories, _includeTestAssembly);
             string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
 
-            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded module filter '{filter}'"));
-            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Included module filter '{filter}'"));
-            Array.ForEach(excludes ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded source files '{filter}'"));
+            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded module filter '{filter}'"));
+            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Included module filter '{filter}'"));
+            Array.ForEach(excludes ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded source files '{filter}'"));
 
             _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
             _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
@@ -78,7 +78,7 @@ namespace Coverlet.Core
                 if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
                     !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
                 {
-                    _logger.LogInformation($"Excluded module: '{module}'");
+                    _logger.LogVerbose($"Excluded module: '{module}'");
                     continue;
                 }
 
@@ -92,7 +92,7 @@ namespace Coverlet.Core
                     {
                         var result = instrumenter.Instrument();
                         _results.Add(result);
-                        _logger.LogInformation($"Instrumented module: '{module}'");
+                        _logger.LogVerbose($"Instrumented module: '{module}'");
                     }
                     catch (Exception ex)
                     {
@@ -209,7 +209,11 @@ namespace Coverlet.Core
             {
                 if (!File.Exists(result.HitsFilePath))
                 {
-                    _logger.LogWarning($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
+                    // Hits file could be missed mainly for two reason
+                    // 1) Issue during module Unload()
+                    // 2) Instrumented module is never loaded or used so we don't have any hit to register and
+                    //    module tracker is never used
+                    _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
                     continue;
                 }
 
