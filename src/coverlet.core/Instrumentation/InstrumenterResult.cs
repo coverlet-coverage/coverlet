@@ -5,7 +5,7 @@ using System.Globalization;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace Coverlet.Core
+namespace Coverlet.Core.Instrumentation
 {
     public class Line
     {
