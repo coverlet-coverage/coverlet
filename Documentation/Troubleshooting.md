@@ -1,6 +1,6 @@
 # Troubleshooting
 
-## Msbuild integration
+## Msbuild Integration
 
 1) Generate verbose log
 ```
