@@ -377,8 +377,7 @@ namespace Coverlet.Core.Instrumentation
                     document.Lines.Add(i, new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
 
-            var entry = (false, document.Index, sequencePoint.StartLine, sequencePoint.EndLine);
-            _result.HitCandidates.Add(entry);
+            _result.HitCandidates.Add(new HitCandidate(false, document.Index, sequencePoint.StartLine, sequencePoint.EndLine));
 
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
         }
@@ -392,7 +391,7 @@ namespace Coverlet.Core.Instrumentation
                 _result.Documents.Add(document.Path, document);
             }
 
-            var key = (branchPoint.StartLine, (int)branchPoint.Ordinal);
+            BranchKey key = new BranchKey(branchPoint.StartLine, (int)branchPoint.Ordinal);
             if (!document.Branches.ContainsKey(key))
             {
                 document.Branches.Add(key,
@@ -422,8 +421,7 @@ namespace Coverlet.Core.Instrumentation
                 }
             }
 
-            var entry = (true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal);
-            _result.HitCandidates.Add(entry);
+            _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));
 
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
         }

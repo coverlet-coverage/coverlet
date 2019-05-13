@@ -18,6 +18,7 @@ namespace Coverlet.MSbuild.Tasks
         private double _threshold;
         private string _thresholdType;
         private string _thresholdStat;
+        private ITaskItem _instrumenterState;
         private MSBuildLogger _logger;
 
         [Required]
@@ -55,6 +56,13 @@ namespace Coverlet.MSbuild.Tasks
             set { _thresholdStat = value; }
         }
 
+        [Required]
+        public ITaskItem InstrumenterState
+        {
+            get { return _instrumenterState; }
+            set { _instrumenterState = value; }
+        }
+
         public CoverageResultTask()
         {
             _logger = new MSBuildLogger(Log);
@@ -66,7 +74,13 @@ namespace Coverlet.MSbuild.Tasks
             {
                 Console.WriteLine("\nCalculating coverage result...");
 
-                var coverage = InstrumentationTask.Coverage;
+                if (InstrumenterState is null || !File.Exists(InstrumenterState.ItemSpec))
+                {
+                    _logger.LogError("Instrumenter result file not found");
+                    return false;
+                }
+
+                var coverage = new Coverage(CoveragePrepareResult.Deserialize(new FileStream(InstrumenterState.ItemSpec, FileMode.Open)), this._logger);
                 var result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);
