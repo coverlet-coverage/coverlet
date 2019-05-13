@@ -12,7 +12,7 @@ dotnet test test\coverlet.core.tests\coverlet.core.tests.csproj -c debug /p:Coll
  
 ![File](images/file.png)
 
-## Coverlet dotnet tool
+## Coverlet Global Tool
 
 ```
 coverlet "C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\coverlet.core.tests.dll" --target "dotnet" --targetargs "test C:\git\coverlet\test\coverlet.core.tests --no-build" --verbosity detailed
