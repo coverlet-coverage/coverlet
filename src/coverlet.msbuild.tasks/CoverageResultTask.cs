@@ -76,7 +76,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 if (InstrumenterState is null || !File.Exists(InstrumenterState.ItemSpec))
                 {
-                    _logger.LogError("Instrumenter result file not found");
+                    _logger.LogError("Result of instrumentation task not found");
                     return false;
                 }
 
