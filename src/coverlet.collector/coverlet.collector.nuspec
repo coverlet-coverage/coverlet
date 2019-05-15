@@ -7,15 +7,15 @@
     <authors>tonerdo</authors>
     <owners>tonerdo</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <licenseUrl>https://github.com/tonerdo/coverlet/blob/master/LICENSE</licenseUrl>
+    <license type="expression">MIT</license>
     <iconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</iconUrl>
     <description>Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.</description>
     <projectUrl>http://github.com/tonerdo/coverlet</projectUrl>
     <tags>coverage testing unit-test lcov opencover quality</tags>
   </metadata>
   <files>
-    <file src="bin\debug\netcoreapp2.0\*.dll" target="build\netcoreapp2.0\" />
-    <file src="bin\debug\netcoreapp2.0\coverlet.collector.deps.json" target="build\netcoreapp2.0\" />
+    <file src="bin\Release\netcoreapp2.0\*.dll" target="build\netcoreapp2.0\" />
+    <file src="bin\Release\netcoreapp2.0\coverlet.collector.deps.json" target="build\netcoreapp2.0\" />
     <file src="coverlet.collector.targets" target="build\netcoreapp2.0\" />
   </files>
 </package>
