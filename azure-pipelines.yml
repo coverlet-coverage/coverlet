@@ -1,9 +1,45 @@
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
+- job: Windows
+  displayName: Windows
+  continueOnError: true
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "Debug"
+      Release:
+        buildConfiguration: "Release"
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+  - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
+    displayName: 'Run Build'
 
-variables:
-  buildConfiguration: 'Release'
+- job: macOS
+  displayName: macOS
+  continueOnError: true
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "Debug"
+      Release:
+        buildConfiguration: "Release"
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+  - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
+    displayName: 'Run Build'
 
-steps:
-- script: dotnet msbuild build.proj /p:Configuration $(buildConfiguration)
-  displayName: 'Run Build'
+- job: Linux
+  displayName: Linux
+  continueOnError: true
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "Debug"
+      Release:
+        buildConfiguration: "Release"
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
+    displayName: 'Run Build'
