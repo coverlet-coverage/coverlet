@@ -1,0 +1,9 @@
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- script: dotnet msbuild build.proj /p:Configuration $(buildConfiguration)
+  displayName: 'Run Build'
