@@ -1,7 +1,7 @@
-﻿namespace Coverlet.Collector.Utilities
-{
-    using System;
+﻿using System;
 
+namespace Coverlet.Collector.Utilities
+{
     internal class CoverletDataCollectorException : Exception
     {
         public CoverletDataCollectorException(string message) : base(message)

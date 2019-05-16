@@ -21,8 +21,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.performancete
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.collector", "src\coverlet.collector\coverlet.collector.csproj", "{F5B2C45B-274B-43D6-9565-8B50659CFE56}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.inproccollector", "src\coverlet.inproccollector\coverlet.inproccollector.csproj", "{C53F1496-65AE-415D-A46B-4BA1BC45709B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.collector.tests", "test\coverlet.collector.tests\coverlet.collector.tests.csproj", "{5ED4FA81-8F8C-4211-BA88-7573BD63262E}"
 EndProject
 Global
@@ -59,10 +57,6 @@ Global
 		{F5B2C45B-274B-43D6-9565-8B50659CFE56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5B2C45B-274B-43D6-9565-8B50659CFE56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5B2C45B-274B-43D6-9565-8B50659CFE56}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C53F1496-65AE-415D-A46B-4BA1BC45709B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C53F1496-65AE-415D-A46B-4BA1BC45709B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C53F1496-65AE-415D-A46B-4BA1BC45709B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C53F1496-65AE-415D-A46B-4BA1BC45709B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5ED4FA81-8F8C-4211-BA88-7573BD63262E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5ED4FA81-8F8C-4211-BA88-7573BD63262E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5ED4FA81-8F8C-4211-BA88-7573BD63262E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -79,7 +73,6 @@ Global
 		{AE117FAA-C21D-4F23-917E-0C8050614750} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F5B2C45B-274B-43D6-9565-8B50659CFE56} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
-		{C53F1496-65AE-415D-A46B-4BA1BC45709B} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
 		{5ED4FA81-8F8C-4211-BA88-7573BD63262E} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

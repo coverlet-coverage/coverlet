@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Text;
 
-namespace Coverlet.Collector.DataCollector
+namespace Coverlet.Collector.DataCollection
 {
     /// <summary>
     /// Coverlet settings

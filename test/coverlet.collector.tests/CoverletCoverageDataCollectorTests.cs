@@ -7,89 +7,88 @@ using Moq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Coverlet.Core;
 using Coverlet.Core.Logging;
-using Coverlet.Collector.DataCollector;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
-using coverlet.collector.DataCollector;
 using Xunit;
+using Coverlet.Collector.DataCollection;
 
 namespace Coverlet.Collector.Tests
 {
     public class CoverletCoverageDataCollectorTests
     {
-        private DataCollectionEnvironmentContext context;
-        private CoverletCoverageCollector coverletCoverageDataCollector;
-        private DataCollectionContext dataCollectionContext;
-        private Mock<DataCollectionEvents> mockDataColectionEvents;
-        private Mock<DataCollectionSink> mockDataCollectionSink;
-        private Mock<ICoverageWrapper> mockCoverageWrapper;
-        private XmlElement configurationElement;
-        private Mock<DataCollectionLogger> mockLogger;
+        private DataCollectionEnvironmentContext _context;
+        private CoverletCoverageCollector _coverletCoverageDataCollector;
+        private DataCollectionContext _dataCollectionContext;
+        private Mock<DataCollectionEvents> _mockDataColectionEvents;
+        private Mock<DataCollectionSink> _mockDataCollectionSink;
+        private Mock<ICoverageWrapper> _mockCoverageWrapper;
+        private XmlElement _configurationElement;
+        private Mock<DataCollectionLogger> _mockLogger;
 
         public CoverletCoverageDataCollectorTests()
         {
-            this.mockDataColectionEvents = new Mock<DataCollectionEvents>();
-            this.mockDataCollectionSink = new Mock<DataCollectionSink>();
-            this.mockLogger = new Mock<DataCollectionLogger>();
-            this.configurationElement = null;
+            _mockDataColectionEvents = new Mock<DataCollectionEvents>();
+            _mockDataCollectionSink = new Mock<DataCollectionSink>();
+            _mockLogger = new Mock<DataCollectionLogger>();
+            _configurationElement = null;
 
             TestCase testcase = new TestCase { Id = Guid.NewGuid() };
-            this.dataCollectionContext = new DataCollectionContext(testcase);
-            this.context = new DataCollectionEnvironmentContext(this.dataCollectionContext);
-            this.mockCoverageWrapper = new Mock<ICoverageWrapper>();
+            _dataCollectionContext = new DataCollectionContext(testcase);
+            _context = new DataCollectionEnvironmentContext(_dataCollectionContext);
+            _mockCoverageWrapper = new Mock<ICoverageWrapper>();
         }
 
         [Fact]
         public void OnSessionStartShouldInitializeCoverageWithCorrectCoverletSettings()
         {
-            coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), this.mockCoverageWrapper.Object);
-            coverletCoverageDataCollector.Initialize(
-                    this.configurationElement,
-                    this.mockDataColectionEvents.Object,
-                    this.mockDataCollectionSink.Object,
-                    this.mockLogger.Object,
-                    this.context);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object);
+            _coverletCoverageDataCollector.Initialize(
+                    _configurationElement,
+                    _mockDataColectionEvents.Object,
+                    _mockDataCollectionSink.Object,
+                    _mockLogger.Object,
+                    _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
 
-            this.mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
+            _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
-            this.mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => string.Equals(y.TestModule, "abc.dll")), It.IsAny<ILogger>()), Times.Once);
+            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => string.Equals(y.TestModule, "abc.dll")), It.IsAny<ILogger>()), Times.Once);
         }
 
         [Fact]
         public void OnSessionStartShouldPrepareModulesForCoverage()
         {
-            coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), this.mockCoverageWrapper.Object);
-            coverletCoverageDataCollector.Initialize(
-                    this.configurationElement,
-                    this.mockDataColectionEvents.Object,
-                    this.mockDataCollectionSink.Object,
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object);
+            _coverletCoverageDataCollector.Initialize(
+                    _configurationElement,
+                    _mockDataColectionEvents.Object,
+                    _mockDataCollectionSink.Object,
                     null,
-                    this.context);
+                    _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
             Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>());
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
-            this.mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>())).Returns(coverage);
+            _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>())).Returns(coverage);
 
-            this.mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
+            _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
-            this.mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => y.TestModule.Contains("abc.dll")), It.IsAny<ILogger>()), Times.Once);
-            this.mockCoverageWrapper.Verify(x => x.PrepareModules(It.IsAny<Coverage>()), Times.Once);
+            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => y.TestModule.Contains("abc.dll")), It.IsAny<ILogger>()), Times.Once);
+            _mockCoverageWrapper.Verify(x => x.PrepareModules(It.IsAny<Coverage>()), Times.Once);
         }
 
         [Fact]
         public void OnSessionEndShouldSendGetCoverageReportToTestPlatform()
         {
-            coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper());
-            coverletCoverageDataCollector.Initialize(
-                    this.configurationElement,
-                    this.mockDataColectionEvents.Object,
-                    this.mockDataCollectionSink.Object,
-                    this.mockLogger.Object,
-                    this.context);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper());
+            _coverletCoverageDataCollector.Initialize(
+                    _configurationElement,
+                    _mockDataColectionEvents.Object,
+                    _mockDataCollectionSink.Object,
+                    _mockLogger.Object,
+                    _context);
 
             string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
@@ -102,10 +101,10 @@ namespace Coverlet.Collector.Tests
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
             sessionStartProperties.Add("TestSources", new List<string> { Path.Combine(directory.FullName, Path.GetFileName(module)) });
 
-            this.mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
-            this.mockDataColectionEvents.Raise(x => x.SessionEnd += null, new SessionEndEventArgs());
+            _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
+            _mockDataColectionEvents.Raise(x => x.SessionEnd += null, new SessionEndEventArgs());
 
-            this.mockDataCollectionSink.Verify(x => x.SendFileAsync(It.IsAny<FileTransferInformation>()), Times.Once);
+            _mockDataCollectionSink.Verify(x => x.SendFileAsync(It.IsAny<FileTransferInformation>()), Times.Once);
 
             directory.Delete(true);
         }
@@ -113,22 +112,22 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void OnSessionStartShouldLogWarningIfInstrumentationFailed()
         {
-            coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), this.mockCoverageWrapper.Object);
-            coverletCoverageDataCollector.Initialize(
-                    this.configurationElement,
-                    this.mockDataColectionEvents.Object,
-                    this.mockDataCollectionSink.Object,
-                    this.mockLogger.Object,
-                    this.context);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object);
+            _coverletCoverageDataCollector.Initialize(
+                    _configurationElement,
+                    _mockDataColectionEvents.Object,
+                    _mockDataCollectionSink.Object,
+                    _mockLogger.Object,
+                    _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
 
-            this.mockCoverageWrapper.Setup(x => x.PrepareModules(It.IsAny<Coverage>())).Throws(new FileNotFoundException());
+            _mockCoverageWrapper.Setup(x => x.PrepareModules(It.IsAny<Coverage>())).Throws(new FileNotFoundException());
 
-            this.mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
+            _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
-            this.mockLogger.Verify(x => x.LogWarning(this.dataCollectionContext,
+            _mockLogger.Verify(x => x.LogWarning(_dataCollectionContext,
                 It.Is<string>(y => y.Contains("CoverletDataCollectorException"))));
         }
     }

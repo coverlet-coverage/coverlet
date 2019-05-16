@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollector.InProcDataCollector;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.InProcDataCollector;
 
-namespace Coverlet.InProcDataCollector
+namespace Coverlet.Collector.InProcDataCollector
 {
     public class CoverletInProcDataCollector : InProcDataCollection
     {

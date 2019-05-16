@@ -6,18 +6,18 @@ using Coverlet.Core;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Reporters;
 
-namespace Coverlet.Collector.DataCollector
+namespace Coverlet.Collector.DataCollection
 {
     /// <summary>
     /// Manages coverlet coverage
     /// </summary>
     internal class CoverageManager
     {
-        private readonly Coverage coverage;
+        private readonly Coverage _coverage;
 
-        private ICoverageWrapper coverageWrapper;
+        private ICoverageWrapper _coverageWrapper;
 
-        public IReporter Reporter { get; }
+        public IReporter _reporter { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper)
             : this(settings,
@@ -30,11 +30,11 @@ namespace Coverlet.Collector.DataCollector
         public CoverageManager(CoverletSettings settings, IReporter reporter, ILogger logger, ICoverageWrapper coverageWrapper)
         {
             // Store input vars
-            this.Reporter = reporter;
-            this.coverageWrapper = coverageWrapper;
+            _reporter = reporter;
+            _coverageWrapper = coverageWrapper;
 
             // Coverage object
-            this.coverage = this.coverageWrapper.CreateCoverage(settings, logger);
+            _coverage = _coverageWrapper.CreateCoverage(settings, logger);
         }
 
         /// <summary>
@@ -45,11 +45,11 @@ namespace Coverlet.Collector.DataCollector
             try
             {
                 // Instrument modules
-                this.coverageWrapper.PrepareModules(this.coverage);
+                _coverageWrapper.PrepareModules(_coverage);
             }
             catch (Exception ex)
             {
-                var errorMessage = string.Format(Resources.InstrumentationException, CoverletConstants.DataCollectorName);
+                string errorMessage = string.Format(Resources.InstrumentationException, CoverletConstants.DataCollectorName);
                 throw new CoverletDataCollectorException(errorMessage, ex);
             }
         }
@@ -61,10 +61,10 @@ namespace Coverlet.Collector.DataCollector
         public string GetCoverageReport()
         {
             // Get coverage result
-            var coverageResult = this.GetCoverageResult();
+            CoverageResult coverageResult = this.GetCoverageResult();
 
             // Get coverage report in default format
-            var coverageReport = this.GetCoverageReport(coverageResult);
+            string coverageReport = this.GetCoverageReport(coverageResult);
             return coverageReport;
         }
 
@@ -76,11 +76,11 @@ namespace Coverlet.Collector.DataCollector
         {
             try
             {
-                return this.coverageWrapper.GetCoverageResult(this.coverage);
+                return _coverageWrapper.GetCoverageResult(_coverage);
             }
             catch (Exception ex)
             {
-                var errorMessage = string.Format(Resources.CoverageResultException, CoverletConstants.DataCollectorName);
+                string errorMessage = string.Format(Resources.CoverageResultException, CoverletConstants.DataCollectorName);
                 throw new CoverletDataCollectorException(errorMessage, ex);
             }
         }
@@ -94,11 +94,11 @@ namespace Coverlet.Collector.DataCollector
         {
             try
             {
-                return this.Reporter.Report(coverageResult);
+                return _reporter.Report(coverageResult);
             }
             catch (Exception ex)
             {
-                var errorMessage = string.Format(Resources.CoverageReportException, CoverletConstants.DataCollectorName);
+                string errorMessage = string.Format(Resources.CoverageReportException, CoverletConstants.DataCollectorName);
                 throw new CoverletDataCollectorException(errorMessage, ex);
             }
         }

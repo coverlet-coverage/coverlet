@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using Coverlet.Collector.DataCollector;
+using Coverlet.Collector.DataCollection;
 using Coverlet.Collector.Utilities;
 using Xunit;
 
@@ -9,17 +9,17 @@ namespace Coverlet.Collector.Tests
 {
     public class CoverletSettingsParserTests
     {
-        private CoverletSettingsParser coverletSettingsParser;
+        private CoverletSettingsParser _coverletSettingsParser;
 
         public CoverletSettingsParserTests()
         {
-            this.coverletSettingsParser = new CoverletSettingsParser(new TestPlatformEqtTrace());
+            _coverletSettingsParser = new CoverletSettingsParser(new TestPlatformEqtTrace());
         }
 
         [Fact]
         public void ParseShouldThrowCoverletDataCollectorExceptionIfTestModulesIsNull()
         {
-            var message = Assert.Throws<CoverletDataCollectorException>(() => this.coverletSettingsParser.Parse(null, null)).Message;
+            string message = Assert.Throws<CoverletDataCollectorException>(() => _coverletSettingsParser.Parse(null, null)).Message;
 
             Assert.Equal("CoverletCoverageDataCollector: No test modules found", message);
         }
@@ -27,7 +27,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void ParseShouldThrowCoverletDataCollectorExceptionIfTestModulesIsEmpty()
         {
-            var message = Assert.Throws<CoverletDataCollectorException>(() => this.coverletSettingsParser.Parse(null, Enumerable.Empty<string>())).Message;
+            string message = Assert.Throws<CoverletDataCollectorException>(() => _coverletSettingsParser.Parse(null, Enumerable.Empty<string>())).Message;
 
             Assert.Equal("CoverletCoverageDataCollector: No test modules found", message);
         }
@@ -37,7 +37,7 @@ namespace Coverlet.Collector.Tests
         {
             var testModules = new List<string> { "module1.dll", "module2.dll", "module3.dll" };
 
-            var coverletSettings = this.coverletSettingsParser.Parse(null, testModules);
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(null, testModules);
 
             Assert.Equal("module1.dll", coverletSettings.TestModule);
         }
@@ -57,7 +57,7 @@ namespace Coverlet.Collector.Tests
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.UseSourceLinkElementName, "false");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.SingleHitElementName, "true");
 
-            var coverletSettings = this.coverletSettingsParser.Parse(configElement, testModules);
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
             Assert.Equal("abc.dll", coverletSettings.TestModule);
             Assert.Equal("[*]*", coverletSettings.IncludeFilters[0]);

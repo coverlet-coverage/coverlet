@@ -4,18 +4,18 @@ using System.Xml;
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 
-namespace Coverlet.Collector.DataCollector
+namespace Coverlet.Collector.DataCollection
 {
     /// <summary>
     /// Coverlet settings parser
     /// </summary>
     internal class CoverletSettingsParser
     {
-        private readonly TestPlatformEqtTrace eqtTrace;
+        private readonly TestPlatformEqtTrace _eqtTrace;
 
         public CoverletSettingsParser(TestPlatformEqtTrace eqtTrace)
         {
-            this.eqtTrace = eqtTrace;
+            _eqtTrace = eqtTrace;
         }
 
         /// <summary>
@@ -32,10 +32,9 @@ namespace Coverlet.Collector.DataCollector
             };
 
             if (configurationElement != null)
-            {
-                
+            { 
                 coverletSettings.IncludeFilters = this.ParseIncludeFilters(configurationElement);
-                coverletSettings.IncludeDirectories = this.ParseIncludeDirectories(configurationElement);             
+                coverletSettings.IncludeDirectories = this.ParseIncludeDirectories(configurationElement); 
                 coverletSettings.ExcludeAttributes = this.ParseExcludeAttributes(configurationElement);
                 coverletSettings.ExcludeSourceFiles = this.ParseExcludeSourceFiles(configurationElement);
                 coverletSettings.MergeWith = this.ParseMergeWith(configurationElement);
@@ -47,9 +46,9 @@ namespace Coverlet.Collector.DataCollector
             coverletSettings.ReportFormat = this.ParseReportFormat(configurationElement);
             coverletSettings.ExcludeFilters = this.ParseExcludeFilters(configurationElement);
             
-            if (this.eqtTrace.IsVerboseEnabled)
+            if (_eqtTrace.IsVerboseEnabled)
             {
-                this.eqtTrace.Verbose("{0}: Initializing coverlet process with settings: \"{1}\"", CoverletConstants.DataCollectorName, coverletSettings.ToString());
+                _eqtTrace.Verbose("{0}: Initializing coverlet process with settings: \"{1}\"", CoverletConstants.DataCollectorName, coverletSettings.ToString());
             }
 
             return coverletSettings;
@@ -62,10 +61,10 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Test module</returns>
         private string ParseTestModule(IEnumerable<string> testModules)
         {
-            // Validate if atleast one source present.
+            // Validate if at least one source present.
             if (testModules == null || !testModules.Any())
             {
-                var errorMessage = string.Format(Resources.NoTestModulesFound, CoverletConstants.DataCollectorName);
+                string errorMessage = string.Format(Resources.NoTestModulesFound, CoverletConstants.DataCollectorName);
                 throw new CoverletDataCollectorException(errorMessage);
             }
 
@@ -85,8 +84,8 @@ namespace Coverlet.Collector.DataCollector
             string format = string.Empty;
             if (configurationElement != null)
             {
-                var reportFormat = configurationElement[CoverletConstants.ReportFormatElementName];
-                format = reportFormat?.InnerText?.Split(',').FirstOrDefault();
+                XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
+                format = reportFormatElement?.InnerText?.Split(',').FirstOrDefault();
             }
             return string.IsNullOrEmpty(format) ?  CoverletConstants.DefaultReportFormat : format;
         }
@@ -98,7 +97,7 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Filters to include</returns>
         private string[] ParseIncludeFilters(XmlElement configurationElement)
         {
-            var includeFiltersElement = configurationElement[CoverletConstants.IncludeFiltersElementName];
+            XmlElement includeFiltersElement = configurationElement[CoverletConstants.IncludeFiltersElementName];
             return includeFiltersElement?.InnerText?.Split(',');
         }
 
@@ -109,7 +108,7 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Directories to include</returns>
         private string[] ParseIncludeDirectories(XmlElement configurationElement)
         {
-            var includeDirectoriesElement = configurationElement[CoverletConstants.IncludeDirectoriesElementName];
+            XmlElement includeDirectoriesElement = configurationElement[CoverletConstants.IncludeDirectoriesElementName];
             return includeDirectoriesElement?.InnerText?.Split(',');
         }
 
@@ -120,12 +119,12 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Filters to exclude</returns>
         private string[] ParseExcludeFilters(XmlElement configurationElement)
         {
-            var excludeFilters = new List<string> { CoverletConstants.DefaultExcludeFilter };
+            List<string> excludeFilters = new List<string> { CoverletConstants.DefaultExcludeFilter };
 
             if (configurationElement != null)
             {
-                var excludeFiltersElement = configurationElement[CoverletConstants.ExcludeFiltersElementName];
-                var filters = excludeFiltersElement?.InnerText?.Split(',');
+                XmlElement excludeFiltersElement = configurationElement[CoverletConstants.ExcludeFiltersElementName];
+                string[] filters = excludeFiltersElement?.InnerText?.Split(',');
                 if (filters != null)
                 {
                     excludeFilters.AddRange(filters);
@@ -142,8 +141,8 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Source files to exclude</returns>
         private string[] ParseExcludeSourceFiles(XmlElement configurationElement)
         {
-                var excludeSourceFilesElement = configurationElement[CoverletConstants.ExcludeSourceFilesElementName];
-                return excludeSourceFilesElement?.InnerText?.Split(',');
+            XmlElement excludeSourceFilesElement = configurationElement[CoverletConstants.ExcludeSourceFilesElementName];
+            return excludeSourceFilesElement?.InnerText?.Split(',');
         }
 
         /// <summary>
@@ -153,7 +152,7 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Attributes to exclude</returns>
         private string[] ParseExcludeAttributes(XmlElement configurationElement)
         {
-            var excludeAttributesElement = configurationElement[CoverletConstants.ExcludeAttributesElementName];
+            XmlElement excludeAttributesElement = configurationElement[CoverletConstants.ExcludeAttributesElementName];
             return excludeAttributesElement?.InnerText?.Split(',');
         }
 
@@ -164,7 +163,7 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Merge with attribute</returns>
         private string ParseMergeWith(XmlElement configurationElement)
         {
-            var mergeWithElement = configurationElement[CoverletConstants.MergeWithElementName];
+            XmlElement mergeWithElement = configurationElement[CoverletConstants.MergeWithElementName];
             return mergeWithElement?.InnerText;
         }
 
@@ -175,8 +174,8 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Use source link flag</returns>
         private bool ParseUseSourceLink(XmlElement configurationElement)
         {
-            var useSourceLinkElement = configurationElement[CoverletConstants.UseSourceLinkElementName];
-            bool.TryParse(useSourceLinkElement?.InnerText, out var useSourceLink);
+            XmlElement useSourceLinkElement = configurationElement[CoverletConstants.UseSourceLinkElementName];
+            bool.TryParse(useSourceLinkElement?.InnerText, out bool useSourceLink);
             return useSourceLink;
         }
 
@@ -187,8 +186,8 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Single hit flag</returns>
         private bool ParseSingleHit(XmlElement configurationElement)
         {
-            var singleHitElement = configurationElement[CoverletConstants.SingleHitElementName];
-            bool.TryParse(singleHitElement?.InnerText, out var singleHit);
+            XmlElement singleHitElement = configurationElement[CoverletConstants.SingleHitElementName];
+            bool.TryParse(singleHitElement?.InnerText, out bool singleHit);
             return singleHit;
         }
 
@@ -199,8 +198,8 @@ namespace Coverlet.Collector.DataCollector
         /// <returns>Include Test Assembly Flag</returns>
         private bool ParseIncludeTestAssembly(XmlElement configurationElement)
         {
-            var includeTestAssemblyElement = configurationElement[CoverletConstants.IncludeTestAssemblyElementName];
-            bool.TryParse(includeTestAssemblyElement?.InnerText, out var includeTestAssembly);
+            XmlElement includeTestAssemblyElement = configurationElement[CoverletConstants.IncludeTestAssemblyElementName];
+            bool.TryParse(includeTestAssemblyElement?.InnerText, out bool includeTestAssembly);
             return includeTestAssembly;
         }
     }

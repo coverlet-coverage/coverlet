@@ -7,13 +7,13 @@ namespace Coverlet.Collector.Utilities
     /// </summary>
     internal class TestPlatformLogger
     {
-        private readonly DataCollectionLogger logger;
-        private readonly DataCollectionContext dataCollectionContext;
+        private readonly DataCollectionLogger _logger;
+        private readonly DataCollectionContext _dataCollectionContext;
 
         public TestPlatformLogger(DataCollectionLogger logger, DataCollectionContext dataCollectionContext)
         {
-            this.logger = logger;
-            this.dataCollectionContext = dataCollectionContext;
+            _logger = logger;
+            _dataCollectionContext = dataCollectionContext;
         }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace Coverlet.Collector.Utilities
         /// <param name="warning">Warning message</param>
         public void LogWarning(string warning)
         {
-            this.logger.LogWarning(this.dataCollectionContext, warning);
+            _logger.LogWarning(_dataCollectionContext, warning);
         }
     }
 }

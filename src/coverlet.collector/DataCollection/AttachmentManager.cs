@@ -6,21 +6,21 @@ using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
-namespace Coverlet.Collector.DataCollector
+namespace Coverlet.Collector.DataCollection
 {
     /// <summary>
     /// Manages coverage report attachments
     /// </summary>
     internal class AttachmentManager : IDisposable
     {
-        private readonly DataCollectionSink dataSink;
-        private readonly TestPlatformEqtTrace eqtTrace;
-        private readonly TestPlatformLogger logger;
-        private readonly DataCollectionContext dataCollectionContext;
-        private readonly IFileHelper fileHelper;
-        private readonly IDirectoryHelper directoryHelper;
-        private readonly string reportFileName;
-        private readonly string reportDirectory;
+        private readonly DataCollectionSink _dataSink;
+        private readonly TestPlatformEqtTrace _eqtTrace;
+        private readonly TestPlatformLogger _logger;
+        private readonly DataCollectionContext _dataCollectionContext;
+        private readonly IFileHelper _fileHelper;
+        private readonly IDirectoryHelper _directoryHelper;
+        private readonly string _reportFileName;
+        private readonly string _reportDirectory;
 
         public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportFileName)
             : this(dataSink,
@@ -36,20 +36,20 @@ namespace Coverlet.Collector.DataCollector
 
         public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportFileName, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper)
         {
-            // Store input vars
-            this.dataSink = dataSink;
-            this.dataCollectionContext = dataCollectionContext;
-            this.logger = logger;
-            this.eqtTrace = eqtTrace;
-            this.reportFileName = reportFileName;
-            this.fileHelper = fileHelper;
-            this.directoryHelper = directoryHelper;
+            // Store input variabless
+            _dataSink = dataSink;
+            _dataCollectionContext = dataCollectionContext;
+            _logger = logger;
+            _eqtTrace = eqtTrace;
+            _reportFileName = reportFileName;
+            _fileHelper = fileHelper;
+            _directoryHelper = directoryHelper;
 
             // Report directory to store the coverage reports.
-            this.reportDirectory = Path.Combine(Path.GetTempPath(), reportDirectoryName);
+            _reportDirectory = Path.Combine(Path.GetTempPath(), reportDirectoryName);
 
             // Register events
-            this.dataSink.SendFileCompleted += this.OnSendFileCompleted;
+            _dataSink.SendFileCompleted += this.OnSendFileCompleted;
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Coverlet.Collector.DataCollector
         public void SendCoverageReport(string coverageReport)
         {
             // Save coverage report to file
-            var coverageReportPath = this.SaveCoverageReport(coverageReport);
+            string coverageReportPath = this.SaveCoverageReport(coverageReport);
 
             // Send coverage attachment to test platform.
             this.SendAttachment(coverageReportPath);
@@ -71,9 +71,17 @@ namespace Coverlet.Collector.DataCollector
         public void Dispose()
         {
             // Unregister events
-            if (this.dataSink != null)
+            try
             {
-                this.dataSink.SendFileCompleted -= this.OnSendFileCompleted;
+                if (_dataSink != null)
+                {
+                    _dataSink.SendFileCompleted -= this.OnSendFileCompleted;
+                }
+                this.CleanupReportDirectory();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex.ToString());
             }
         }
 
@@ -86,16 +94,16 @@ namespace Coverlet.Collector.DataCollector
         {
             try
             {
-                this.directoryHelper.CreateDirectory(this.reportDirectory);
-                var filePath = Path.Combine(this.reportDirectory, this.reportFileName);
-                this.fileHelper.WriteAllText(filePath, report);
-                this.eqtTrace.Info("{0}: Saved coverage report to path: '{1}'", CoverletConstants.DataCollectorName, filePath);
+                _directoryHelper.CreateDirectory(_reportDirectory);
+                string filePath = Path.Combine(_reportDirectory, _reportFileName);
+                _fileHelper.WriteAllText(filePath, report);
+                _eqtTrace.Info("{0}: Saved coverage report to path: '{1}'", CoverletConstants.DataCollectorName, filePath);
 
                 return filePath;
             }
             catch (Exception ex)
             {
-                var errorMessage = string.Format(Resources.FailedToSaveCoverageReport, CoverletConstants.DataCollectorName, this.reportFileName, this.reportDirectory);
+                string errorMessage = string.Format(Resources.FailedToSaveCoverageReport, CoverletConstants.DataCollectorName, _reportFileName, _reportDirectory);
                 throw new CoverletDataCollectorException(errorMessage, ex);
             }
         }
@@ -109,12 +117,12 @@ namespace Coverlet.Collector.DataCollector
         {
             try
             {
-                this.eqtTrace.Verbose("{0}: SendFileCompleted received", CoverletConstants.DataCollectorName);
+                _eqtTrace.Verbose("{0}: SendFileCompleted received", CoverletConstants.DataCollectorName);
                 this.CleanupReportDirectory();
             }
             catch (Exception ex)
             {
-                this.logger.LogWarning(ex.ToString());
+                _logger.LogWarning(ex.ToString());
                 this.Dispose();
             }
         }
@@ -125,11 +133,15 @@ namespace Coverlet.Collector.DataCollector
         /// <param name="attachmentPath">Attachment file path</param>
         private void SendAttachment(string attachmentPath)
         {
-            if (this.fileHelper.Exists(attachmentPath))
+            if (_fileHelper.Exists(attachmentPath))
             {
                 // Send coverage attachment to test platform.
-                this.eqtTrace.Verbose("{0}: Sending attachment to test platform", CoverletConstants.DataCollectorName);
-                this.dataSink.SendFileAsync(this.dataCollectionContext, attachmentPath, false);
+                _eqtTrace.Verbose("{0}: Sending attachment to test platform", CoverletConstants.DataCollectorName);
+                _dataSink.SendFileAsync(_dataCollectionContext, attachmentPath, false);
+            }
+            else
+            {
+                _eqtTrace.Warning("{0}: Attachment file does not exist", CoverletConstants.DataCollectorName);
             }
         }
 
@@ -140,15 +152,15 @@ namespace Coverlet.Collector.DataCollector
         {
             try
             {
-                if (this.directoryHelper.Exists(this.reportDirectory))
+                if (_directoryHelper.Exists(_reportDirectory))
                 {
-                    this.directoryHelper.Delete(this.reportDirectory, true);
-                    this.eqtTrace.Verbose("{0}: Deleted report directory: '{1}'", CoverletConstants.DataCollectorName, this.reportDirectory);
+                    _directoryHelper.Delete(_reportDirectory, true);
+                    _eqtTrace.Verbose("{0}: Deleted report directory: '{1}'", CoverletConstants.DataCollectorName, _reportDirectory);
                 }
             }
             catch (Exception ex)
             {
-                var errorMessage = string.Format(Resources.FailedToCleanupReportDirectory, CoverletConstants.DataCollectorName, this.reportDirectory);
+                string errorMessage = string.Format(Resources.FailedToCleanupReportDirectory, CoverletConstants.DataCollectorName, _reportDirectory);
                 throw new CoverletDataCollectorException(errorMessage, ex);
             }
         }

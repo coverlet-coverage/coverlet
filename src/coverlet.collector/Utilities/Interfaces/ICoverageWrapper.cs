@@ -1,4 +1,4 @@
-﻿using Coverlet.Collector.DataCollector;
+﻿using Coverlet.Collector.DataCollection;
 using Coverlet.Core;
 using Coverlet.Core.Logging;
 

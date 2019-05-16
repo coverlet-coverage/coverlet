@@ -1,9 +1,8 @@
-﻿using Coverlet.Collector.DataCollector;
-using Coverlet.Collector.Utilities.Interfaces;
+﻿using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
 using Coverlet.Core.Logging;
 
-namespace coverlet.collector.DataCollector
+namespace Coverlet.Collector.DataCollection
 {
     /// <summary>
     /// Implementation for wrapping over Coverage class in coverlet.core

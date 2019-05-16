@@ -2,20 +2,20 @@
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Logging;
 
-namespace Coverlet.Collector.DataCollector
+namespace Coverlet.Collector.DataCollection
 {
     /// <summary>
     /// Coverlet logger
     /// </summary>
     internal class CoverletLogger : ILogger
     {
-        private readonly TestPlatformEqtTrace eqtTrace;
-        private readonly TestPlatformLogger logger;
+        private readonly TestPlatformEqtTrace _eqtTrace;
+        private readonly TestPlatformLogger _logger;
 
         public CoverletLogger(TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger)
         {
-            this.eqtTrace = eqtTrace;
-            this.logger = logger;
+            _eqtTrace = eqtTrace;
+            _logger = logger;
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Coverlet.Collector.DataCollector
         /// <param name="message">Error message</param>
         public void LogError(string message)
         {
-            this.logger.LogWarning(message);
+            _logger.LogWarning(message);
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Coverlet.Collector.DataCollector
         /// <param name="exception">Exception to log</param>
         public void LogError(Exception exception)
         {
-            this.logger.LogWarning(exception.ToString());
+            _logger.LogWarning(exception.ToString());
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Coverlet.Collector.DataCollector
         /// <param name="important">importance</param>
         public void LogInformation(string message, bool important = false)
         {
-            this.eqtTrace.Info(message);
+            _eqtTrace.Info(message);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Coverlet.Collector.DataCollector
         /// <param name="message">Verbose message</param>
         public void LogVerbose(string message)
         {
-            this.eqtTrace.Verbose(message);
+            _eqtTrace.Verbose(message);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Coverlet.Collector.DataCollector
         /// <param name="message">Warning message</param>
         public void LogWarning(string message)
         {
-            this.eqtTrace.Warning(message);
+            _eqtTrace.Warning(message);
         }
     }
 }
