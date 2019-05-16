@@ -151,7 +151,7 @@ namespace Coverlet.Collector.DataCollection
         private string GetReportFileName()
         {
             string fileName = CoverletConstants.DefaultFileName;
-            string extension = _coverageManager?._reporter.Extension;
+            string extension = _coverageManager?.Reporter.Extension;
 
             return extension == null ? fileName : $"{fileName}.{extension}";
         }

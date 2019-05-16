@@ -17,7 +17,7 @@ namespace Coverlet.Collector.DataCollection
 
         private ICoverageWrapper _coverageWrapper;
 
-        public IReporter _reporter { get; }
+        public IReporter Reporter { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper)
             : this(settings,
@@ -30,7 +30,7 @@ namespace Coverlet.Collector.DataCollection
         public CoverageManager(CoverletSettings settings, IReporter reporter, ILogger logger, ICoverageWrapper coverageWrapper)
         {
             // Store input vars
-            _reporter = reporter;
+            Reporter = reporter;
             _coverageWrapper = coverageWrapper;
 
             // Coverage object
@@ -94,7 +94,7 @@ namespace Coverlet.Collector.DataCollection
         {
             try
             {
-                return _reporter.Report(coverageResult);
+                return Reporter.Report(coverageResult);
             }
             catch (Exception ex)
             {
