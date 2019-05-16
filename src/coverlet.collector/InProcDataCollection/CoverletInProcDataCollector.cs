@@ -65,7 +65,7 @@ namespace Coverlet.Collector.InProcDataCollector
             }
             catch
             {
-                // Avoid crashing if reflection fails
+                // Avoid crashing if reflection fails.
                 return null;
             }
         }
