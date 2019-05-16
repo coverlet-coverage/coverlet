@@ -47,7 +47,7 @@ namespace Coverlet.Collector.Tests
                                     + "</coverage>";
 
             _attachmentManager.SendCoverageReport(coverageReport);
-            _mockFileHelper.Verify(x => x.WriteAllText(It.Is<string>(y => y.Contains(@"E:\temp\report.cobertura.xml")), coverageReport), Times.Once);
+            _mockFileHelper.Verify(x => x.WriteAllText(It.Is<string>(y => y.Contains(@"report.cobertura.xml")), coverageReport), Times.Once);
         }
 
         [Fact]
