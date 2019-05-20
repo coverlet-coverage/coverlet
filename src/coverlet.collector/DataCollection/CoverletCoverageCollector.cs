@@ -62,7 +62,7 @@ namespace Coverlet.Collector.DataCollection
             _logger = new TestPlatformLogger(logger, _dataCollectionContext);
 
             // Register events
-           _events.SessionStart += OnSessionStart;
+            _events.SessionStart += OnSessionStart;
             _events.SessionEnd += OnSessionEnd;
         }
 
