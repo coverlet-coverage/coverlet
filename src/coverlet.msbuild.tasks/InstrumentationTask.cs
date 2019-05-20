@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Coverlet.Core;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -7,7 +8,6 @@ namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : Task
     {
-        private static Coverage _coverage;
         private string _path;
         private string _include;
         private string _includeDirectory;
@@ -18,12 +18,8 @@ namespace Coverlet.MSbuild.Tasks
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
+        private ITaskItem _instrumenterState;
         private readonly MSBuildLogger _logger;
-
-        internal static Coverage Coverage
-        {
-            get { return _coverage; }
-        }
 
         [Required]
         public string Path
@@ -86,6 +82,13 @@ namespace Coverlet.MSbuild.Tasks
             set { _useSourceLink = value; }
         }
 
+        [Output]
+        public ITaskItem InstrumenterState
+        {
+            get { return _instrumenterState; }
+            set { _instrumenterState = value; }
+        }
+
         public InstrumentationTask()
         {
             _logger = new MSBuildLogger(Log);
@@ -101,8 +104,16 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
 
-                _coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _includeTestAssembly, _singleHit, _mergeWith, _useSourceLink, _logger);
-                _coverage.PrepareModules();
+                Coverage coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _includeTestAssembly, _singleHit, _mergeWith, _useSourceLink, _logger);
+                CoveragePrepareResult prepareResult = coverage.PrepareModules();
+                InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());
+                using (var instrumentedStateFile = new FileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write))
+                {
+                    using (Stream serializedState = CoveragePrepareResult.Serialize(prepareResult))
+                    {
+                        serializedState.CopyTo(instrumentedStateFile);
+                    }
+                }
             }
             catch (Exception ex)
             {

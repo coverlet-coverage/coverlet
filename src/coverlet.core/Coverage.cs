@@ -61,7 +61,17 @@ namespace Coverlet.Core
             _results = new List<InstrumenterResult>();
         }
 
-        public void PrepareModules()
+        public Coverage(CoveragePrepareResult prepareResult, ILogger logger)
+        {
+            this._identifier = prepareResult.Identifier;
+            this._module = prepareResult.Module;
+            this._mergeWith = prepareResult.MergeWith;
+            this._useSourceLink = prepareResult.UseSourceLink;
+            this._results = new List<InstrumenterResult>(prepareResult.Results);
+            _logger = logger;
+        }
+
+        public CoveragePrepareResult PrepareModules()
         {
             string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories, _includeTestAssembly);
             string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
@@ -101,6 +111,15 @@ namespace Coverlet.Core
                     }
                 }
             }
+
+            return new CoveragePrepareResult()
+            {
+                Identifier = _identifier,
+                Module = _module,
+                MergeWith = _mergeWith,
+                UseSourceLink = _useSourceLink,
+                Results = _results.ToArray()
+            };
         }
 
         public CoverageResult GetCoverageResult()
@@ -245,7 +264,7 @@ namespace Coverlet.Core
 
                         if (hitLocation.isBranch)
                         {
-                            var branch = document.Branches[(hitLocation.start, hitLocation.end)];
+                            var branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
                             branch.Hits += hits;
                         }
                         else
@@ -263,7 +282,7 @@ namespace Coverlet.Core
                 // we'll remove all MoveNext() not covered branch
                 foreach (var document in result.Documents)
                 {
-                    List<KeyValuePair<(int, int), Branch>> branchesToRemove = new List<KeyValuePair<(int, int), Branch>>();
+                    List<KeyValuePair<BranchKey, Branch>> branchesToRemove = new List<KeyValuePair<BranchKey, Branch>>();
                     foreach (var branch in document.Value.Branches)
                     {
                         //if one branch is covered we search the other one only if it's not covered
