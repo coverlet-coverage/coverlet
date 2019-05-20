@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Instrumentation;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -29,23 +30,25 @@ namespace Coverlet.Collector.DataCollection
             {
                 Type injectedInstrumentationClass = GetInstrumentationClass(assembly);
                 if (injectedInstrumentationClass is null)
+                {
                     continue;
-
-                var unloadModule = injectedInstrumentationClass.GetMethod(nameof(ModuleTrackerTemplate.UnloadModule), new[] { typeof(object), typeof(EventArgs) });
-                if (unloadModule is null)
-                    continue;
+                }
 
                 try
                 {
+                    var unloadModule = injectedInstrumentationClass.GetMethod(nameof(ModuleTrackerTemplate.UnloadModule), new[] { typeof(object), typeof(EventArgs) });
                     unloadModule.Invoke(null, new[] { null, EventArgs.Empty });
                 }
                 catch(Exception ex)
                 {
-                    // Ignore exceptions and continue with the unload
-                    if (EqtTrace.IsWarningEnabled)
+                    // Throw any exception if unload fails
+                    if (EqtTrace.IsErrorEnabled)
                     {
-                        EqtTrace.Warning("{0}: Failed to unload module with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
+                        EqtTrace.Error("{0}: Failed to unload module with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
                     }
+
+                    string errorMessage = string.Format(Resources.FailedToUnloadModule, CoverletConstants.InProcDataCollectorName);
+                    throw new CoverletDataCollectorException(errorMessage, ex);
                 }
             }
         }

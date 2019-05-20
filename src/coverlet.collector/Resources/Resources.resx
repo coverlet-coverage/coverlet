@@ -129,6 +129,9 @@
   <data name="FailedToSaveCoverageReport" xml:space="preserve">
     <value>{0}: Failed to save coverage report '{1}' in directory '{2}'</value>
   </data>
+  <data name="FailedToUnloadModule" xml:space="preserve">
+    <value>{0}: Failed to unload module</value>
+  </data>
   <data name="InstrumentationException" xml:space="preserve">
     <value>{0}: Failed to instrument modules</value>
   </data>

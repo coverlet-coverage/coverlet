@@ -97,6 +97,15 @@ namespace coverlet.collector.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}: Failed to unload module.
+        /// </summary>
+        internal static string FailedToUnloadModule {
+            get {
+                return ResourceManager.GetString("FailedToUnloadModule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0}: Failed to instrument modules.
         /// </summary>
         internal static string InstrumentationException {
