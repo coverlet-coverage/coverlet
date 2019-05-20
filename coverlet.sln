@@ -19,6 +19,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.testsubject", "tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.performancetest", "test\coverlet.core.performancetest\coverlet.core.performancetest.csproj", "{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.collector", "src\coverlet.collector\coverlet.collector.csproj", "{F5B2C45B-274B-43D6-9565-8B50659CFE56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.collector.tests", "test\coverlet.collector.tests\coverlet.collector.tests.csproj", "{5ED4FA81-8F8C-4211-BA88-7573BD63262E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +53,14 @@ Global
 		{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5B2C45B-274B-43D6-9565-8B50659CFE56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5B2C45B-274B-43D6-9565-8B50659CFE56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5B2C45B-274B-43D6-9565-8B50659CFE56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5B2C45B-274B-43D6-9565-8B50659CFE56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5ED4FA81-8F8C-4211-BA88-7573BD63262E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ED4FA81-8F8C-4211-BA88-7573BD63262E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ED4FA81-8F8C-4211-BA88-7573BD63262E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5ED4FA81-8F8C-4211-BA88-7573BD63262E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +72,8 @@ Global
 		{F3DBE7C3-ABBB-4B8B-A6CB-A1D3D607163E} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
 		{AE117FAA-C21D-4F23-917E-0C8050614750} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{F5B2C45B-274B-43D6-9565-8B50659CFE56} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
+		{5ED4FA81-8F8C-4211-BA88-7573BD63262E} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}
