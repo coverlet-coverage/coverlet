@@ -26,6 +26,7 @@ jobs:
   pool:
     vmImage: 'macOS-10.14'
   steps:
+  - bash: chmod +x ./eng/build.sh
   - bash: chmod +x build.sh
   - bash: ./build.sh $(buildConfiguration)
     displayName: 'Run Build'
@@ -42,6 +43,7 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - bash: chmod +x ./eng/build.sh
   - bash: chmod +x build.sh
   - bash: ./build.sh $(buildConfiguration)
     displayName: 'Run Build'
