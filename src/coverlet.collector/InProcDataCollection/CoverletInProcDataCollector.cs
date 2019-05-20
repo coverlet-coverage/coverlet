@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Reflection;
+using Coverlet.Collector.Utilities;
 using Coverlet.Core.Instrumentation;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollector.InProcDataCollector;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.InProcDataCollector;
 
-namespace Coverlet.Collector.InProcDataCollector
+namespace Coverlet.Collector.DataCollection
 {
     public class CoverletInProcDataCollector : InProcDataCollection
     {
@@ -37,9 +39,13 @@ namespace Coverlet.Collector.InProcDataCollector
                 {
                     unloadModule.Invoke(null, new[] { null, EventArgs.Empty });
                 }
-                catch
+                catch(Exception ex)
                 {
                     // Ignore exceptions and continue with the unload
+                    if (EqtTrace.IsWarningEnabled)
+                    {
+                        EqtTrace.Warning("{0}: Failed to unload module with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
+                    }
                 }
             }
         }
@@ -63,9 +69,13 @@ namespace Coverlet.Collector.InProcDataCollector
 
                 return null;
             }
-            catch
+            catch(Exception ex)
             {
                 // Avoid crashing if reflection fails.
+                if (EqtTrace.IsWarningEnabled)
+                {
+                    EqtTrace.Warning("{0}: Failed to get Instrumentation class with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
+                }
                 return null;
             }
         }

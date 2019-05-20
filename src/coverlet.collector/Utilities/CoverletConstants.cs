@@ -19,5 +19,6 @@
         public const string TestSourcesPropertyName = "TestSources";
         public const string ReportFormatElementName = "Format";
         public const string DefaultExcludeFilter = "[coverlet.*]*";
+        public const string InProcDataCollectorName = "CoverletInProcDataCollector";
     }
 }
