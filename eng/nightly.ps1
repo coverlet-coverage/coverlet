@@ -19,7 +19,7 @@ Write-Host -ForegroundColor Blue Publish with .NET cli
 
 Write-Host Create Packages
 
-& $dotnetcli msbuild "$PSScriptRoot\..\build.proj" /t:CreateNuGetPackage /p:Configuration=$configuration # amed build.proj path with future new position under eng
+& $dotnetcli msbuild "$PSScriptRoot\..\build.proj" /t:CreateNuGetPackage /p:Configuration=$configuration /p:PublicRelease=false # amed build.proj path with future new position under eng
 
 #& $dotnetcli nuget push "$reporoot\build\$configuration\*.nupkg" -k $apiKey -s $source
 #& nuget push -Source "TestCoverlet2" -ApiKey AzureDevOps "$reporoot\build\$configuration\*.nupkg" #test with my azure artifacts

@@ -3,10 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyTitle>coverlet.collector</AssemblyTitle>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-
     <PackageId>coverlet.collector</PackageId>
-    <PackageVersion>$(AssemblyVersion)</PackageVersion>
     <Title>coverlet.collector</Title>
     <Authors>tonerdo</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
