@@ -20,6 +20,5 @@ Write-Host Create Packages
 
 & $dotnetcli msbuild "$PSScriptRoot\..\build.proj" /t:CreateNuGetPackage /p:Configuration=$configuration # amed build.proj path with future new position under eng
 
-& $dotnetcli nuget push "$reporoot\build\$configuration\coverlet.collector.1.0.0.nupkg" -k $apiKey -s $source
-& $dotnetcli nuget push "$reporoot\build\$configuration\coverlet.console.1.5.1.nupkg" -k $apiKey -s $source
-& $dotnetcli nuget push "$reporoot\build\$configuration\coverlet.msbuild.2.6.1.nupkg" -k $apiKey -s $source
+#& $dotnetcli nuget push "$reporoot\build\$configuration\*.nupkg" -k $apiKey -s $source
+& nuget push -Source "TestCoverlet2" -ApiKey AzureDevOps "$reporoot\build\$configuration\*.nupkg" #test with my azure artifacts
