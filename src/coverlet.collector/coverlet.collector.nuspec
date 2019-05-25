@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>coverlet.collector</id>
-    <version>1.0.0</version>
+    <version>$version$</version>
     <title>coverlet.collector</title>
     <authors>tonerdo</authors>
     <owners>tonerdo</owners>
@@ -14,8 +14,8 @@
     <tags>coverage testing unit-test lcov opencover quality</tags>
   </metadata>
   <files>
-    <file src="bin\Release\netcoreapp2.0\*.dll" target="build\netcoreapp2.0\" />
-    <file src="bin\Release\netcoreapp2.0\coverlet.collector.deps.json" target="build\netcoreapp2.0\" />
+    <file src="bin\$configuration$\netcoreapp2.0\*.dll" target="build\netcoreapp2.0\" />
+    <file src="bin\$configuration$\netcoreapp2.0\coverlet.collector.deps.json" target="build\netcoreapp2.0\" />
     <file src="coverlet.collector.targets" target="build\netcoreapp2.0\" />
   </files>
 </package>

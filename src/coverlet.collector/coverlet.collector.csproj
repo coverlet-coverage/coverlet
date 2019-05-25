@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk" >
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyTitle>coverlet.collector</AssemblyTitle>
@@ -16,6 +15,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <NuspecFile>coverlet.collector.nuspec</NuspecFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -62,4 +62,11 @@
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="All" />
   </ItemGroup>
   
+  <Target Name="SetNuspecPackageVersion" DependsOnTargets="GetBuildVersion" BeforeTargets="GenerateNuspec">
+    <PropertyGroup>
+      <NuspecProperties>$(NuspecProperties);version=$(NuGetPackageVersion);configuration=$(Configuration)
+    </NuspecProperties>
+  </PropertyGroup>
+  </Target>
+
 </Project>
