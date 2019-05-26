@@ -57,7 +57,7 @@ How to specify these options via runsettings?
           <Include>[coverlet.*]*,[*]Coverlet.Core*</Include> <!-- [Assembly-Filter]Type-Filter -->
           <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
           <ExcludeByFile>../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs,</ExcludeByFile> <!-- Absolute or relative file paths -->
-          <IncludeDirectory>../dir1/*,../dir2/,</IncludeDirectory>
+          <IncludeDirectory>../dir1/,../dir2/,</IncludeDirectory>
           <SingleHit>false</SingleHit>
           <UseSourceLink>true</UseSourceLink>
         </Configuration>
@@ -84,9 +84,9 @@ The proposed solution is implemented with the help of [datacollectors](https://g
 The datacollectors will be bundled as a separate NuGet package, the reference to which will be added by default in the .NET Core test templates, thus making it the default solution for collecting code coverage for .NET core projects.
 ```
 <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="1.3.2" />
-    <PackageReference Include="MSTest.TestFramework" Version="1.3.2" />
-    <PackageReference Include="coverlet.collector" Version="1.0.0" />   
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="x.x.x" />
+    <PackageReference Include="MSTest.TestAdapter" Version="x.x.x" />
+    <PackageReference Include="MSTest.TestFramework" Version="x.x.x" />
+    <PackageReference Include="coverlet.collector" Version="1.0.0" />
 </ItemGroup>
 ```
