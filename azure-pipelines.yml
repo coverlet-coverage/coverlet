@@ -11,8 +11,7 @@ jobs:
   pool:
     vmImage: 'windows-2019'
   steps:
-  - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
-    displayName: 'Run Build'
+  - template: build.yml
 
 - job: macOS
   displayName: macOS
@@ -26,8 +25,7 @@ jobs:
   pool:
     vmImage: 'macOS-10.14'
   steps:
-  - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
-    displayName: 'Run Build'
+  - template: build.yml
 
 - job: Linux
   displayName: Linux
@@ -41,5 +39,4 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
-    displayName: 'Run Build'
+  - template: build.yml
