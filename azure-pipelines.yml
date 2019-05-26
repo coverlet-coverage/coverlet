@@ -11,6 +11,10 @@ jobs:
   pool:
     vmImage: 'windows-2019'
   steps:
+  - task: DotNetCoreInstaller@0
+    inputs:
+      version: '2.2.300'
+    displayName: 'Install .NET Core SDK'
   - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
     displayName: 'Run Build'
 
@@ -26,6 +30,10 @@ jobs:
   pool:
     vmImage: 'macOS-10.14'
   steps:
+  - task: DotNetCoreInstaller@0
+    inputs:
+      version: '2.2.300'
+    displayName: 'Install .NET Core SDK'
   - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
     displayName: 'Run Build'
 
@@ -41,5 +49,9 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
+  - task: DotNetCoreInstaller@0
+    inputs:
+      version: '2.2.300'
+    displayName: 'Install .NET Core SDK'
   - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
     displayName: 'Run Build'

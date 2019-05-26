@@ -4,10 +4,7 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyTitle>coverlet.msbuild.tasks</AssemblyTitle>
-    <AssemblyVersion>2.6.1</AssemblyVersion>
-
     <PackageId>coverlet.msbuild</PackageId>
-    <PackageVersion>$(AssemblyVersion)</PackageVersion>
     <Title>coverlet.msbuild</Title>
     <Authors>tonerdo</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
