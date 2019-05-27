@@ -13,19 +13,7 @@
     <Exec Command="dotnet build &quot;$(MSBuildThisFileDirectory)src\coverlet.collector\coverlet.collector.csproj&quot; -c $(Configuration)" />
   </Target>
 
-  <Target Name="PublishMSBuildTaskProject" AfterTargets="BuildAllProjects">
-    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o &quot;$(OutputPath)&quot;" />
-  </Target>
-
-  <Target Name="CopyMSBuildScripts" AfterTargets="PublishMSBuildTaskProject">
-    <ItemGroup>
-      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
-      <BuildScript Include="$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />
-    </ItemGroup>
-    <Copy SourceFiles="@(BuildScript)" DestinationFolder="$(OutputPath)" />
-  </Target>
-
-  <Target Name="RunTests" AfterTargets="CopyMSBuildScripts">
+  <Target Name="RunTests" AfterTargets="BuildAllProjects">
     <Exec Command="dotnet test &quot;$(MSBuildThisFileDirectory)test\coverlet.core.tests\coverlet.core.tests.csproj&quot; -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]*"/>
     <Exec Command="dotnet test &quot;$(MSBuildThisFileDirectory)test\coverlet.collector.tests\coverlet.collector.tests.csproj&quot; -c $(Configuration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]*"/>
   </Target>
