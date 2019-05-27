@@ -31,9 +31,7 @@
   </Target>
 
   <Target Name="CreateNuGetPackage" AfterTargets="RunTests" Condition="$(Configuration) == 'Release'">
-    <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj&quot; -c $(Configuration) -o $(OutputPath) /p:PublicRelease=$(PublicRelease)"  />
-    <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.console\coverlet.console.csproj&quot; -c $(Configuration) -o $(OutputPath) /p:PublicRelease=$(PublicRelease)" />
-    <Exec Command="dotnet pack &quot;$(MSBuildThisFileDirectory)src\coverlet.collector\coverlet.collector.csproj&quot; -c $(Configuration) -o $(OutputPath) /p:PublicRelease=$(PublicRelease)" />
+    <Exec Command="dotnet pack coverlet.sln -c $(Configuration) /p:PublicRelease=$(PublicRelease)"  />
   </Target>
 
 </Project>
