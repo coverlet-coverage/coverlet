@@ -22,7 +22,9 @@ jobs:
     displayName: Collect packages
     inputs:
       SourceFolder: build\$(BuildConfiguration)
-      Contents: '*.nupkg'
+      Contents: |
+        *.nupkg
+        *.snupkg
       TargetFolder: $(Build.ArtifactStagingDirectory)\Packages
     condition: eq(variables['BuildConfiguration'], 'Release')
   - task: PublishBuildArtifacts@1
