@@ -25,6 +25,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Bb]uild/
+msbuild.binlog
 
 # Visual Studio 2015 cache/options directory
 .vs/
