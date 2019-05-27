@@ -339,10 +339,18 @@ namespace Coverlet.Core
                 string key = sourceLinkDocument.Key;
                 if (Path.GetFileName(key) != "*") continue;
 
-                if (!Path.GetDirectoryName(document).StartsWith(Path.GetDirectoryName(key) + Path.DirectorySeparatorChar))
-                    continue;
+                string directoryDocument = Path.GetDirectoryName(document);
+                string sourceLinkRoot = Path.GetDirectoryName(key);
+                string relativePath = "";
 
-                var relativePath = Path.GetDirectoryName(document).Substring(Path.GetDirectoryName(key).Length + 1);
+                // if document is on repo root we skip relative path calculation
+                if (directoryDocument != sourceLinkRoot)
+                {
+                    if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
+                        continue;
+
+                    relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
+                }
 
                 if (relativePathOfBestMatch.Length == 0)
                 {
