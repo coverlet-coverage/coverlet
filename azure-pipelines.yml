@@ -1,3 +1,9 @@
+trigger:
+  branches:
+    include: ["master"]
+  paths:
+    exclude: [".github", "doc", "*.md"]
+
 jobs:
 - job: Windows
   displayName: Windows
