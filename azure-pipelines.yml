@@ -1,3 +1,9 @@
+trigger:
+  branches:
+    include: ["master"]
+  paths:
+    exclude: [".github", "doc", "*.md"]
+
 jobs:
 - job: Windows
   displayName: Windows
@@ -12,6 +18,19 @@ jobs:
     vmImage: 'windows-2019'
   steps:
   - template: build.yml
+  - task: CopyFiles@2
+    displayName: Collect packages
+    inputs:
+      SourceFolder: build\$(BuildConfiguration)
+      Contents: '*.nupkg'
+      TargetFolder: $(Build.ArtifactStagingDirectory)\Packages
+  - task: PublishBuildArtifacts@1
+    displayName: Publish packages as build artifacts
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)\Packages
+      ArtifactName: Packages
+      publishLocation: Container
+    condition: eq(variables['BuildConfiguration'], 'Release')
 
 - job: macOS
   displayName: macOS
