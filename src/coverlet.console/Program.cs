@@ -14,43 +14,7 @@ using McMaster.Extensions.CommandLineUtils;
 namespace Coverlet.Console
 {
     class Program
-    {
-        /// <summary>
-        /// Exit Codes returned from Coverlet console process.
-        /// </summary>
-        enum CommandExitCodes
-        {
-            /// <summary>
-            /// Indicates successful run of dotnet test without any test failure and coverage percentage above threshold if provided.
-            /// </summary>
-            Success = 0,
-
-            /// <summary>
-            /// Indicates test failure by dotnet test.
-            /// </summary>
-            TestFailed = 1,
-
-            /// <summary>
-            /// Indicates coverage percentage is below given threshold for one or more threshold type.
-            /// </summary>
-            CoverageBelowThreshold = 2,
-
-            /// <summary>
-            /// Indicates test failure by dotnet test and coverage percentage is below given threshold for one or more threshold type.
-            /// </summary>
-            TestFailedAndCoverageBelowThreshold = TestFailed + CoverageBelowThreshold,
-
-            /// <summary>
-            /// Indicates exception occurred during Coverlet process.
-            /// </summary>
-            Exception = 101,
-
-            /// <summary>
-            /// Indicates missing options or empty arguments for Coverlet process.
-            /// </summary>
-            CommandParsingException = 102
-        }
-
+    {        
         static int Main(string[] args)
         {
             var logger = new ConsoleLogger();
@@ -59,7 +23,7 @@ namespace Coverlet.Console
             app.FullName = "Cross platform .NET Core code coverage tool";
             app.HelpOption("-h|--help");
             app.VersionOption("-v|--version", GetAssemblyVersion());
-            int exitCode = 0;
+            int exitCode = (int)CommandExitCodes.Success;
 
             CommandArgument module = app.Argument("<ASSEMBLY>", "Path to the test assembly.");
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
