@@ -15,7 +15,9 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <NuspecFile>coverlet.collector.nuspec</NuspecFile>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="coverlet.collector.targets" />
+    <None Update="build\**" Pack="true" PackagePath="" />
   </ItemGroup>
   
   <ItemGroup>
@@ -61,12 +63,11 @@
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="All" />
   </ItemGroup>
-  
-  <Target Name="SetNuspecPackageVersion" DependsOnTargets="GetBuildVersion" BeforeTargets="GenerateNuspec">
-    <PropertyGroup>
-      <NuspecProperties>$(NuspecProperties);version=$(NuGetPackageVersion);configuration=$(Configuration)
-    </NuspecProperties>
-  </PropertyGroup>
-  </Target>
 
+  <Target Name="PackBuildOutputs">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(TargetDir)\*.dll" PackagePath="build\netstandard1.0\" />
+      <TfmSpecificPackageFile Include="$(TargetDir)\*.deps.json" PackagePath="build\netstandard1.0\" />
+    </ItemGroup>
+  </Target>
 </Project>
