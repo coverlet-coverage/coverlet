@@ -24,6 +24,7 @@ jobs:
       SourceFolder: build\$(BuildConfiguration)
       Contents: '*.nupkg'
       TargetFolder: $(Build.ArtifactStagingDirectory)\Packages
+    condition: eq(variables['BuildConfiguration'], 'Release')
   - task: PublishBuildArtifacts@1
     displayName: Publish packages as build artifacts
     inputs:
