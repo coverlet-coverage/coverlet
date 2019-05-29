@@ -21,7 +21,7 @@ We release 3 components as nuget packages:
 **coverlet.console.nupkg**  
 **coverlet.collector.nupkg**  
 
-We plan 1 release every [Q1](https://en.wikipedia.org/wiki/Calendar_year) if there is *at least* 1 new commit of source code on master.  
+We plan 1 release [once per quarter](https://en.wikipedia.org/wiki/Calendar_year) if there is *at least* 1 new commit of source code on master. This release may be a major, minor, or patch version upgrade from the previous release depending on impact to consumers. 
 **We release intermediate packages in case of severe bug or to unblock users.**
 
 ### Current versions
