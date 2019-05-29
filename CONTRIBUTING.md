@@ -15,10 +15,6 @@ Building, testing, and packing use all the standard dotnet commands:
     dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]*"
     dotnet pack
 
-To see code coverage results while testing, run with a few extra parameters:
-
-    dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]*
-
 ## Performance testing
 
 There is a simple performance test for the hit counting instrumentation in the test project `coverlet.core.performancetest`.  Build the project with the msbuild step above and then run:
