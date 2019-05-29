@@ -35,7 +35,8 @@ We plan 1 release every [Q1](https://en.wikipedia.org/wiki/Calendar_year) if the
 ### Proposed next versions  
 
 We bump version based on Semantic Versioning 2.0.0 spec(PATCH is handled by Nerdbank.GitVersioning).  
-If we add features to **coverlet.core.dll** we bump MINOR version of all packages.
+If we add features to **coverlet.core.dll** we bump MINOR version of all packages.  
+If we do breaking changes on **coverlet.core.dll** we bump MAJOR version of all packages.
 
 
 | Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **notes** |
