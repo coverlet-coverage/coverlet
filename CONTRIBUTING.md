@@ -12,7 +12,7 @@ Clone this repo:
 Building, testing, and packing use all the standard dotnet commands:
 
     dotnet build
-    dotnet test
+    dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]*"
     dotnet pack
 
 To see code coverage results while testing, run with a few extra parameters:
