@@ -188,7 +188,7 @@ namespace Coverlet.Console
                 logger.LogInformation(coverageTable.ToStringAlternative());
                 if (process.ExitCode > 0)
                 {
-                    exitCode = (int)CommandExitCodes.TestFailed;
+                    exitCode += (int)CommandExitCodes.TestFailed;
                 }
                 thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, dThreshold, thresholdTypeFlags, dThresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
