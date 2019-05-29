@@ -13,7 +13,7 @@ Write-Host -ForegroundColor Blue Publish with .NET CLI
 & dotnet --info
 
 Write-Host -ForegroundColor Green Create Packages
-& dotnet pack -c Release
+& dotnet pack -c Release /p:PublicRelease=false
 
 Write-Host -ForegroundColor Green Upload Packages
 & dotnet nuget push "$PSScriptRoot\..\build\Release\*.nupkg" -k $apiKey -s $source
