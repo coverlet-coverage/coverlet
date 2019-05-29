@@ -21,7 +21,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect packages
     inputs:
-      SourceFolder: build\$(BuildConfiguration)
+      SourceFolder: bin\$(BuildConfiguration)\Packages
       Contents: '*.nupkg'
       TargetFolder: $(Build.ArtifactStagingDirectory)\Packages
     condition: eq(variables['BuildConfiguration'], 'Release')
