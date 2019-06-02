@@ -2,6 +2,7 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <PackageOutputPath>$(MSBuildThisFileDirectory)build\$(Configuration)\</PackageOutputPath>
   </PropertyGroup>
 
