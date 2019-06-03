@@ -36,6 +36,8 @@ After the above command is run, a `coverage.cobertura.json` file containing the 
 
 See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
+_Note: You need to be running .NET Core SDK v2.2.300 and above_
+
 ### MSBuild Integration
 
 Coverlet also integrates with the build system to run code coverage after tests. Enabling code coverage is as simple as setting the `CollectCoverage` property to `true`
