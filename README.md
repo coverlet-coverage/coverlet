@@ -85,6 +85,11 @@ _Note: The assembly you'd like to get coverage for must be different from the as
 
 If you're using [Cake Build](https://cakebuild.net) for your build script you can use the [Cake.Coverlet](https://github.com/Romanx/Cake.Coverlet) add-in to provide you extensions to dotnet test for passing Coverlet arguments in a strongly typed manner.
 
+## Consume nightly build
+
+We offer nightly build of master for all packages.
+See the [documentation](Documentation/ConsumeNightlyBuild.md)
+
 ## Issues & Contributions
 
 If you find a bug or have a feature request, please report them at this repository's issues section. See the [CONTRIBUTING GUIDE](CONTRIBUTING.md) for details on building and contributing to this project.
