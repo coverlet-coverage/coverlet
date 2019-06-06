@@ -25,7 +25,7 @@ To consume nightly build create a `NuGet.Config` on your root solution directory
 
 You can install nightly package using visual studio
 
-![File](images/nightly.png)
+![File](images/nightly.PNG)
 
 Nuget(PM console)
 ```
@@ -49,8 +49,8 @@ You can understand which version you're using comparing nightly build release da
 For instance if we want to consume last msbuild nightly build:
 * Go to https://www.myget.org/feed/coverlet-dev/package/nuget/coverlet.msbuild
 * Scroll down the page and check release date 
-![File](images/nightly_1.png)
+![File](images/nightly_1.PNG)
 * Go to repo commits and compare date and first part of commit hash
-![File](images/nightly_2.png)
+![File](images/nightly_2.PNG)
 
 As you can see we build at 00.00 UTC and build takes some seconds, so it's possible that release date won't be the same of commit repo.
