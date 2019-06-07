@@ -41,5 +41,5 @@ We MANUALLY bump versions on production release, so we have different release pl
 
 | Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **commit hash**| **notes** |
 | :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
-| 1 July 2019      | 2.6.2 | 1.5.2 |   1.0.0 |  |  |
+| 1 July 2019      | 2.6.3 | 1.5.3 |   1.0.1 |  |  |
 | 6 June 2019      | 2.6.2 | 1.5.2 |   1.0.0 | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release |
