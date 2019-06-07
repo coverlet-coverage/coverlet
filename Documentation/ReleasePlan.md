@@ -28,17 +28,18 @@ We plan 1 release [once per quarter](https://en.wikipedia.org/wiki/Calendar_year
 
 | Package        | **coverlet.msbuild** |
 | :-------------: |:-------------:|
-|**coverlet.msbuild**      | 2.6.1  |  
-|**coverlet.console**      | 1.5.1  |
-|**coverlet.collector**      | not yet released |  
+|**coverlet.msbuild**      | 2.6.2  |  
+|**coverlet.console**      | 1.5.2  |
+|**coverlet.collector**      | 1.0.0 |  
 
 ### Proposed next versions  
 
-We bump version based on Semantic Versioning 2.0.0 spec(PATCH is handled by Nerdbank.GitVersioning).  
+We bump version based on Semantic Versioning 2.0.0 spec.  
 If we add features to **coverlet.core.dll** we bump MINOR version of all packages.  
-If we do breaking changes on **coverlet.core.dll** we bump MAJOR version of all packages.
+If we do breaking changes on **coverlet.core.dll** we bump MAJOR version of all packages.  
+We MANUALLY bump versions on production release, so we have different release plan between prod and nigntly packages.
 
-
-| Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **notes** |
-| :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|
-| 1 July 2019      | 2.6 | 1.5 |   1.0 |               |
+| Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **commit hash**| **notes** |
+| :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| 1 July 2019      | 2.6.2 | 1.5.2 |   1.0.0 |  |  |
+| 6 June 2019      | 2.6.2 | 1.5.2 |   1.0.0 | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release |
