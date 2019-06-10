@@ -36,7 +36,12 @@ After the above command is run, a `coverage.cobertura.json` file containing the 
 
 See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
-_Note: You need to be running .NET Core SDK v2.2.300 and above_
+#### Requirements
+* _You need to be running .NET Core SDK v2.2.300 and above_
+* _You need to reference version 16.1.0 and above of Microsoft.NET.Test.Sdk_
+```
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
+```
 
 ### MSBuild Integration
 
