@@ -88,6 +88,7 @@ namespace Coverlet.Collector.Tests
 
             Assert.Equal("[coverlet.*]*", coverletSettings.ExcludeFilters[0]);
             Assert.Equal("[xunit*]*", coverletSettings.ExcludeFilters[1]);
+            Assert.Equal(2, coverletSettings.ExcludeFilters.Length);
         }
 
         [Fact]
