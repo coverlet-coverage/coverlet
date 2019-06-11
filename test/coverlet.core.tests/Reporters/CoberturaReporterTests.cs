@@ -46,7 +46,7 @@ namespace Coverlet.Core.Reporters.Tests
             Thread.CurrentThread.CurrentCulture = new CultureInfo("it-IT");
             try
             {
-                // Asserts conversion behaviours to be sure to be in a Italian culture context
+                // Assert conversion behaviour to be sure to be in a Italian culture context
                 // where decimal char is comma.
                 Assert.Equal("1,5", (1.5).ToString());
 
