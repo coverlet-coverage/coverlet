@@ -53,6 +53,8 @@ namespace Coverlet.Core.Reporters.Tests
                 CoberturaReporter reporter = new CoberturaReporter();
                 string report = reporter.Report(result);
 
+                Assert.NotEmpty(report);
+
                 var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
                 Assert.All(doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate")).Select(attr => attr.Value),
                 value =>
