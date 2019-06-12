@@ -1,6 +1,6 @@
 trigger:
   branches:
-    include: ["master"]
+    include: ["master", "*_validate"]
   paths:
     exclude: [".github", "doc", "*.md"]
 

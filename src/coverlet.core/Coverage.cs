@@ -63,11 +63,11 @@ namespace Coverlet.Core
 
         public Coverage(CoveragePrepareResult prepareResult, ILogger logger)
         {
-            this._identifier = prepareResult.Identifier;
-            this._module = prepareResult.Module;
-            this._mergeWith = prepareResult.MergeWith;
-            this._useSourceLink = prepareResult.UseSourceLink;
-            this._results = new List<InstrumenterResult>(prepareResult.Results);
+            _identifier = prepareResult.Identifier;
+            _module = prepareResult.Module;
+            _mergeWith = prepareResult.MergeWith;
+            _useSourceLink = prepareResult.UseSourceLink;
+            _results = new List<InstrumenterResult>(prepareResult.Results);
             _logger = logger;
         }
 
