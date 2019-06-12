@@ -3,13 +3,13 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>5.1.0</AssemblyVersion>
+    <AssemblyVersion>5.1.1</AssemblyVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <!--
               Do not change System.Reflection.Metadata version since we need to support VSTest DataCollectors. Goto https://www.nuget.org/packages/System.Reflection.Metadata to check versions.
               We need to load assembly version 1.4.2.0 to properly work

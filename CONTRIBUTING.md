@@ -2,33 +2,18 @@
 
 Contributions are highly welcome, however, except for very small changes, kindly file an issue and let's have a discussion before you open a pull request.
 
-## Building The Project
+## Building the Project
 
 Clone this repo:
 
-```bash
-git clone https://github.com/tonerdo/coverlet
-```
+    git clone https://github.com/tonerdo/coverlet.git
+    cd coverlet
 
-Change directory to repo root:
+Building, testing, and packing use all the standard dotnet commands:
 
-```bash
-cd coverlet
-```
-
-Execute build script:
-
-```bash
-dotnet msbuild build.proj
-```
-
-This will result in the following:
-
-* Restore all NuGet packages required for building
-* Build and publish all projects. Final binaries are placed into `<repo_root>\build\<Configuration>`
-* Build and run tests
-
-These steps must be followed before you attempt to open the solution in an IDE (e.g. Visual Studio, Rider) for all projects to be loaded successfully.
+    dotnet build
+    dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]*"
+    dotnet pack
 
 ## Performance testing
 
@@ -48,8 +33,8 @@ For more realistic testing it is recommended to try out any changes to the hit c
 
 Change to the directory of the library and run the msbuild code coverage command:
 
-    dotnet msbuild /t:BuildAndTest /p:Coverage=true
-    
+    dotnet test /p:Coverage=true
+
 To run with a development version of coverlet call `dotnet run` instead of the installed coverlet version, e.g.:
 
-    dotnet msbuild /t:BuildAndTest /p:Coverage=true /p:CoverageExecutablePath="dotnet run -p C:\...\coverlet\src\coverlet.console\coverlet.console.csproj"
+    dotnet test /p:Coverage=true /p:CoverageExecutablePath="dotnet run -p C:\...\coverlet\src\coverlet.console\coverlet.console.csproj"
