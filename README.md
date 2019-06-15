@@ -55,6 +55,9 @@ After the above command is run, a `coverage.json` file containing the results wi
 
 See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 
+#### Requirements
+Requires a runtime that support _.NET Standard 2.0 and above_
+
 ### Global Tool
 
 The `coverlet` tool is invoked by specifying the path to the assembly that contains the unit tests. You also need to specify the test runner and the arguments to pass to the test runner using the `--target` and `--targetargs` options respectively. The invocation of the test runner with the supplied arguments **must not** involve a recompilation of the unit test assembly or no coverage result will be generated.
@@ -68,6 +71,12 @@ coverlet /path/to/test-assembly.dll --target "dotnet" --targetargs "test /path/t
 _Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dll` assembly isn't rebuilt_
 
 See [documentation](Documentation/GlobalTool.md) for advanced usage.
+
+#### Requirements
+.NET global tools rely on a .NET Core runtime installed on your machine https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong
+
+.NET Coverlet global tool requires _.NET Core 2.2 and above_ 
+
 
 ## How It Works
 
