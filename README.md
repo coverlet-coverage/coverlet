@@ -1,5 +1,7 @@
 # Coverlet
 
+[![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/tonerdo.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=3&branchName=master)
+
 Coverlet is a cross platform code coverage framework for .NET, with support for line, branch and method coverage. It works with .NET Framework on Windows and .NET Core on all supported platforms.
 
 ## Installation
