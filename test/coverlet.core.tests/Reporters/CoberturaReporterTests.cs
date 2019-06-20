@@ -1,5 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Xml;
+using System.Xml.Linq;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -35,8 +42,32 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
 
-            CoberturaReporter reporter = new CoberturaReporter();
-            Assert.NotEqual(string.Empty, reporter.Report(result));
+            CultureInfo currentCulture = Thread.CurrentThread.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("it-IT");
+            try
+            {
+                // Assert conversion behaviour to be sure to be in a Italian culture context
+                // where decimal char is comma.
+                Assert.Equal("1,5", (1.5).ToString());
+
+                CoberturaReporter reporter = new CoberturaReporter();
+                string report = reporter.Report(result);
+
+                Assert.NotEmpty(report);
+
+                var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+                Assert.All(doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate")).Select(attr => attr.Value),
+                value =>
+                {
+                    Assert.DoesNotContain(",", value);
+                    Assert.Contains(".", value);
+                    Assert.Equal(0.5, double.Parse(value, CultureInfo.InvariantCulture));
+                });
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = currentCulture;
+            }
         }
     }
 }

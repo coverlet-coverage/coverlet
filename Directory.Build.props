@@ -2,7 +2,8 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <PackageOutputPath>$(MSBuildThisFileDirectory)build\$(Configuration)\</PackageOutputPath>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\Packages\</PackageOutputPath>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>

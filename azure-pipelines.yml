@@ -1,6 +1,6 @@
 trigger:
   branches:
-    include: ["master"]
+    include: ["master", "*_validate"]
   paths:
     exclude: [".github", "doc", "*.md"]
 
@@ -21,7 +21,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect packages
     inputs:
-      SourceFolder: build\$(BuildConfiguration)
+      SourceFolder: bin\$(BuildConfiguration)\Packages
       Contents: |
         *.nupkg
         *.snupkg

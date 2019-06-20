@@ -57,6 +57,12 @@ namespace Coverlet.Console
                     logger.Level = verbosity.ParsedValue;
                 }
 
+                // We add default exclusion filter if no specified
+                if (excludeFilters.Values.Count == 0)
+                {
+                    excludeFilters.Values.Add("[xunit*]*");
+                }
+
                 Coverage coverage = new Coverage(module.Value,
                     includeFilters.Values.ToArray(),
                     includeDirectories.Values.ToArray(),

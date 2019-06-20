@@ -59,3 +59,55 @@ Hits file:'C:\Users\Marco\AppData\Local\Temp\coverlet.core_703263e9-21f0-4d1c-9c
 | Average | 4,44%  | 3,455% | 5,66%  |
 +---------+--------+--------+--------+
 ```
+
+## Use local build
+
+Sometimes is useful test local updated source to fix issue.  
+You can "load" your local build using simple switch:
+
+* build repo
+
+```
+D:\git\coverlet (fixjsonserializerbug -> origin)
+λ dotnet build
+Microsoft (R) Build Engine version 16.1.76+g14b0a930a7 for .NET Core
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+  Restore completed in 52.23 ms for D:\git\coverlet\test\coverlet.testsubject\coverlet.testsubject.csproj.
+  Restore completed in 58.97 ms for D:\git\coverlet\src\coverlet.console\coverlet.console.csproj.
+  Restore completed in 59 ms for D:\git\coverlet\src\coverlet.core\coverlet.core.csproj.
+  Restore completed in 59.17 ms for D:\git\coverlet\src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj.
+  Restore completed in 59.26 ms for D:\git\coverlet\src\coverlet.collector\coverlet.collector.csproj.
+  Restore completed in 60.1 ms for D:\git\coverlet\test\coverlet.collector.tests\coverlet.collector.tests.csproj.
+  Restore completed in 60.42 ms for D:\git\coverlet\test\coverlet.core.performancetest\coverlet.core.performancetest.csproj.
+  Restore completed in 60.47 ms for D:\git\coverlet\test\coverlet.core.tests\coverlet.core.tests.csproj.
+  Restore completed in 22.85 ms for D:\git\coverlet\test\coverlet.core.tests\coverlet.core.tests.csproj.
+  coverlet.testsubject -> D:\git\coverlet\test\coverlet.testsubject\bin\Debug\netcoreapp2.0\coverlet.testsubject.dll
+  coverlet.core -> D:\git\coverlet\src\coverlet.core\bin\Debug\netstandard2.0\coverlet.core.dll
+  coverlet.msbuild.tasks -> D:\git\coverlet\src\coverlet.msbuild.tasks\bin\Debug\netstandard2.0\coverlet.msbuild.tasks.dll
+  coverlet.collector -> D:\git\coverlet\src\coverlet.collector\bin\Debug\netcoreapp2.0\coverlet.collector.dll
+  coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Debug\netcoreapp2.2\coverlet.console.dll
+  coverlet.core.performancetest -> D:\git\coverlet\test\coverlet.core.performancetest\bin\Debug\netcoreapp2.0\coverlet.core.performancetest.dll
+  coverlet.core.tests -> D:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\coverlet.core.tests.dll
+  coverlet.collector.tests -> D:\git\coverlet\test\coverlet.collector.tests\bin\Debug\netcoreapp2.2\coverlet.collector.tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:07.42
+
+D:\git\coverlet (fixjsonserializerbug -> origin)
+λ
+
+```
+
+* Go to repro project and run
+```
+D:\git\Cake.Codecov\Source\Cake.Codecov.Tests (develop -> origin)
+λ dotnet test /p:CollectCoverage=true /p:Exclude="[xunit.*]*" /p:CoverletToolsPath=D:\git\coverlet\src\coverlet.msbuild.tasks\bin\Debug\netstandard2.0\  
+Test run for D:\git\Cake.Codecov\Source\Cake.Codecov.Tests\bin\Debug\netcoreapp2.0\Cake.Codecov.Tests.dll(.NETCoreApp,Version=v2.0)
+...
+```
+
+In this way you can add `Debug.Launch()` inside coverlet source and debug.
