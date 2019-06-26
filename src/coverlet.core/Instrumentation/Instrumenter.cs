@@ -273,10 +273,20 @@ namespace Coverlet.Core.Instrumentation
             foreach (var method in methods)
             {
                 MethodDefinition actualMethod = method;
+                IEnumerable<CustomAttribute> customAttributes = method.CustomAttributes;
                 if (InstrumentationHelper.IsLocalMethod(method.Name))
                     actualMethod = methods.FirstOrDefault(m => m.Name == method.Name.Split('>')[0].Substring(1)) ?? method;
 
-                if (!actualMethod.CustomAttributes.Any(IsExcludeAttribute))
+                if (actualMethod.IsGetter || actualMethod.IsSetter)
+                {
+                    var prop = type.Properties.FirstOrDefault(p => p.GetMethod.FullName.Equals(actualMethod.FullName));
+                    if (prop?.HasCustomAttributes == true)
+                    {
+                        customAttributes = customAttributes.Union(prop.CustomAttributes);
+                    }
+                }
+
+                if (!customAttributes.Any(IsExcludeAttribute))
                     InstrumentMethod(method);
             }
 

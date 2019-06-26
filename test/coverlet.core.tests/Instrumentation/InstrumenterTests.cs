@@ -84,7 +84,6 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
-
         [Theory]
         [InlineData(nameof(ObsoleteAttribute))]
         [InlineData("Obsolete")]
@@ -99,6 +98,47 @@ namespace Coverlet.Core.Instrumentation.Tests
             var found = doc.Lines.Values.Any(l => l.Class.Equals(nameof(ClassExcludedByObsoleteAttr)));
 #pragma warning restore CS0612 // Type or member is obsolete
             Assert.False(found, "Class decorated with with exclude attribute should be excluded");
+
+            instrumenterTest.Directory.Delete(true);
+        }
+
+        [Theory]
+        [InlineData(nameof(ObsoleteAttribute))]
+        [InlineData("Obsolete")]
+        public void TestInstrument_ClassesWithMethodWithCustomExcludeAttributeAreExcluded(string excludedAttribute)
+        {
+            var instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
+            var result = instrumenterTest.Instrumenter.Instrument();
+
+            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            Assert.NotNull(doc);
+#pragma warning disable CS0612 // Type or member is obsolete
+            var found = doc.Lines.Values.Any(l => l.Method.Equals("System.String Coverlet.Core.Samples.Tests.ClassWithMethodExcludedByObsoleteAttr::Method(System.String)"));
+#pragma warning restore CS0612 // Type or member is obsolete
+            Assert.False(found, "Method decorated with with exclude attribute should be excluded");
+
+            instrumenterTest.Directory.Delete(true);
+        }
+
+        [Theory]
+        [InlineData(nameof(ObsoleteAttribute))]
+        [InlineData("Obsolete")]
+        public void TestInstrument_ClassesWithPropertyWithCustomExcludeAttributeAreExcluded(string excludedAttribute)
+        {
+            var instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
+            var result = instrumenterTest.Instrumenter.Instrument();
+
+            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            Assert.NotNull(doc);
+#pragma warning disable CS0612 // Type or member is obsolete
+            var getFound = doc.Lines.Values.Any(l => l.Method.Equals("System.String Coverlet.Core.Samples.Tests.ClassWithPropertyExcludedByObsoleteAttr::get_Property()"));
+#pragma warning restore CS0612 // Type or member is obsolete
+            Assert.False(getFound, "Property getter decorated with with exclude attribute should be excluded");
+
+#pragma warning disable CS0612 // Type or member is obsolete
+            var setFound = doc.Lines.Values.Any(l => l.Method.Equals("System.String Coverlet.Core.Samples.Tests.ClassWithPropertyExcludedByObsoleteAttr::set_Property()"));
+#pragma warning restore CS0612 // Type or member is obsolete
+            Assert.False(setFound, "Property setter decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);
         }
