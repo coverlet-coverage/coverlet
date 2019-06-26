@@ -281,9 +281,7 @@ namespace Coverlet.Core.Instrumentation
                 {
                     var prop = type.Properties.FirstOrDefault(p => p.GetMethod.FullName.Equals(actualMethod.FullName));
                     if (prop?.HasCustomAttributes == true)
-                    {
                         customAttributes = customAttributes.Union(prop.CustomAttributes);
-                    }
                 }
 
                 if (!customAttributes.Any(IsExcludeAttribute))
