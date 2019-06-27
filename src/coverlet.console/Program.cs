@@ -172,13 +172,17 @@ namespace Coverlet.Console
                 var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent;
                 var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent;
 
+                var averageLinePercent = summary.CalculateLineCoverage(result.Modules).AveragePercent;
+                var averageBranchPercent = summary.CalculateBranchCoverage(result.Modules).AveragePercent;
+                var averageMethodPercent = summary.CalculateMethodCoverage(result.Modules).AveragePercent;
+
                 foreach (var _module in result.Modules)
                 {
                     var linePercent = summary.CalculateLineCoverage(_module.Value).Percent;
                     var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
                     var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
-                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent.ToString("0.00")}%", $"{branchPercent.ToString("0.00")}%", $"{methodPercent.ToString("0.00")}%");
                 }
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
@@ -187,8 +191,8 @@ namespace Coverlet.Console
                 coverageTable.Rows.Clear();
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
-                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
+                coverageTable.AddRow("Total", $"{totalLinePercent.ToString("0.00")}%", $"{totalBranchPercent.ToString("0.00")}%", $"{totalMethodPercent.ToString("0.00")}%");
+                coverageTable.AddRow("Average", $"{averageLinePercent.ToString("0.00")}%", $"{averageBranchPercent.ToString("0.00")}%", $"{averageMethodPercent.ToString("0.00")}%");
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
 
