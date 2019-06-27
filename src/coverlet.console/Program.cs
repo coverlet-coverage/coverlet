@@ -172,9 +172,9 @@ namespace Coverlet.Console
                 var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent;
                 var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent;
 
-                var averageLinePercent = summary.CalculateLineCoverage(result.Modules).AveragePercent;
-                var averageBranchPercent = summary.CalculateBranchCoverage(result.Modules).AveragePercent;
-                var averageMethodPercent = summary.CalculateMethodCoverage(result.Modules).AveragePercent;
+                var averageLinePercent = summary.CalculateLineCoverage(result.Modules).AverageModulePercent;
+                var averageBranchPercent = summary.CalculateBranchCoverage(result.Modules).AverageModulePercent;
+                var averageMethodPercent = summary.CalculateMethodCoverage(result.Modules).AverageModulePercent;
 
                 foreach (var _module in result.Modules)
                 {

@@ -196,33 +196,26 @@ namespace Coverlet.Core
                     break;
                 case ThresholdStatistic.Average:
                     {
-                        double line = 0;
-                        double branch = 0;
-                        double method = 0;
+                        var line = summary.CalculateLineCoverage(Modules).AverageModulePercent;
+                        var branch = summary.CalculateBranchCoverage(Modules).AverageModulePercent;
+                        var method = summary.CalculateMethodCoverage(Modules).AverageModulePercent;
                         int numModules = Modules.Count;
-
-                        foreach (var module in Modules)
-                        {
-                            line += summary.CalculateLineCoverage(module.Value).Percent;
-                            branch += summary.CalculateBranchCoverage(module.Value).Percent;
-                            method += summary.CalculateMethodCoverage(module.Value).Percent;
-                        }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                         {
-                            if ((line / numModules) < threshold)
+                            if (line < threshold)
                                 thresholdTypeFlags |= ThresholdTypeFlags.Line;
                         }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
                         {
-                            if ((branch / numModules) < threshold)
+                            if (branch < threshold)
                                 thresholdTypeFlags |= ThresholdTypeFlags.Branch;
                         }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
                         {
-                            if ((method / numModules) < threshold)
+                            if (method < threshold)
                                 thresholdTypeFlags |= ThresholdTypeFlags.Method;
                         }
                     }
