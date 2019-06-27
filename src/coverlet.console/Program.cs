@@ -14,7 +14,7 @@ using McMaster.Extensions.CommandLineUtils;
 namespace Coverlet.Console
 {
     class Program
-    {        
+    {
         static int Main(string[] args)
         {
             var logger = new ConsoleLogger();
