@@ -168,13 +168,17 @@ namespace Coverlet.Console
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
 
-                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent;
-                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent;
-                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent;
+                var linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
+                var branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
+                var methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
 
-                var averageLinePercent = summary.CalculateLineCoverage(result.Modules).AverageModulePercent;
-                var averageBranchPercent = summary.CalculateBranchCoverage(result.Modules).AverageModulePercent;
-                var averageMethodPercent = summary.CalculateMethodCoverage(result.Modules).AverageModulePercent;
+                var totalLinePercent = linePercentCalculation.Percent;
+                var totalBranchPercent = branchPercentCalculation.Percent;
+                var totalMethodPercent = methodPercentCalculation.Percent;
+
+                var averageLinePercent = linePercentCalculation.AverageModulePercent;
+                var averageBranchPercent = branchPercentCalculation.AverageModulePercent;
+                var averageMethodPercent = methodPercentCalculation.AverageModulePercent;
 
                 foreach (var _module in result.Modules)
                 {
@@ -182,7 +186,7 @@ namespace Coverlet.Console
                     var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
                     var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
-                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent.ToString("0.00")}%", $"{branchPercent.ToString("0.00")}%", $"{methodPercent.ToString("0.00")}%");
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
@@ -191,8 +195,8 @@ namespace Coverlet.Console
                 coverageTable.Rows.Clear();
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
-                coverageTable.AddRow("Total", $"{totalLinePercent.ToString("0.00")}%", $"{totalBranchPercent.ToString("0.00")}%", $"{totalMethodPercent.ToString("0.00")}%");
-                coverageTable.AddRow("Average", $"{averageLinePercent.ToString("0.00")}%", $"{averageBranchPercent.ToString("0.00")}%", $"{averageMethodPercent.ToString("0.00")}%");
+                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
+                coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
 

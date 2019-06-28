@@ -150,10 +150,10 @@ namespace ConsoleTables
             var format = Format(columnLengths, delimiter);
 
             // find the longest formatted line
-            var columnHeaders = string.Format(format, Columns.ToArray());
+            var columnHeaders = string.Format(format["Header"], Columns.ToArray());
 
             // add each row
-            var results = Rows.Select(row => string.Format(format, row)).ToList();
+            var results = Rows.Select(row => string.Format(format["Body"], row)).ToList();
 
             // create the divider
             var divider = Regex.Replace(columnHeaders, @"[^|]", "-");
@@ -181,10 +181,10 @@ namespace ConsoleTables
             var format = Format(columnLengths);
 
             // find the longest formatted line
-            var columnHeaders = string.Format(format, Columns.ToArray());
+            var columnHeaders = string.Format(format["Header"], Columns.ToArray());
 
             // add each row
-            var results = Rows.Select(row => string.Format(format, row)).ToList();
+            var results = Rows.Select(row => string.Format(format["Body"], row)).ToList();
 
             // create the divider
             var divider = Regex.Replace(columnHeaders, @"[^|]", "-");
@@ -203,13 +203,33 @@ namespace ConsoleTables
             return builder.ToString();
         }
 
-        private string Format(List<int> columnLengths, char delimiter = '|')
+        private Dictionary<string, string> Format(List<int> columnLengths, char delimiter = '|')
         {
             var delimiterStr = delimiter == char.MinValue ? string.Empty : delimiter.ToString();
             var format = (Enumerable.Range(0, Columns.Count)
                 .Select(i => " " + delimiterStr + " {" + i + ",-" + columnLengths[i] + "}")
                 .Aggregate((s, a) => s + a) + " " + delimiterStr).Trim();
-            return format;
+
+            return new Dictionary<string, string>()
+            {
+                { "Header", format },
+                { "Body", NumberRightAligment(format) }
+            };
+        }
+
+        private string NumberRightAligment(string format)
+        {
+            int index = 0;
+            return Regex.Replace(
+                format,
+                @"\-\d+",
+                m => Replacement(m.Captures[0].Value, index++)
+            );
+        }
+
+        private string Replacement(string matchValue, int index)
+        {
+            return string.Format("{0}", index > 0 ? matchValue.Replace("-", "") : matchValue);
         }
 
         private List<int> ColumnLengths()
