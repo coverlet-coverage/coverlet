@@ -75,7 +75,7 @@ namespace Coverlet.Core.Tests
             _modules.Add("module", documents);
         }
 
-        private void SetupAditionalData()
+        private void SetupDataForAverageCalculation()
         {
             Lines lines = new Lines
             {
@@ -139,7 +139,7 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateLineCoverage_Modules()
         {
-            SetupAditionalData();
+            SetupDataForAverageCalculation();
 
             CoverageSummary summary = new CoverageSummary();
             var documentsFirstModule = _modules["module"];
@@ -173,7 +173,7 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateBranchCoverage_Modules()
         {
-            SetupAditionalData();
+            SetupDataForAverageCalculation();
 
             CoverageSummary summary = new CoverageSummary();
             var documentsFirstModule = _modules["module"];
@@ -204,7 +204,7 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateMethodCoverage_Modules()
         {
-            SetupAditionalData();
+            SetupDataForAverageCalculation();
 
             CoverageSummary summary = new CoverageSummary();
             var documentsFirstModule = _modules["module"];

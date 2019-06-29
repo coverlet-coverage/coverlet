@@ -9,7 +9,7 @@ namespace Coverlet.Core
         private double averageModulePercent;
         public double AverageModulePercent
         {
-            get { return Math.Round(averageModulePercent, 2); ; }
+            get { return Math.Floor(averageModulePercent * 100) / 100; }
             internal set { averageModulePercent = value; }
         }
 
