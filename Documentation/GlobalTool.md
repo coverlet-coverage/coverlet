@@ -204,3 +204,15 @@ Examples
 Both `--exclude` and `--include` options can be used together but `--exclude` takes precedence. You can specify the `--exclude` and `--include` options multiple times to allow for multiple filter expressions.
 
 You can also include coverage of the test assembly itself by specifying the `--include-test-assembly` flag.
+
+## Exit Codes
+
+Coverlet outputs specific exit codes to better support build automation systems for determining failures and take action on it.
+```bash
+0 - Success.
+1 - If any test fails.
+2 - Coverage percentage is below threshold.
+3 - Test fails and also coverage percentage is below threshold.
+101 - General exception occured during coverlet process.
+102 - Missing options or invalid arguments for coverlet process.
+```
