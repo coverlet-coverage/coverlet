@@ -63,8 +63,8 @@ namespace Coverlet.Core.Reporters
                                 continue;
 
                             XElement method = new XElement("method");
-                            method.Add(new XAttribute("name", meth.Key.Split(':')[2].Split('(')[0]));
-                            method.Add(new XAttribute("signature", "(" + meth.Key.Split(':')[2].Split('(')[1]));
+                            method.Add(new XAttribute("name", meth.Key.Split(':').Last().Split('(').First()));
+                            method.Add(new XAttribute("signature", "(" + meth.Key.Split(':').Last().Split('(').Last()));
                             method.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(meth.Value.Lines).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                             method.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(meth.Value.Branches).Percent / 100).ToString(CultureInfo.InvariantCulture)));
 
