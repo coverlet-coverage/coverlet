@@ -170,9 +170,9 @@ namespace Coverlet.Core
                     {
                         foreach (var module in Modules)
                         {
-                            var line = summary.CalculateLineCoverage(module.Value).Percent;
-                            var branch = summary.CalculateBranchCoverage(module.Value).Percent;
-                            var method = summary.CalculateMethodCoverage(module.Value).Percent;
+                            double line = summary.CalculateLineCoverage(module.Value).Percent;
+                            double branch = summary.CalculateBranchCoverage(module.Value).Percent;
+                            double method = summary.CalculateMethodCoverage(module.Value).Percent;
 
                             if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                             {
@@ -199,7 +199,6 @@ namespace Coverlet.Core
                         double line = summary.CalculateLineCoverage(Modules).AverageModulePercent;
                         double branch = summary.CalculateBranchCoverage(Modules).AverageModulePercent;
                         double method = summary.CalculateMethodCoverage(Modules).AverageModulePercent;
-                        int numModules = Modules.Count;
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                         {
@@ -222,9 +221,9 @@ namespace Coverlet.Core
                     break;
                 case ThresholdStatistic.Total:
                     {
-                        var line = summary.CalculateLineCoverage(Modules).Percent;
-                        var branch = summary.CalculateBranchCoverage(Modules).Percent;
-                        var method = summary.CalculateMethodCoverage(Modules).Percent;
+                        double line = summary.CalculateLineCoverage(Modules).Percent;
+                        double branch = summary.CalculateBranchCoverage(Modules).Percent;
+                        double method = summary.CalculateMethodCoverage(Modules).Percent;
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                         {
