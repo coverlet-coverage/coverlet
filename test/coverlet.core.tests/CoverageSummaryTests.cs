@@ -81,22 +81,22 @@ namespace Coverlet.Core.Tests
         {
             Lines lines = new Lines
             {
-                { 1, 1 },//covered
-                { 2, 0 },//not covered
-                { 3, 0 }//not covered
+                { 1, 1 }, // covered
+                { 2, 0 }, // not covered
+                { 3, 0 } // not covered
             };
 
             Branches branches = new Branches
             {
-                new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 },//covered
-                new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 },//covered
-                new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2 }//not covered
+                new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 }, // covered
+                new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 }, // covered
+                new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2 } // not covered
             };
 
             Methods methods = new Methods();
             string[] methodString = {
-                "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()",//covered
-                "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestAditionalCalculateSummary()"//not covered
+                "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()", // covered
+                "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestAditionalCalculateSummary()" // not covered
             };
             methods.Add(methodString[0], new Method());
             methods[methodString[0]].Lines = lines;
@@ -105,7 +105,7 @@ namespace Coverlet.Core.Tests
             methods.Add(methodString[1], new Method());
             methods[methodString[1]].Lines = new Lines
             {
-                { 1, 0 }//not covered
+                { 1, 0 } // not covered
             };
 
             Classes classes = new Classes
@@ -152,9 +152,9 @@ namespace Coverlet.Core.Tests
             Assert.Equal(37.5, summary.CalculateLineCoverage(_averageCalculationMultiModule).AverageModulePercent);
             Assert.Equal(50, summary.CalculateLineCoverage(documentsFirstModule.First().Value).Percent);
 
-            Assert.Equal(33.33, summary.CalculateLineCoverage(documentsSecondModule.First().Value.First().Value.ElementAt(0).Value.Lines).Percent);//covered 1 of 3
-            Assert.Equal(0, summary.CalculateLineCoverage(documentsSecondModule.First().Value.First().Value.ElementAt(1).Value.Lines).Percent);//covered 0 of 1
-            Assert.Equal(25, summary.CalculateLineCoverage(documentsSecondModule.First().Value).Percent);//covered 1 of 4 lines
+            Assert.Equal(33.33, summary.CalculateLineCoverage(documentsSecondModule.First().Value.First().Value.ElementAt(0).Value.Lines).Percent); // covered 1 of 3
+            Assert.Equal(0, summary.CalculateLineCoverage(documentsSecondModule.First().Value.First().Value.ElementAt(1).Value.Lines).Percent); // covered 0 of 1
+            Assert.Equal(25, summary.CalculateLineCoverage(documentsSecondModule.First().Value).Percent); // covered 1 of 4 lines
         }
 
         [Fact]

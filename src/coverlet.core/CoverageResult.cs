@@ -196,9 +196,9 @@ namespace Coverlet.Core
                     break;
                 case ThresholdStatistic.Average:
                     {
-                        var line = summary.CalculateLineCoverage(Modules).AverageModulePercent;
-                        var branch = summary.CalculateBranchCoverage(Modules).AverageModulePercent;
-                        var method = summary.CalculateMethodCoverage(Modules).AverageModulePercent;
+                        double line = summary.CalculateLineCoverage(Modules).AverageModulePercent;
+                        double branch = summary.CalculateBranchCoverage(Modules).AverageModulePercent;
+                        double method = summary.CalculateMethodCoverage(Modules).AverageModulePercent;
                         int numModules = Modules.Count;
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
