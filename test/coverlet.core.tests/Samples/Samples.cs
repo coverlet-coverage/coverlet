@@ -188,7 +188,6 @@ namespace Coverlet.Core.Samples.Tests
     [ExcludeFromCodeCoverage]
     public class ClassExcludedByCodeAnalysisCodeCoverageAttr
     {
-
         public string Method(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -201,7 +200,6 @@ namespace Coverlet.Core.Samples.Tests
     [Obsolete]
     public class ClassExcludedByObsoleteAttr
     {
-
         public string Method(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -209,6 +207,24 @@ namespace Coverlet.Core.Samples.Tests
 
             return input;
         }
+    }
+
+    public class ClassWithMethodExcludedByObsoleteAttr
+    {
+        [Obsolete]
+        public string Method(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                throw new ArgumentException("Cannot be empty", nameof(input));
+
+            return input;
+        }
+    }
+
+    public class ClassWithPropertyExcludedByObsoleteAttr
+    {
+        [Obsolete]
+        public string Property { get; set; }
     }
 
     public class ExceptionFilter
