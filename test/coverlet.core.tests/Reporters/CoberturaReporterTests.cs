@@ -69,5 +69,56 @@ namespace Coverlet.Core.Reporters.Tests
                 Thread.CurrentThread.CurrentCulture = currentCulture;
             }
         }
+
+        [Theory]
+        [InlineData(
+            "Test.SearchRequest::pb::Google.Protobuf.IMessage.get_Descriptor()",
+            "Google.Protobuf.IMessage.get_Descriptor",
+            "()")]
+        [InlineData(
+            "Test.SearchRequest::pb::Google.Protobuf.IMessage.get_Descriptor(int i)",
+            "Google.Protobuf.IMessage.get_Descriptor",
+            "(int i)")]
+        public void TestEnsureParseMethodStringCorrectly(
+            string methodString,
+            string expectedMethodName,
+            string expectedSignature)
+        {
+            CoverageResult result = new CoverageResult();
+            result.Identifier = Guid.NewGuid().ToString();
+
+            Lines lines = new Lines();
+            lines.Add(1, 1);
+
+            Branches branches = new Branches();
+            branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 });
+
+            Methods methods = new Methods();
+            methods.Add(methodString, new Method());
+            methods[methodString].Lines = lines;
+            methods[methodString].Branches = branches;
+
+            Classes classes = new Classes();
+            classes.Add("Google.Protobuf.Reflection.MessageDescriptor", methods);
+
+            Documents documents = new Documents();
+            documents.Add("doc.cs", classes);
+
+            result.Modules = new Modules();
+            result.Modules.Add("module", documents);
+
+            CoberturaReporter reporter = new CoberturaReporter();
+            string report = reporter.Report(result);
+
+            Assert.NotEmpty(report);
+
+            var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+            var methodAttrs = doc.Descendants()
+                .Where(o => o.Name.LocalName == "method")
+                .Attributes()
+                .ToDictionary(o => o.Name.LocalName, o => o.Value);
+            Assert.Equal(expectedMethodName, methodAttrs["name"]);
+            Assert.Equal(expectedSignature, methodAttrs["signature"]);
+        }
     }
 }
