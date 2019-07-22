@@ -279,7 +279,7 @@ namespace Coverlet.Core.Instrumentation
 
                 if (actualMethod.IsGetter || actualMethod.IsSetter)
                 {
-                    PropertyDefinition prop = type.Properties.FirstOrDefault(p => p.GetMethod.FullName.Equals(actualMethod.FullName));
+                    PropertyDefinition prop = type.Properties.FirstOrDefault(p => (p.GetMethod ?? p.SetMethod).FullName.Equals(actualMethod.FullName));
                     if (prop?.HasCustomAttributes == true)
                         customAttributes = customAttributes.Union(prop.CustomAttributes);
                 }
