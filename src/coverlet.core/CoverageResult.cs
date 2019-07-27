@@ -170,9 +170,9 @@ namespace Coverlet.Core
                     {
                         foreach (var module in Modules)
                         {
-                            var line = summary.CalculateLineCoverage(module.Value).Percent;
-                            var branch = summary.CalculateBranchCoverage(module.Value).Percent;
-                            var method = summary.CalculateMethodCoverage(module.Value).Percent;
+                            double line = summary.CalculateLineCoverage(module.Value).Percent;
+                            double branch = summary.CalculateBranchCoverage(module.Value).Percent;
+                            double method = summary.CalculateMethodCoverage(module.Value).Percent;
 
                             if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                             {
@@ -196,42 +196,34 @@ namespace Coverlet.Core
                     break;
                 case ThresholdStatistic.Average:
                     {
-                        double line = 0;
-                        double branch = 0;
-                        double method = 0;
-                        int numModules = Modules.Count;
-
-                        foreach (var module in Modules)
-                        {
-                            line += summary.CalculateLineCoverage(module.Value).Percent;
-                            branch += summary.CalculateBranchCoverage(module.Value).Percent;
-                            method += summary.CalculateMethodCoverage(module.Value).Percent;
-                        }
+                        double line = summary.CalculateLineCoverage(Modules).AverageModulePercent;
+                        double branch = summary.CalculateBranchCoverage(Modules).AverageModulePercent;
+                        double method = summary.CalculateMethodCoverage(Modules).AverageModulePercent;
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                         {
-                            if ((line / numModules) < threshold)
+                            if (line < threshold)
                                 thresholdTypeFlags |= ThresholdTypeFlags.Line;
                         }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
                         {
-                            if ((branch / numModules) < threshold)
+                            if (branch < threshold)
                                 thresholdTypeFlags |= ThresholdTypeFlags.Branch;
                         }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
                         {
-                            if ((method / numModules) < threshold)
+                            if (method < threshold)
                                 thresholdTypeFlags |= ThresholdTypeFlags.Method;
                         }
                     }
                     break;
                 case ThresholdStatistic.Total:
                     {
-                        var line = summary.CalculateLineCoverage(Modules).Percent;
-                        var branch = summary.CalculateBranchCoverage(Modules).Percent;
-                        var method = summary.CalculateMethodCoverage(Modules).Percent;
+                        double line = summary.CalculateLineCoverage(Modules).Percent;
+                        double branch = summary.CalculateBranchCoverage(Modules).Percent;
+                        double method = summary.CalculateMethodCoverage(Modules).Percent;
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                         {
