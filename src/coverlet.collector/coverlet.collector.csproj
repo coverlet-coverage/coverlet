@@ -13,7 +13,6 @@
     <Description>Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.</Description>
     <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
@@ -27,7 +26,7 @@
   <ItemGroup>
     <None Update="build\**" Pack="true" PackagePath="" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Compile Update="Resources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -67,6 +66,7 @@
   <Target Name="PackBuildOutputs">
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(TargetDir)\*.dll" PackagePath="build\netstandard1.0\" />
+      <TfmSpecificPackageFile Include="$(TargetDir)\*.pdb" PackagePath="build\netstandard1.0\" />
       <TfmSpecificPackageFile Include="$(TargetDir)\*.deps.json" PackagePath="build\netstandard1.0\" />
     </ItemGroup>
   </Target>

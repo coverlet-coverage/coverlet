@@ -82,7 +82,8 @@ namespace Coverlet.Core.Instrumentation
                 if (!createdNew)
                     mutex.WaitOne();
 
-                if (!File.Exists(HitsFilePath))
+                bool failedToCreateNewHitsFile = false;
+                try
                 {
                     using (var fs = new FileStream(HitsFilePath, FileMode.CreateNew))
                     using (var bw = new BinaryWriter(fs))
@@ -94,7 +95,12 @@ namespace Coverlet.Core.Instrumentation
                         }
                     }
                 }
-                else
+                catch
+                {
+                    failedToCreateNewHitsFile = true;
+                }
+
+                if (failedToCreateNewHitsFile)
                 {
                     // Update the number of hits by adding value on disk with the ones on memory.
                     // This path should be triggered only in the case of multiple AppDomain unloads.

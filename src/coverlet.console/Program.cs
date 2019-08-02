@@ -23,6 +23,7 @@ namespace Coverlet.Console
             app.FullName = "Cross platform .NET Core code coverage tool";
             app.HelpOption("-h|--help");
             app.VersionOption("-v|--version", GetAssemblyVersion());
+            int exitCode = (int)CommandExitCodes.Success;
 
             CommandArgument module = app.Argument("<ASSEMBLY>", "Path to the test assembly.");
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
@@ -199,10 +200,14 @@ namespace Coverlet.Console
                 coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
-
+                if (process.ExitCode > 0)
+                {
+                    exitCode += (int)CommandExitCodes.TestFailed;
+                }
                 thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, dThreshold, thresholdTypeFlags, dThresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
+                    exitCode += (int)CommandExitCodes.CoverageBelowThreshold;
                     var exceptionMessageBuilder = new StringBuilder();
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                     {
@@ -222,7 +227,7 @@ namespace Coverlet.Console
                     throw new Exception(exceptionMessageBuilder.ToString());
                 }
 
-                return process.ExitCode == 0 ? 0 : process.ExitCode;
+                return exitCode;
             });
 
             try
@@ -233,12 +238,12 @@ namespace Coverlet.Console
             {
                 logger.LogError(ex.Message);
                 app.ShowHelp();
-                return 1;
+                return (int)CommandExitCodes.CommandParsingException;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex.Message);
-                return 1;
+                return exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception;
             }
         }
 
