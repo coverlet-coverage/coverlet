@@ -153,9 +153,17 @@ namespace Coverlet.MSbuild.Tasks
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
 
-                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent;
-                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent;
-                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent;
+                var linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
+                var branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
+                var methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
+
+                var totalLinePercent = linePercentCalculation.Percent;
+                var totalBranchPercent = branchPercentCalculation.Percent;
+                var totalMethodPercent = methodPercentCalculation.Percent;
+
+                var averageLinePercent = linePercentCalculation.AverageModulePercent;
+                var averageBranchPercent = branchPercentCalculation.AverageModulePercent;
+                var averageMethodPercent = methodPercentCalculation.AverageModulePercent;
 
                 foreach (var module in result.Modules)
                 {
@@ -174,7 +182,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
                 coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
+                coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
 
                 Console.WriteLine(coverageTable.ToStringAlternative());
 
