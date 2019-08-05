@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Samples.Tests;
