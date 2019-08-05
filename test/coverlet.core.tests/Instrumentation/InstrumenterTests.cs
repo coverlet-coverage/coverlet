@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Samples.Tests;
 using Microsoft.CodeAnalysis;
@@ -231,5 +231,18 @@ namespace Coverlet.Core.Instrumentation.Tests
             // We check if final netstandard.dll resolved is local folder one and not "official" netstandard.dll
             Assert.Equal(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "netstandard.dll"), Path.GetFullPath(resolved.MainModule.FileName));
         }
+
+        [Fact]
+        public void SkipEmbeddedPpdbWithoutLocalSource()
+        {
+            string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.*.dll").First();
+            var loggerMock = new Mock<ILogger>();
+            Instrumenter instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object);
+            Assert.True(InstrumentationHelper.HasPdb(xunitDll, out bool embedded));
+            Assert.True(embedded);
+            Assert.False(instrumenter.CanInstrument());
+            loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
+        }
+
     }
 }
