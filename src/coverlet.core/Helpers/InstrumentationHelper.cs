@@ -110,15 +110,22 @@ namespace Coverlet.Core.Helpers
                                 Document document = metadataReader.GetDocument(docHandle);
                                 string docName = metadataReader.GetString(document.Name);
 
-                                // We stop at first document we need only to verify if module has got local source
-                                return File.Exists(docName);
+                                // We verify all docs and return false if not all are present in local
+                                // We could have false negative if doc is not a source
+                                // Btw check for all possible extension could be weak approach
+                                if (!File.Exists(docName))
+                                {
+                                    return false;
+                                }
                             }
                         }
                     }
                 }
             }
 
-            return false;
+            // If we don't have EmbeddedPortablePdb entry return true, for instance empty dll
+            // We should call this method only on embedded pdb module
+            return true;
         }
 
         public static void BackupOriginalModule(string module, string identifier)
