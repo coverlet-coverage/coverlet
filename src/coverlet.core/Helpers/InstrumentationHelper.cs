@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 
@@ -66,8 +67,9 @@ namespace Coverlet.Core.Helpers
                 .ToArray();
         }
 
-        public static bool HasPdb(string module)
+        public static bool HasPdb(string module, out bool embedded)
         {
+            embedded = false;
             using (var moduleStream = File.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
@@ -79,6 +81,7 @@ namespace Coverlet.Core.Helpers
                         if (codeViewData.Path == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
                         {
                             // PDB is embedded
+                            embedded = true;
                             return true;
                         }
 
@@ -88,6 +91,34 @@ namespace Coverlet.Core.Helpers
 
                 return false;
             }
+        }
+
+        public static bool EmbeddedPortablePdbHasLocalSource(string module)
+        {
+            using (FileStream moduleStream = File.OpenRead(module))
+            using (var peReader = new PEReader(moduleStream))
+            {
+                foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
+                {
+                    if (entry.Type == DebugDirectoryEntryType.EmbeddedPortablePdb)
+                    {
+                        using (MetadataReaderProvider embeddedMetadataProvider = peReader.ReadEmbeddedPortablePdbDebugDirectoryData(entry))
+                        {
+                            MetadataReader metadataReader = embeddedMetadataProvider.GetMetadataReader();
+                            foreach (DocumentHandle docHandle in metadataReader.Documents)
+                            {
+                                Document document = metadataReader.GetDocument(docHandle);
+                                string docName = metadataReader.GetString(document.Name);
+
+                                // We stop at first document we need only to verify if module has got local source
+                                return File.Exists(docName);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         public static void BackupOriginalModule(string module, string identifier)
