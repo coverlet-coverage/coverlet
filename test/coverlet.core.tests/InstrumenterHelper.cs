@@ -109,9 +109,12 @@ namespace Coverlet.Core.Tests
     {
         public static CoverageResult GetCoverageResult(string filePath)
         {
-            CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(new FileStream(filePath, FileMode.Open));
-            Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object);
-            return coverage.GetCoverageResult();
+            using (var result = new FileStream(filePath, FileMode.Open))
+            {
+                CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
+                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object);
+                return coverage.GetCoverageResult();
+            }
         }
 
         async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, string persistPrepareResultToFile)
