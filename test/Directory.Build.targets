@@ -1,4 +1,5 @@
 <Project>
+  <Import Project="../Directory.Build.targets" />
   <Choose>
     <!-- This condition tests whether coverlet.msbuild.props has been imported by the project -->
     <When Condition=" '$(ThresholdType)' != '' ">

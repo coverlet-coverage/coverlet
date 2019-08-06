@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
