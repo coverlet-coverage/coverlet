@@ -1,52 +1,44 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
-using System.IO;
-using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 namespace Coverlet.Core.Instrumentation
 {
+    [DataContract]
     public class Line
     {
+        [DataMember]
         public int Number;
+        [DataMember]
         public string Class;
+        [DataMember]
         public string Method;
+        [DataMember]
         public int Hits;
     }
 
+    [DataContract]
     public class Branch : Line
     {
+        [DataMember]
         public int Offset;
+        [DataMember]
         public int EndOffset;
+        [DataMember]
         public int Path;
+        [DataMember]
         public uint Ordinal;
     }
 
-    public class BranchKeyConverter : TypeConverter
-    {
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-        {
-            return sourceType == typeof(string);
-        }
-
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
-        {
-            return JsonConvert.DeserializeObject<BranchKey>(value.ToString());
-        }
-
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-        {
-            return destinationType == typeof(BranchKey);
-        }
-    }
-
-    [TypeConverter(typeof(BranchKeyConverter))]
+    // Implements IEquatable because is used by dictionary key https://docs.microsoft.com/en-us/dotnet/api/system.iequatable-1?view=netcore-2.2#remarks
+    [DataContract]
     public class BranchKey : IEquatable<BranchKey>
     {
         public BranchKey(int line, int ordinal) => (Line, Ordinal) = (line, ordinal);
 
+        [DataMember]
         public int Line { get; set; }
+        [DataMember]
         public int Ordinal { get; set; }
 
         public override bool Equals(object obj) => Equals(obj);
@@ -57,13 +49,9 @@ namespace Coverlet.Core.Instrumentation
         {
             return (this.Line, this.Ordinal).GetHashCode();
         }
-
-        public override string ToString()
-        {
-            return JsonConvert.SerializeObject(this);
-        }
     }
 
+    [DataContract]
     public class Document
     {
         public Document()
@@ -72,22 +60,32 @@ namespace Coverlet.Core.Instrumentation
             Branches = new Dictionary<BranchKey, Branch>();
         }
 
+        [DataMember]
         public string Path;
+        [DataMember]
         public int Index;
+        [DataMember]
         public Dictionary<int, Line> Lines { get; private set; }
+        [DataMember]
         public Dictionary<BranchKey, Branch> Branches { get; private set; }
     }
 
+    [DataContract]
     public class HitCandidate
     {
         public HitCandidate(bool isBranch, int docIndex, int start, int end) => (this.isBranch, this.docIndex, this.start, this.end) = (isBranch, docIndex, start, end);
 
+        [DataMember]
         public bool isBranch { get; set; }
+        [DataMember]
         public int docIndex { get; set; }
+        [DataMember]
         public int start { get; set; }
+        [DataMember]
         public int end { get; set; }
     }
 
+    [DataContract]
     public class InstrumenterResult
     {
         public InstrumenterResult()
@@ -96,12 +94,19 @@ namespace Coverlet.Core.Instrumentation
             HitCandidates = new List<HitCandidate>();
         }
 
+        [DataMember]
         public string Module;
+        [DataMember]
         public string[] AsyncMachineStateMethod;
+        [DataMember]
         public string HitsFilePath;
+        [DataMember]
         public string ModulePath;
+        [DataMember]
         public string SourceLink;
+        [DataMember]
         public Dictionary<string, Document> Documents { get; private set; }
+        [DataMember]
         public List<HitCandidate> HitCandidates { get; private set; }
     }
 }

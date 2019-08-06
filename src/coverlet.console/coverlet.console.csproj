@@ -6,18 +6,14 @@
     <ToolCommandName>coverlet</ToolCommandName>
     <PackAsTool>true</PackAsTool>
     <AssemblyTitle>coverlet.console</AssemblyTitle>
-    <AssemblyVersion>1.5.1</AssemblyVersion>
     <Authors>tonerdo</Authors>
     <PackageId>$(AssemblyTitle)</PackageId>
-    <Title>$(AssemblyTitle)</Title>
     <Description>Coverlet is a cross platform code coverage tool for .NET, with support for line, branch and method coverage.</Description>
-    <PackageVersion>$(AssemblyVersion)</PackageVersion>
     <PackageTags>coverage;testing;unit-test;lcov;opencover;quality</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageProjectUrl>https://github.com/tonerdo/coverlet</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -63,11 +63,11 @@ namespace Coverlet.Core
 
         public Coverage(CoveragePrepareResult prepareResult, ILogger logger)
         {
-            this._identifier = prepareResult.Identifier;
-            this._module = prepareResult.Module;
-            this._mergeWith = prepareResult.MergeWith;
-            this._useSourceLink = prepareResult.UseSourceLink;
-            this._results = new List<InstrumenterResult>(prepareResult.Results);
+            _identifier = prepareResult.Identifier;
+            _module = prepareResult.Module;
+            _mergeWith = prepareResult.MergeWith;
+            _useSourceLink = prepareResult.UseSourceLink;
+            _results = new List<InstrumenterResult>(prepareResult.Results);
             _logger = logger;
         }
 
@@ -339,10 +339,18 @@ namespace Coverlet.Core
                 string key = sourceLinkDocument.Key;
                 if (Path.GetFileName(key) != "*") continue;
 
-                if (!Path.GetDirectoryName(document).StartsWith(Path.GetDirectoryName(key) + Path.DirectorySeparatorChar))
-                    continue;
+                string directoryDocument = Path.GetDirectoryName(document);
+                string sourceLinkRoot = Path.GetDirectoryName(key);
+                string relativePath = "";
 
-                var relativePath = Path.GetDirectoryName(document).Substring(Path.GetDirectoryName(key).Length + 1);
+                // if document is on repo root we skip relative path calculation
+                if (directoryDocument != sourceLinkRoot)
+                {
+                    if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
+                        continue;
+
+                    relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
+                }
 
                 if (relativePathOfBestMatch.Length == 0)
                 {

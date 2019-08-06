@@ -23,6 +23,7 @@ namespace Coverlet.Console
             app.FullName = "Cross platform .NET Core code coverage tool";
             app.HelpOption("-h|--help");
             app.VersionOption("-v|--version", GetAssemblyVersion());
+            int exitCode = (int)CommandExitCodes.Success;
 
             CommandArgument module = app.Argument("<ASSEMBLY>", "Path to the test assembly.");
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
@@ -55,6 +56,12 @@ namespace Coverlet.Console
                 {
                     // Adjust log level based on user input.
                     logger.Level = verbosity.ParsedValue;
+                }
+
+                // We add default exclusion filter if no specified
+                if (excludeFilters.Values.Count == 0)
+                {
+                    excludeFilters.Values.Add("[xunit*]*");
                 }
 
                 Coverage coverage = new Coverage(module.Value,
@@ -162,9 +169,17 @@ namespace Coverlet.Console
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
 
-                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent;
-                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent;
-                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent;
+                var linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
+                var branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
+                var methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
+
+                var totalLinePercent = linePercentCalculation.Percent;
+                var totalBranchPercent = branchPercentCalculation.Percent;
+                var totalMethodPercent = methodPercentCalculation.Percent;
+
+                var averageLinePercent = linePercentCalculation.AverageModulePercent;
+                var averageBranchPercent = branchPercentCalculation.AverageModulePercent;
+                var averageMethodPercent = methodPercentCalculation.AverageModulePercent;
 
                 foreach (var _module in result.Modules)
                 {
@@ -182,13 +197,17 @@ namespace Coverlet.Console
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
                 coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
+                coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
-
+                if (process.ExitCode > 0)
+                {
+                    exitCode += (int)CommandExitCodes.TestFailed;
+                }
                 thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, dThreshold, thresholdTypeFlags, dThresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
+                    exitCode += (int)CommandExitCodes.CoverageBelowThreshold;
                     var exceptionMessageBuilder = new StringBuilder();
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                     {
@@ -208,7 +227,7 @@ namespace Coverlet.Console
                     throw new Exception(exceptionMessageBuilder.ToString());
                 }
 
-                return process.ExitCode == 0 ? 0 : process.ExitCode;
+                return exitCode;
             });
 
             try
@@ -219,12 +238,12 @@ namespace Coverlet.Console
             {
                 logger.LogError(ex.Message);
                 app.ShowHelp();
-                return 1;
+                return (int)CommandExitCodes.CommandParsingException;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex.Message);
-                return 1;
+                return exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception;
             }
         }
 

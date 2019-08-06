@@ -32,9 +32,9 @@ namespace Coverlet.Collector.DataCollection
             };
 
             if (configurationElement != null)
-            { 
+            {
                 coverletSettings.IncludeFilters = this.ParseIncludeFilters(configurationElement);
-                coverletSettings.IncludeDirectories = this.ParseIncludeDirectories(configurationElement); 
+                coverletSettings.IncludeDirectories = this.ParseIncludeDirectories(configurationElement);
                 coverletSettings.ExcludeAttributes = this.ParseExcludeAttributes(configurationElement);
                 coverletSettings.ExcludeSourceFiles = this.ParseExcludeSourceFiles(configurationElement);
                 coverletSettings.MergeWith = this.ParseMergeWith(configurationElement);
@@ -45,7 +45,7 @@ namespace Coverlet.Collector.DataCollection
 
             coverletSettings.ReportFormat = this.ParseReportFormat(configurationElement);
             coverletSettings.ExcludeFilters = this.ParseExcludeFilters(configurationElement);
-            
+
             if (_eqtTrace.IsVerboseEnabled)
             {
                 _eqtTrace.Verbose("{0}: Initializing coverlet process with settings: \"{1}\"", CoverletConstants.DataCollectorName, coverletSettings.ToString());
@@ -87,7 +87,7 @@ namespace Coverlet.Collector.DataCollection
                 XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
                 format = reportFormatElement?.InnerText?.Split(',').FirstOrDefault();
             }
-            return string.IsNullOrEmpty(format) ?  CoverletConstants.DefaultReportFormat : format;
+            return string.IsNullOrEmpty(format) ? CoverletConstants.DefaultReportFormat : format;
         }
 
         /// <summary>
@@ -129,6 +129,13 @@ namespace Coverlet.Collector.DataCollection
                 {
                     excludeFilters.AddRange(filters);
                 }
+            }
+
+            // if we've only one element mean that we only added CoverletConstants.DefaultExcludeFilter
+            // so add default exclusions
+            if (excludeFilters.Count == 1)
+            {
+                excludeFilters.Add("[xunit*]*");
             }
 
             return excludeFilters.ToArray();

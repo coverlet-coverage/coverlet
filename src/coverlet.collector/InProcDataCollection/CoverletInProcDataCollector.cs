@@ -39,7 +39,7 @@ namespace Coverlet.Collector.DataCollection
                     var unloadModule = injectedInstrumentationClass.GetMethod(nameof(ModuleTrackerTemplate.UnloadModule), new[] { typeof(object), typeof(EventArgs) });
                     unloadModule.Invoke(null, new[] { null, EventArgs.Empty });
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // Throw any exception if unload fails
                     if (EqtTrace.IsErrorEnabled)
@@ -72,7 +72,7 @@ namespace Coverlet.Collector.DataCollection
 
                 return null;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // Avoid crashing if reflection fails.
                 if (EqtTrace.IsWarningEnabled)

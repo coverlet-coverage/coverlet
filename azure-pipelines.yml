@@ -1,3 +1,9 @@
+trigger:
+  branches:
+    include: ["master", "*_validate"]
+  paths:
+    exclude: [".github", "doc", "*.md"]
+
 jobs:
 - job: Windows
   displayName: Windows
@@ -11,8 +17,23 @@ jobs:
   pool:
     vmImage: 'windows-2019'
   steps:
-  - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
-    displayName: 'Run Build'
+  - template: build.yml
+  - task: CopyFiles@2
+    displayName: Collect packages
+    inputs:
+      SourceFolder: bin\$(BuildConfiguration)\Packages
+      Contents: |
+        *.nupkg
+        *.snupkg
+      TargetFolder: $(Build.ArtifactStagingDirectory)\Packages
+    condition: eq(variables['BuildConfiguration'], 'Release')
+  - task: PublishBuildArtifacts@1
+    displayName: Publish packages as build artifacts
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)\Packages
+      ArtifactName: Packages
+      publishLocation: Container
+    condition: eq(variables['BuildConfiguration'], 'Release')
 
 - job: macOS
   displayName: macOS
@@ -26,8 +47,7 @@ jobs:
   pool:
     vmImage: 'macOS-10.14'
   steps:
-  - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
-    displayName: 'Run Build'
+  - template: build.yml
 
 - job: Linux
   displayName: Linux
@@ -41,5 +61,4 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - script: dotnet msbuild build.proj /p:Configuration=$(buildConfiguration)
-    displayName: 'Run Build'
+  - template: build.yml

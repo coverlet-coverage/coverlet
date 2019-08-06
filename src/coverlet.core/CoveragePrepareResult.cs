@@ -1,40 +1,39 @@
-﻿using System.IO;
-using System.Text;
-
+﻿using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using Coverlet.Core.Instrumentation;
-using Newtonsoft.Json;
 
 namespace Coverlet.Core
 {
+    // Followed safe serializer guide, will emit xml format
+    // https://docs.microsoft.com/en-us/visualstudio/code-quality/ca2300-do-not-use-insecure-deserializer-binaryformatter?view=vs-2019
+    // https://docs.microsoft.com/en-us/visualstudio/code-quality/ca2301-do-not-call-binaryformatter-deserialize-without-first-setting-binaryformatter-binder?view=vs-2019
+    [DataContract]
     public class CoveragePrepareResult
     {
+        [DataMember]
         public string Identifier { get; set; }
+        [DataMember]
         public string Module { get; set; }
+        [DataMember]
         public string MergeWith { get; set; }
+        [DataMember]
         public bool UseSourceLink { get; set; }
+        [DataMember]
         public InstrumenterResult[] Results { get; set; }
 
         public static CoveragePrepareResult Deserialize(Stream serializedInstrumentState)
         {
-            var serializer = new JsonSerializer();
-            using (var sr = new StreamReader(serializedInstrumentState))
-            using (var jsonTextReader = new JsonTextReader(sr))
-            {
-                return serializer.Deserialize<CoveragePrepareResult>(jsonTextReader);
-            }
+            return (CoveragePrepareResult)new DataContractSerializer(typeof(CoveragePrepareResult)).ReadObject(serializedInstrumentState);
         }
 
         public static Stream Serialize(CoveragePrepareResult instrumentState)
         {
-            var serializer = new JsonSerializer();
             MemoryStream ms = new MemoryStream();
-            using (var sw = new StreamWriter(ms, Encoding.UTF8, 1024, true))
-            {
-                serializer.Serialize(sw, instrumentState);
-                sw.Flush();
-                ms.Position = 0;
-                return ms;
-            }
+            new DataContractSerializer(typeof(CoveragePrepareResult)).WriteObject(ms, instrumentState);
+            ms.Position = 0;
+            return ms;
         }
     }
 }
