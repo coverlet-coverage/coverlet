@@ -9,15 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" />
-    <!-- Do not upgrade this version or we won't support old SDK -->
     <PackageReference Include="Newtonsoft.Json" />
-    <!--
-              Do not change System.Reflection.Metadata version since we need to support VSTest DataCollectors. Goto https://www.nuget.org/packages/System.Reflection.Metadata to check versions.
-              We need to load assembly version 1.4.2.0 to properly work
-              We can check minimum supported package version here https://github.com/Microsoft/vstest/blob/master/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L37
-     -->
-    <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
+    <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
   </ItemGroup>
 
 </Project>
