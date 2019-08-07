@@ -2,7 +2,7 @@
 
 namespace Coverlet.Core.Abstracts
 {
-    public interface IProcessExitHandler
+    internal interface IProcessExitHandler
     {
         void Add(EventHandler handler);
     }
