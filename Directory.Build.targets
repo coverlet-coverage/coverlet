@@ -1,0 +1,22 @@
+<Project>
+  <ItemGroup>
+    <PackageReference Update="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
+    <PackageReference Update="Microsoft.Build.Utilities.Core" Version="15.5.180"/>
+    <PackageReference Update="Microsoft.CodeAnalysis.CSharp" Version="2.10.0" />
+    <PackageReference Update="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" /> 
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="15.9.0" /> 
+    <PackageReference Update="Microsoft.TestPlatform.ObjectModel" Version="16.1.0" />
+    <PackageReference Update="Mono.Cecil" Version="0.10.4" />
+    <PackageReference Update="Moq" Version="4.10.1" />
+    <!-- Do not upgrade this version or we won't support old SDK -->
+    <PackageReference Update="Newtonsoft.Json" Version="9.0.1" />
+    <!--
+        Do not change System.Reflection.Metadata version since we need to support VSTest DataCollectors. Goto https://www.nuget.org/packages/System.Reflection.Metadata to check versions.
+        We need to load assembly version 1.4.2.0 to properly work
+        We can check minimum supported package version here https://github.com/Microsoft/vstest/blob/master/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L37
+     -->
+    <PackageReference Update="System.Reflection.Metadata" Version="1.5.0" />
+    <PackageReference Update="xunit" Version="2.4.1" />
+    <PackageReference Update="xunit.runner.visualstudio" Version="2.4.1"/>
+  </ItemGroup>
+</Project>
