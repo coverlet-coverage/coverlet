@@ -21,7 +21,7 @@ namespace Coverlet.Core.Tests
         {
             if (docName is null)
             {
-                throw new ArgumentNullException(docName);
+                throw new ArgumentNullException(nameof(docName));
             }
 
             foreach (InstrumenterResult instrumenterResult in coverageResult.InstrumentedResults)

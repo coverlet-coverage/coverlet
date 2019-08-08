@@ -12,6 +12,8 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 
 </Project>
