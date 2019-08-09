@@ -4,6 +4,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +17,13 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.remoteexecutor\coverlet.tests.remoteexecutor.csproj" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="copy $(ProjectDir)..\coverlet.tests.remoteexecutor\$(OutDir) $(TargetDir) /Y" />
+    <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) OR $([MSBuild]::IsOSPlatform('Linux'))" Command="cp -r $(ProjectDir)..\coverlet.tests.remoteexecutor\$(OutDir). $(TargetDir)" />
+  </Target>
 
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />
 </Project>

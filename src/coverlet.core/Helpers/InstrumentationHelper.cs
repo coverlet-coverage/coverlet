@@ -7,8 +7,9 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
-
+using Coverlet.Core.Abstracts;
 using Microsoft.Extensions.FileSystemGlobbing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 
 namespace Coverlet.Core.Helpers
@@ -19,7 +20,7 @@ namespace Coverlet.Core.Helpers
 
         static InstrumentationHelper()
         {
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => RestoreOriginalModules();
+            DependencyInjection.Current.GetService<IProcessExitHandler>().Add((s, e) => RestoreOriginalModules());
         }
 
         public static string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly)
@@ -120,14 +121,14 @@ namespace Coverlet.Core.Helpers
             // See: https://github.com/tonerdo/coverlet/issues/25
             var retryStrategy = CreateRetryStrategy();
 
-            RetryHelper.Retry(() =>
+            DependencyInjection.Current.GetService<IRetryHelper>().Retry(() =>
             {
                 File.Copy(backupPath, module, true);
                 File.Delete(backupPath);
                 _backupList.TryRemove(module, out string _);
             }, retryStrategy, 10);
 
-            RetryHelper.Retry(() =>
+            DependencyInjection.Current.GetService<IRetryHelper>().Retry(() =>
             {
                 if (File.Exists(backupSymbolPath))
                 {
@@ -148,7 +149,7 @@ namespace Coverlet.Core.Helpers
             foreach (string key in _backupList.Keys.ToList())
             {
                 string backupPath = _backupList[key];
-                RetryHelper.Retry(() =>
+                DependencyInjection.Current.GetService<IRetryHelper>().Retry(() =>
                 {
                     File.Copy(backupPath, key, true);
                     File.Delete(backupPath);
@@ -162,7 +163,7 @@ namespace Coverlet.Core.Helpers
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
             var retryStrategy = CreateRetryStrategy();
-            RetryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
+            DependencyInjection.Current.GetService<IRetryHelper>().Retry(() => File.Delete(path), retryStrategy, 10);
         }
 
         public static bool IsValidFilterExpression(string filter)
