@@ -11,12 +11,14 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 ```bash
 dotnet add package coverlet.collector
 ```
+N.B. You **MUST** add package only to test projects  
 
 **MSBuild Integration**:
 
 ```bash
 dotnet add package coverlet.msbuild
 ```
+N.B. You **MUST** add package only to test projects  
 
 **Global Tool**:
 
