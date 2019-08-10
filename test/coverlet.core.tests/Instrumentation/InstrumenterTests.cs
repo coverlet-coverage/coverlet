@@ -243,6 +243,14 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.True(embedded);
             Assert.False(instrumenter.CanInstrument());
             loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
+
+            // Default case
+            string coverletCoreDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.core.dll").First();
+            instrumenter = new Instrumenter(coverletCoreDll, "_coverlet_core_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object);
+            Assert.True(InstrumentationHelper.HasPdb(coverletCoreDll, out embedded));
+            Assert.False(embedded);
+            Assert.True(instrumenter.CanInstrument());
+            loggerMock.VerifyNoOtherCalls();
         }
 
     }
