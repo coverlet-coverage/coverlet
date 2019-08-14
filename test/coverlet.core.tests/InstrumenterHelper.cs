@@ -111,6 +111,7 @@ namespace Coverlet.Core.Tests
     public static class TestInstrumentationHelper
     {
         /// <summary>
+        /// Install report generator "dotnet tool install --global dotnet-reportgenerator-globaltool" https://danielpalme.github.io/ReportGenerator/usage.html
         /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");
         ///                 TestInstrumentationHelper.GenerateHtmlReport(result);
         /// </summary>
