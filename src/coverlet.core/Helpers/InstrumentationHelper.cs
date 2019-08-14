@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using Coverlet.Core.Abstracts;
@@ -67,8 +68,9 @@ namespace Coverlet.Core.Helpers
                 .ToArray();
         }
 
-        public static bool HasPdb(string module)
+        public static bool HasPdb(string module, out bool embedded)
         {
+            embedded = false;
             using (var moduleStream = File.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
@@ -80,6 +82,7 @@ namespace Coverlet.Core.Helpers
                         if (codeViewData.Path == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
                         {
                             // PDB is embedded
+                            embedded = true;
                             return true;
                         }
 
@@ -89,6 +92,41 @@ namespace Coverlet.Core.Helpers
 
                 return false;
             }
+        }
+
+        public static bool EmbeddedPortablePdbHasLocalSource(string module)
+        {
+            using (FileStream moduleStream = File.OpenRead(module))
+            using (var peReader = new PEReader(moduleStream))
+            {
+                foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
+                {
+                    if (entry.Type == DebugDirectoryEntryType.EmbeddedPortablePdb)
+                    {
+                        using (MetadataReaderProvider embeddedMetadataProvider = peReader.ReadEmbeddedPortablePdbDebugDirectoryData(entry))
+                        {
+                            MetadataReader metadataReader = embeddedMetadataProvider.GetMetadataReader();
+                            foreach (DocumentHandle docHandle in metadataReader.Documents)
+                            {
+                                Document document = metadataReader.GetDocument(docHandle);
+                                string docName = metadataReader.GetString(document.Name);
+
+                                // We verify all docs and return false if not all are present in local
+                                // We could have false negative if doc is not a source
+                                // Btw check for all possible extension could be weak approach
+                                if (!File.Exists(docName))
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // If we don't have EmbeddedPortablePdb entry return true, for instance empty dll
+            // We should call this method only on embedded pdb module
+            return true;
         }
 
         public static void BackupOriginalModule(string module, string identifier)

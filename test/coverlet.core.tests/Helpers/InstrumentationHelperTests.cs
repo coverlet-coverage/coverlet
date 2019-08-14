@@ -27,7 +27,8 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestHasPdb()
         {
-            Assert.True(InstrumentationHelper.HasPdb(typeof(InstrumentationHelperTests).Assembly.Location));
+            Assert.True(InstrumentationHelper.HasPdb(typeof(InstrumentationHelperTests).Assembly.Location, out bool embeddedPdb));
+            Assert.False(embeddedPdb);
         }
 
         [Fact]
