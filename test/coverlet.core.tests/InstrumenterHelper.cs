@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +13,7 @@ using Coverlet.Core.Logging;
 using Coverlet.Core.Reporters;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Palmmedia.ReportGenerator.Core;
 using Xunit.Sdk;
 
 namespace Coverlet.Core.Tests
@@ -111,7 +111,6 @@ namespace Coverlet.Core.Tests
     public static class TestInstrumentationHelper
     {
         /// <summary>
-        /// Install report generator "dotnet tool install --global dotnet-reportgenerator-globaltool" https://danielpalme.github.io/ReportGenerator/usage.html
         /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");
         ///                 TestInstrumentationHelper.GenerateHtmlReport(result);
         /// </summary>
@@ -124,7 +123,18 @@ namespace Coverlet.Core.Tests
             string reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", reporter.Extension));
             File.WriteAllText(reportFile, reporter.Report(coverageResult));
             // i.e. reportgenerator -reports:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If\report.cobertura.xml" -targetdir:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If" -filefilters:+**\Samples\Instrumentation.cs
-            Process.Start("reportgenerator", $"-reports:\"{reportFile}\" -targetdir:\"{dir.FullName}\" {(string.IsNullOrEmpty(sourceFileFilter) ? "" : $" -filefilters:{sourceFileFilter}")}");
+            new Generator().GenerateReport(new ReportConfiguration(
+            new[] { reportFile },
+            dir.FullName,
+            new string[0],
+            null,
+            new string[0],
+            new string[0],
+            new string[0],
+            new string[0],
+            string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : new[] { sourceFileFilter },
+            null,
+            null));
         }
 
         public static CoverageResult GetCoverageResult(string filePath)

@@ -96,6 +96,9 @@ namespace Coverlet.Core.Tests
                       .AssertLinesCovered((11, 1), (15, 0))
                       // (line,ordinal,hits)
                       .AssertBranchesCovered((9, 0, 1), (9, 1, 0));
+
+                // if need to generate html report for debugging purpose
+                // TestInstrumentationHelper.GenerateHtmlReport(result);
             }
             finally
             {
