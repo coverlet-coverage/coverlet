@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Logging;
+using Coverlet.Core.Reporters;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using Xunit;
 using Xunit.Sdk;
 
 namespace Coverlet.Core.Tests
@@ -107,6 +110,22 @@ namespace Coverlet.Core.Tests
 
     public static class TestInstrumentationHelper
     {
+        /// <summary>
+        /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");
+        ///                 TestInstrumentationHelper.GenerateHtmlReport(result);
+        /// </summary>
+        public static void GenerateHtmlReport(CoverageResult coverageResult, IReporter reporter = null, string sourceFileFilter = "", [CallerMemberName]string directory = "")
+        {
+            reporter ??= new CoberturaReporter();
+            DirectoryInfo dir = Directory.CreateDirectory(directory);
+            dir.Delete(true);
+            dir.Create();
+            string reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", reporter.Extension));
+            File.WriteAllText(reportFile, reporter.Report(coverageResult));
+            // i.e. reportgenerator -reports:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If\report.cobertura.xml" -targetdir:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If" -filefilters:+**\Samples\Instrumentation.cs
+            Process.Start("reportgenerator", $"-reports:\"{reportFile}\" -targetdir:\"{dir.FullName}\" {(string.IsNullOrEmpty(sourceFileFilter) ? "" : $" -filefilters:{sourceFileFilter}")}");
+        }
+
         public static CoverageResult GetCoverageResult(string filePath)
         {
             using (var result = new FileStream(filePath, FileMode.Open))
