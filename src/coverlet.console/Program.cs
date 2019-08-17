@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
+
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
@@ -239,6 +240,11 @@ namespace Coverlet.Console
                 logger.LogError(ex.Message);
                 app.ShowHelp();
                 return (int)CommandExitCodes.CommandParsingException;
+            }
+            catch (Win32Exception we) when (we.Source == "System.Diagnostics.Process")
+            {
+                logger.LogError($"Start process '{target.Value()}' failed with '{we.Message}'");
+                return exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception;
             }
             catch (Exception ex)
             {
