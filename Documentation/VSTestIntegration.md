@@ -25,6 +25,17 @@ The following table summarizes the support that needs to be added for a seamless
 |dotnet test CLI              | Through a switch to condition data collection | `dotnet test --collect:"XPlat Code Coverage"`   |
 |dotnet vstest CLI            | Through a switch to condition data collection | `dotnet vstest --collect:"XPlat Code Coverage"` |
 
+NB. If you're using `dotnet vstest` you MUST `publish` your test project before i.e.
+```bash
+C:\project
+dotnet publish
+...
+  vstest -> C:\project\bin\Debug\netcoreapp3.0\testdll.dll
+  vstest -> C:\project\bin\Debug\netcoreapp3.0\publish\
+...
+dotnet vstest C:\project\bin\Debug\netcoreapp3.0\publish\testdll.dll --collect:"XPlat Code Coverage"
+```
+
 ### Coverlet Options Supported with VSTest
 
 #### Default
