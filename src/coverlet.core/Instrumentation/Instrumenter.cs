@@ -9,7 +9,7 @@ using Coverlet.Core.Attributes;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Symbols;
-
+using Microsoft.Extensions.FileSystemGlobbing;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
@@ -22,7 +22,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly string _identifier;
         private readonly string[] _excludeFilters;
         private readonly string[] _includeFilters;
-        private readonly string[] _excludedFiles;
+        private readonly ExcludedFilesHelper _excludedFilesHelper;
         private readonly string[] _excludedAttributes;
         private readonly bool _singleHit;
         private readonly bool _isCoreLibrary;
@@ -36,6 +36,7 @@ namespace Coverlet.Core.Instrumentation
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
         private MethodReference _customTrackerRecordHitMethod;
         private List<string> _asyncMachineStateMethod;
+        private List<string> _excludedSourceFiles;
 
         public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes, bool singleHit, ILogger logger)
         {
@@ -43,7 +44,7 @@ namespace Coverlet.Core.Instrumentation
             _identifier = identifier;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
-            _excludedFiles = excludedFiles ?? Array.Empty<string>();
+            _excludedFilesHelper = new ExcludedFilesHelper(excludedFiles);
             _excludedAttributes = excludedAttributes;
             _singleHit = singleHit;
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
@@ -80,6 +81,14 @@ namespace Coverlet.Core.Instrumentation
             InstrumentModule();
 
             _result.AsyncMachineStateMethod = _asyncMachineStateMethod == null ? Array.Empty<string>() : _asyncMachineStateMethod.ToArray();
+
+            if (_excludedSourceFiles != null)
+            {
+                foreach (string sourceFile in _excludedSourceFiles)
+                {
+                    _logger.LogVerbose($"Excluded source file: '{sourceFile}'");
+                }
+            }
 
             return _result;
         }
@@ -299,9 +308,9 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentMethod(MethodDefinition method)
         {
             var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
-            if (!string.IsNullOrEmpty(sourceFile) && _excludedFiles.Contains(sourceFile))
+            if (!string.IsNullOrEmpty(sourceFile) && _excludedFilesHelper.Exclude(sourceFile) && !(_excludedSourceFiles ??= new List<string>()).Contains(sourceFile))
             {
-                _logger.LogVerbose($"Excluded source file: '{sourceFile}'");
+                _excludedSourceFiles.Add(sourceFile);
                 return;
             }
 
@@ -540,7 +549,7 @@ namespace Coverlet.Core.Instrumentation
                 customAttribute.AttributeType.Name.Equals(a.EndsWith("Attribute") ? a : $"{a}Attribute"));
         }
 
-        private static Mono.Cecil.Cil.MethodBody GetMethodBody(MethodDefinition method)
+        private static MethodBody GetMethodBody(MethodDefinition method)
         {
             try
             {
@@ -707,6 +716,37 @@ namespace Coverlet.Core.Instrumentation
             {
                 return base.Resolve(name);
             }
+        }
+    }
+
+    // Exclude files helper https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.filesystemglobbing.matcher?view=aspnetcore-2.2
+    internal class ExcludedFilesHelper
+    {
+        Matcher _matcher;
+
+        public ExcludedFilesHelper(string[] excludes)
+        {
+            if (excludes != null && excludes.Length > 0)
+            {
+                _matcher = new Matcher();
+                foreach (var excludeRule in excludes)
+                {
+                    if (excludeRule is null)
+                    {
+                        continue;
+                    }
+                    _matcher.AddInclude(Path.IsPathRooted(excludeRule) ? excludeRule.Substring(Path.GetPathRoot(excludeRule).Length) : excludeRule);
+                }
+            }
+        }
+
+        public bool Exclude(string sourceFile)
+        {
+            if (_matcher is null || sourceFile is null)
+                return false;
+
+            // We strip out drive because it doesn't work with globbing
+            return _matcher.Match(Path.IsPathRooted(sourceFile) ? sourceFile.Substring(Path.GetPathRoot(sourceFile).Length) : sourceFile).HasMatches;
         }
     }
 }

@@ -279,46 +279,6 @@ namespace Coverlet.Core.Helpers
         public static bool IsLocalMethod(string method)
             => new Regex(WildcardToRegex("<*>*__*|*")).IsMatch(method);
 
-        public static string[] GetExcludedFiles(string[] excludes)
-        {
-            const string RELATIVE_KEY = nameof(RELATIVE_KEY);
-            string parentDir = Directory.GetCurrentDirectory();
-
-            if (excludes == null || !excludes.Any()) return Array.Empty<string>();
-
-            var matcherDict = new Dictionary<string, Matcher>() { { RELATIVE_KEY, new Matcher() } };
-            foreach (var excludeRule in excludes)
-            {
-                if (Path.IsPathRooted(excludeRule))
-                {
-                    var root = Path.GetPathRoot(excludeRule);
-                    if (!matcherDict.ContainsKey(root))
-                    {
-                        matcherDict.Add(root, new Matcher());
-                    }
-                    matcherDict[root].AddInclude(Path.GetFullPath(excludeRule).Substring(root.Length));
-                }
-                else
-                {
-                    matcherDict[RELATIVE_KEY].AddInclude(excludeRule);
-                }
-            }
-
-            var files = new List<string>();
-            foreach (var entry in matcherDict)
-            {
-                var root = entry.Key;
-                var matcher = entry.Value;
-                var directoryInfo = new DirectoryInfo(root.Equals(RELATIVE_KEY) ? parentDir : root);
-                var fileMatchResult = matcher.Execute(new DirectoryInfoWrapper(directoryInfo));
-                var currentFiles = fileMatchResult.Files
-                    .Select(f => Path.GetFullPath(Path.Combine(directoryInfo.ToString(), f.Path)));
-                files.AddRange(currentFiles);
-            }
-
-            return files.Distinct().ToArray();
-        }
-
         private static bool IsTypeFilterMatch(string module, string type, string[] filters)
         {
             Debug.Assert(module != null);

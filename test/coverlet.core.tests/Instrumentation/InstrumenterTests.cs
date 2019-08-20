@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -230,6 +231,97 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             // We check if final netstandard.dll resolved is local folder one and not "official" netstandard.dll
             Assert.Equal(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "netstandard.dll"), Path.GetFullPath(resolved.MainModule.FileName));
+        }
+
+        public static IEnumerable<object[]> TestInstrument_ExcludedFilesHelper_Data()
+        {
+            yield return new object[] { new string[]{ @"one.txt" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", true),
+                                            (@"c:\dir\one.txt", false),
+                                            (@"dir/one.txt", false)
+                                        }};
+            yield return new object[] { new string[]{ @"*one.txt" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", true),
+                                            (@"c:\dir\one.txt", false),
+                                            (@"dir/one.txt", false)
+                                        }};
+            yield return new object[] { new string[]{ @"*.txt" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", true),
+                                            (@"c:\dir\one.txt", false),
+                                            (@"dir/one.txt", false)
+                                        }};
+            yield return new object[] { new string[]{ @"*.*" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", true),
+                                            (@"c:\dir\one.txt", false),
+                                            (@"dir/one.txt", false)
+                                        }};
+            yield return new object[] { new string[]{ @"one.*" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", true),
+                                            (@"c:\dir\one.txt", false),
+                                            (@"dir/one.txt", false)
+                                        }};
+            yield return new object[] { new string[]{ @"dir/*.txt" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", false),
+                                            (@"c:\dir\one.txt", true),
+                                            (@"dir/one.txt", true)
+                                        }};
+            yield return new object[] { new string[]{ @"dir\*.txt" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", false),
+                                            (@"c:\dir\one.txt", true),
+                                            (@"dir/one.txt", true)
+                                        }};
+            yield return new object[] { new string[]{ @"**/*" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", true),
+                                            (@"c:\dir\one.txt", true),
+                                            (@"dir/one.txt", true)
+                                        }};
+            yield return new object[] { new string[]{ @"dir/**/*" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", false),
+                                            (@"c:\dir\one.txt", true),
+                                            (@"dir/one.txt", true),
+                                            (@"c:\dir\dir2\one.txt", true),
+                                            (@"dir/dir2/one.txt", true)
+                                        }};
+            yield return new object[] { new string[]{ @"one.txt", @"dir\*two.txt" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"one.txt", true),
+                                            (@"c:\dir\imtwo.txt", true),
+                                            (@"dir/one.txt", false)
+                                        }};
+
+            // This is a special case test different drive same path
+            // We strip out drive from path to check for globbing
+            // BTW I don't know if makes sense add a filter with full path maybe we should forbid
+            yield return new object[] { new string[]{ @"c:\dir\one.txt" }, new ValueTuple<string, bool>[]
+                                        {
+                                            (@"c:\dir\one.txt", true),
+                                            (@"d:\dir\one.txt", true) // maybe should be false?
+                                        }};
+
+            yield return new object[] { new string[]{ null }, new ValueTuple<string, bool>[]
+                                        {
+                                            (null, false),
+                                        }};
+        }
+
+        [Theory]
+        [MemberData(nameof(TestInstrument_ExcludedFilesHelper_Data))]
+        public void TestInstrument_ExcludedFilesHelper(string[] excludeFilterHelper, ValueTuple<string, bool>[] result)
+        {
+            var exludeFilterHelper = new ExcludedFilesHelper(excludeFilterHelper);
+            foreach (ValueTuple<string, bool> checkFile in result)
+            {
+                Assert.Equal(checkFile.Item2, exludeFilterHelper.Exclude(checkFile.Item1));
+            }
         }
     }
 }
