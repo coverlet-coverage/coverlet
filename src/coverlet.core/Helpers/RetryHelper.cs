@@ -1,3 +1,4 @@
+using Coverlet.Core.Abstracts;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -6,7 +7,7 @@ namespace Coverlet.Core.Helpers
 {
     // A slightly amended version of the code found here: https://stackoverflow.com/a/1563234/186184
     // This code allows for varying backoff strategies through the use of Func<TimeSpan>.
-    public static class RetryHelper
+    public class RetryHelper : IRetryHelper
     {
         /// <summary>
         /// Retry a void method.
@@ -14,7 +15,7 @@ namespace Coverlet.Core.Helpers
         /// <param name="action">The action to perform</param>
         /// <param name="backoffStrategy">A function returning a Timespan defining the backoff strategy to use.</param>
         /// <param name="maxAttemptCount">The maximum number of retries before bailing out. Defaults to 3.</param>
-        public static void Retry(
+        public void Retry(
             Action action,
             Func<TimeSpan> backoffStrategy,
             int maxAttemptCount = 3)
@@ -33,7 +34,7 @@ namespace Coverlet.Core.Helpers
         /// <param name="action">The action to perform</param>
         /// <param name="backoffStrategy">A function returning a Timespan defining the backoff strategy to use.</param>
         /// <param name="maxAttemptCount">The maximum number of retries before bailing out. Defaults to 3.</param>
-        public static T Do<T>(
+        public T Do<T>(
             Func<T> action,
             Func<TimeSpan> backoffStrategy,
             int maxAttemptCount = 3)

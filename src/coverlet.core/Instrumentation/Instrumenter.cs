@@ -55,7 +55,29 @@ namespace Coverlet.Core.Instrumentation
         {
             try
             {
-                return InstrumentationHelper.HasPdb(_module);
+                if (InstrumentationHelper.HasPdb(_module, out bool embeddedPdb))
+                {
+                    if (embeddedPdb)
+                    {
+                        if (InstrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Unable to instrument module: {_module}, embedded pdb without local source files");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
             }
             catch (Exception ex)
             {

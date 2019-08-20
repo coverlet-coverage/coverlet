@@ -19,7 +19,7 @@ namespace Coverlet.Core.Helpers.Tests
             var target = new RetryTarget();
             try
             {
-                RetryHelper.Retry(() => target.TargetActionThrows(), retryStrategy, 7);
+                new RetryHelper().Retry(() => target.TargetActionThrows(), retryStrategy, 7);
             }
             catch
             {
@@ -41,7 +41,7 @@ namespace Coverlet.Core.Helpers.Tests
             var target = new RetryTarget();
             try
             {
-                RetryHelper.Retry(() => target.TargetActionThrows(), retryStrategy, 3);
+                new RetryHelper().Retry(() => target.TargetActionThrows(), retryStrategy, 3);
             }
             catch
             {
@@ -59,7 +59,7 @@ namespace Coverlet.Core.Helpers.Tests
             };
 
             var target = new RetryTarget();
-            RetryHelper.Retry(() => target.TargetActionThrows5Times(), retryStrategy, 20);
+            new RetryHelper().Retry(() => target.TargetActionThrows5Times(), retryStrategy, 20);
             Assert.Equal(6, target.Calls);
         }
 
