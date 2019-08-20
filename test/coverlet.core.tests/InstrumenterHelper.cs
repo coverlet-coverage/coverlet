@@ -61,6 +61,7 @@ namespace Coverlet.Core.Tests
             }
 
             BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
             if ((buildConfiguration & configuration) != buildConfiguration)
             {
                 return document;
@@ -101,16 +102,16 @@ namespace Coverlet.Core.Tests
 
         public static Document AssertLinesCovered(this Document document, BuildConfiguration configuration, params (int line, int hits)[] lines)
         {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
             BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
 
             if ((buildConfiguration & configuration) != buildConfiguration)
             {
                 return document;
-            }
-
-            if (document is null)
-            {
-                throw new ArgumentNullException(nameof(document));
             }
 
             List<int> linesToCover = new List<int>(lines.Select(l => l.line));
