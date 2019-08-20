@@ -44,7 +44,7 @@ namespace Coverlet.Core.Instrumentation
             _identifier = identifier;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
-            _excludedFilesHelper = new ExcludedFilesHelper(excludedFiles);
+            _excludedFilesHelper = new ExcludedFilesHelper(excludedFiles, logger);
             _excludedAttributes = excludedAttributes;
             _singleHit = singleHit;
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
@@ -749,7 +749,7 @@ namespace Coverlet.Core.Instrumentation
     {
         Matcher _matcher;
 
-        public ExcludedFilesHelper(string[] excludes)
+        public ExcludedFilesHelper(string[] excludes, ILogger logger)
         {
             if (excludes != null && excludes.Length > 0)
             {
@@ -760,6 +760,7 @@ namespace Coverlet.Core.Instrumentation
                     {
                         continue;
                     }
+                    logger.LogVerbose($"Excluded source file rule '{excludeRule}'");
                     _matcher.AddInclude(Path.IsPathRooted(excludeRule) ? excludeRule.Substring(Path.GetPathRoot(excludeRule).Length) : excludeRule);
                 }
             }

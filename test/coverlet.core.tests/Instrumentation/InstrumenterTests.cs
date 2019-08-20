@@ -319,7 +319,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [MemberData(nameof(TestInstrument_ExcludedFilesHelper_Data))]
         public void TestInstrument_ExcludedFilesHelper(string[] excludeFilterHelper, ValueTuple<string, bool, bool>[] result)
         {
-            var exludeFilterHelper = new ExcludedFilesHelper(excludeFilterHelper);
+            var exludeFilterHelper = new ExcludedFilesHelper(excludeFilterHelper, new Mock<ILogger>().Object);
             foreach (ValueTuple<string, bool, bool> checkFile in result)
             {
                 if (checkFile.Item3) // run test only on windows platform
