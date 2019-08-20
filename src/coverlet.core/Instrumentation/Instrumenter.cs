@@ -330,9 +330,12 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentMethod(MethodDefinition method)
         {
             var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
-            if (!string.IsNullOrEmpty(sourceFile) && _excludedFilesHelper.Exclude(sourceFile) && !(_excludedSourceFiles ??= new List<string>()).Contains(sourceFile))
+            if (!string.IsNullOrEmpty(sourceFile) && _excludedFilesHelper.Exclude(sourceFile))
             {
-                _excludedSourceFiles.Add(sourceFile);
+                if (!(_excludedSourceFiles ??= new List<string>()).Contains(sourceFile))
+                {
+                    _excludedSourceFiles.Add(sourceFile);
+                }
                 return;
             }
 
