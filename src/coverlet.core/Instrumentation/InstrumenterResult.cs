@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace Coverlet.Core.Instrumentation
@@ -17,6 +18,7 @@ namespace Coverlet.Core.Instrumentation
         public int Hits;
     }
 
+    [DebuggerDisplay("Line = {Number} Offset = {Offset} EndOffset = {EndOffset} Path = {Path} Ordinal = {Ordinal} Hits = {Hits}")]
     [DataContract]
     public class Branch : Line
     {
@@ -30,6 +32,7 @@ namespace Coverlet.Core.Instrumentation
         public uint Ordinal;
     }
 
+    [DebuggerDisplay("line = {Line} Ordinal = {Ordinal}")]
     // Implements IEquatable because is used by dictionary key https://docs.microsoft.com/en-us/dotnet/api/system.iequatable-1?view=netcore-2.2#remarks
     [DataContract]
     public class BranchKey : IEquatable<BranchKey>

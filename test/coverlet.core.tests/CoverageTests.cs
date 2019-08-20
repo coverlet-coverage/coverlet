@@ -62,7 +62,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
-        public void Condition_If()
+        public void SelectionStatements_If()
         {
             // We need to pass file name to remote process where it save instrumentation result
             // Similar to msbuild input/output
@@ -73,7 +73,7 @@ namespace Coverlet.Core.Tests
                 RemoteExecutor.Invoke(async pathSerialize =>
                 {
                     // Run load and call a delegate passing class as dynamic to simplify method call
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Conditions>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                     {
                         // We call method to trigger coverage hits
                         instance.If(true);
@@ -91,7 +91,7 @@ namespace Coverlet.Core.Tests
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
                 // Asserts on doc/lines/branches
-                result.Document("Instrumentation.cs")
+                result.Document("Instrumentation.SelectionStatements.cs")
                       // (line, hits)
                       .AssertLinesCovered((11, 1), (15, 0))
                       // (line,ordinal,hits)
@@ -103,6 +103,34 @@ namespace Coverlet.Core.Tests
             finally
             {
                 // Cleanup tmp file
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void SelectionStatements_Switch()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                RemoteExecutor.Invoke(async pathSerialize =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                    {
+                        instance.Switch(1);
+                        return Task.CompletedTask;
+                    }, pathSerialize);
+                    return 0;
+                }, path).Dispose();
+
+                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+                result.Document("Instrumentation.SelectionStatements.cs")
+                      .AssertLinesCovered((18, 1), (19, 1), (22, 1), (28, 1))
+                      .AssertBranchesCovered((19, 0, 0), (19, 1, 1), (19, 2, 0), (19, 3, 0));
+            }
+            finally
+            {
                 File.Delete(path);
             }
         }
