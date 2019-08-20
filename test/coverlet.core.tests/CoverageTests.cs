@@ -126,10 +126,10 @@ namespace Coverlet.Core.Tests
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
                 result.Document("Instrumentation.SelectionStatements.cs")
-                      .AssertLinesCovered((20, 1), (21, 1), (24, 1), (30, 1))
-                      .AssertBranchesCovered((21, 0, 0), (21, 1, 1), (21, 2, 0), (21, 3, 0));
-
-                TestInstrumentationHelper.GenerateHtmlReport(result);
+                      .AssertLinesCovered(BuildConfiguration.Release, (24, 1), (26, 0), (28, 0))
+                      .AssertBranchesCovered(BuildConfiguration.Release, (24, 1, 1))
+                      .AssertLinesCovered(BuildConfiguration.Debug, (20, 1), (21, 1), (24, 1), (30, 1))
+                      .AssertBranchesCovered(BuildConfiguration.Debug, (21, 0, 0), (21, 1, 1), (21, 2, 0), (21, 3, 0));
             }
             finally
             {
