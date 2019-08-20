@@ -67,11 +67,6 @@ This runsettings file can easily be provided using command line option as given 
 
 2. `dotnet vstest --settings coverletArgs.runsettings`
 
-
-#### Scope of Enhancement
-
-Currently, advanced options are supported via runsettings. Providing support through additional command line arguments in vstest can be taken up separately.
-
 ## Implementation Details
 
 The proposed solution is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md).
