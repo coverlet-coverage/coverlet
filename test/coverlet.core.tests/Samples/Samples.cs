@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Coverlet.Core.Attributes;
 
@@ -225,6 +227,19 @@ namespace Coverlet.Core.Samples.Tests
     {
         [Obsolete]
         public string Property { get; set; }
+    }
+
+    public class ClassWithSetterOnlyPropertyExcludedByObsoleteAttr
+    {
+        [Obsolete]
+        public string Property {
+            set => _ = string.Empty;
+        }
+    }
+
+    public abstract class ClassWithEmptyMethod
+    {
+        public abstract void EmptyMethod();
     }
 
     public class ExceptionFilter
