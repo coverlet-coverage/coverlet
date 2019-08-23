@@ -99,7 +99,6 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             Assert.Equal(Path.GetFileNameWithoutExtension(instrumenterTest.Module), result.Module);
             Assert.Equal(instrumenterTest.Module, result.ModulePath);
-            instrumenterTest.Logger.Verify(l => l.LogVerbose(It.IsAny<string>()));
 
             instrumenterTest.Directory.Delete(true);
         }
@@ -185,7 +184,6 @@ namespace Coverlet.Core.Instrumentation.Tests
             string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
             string identifier = Guid.NewGuid().ToString();
-            Mock<ILogger> logger = new Mock<ILogger>();
 
             DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
 
@@ -205,15 +203,14 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
 
             module = Path.Combine(directory.FullName, destModule);
-            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), excludedFiles, attributesToIgnore, singleHit, logger.Object);
+            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), excludedFiles, attributesToIgnore, singleHit, new Mock<ILogger>().Object);
 
             return new InstrumenterTest
             {
                 Instrumenter = instrumenter,
                 Module = module,
                 Identifier = identifier,
-                Directory = directory,
-                Logger = logger
+                Directory = directory
             };
         }
 
