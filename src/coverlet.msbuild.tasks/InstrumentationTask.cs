@@ -104,12 +104,6 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
 
-                // We add default exclusion filter if no specified
-                if (excludeFilters is null || excludeFilters.Length == 0)
-                {
-                    excludeFilters = new string[] { "[xunit*]*" };
-                }
-
                 Coverage coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _includeTestAssembly, _singleHit, _mergeWith, _useSourceLink, _logger);
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());

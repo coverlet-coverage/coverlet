@@ -131,13 +131,6 @@ namespace Coverlet.Collector.DataCollection
                 }
             }
 
-            // if we've only one element mean that we only added CoverletConstants.DefaultExcludeFilter
-            // so add default exclusions
-            if (excludeFilters.Count == 1)
-            {
-                excludeFilters.Add("[xunit*]*");
-            }
-
             return excludeFilters.ToArray();
         }
 
