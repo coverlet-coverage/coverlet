@@ -48,7 +48,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [InlineData(false)]
         public void TestInstrument(bool singleHit)
         {
-            var instrumenterTest = CreateInstrumentor(singleHit:singleHit);
+            var instrumenterTest = CreateInstrumentor(singleHit: singleHit);
 
             var result = instrumenterTest.Instrumenter.Instrument();
 
@@ -64,36 +64,6 @@ namespace Coverlet.Core.Instrumentation.Tests
         public void TestInstrumentCoreLib(bool singleHit)
         {
             var instrumenterTest = CreateInstrumentor(fakeCoreLibModule: true, singleHit: singleHit);
-
-            var result = instrumenterTest.Instrumenter.Instrument();
-
-            Assert.Equal(Path.GetFileNameWithoutExtension(instrumenterTest.Module), result.Module);
-            Assert.Equal(instrumenterTest.Module, result.ModulePath);
-
-            instrumenterTest.Directory.Delete(true);
-        }
-
-        [Fact]
-        public void TestInstrumentWithExcludedFiles()
-        {
-            var samplesFound = false;
-            var directory = Directory.GetCurrentDirectory();
-            while (!samplesFound)
-            {
-                var parent = Directory.GetParent(directory);
-                var search = parent.GetDirectories("Samples", SearchOption.AllDirectories);
-                if (search.Length != 0)
-                {
-                    directory = search.First().FullName;
-                    samplesFound = true;
-                }
-                else
-                {
-                    directory = parent.FullName;
-                }
-            }
-
-            var instrumenterTest = CreateInstrumentor(excludedFiles: new[] { $"{directory}\\Samples.cs" });
 
             var result = instrumenterTest.Instrumenter.Instrument();
 
@@ -223,8 +193,6 @@ namespace Coverlet.Core.Instrumentation.Tests
             public string Identifier { get; set; }
 
             public DirectoryInfo Directory { get; set; }
-
-            public Mock<ILogger> Logger { get; set; }
         }
 
         [Fact]
@@ -292,7 +260,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         }
 
         [Fact]
-        public void CanInstrumentReturnsFalseAndLogsCatchedException()
+        public void TestInstrument_MissingModule()
         {
             var loggerMock = new Mock<ILogger>();
             var instrumenter = new Instrumenter("test", "_test_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object);
