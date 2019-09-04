@@ -42,10 +42,12 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.NotNull(result);
         }
 
-        [Fact]
-        public void TestInstrument()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestInstrument(bool singleHit)
         {
-            var instrumenterTest = CreateInstrumentor();
+            var instrumenterTest = CreateInstrumentor(singleHit: singleHit);
 
             var result = instrumenterTest.Instrumenter.Instrument();
 
@@ -55,10 +57,12 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
-        [Fact]
-        public void TestInstrumentCoreLib()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestInstrumentCoreLib(bool singleHit)
         {
-            var instrumenterTest = CreateInstrumentor(fakeCoreLibModule: true);
+            var instrumenterTest = CreateInstrumentor(fakeCoreLibModule: true, singleHit: singleHit);
 
             var result = instrumenterTest.Instrumenter.Instrument();
 
@@ -144,7 +148,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
-        private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false, string[] attributesToIgnore = null)
+        private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false, string[] attributesToIgnore = null, string[] excludedFiles = null, bool singleHit = false)
         {
             string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
@@ -168,7 +172,8 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
 
             module = Path.Combine(directory.FullName, destModule);
-            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, false, new Mock<ILogger>().Object);
+            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), excludedFiles, attributesToIgnore, singleHit, new Mock<ILogger>().Object);
+
             return new InstrumenterTest
             {
                 Instrumenter = instrumenter,
@@ -251,6 +256,15 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.False(embedded);
             Assert.True(instrumenter.CanInstrument());
             loggerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void TestInstrument_MissingModule()
+        {
+            var loggerMock = new Mock<ILogger>();
+            var instrumenter = new Instrumenter("test", "_test_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object);
+            Assert.False(instrumenter.CanInstrument());
+            loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
         }
 
     }

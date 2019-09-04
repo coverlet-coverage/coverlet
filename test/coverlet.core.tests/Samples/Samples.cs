@@ -227,6 +227,19 @@ namespace Coverlet.Core.Samples.Tests
         public string Property { get; set; }
     }
 
+    public class ClassWithSetterOnlyPropertyExcludedByObsoleteAttr
+    {
+        [Obsolete]
+        public string Property {
+            set => _ = string.Empty;
+        }
+    }
+
+    public abstract class ClassWithEmptyMethod
+    {
+        public abstract void EmptyMethod();
+    }
+
     public class ExceptionFilter
     {
         public void Test()
