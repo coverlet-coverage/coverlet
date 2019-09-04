@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Logging;
@@ -26,6 +26,7 @@ namespace Coverlet.Core
         private string _mergeWith;
         private bool _useSourceLink;
         private ILogger _logger;
+        IInstrumentationHelper _instrumentationHelper;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -43,7 +44,8 @@ namespace Coverlet.Core
             bool singleHit,
             string mergeWith,
             bool useSourceLink,
-            ILogger logger)
+            ILogger logger,
+            IInstrumentationHelper instrumentationHelper)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -56,12 +58,13 @@ namespace Coverlet.Core
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
             _logger = logger;
+            _instrumentationHelper = instrumentationHelper;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
 
-        public Coverage(CoveragePrepareResult prepareResult, ILogger logger)
+        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper)
         {
             _identifier = prepareResult.Identifier;
             _module = prepareResult.Module;
@@ -69,33 +72,34 @@ namespace Coverlet.Core
             _useSourceLink = prepareResult.UseSourceLink;
             _results = new List<InstrumenterResult>(prepareResult.Results);
             _logger = logger;
+            _instrumentationHelper = instrumentationHelper;
         }
 
         public CoveragePrepareResult PrepareModules()
         {
-            string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories, _includeTestAssembly);
-            string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
+            string[] modules = _instrumentationHelper.GetCoverableModules(_module, _includeDirectories, _includeTestAssembly);
+            string[] excludes = _instrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
 
             Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded module filter '{filter}'"));
             Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Included module filter '{filter}'"));
             Array.ForEach(excludes ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded source files '{filter}'"));
 
-            _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
-            _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            _excludeFilters = _excludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            _includeFilters = _includeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
             foreach (var module in modules)
             {
-                if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
-                    !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
+                if (_instrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
+                    !_instrumentationHelper.IsModuleIncluded(module, _includeFilters))
                 {
                     _logger.LogVerbose($"Excluded module: '{module}'");
                     continue;
                 }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes, _singleHit, _logger);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes, _singleHit, _logger, _instrumentationHelper);
                 if (instrumenter.CanInstrument())
                 {
-                    InstrumentationHelper.BackupOriginalModule(module, _identifier);
+                    _instrumentationHelper.BackupOriginalModule(module, _identifier);
 
                     // Guard code path and restore if instrumentation fails.
                     try
@@ -107,7 +111,7 @@ namespace Coverlet.Core
                     catch (Exception ex)
                     {
                         _logger.LogWarning($"Unable to instrument module: {module} because : {ex.Message}");
-                        InstrumentationHelper.RestoreOriginalModule(module, _identifier);
+                        _instrumentationHelper.RestoreOriginalModule(module, _identifier);
                     }
                 }
             }
@@ -208,7 +212,7 @@ namespace Coverlet.Core
                 }
 
                 modules.Add(Path.GetFileName(result.ModulePath), documents);
-                InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
+                _instrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
             var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
@@ -303,7 +307,7 @@ namespace Coverlet.Core
                     }
                 }
 
-                InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+                _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
             }
         }
 

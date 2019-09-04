@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.RemoteExecutor;
@@ -28,7 +28,7 @@ namespace Coverlet.Core.Tests
 
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, new Mock<ILogger>().Object);
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper()));
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
@@ -51,7 +51,7 @@ namespace Coverlet.Core.Tests
 
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, new Mock<ILogger>().Object);
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper()));
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();

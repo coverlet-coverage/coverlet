@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+
 using Coverlet.Core;
+using Coverlet.Core.Abstracts;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -104,7 +106,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
 
-                Coverage coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _includeTestAssembly, _singleHit, _mergeWith, _useSourceLink, _logger);
+                Coverage coverage = new Coverage(_path, includeFilters, includeDirectories, excludeFilters, excludedSourceFiles, excludeAttributes, _includeTestAssembly, _singleHit, _mergeWith, _useSourceLink, _logger, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());
                 using (var instrumentedStateFile = new FileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write))

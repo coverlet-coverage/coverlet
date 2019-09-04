@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ConsoleTables;
 using Coverlet.Core;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Reporters;
 using Microsoft.Build.Framework;
@@ -80,7 +81,7 @@ namespace Coverlet.MSbuild.Tasks
                     return false;
                 }
 
-                var coverage = new Coverage(CoveragePrepareResult.Deserialize(new FileStream(InstrumenterState.ItemSpec, FileMode.Open)), this._logger);
+                var coverage = new Coverage(CoveragePrepareResult.Deserialize(new FileStream(InstrumenterState.ItemSpec, FileMode.Open)), this._logger, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
                 var result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);

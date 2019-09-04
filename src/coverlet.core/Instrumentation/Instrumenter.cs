@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
@@ -27,6 +27,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly bool _singleHit;
         private readonly bool _isCoreLibrary;
         private readonly ILogger _logger;
+        private readonly IInstrumentationHelper _instrumentationHelper;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
@@ -37,7 +38,16 @@ namespace Coverlet.Core.Instrumentation
         private MethodReference _customTrackerRecordHitMethod;
         private List<string> _asyncMachineStateMethod;
 
-        public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes, bool singleHit, ILogger logger)
+        public Instrumenter(
+            string module, 
+            string identifier, 
+            string[] excludeFilters, 
+            string[] includeFilters, 
+            string[] excludedFiles, 
+            string[] excludedAttributes, 
+            bool singleHit, 
+            ILogger logger,
+            IInstrumentationHelper instrumentationHelper)
         {
             _module = module;
             _identifier = identifier;
@@ -48,17 +58,18 @@ namespace Coverlet.Core.Instrumentation
             _singleHit = singleHit;
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
             _logger = logger;
+            _instrumentationHelper = instrumentationHelper;
         }
 
         public bool CanInstrument()
         {
             try
             {
-                if (InstrumentationHelper.HasPdb(_module, out bool embeddedPdb))
+                if (_instrumentationHelper.HasPdb(_module, out bool embeddedPdb))
                 {
                     if (embeddedPdb)
                     {
-                        if (InstrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module))
+                        if (_instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module))
                         {
                             return true;
                         }
@@ -136,8 +147,8 @@ namespace Coverlet.Core.Instrumentation
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
                             // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
                             && (!_isCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
-                            && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
-                            && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
+                            && !_instrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
+                            && _instrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
                     }
 
@@ -296,7 +307,7 @@ namespace Coverlet.Core.Instrumentation
             {
                 MethodDefinition actualMethod = method;
                 IEnumerable<CustomAttribute> customAttributes = method.CustomAttributes;
-                if (InstrumentationHelper.IsLocalMethod(method.Name))
+                if (_instrumentationHelper.IsLocalMethod(method.Name))
                     actualMethod = methods.FirstOrDefault(m => m.Name == method.Name.Split('>')[0].Substring(1)) ?? method;
 
                 if (actualMethod.IsGetter || actualMethod.IsSetter)

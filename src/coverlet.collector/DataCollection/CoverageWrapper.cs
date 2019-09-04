@@ -1,5 +1,6 @@
 ﻿using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Logging;
 
 namespace Coverlet.Collector.DataCollection
@@ -28,7 +29,8 @@ namespace Coverlet.Collector.DataCollection
                 settings.SingleHit,
                 settings.MergeWith,
                 settings.UseSourceLink,
-                coverletLogger);
+                coverletLogger,
+                (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
         }
 
         /// <summary>
