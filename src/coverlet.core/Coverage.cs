@@ -26,7 +26,7 @@ namespace Coverlet.Core
         private string _mergeWith;
         private bool _useSourceLink;
         private ILogger _logger;
-        IInstrumentationHelper _instrumentationHelper;
+        private IInstrumentationHelper _instrumentationHelper;
         private List<InstrumenterResult> _results;
 
         public string Identifier
