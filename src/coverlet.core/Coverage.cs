@@ -247,7 +247,7 @@ namespace Coverlet.Core
                     }
                 }
 
-                using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
+                using (var fs = new FileStream(result.HitsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 using (var br = new BinaryReader(fs))
                 {
                     int hitCandidatesCount = br.ReadInt32();
