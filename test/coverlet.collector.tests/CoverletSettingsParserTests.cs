@@ -78,33 +78,5 @@ namespace Coverlet.Collector.Tests
             node.InnerText = nodeValue;
             configElement.AppendChild(node);
         }
-
-        [Fact]
-        public void ParseShouldSkipXunitModulesIfEmptyExclude()
-        {
-            var testModules = new List<string> { "abc.dll" };
-
-            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(null, testModules);
-
-            Assert.Equal("[coverlet.*]*", coverletSettings.ExcludeFilters[0]);
-            Assert.Equal("[xunit*]*", coverletSettings.ExcludeFilters[1]);
-            Assert.Equal(2, coverletSettings.ExcludeFilters.Length);
-        }
-
-        [Fact]
-        public void ParseShouldNotSkipXunitModulesIfNotEmptyExclude()
-        {
-            var testModules = new List<string> { "abc.dll" };
-            var doc = new XmlDocument();
-            var configElement = doc.CreateElement("Configuration");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName, "[coverlet.*.tests?]*");
-
-            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
-
-            Assert.Equal("[coverlet.*]*", coverletSettings.ExcludeFilters[0]);
-            Assert.Equal("[coverlet.*.tests?]*", coverletSettings.ExcludeFilters[1]);
-            Assert.Equal(2, coverletSettings.ExcludeFilters.Length);
-            Assert.DoesNotContain("[xunit*]*", coverletSettings.ExcludeFilters);
-        }
     }
 }

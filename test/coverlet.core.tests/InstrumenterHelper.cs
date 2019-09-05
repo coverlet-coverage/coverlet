@@ -18,6 +18,13 @@ using Xunit.Sdk;
 
 namespace Coverlet.Core.Tests
 {
+    [Flags]
+    public enum BuildConfiguration
+    {
+        Debug = 1,
+        Release = 2
+    }
+
     public static class TestInstrumentationAssert
     {
         public static Document Document(this CoverageResult coverageResult, string docName)
@@ -43,9 +50,21 @@ namespace Coverlet.Core.Tests
 
         public static Document AssertBranchesCovered(this Document document, params (int line, int ordinal, int hits)[] lines)
         {
+            return AssertBranchesCovered(document, BuildConfiguration.Debug | BuildConfiguration.Release, lines);
+        }
+
+        public static Document AssertBranchesCovered(this Document document, BuildConfiguration configuration, params (int line, int ordinal, int hits)[] lines)
+        {
             if (document is null)
             {
                 throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
             }
 
             List<string> branchesToCover = new List<string>(lines.Select(b => $"[line {b.line} ordinal {b.ordinal}]"));
@@ -78,9 +97,21 @@ namespace Coverlet.Core.Tests
 
         public static Document AssertLinesCovered(this Document document, params (int line, int hits)[] lines)
         {
+            return AssertLinesCovered(document, BuildConfiguration.Debug | BuildConfiguration.Release, lines);
+        }
+
+        public static Document AssertLinesCovered(this Document document, BuildConfiguration configuration, params (int line, int hits)[] lines)
+        {
             if (document is null)
             {
                 throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
             }
 
             List<int> linesToCover = new List<int>(lines.Select(l => l.line));
@@ -105,6 +136,23 @@ namespace Coverlet.Core.Tests
             }
 
             return document;
+        }
+
+        private static BuildConfiguration GetAssemblyBuildConfiguration()
+        {
+            var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();
+            if (configurationAttribute.Configuration.Equals("Debug", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return Tests.BuildConfiguration.Debug;
+            }
+            else if (configurationAttribute.Configuration.Equals("Release", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return Tests.BuildConfiguration.Release;
+            }
+            else
+            {
+                throw new NotSupportedException($"Build configuration '{configurationAttribute.Configuration}' not supported");
+            }
         }
     }
 
