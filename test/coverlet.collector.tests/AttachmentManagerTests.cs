@@ -34,7 +34,7 @@ namespace Coverlet.Collector.Tests
             _mockDirectoryHelper = new Mock<IDirectoryHelper>();
 
             _attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger,
-                _eqtTrace, "report.cobertura.xml", @"E:\temp", _mockFileHelper.Object, _mockDirectoryHelper.Object);
+                _eqtTrace, @"E:\temp", _mockFileHelper.Object, _mockDirectoryHelper.Object);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace Coverlet.Collector.Tests
                                     + "<packages/>"
                                     + "</coverage>";
 
-            _attachmentManager.SendCoverageReport(coverageReport);
+            _attachmentManager.SendCoverageReport(coverageReport, "report.cobertura.xml");
             _mockFileHelper.Verify(x => x.WriteAllText(It.Is<string>(y => y.Contains(@"report.cobertura.xml")), coverageReport), Times.Once);
         }
 
@@ -54,7 +54,7 @@ namespace Coverlet.Collector.Tests
         public void SendCoverageReportShouldThrowExceptionWhenFailedToSaveReportToFile()
         {
             _attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger,
-               _eqtTrace, null, @"E:\temp", _mockFileHelper.Object, _mockDirectoryHelper.Object);
+               _eqtTrace, @"E:\temp", _mockFileHelper.Object, _mockDirectoryHelper.Object);
 
             string coverageReport = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                                     + "<coverage line-rate=\"1\" branch-rate=\"1\" version=\"1.9\" timestamp=\"1556263787\" lines-covered=\"0\" lines-valid=\"0\" branches-covered=\"0\" branches-valid=\"0\">"
@@ -62,7 +62,7 @@ namespace Coverlet.Collector.Tests
                                     + "<packages/>"
                                     + "</coverage>";
 
-            string message = Assert.Throws<CoverletDataCollectorException>(() => _attachmentManager.SendCoverageReport(coverageReport)).Message;
+            string message = Assert.Throws<CoverletDataCollectorException>(() => _attachmentManager.SendCoverageReport(coverageReport, null)).Message;
             Assert.Contains("CoverletCoverageDataCollector: Failed to save coverage report", message);
         }
 
@@ -71,7 +71,7 @@ namespace Coverlet.Collector.Tests
         {
             var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             _attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger,
-               _eqtTrace, "report.cobertura.xml", directory.ToString(), new FileHelper(), _mockDirectoryHelper.Object);
+               _eqtTrace, directory.ToString(), new FileHelper(), _mockDirectoryHelper.Object);
 
             string coverageReport = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                                     + "<coverage line-rate=\"1\" branch-rate=\"1\" version=\"1.9\" timestamp=\"1556263787\" lines-covered=\"0\" lines-valid=\"0\" branches-covered=\"0\" branches-valid=\"0\">"
@@ -79,7 +79,7 @@ namespace Coverlet.Collector.Tests
                                     + "<packages/>"
                                     + "</coverage>";
 
-            _attachmentManager.SendCoverageReport(coverageReport);
+            _attachmentManager.SendCoverageReport(coverageReport, "report.cobertura.xml");
 
             _mockDataCollectionSink.Verify(x => x.SendFileAsync(It.IsAny<FileTransferInformation>()));
 

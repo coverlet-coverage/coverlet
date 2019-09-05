@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using coverlet.collector.Resources;
@@ -43,7 +44,7 @@ namespace Coverlet.Collector.DataCollection
                 coverletSettings.IncludeTestAssembly = this.ParseIncludeTestAssembly(configurationElement);
             }
 
-            coverletSettings.ReportFormat = this.ParseReportFormat(configurationElement);
+            coverletSettings.ReportFormats = this.ParseReportFormats(configurationElement);
             coverletSettings.ExcludeFilters = this.ParseExcludeFilters(configurationElement);
 
             if (_eqtTrace.IsVerboseEnabled)
@@ -75,19 +76,20 @@ namespace Coverlet.Collector.DataCollection
         }
 
         /// <summary>
-        /// Parse report format
+        /// Parse report formats
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
-        /// <returns>Report format</returns>
-        private string ParseReportFormat(XmlElement configurationElement)
+        /// <returns>Report formats</returns>
+        private string[] ParseReportFormats(XmlElement configurationElement)
         {
-            string format = string.Empty;
+            string[] formats = Array.Empty<string>();
             if (configurationElement != null)
             {
                 XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
-                format = reportFormatElement?.InnerText?.Split(',').FirstOrDefault();
+                formats = reportFormatElement?.InnerText?.Split(',')
+                    .Select(x => string.IsNullOrEmpty(x) ? CoverletConstants.DefaultReportFormat : x).ToArray();
             }
-            return string.IsNullOrEmpty(format) ? CoverletConstants.DefaultReportFormat : format;
+            return formats == null || formats.Length == 0 ? new []{CoverletConstants.DefaultReportFormat}: formats;
         }
 
         /// <summary>

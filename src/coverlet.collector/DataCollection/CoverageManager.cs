@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
@@ -17,20 +19,20 @@ namespace Coverlet.Collector.DataCollection
 
         private ICoverageWrapper _coverageWrapper;
 
-        public IReporter Reporter { get; }
+        public IEnumerable<IReporter> Reporters { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper)
             : this(settings,
-                  new ReporterFactory(settings.ReportFormat).CreateReporter(),
+                  settings.ReportFormats.Select(x => new ReporterFactory(x).CreateReporter()),
                   new CoverletLogger(eqtTrace, logger),
                   coverageWrapper)
         {
         }
 
-        public CoverageManager(CoverletSettings settings, IReporter reporter, ILogger logger, ICoverageWrapper coverageWrapper)
+        public CoverageManager(CoverletSettings settings, IEnumerable<IReporter> reporters, ILogger logger, ICoverageWrapper coverageWrapper)
         {
             // Store input vars
-            Reporter = reporter;
+            Reporters = reporters;
             _coverageWrapper = coverageWrapper;
 
             // Coverage object
@@ -55,17 +57,24 @@ namespace Coverlet.Collector.DataCollection
         }
 
         /// <summary>
-        /// Gets coverlet coverage report
+        /// Gets coverlet coverage reports
         /// </summary>
-        /// <returns>Coverage report</returns>
-        public string GetCoverageReport()
+        /// <returns>Coverage reports</returns>
+        public IEnumerable<Tuple<string, string>> GetCoverageReports()
         {
             // Get coverage result
             CoverageResult coverageResult = this.GetCoverageResult();
+            return this.GetCoverageReports(coverageResult);
+        }
 
-            // Get coverage report in default format
-            string coverageReport = this.GetCoverageReport(coverageResult);
-            return coverageReport;
+        /// <summary>
+        /// Gets coverage report file name
+        /// </summary>
+        /// <returns>Coverage report file name</returns>
+        private string GetReportFileName(string extension)
+        {
+            string fileName = CoverletConstants.DefaultFileName;
+            return extension == null ? fileName : $"{fileName}.{extension}";
         }
 
         /// <summary>
@@ -86,15 +95,15 @@ namespace Coverlet.Collector.DataCollection
         }
 
         /// <summary>
-        /// Gets coverage report from coverage result
+        /// Gets coverage reports from coverage result
         /// </summary>
         /// <param name="coverageResult">Coverage result</param>
-        /// <returns>Coverage report</returns>
-        private string GetCoverageReport(CoverageResult coverageResult)
+        /// <returns>Coverage reports</returns>
+        private IEnumerable<Tuple<string, string>> GetCoverageReports(CoverageResult coverageResult)
         {
             try
             {
-                return Reporter.Report(coverageResult);
+                return Reporters.Select(x => new Tuple<string, string>(x.Report(coverageResult), this.GetReportFileName(x.Extension)) );
             }
             catch (Exception ex)
             {

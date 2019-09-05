@@ -130,30 +130,17 @@ namespace Coverlet.Collector.DataCollection
                 _eqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
 
                 // Get coverage reports
-                string coverageReport = _coverageManager?.GetCoverageReport();
+                var coverageReports = _coverageManager?.GetCoverageReports();
 
                 // Send result attachments to test platform.
-                var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, this.GetReportFileName());
-                attachmentManager?.SendCoverageReport(coverageReport);
-
+                var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace);
+                coverageReports?.ToList().ForEach(x => attachmentManager?.SendCoverageReport(x.Item1, x.Item2));
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex.ToString());
                 this.Dispose(true);
             }
-        }
-
-        /// <summary>
-        /// Gets coverage report file name
-        /// </summary>
-        /// <returns>Coverage report file name</returns>
-        private string GetReportFileName()
-        {
-            string fileName = CoverletConstants.DefaultFileName;
-            string extension = _coverageManager?.Reporter.Extension;
-
-            return extension == null ? fileName : $"{fileName}.{extension}";
         }
 
         /// <summary>

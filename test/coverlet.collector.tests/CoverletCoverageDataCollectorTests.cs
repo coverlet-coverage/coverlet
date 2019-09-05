@@ -109,6 +109,37 @@ namespace Coverlet.Collector.Tests
             directory.Delete(true);
         }
 
+        [Theory]
+        [InlineData("noValidFormat", 0)]
+        [InlineData("json,cobertura", 2)]
+        [InlineData("json,cobertura,lcov", 3)]
+        public void OnSessionEndShouldSendCoverageReportsForMultipleFormatsToTestPlatform(string formats, int sendReportsCount)
+        {
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper());
+
+            var doc = new XmlDocument();
+            var root = doc.CreateElement("Configuration");
+            var element = doc.CreateElement("Format");
+            element.AppendChild(doc.CreateTextNode(formats));
+            root.AppendChild(element);
+
+            _configurationElement = root;
+
+            _coverletCoverageDataCollector.Initialize(
+                _configurationElement,
+                _mockDataColectionEvents.Object,
+                _mockDataCollectionSink.Object,
+                _mockLogger.Object,
+                _context);
+
+            var sessionStartProperties = new Dictionary<string, object>{{ "TestSources", new List<string> { "Test" }} };
+
+            _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
+            _mockDataColectionEvents.Raise(x => x.SessionEnd += null, new SessionEndEventArgs());
+
+            _mockDataCollectionSink.Verify(x => x.SendFileAsync(It.IsAny<FileTransferInformation>()), Times.Exactly(sendReportsCount));
+        }
+
         [Fact]
         public void OnSessionStartShouldLogWarningIfInstrumentationFailed()
         {

@@ -19,29 +19,26 @@ namespace Coverlet.Collector.DataCollection
         private readonly DataCollectionContext _dataCollectionContext;
         private readonly IFileHelper _fileHelper;
         private readonly IDirectoryHelper _directoryHelper;
-        private readonly string _reportFileName;
         private readonly string _reportDirectory;
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportFileName)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace)
             : this(dataSink,
                   dataCollectionContext,
                   logger,
                   eqtTrace,
-                  reportFileName,
                   Guid.NewGuid().ToString(),
                   new FileHelper(),
                   new DirectoryHelper())
         {
         }
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportFileName, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper)
         {
             // Store input variabless
             _dataSink = dataSink;
             _dataCollectionContext = dataCollectionContext;
             _logger = logger;
             _eqtTrace = eqtTrace;
-            _reportFileName = reportFileName;
             _fileHelper = fileHelper;
             _directoryHelper = directoryHelper;
 
@@ -56,10 +53,11 @@ namespace Coverlet.Collector.DataCollection
         /// Sends coverage report to test platform
         /// </summary>
         /// <param name="coverageReport">Coverage report</param>
-        public void SendCoverageReport(string coverageReport)
+        /// <param name="coverageReportFileName">Coverage report file name</param>
+        public void SendCoverageReport(string coverageReport, string coverageReportFileName)
         {
             // Save coverage report to file
-            string coverageReportPath = this.SaveCoverageReport(coverageReport);
+            string coverageReportPath = this.SaveCoverageReport(coverageReport, coverageReportFileName);
 
             // Send coverage attachment to test platform.
             this.SendAttachment(coverageReportPath);
@@ -89,13 +87,14 @@ namespace Coverlet.Collector.DataCollection
         /// Saves coverage report to file system
         /// </summary>
         /// <param name="report">Coverage report</param>
+        /// <param name="reportFileName">Coverage report file name</param>
         /// <returns>Coverage report file path</returns>
-        private string SaveCoverageReport(string report)
+        private string SaveCoverageReport(string report, string reportFileName)
         {
             try
             {
                 _directoryHelper.CreateDirectory(_reportDirectory);
-                string filePath = Path.Combine(_reportDirectory, _reportFileName);
+                string filePath = Path.Combine(_reportDirectory, reportFileName);
                 _fileHelper.WriteAllText(filePath, report);
                 _eqtTrace.Info("{0}: Saved coverage report to path: '{1}'", CoverletConstants.DataCollectorName, filePath);
 
@@ -103,7 +102,7 @@ namespace Coverlet.Collector.DataCollection
             }
             catch (Exception ex)
             {
-                string errorMessage = string.Format(Resources.FailedToSaveCoverageReport, CoverletConstants.DataCollectorName, _reportFileName, _reportDirectory);
+                string errorMessage = string.Format(Resources.FailedToSaveCoverageReport, CoverletConstants.DataCollectorName, reportFileName, _reportDirectory);
                 throw new CoverletDataCollectorException(errorMessage, ex);
             }
         }
