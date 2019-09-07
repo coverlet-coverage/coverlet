@@ -72,18 +72,23 @@ namespace Coverlet.Collector.Tests
             Assert.True(coverletSettings.SingleHit);
         }
 
-        [Fact]
-        public void ParseShouldCorrectlyParseMultipleFormats()
+        [Theory]
+        [InlineData(" , json", 2, new []{ " ", " json" })]
+        [InlineData(" , json, ", 3, new [] { " ", " json", " " })]
+        [InlineData("json,cobertura", 2, new[] { "json", "cobertura" })]
+        [InlineData(" , json,, cobertura ", 3, new[] { " ", " json", " cobertura " })]
+        [InlineData(" , json, , cobertura ", 4, new [] { " ", " json", " ", " cobertura " })]
+        public void ParseShouldCorrectlyParseMultipleFormats(string formats, int formatsCount, string[] expectedReportFormats)
         {
             var testModules = new List<string> { "abc.dll" };
             var doc = new XmlDocument();
             var configElement = doc.CreateElement("Configuration");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, "json,cobertura");
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
-            Assert.Equal("json", coverletSettings.ReportFormats[0]);
-            Assert.Equal("cobertura", coverletSettings.ReportFormats[1]);
+            Assert.Equal(expectedReportFormats, coverletSettings.ReportFormats);
+            Assert.Equal(formatsCount, coverletSettings.ReportFormats.Length);
         }
 
         [Theory]

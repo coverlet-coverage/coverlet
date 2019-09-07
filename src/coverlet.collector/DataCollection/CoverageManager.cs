@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
@@ -19,17 +20,17 @@ namespace Coverlet.Collector.DataCollection
 
         private ICoverageWrapper _coverageWrapper;
 
-        public IEnumerable<IReporter> Reporters { get; }
+        public IReporter[] Reporters { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper)
             : this(settings,
-                  settings.ReportFormats.Select(x => new ReporterFactory(x).CreateReporter()),
+                  settings.ReportFormats.Select(format => new ReporterFactory(format).CreateReporter()).ToArray(),
                   new CoverletLogger(eqtTrace, logger),
                   coverageWrapper)
         {
         }
 
-        public CoverageManager(CoverletSettings settings, IEnumerable<IReporter> reporters, ILogger logger, ICoverageWrapper coverageWrapper)
+        public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper)
         {
             // Store input vars
             Reporters = reporters;
@@ -60,7 +61,7 @@ namespace Coverlet.Collector.DataCollection
         /// Gets coverlet coverage reports
         /// </summary>
         /// <returns>Coverage reports</returns>
-        public IEnumerable<Tuple<string, string>> GetCoverageReports()
+        public IEnumerable<(string report, string fileName)> GetCoverageReports()
         {
             // Get coverage result
             CoverageResult coverageResult = this.GetCoverageResult();
@@ -99,11 +100,16 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="coverageResult">Coverage result</param>
         /// <returns>Coverage reports</returns>
-        private IEnumerable<Tuple<string, string>> GetCoverageReports(CoverageResult coverageResult)
+        private IEnumerable<(string report, string fileName)> GetCoverageReports(CoverageResult coverageResult)
         {
             try
             {
-                return Reporters.Select(x => new Tuple<string, string>(x.Report(coverageResult), this.GetReportFileName(x.Extension)) );
+                return Reporters.Select(reporter =>
+                {
+                    var report = reporter.Report(coverageResult);
+                    var extension = reporter.Extension;
+                    return (report, Path.ChangeExtension(CoverletConstants.DefaultFileName, extension));
+                });
             }
             catch (Exception ex)
             {
