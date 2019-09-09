@@ -60,7 +60,7 @@ Hits file:'C:\Users\Marco\AppData\Local\Temp\coverlet.core_703263e9-21f0-4d1c-9c
 +---------+--------+--------+--------+
 ```
 
-## Use local build
+## Use local build(no collectors)
 
 Sometimes is useful test local updated source to fix issue.  
 You can "load" your local build using simple switch:
@@ -111,3 +111,57 @@ Test run for D:\git\Cake.Codecov\Source\Cake.Codecov.Tests\bin\Debug\netcoreapp2
 ```
 
 In this way you can add `Debug.Launch()` inside coverlet source and debug.
+
+## Use local collectors build 
+
+To use/debug local collectors build we need to tell to our project to restore and use our local build nuget package.
+
+1) Build local package
+```
+C:\git\coverlet\src\coverlet.collector (master -> origin)
+λ dotnet pack
+Microsoft (R) Build Engine version 16.2.32702+c4012a063 for .NET Core
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+  Restore completed in 50,28 ms for C:\git\coverlet\src\coverlet.collector\coverlet.collector.csproj.
+  Restore completed in 50,28 ms for C:\git\coverlet\src\coverlet.core\coverlet.core.csproj.
+  coverlet.core -> C:\git\coverlet\src\coverlet.core\bin\Debug\netstandard2.0\coverlet.core.dll
+  coverlet.collector -> C:\git\coverlet\src\coverlet.collector\bin\Debug\netcoreapp2.0\coverlet.collector.dll
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.1.0.67.nupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.1.0.67.snupkg'.
+```
+2) Add new `NuGet.Config` file on your test project/solution
+```
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <!-- Local path where you build packages -->
+    <add key="localpackagesbuild" value="C:\git\coverlet\bin\Debug\Packages" /> 
+    <!-- Defaul nuget feed -->
+    <add key="nuget" value="https://api.nuget.org/v3/index.json" /> 
+    <!-- Add all other needed feed -->
+  </packageSources>
+</configuration>
+```
+3) Run test command
+```
+ dotnet test XUnitTestProject1\ --collect:"XPlat Code Coverage"
+```
+
+You can also attach/debug your code adding some line of code on collectors i.e.
+
+Attach using vs "Attach to Process"
+```cs
+while(!System.Diagnostics.Debugger.IsAttached)
+{
+    System.Threading.Thread.Sleep(1000);
+}
+```
+
+Fire attach
+```cs
+System.Diagnostics.Debugger.Launch();
+```
+
+**Every time you update code and rebuild new package remember to remove local nuget cache(`RMDIR "C:\Users\[winUser]\.nuget\packages\coverlet.collector" /S /Q`) otherwise you'll load old collector code because the package version wasn't changed**
