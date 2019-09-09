@@ -144,7 +144,30 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </packageSources>
 </configuration>
 ```
-3) Run test command
+3) Update nuget package in our test project
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageReference Include="coverlet.collector" Version="1.0.67" /> <-- My local package version
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClassLibrary1\ClassLibrary1.csproj" />
+  </ItemGroup>
+
+</Project>
+
+```
+4) Run test command
 ```
  dotnet test XUnitTestProject1\ --collect:"XPlat Code Coverage"
 ```
