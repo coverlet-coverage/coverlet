@@ -73,11 +73,11 @@ namespace Coverlet.Collector.Tests
         }
 
         [Theory]
-        [InlineData(" , json", 2, new []{ " ", " json" })]
-        [InlineData(" , json, ", 3, new [] { " ", " json", " " })]
+        [InlineData(" , json", 1, new []{ "json" })]
+        [InlineData(" , json, ", 1, new [] { "json" })]
         [InlineData("json,cobertura", 2, new[] { "json", "cobertura" })]
-        [InlineData(" , json,, cobertura ", 3, new[] { " ", " json", " cobertura " })]
-        [InlineData(" , json, , cobertura ", 4, new [] { " ", " json", " ", " cobertura " })]
+        [InlineData(" , json,, cobertura ", 2, new[] { "json", "cobertura" })]
+        [InlineData(" , json, , cobertura ", 2, new [] { "json", "cobertura" })]
         public void ParseShouldCorrectlyParseMultipleFormats(string formats, int formatsCount, string[] expectedReportFormats)
         {
             var testModules = new List<string> { "abc.dll" };
