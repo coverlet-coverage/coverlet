@@ -69,16 +69,6 @@ namespace Coverlet.Collector.DataCollection
         }
 
         /// <summary>
-        /// Gets coverage report file name
-        /// </summary>
-        /// <returns>Coverage report file name</returns>
-        private string GetReportFileName(string extension)
-        {
-            string fileName = CoverletConstants.DefaultFileName;
-            return extension == null ? fileName : $"{fileName}.{extension}";
-        }
-
-        /// <summary>
         /// Gets coverlet coverage result
         /// </summary>
         /// <returns>Coverage result</returns>
@@ -104,12 +94,7 @@ namespace Coverlet.Collector.DataCollection
         {
             try
             {
-                return Reporters.Select(reporter =>
-                {
-                    var report = reporter.Report(coverageResult);
-                    var extension = reporter.Extension;
-                    return (report, Path.ChangeExtension(CoverletConstants.DefaultFileName, extension));
-                });
+                return Reporters.Select(reporter => (reporter.Report(coverageResult), Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension)));
             }
             catch (Exception ex)
             {

@@ -86,8 +86,10 @@ namespace Coverlet.Collector.DataCollection
             if (configurationElement != null)
             {
                 XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
-                formats = reportFormatElement?.InnerText?.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                formats = reportFormatElement?.InnerText?.Split(',').Select(format => format.Trim())
+                    .Where(format => !string.IsNullOrEmpty(format)).ToArray();
             }
+
             return formats is null || formats.Length == 0 ? new[] {CoverletConstants.DefaultReportFormat} : formats;
         }
 
