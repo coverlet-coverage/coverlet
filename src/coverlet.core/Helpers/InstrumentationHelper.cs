@@ -131,7 +131,7 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        public bool PdbHasLocalSource(string module)
+        public bool PortablePdbHasLocalSource(string module)
         {
             using (var moduleStream = File.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))

@@ -82,7 +82,7 @@ namespace Coverlet.Core.Instrumentation
                     }
                     else
                     {
-                        if (_instrumentationHelper.PdbHasLocalSource(_module))
+                        if (_instrumentationHelper.PortablePdbHasLocalSource(_module))
                         {
                             return true;
                         }
