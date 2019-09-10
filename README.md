@@ -42,7 +42,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
 #### Requirements
 * _You need to be running .NET Core SDK v2.2.300 and above_
-* _To run fully featured collectors([fixes this long standing bug](https://github.com/tonerdo/coverlet/issues/110)) you need to be running  .NET Core SDK v2.2.401 and above_
+* _To run fully-featured collectors ([see #110](https://github.com/tonerdo/coverlet/issues/110)) you need to be running  .NET Core SDK v2.2.401 or newer_
 * _You need to reference version 16.1.0 and above of Microsoft.NET.Test.Sdk_
 ```
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
