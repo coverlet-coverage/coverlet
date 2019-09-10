@@ -207,7 +207,7 @@ namespace Coverlet.Core.Tests
 
             // Rename test file to avoid locks
             string location = typeof(T).Assembly.Location;
-            string fileName = Path.ChangeExtension(Path.GetRandomFileName(), ".dll");
+            string fileName = Path.ChangeExtension($"testgen_{Path.GetFileNameWithoutExtension(Path.GetRandomFileName())}", ".dll");
             string logFile = Path.ChangeExtension(fileName, ".log");
             string newPath = Path.Combine(Path.GetDirectoryName(location), fileName);
 
