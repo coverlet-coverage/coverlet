@@ -9,22 +9,21 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using Coverlet.Core.Abstracts;
-using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
-    internal static class InstrumentationHelper
+    internal class InstrumentationHelper : IInstrumentationHelper
     {
-        private static readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
+        private readonly IRetryHelper _retryHelper;
 
-        static InstrumentationHelper()
+        public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper)
         {
-            DependencyInjection.Current.GetService<IProcessExitHandler>().Add((s, e) => RestoreOriginalModules());
+            processExitHandler.Add((s, e) => RestoreOriginalModules());
+            _retryHelper = retryHelper;
         }
 
-        public static string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly)
+        public string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly)
         {
             Debug.Assert(directories != null);
 
@@ -68,7 +67,7 @@ namespace Coverlet.Core.Helpers
                 .ToArray();
         }
 
-        public static bool HasPdb(string module, out bool embedded)
+        public bool HasPdb(string module, out bool embedded)
         {
             embedded = false;
             using (var moduleStream = File.OpenRead(module))
@@ -94,7 +93,7 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public static bool EmbeddedPortablePdbHasLocalSource(string module)
+        public bool EmbeddedPortablePdbHasLocalSource(string module)
         {
             using (FileStream moduleStream = File.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
@@ -129,7 +128,7 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        public static void BackupOriginalModule(string module, string identifier)
+        public void BackupOriginalModule(string module, string identifier)
         {
             var backupPath = GetBackupPath(module, identifier);
             var backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
@@ -150,7 +149,7 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public static void RestoreOriginalModule(string module, string identifier)
+        public void RestoreOriginalModule(string module, string identifier)
         {
             var backupPath = GetBackupPath(module, identifier);
             var backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
@@ -159,14 +158,14 @@ namespace Coverlet.Core.Helpers
             // See: https://github.com/tonerdo/coverlet/issues/25
             var retryStrategy = CreateRetryStrategy();
 
-            DependencyInjection.Current.GetService<IRetryHelper>().Retry(() =>
+            _retryHelper.Retry(() =>
             {
                 File.Copy(backupPath, module, true);
                 File.Delete(backupPath);
                 _backupList.TryRemove(module, out string _);
             }, retryStrategy, 10);
 
-            DependencyInjection.Current.GetService<IRetryHelper>().Retry(() =>
+            _retryHelper.Retry(() =>
             {
                 if (File.Exists(backupSymbolPath))
                 {
@@ -178,7 +177,7 @@ namespace Coverlet.Core.Helpers
             }, retryStrategy, 10);
         }
 
-        public static void RestoreOriginalModules()
+        public void RestoreOriginalModules()
         {
             // Restore the original module - retry up to 10 times, since the destination file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
@@ -187,7 +186,7 @@ namespace Coverlet.Core.Helpers
             foreach (string key in _backupList.Keys.ToList())
             {
                 string backupPath = _backupList[key];
-                DependencyInjection.Current.GetService<IRetryHelper>().Retry(() =>
+                _retryHelper.Retry(() =>
                 {
                     File.Copy(backupPath, key, true);
                     File.Delete(backupPath);
@@ -196,15 +195,15 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public static void DeleteHitsFile(string path)
+        public void DeleteHitsFile(string path)
         {
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
             var retryStrategy = CreateRetryStrategy();
-            DependencyInjection.Current.GetService<IRetryHelper>().Retry(() => File.Delete(path), retryStrategy, 10);
+            _retryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
         }
 
-        public static bool IsValidFilterExpression(string filter)
+        public bool IsValidFilterExpression(string filter)
         {
             if (filter == null)
                 return false;
@@ -236,7 +235,7 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        public static bool IsModuleExcluded(string module, string[] excludeFilters)
+        public bool IsModuleExcluded(string module, string[] excludeFilters)
         {
             if (excludeFilters == null || excludeFilters.Length == 0)
                 return false;
@@ -264,7 +263,7 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
-        public static bool IsModuleIncluded(string module, string[] includeFilters)
+        public bool IsModuleIncluded(string module, string[] includeFilters)
         {
             if (includeFilters == null || includeFilters.Length == 0)
                 return true;
@@ -291,7 +290,7 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
-        public static bool IsTypeExcluded(string module, string type, string[] excludeFilters)
+        public bool IsTypeExcluded(string module, string type, string[] excludeFilters)
         {
             if (excludeFilters == null || excludeFilters.Length == 0)
                 return false;
@@ -303,7 +302,7 @@ namespace Coverlet.Core.Helpers
             return IsTypeFilterMatch(module, type, excludeFilters);
         }
 
-        public static bool IsTypeIncluded(string module, string type, string[] includeFilters)
+        public bool IsTypeIncluded(string module, string type, string[] includeFilters)
         {
             if (includeFilters == null || includeFilters.Length == 0)
                 return true;
@@ -315,10 +314,10 @@ namespace Coverlet.Core.Helpers
             return IsTypeFilterMatch(module, type, includeFilters);
         }
 
-        public static bool IsLocalMethod(string method)
+        public bool IsLocalMethod(string method)
             => new Regex(WildcardToRegex("<*>*__*|*")).IsMatch(method);
 
-        private static bool IsTypeFilterMatch(string module, string type, string[] filters)
+        private bool IsTypeFilterMatch(string module, string type, string[] filters)
         {
             Debug.Assert(module != null);
             Debug.Assert(filters != null);
@@ -338,7 +337,7 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
-        private static string GetBackupPath(string module, string identifier)
+        private string GetBackupPath(string module, string identifier)
         {
             return Path.Combine(
                 Path.GetTempPath(),
@@ -346,7 +345,7 @@ namespace Coverlet.Core.Helpers
             );
         }
 
-        private static Func<TimeSpan> CreateRetryStrategy(int initialSleepSeconds = 6)
+        private Func<TimeSpan> CreateRetryStrategy(int initialSleepSeconds = 6)
         {
             TimeSpan retryStrategy()
             {
@@ -358,14 +357,14 @@ namespace Coverlet.Core.Helpers
             return retryStrategy;
         }
 
-        private static string WildcardToRegex(string pattern)
+        private string WildcardToRegex(string pattern)
         {
             return "^" + Regex.Escape(pattern).
             Replace("\\*", ".*").
             Replace("\\?", "?") + "$";
         }
 
-        private static bool IsAssembly(string filePath)
+        private bool IsAssembly(string filePath)
         {
             Debug.Assert(filePath != null);
 
@@ -384,4 +383,3 @@ namespace Coverlet.Core.Helpers
         }
     }
 }
-
