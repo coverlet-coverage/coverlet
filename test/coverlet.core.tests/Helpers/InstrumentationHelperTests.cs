@@ -9,6 +9,7 @@ namespace Coverlet.Core.Helpers.Tests
     public class InstrumentationHelperTests
     {
         private InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper());
+
         [Fact]
         public void TestGetDependencies()
         {

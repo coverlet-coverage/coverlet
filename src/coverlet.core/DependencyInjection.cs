@@ -29,7 +29,7 @@ namespace Coverlet.Core
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
 
-            // We need to keep singleton/static behaviour
+            // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
 
             return serviceCollection.BuildServiceProvider();

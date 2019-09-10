@@ -17,7 +17,7 @@ namespace Coverlet.Core.Helpers
     internal class InstrumentationHelper : IInstrumentationHelper
     {
         private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
-        private IRetryHelper _retryHelper;
+        private readonly IRetryHelper _retryHelper;
 
         public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper)
         {
