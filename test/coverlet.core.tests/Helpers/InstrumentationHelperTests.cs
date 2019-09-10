@@ -74,61 +74,6 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.False(File.Exists(tempFile));
         }
 
-        public static IEnumerable<object[]> GetExcludedFilesReturnsEmptyArgs =>
-        new[]
-        {
-            new object[]{null},
-            new object[]{new string[0]},
-            new object[]{new string[]{ Path.GetRandomFileName() }},
-            new object[]{new string[]{Path.GetRandomFileName(),
-                Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName())}
-            }
-        };
-
-        [Theory]
-        [MemberData(nameof(GetExcludedFilesReturnsEmptyArgs))]
-        public void TestGetExcludedFilesReturnsEmpty(string[] excludedFiles)
-        {
-            Assert.False(_instrumentationHelper.GetExcludedFiles(excludedFiles)?.Any());
-        }
-
-        [Fact]
-        public void TestGetExcludedFilesUsingAbsFile()
-        {
-            var file = Path.GetRandomFileName();
-            File.Create(file).Dispose();
-            var excludedFiles = _instrumentationHelper.GetExcludedFiles(
-                new string[] { Path.Combine(Directory.GetCurrentDirectory(), file) }
-            );
-            File.Delete(file);
-            Assert.Single(excludedFiles);
-        }
-
-        [Fact]
-        public void TestGetExcludedFilesUsingGlobbing()
-        {
-            var fileExtension = Path.GetRandomFileName();
-            var paths = new string[]{
-                $"{Path.GetRandomFileName()}.{fileExtension}",
-                $"{Path.GetRandomFileName()}.{fileExtension}"
-            };
-
-            foreach (var path in paths)
-            {
-                File.Create(path).Dispose();
-            }
-
-            var excludedFiles = _instrumentationHelper.GetExcludedFiles(
-                new string[] { $"*.{fileExtension}" });
-
-            foreach (var path in paths)
-            {
-                File.Delete(path);
-            }
-
-            Assert.Equal(paths.Length, excludedFiles.Count());
-        }
-
         [Fact]
         public void TestIsModuleExcludedWithoutFilter()
         {

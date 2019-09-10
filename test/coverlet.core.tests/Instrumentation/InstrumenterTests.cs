@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
@@ -45,10 +47,12 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.NotNull(result);
         }
 
-        [Fact]
-        public void TestInstrument()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestInstrument(bool singleHit)
         {
-            var instrumenterTest = CreateInstrumentor();
+            var instrumenterTest = CreateInstrumentor(singleHit: singleHit);
 
             var result = instrumenterTest.Instrumenter.Instrument();
 
@@ -58,10 +62,12 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
-        [Fact]
-        public void TestInstrumentCoreLib()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestInstrumentCoreLib(bool singleHit)
         {
-            var instrumenterTest = CreateInstrumentor(fakeCoreLibModule: true);
+            var instrumenterTest = CreateInstrumentor(fakeCoreLibModule: true, singleHit: singleHit);
 
             var result = instrumenterTest.Instrumenter.Instrument();
 
@@ -147,7 +153,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             instrumenterTest.Directory.Delete(true);
         }
 
-        private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false, string[] attributesToIgnore = null)
+        private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false, string[] attributesToIgnore = null, string[] excludedFiles = null, bool singleHit = false)
         {
             string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
@@ -236,6 +242,107 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.Equal(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "netstandard.dll"), Path.GetFullPath(resolved.MainModule.FileName));
         }
 
+        public static IEnumerable<object[]> TestInstrument_ExcludedFilesHelper_Data()
+        {
+            yield return new object[] { new string[]{ @"one.txt" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", true, false),
+                                            (@"c:\dir\one.txt", false, true),
+                                            (@"dir/one.txt", false, false)
+                                        }};
+            yield return new object[] { new string[]{ @"*one.txt" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", true , false),
+                                            (@"c:\dir\one.txt", false, true),
+                                            (@"dir/one.txt", false, false)
+                                        }};
+            yield return new object[] { new string[]{ @"*.txt" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", true, false),
+                                            (@"c:\dir\one.txt", false, true),
+                                            (@"dir/one.txt", false, false)
+                                        }};
+            yield return new object[] { new string[]{ @"*.*" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", true, false),
+                                            (@"c:\dir\one.txt", false, true),
+                                            (@"dir/one.txt", false, false)
+                                        }};
+            yield return new object[] { new string[]{ @"one.*" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", true, false),
+                                            (@"c:\dir\one.txt", false, true),
+                                            (@"dir/one.txt", false, false)
+                                        }};
+            yield return new object[] { new string[]{ @"dir/*.txt" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", false, false),
+                                            (@"c:\dir\one.txt", true, true),
+                                            (@"dir/one.txt", true, false)
+                                        }};
+            yield return new object[] { new string[]{ @"dir\*.txt" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", false, false),
+                                            (@"c:\dir\one.txt", true, true),
+                                            (@"dir/one.txt", true, false)
+                                        }};
+            yield return new object[] { new string[]{ @"**/*" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", true, false),
+                                            (@"c:\dir\one.txt", true, true),
+                                            (@"dir/one.txt", true, false)
+                                        }};
+            yield return new object[] { new string[]{ @"dir/**/*" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", false, false),
+                                            (@"c:\dir\one.txt", true, true),
+                                            (@"dir/one.txt", true, false),
+                                            (@"c:\dir\dir2\one.txt", true, true),
+                                            (@"dir/dir2/one.txt", true, false)
+                                        }};
+            yield return new object[] { new string[]{ @"one.txt", @"dir\*two.txt" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"one.txt", true, false),
+                                            (@"c:\dir\imtwo.txt", true, true),
+                                            (@"dir/one.txt", false, false)
+                                        }};
+
+            // This is a special case test different drive same path
+            // We strip out drive from path to check for globbing
+            // BTW I don't know if makes sense add a filter with full path maybe we should forbid
+            yield return new object[] { new string[]{ @"c:\dir\one.txt" }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (@"c:\dir\one.txt", true, true),
+                                            (@"d:\dir\one.txt", true, true) // maybe should be false?
+                                        }};
+
+            yield return new object[] { new string[]{ null }, new ValueTuple<string, bool, bool>[]
+                                        {
+                                            (null, false, false),
+                                        }};
+        }
+
+        [Theory]
+        [MemberData(nameof(TestInstrument_ExcludedFilesHelper_Data))]
+        public void TestInstrument_ExcludedFilesHelper(string[] excludeFilterHelper, ValueTuple<string, bool, bool>[] result)
+        {
+            var exludeFilterHelper = new ExcludedFilesHelper(excludeFilterHelper, new Mock<ILogger>().Object);
+            foreach (ValueTuple<string, bool, bool> checkFile in result)
+            {
+                if (checkFile.Item3) // run test only on windows platform
+                {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        Assert.Equal(checkFile.Item2, exludeFilterHelper.Exclude(checkFile.Item1));
+                    }
+                }
+                else
+                {
+                    Assert.Equal(checkFile.Item2, exludeFilterHelper.Exclude(checkFile.Item1));
+                }
+            }
+        }
+
         [Fact]
         public void SkipEmbeddedPpdbWithoutLocalSource()
         {
@@ -254,6 +361,15 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.False(embedded);
             Assert.True(instrumenter.CanInstrument());
             loggerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void TestInstrument_MissingModule()
+        {
+            var loggerMock = new Mock<ILogger>();
+            var instrumenter = new Instrumenter("test", "_test_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object);
+            Assert.False(instrumenter.CanInstrument());
+            loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
         }
 
     }
