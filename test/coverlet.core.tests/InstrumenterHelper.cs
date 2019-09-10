@@ -191,7 +191,7 @@ namespace Coverlet.Core.Tests
             using (var result = new FileStream(filePath, FileMode.Open))
             {
                 CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper()));
+                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem()));
                 return coverage.GetCoverageResult();
             }
         }
@@ -202,6 +202,7 @@ namespace Coverlet.Core.Tests
             DependencyInjection.Set(new ServiceCollection()
             .AddTransient<IRetryHelper, CustomRetryHelper>()
             .AddTransient<IProcessExitHandler, CustomProcessExitHandler>()
+            .AddTransient<IFileSystem, FileSystem>()
             .AddSingleton<IInstrumentationHelper, InstrumentationHelper>()
             .BuildServiceProvider());
 

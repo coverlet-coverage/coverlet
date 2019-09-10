@@ -13,6 +13,7 @@
         bool IsTypeIncluded(string module, string type, string[] includeFilters);
         void RestoreOriginalModule(string module, string identifier);
         bool EmbeddedPortablePdbHasLocalSource(string module);
+        bool PdbHasLocalSource(string module);
         bool IsLocalMethod(string method);
     }
 }

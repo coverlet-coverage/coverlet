@@ -40,13 +40,13 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _excludedSourceFiles;
 
         public Instrumenter(
-            string module, 
-            string identifier, 
-            string[] excludeFilters, 
-            string[] includeFilters, 
-            string[] excludedFiles, 
-            string[] excludedAttributes, 
-            bool singleHit, 
+            string module,
+            string identifier,
+            string[] excludeFilters,
+            string[] includeFilters,
+            string[] excludedFiles,
+            string[] excludedAttributes,
+            bool singleHit,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper)
         {
@@ -82,7 +82,15 @@ namespace Coverlet.Core.Instrumentation
                     }
                     else
                     {
-                        return true;
+                        if (_instrumentationHelper.PdbHasLocalSource(_module))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Unable to instrument module: {_module}, pdb without local source files");
+                            return false;
+                        }
                     }
                 }
                 else
