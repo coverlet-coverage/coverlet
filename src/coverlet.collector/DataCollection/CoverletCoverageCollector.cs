@@ -132,9 +132,12 @@ namespace Coverlet.Collector.DataCollection
                 // Get coverage reports
                 IEnumerable<(string report, string fileName)> coverageReports = _coverageManager?.GetCoverageReports();
 
-                // Send result attachments to test platform.
-                var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace);
-                coverageReports?.ToList().ForEach(report => attachmentManager.SendCoverageReport(report.report, report.fileName));
+                coverageReports?.ToList().ForEach(report =>
+                {
+                    // Send result attachments to test platform.
+                    var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace);
+                    attachmentManager.SendCoverageReport(report.report, report.fileName);
+                });
             }
             catch (Exception ex)
             {

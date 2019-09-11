@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Moq;
@@ -11,6 +12,7 @@ using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
 using Xunit;
 using Coverlet.Collector.DataCollection;
+using Coverlet.Core.Reporters;
 
 namespace Coverlet.Collector.Tests
 {
@@ -117,6 +119,15 @@ namespace Coverlet.Collector.Tests
         {
             _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper());
 
+            IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f).CreateReporter()).Where(x => x != null).ToList();
+            Mock<DataCollectionSink> mockDataCollectionSink = new Mock<DataCollectionSink>();
+            mockDataCollectionSink.Setup(m => m.SendFileAsync(It.IsAny<FileTransferInformation>())).Callback<FileTransferInformation>(fti =>
+            {
+                reporters.Remove(reporters.First(x => 
+                    Path.GetFileName(fti.Path) == Path.ChangeExtension(CoverletConstants.DefaultFileName, x.Extension))
+                );
+            });
+
             var doc = new XmlDocument();
             var root = doc.CreateElement("Configuration");
             var element = doc.CreateElement("Format");
@@ -128,7 +139,7 @@ namespace Coverlet.Collector.Tests
             _coverletCoverageDataCollector.Initialize(
                 _configurationElement,
                 _mockDataColectionEvents.Object,
-                _mockDataCollectionSink.Object,
+                mockDataCollectionSink.Object,
                 _mockLogger.Object,
                 _context);
 
@@ -137,7 +148,8 @@ namespace Coverlet.Collector.Tests
             _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
             _mockDataColectionEvents.Raise(x => x.SessionEnd += null, new SessionEndEventArgs());
 
-            _mockDataCollectionSink.Verify(x => x.SendFileAsync(It.IsAny<FileTransferInformation>()), Times.Exactly(sendReportsCount));
+            mockDataCollectionSink.Verify(x => x.SendFileAsync(It.IsAny<FileTransferInformation>()), Times.Exactly(sendReportsCount));
+            Assert.Empty(reporters);
         }
 
         [Fact]

@@ -29,7 +29,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 
 | Option         | Summary                                                                                  |
 |-------------   |------------------------------------------------------------------------------------------|
-|Format          | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity.   | 
+|Format          | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.   | 
 |MergeWith       | Combine the output of multiple coverage runs into a single result.                       | 
 |Exclude         | Exclude from code coverage analysing using filter expressions.                           | 
 |ExcludeByFile   | Ignore specific source files from code coverage.                                         | 
@@ -46,7 +46,7 @@ How to specify these options via runsettings?
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Format>json</Format>
+          <Format>json,</Format>
           <MergeWith>/custom/path/result.json</MergeWith>
           <Exclude>[coverlet.*.tests?]*,[*]Coverlet.Core*</Exclude> <!-- [Assembly-Filter]Type-Filter -->
           <Include>[coverlet.*]*,[*]Coverlet.Core*</Include> <!-- [Assembly-Filter]Type-Filter -->
