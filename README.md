@@ -99,7 +99,7 @@ Coverlet generates code coverage information by going through the following proc
 
 _Note: The assembly you'd like to get coverage for must be different from the assembly that contains the tests_
 
-### Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)!
+## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)!
 
 ## Cake Add-In
 
