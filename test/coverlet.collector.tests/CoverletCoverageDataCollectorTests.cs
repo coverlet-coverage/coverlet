@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Moq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -13,6 +14,7 @@ using Coverlet.Collector.Utilities;
 using Xunit;
 using Coverlet.Collector.DataCollection;
 using Coverlet.Core.Reporters;
+using Coverlet.Core.Abstracts;
 
 namespace Coverlet.Collector.Tests
 {
@@ -70,7 +72,7 @@ namespace Coverlet.Collector.Tests
                     null,
                     _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
-            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>());
+            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
             _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>())).Returns(coverage);

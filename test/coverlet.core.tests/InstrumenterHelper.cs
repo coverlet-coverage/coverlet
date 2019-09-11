@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Abstracts;
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Reporters;
@@ -190,7 +191,7 @@ namespace Coverlet.Core.Tests
             using (var result = new FileStream(filePath, FileMode.Open))
             {
                 CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object);
+                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper()));
                 return coverage.GetCoverageResult();
             }
         }
@@ -201,11 +202,12 @@ namespace Coverlet.Core.Tests
             DependencyInjection.Set(new ServiceCollection()
             .AddTransient<IRetryHelper, CustomRetryHelper>()
             .AddTransient<IProcessExitHandler, CustomProcessExitHandler>()
+            .AddSingleton<IInstrumentationHelper, InstrumentationHelper>()
             .BuildServiceProvider());
 
             // Rename test file to avoid locks
             string location = typeof(T).Assembly.Location;
-            string fileName = Path.ChangeExtension(Path.GetRandomFileName(), ".dll");
+            string fileName = Path.ChangeExtension($"testgen_{Path.GetFileNameWithoutExtension(Path.GetRandomFileName())}", ".dll");
             string logFile = Path.ChangeExtension(fileName, ".log");
             string newPath = Path.Combine(Path.GetDirectoryName(location), fileName);
 
@@ -223,7 +225,7 @@ namespace Coverlet.Core.Tests
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile));
+            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             // Load new assembly
