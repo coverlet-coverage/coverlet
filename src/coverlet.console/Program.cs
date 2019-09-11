@@ -8,6 +8,7 @@ using System.Text;
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Reporters;
 using McMaster.Extensions.CommandLineUtils;
@@ -69,7 +70,8 @@ namespace Coverlet.Console
                     singleHit.HasValue(),
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
-                    logger);
+                    logger,
+                    (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
                 coverage.PrepareModules();
 
                 Process process = new Process();
