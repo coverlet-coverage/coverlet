@@ -23,7 +23,7 @@ log.datacollector.19-09-12_14-55-17_64755_5.txt
 log.host.19-09-12_14-55-18_82700_6.txt
 log.txt
 ```
-
+Search inside with filter `[coverlet]`
 ## Coverlet Global Tool
 
 ```
