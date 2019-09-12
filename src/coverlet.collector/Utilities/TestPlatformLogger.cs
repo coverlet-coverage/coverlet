@@ -22,7 +22,7 @@ namespace Coverlet.Collector.Utilities
         /// <param name="warning">Warning message</param>
         public void LogWarning(string warning)
         {
-            _logger.LogWarning(_dataCollectionContext, warning);
+            _logger.LogWarning(_dataCollectionContext, $"[coverlet]{warning}");
         }
     }
 }

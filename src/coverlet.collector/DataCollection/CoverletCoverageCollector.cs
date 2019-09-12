@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml;
 using Coverlet.Collector.Utilities;
@@ -23,15 +24,17 @@ namespace Coverlet.Collector.DataCollection
         private DataCollectionContext _dataCollectionContext;
         private CoverageManager _coverageManager;
         private ICoverageWrapper _coverageWrapper;
+        private ICountDownEventFactory _countDownEventFactory;
 
-        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper())
+        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper(), new CollectorCountdownEventFactory())
         {
         }
 
-        internal CoverletCoverageCollector(TestPlatformEqtTrace eqtTrace, ICoverageWrapper coverageWrapper) : base()
+        internal CoverletCoverageCollector(TestPlatformEqtTrace eqtTrace, ICoverageWrapper coverageWrapper, ICountDownEventFactory countDownEventFactory) : base()
         {
             _eqtTrace = eqtTrace;
             _coverageWrapper = coverageWrapper;
+            _countDownEventFactory = countDownEventFactory;
         }
 
         /// <summary>
@@ -132,12 +135,22 @@ namespace Coverlet.Collector.DataCollection
                 // Get coverage reports
                 IEnumerable<(string report, string fileName)> coverageReports = _coverageManager?.GetCoverageReports();
 
-                coverageReports?.ToList().ForEach(report =>
+                if (coverageReports != null && coverageReports.Count() > 0)
                 {
                     // Send result attachments to test platform.
-                    var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace);
-                    attachmentManager.SendCoverageReport(report.report, report.fileName);
-                });
+                    using (var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30))))
+                    {
+                        foreach ((string report, string fileName) in coverageReports)
+                        {
+                            attachmentManager.SendCoverageReport(report, fileName);
+                        }
+                    }
+                }
+                else
+                {
+                    _eqtTrace.Verbose("{0}: No coverage reports specified", CoverletConstants.DataCollectorName);
+                    Debug.Assert(false, "Empty formats settings shouldn't allowed");
+                }
             }
             catch (Exception ex)
             {

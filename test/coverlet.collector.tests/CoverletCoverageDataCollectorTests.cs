@@ -26,6 +26,7 @@ namespace Coverlet.Collector.Tests
         private Mock<DataCollectionEvents> _mockDataColectionEvents;
         private Mock<DataCollectionSink> _mockDataCollectionSink;
         private Mock<ICoverageWrapper> _mockCoverageWrapper;
+        private Mock<ICountDownEventFactory> _mockCountDownEventFactory;
         private XmlElement _configurationElement;
         private Mock<DataCollectionLogger> _mockLogger;
 
@@ -40,12 +41,13 @@ namespace Coverlet.Collector.Tests
             _dataCollectionContext = new DataCollectionContext(testcase);
             _context = new DataCollectionEnvironmentContext(_dataCollectionContext);
             _mockCoverageWrapper = new Mock<ICoverageWrapper>();
+            _mockCountDownEventFactory = new Mock<ICountDownEventFactory>();
         }
 
         [Fact]
         public void OnSessionStartShouldInitializeCoverageWithCorrectCoverletSettings()
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object);
             _coverletCoverageDataCollector.Initialize(
                     _configurationElement,
                     _mockDataColectionEvents.Object,
@@ -64,7 +66,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void OnSessionStartShouldPrepareModulesForCoverage()
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object);
             _coverletCoverageDataCollector.Initialize(
                     _configurationElement,
                     _mockDataColectionEvents.Object,
@@ -86,7 +88,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void OnSessionEndShouldSendGetCoverageReportToTestPlatform()
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper());
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object);
             _coverletCoverageDataCollector.Initialize(
                     _configurationElement,
                     _mockDataColectionEvents.Object,
@@ -119,13 +121,13 @@ namespace Coverlet.Collector.Tests
         [InlineData("json,cobertura,lcov", 3)]
         public void OnSessionEndShouldSendCoverageReportsForMultipleFormatsToTestPlatform(string formats, int sendReportsCount)
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper());
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object);
 
             IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f).CreateReporter()).Where(x => x != null).ToList();
             Mock<DataCollectionSink> mockDataCollectionSink = new Mock<DataCollectionSink>();
             mockDataCollectionSink.Setup(m => m.SendFileAsync(It.IsAny<FileTransferInformation>())).Callback<FileTransferInformation>(fti =>
             {
-                reporters.Remove(reporters.First(x => 
+                reporters.Remove(reporters.First(x =>
                     Path.GetFileName(fti.Path) == Path.ChangeExtension(CoverletConstants.DefaultFileName, x.Extension))
                 );
             });
@@ -145,7 +147,7 @@ namespace Coverlet.Collector.Tests
                 _mockLogger.Object,
                 _context);
 
-            var sessionStartProperties = new Dictionary<string, object>{{ "TestSources", new List<string> { "Test" }} };
+            var sessionStartProperties = new Dictionary<string, object> { { "TestSources", new List<string> { "Test" } } };
 
             _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
             _mockDataColectionEvents.Raise(x => x.SessionEnd += null, new SessionEndEventArgs());
@@ -157,7 +159,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void OnSessionStartShouldLogWarningIfInstrumentationFailed()
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object);
             _coverletCoverageDataCollector.Initialize(
                     _configurationElement,
                     _mockDataColectionEvents.Object,

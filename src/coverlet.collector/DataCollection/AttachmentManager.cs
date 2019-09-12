@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
@@ -19,20 +20,22 @@ namespace Coverlet.Collector.DataCollection
         private readonly DataCollectionContext _dataCollectionContext;
         private readonly IFileHelper _fileHelper;
         private readonly IDirectoryHelper _directoryHelper;
+        private readonly ICountDownEvent _countDownEvent;
         private readonly string _reportDirectory;
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, ICountDownEvent countDownEvent)
             : this(dataSink,
                   dataCollectionContext,
                   logger,
                   eqtTrace,
                   Guid.NewGuid().ToString(),
                   new FileHelper(),
-                  new DirectoryHelper())
+                  new DirectoryHelper(),
+                  countDownEvent)
         {
         }
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper, ICountDownEvent countDownEvent)
         {
             // Store input variabless
             _dataSink = dataSink;
@@ -41,6 +44,7 @@ namespace Coverlet.Collector.DataCollection
             _eqtTrace = eqtTrace;
             _fileHelper = fileHelper;
             _directoryHelper = directoryHelper;
+            _countDownEvent = countDownEvent;
 
             // Report directory to store the coverage reports.
             _reportDirectory = Path.Combine(Path.GetTempPath(), reportDirectoryName);
@@ -71,6 +75,7 @@ namespace Coverlet.Collector.DataCollection
             // Unregister events
             try
             {
+                _countDownEvent.Wait();
                 if (_dataSink != null)
                 {
                     _dataSink.SendFileCompleted -= this.OnSendFileCompleted;
@@ -117,12 +122,14 @@ namespace Coverlet.Collector.DataCollection
             try
             {
                 _eqtTrace.Verbose("{0}: SendFileCompleted received", CoverletConstants.DataCollectorName);
-                this.CleanupReportDirectory();
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex.ToString());
-                this.Dispose();
+            }
+            finally
+            {
+                _countDownEvent.Signal();
             }
         }
 
