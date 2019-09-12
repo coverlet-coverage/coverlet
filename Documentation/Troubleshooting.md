@@ -1,6 +1,6 @@
 # Troubleshooting
 
-## Msbuild Integration
+## Msbuild integration
 
 1) Generate verbose log
 ```
@@ -11,6 +11,18 @@ dotnet test test\coverlet.core.tests\coverlet.core.tests.csproj -c debug /p:Coll
 3) Open `msbuild.binlog` generated and search for '[coverlet]' logs
  
 ![File](images/file.png)
+
+## Collectors integration
+
+```
+dotnet test --collect:"XPlat Code Coverage" --settings runsettings --diag:log.txt
+```
+You'll get logs file in same folder similar to
+```
+log.datacollector.19-09-12_14-55-17_64755_5.txt
+log.host.19-09-12_14-55-18_82700_6.txt
+log.txt
+```
 
 ## Coverlet Global Tool
 
