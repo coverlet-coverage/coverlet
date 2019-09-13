@@ -96,8 +96,9 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public bool EmbeddedPortablePdbHasLocalSource(string module)
+        public bool EmbeddedPortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
         {
+            firstNotFoundDocument = "";
             using (FileStream moduleStream = File.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
@@ -118,6 +119,7 @@ namespace Coverlet.Core.Helpers
                                 // Btw check for all possible extension could be weak approach
                                 if (!File.Exists(docName))
                                 {
+                                    firstNotFoundDocument = docName;
                                     return false;
                                 }
                             }
@@ -131,8 +133,9 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        public bool PortablePdbHasLocalSource(string module)
+        public bool PortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
         {
+            firstNotFoundDocument = "";
             using (var moduleStream = File.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
@@ -154,6 +157,7 @@ namespace Coverlet.Core.Helpers
                             // Btw check for all possible extension could be weak approach
                             if (!_fileSystem.Exists(docName))
                             {
+                                firstNotFoundDocument = docName;
                                 return false;
                             }
                         }

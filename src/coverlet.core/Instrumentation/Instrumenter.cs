@@ -70,25 +70,25 @@ namespace Coverlet.Core.Instrumentation
                 {
                     if (embeddedPdb)
                     {
-                        if (_instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module))
+                        if (_instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
                         {
                             return true;
                         }
                         else
                         {
-                            _logger.LogWarning($"Unable to instrument module: {_module}, embedded pdb without local source files");
+                            _logger.LogWarning($"Unable to instrument module: {_module}, embedded pdb without local source files, [{firstNotFoundDocument}]");
                             return false;
                         }
                     }
                     else
                     {
-                        if (_instrumentationHelper.PortablePdbHasLocalSource(_module))
+                        if (_instrumentationHelper.PortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
                         {
                             return true;
                         }
                         else
                         {
-                            _logger.LogWarning($"Unable to instrument module: {_module}, pdb without local source files");
+                            _logger.LogWarning($"Unable to instrument module: {_module}, pdb without local source files, [{firstNotFoundDocument}]");
                             return false;
                         }
                     }
