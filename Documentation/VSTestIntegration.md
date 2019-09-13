@@ -46,7 +46,7 @@ How to specify these options via runsettings?
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Format>json,</Format>
+          <Format>json,cobertura</Format>
           <MergeWith>/custom/path/result.json</MergeWith>
           <Exclude>[coverlet.*.tests?]*,[*]Coverlet.Core*</Exclude> <!-- [Assembly-Filter]Type-Filter -->
           <Include>[coverlet.*]*,[*]Coverlet.Core*</Include> <!-- [Assembly-Filter]Type-Filter -->
