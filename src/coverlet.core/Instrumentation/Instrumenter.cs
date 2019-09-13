@@ -40,13 +40,13 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _excludedSourceFiles;
 
         public Instrumenter(
-            string module, 
-            string identifier, 
-            string[] excludeFilters, 
-            string[] includeFilters, 
-            string[] excludedFiles, 
-            string[] excludedAttributes, 
-            bool singleHit, 
+            string module,
+            string identifier,
+            string[] excludeFilters,
+            string[] includeFilters,
+            string[] excludedFiles,
+            string[] excludedAttributes,
+            bool singleHit,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper)
         {
@@ -70,19 +70,27 @@ namespace Coverlet.Core.Instrumentation
                 {
                     if (embeddedPdb)
                     {
-                        if (_instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module))
+                        if (_instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
                         {
                             return true;
                         }
                         else
                         {
-                            _logger.LogWarning($"Unable to instrument module: {_module}, embedded pdb without local source files");
+                            _logger.LogWarning($"Unable to instrument module: {_module}, embedded pdb without local source files, [{firstNotFoundDocument}]");
                             return false;
                         }
                     }
                     else
                     {
-                        return true;
+                        if (_instrumentationHelper.PortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Unable to instrument module: {_module}, pdb without local source files, [{firstNotFoundDocument}]");
+                            return false;
+                        }
                     }
                 }
                 else
