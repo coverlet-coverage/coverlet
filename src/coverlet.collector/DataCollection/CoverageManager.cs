@@ -24,9 +24,21 @@ namespace Coverlet.Collector.DataCollection
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper)
             : this(settings,
-                  settings.ReportFormats.Select(format => new ReporterFactory(format).CreateReporter()).ToArray(),
-                  new CoverletLogger(eqtTrace, logger),
-                  coverageWrapper)
+            settings.ReportFormats.Select(format =>
+            {
+                var reporterFactory = new ReporterFactory(format);
+                if (!reporterFactory.IsValidFormat())
+                {
+                    eqtTrace.Warning($"Invalid report format '{format}'");
+                    return null;
+                }
+                else
+                {
+                    return reporterFactory.CreateReporter();
+                }
+            }).Where(r => r != null).ToArray(),
+            new CoverletLogger(eqtTrace, logger),
+            coverageWrapper)
         {
         }
 

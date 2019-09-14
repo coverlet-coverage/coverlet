@@ -1,7 +1,5 @@
 using System;
 using System.Linq;
-using System.Collections.Generic;
-using Coverlet.Core.Reporters;
 
 namespace Coverlet.Core.Reporters
 {
@@ -18,6 +16,11 @@ namespace Coverlet.Core.Reporters
                 new OpenCoverReporter(), new CoberturaReporter(),
                 new TeamCityReporter()
             };
+        }
+
+        public bool IsValidFormat()
+        {
+            return new ReporterFactory(_format).CreateReporter() != null;
         }
 
         public IReporter CreateReporter()
