@@ -20,7 +20,7 @@ namespace Coverlet.Core.Reporters
 
         public bool IsValidFormat()
         {
-            return new ReporterFactory(_format).CreateReporter() != null;
+            return CreateReporter() != null;
         }
 
         public IReporter CreateReporter()
