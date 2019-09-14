@@ -149,7 +149,6 @@ namespace Coverlet.Collector.DataCollection
                 else
                 {
                     _eqtTrace.Verbose("{0}: No coverage reports specified", CoverletConstants.DataCollectorName);
-                    Debug.Assert(false, "Empty formats settings shouldn't allowed");
                 }
             }
             catch (Exception ex)
