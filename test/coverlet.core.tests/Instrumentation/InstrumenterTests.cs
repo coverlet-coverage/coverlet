@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Samples.Tests;
@@ -20,7 +21,7 @@ namespace Coverlet.Core.Instrumentation.Tests
 {
     public class InstrumenterTests
     {
-        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper());
+        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem());
         private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
 
         [Fact(Skip = "To be used only validating System.Private.CoreLib instrumentation")]
@@ -361,6 +362,25 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.False(embedded);
             Assert.True(instrumenter.CanInstrument());
             loggerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void SkipPpdbWithoutLocalSource()
+        {
+            Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
+             {
+                 return Path.GetExtension(path) != ".cs";
+             });
+            InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), mockFileSystem.Object);
+
+            string coverletLib = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.core.dll").First();
+            var loggerMock = new Mock<ILogger>();
+            Instrumenter instrumenter = new Instrumenter(coverletLib, "_corelib_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper);
+            Assert.True(_instrumentationHelper.HasPdb(coverletLib, out bool embedded));
+            Assert.False(embedded);
+            Assert.False(instrumenter.CanInstrument());
+            loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
         }
 
         [Fact]

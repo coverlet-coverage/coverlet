@@ -72,6 +72,41 @@ namespace Coverlet.Collector.Tests
             Assert.True(coverletSettings.SingleHit);
         }
 
+        [Theory]
+        [InlineData(" , json", 1, new []{ "json" })]
+        [InlineData(" , json, ", 1, new [] { "json" })]
+        [InlineData("json,cobertura", 2, new[] { "json", "cobertura" })]
+        [InlineData(" , json,, cobertura ", 2, new[] { "json", "cobertura" })]
+        [InlineData(" , json, , cobertura ", 2, new [] { "json", "cobertura" })]
+        public void ParseShouldCorrectlyParseMultipleFormats(string formats, int formatsCount, string[] expectedReportFormats)
+        {
+            var testModules = new List<string> { "abc.dll" };
+            var doc = new XmlDocument();
+            var configElement = doc.CreateElement("Configuration");
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
+
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
+
+            Assert.Equal(expectedReportFormats, coverletSettings.ReportFormats);
+            Assert.Equal(formatsCount, coverletSettings.ReportFormats.Length);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void ParseShouldUseDefaultFormatWhenNoFormatSpecified(string formats)
+        {
+            var testModules = new List<string> { "abc.dll" };
+            var defaultFormat = CoverletConstants.DefaultReportFormat;
+            var doc = new XmlDocument();
+            var configElement = doc.CreateElement("Configuration");
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
+
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
+
+            Assert.Equal(defaultFormat, coverletSettings.ReportFormats[0]);
+        }
+
         private void CreateCoverletNodes(XmlDocument doc, XmlElement configElement, string nodeSetting, string nodeValue)
         {
             var node = doc.CreateNode("element", nodeSetting, string.Empty);

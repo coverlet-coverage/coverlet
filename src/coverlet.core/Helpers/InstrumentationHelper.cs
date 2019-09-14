@@ -9,6 +9,7 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using Coverlet.Core.Abstracts;
+using Coverlet.Core.Logging;
 
 namespace Coverlet.Core.Helpers
 {
@@ -16,11 +17,13 @@ namespace Coverlet.Core.Helpers
     {
         private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
         private readonly IRetryHelper _retryHelper;
+        private readonly IFileSystem _fileSystem;
 
-        public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper)
+        public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem)
         {
             processExitHandler.Add((s, e) => RestoreOriginalModules());
             _retryHelper = retryHelper;
+            _fileSystem = fileSystem;
         }
 
         public string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly)
@@ -93,8 +96,9 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public bool EmbeddedPortablePdbHasLocalSource(string module)
+        public bool EmbeddedPortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
         {
+            firstNotFoundDocument = "";
             using (FileStream moduleStream = File.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
@@ -115,6 +119,7 @@ namespace Coverlet.Core.Helpers
                                 // Btw check for all possible extension could be weak approach
                                 if (!File.Exists(docName))
                                 {
+                                    firstNotFoundDocument = docName;
                                     return false;
                                 }
                             }
@@ -125,6 +130,41 @@ namespace Coverlet.Core.Helpers
 
             // If we don't have EmbeddedPortablePdb entry return true, for instance empty dll
             // We should call this method only on embedded pdb module
+            return true;
+        }
+
+        public bool PortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
+        {
+            firstNotFoundDocument = "";
+            using (var moduleStream = File.OpenRead(module))
+            using (var peReader = new PEReader(moduleStream))
+            {
+                foreach (var entry in peReader.ReadDebugDirectory())
+                {
+                    if (entry.Type == DebugDirectoryEntryType.CodeView)
+                    {
+                        var codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
+                        using FileStream pdbStream = new FileStream(codeViewData.Path, FileMode.Open);
+                        using MetadataReaderProvider metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
+                        MetadataReader metadataReader = metadataReaderProvider.GetMetadataReader();
+                        foreach (DocumentHandle docHandle in metadataReader.Documents)
+                        {
+                            Document document = metadataReader.GetDocument(docHandle);
+                            string docName = metadataReader.GetString(document.Name);
+
+                            // We verify all docs and return false if not all are present in local
+                            // We could have false negative if doc is not a source
+                            // Btw check for all possible extension could be weak approach
+                            if (!_fileSystem.Exists(docName))
+                            {
+                                firstNotFoundDocument = docName;
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
             return true;
         }
 

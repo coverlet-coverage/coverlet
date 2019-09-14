@@ -14,9 +14,9 @@ namespace Coverlet.Collector.DataCollection
         public string TestModule { get; set; }
 
         /// <summary>
-        /// Report format
+        /// Report formats
         /// </summary>
-        public string ReportFormat { get; set; }
+        public string[] ReportFormats { get; set; }
 
         /// <summary>
         /// Filters to include
