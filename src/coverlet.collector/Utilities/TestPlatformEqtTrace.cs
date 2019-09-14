@@ -17,7 +17,7 @@ namespace Coverlet.Collector.Utilities
         /// <param name="args">Args</param>
         public void Verbose(string format, params object[] args)
         {
-            EqtTrace.Verbose(format, args);
+            EqtTrace.Verbose($"[coverlet]{format}", args);
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Coverlet.Collector.Utilities
         /// <param name="args">Args</param>
         public void Warning(string format, params object[] args)
         {
-            EqtTrace.Warning(format, args);
+            EqtTrace.Warning($"[coverlet]{format}", args);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Coverlet.Collector.Utilities
         /// <param name="args">Args</param>
         public void Info(string format, params object[] args)
         {
-            EqtTrace.Info(format, args);
+            EqtTrace.Info($"[coverlet]{format}", args);
         }
     }
 }

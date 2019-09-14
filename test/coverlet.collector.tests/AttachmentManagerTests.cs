@@ -20,6 +20,7 @@ namespace Coverlet.Collector.Tests
         private TestPlatformEqtTrace _eqtTrace;
         private Mock<IFileHelper> _mockFileHelper;
         private Mock<IDirectoryHelper> _mockDirectoryHelper;
+        private Mock<ICountDownEvent> _mockCountDownEvent;
         private Mock<DataCollectionLogger> _mockDataCollectionLogger;
 
         public AttachmentManagerTests()
@@ -32,9 +33,10 @@ namespace Coverlet.Collector.Tests
             _eqtTrace = new TestPlatformEqtTrace();
             _mockFileHelper = new Mock<IFileHelper>();
             _mockDirectoryHelper = new Mock<IDirectoryHelper>();
+            _mockCountDownEvent = new Mock<ICountDownEvent>();
 
             _attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger,
-                _eqtTrace, "report.cobertura.xml", @"E:\temp", _mockFileHelper.Object, _mockDirectoryHelper.Object);
+                _eqtTrace, @"E:\temp", _mockFileHelper.Object, _mockDirectoryHelper.Object, _mockCountDownEvent.Object);
         }
 
         [Fact]
@@ -46,7 +48,7 @@ namespace Coverlet.Collector.Tests
                                     + "<packages/>"
                                     + "</coverage>";
 
-            _attachmentManager.SendCoverageReport(coverageReport);
+            _attachmentManager.SendCoverageReport(coverageReport, "report.cobertura.xml");
             _mockFileHelper.Verify(x => x.WriteAllText(It.Is<string>(y => y.Contains(@"report.cobertura.xml")), coverageReport), Times.Once);
         }
 
@@ -54,7 +56,7 @@ namespace Coverlet.Collector.Tests
         public void SendCoverageReportShouldThrowExceptionWhenFailedToSaveReportToFile()
         {
             _attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger,
-               _eqtTrace, null, @"E:\temp", _mockFileHelper.Object, _mockDirectoryHelper.Object);
+               _eqtTrace, @"E:\temp", _mockFileHelper.Object, _mockDirectoryHelper.Object, _mockCountDownEvent.Object);
 
             string coverageReport = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                                     + "<coverage line-rate=\"1\" branch-rate=\"1\" version=\"1.9\" timestamp=\"1556263787\" lines-covered=\"0\" lines-valid=\"0\" branches-covered=\"0\" branches-valid=\"0\">"
@@ -62,7 +64,7 @@ namespace Coverlet.Collector.Tests
                                     + "<packages/>"
                                     + "</coverage>";
 
-            string message = Assert.Throws<CoverletDataCollectorException>(() => _attachmentManager.SendCoverageReport(coverageReport)).Message;
+            string message = Assert.Throws<CoverletDataCollectorException>(() => _attachmentManager.SendCoverageReport(coverageReport, null)).Message;
             Assert.Contains("CoverletCoverageDataCollector: Failed to save coverage report", message);
         }
 
@@ -71,7 +73,7 @@ namespace Coverlet.Collector.Tests
         {
             var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             _attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger,
-               _eqtTrace, "report.cobertura.xml", directory.ToString(), new FileHelper(), _mockDirectoryHelper.Object);
+               _eqtTrace, directory.ToString(), new FileHelper(), _mockDirectoryHelper.Object, _mockCountDownEvent.Object);
 
             string coverageReport = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                                     + "<coverage line-rate=\"1\" branch-rate=\"1\" version=\"1.9\" timestamp=\"1556263787\" lines-covered=\"0\" lines-valid=\"0\" branches-covered=\"0\" branches-valid=\"0\">"
@@ -79,7 +81,7 @@ namespace Coverlet.Collector.Tests
                                     + "<packages/>"
                                     + "</coverage>";
 
-            _attachmentManager.SendCoverageReport(coverageReport);
+            _attachmentManager.SendCoverageReport(coverageReport, "report.cobertura.xml");
 
             _mockDataCollectionSink.Verify(x => x.SendFileAsync(It.IsAny<FileTransferInformation>()));
 
@@ -87,22 +89,28 @@ namespace Coverlet.Collector.Tests
         }
 
         [Fact]
-        public void OnSendFileCompletedShouldCleanUpReportDirectory()
+        public void OnDisposeAttachmentManagerShouldCleanUpReportDirectory()
         {
-            _mockDirectoryHelper.Setup(x => x.Exists(It.Is<string>(y => y.Contains(@"E:\temp")))).Returns(true);
+            var mockDirectoryHelper = new Mock<IDirectoryHelper>();
+            mockDirectoryHelper.Setup(x => x.Exists(It.Is<string>(y => y.Contains(@"E:\temp")))).Returns(true);
+            using (var attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger, _eqtTrace, @"E:\temp", _mockFileHelper.Object, mockDirectoryHelper.Object, _mockCountDownEvent.Object))
+            {
+                _mockDataCollectionSink.Raise(x => x.SendFileCompleted += null, new AsyncCompletedEventArgs(null, false, null));
+            }
 
-            _mockDataCollectionSink.Raise(x => x.SendFileCompleted += null, new AsyncCompletedEventArgs(null, false, null));
-
-            _mockDirectoryHelper.Verify(x => x.Delete(It.Is<string>(y => y.Contains(@"E:\temp")), true), Times.Once);
+            mockDirectoryHelper.Verify(x => x.Delete(It.Is<string>(y => y.Contains(@"E:\temp")), true), Times.Once);
         }
 
         [Fact]
-        public void OnSendFileCompletedShouldThrowCoverletDataCollectorExceptionIfUnableToCleanUpReportDirectory()
+        public void OnDisposeAttachmentManagerShouldThrowCoverletDataCollectorExceptionIfUnableToCleanUpReportDirectory()
         {
-            _mockDirectoryHelper.Setup(x => x.Exists(It.Is<string>(y => y.Contains(@"E:\temp")))).Returns(true);
-            _mockDirectoryHelper.Setup(x => x.Delete(It.Is<string>(y => y.Contains(@"E:\temp")), true)).Throws(new FileNotFoundException());
-
-            _mockDataCollectionSink.Raise(x => x.SendFileCompleted += null, new AsyncCompletedEventArgs(null, false, null));
+            var mockDirectoryHelper = new Mock<IDirectoryHelper>();
+            mockDirectoryHelper.Setup(x => x.Exists(It.Is<string>(y => y.Contains(@"E:\temp")))).Returns(true);
+            mockDirectoryHelper.Setup(x => x.Delete(It.Is<string>(y => y.Contains(@"E:\temp")), true)).Throws(new FileNotFoundException());
+            using (var attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger, _eqtTrace, @"E:\temp", _mockFileHelper.Object, mockDirectoryHelper.Object, _mockCountDownEvent.Object))
+            {
+                _mockDataCollectionSink.Raise(x => x.SendFileCompleted += null, new AsyncCompletedEventArgs(null, false, null));
+            }
             _mockDataCollectionLogger.Verify(x => x.LogWarning(_dataCollectionContext,
                 It.Is<string>(y => y.Contains("CoverletDataCollectorException: CoverletCoverageDataCollector: Failed to cleanup report directory"))), Times.AtLeastOnce);
         }

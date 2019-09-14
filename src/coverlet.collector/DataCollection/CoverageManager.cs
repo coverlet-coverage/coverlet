@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
@@ -17,20 +20,32 @@ namespace Coverlet.Collector.DataCollection
 
         private ICoverageWrapper _coverageWrapper;
 
-        public IReporter Reporter { get; }
+        public IReporter[] Reporters { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper)
             : this(settings,
-                  new ReporterFactory(settings.ReportFormat).CreateReporter(),
-                  new CoverletLogger(eqtTrace, logger),
-                  coverageWrapper)
+            settings.ReportFormats.Select(format =>
+            {
+                var reporterFactory = new ReporterFactory(format);
+                if (!reporterFactory.IsValidFormat())
+                {
+                    eqtTrace.Warning($"Invalid report format '{format}'");
+                    return null;
+                }
+                else
+                {
+                    return reporterFactory.CreateReporter();
+                }
+            }).Where(r => r != null).ToArray(),
+            new CoverletLogger(eqtTrace, logger),
+            coverageWrapper)
         {
         }
 
-        public CoverageManager(CoverletSettings settings, IReporter reporter, ILogger logger, ICoverageWrapper coverageWrapper)
+        public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper)
         {
             // Store input vars
-            Reporter = reporter;
+            Reporters = reporters;
             _coverageWrapper = coverageWrapper;
 
             // Coverage object
@@ -55,17 +70,14 @@ namespace Coverlet.Collector.DataCollection
         }
 
         /// <summary>
-        /// Gets coverlet coverage report
+        /// Gets coverlet coverage reports
         /// </summary>
-        /// <returns>Coverage report</returns>
-        public string GetCoverageReport()
+        /// <returns>Coverage reports</returns>
+        public IEnumerable<(string report, string fileName)> GetCoverageReports()
         {
             // Get coverage result
             CoverageResult coverageResult = this.GetCoverageResult();
-
-            // Get coverage report in default format
-            string coverageReport = this.GetCoverageReport(coverageResult);
-            return coverageReport;
+            return this.GetCoverageReports(coverageResult);
         }
 
         /// <summary>
@@ -86,15 +98,15 @@ namespace Coverlet.Collector.DataCollection
         }
 
         /// <summary>
-        /// Gets coverage report from coverage result
+        /// Gets coverage reports from coverage result
         /// </summary>
         /// <param name="coverageResult">Coverage result</param>
-        /// <returns>Coverage report</returns>
-        private string GetCoverageReport(CoverageResult coverageResult)
+        /// <returns>Coverage reports</returns>
+        private IEnumerable<(string report, string fileName)> GetCoverageReports(CoverageResult coverageResult)
         {
             try
             {
-                return Reporter.Report(coverageResult);
+                return Reporters.Select(reporter => (reporter.Report(coverageResult), Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension)));
             }
             catch (Exception ex)
             {
