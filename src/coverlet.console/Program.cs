@@ -59,7 +59,7 @@ namespace Coverlet.Console
                     // Adjust log level based on user input.
                     logger.Level = verbosity.ParsedValue;
                 }
-
+                var fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
                 Coverage coverage = new Coverage(module.Value,
                     includeFilters.Values.ToArray(),
                     includeDirectories.Values.ToArray(),
@@ -71,6 +71,7 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger,
+                    fileSystem,
                     (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
                 coverage.PrepareModules();
 
@@ -140,7 +141,6 @@ namespace Coverlet.Console
 
                         var report = Path.Combine(directory, filename);
                         logger.LogInformation($"  Generating report '{report}'", important: true);
-                        var fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
                         fileSystem.WriteAllText(report, reporter.Report(result));
                     }
                 }

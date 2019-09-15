@@ -191,7 +191,9 @@ namespace Coverlet.Core.Tests
             using (var result = new FileStream(filePath, FileMode.Open))
             {
                 CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem()));
+                var fileSystem = new Mock<IFileSystem>();
+                fileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object), fileSystem.Object);
                 return coverage.GetCoverageResult();
             }
         }
@@ -226,7 +228,7 @@ namespace Coverlet.Core.Tests
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>());
+            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), new Mock<IFileSystem>().Object, DependencyInjection.Current.GetService<IInstrumentationHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             // Load new assembly

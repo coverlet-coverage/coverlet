@@ -27,6 +27,7 @@ namespace Coverlet.Core
         private bool _useSourceLink;
         private ILogger _logger;
         private IInstrumentationHelper _instrumentationHelper;
+        private IFileSystem _fileSystem;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -45,6 +46,7 @@ namespace Coverlet.Core
             string mergeWith,
             bool useSourceLink,
             ILogger logger,
+            IFileSystem fileSystem,
             IInstrumentationHelper instrumentationHelper)
         {
             _module = module;
@@ -58,13 +60,14 @@ namespace Coverlet.Core
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
             _logger = logger;
+            _fileSystem = fileSystem;
             _instrumentationHelper = instrumentationHelper;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
 
-        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper)
+        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
         {
             _identifier = prepareResult.Identifier;
             _module = prepareResult.Module;
@@ -72,6 +75,7 @@ namespace Coverlet.Core
             _useSourceLink = prepareResult.UseSourceLink;
             _results = new List<InstrumenterResult>(prepareResult.Results);
             _logger = logger;
+            _fileSystem = fileSystem;
             _instrumentationHelper = instrumentationHelper;
         }
 
@@ -215,9 +219,9 @@ namespace Coverlet.Core
 
             var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
 
-            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
+            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && _fileSystem.Exists(_mergeWith))
             {
-                string json = File.ReadAllText(_mergeWith);
+                string json = _fileSystem.ReadAllText(_mergeWith);
                 coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
             }
 
@@ -228,7 +232,7 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                if (!File.Exists(result.HitsFilePath))
+                if (!_fileSystem.Exists(result.HitsFilePath))
                 {
                     // Hits file could be missed mainly for two reason
                     // 1) Issue during module Unload()
