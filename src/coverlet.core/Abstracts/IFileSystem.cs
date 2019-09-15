@@ -14,6 +14,8 @@ namespace Coverlet.Core.Abstracts
 
         void Copy(string sourceFileName, string destFileName);
 
+        void Copy(string sourceFileName, string destFileName, bool overwrite);
+
         void Delete(string path);
 
         void AppendAllText(string path, string contents);

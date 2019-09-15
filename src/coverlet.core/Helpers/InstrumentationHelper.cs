@@ -73,7 +73,7 @@ namespace Coverlet.Core.Helpers
         public bool HasPdb(string module, out bool embedded)
         {
             embedded = false;
-            using (var moduleStream = File.OpenRead(module))
+            using (var moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
                 foreach (var entry in peReader.ReadDebugDirectory())
@@ -88,7 +88,7 @@ namespace Coverlet.Core.Helpers
                             return true;
                         }
 
-                        return File.Exists(codeViewData.Path);
+                        return _fileSystem.Exists(codeViewData.Path);
                     }
                 }
 
@@ -99,7 +99,7 @@ namespace Coverlet.Core.Helpers
         public bool EmbeddedPortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
         {
             firstNotFoundDocument = "";
-            using (FileStream moduleStream = File.OpenRead(module))
+            using (FileStream moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
                 foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
@@ -117,7 +117,7 @@ namespace Coverlet.Core.Helpers
                                 // We verify all docs and return false if not all are present in local
                                 // We could have false negative if doc is not a source
                                 // Btw check for all possible extension could be weak approach
-                                if (!File.Exists(docName))
+                                if (!_fileSystem.Exists(docName))
                                 {
                                     firstNotFoundDocument = docName;
                                     return false;
@@ -136,7 +136,7 @@ namespace Coverlet.Core.Helpers
         public bool PortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
         {
             firstNotFoundDocument = "";
-            using (var moduleStream = File.OpenRead(module))
+            using (var moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
                 foreach (var entry in peReader.ReadDebugDirectory())
@@ -172,16 +172,16 @@ namespace Coverlet.Core.Helpers
         {
             var backupPath = GetBackupPath(module, identifier);
             var backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
-            File.Copy(module, backupPath, true);
+            _fileSystem.Copy(module, backupPath, true);
             if (!_backupList.TryAdd(module, backupPath))
             {
                 throw new ArgumentException($"Key already added '{module}'");
             }
 
             var symbolFile = Path.ChangeExtension(module, ".pdb");
-            if (File.Exists(symbolFile))
+            if (_fileSystem.Exists(symbolFile))
             {
-                File.Copy(symbolFile, backupSymbolPath, true);
+                _fileSystem.Copy(symbolFile, backupSymbolPath, true);
                 if (!_backupList.TryAdd(symbolFile, backupSymbolPath))
                 {
                     throw new ArgumentException($"Key already added '{module}'");
@@ -200,18 +200,18 @@ namespace Coverlet.Core.Helpers
 
             _retryHelper.Retry(() =>
             {
-                File.Copy(backupPath, module, true);
-                File.Delete(backupPath);
+                _fileSystem.Copy(backupPath, module, true);
+                _fileSystem.Delete(backupPath);
                 _backupList.TryRemove(module, out string _);
             }, retryStrategy, 10);
 
             _retryHelper.Retry(() =>
             {
-                if (File.Exists(backupSymbolPath))
+                if (_fileSystem.Exists(backupSymbolPath))
                 {
                     string symbolFile = Path.ChangeExtension(module, ".pdb");
-                    File.Copy(backupSymbolPath, symbolFile, true);
-                    File.Delete(backupSymbolPath);
+                    _fileSystem.Copy(backupSymbolPath, symbolFile, true);
+                    _fileSystem.Delete(backupSymbolPath);
                     _backupList.TryRemove(symbolFile, out string _);
                 }
             }, retryStrategy, 10);
@@ -228,8 +228,8 @@ namespace Coverlet.Core.Helpers
                 string backupPath = _backupList[key];
                 _retryHelper.Retry(() =>
                 {
-                    File.Copy(backupPath, key, true);
-                    File.Delete(backupPath);
+                    _fileSystem.Copy(backupPath, key, true);
+                    _fileSystem.Delete(backupPath);
                     _backupList.TryRemove(key, out string _);
                 }, retryStrategy, 10);
             }
@@ -240,7 +240,7 @@ namespace Coverlet.Core.Helpers
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
             var retryStrategy = CreateRetryStrategy();
-            _retryHelper.Retry(() => File.Delete(path), retryStrategy, 10);
+            _retryHelper.Retry(() => _fileSystem.Delete(path), retryStrategy, 10);
         }
 
         public bool IsValidFilterExpression(string filter)
