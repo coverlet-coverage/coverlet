@@ -2,7 +2,7 @@
 
 namespace Coverlet.Core.Abstracts
 {
-    internal interface IFileSystem
+    public interface IFileSystem
     {
         bool Exists(string path);
 

@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Coverlet.Core.Helpers
 {
-    internal class FileSystem : IFileSystem
+    public class FileSystem : IFileSystem
     {
         public bool Exists(string path)
         {
