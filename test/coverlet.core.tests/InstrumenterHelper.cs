@@ -218,6 +218,7 @@ namespace Coverlet.Core.Tests
             File.Copy(Path.ChangeExtension(location, ".pdb"), Path.ChangeExtension(newPath, ".pdb"));
 
             // Instrument module
+            Mock<IFileSystem> fileSystemMock = new Mock<IFileSystem>();
             Coverage coverage = new Coverage(newPath,
             new string[]
             {
@@ -228,7 +229,7 @@ namespace Coverlet.Core.Tests
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), new Mock<IFileSystem>().Object, DependencyInjection.Current.GetService<IInstrumentationHelper>());
+            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile, fileSystemMock.Object), fileSystemMock.Object, DependencyInjection.Current.GetService<IInstrumentationHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             // Load new assembly
@@ -313,32 +314,37 @@ namespace Coverlet.Core.Tests
     class Logger : ILogger
     {
         string _logFile;
+        IFileSystem _fileSystem;
 
-        public Logger(string logFile) => _logFile = logFile;
+        public Logger(string logFile, IFileSystem fileSystem)
+        {
+            _logFile = logFile;
+            _fileSystem = fileSystem;
+        }
 
         public void LogError(string message)
         {
-            File.AppendAllText(_logFile, message + Environment.NewLine);
+            _fileSystem.AppendAllText(_logFile, message + Environment.NewLine);
         }
 
         public void LogError(Exception exception)
         {
-            File.AppendAllText(_logFile, exception.ToString() + Environment.NewLine);
+            _fileSystem.AppendAllText(_logFile, exception.ToString() + Environment.NewLine);
         }
 
         public void LogInformation(string message, bool important = false)
         {
-            File.AppendAllText(_logFile, message + Environment.NewLine);
+            _fileSystem.AppendAllText(_logFile, message + Environment.NewLine);
         }
 
         public void LogVerbose(string message)
         {
-            File.AppendAllText(_logFile, message + Environment.NewLine);
+            _fileSystem.AppendAllText(_logFile, message + Environment.NewLine);
         }
 
         public void LogWarning(string message)
         {
-            File.AppendAllText(_logFile, message + Environment.NewLine);
+            _fileSystem.AppendAllText(_logFile, message + Environment.NewLine);
         }
     }
 }
