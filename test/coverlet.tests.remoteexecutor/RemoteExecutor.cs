@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Coverlet.Core;
+using Coverlet.Core.Abstracts;
 using Xunit;
 using Xunit.Sdk;
 
@@ -121,12 +123,13 @@ namespace Coverlet.Tests.RemoteExecutor
         public void Dispose()
         {
             Assert.True(_process.WaitForExit(FailWaitTimeoutMilliseconds), $"Timed out after {FailWaitTimeoutMilliseconds}ms waiting for remote process {_process.Id}");
+            IFileSystem fileSystem = (IFileSystem) DependencyInjection.Current.GetService(typeof(IFileSystem));
 
             FileInfo exceptionFileInfo = new FileInfo(_exceptionFile);
             if (exceptionFileInfo.Exists && exceptionFileInfo.Length != 0)
             {
-                string exception = File.ReadAllText(_exceptionFile);
-                File.Delete(_exceptionFile);
+                string exception = fileSystem.ReadAllText(_exceptionFile);
+                fileSystem.Delete(_exceptionFile);
                 throw new RemoteExecutionException(exception);
             }
 
