@@ -140,7 +140,8 @@ namespace Coverlet.Console
 
                         var report = Path.Combine(directory, filename);
                         logger.LogInformation($"  Generating report '{report}'", important: true);
-                        File.WriteAllText(report, reporter.Report(result));
+                        var fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
+                        fileSystem.WriteAllText(report, reporter.Report(result));
                     }
                 }
 
