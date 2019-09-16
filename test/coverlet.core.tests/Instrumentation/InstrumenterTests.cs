@@ -353,7 +353,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.True(_instrumentationHelper.HasPdb(xunitDll, out bool embedded));
             Assert.True(embedded);
             Assert.False(instrumenter.CanInstrument());
-            loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
+            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
 
             // Default case
             string coverletCoreDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.core.dll").First();
@@ -380,7 +380,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.True(_instrumentationHelper.HasPdb(coverletLib, out bool embedded));
             Assert.False(embedded);
             Assert.False(instrumenter.CanInstrument());
-            loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
+            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
         }
 
         [Fact]
