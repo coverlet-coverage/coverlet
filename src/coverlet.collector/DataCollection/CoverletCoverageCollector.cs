@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
+using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
@@ -27,16 +28,14 @@ namespace Coverlet.Collector.DataCollection
         private CoverageManager _coverageManager;
         private ICoverageWrapper _coverageWrapper;
         private ICountDownEventFactory _countDownEventFactory;
-        private IFileSystem _fileSystem;
 
-        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper(), new CollectorCountdownEventFactory(), new FileSystem())
+        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper(), new CollectorCountdownEventFactory())
         {
         }
 
-        internal CoverletCoverageCollector(TestPlatformEqtTrace eqtTrace, ICoverageWrapper coverageWrapper, ICountDownEventFactory countDownEventFactory, IFileSystem fileSystem) : base()
+        internal CoverletCoverageCollector(TestPlatformEqtTrace eqtTrace, ICoverageWrapper coverageWrapper, ICountDownEventFactory countDownEventFactory) : base()
         {
             _eqtTrace = eqtTrace;
-            _fileSystem = fileSystem;
             _coverageWrapper = coverageWrapper;
             _countDownEventFactory = countDownEventFactory;
         }
@@ -136,13 +135,14 @@ namespace Coverlet.Collector.DataCollection
             {
                 _eqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
 
+                IFileSystem fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
                 // Get coverage reports
                 IEnumerable<(string report, string fileName)> coverageReports = _coverageManager?.GetCoverageReports();
 
                 if (coverageReports != null && coverageReports.Count() > 0)
                 {
                     // Send result attachments to test platform.
-                    using (var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30)), _fileSystem))
+                    using (var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30)), fileSystem))
                     {
                         foreach ((string report, string fileName) in coverageReports)
                         {
