@@ -9,6 +9,7 @@ using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.DataCollection;
 using Coverlet.Core.Abstracts;
+using Coverlet.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.Utilities.Helpers.Interfaces;
 
 namespace Coverlet.Collector.Tests
@@ -75,7 +76,7 @@ namespace Coverlet.Collector.Tests
         {
             var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             _attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger,
-               _eqtTrace, directory.ToString(), new Mock<IFileSystem>().Object, _mockDirectoryHelper.Object, _mockCountDownEvent.Object);
+               _eqtTrace, directory.ToString(), new FileSystem(), _mockDirectoryHelper.Object, _mockCountDownEvent.Object);
 
             string coverageReport = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                                     + "<coverage line-rate=\"1\" branch-rate=\"1\" version=\"1.9\" timestamp=\"1556263787\" lines-covered=\"0\" lines-valid=\"0\" branches-covered=\"0\" branches-valid=\"0\">"
