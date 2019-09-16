@@ -30,7 +30,8 @@ namespace Coverlet.Collector.Tests
         private Mock<ICountDownEventFactory> _mockCountDownEventFactory;
         private XmlElement _configurationElement;
         private Mock<DataCollectionLogger> _mockLogger;
-        private IFileSystem _fileSystem;
+        private Mock<IFileSystem> _mockFileSystem;
+        //private IFileSystem _fileSystem;
 
         public CoverletCoverageDataCollectorTests()
         {
@@ -42,7 +43,8 @@ namespace Coverlet.Collector.Tests
             TestCase testcase = new TestCase { Id = Guid.NewGuid() };
             _dataCollectionContext = new DataCollectionContext(testcase);
             _context = new DataCollectionEnvironmentContext(_dataCollectionContext);
-            _fileSystem = new FileSystem();
+            //_fileSystem = new FileSystem();
+            _mockFileSystem = new Mock<IFileSystem>();
             _mockCoverageWrapper = new Mock<ICoverageWrapper>();
             _mockCountDownEventFactory = new Mock<ICountDownEventFactory>();
         }
@@ -50,7 +52,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void OnSessionStartShouldInitializeCoverageWithCorrectCoverletSettings()
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object, _fileSystem);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object, _mockFileSystem.Object);
             _coverletCoverageDataCollector.Initialize(
                     _configurationElement,
                     _mockDataColectionEvents.Object,
@@ -69,7 +71,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void OnSessionStartShouldPrepareModulesForCoverage()
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object, _fileSystem);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object, _mockFileSystem.Object);
             _coverletCoverageDataCollector.Initialize(
                     _configurationElement,
                     _mockDataColectionEvents.Object,
@@ -91,7 +93,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void OnSessionEndShouldSendGetCoverageReportToTestPlatform()
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, _fileSystem);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, new FileSystem());
             _coverletCoverageDataCollector.Initialize(
                     _configurationElement,
                     _mockDataColectionEvents.Object,
@@ -124,7 +126,7 @@ namespace Coverlet.Collector.Tests
         [InlineData("json,cobertura,lcov", 3)]
         public void OnSessionEndShouldSendCoverageReportsForMultipleFormatsToTestPlatform(string formats, int sendReportsCount)
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, _fileSystem);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, new FileSystem());
 
             IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f).CreateReporter()).Where(x => x != null).ToList();
             Mock<DataCollectionSink> mockDataCollectionSink = new Mock<DataCollectionSink>();
@@ -162,7 +164,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void OnSessionStartShouldLogWarningIfInstrumentationFailed()
         {
-            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object, _fileSystem);
+            _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object, _mockFileSystem.Object);
             _coverletCoverageDataCollector.Initialize(
                     _configurationElement,
                     _mockDataColectionEvents.Object,
