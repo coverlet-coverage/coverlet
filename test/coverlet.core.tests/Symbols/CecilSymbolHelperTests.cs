@@ -263,6 +263,22 @@ namespace Coverlet.Core.Symbols.Tests
         }
 
         [Fact]
+        public void GetBranchPoints_IgnoresBranchesIn_AsyncAwaitStateMachine()
+        {
+            // arrange
+            var nestedName = typeof(AsyncAwaitStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachine).FullName);
+            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+
+            // act
+            var points = CecilSymbolHelper.GetBranchPoints(method);
+
+            // assert
+            Assert.Empty(points);
+        }
+
+        [Fact]
         public void GetBranchPoints_ExceptionFilter()
         {
             // arrange

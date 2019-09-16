@@ -172,6 +172,14 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
+    public class AsyncAwaitStateMachine
+    {
+        async public Task AsyncAwait()
+        {
+            await Task.CompletedTask;
+        }
+    }
+
     [ExcludeFromCoverage]
     public class ClassExcludedByCoverletCodeCoverageAttr
     {
@@ -230,7 +238,8 @@ namespace Coverlet.Core.Samples.Tests
     public class ClassWithSetterOnlyPropertyExcludedByObsoleteAttr
     {
         [Obsolete]
-        public string Property {
+        public string Property
+        {
             set => _ = string.Empty;
         }
     }
