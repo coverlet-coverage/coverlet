@@ -76,7 +76,7 @@ namespace Coverlet.Core.Instrumentation
                         }
                         else
                         {
-                            _logger.LogWarning($"Unable to instrument module: {_module}, embedded pdb without local source files, [{firstNotFoundDocument}]");
+                            _logger.LogVerbose($"Unable to instrument module: {_module}, embedded pdb without local source files, [{firstNotFoundDocument}]");
                             return false;
                         }
                     }
@@ -88,7 +88,7 @@ namespace Coverlet.Core.Instrumentation
                         }
                         else
                         {
-                            _logger.LogWarning($"Unable to instrument module: {_module}, pdb without local source files, [{firstNotFoundDocument}]");
+                            _logger.LogVerbose($"Unable to instrument module: {_module}, pdb without local source files, [{firstNotFoundDocument}]");
                             return false;
                         }
                     }
