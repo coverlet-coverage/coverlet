@@ -10,7 +10,7 @@ namespace Coverlet.Core.Abstracts
 
         string ReadAllText(string path);
 
-        FileStream OpenRead(string path);
+        Stream OpenRead(string path);
 
         void Copy(string sourceFileName, string destFileName);
 
@@ -19,5 +19,9 @@ namespace Coverlet.Core.Abstracts
         void Delete(string path);
 
         void AppendAllText(string path, string contents);
+
+        Stream NewFileStream(string path, FileMode mode);
+
+        Stream NewFileStream(string path, FileMode mode, FileAccess access);
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Coverlet.Core.Abstracts;
-using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Logging;
 
@@ -106,6 +105,17 @@ namespace Coverlet.Core
             _results = new List<InstrumenterResult>(prepareResult.Results);
             _logger = logger;
             _fileSystem = fileSystem;
+            _instrumentationHelper = instrumentationHelper;
+        }
+
+        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper)
+        {
+            _identifier = prepareResult.Identifier;
+            _module = prepareResult.Module;
+            _mergeWith = prepareResult.MergeWith;
+            _useSourceLink = prepareResult.UseSourceLink;
+            _results = new List<InstrumenterResult>(prepareResult.Results);
+            _logger = logger;
             _instrumentationHelper = instrumentationHelper;
         }
 
@@ -283,7 +293,7 @@ namespace Coverlet.Core
                     }
                 }
 
-                using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
+                using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
                 using (var br = new BinaryReader(fs))
                 {
                     int hitCandidatesCount = br.ReadInt32();

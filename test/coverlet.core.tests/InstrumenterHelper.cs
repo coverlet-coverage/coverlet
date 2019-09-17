@@ -191,9 +191,7 @@ namespace Coverlet.Core.Tests
             using (var result = new FileStream(filePath, FileMode.Open))
             {
                 CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-                var fileSystem = new Mock<IFileSystem>();
-                fileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object), fileSystem.Object);
+                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem()));
                 return coverage.GetCoverageResult();
             }
         }
@@ -218,7 +216,6 @@ namespace Coverlet.Core.Tests
             File.Copy(Path.ChangeExtension(location, ".pdb"), Path.ChangeExtension(newPath, ".pdb"));
 
             // Instrument module
-            Mock<IFileSystem> fileSystemMock = new Mock<IFileSystem>();
             Coverage coverage = new Coverage(newPath,
             new string[]
             {
@@ -229,7 +226,7 @@ namespace Coverlet.Core.Tests
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile, fileSystemMock.Object), fileSystemMock.Object, DependencyInjection.Current.GetService<IInstrumentationHelper>());
+            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IFileSystem>(), DependencyInjection.Current.GetService<IInstrumentationHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             // Load new assembly
@@ -314,37 +311,32 @@ namespace Coverlet.Core.Tests
     class Logger : ILogger
     {
         string _logFile;
-        IFileSystem _fileSystem;
 
-        public Logger(string logFile, IFileSystem fileSystem)
-        {
-            _logFile = logFile;
-            _fileSystem = fileSystem;
-        }
+        public Logger(string logFile) => _logFile = logFile;
 
         public void LogError(string message)
         {
-            _fileSystem.AppendAllText(_logFile, message + Environment.NewLine);
+            File.AppendAllText(_logFile, message + Environment.NewLine);
         }
 
         public void LogError(Exception exception)
         {
-            _fileSystem.AppendAllText(_logFile, exception.ToString() + Environment.NewLine);
+            File.AppendAllText(_logFile, exception.ToString() + Environment.NewLine);
         }
 
         public void LogInformation(string message, bool important = false)
         {
-            _fileSystem.AppendAllText(_logFile, message + Environment.NewLine);
+            File.AppendAllText(_logFile, message + Environment.NewLine);
         }
 
         public void LogVerbose(string message)
         {
-            _fileSystem.AppendAllText(_logFile, message + Environment.NewLine);
+            File.AppendAllText(_logFile, message + Environment.NewLine);
         }
 
         public void LogWarning(string message)
         {
-            _fileSystem.AppendAllText(_logFile, message + Environment.NewLine);
+            File.AppendAllText(_logFile, message + Environment.NewLine);
         }
     }
 }
