@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 
 namespace Coverlet.Core.Instrumentation
@@ -19,6 +20,7 @@ namespace Coverlet.Core.Instrumentation
         public static string HitsFilePath;
         public static int[] HitsArray;
         public static bool SingleHit;
+        private static bool _enableLog = int.TryParse(Environment.GetEnvironmentVariable("COVERLET_ENABLETRAKERLOG"), out int result) ? result == 1 : false;
 
         static ModuleTrackerTemplate()
         {
@@ -72,64 +74,90 @@ namespace Coverlet.Core.Instrumentation
 
         public static void UnloadModule(object sender, EventArgs e)
         {
-            // Claim the current hits array and reset it to prevent double-counting scenarios.
-            var hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
-
-            // The same module can be unloaded multiple times in the same process via different app domains.
-            // Use a global mutex to ensure no concurrent access.
-            using (var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew))
+            try
             {
-                if (!createdNew)
-                    mutex.WaitOne();
+                WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}'");
+                // Claim the current hits array and reset it to prevent double-counting scenarios.
+                var hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
 
-                bool failedToCreateNewHitsFile = false;
-                try
+                // The same module can be unloaded multiple times in the same process via different app domains.
+                // Use a global mutex to ensure no concurrent access.
+                using (var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew))
                 {
-                    using (var fs = new FileStream(HitsFilePath, FileMode.CreateNew))
-                    using (var bw = new BinaryWriter(fs))
+                    WriteLog($"Flushing hit file '{HitsFilePath}'");
+                    if (!createdNew)
+                        mutex.WaitOne();
+
+                    bool failedToCreateNewHitsFile = false;
+                    try
                     {
-                        bw.Write(hitsArray.Length);
-                        foreach (int hitCount in hitsArray)
+                        using (var fs = new FileStream(HitsFilePath, FileMode.CreateNew))
+                        using (var bw = new BinaryWriter(fs))
                         {
-                            bw.Write(hitCount);
+                            bw.Write(hitsArray.Length);
+                            foreach (int hitCount in hitsArray)
+                            {
+                                bw.Write(hitCount);
+                            }
                         }
                     }
+                    catch
+                    {
+                        failedToCreateNewHitsFile = true;
+                    }
+
+                    if (failedToCreateNewHitsFile)
+                    {
+                        // Update the number of hits by adding value on disk with the ones on memory.
+                        // This path should be triggered only in the case of multiple AppDomain unloads.
+                        using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                        using (var br = new BinaryReader(fs))
+                        using (var bw = new BinaryWriter(fs))
+                        {
+                            int hitsLength = br.ReadInt32();
+                            if (hitsLength != hitsArray.Length)
+                            {
+                                throw new InvalidOperationException(
+                                    $"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {hitsArray.Length}");
+                            }
+
+                            for (int i = 0; i < hitsLength; ++i)
+                            {
+                                int oldHitCount = br.ReadInt32();
+                                bw.Seek(-sizeof(int), SeekOrigin.Current);
+                                if (SingleHit)
+                                    bw.Write(hitsArray[i] + oldHitCount > 0 ? 1 : 0);
+                                else
+                                    bw.Write(hitsArray[i] + oldHitCount);
+                            }
+                        }
+                    }
+
+                    // On purpose this is not under a try-finally: it is better to have an exception if there was any error writing the hits file
+                    // this case is relevant when instrumenting corelib since multiple processes can be running against the same instrumented dll.
+                    mutex.ReleaseMutex();
+                    WriteLog($"Hit file '{HitsFilePath}' flushed, size {new FileInfo(HitsFilePath).Length}");
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteLog(ex.ToString());
+                throw;
+            }
+        }
+
+        private static void WriteLog(string logText)
+        {
+            if (_enableLog)
+            {
+                try
+                {
+                    File.AppendAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location) + "_tracker.txt"), $"[{DateTime.UtcNow} {Thread.CurrentThread.ManagedThreadId}]{logText}{Environment.NewLine}");
                 }
                 catch
                 {
-                    failedToCreateNewHitsFile = true;
+                    // do nothing if log fail
                 }
-
-                if (failedToCreateNewHitsFile)
-                {
-                    // Update the number of hits by adding value on disk with the ones on memory.
-                    // This path should be triggered only in the case of multiple AppDomain unloads.
-                    using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-                    using (var br = new BinaryReader(fs))
-                    using (var bw = new BinaryWriter(fs))
-                    {
-                        int hitsLength = br.ReadInt32();
-                        if (hitsLength != hitsArray.Length)
-                        {
-                            throw new InvalidOperationException(
-                                $"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {hitsArray.Length}");
-                        }
-
-                        for (int i = 0; i < hitsLength; ++i)
-                        {
-                            int oldHitCount = br.ReadInt32();
-                            bw.Seek(-sizeof(int), SeekOrigin.Current);
-                            if (SingleHit)
-                                bw.Write(hitsArray[i] + oldHitCount > 0 ? 1 : 0);
-                            else
-                                bw.Write(hitsArray[i] + oldHitCount);
-                        }
-                    }
-                }
-
-                // On purpose this is not under a try-finally: it is better to have an exception if there was any error writing the hits file
-                // this case is relevant when instrumenting corelib since multiple processes can be running against the same instrumented dll.
-                mutex.ReleaseMutex();
             }
         }
     }

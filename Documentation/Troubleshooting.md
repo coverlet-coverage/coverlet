@@ -200,3 +200,14 @@ System.Diagnostics.Debugger.Launch();
 ```
 
 **Every time you update code and rebuild new package remember to remove local nuget cache(`RMDIR "C:\Users\[winUser]\.nuget\packages\coverlet.collector" /S /Q`) otherwise you'll load old collector code because the package version wasn't changed**
+
+## Enable injected tracker log
+
+Coverlet works thanks to ModuleTracker that is injected during instrumentation for every covered module.
+This piece of code run as a part of tests and doesn't have any connection with coverlet.
+We can collect logs from trackers throught an enviroment variable
+```
+ set COVERLET_ENABLETRAKERLOG=1
+```
+When enabled tracking event will be collected in log file near to module location.  
+File name will be something `moduleName.dll_tracker.txt`

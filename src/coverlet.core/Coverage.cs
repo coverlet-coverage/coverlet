@@ -306,6 +306,7 @@ namespace Coverlet.Core
                 }
 
                 _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+                _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
             }
         }
 
