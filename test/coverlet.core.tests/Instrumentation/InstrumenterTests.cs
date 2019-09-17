@@ -367,18 +367,17 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void SkipPpdbWithoutLocalSource()
         {
-            Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
-             {
-                 return Path.GetExtension(path) != ".cs";
-             });
-            InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), mockFileSystem.Object);
-
             string coverletLib = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.core.dll").First();
+            var instrumentationHelperMock = new Mock<IInstrumentationHelper>();
+
+            bool embedded;
+            string firstNotFoundDocument;
+            instrumentationHelperMock.Setup(x => x.HasPdb(It.IsAny<string>(), out embedded)).Returns(true);
+            instrumentationHelperMock.Setup(x => x.PortablePdbHasLocalSource(It.IsAny<string>(), out firstNotFoundDocument)).Returns(false);
+
             var loggerMock = new Mock<ILogger>();
-            Instrumenter instrumenter = new Instrumenter(coverletLib, "_corelib_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper);
-            Assert.True(_instrumentationHelper.HasPdb(coverletLib, out bool embedded));
-            Assert.False(embedded);
+            Instrumenter instrumenter = new Instrumenter(coverletLib, "_corelib_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelperMock.Object);
+
             Assert.False(instrumenter.CanInstrument());
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
         }
