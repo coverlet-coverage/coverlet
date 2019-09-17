@@ -199,7 +199,7 @@ Fire attach
 System.Diagnostics.Debugger.Launch();
 ```
 
-If you want debug in-process collector you need to set VSTEST_HOST_DEBUG environment variable
+If you want debug in-process collector you need to set VSTEST_HOST_DEBUG(https://github.com/microsoft/vstest/issues/2158) environment variable
 ```
 set VSTEST_HOST_DEBUG=1
 ```
