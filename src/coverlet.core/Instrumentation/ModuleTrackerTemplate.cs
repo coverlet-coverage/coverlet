@@ -152,7 +152,10 @@ namespace Coverlet.Core.Instrumentation
             {
                 try
                 {
-                    File.AppendAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(Assembly.GetExecutingAssembly().Location) + "_tracker.txt"), $"[{DateTime.UtcNow} {Thread.CurrentThread.ManagedThreadId}]{logText}{Environment.NewLine}");
+                    // We don't set path as global var to keep benign possible errors inside try/catch
+                    // I'm not sure that location will be ok in every scenario
+                    string location = Assembly.GetExecutingAssembly().Location;
+                    File.AppendAllText(Path.Combine(Path.GetDirectoryName(location), Path.GetFileName(location) + "_tracker.txt"), $"[{DateTime.UtcNow} {Thread.CurrentThread.ManagedThreadId}]{logText}{Environment.NewLine}");
                 }
                 catch
                 {
