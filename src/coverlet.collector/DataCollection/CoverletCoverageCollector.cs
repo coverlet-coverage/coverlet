@@ -5,9 +5,6 @@ using System.Linq;
 using System.Xml;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
-using Coverlet.Core;
-using Coverlet.Core.Abstracts;
-using Coverlet.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
 namespace Coverlet.Collector.DataCollection
@@ -135,14 +132,13 @@ namespace Coverlet.Collector.DataCollection
             {
                 _eqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
 
-                IFileSystem fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
                 // Get coverage reports
                 IEnumerable<(string report, string fileName)> coverageReports = _coverageManager?.GetCoverageReports();
 
                 if (coverageReports != null && coverageReports.Count() > 0)
                 {
                     // Send result attachments to test platform.
-                    using (var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30)), fileSystem))
+                    using (var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30))))
                     {
                         foreach ((string report, string fileName) in coverageReports)
                         {

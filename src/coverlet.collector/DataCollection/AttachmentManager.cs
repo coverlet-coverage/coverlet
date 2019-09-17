@@ -5,7 +5,6 @@ using System.IO;
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
-using Coverlet.Core.Abstracts;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
 namespace Coverlet.Collector.DataCollection
@@ -19,31 +18,31 @@ namespace Coverlet.Collector.DataCollection
         private readonly TestPlatformEqtTrace _eqtTrace;
         private readonly TestPlatformLogger _logger;
         private readonly DataCollectionContext _dataCollectionContext;
-        private readonly IFileSystem _fileSystem;
+        private readonly IFileHelper _fileHelper;
         private readonly IDirectoryHelper _directoryHelper;
         private readonly ICountDownEvent _countDownEvent;
         private readonly string _reportDirectory;
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, ICountDownEvent countDownEvent, IFileSystem fileSystem)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, ICountDownEvent countDownEvent)
             : this(dataSink,
                   dataCollectionContext,
                   logger,
                   eqtTrace,
                   Guid.NewGuid().ToString(),
-                  fileSystem,
+                  new FileHelper(),
                   new DirectoryHelper(),
                   countDownEvent)
         {
         }
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportDirectoryName, IFileSystem fileSystem, IDirectoryHelper directoryHelper, ICountDownEvent countDownEvent)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper, ICountDownEvent countDownEvent)
         {
             // Store input variabless
             _dataSink = dataSink;
             _dataCollectionContext = dataCollectionContext;
             _logger = logger;
             _eqtTrace = eqtTrace;
-            _fileSystem = fileSystem;
+            _fileHelper = fileHelper;
             _directoryHelper = directoryHelper;
             _countDownEvent = countDownEvent;
 
@@ -101,7 +100,7 @@ namespace Coverlet.Collector.DataCollection
             {
                 _directoryHelper.CreateDirectory(_reportDirectory);
                 string filePath = Path.Combine(_reportDirectory, reportFileName);
-                _fileSystem.WriteAllText(filePath, report);
+                _fileHelper.WriteAllText(filePath, report);
                 _eqtTrace.Info("{0}: Saved coverage report to path: '{1}'", CoverletConstants.DataCollectorName, filePath);
 
                 return filePath;
@@ -140,7 +139,7 @@ namespace Coverlet.Collector.DataCollection
         /// <param name="attachmentPath">Attachment file path</param>
         private void SendAttachment(string attachmentPath)
         {
-            if (_fileSystem.Exists(attachmentPath))
+            if (_fileHelper.Exists(attachmentPath))
             {
                 // Send coverage attachment to test platform.
                 _eqtTrace.Verbose("{0}: Sending attachment to test platform", CoverletConstants.DataCollectorName);
