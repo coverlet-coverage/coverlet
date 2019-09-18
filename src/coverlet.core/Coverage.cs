@@ -66,37 +66,7 @@ namespace Coverlet.Core
             _results = new List<InstrumenterResult>();
         }
 
-        public Coverage(string module,
-            string[] includeFilters,
-            string[] includeDirectories,
-            string[] excludeFilters,
-            string[] excludedSourceFiles,
-            string[] excludeAttributes,
-            bool includeTestAssembly,
-            bool singleHit,
-            string mergeWith,
-            bool useSourceLink,
-            ILogger logger,
-            IInstrumentationHelper instrumentationHelper)
-        {
-            _module = module;
-            _includeFilters = includeFilters;
-            _includeDirectories = includeDirectories ?? Array.Empty<string>();
-            _excludeFilters = excludeFilters;
-            _excludedSourceFiles = excludedSourceFiles;
-            _excludeAttributes = excludeAttributes;
-            _includeTestAssembly = includeTestAssembly;
-            _singleHit = singleHit;
-            _mergeWith = mergeWith;
-            _useSourceLink = useSourceLink;
-            _logger = logger;
-            _instrumentationHelper = instrumentationHelper;
-
-            _identifier = Guid.NewGuid().ToString();
-            _results = new List<InstrumenterResult>();
-        }
-
-        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
+        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IFileSystem fileSystem, IInstrumentationHelper instrumentationHelper)
         {
             _identifier = prepareResult.Identifier;
             _module = prepareResult.Module;
@@ -105,17 +75,6 @@ namespace Coverlet.Core
             _results = new List<InstrumenterResult>(prepareResult.Results);
             _logger = logger;
             _fileSystem = fileSystem;
-            _instrumentationHelper = instrumentationHelper;
-        }
-
-        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper)
-        {
-            _identifier = prepareResult.Identifier;
-            _module = prepareResult.Module;
-            _mergeWith = prepareResult.MergeWith;
-            _useSourceLink = prepareResult.UseSourceLink;
-            _results = new List<InstrumenterResult>(prepareResult.Results);
-            _logger = logger;
             _instrumentationHelper = instrumentationHelper;
         }
 

@@ -75,14 +75,14 @@ namespace Coverlet.MSbuild.Tasks
             {
                 Console.WriteLine("\nCalculating coverage result...");
 
-                IFileSystem fileSystem = (IFileSystem) DependencyInjection.Current.GetService(typeof(IFileSystem));
+                IFileSystem fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
                 if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
                 {
                     _logger.LogError("Result of instrumentation task not found");
                     return false;
                 }
 
-                var coverage = new Coverage(CoveragePrepareResult.Deserialize(new FileStream(InstrumenterState.ItemSpec, FileMode.Open)), this._logger, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)), fileSystem);
+                var coverage = new Coverage(CoveragePrepareResult.Deserialize(new FileStream(InstrumenterState.ItemSpec, FileMode.Open)), this._logger, fileSystem, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
                 var result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);
