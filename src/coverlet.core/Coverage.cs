@@ -97,7 +97,7 @@ namespace Coverlet.Core
                     continue;
                 }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem);
                 if (instrumenter.CanInstrument())
                 {
                     _instrumentationHelper.BackupOriginalModule(module, _identifier);

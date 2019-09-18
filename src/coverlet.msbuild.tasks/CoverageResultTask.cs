@@ -82,10 +82,11 @@ namespace Coverlet.MSbuild.Tasks
                     return false;
                 }
 
-                var coverage = new Coverage(
-                    CoveragePrepareResult.Deserialize(fileSystem.NewFileStream(InstrumenterState.ItemSpec,
-                        FileMode.Open)), this._logger, fileSystem,
-                    (IInstrumentationHelper) DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
+                Coverage coverage = null;
+                using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
+                {
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, fileSystem, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
+                }
 
                 var result = coverage.GetCoverageResult();
 

@@ -5,7 +5,7 @@ namespace Coverlet.Core.Helpers
 {
     public class FileSystem : IFileSystem
     {
-        public bool Exists(string path)
+        public virtual bool Exists(string path)
         {
             return File.Exists(path);
         }
@@ -43,11 +43,6 @@ namespace Coverlet.Core.Helpers
         public Stream NewFileStream(string path, FileMode mode, FileAccess access)
         {
             return new FileStream(path, mode, access);
-        }
-
-        public Stream NewFileStream(string path, FileMode mode, FileAccess access, FileShare share)
-        {
-            return new FileStream(path, mode, access, share);
         }
     }
 }

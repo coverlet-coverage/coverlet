@@ -19,7 +19,5 @@ namespace Coverlet.Core.Abstracts
         Stream NewFileStream(string path, FileMode mode);
 
         Stream NewFileStream(string path, FileMode mode, FileAccess access);
-
-        Stream NewFileStream(string path, FileMode mode, FileAccess access, FileShare share);
     }
 }
