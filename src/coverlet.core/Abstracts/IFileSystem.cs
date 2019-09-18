@@ -16,10 +16,10 @@ namespace Coverlet.Core.Abstracts
 
         void Delete(string path);
 
-        void AppendAllText(string path, string contents);
-
         Stream NewFileStream(string path, FileMode mode);
 
         Stream NewFileStream(string path, FileMode mode, FileAccess access);
+
+        Stream NewFileStream(string path, FileMode mode, FileAccess access, FileShare share);
     }
 }

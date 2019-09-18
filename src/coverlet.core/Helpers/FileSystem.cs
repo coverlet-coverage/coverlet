@@ -35,11 +35,6 @@ namespace Coverlet.Core.Helpers
             File.Delete(path);
         }
 
-        public void AppendAllText(string path, string contents)
-        {
-            File.AppendAllText(path, contents);
-        }
-
         public Stream NewFileStream(string path, FileMode mode)
         {
             return new FileStream(path, mode);
@@ -48,6 +43,11 @@ namespace Coverlet.Core.Helpers
         public Stream NewFileStream(string path, FileMode mode, FileAccess access)
         {
             return new FileStream(path, mode, access);
+        }
+
+        public Stream NewFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+        {
+            return new FileStream(path, mode, access, share);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
+using Coverlet.Core.Abstracts;
 
 namespace Coverlet.Core.Instrumentation
 {
@@ -72,6 +73,8 @@ namespace Coverlet.Core.Instrumentation
 
         public static void UnloadModule(object sender, EventArgs e)
         {
+            var fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
+
             // Claim the current hits array and reset it to prevent double-counting scenarios.
             var hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
 
@@ -85,7 +88,7 @@ namespace Coverlet.Core.Instrumentation
                 bool failedToCreateNewHitsFile = false;
                 try
                 {
-                    using (var fs = new FileStream(HitsFilePath, FileMode.CreateNew))
+                    using (var fs = fileSystem.NewFileStream(HitsFilePath, FileMode.CreateNew))
                     using (var bw = new BinaryWriter(fs))
                     {
                         bw.Write(hitsArray.Length);
@@ -104,7 +107,7 @@ namespace Coverlet.Core.Instrumentation
                 {
                     // Update the number of hits by adding value on disk with the ones on memory.
                     // This path should be triggered only in the case of multiple AppDomain unloads.
-                    using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    using (var fs = fileSystem.NewFileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
                     using (var br = new BinaryReader(fs))
                     using (var bw = new BinaryWriter(fs))
                     {

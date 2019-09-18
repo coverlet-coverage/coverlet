@@ -105,6 +105,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludeFilters = _exclude?.Split(',');
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
+                var fileSystem = (IFileSystem) DependencyInjection.Current.GetService(typeof(IFileSystem));
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
@@ -117,12 +118,12 @@ namespace Coverlet.MSbuild.Tasks
                     _mergeWith,
                     _useSourceLink,
                     _logger,
-                    (IFileSystem) DependencyInjection.Current.GetService(typeof(IFileSystem)),
+                    fileSystem,
                     (IInstrumentationHelper) DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());
-                using (var instrumentedStateFile = new FileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write))
+                using (var instrumentedStateFile = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write))
                 {
                     using (Stream serializedState = CoveragePrepareResult.Serialize(prepareResult))
                     {

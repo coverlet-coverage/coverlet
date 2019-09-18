@@ -136,7 +136,9 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentModule()
         {
-            using (var stream = new FileStream(_module, FileMode.Open, FileAccess.ReadWrite))
+            var fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
+
+            using (var stream = fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
             using (var resolver = new NetstandardAwareAssemblyResolver())
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));

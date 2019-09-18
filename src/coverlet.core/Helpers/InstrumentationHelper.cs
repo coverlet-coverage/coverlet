@@ -98,7 +98,7 @@ namespace Coverlet.Core.Helpers
         public bool EmbeddedPortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
         {
             firstNotFoundDocument = "";
-            using (FileStream moduleStream = _fileSystem.OpenRead(module) as FileStream)
+            using (Stream moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
                 foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
@@ -143,7 +143,7 @@ namespace Coverlet.Core.Helpers
                     if (entry.Type == DebugDirectoryEntryType.CodeView)
                     {
                         var codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                        using FileStream pdbStream = _fileSystem.NewFileStream(codeViewData.Path, FileMode.Open) as FileStream;
+                        using Stream pdbStream = _fileSystem.NewFileStream(codeViewData.Path, FileMode.Open);
                         using MetadataReaderProvider metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
                         MetadataReader metadataReader = metadataReaderProvider.GetMetadataReader();
                         foreach (DocumentHandle docHandle in metadataReader.Documents)
