@@ -25,11 +25,6 @@ namespace Coverlet.Core.Helpers
             return File.OpenRead(path);
         }
 
-        public void Copy(string sourceFileName, string destFileName)
-        {
-            File.Copy(sourceFileName, destFileName);
-        }
-
         public void Copy(string sourceFileName, string destFileName, bool overwrite)
         {
             File.Copy(sourceFileName, destFileName, overwrite);

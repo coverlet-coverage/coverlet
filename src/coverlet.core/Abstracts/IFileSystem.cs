@@ -12,8 +12,6 @@ namespace Coverlet.Core.Abstracts
 
         Stream OpenRead(string path);
 
-        void Copy(string sourceFileName, string destFileName);
-
         void Copy(string sourceFileName, string destFileName, bool overwrite);
 
         void Delete(string path);
