@@ -20,7 +20,7 @@ namespace Coverlet.Core.Instrumentation
         public static string HitsFilePath;
         public static int[] HitsArray;
         public static bool SingleHit;
-        private static bool _enableLog = int.TryParse(Environment.GetEnvironmentVariable("COVERLET_ENABLETRAKERLOG"), out int result) ? result == 1 : false;
+        private static bool _enableLog = int.TryParse(Environment.GetEnvironmentVariable("COVERLET_ENABLETRACKERLOG"), out int result) ? result == 1 : false;
 
         static ModuleTrackerTemplate()
         {
