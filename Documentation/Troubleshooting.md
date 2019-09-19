@@ -210,4 +210,4 @@ We can collect logs from trackers throught an enviroment variable
  set COVERLET_ENABLETRACKERLOG=1
 ```
 When enabled tracking event will be collected in log file near to module location.  
-File name will be something `moduleName.dll_tracker.txt`
+File name will be something like `moduleName.dll_tracker.txt`
