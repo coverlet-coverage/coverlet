@@ -205,7 +205,7 @@ System.Diagnostics.Debugger.Launch();
 
 Coverlet works thanks to ModuleTracker that is injected during instrumentation for every covered module.
 This piece of code run as a part of tests and doesn't have any connection with coverlet.
-We can collect logs from trackers throught an enviroment variable
+We can collect logs from trackers through an enviroment variable
 ```
  set COVERLET_ENABLETRACKERLOG=1
 ```
