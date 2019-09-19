@@ -779,7 +779,6 @@ namespace Coverlet.Core.Instrumentation
                     {
                         continue;
                     }
-                    logger.LogVerbose($"Excluded source file rule '{excludeRule}'");
                     _matcher.AddInclude(Path.IsPathRooted(excludeRule) ? excludeRule.Substring(Path.GetPathRoot(excludeRule).Length) : excludeRule);
                 }
             }

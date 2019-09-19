@@ -146,7 +146,17 @@ namespace Coverlet.Core.Helpers
                         var codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
                         using FileStream pdbStream = new FileStream(codeViewData.Path, FileMode.Open);
                         using MetadataReaderProvider metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
-                        MetadataReader metadataReader = metadataReaderProvider.GetMetadataReader();
+                        MetadataReader metadataReader = null;
+                        try
+                        {
+                            metadataReader = metadataReaderProvider.GetMetadataReader();
+                        }
+                        catch (BadImageFormatException)
+                        {
+                            // TODO log this to warning
+                            // In case of non portable pdb we get exception so we skip file sources check
+                            return true;
+                        }
                         foreach (DocumentHandle docHandle in metadataReader.Documents)
                         {
                             Document document = metadataReader.GetDocument(docHandle);
