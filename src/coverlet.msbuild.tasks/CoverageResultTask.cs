@@ -85,7 +85,7 @@ namespace Coverlet.MSbuild.Tasks
                 Coverage coverage = null;
                 using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
                 {
-                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, fileSystem, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)), fileSystem);
                 }
 
                 var result = coverage.GetCoverageResult();

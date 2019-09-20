@@ -45,8 +45,8 @@ namespace Coverlet.Core
             string mergeWith,
             bool useSourceLink,
             ILogger logger,
-            IFileSystem fileSystem,
-            IInstrumentationHelper instrumentationHelper)
+            IInstrumentationHelper instrumentationHelper,
+            IFileSystem fileSystem)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -59,14 +59,14 @@ namespace Coverlet.Core
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
             _logger = logger;
-            _fileSystem = fileSystem;
             _instrumentationHelper = instrumentationHelper;
+            _fileSystem = fileSystem;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
 
-        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IFileSystem fileSystem, IInstrumentationHelper instrumentationHelper)
+        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
         {
             _identifier = prepareResult.Identifier;
             _module = prepareResult.Module;
@@ -74,8 +74,8 @@ namespace Coverlet.Core
             _useSourceLink = prepareResult.UseSourceLink;
             _results = new List<InstrumenterResult>(prepareResult.Results);
             _logger = logger;
-            _fileSystem = fileSystem;
             _instrumentationHelper = instrumentationHelper;
+            _fileSystem = fileSystem;
         }
 
         public CoveragePrepareResult PrepareModules()

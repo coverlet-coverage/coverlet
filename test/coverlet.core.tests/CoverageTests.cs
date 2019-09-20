@@ -31,7 +31,7 @@ namespace Coverlet.Core.Tests
 
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, _mockFileSystem.Object, _instrumentationHelper);
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, _mockFileSystem.Object);
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
@@ -54,7 +54,7 @@ namespace Coverlet.Core.Tests
 
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, _mockLogger.Object, new FileSystem(), _instrumentationHelper);
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();

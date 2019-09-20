@@ -118,8 +118,8 @@ namespace Coverlet.MSbuild.Tasks
                     _mergeWith,
                     _useSourceLink,
                     _logger,
-                    fileSystem,
-                    (IInstrumentationHelper) DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
+                    (IInstrumentationHelper) DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)),
+                    fileSystem);
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());

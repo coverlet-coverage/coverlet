@@ -71,8 +71,8 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger,
-                    fileSystem,
-                    (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
+                    (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)),
+                    fileSystem);
                 coverage.PrepareModules();
 
                 Process process = new Process();

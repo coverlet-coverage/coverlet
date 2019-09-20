@@ -5,6 +5,7 @@ namespace Coverlet.Core.Helpers
 {
     public class FileSystem : IFileSystem
     {
+        // We need to partial mock this class on tests
         public virtual bool Exists(string path)
         {
             return File.Exists(path);

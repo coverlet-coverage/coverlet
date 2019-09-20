@@ -30,8 +30,8 @@ namespace Coverlet.Collector.DataCollection
                 settings.MergeWith,
                 settings.UseSourceLink,
                 coverletLogger,
-                (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem)),
-                (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
+                (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)),
+                (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem)));
         }
 
         /// <summary>
