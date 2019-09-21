@@ -74,7 +74,7 @@ namespace Coverlet.Collector.Tests
                     null,
                     _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
-            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
+            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)), (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem)));
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
             _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>())).Returns(coverage);

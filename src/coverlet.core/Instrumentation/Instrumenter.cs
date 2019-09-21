@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Attributes;
-using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.FileSystemGlobbing;
@@ -28,6 +27,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly bool _isCoreLibrary;
         private readonly ILogger _logger;
         private readonly IInstrumentationHelper _instrumentationHelper;
+        private readonly IFileSystem _fileSystem;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
@@ -48,7 +48,8 @@ namespace Coverlet.Core.Instrumentation
             string[] excludedAttributes,
             bool singleHit,
             ILogger logger,
-            IInstrumentationHelper instrumentationHelper)
+            IInstrumentationHelper instrumentationHelper,
+            IFileSystem fileSystem)
         {
             _module = module;
             _identifier = identifier;
@@ -60,6 +61,7 @@ namespace Coverlet.Core.Instrumentation
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
+            _fileSystem = fileSystem;
         }
 
         public bool CanInstrument()
@@ -136,7 +138,7 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentModule()
         {
-            using (var stream = new FileStream(_module, FileMode.Open, FileAccess.ReadWrite))
+            using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
             using (var resolver = new NetstandardAwareAssemblyResolver())
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
