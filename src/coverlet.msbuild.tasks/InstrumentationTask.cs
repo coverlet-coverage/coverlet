@@ -105,7 +105,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludeFilters = _exclude?.Split(',');
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
-                var fileSystem = (IFileSystem) DependencyInjection.Current.GetService(typeof(IFileSystem));
+                var fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
@@ -118,7 +118,7 @@ namespace Coverlet.MSbuild.Tasks
                     _mergeWith,
                     _useSourceLink,
                     _logger,
-                    (IInstrumentationHelper) DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)),
+                    (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)),
                     fileSystem);
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
