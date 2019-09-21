@@ -230,7 +230,8 @@ namespace Coverlet.Core.Samples.Tests
     public class ClassWithSetterOnlyPropertyExcludedByObsoleteAttr
     {
         [Obsolete]
-        public string Property {
+        public string Property
+        {
             set => _ = string.Empty;
         }
     }
