@@ -16,7 +16,6 @@ namespace Coverlet.Core.Tests
     {
         private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem());
         private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
-        private readonly Mock<IFileSystem> _mockFileSystem = new Mock<IFileSystem>();
 
         [Fact]
         public void TestCoverage()
@@ -31,7 +30,7 @@ namespace Coverlet.Core.Tests
 
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, _mockFileSystem.Object);
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();

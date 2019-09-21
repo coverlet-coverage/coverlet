@@ -88,7 +88,7 @@ namespace Coverlet.MSbuild.Tasks
                     coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)), fileSystem);
                 }
 
-                var result = coverage.GetCoverageResult();
+                CoverageResult result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);
                 if (directory == string.Empty)
