@@ -365,39 +365,43 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void SkipPpdbWithoutLocalSource()
         {
-            Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
-            partialMockFileSystem.CallBase = true;
-            partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>())).Returns((string path, FileMode mode) =>
+            // We test only on win because sample dll/pdb were build on it
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (Path.GetFileName(path) == "75d9f96508d74def860a568f426ea4a4.pdb")
+                Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
+                partialMockFileSystem.CallBase = true;
+                partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>())).Returns((string path, FileMode mode) =>
                 {
-                    return new FileStream(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.pdb"), mode);
-                }
-                else
+                    if (Path.GetFileName(path) == "75d9f96508d74def860a568f426ea4a4.pdb")
+                    {
+                        return new FileStream(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.pdb"), mode);
+                    }
+                    else
+                    {
+                        return new FileStream(path, mode);
+                    }
+                });
+                partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
                 {
-                    return new FileStream(path, mode);
-                }
-            });
-            partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
-            {
-                if (Path.GetFileName(path) == "75d9f96508d74def860a568f426ea4a4.pdb")
-                {
-                    return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.pdb"));
-                }
-                else
-                {
-                    return File.Exists(path);
-                }
-            });
+                    if (Path.GetFileName(path) == "75d9f96508d74def860a568f426ea4a4.pdb")
+                    {
+                        return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.pdb"));
+                    }
+                    else
+                    {
+                        return File.Exists(path);
+                    }
+                });
 
-            InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object);
-            string sample = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.dll").First();
-            var loggerMock = new Mock<ILogger>();
-            Instrumenter instrumenter = new Instrumenter(sample, "_75d9f96508d74def860a568f426ea4a4_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object);
-            Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
-            Assert.False(embedded);
-            Assert.False(instrumenter.CanInstrument());
-            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+                InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object);
+                string sample = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.dll").First();
+                var loggerMock = new Mock<ILogger>();
+                Instrumenter instrumenter = new Instrumenter(sample, "_75d9f96508d74def860a568f426ea4a4_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object);
+                Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
+                Assert.False(embedded);
+                Assert.False(instrumenter.CanInstrument());
+                loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+            }
         }
 
         [Fact]
