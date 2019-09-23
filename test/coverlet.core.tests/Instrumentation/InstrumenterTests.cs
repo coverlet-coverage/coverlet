@@ -342,7 +342,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             }
         }
 
-        [Fact(Skip = "Temporary disabled because flaky on CI, we cannot use coverlet.core.dll/pdb as test lib")]
+        [Fact]
         public void SkipEmbeddedPpdbWithoutLocalSource()
         {
             string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.*.dll").First();
@@ -362,7 +362,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             loggerMock.VerifyNoOtherCalls();
         }
 
-        [Fact(Skip = "Temporary disabled because flaky on CI, we cannot use coverlet.core.dll/pdb as test lib")]
+        [Fact]
         public void SkipPpdbWithoutLocalSource()
         {
             Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
