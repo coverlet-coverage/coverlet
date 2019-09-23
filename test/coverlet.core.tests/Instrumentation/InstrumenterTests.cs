@@ -365,6 +365,9 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void SkipPpdbWithoutLocalSource()
         {
+            string dllFileName = "75d9f96508d74def860a568f426ea4a4.dll";
+            string pdbFileName = "75d9f96508d74def860a568f426ea4a4.pdb";
+
             // We test only on win because sample dll/pdb were build on it
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -372,9 +375,9 @@ namespace Coverlet.Core.Instrumentation.Tests
                 partialMockFileSystem.CallBase = true;
                 partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>())).Returns((string path, FileMode mode) =>
                 {
-                    if (Path.GetFileName(path) == "75d9f96508d74def860a568f426ea4a4.pdb")
+                    if (Path.GetFileName(path) == pdbFileName)
                     {
-                        return new FileStream(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.pdb"), mode);
+                        return new FileStream(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName), mode);
                     }
                     else
                     {
@@ -383,9 +386,9 @@ namespace Coverlet.Core.Instrumentation.Tests
                 });
                 partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
                 {
-                    if (Path.GetFileName(path) == "75d9f96508d74def860a568f426ea4a4.pdb")
+                    if (Path.GetFileName(path) == pdbFileName)
                     {
-                        return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.pdb"));
+                        return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName));
                     }
                     else
                     {
@@ -394,7 +397,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 });
 
                 InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object);
-                string sample = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.dll").First();
+                string sample = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), dllFileName).First();
                 var loggerMock = new Mock<ILogger>();
                 Instrumenter instrumenter = new Instrumenter(sample, "_75d9f96508d74def860a568f426ea4a4_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object);
                 Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
