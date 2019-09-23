@@ -342,7 +342,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             }
         }
 
-        [Fact(Skip = "Temporary disabled because flaky on CI, we cannot use coverlet.core.dll/pdb as test lib")]
+        [Fact]
         public void SkipEmbeddedPpdbWithoutLocalSource()
         {
             string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.*.dll").First();
@@ -354,29 +354,47 @@ namespace Coverlet.Core.Instrumentation.Tests
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
 
             // Default case
-            string coverletCoreDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.core.dll").First();
-            instrumenter = new Instrumenter(coverletCoreDll, "_coverlet_core_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper, new FileSystem());
-            Assert.True(_instrumentationHelper.HasPdb(coverletCoreDll, out embedded));
+            string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.empty.dll").First();
+            instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_empty", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper, new FileSystem());
+            Assert.True(_instrumentationHelper.HasPdb(sample, out embedded));
             Assert.False(embedded);
             Assert.True(instrumenter.CanInstrument());
             loggerMock.VerifyNoOtherCalls();
         }
 
-        [Fact(Skip = "Temporary disabled because flaky on CI, we cannot use coverlet.core.dll/pdb as test lib")]
+        [Fact]
         public void SkipPpdbWithoutLocalSource()
         {
             Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
+            partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>())).Returns((string path, FileMode mode) =>
+            {
+                if (Path.GetFileName(path) == "75d9f96508d74def860a568f426ea4a4.pdb")
+                {
+                    return new FileStream(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.pdb"), mode);
+                }
+                else
+                {
+                    return new FileStream(path, mode);
+                }
+            });
             partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
             {
-                return Path.GetExtension(path) != ".cs";
+                if (Path.GetFileName(path) == "75d9f96508d74def860a568f426ea4a4.pdb")
+                {
+                    return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.pdb"));
+                }
+                else
+                {
+                    return File.Exists(path);
+                }
             });
-            InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object);
 
-            string coverletLib = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.core.dll").First();
+            InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object);
+            string sample = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "75d9f96508d74def860a568f426ea4a4.dll").First();
             var loggerMock = new Mock<ILogger>();
-            Instrumenter instrumenter = new Instrumenter(coverletLib, "_corelib_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object);
-            Assert.True(_instrumentationHelper.HasPdb(coverletLib, out bool embedded));
+            Instrumenter instrumenter = new Instrumenter(sample, "_75d9f96508d74def860a568f426ea4a4_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object);
+            Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
             Assert.False(embedded);
             Assert.False(instrumenter.CanInstrument());
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
