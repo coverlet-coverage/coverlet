@@ -5,7 +5,7 @@ namespace Coverlet.Core.Helpers
 {
     public class FileSystem : IFileSystem
     {
-        // We need to partial mock this class on tests
+        // We need to partial mock this method on tests
         public virtual bool Exists(string path)
         {
             return File.Exists(path);
@@ -36,7 +36,8 @@ namespace Coverlet.Core.Helpers
             File.Delete(path);
         }
 
-        public Stream NewFileStream(string path, FileMode mode)
+        // We need to partial mock this method on tests
+        public virtual Stream NewFileStream(string path, FileMode mode)
         {
             return new FileStream(path, mode);
         }
