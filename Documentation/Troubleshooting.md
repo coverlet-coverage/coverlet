@@ -199,6 +199,18 @@ Fire attach
 System.Diagnostics.Debugger.Launch();
 ```
 
+If you want debug in-process collector you need to set VSTEST_HOST_DEBUG(https://github.com/microsoft/vstest/issues/2158) environment variable
+```
+set VSTEST_HOST_DEBUG=1
+```
+Test host will wait for debugger
+```
+Starting test execution, please wait...
+Logging Vstest Diagnostics in file: C:\git\coverletissue\collectorlog\XUnitTestProject1\log.txt
+Host debugging is enabled. Please attach debugger to testhost process to continue.
+Process Id: 800, Name: dotnet
+```
+
 **Every time you update code and rebuild new package remember to remove local nuget cache(`RMDIR "C:\Users\[winUser]\.nuget\packages\coverlet.collector" /S /Q`) otherwise you'll load old collector code because the package version wasn't changed**
 
 ## Enable injected tracker log

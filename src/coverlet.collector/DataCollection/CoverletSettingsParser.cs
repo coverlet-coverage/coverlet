@@ -90,7 +90,7 @@ namespace Coverlet.Collector.DataCollection
                     .Where(format => !string.IsNullOrEmpty(format)).ToArray();
             }
 
-            return formats is null || formats.Length == 0 ? new[] {CoverletConstants.DefaultReportFormat} : formats;
+            return formats is null || formats.Length == 0 ? new[] { CoverletConstants.DefaultReportFormat } : formats;
         }
 
         /// <summary>

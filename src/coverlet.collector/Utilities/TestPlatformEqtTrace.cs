@@ -39,5 +39,15 @@ namespace Coverlet.Collector.Utilities
         {
             EqtTrace.Info($"[coverlet]{format}", args);
         }
+
+        /// <summary>
+        /// Error logger
+        /// </summary>
+        /// <param name="format">Format</param>
+        /// <param name="args">Args</param>
+        public void Error(string format, params object[] args)
+        {
+            EqtTrace.Error($"[coverlet]{format}", args);
+        }
     }
 }
