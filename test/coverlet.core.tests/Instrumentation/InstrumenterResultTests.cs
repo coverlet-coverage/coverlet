@@ -37,7 +37,6 @@ namespace Coverlet.Core.Instrumentation.Tests
             ir.Module = "Module";
             ir.ModulePath = "ModulePath";
             ir.SourceLink = "SourceLink";
-            ir.AsyncMachineStateMethod = new string[] { "A", "B" };
 
             ir.HitCandidates.Add(new HitCandidate(true, 1, 2, 3));
             ir.HitCandidates.Add(new HitCandidate(false, 4, 5, 6));
@@ -109,11 +108,6 @@ namespace Coverlet.Core.Instrumentation.Tests
                 Assert.Equal(cpr.Results[i].Module, roundTrip.Results[i].Module);
                 Assert.Equal(cpr.Results[i].ModulePath, roundTrip.Results[i].ModulePath);
                 Assert.Equal(cpr.Results[i].SourceLink, roundTrip.Results[i].SourceLink);
-
-                for (int k = 0; k < cpr.Results[i].AsyncMachineStateMethod.Length; k++)
-                {
-                    Assert.Equal(cpr.Results[i].AsyncMachineStateMethod[k], roundTrip.Results[i].AsyncMachineStateMethod[k]);
-                }
 
                 for (int k = 0; k < cpr.Results[i].HitCandidates.Count; k++)
                 {

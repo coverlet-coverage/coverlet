@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace Coverlet.Core.Symbols
@@ -6,6 +7,7 @@ namespace Coverlet.Core.Symbols
     /// <summary>
     /// a branch point
     /// </summary>
+    [DebuggerDisplay("StartLine = {StartLine}")]
     public class BranchPoint
     {
         /// <summary>

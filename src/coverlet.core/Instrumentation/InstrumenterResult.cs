@@ -100,8 +100,6 @@ namespace Coverlet.Core.Instrumentation
         [DataMember]
         public string Module;
         [DataMember]
-        public string[] AsyncMachineStateMethod;
-        [DataMember]
         public string HitsFilePath;
         [DataMember]
         public string ModulePath;
