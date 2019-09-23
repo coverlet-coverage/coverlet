@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Instrumentation;
@@ -11,10 +12,11 @@ namespace Coverlet.Collector.DataCollection
 {
     public class CoverletInProcDataCollector : InProcDataCollection
     {
-        private readonly TestPlatformEqtTrace _eqtTrace = new TestPlatformEqtTrace();
+        private TestPlatformEqtTrace _eqtTrace;
 
         public void Initialize(IDataCollectionSink dataCollectionSink)
         {
+            _eqtTrace = new TestPlatformEqtTrace();
             _eqtTrace.Verbose("Initialize CoverletInProcDataCollector");
         }
 
