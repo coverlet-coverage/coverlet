@@ -8,7 +8,7 @@ using System.Xml.Linq;
 
 namespace Coverlet.Core.Reporters
 {
-    public class OpenCoverReporter : IReporter
+    internal class OpenCoverReporter : IReporter
     {
         public ReporterOutputType OutputType => ReporterOutputType.File;
 

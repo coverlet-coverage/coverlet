@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Coverlet.Core
 {
-    public class CoverageSummary
+    internal class CoverageSummary
     {
         public CoverageDetails CalculateLineCoverage(Lines lines)
         {

@@ -1,1 +1,3 @@
-[assembly: System.Reflection.AssemblyKeyFileAttribute("coverlet.tests.remoteexecutor.snk")]
+using System.Reflection;
+
+[assembly: AssemblyKeyFile("coverlet.tests.remoteexecutor.snk")]

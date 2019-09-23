@@ -1,7 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using Coverlet.Core.Instrumentation;
 
 namespace Coverlet.Core
@@ -10,7 +8,7 @@ namespace Coverlet.Core
     // https://docs.microsoft.com/en-us/visualstudio/code-quality/ca2300-do-not-use-insecure-deserializer-binaryformatter?view=vs-2019
     // https://docs.microsoft.com/en-us/visualstudio/code-quality/ca2301-do-not-call-binaryformatter-deserialize-without-first-setting-binaryformatter-binder?view=vs-2019
     [DataContract]
-    public class CoveragePrepareResult
+    internal class CoveragePrepareResult
     {
         [DataMember]
         public string Identifier { get; set; }

@@ -2,7 +2,7 @@ using System;
 
 namespace Coverlet.Core
 {
-    public class CoverageDetails
+    internal class CoverageDetails
     {
         private double _averageModulePercent;
         public double Covered { get; internal set; }

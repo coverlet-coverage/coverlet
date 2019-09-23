@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Coverlet.Core.Reporters
 {
-    public class TeamCityReporter : IReporter
+    internal class TeamCityReporter : IReporter
     {
         public ReporterOutputType OutputType => ReporterOutputType.Console;
 

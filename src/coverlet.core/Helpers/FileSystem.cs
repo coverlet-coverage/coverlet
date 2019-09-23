@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Coverlet.Core.Helpers
 {
-    public class FileSystem : IFileSystem
+    internal class FileSystem : IFileSystem
     {
         // We need to partial mock this method on tests
         public virtual bool Exists(string path)

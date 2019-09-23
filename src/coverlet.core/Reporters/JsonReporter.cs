@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Coverlet.Core.Reporters
 {
-    public class JsonReporter : IReporter
+    internal class JsonReporter : IReporter
     {
         public ReporterOutputType OutputType => ReporterOutputType.File;
 

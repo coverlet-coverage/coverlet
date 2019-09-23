@@ -15,7 +15,7 @@ namespace Coverlet.Core.Instrumentation
     /// regarding visibility of members, etc.
     /// </remarks>
     [ExcludeFromCodeCoverage]
-    public static class ModuleTrackerTemplate
+    internal static class ModuleTrackerTemplate
     {
         public static string HitsFilePath;
         public static int[] HitsArray;

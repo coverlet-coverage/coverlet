@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Logging;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Samples.Tests;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,7 +14,6 @@ using Microsoft.CodeAnalysis.Emit;
 using Mono.Cecil;
 using Moq;
 using Xunit;
-
 
 namespace Coverlet.Core.Instrumentation.Tests
 {

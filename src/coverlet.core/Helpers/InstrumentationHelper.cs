@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
+
 using Coverlet.Core.Abstracts;
 
 namespace Coverlet.Core.Helpers
