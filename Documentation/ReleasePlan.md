@@ -28,9 +28,9 @@ We plan 1 release [once per quarter](https://en.wikipedia.org/wiki/Calendar_year
 
 | Package        | **coverlet.msbuild** |
 | :-------------: |:-------------:|
-|**coverlet.msbuild**      | 2.6.3  |  
-|**coverlet.console**      | 1.5.3  |
-|**coverlet.collector**      | 1.0.1 |  
+|**coverlet.msbuild**      | 2.7.0  |  
+|**coverlet.console**      | 1.6.0  |
+|**coverlet.collector**      | 1.1.0 |  
 
 ### Proposed next versions  
 
@@ -41,6 +41,11 @@ We MANUALLY bump versions on production release, so we have different release pl
 
 | Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **commit hash**| **notes** |
 | :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
-| 1 October 2019      | 2.6.4 | 1.5.4 |   1.0.2 | |  |
+| 23 September 2019      | 2.7.0 | 1.6.0 |   1.1.0 | 4ca01eb239038808739699470a61fad675af6c79 |  |
 | 1 July 2019      | 2.6.3 | 1.5.3 |   1.0.1 | e1593359497fdfe6befbb86304b8f4e09a656d14 |  |
 | 6 June 2019      | 2.6.2 | 1.5.2 |   1.0.0 | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release |
+
+To get the list of commits between two version use git command
+```bash
+ git log --oneline hashbefore currenthash
+```
