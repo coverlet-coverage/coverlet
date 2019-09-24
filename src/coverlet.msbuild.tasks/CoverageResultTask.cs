@@ -75,14 +75,20 @@ namespace Coverlet.MSbuild.Tasks
             {
                 Console.WriteLine("\nCalculating coverage result...");
 
-                if (InstrumenterState is null || !File.Exists(InstrumenterState.ItemSpec))
+                IFileSystem fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
+                if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
                 {
                     _logger.LogError("Result of instrumentation task not found");
                     return false;
                 }
 
-                var coverage = new Coverage(CoveragePrepareResult.Deserialize(new FileStream(InstrumenterState.ItemSpec, FileMode.Open)), this._logger, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)));
-                var result = coverage.GetCoverageResult();
+                Coverage coverage = null;
+                using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
+                {
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)), fileSystem);
+                }
+
+                CoverageResult result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);
                 if (directory == string.Empty)
@@ -118,7 +124,7 @@ namespace Coverlet.MSbuild.Tasks
 
                         var report = Path.Combine(directory, filename);
                         Console.WriteLine($"  Generating report '{report}'");
-                        File.WriteAllText(report, reporter.Report(result));
+                        fileSystem.WriteAllText(report, reporter.Report(result));
                     }
                 }
 

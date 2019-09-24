@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Attributes;
-using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.FileSystemGlobbing;
@@ -28,6 +27,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly bool _isCoreLibrary;
         private readonly ILogger _logger;
         private readonly IInstrumentationHelper _instrumentationHelper;
+        private readonly IFileSystem _fileSystem;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
@@ -36,7 +36,6 @@ namespace Coverlet.Core.Instrumentation
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
         private MethodReference _customTrackerRecordHitMethod;
-        private List<string> _asyncMachineStateMethod;
         private List<string> _excludedSourceFiles;
 
         public Instrumenter(
@@ -48,7 +47,8 @@ namespace Coverlet.Core.Instrumentation
             string[] excludedAttributes,
             bool singleHit,
             ILogger logger,
-            IInstrumentationHelper instrumentationHelper)
+            IInstrumentationHelper instrumentationHelper,
+            IFileSystem fileSystem)
         {
             _module = module;
             _identifier = identifier;
@@ -60,6 +60,7 @@ namespace Coverlet.Core.Instrumentation
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
+            _fileSystem = fileSystem;
         }
 
         public bool CanInstrument()
@@ -121,8 +122,6 @@ namespace Coverlet.Core.Instrumentation
 
             InstrumentModule();
 
-            _result.AsyncMachineStateMethod = _asyncMachineStateMethod == null ? Array.Empty<string>() : _asyncMachineStateMethod.ToArray();
-
             if (_excludedSourceFiles != null)
             {
                 foreach (string sourceFile in _excludedSourceFiles)
@@ -136,7 +135,7 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentModule()
         {
-            using (var stream = new FileStream(_module, FileMode.Open, FileAccess.ReadWrite))
+            using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
             using (var resolver = new NetstandardAwareAssemblyResolver())
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
@@ -396,7 +395,7 @@ namespace Coverlet.Core.Instrumentation
                     index += 2;
                 }
 
-                foreach (var _branchTarget in targetedBranchPoints)
+                foreach (var branchTarget in targetedBranchPoints)
                 {
                     /*
                         * Skip branches with no sequence point reference for now.
@@ -404,10 +403,10 @@ namespace Coverlet.Core.Instrumentation
                         * The CecilSymbolHelper will create branch points with a start line of -1 and no document, which
                         * I am currently not sure how to handle.
                         */
-                    if (_branchTarget.StartLine == -1 || _branchTarget.Document == null)
+                    if (branchTarget.StartLine == -1 || branchTarget.Document == null)
                         continue;
 
-                    var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
+                    var target = AddInstrumentationCode(method, processor, instruction, branchTarget);
                     foreach (var _instruction in processor.Body.Instructions)
                         ReplaceInstructionTarget(_instruction, instruction, target);
 
@@ -467,41 +466,11 @@ namespace Coverlet.Core.Instrumentation
                         Ordinal = branchPoint.Ordinal
                     }
                 );
-
-                if (IsAsyncStateMachineBranch(method.DeclaringType, method))
-                {
-                    if (_asyncMachineStateMethod == null)
-                    {
-                        _asyncMachineStateMethod = new List<string>();
-                    }
-
-                    if (!_asyncMachineStateMethod.Contains(method.FullName))
-                    {
-                        _asyncMachineStateMethod.Add(method.FullName);
-                    }
-                }
             }
 
             _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));
 
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
-        }
-
-        private bool IsAsyncStateMachineBranch(TypeDefinition typeDef, MethodDefinition method)
-        {
-            if (!method.FullName.EndsWith("::MoveNext()"))
-            {
-                return false;
-            }
-
-            foreach (InterfaceImplementation implementedInterface in typeDef.Interfaces)
-            {
-                if (implementedInterface.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine")
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private Instruction AddInstrumentationInstructions(MethodDefinition method, ILProcessor processor, Instruction instruction, int hitEntryIndex)
@@ -779,7 +748,6 @@ namespace Coverlet.Core.Instrumentation
                     {
                         continue;
                     }
-                    logger.LogVerbose($"Excluded source file rule '{excludeRule}'");
                     _matcher.AddInclude(Path.IsPathRooted(excludeRule) ? excludeRule.Substring(Path.GetPathRoot(excludeRule).Length) : excludeRule);
                 }
             }

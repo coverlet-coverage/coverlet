@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-
-using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Samples.Tests;
@@ -42,7 +40,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             foreach (var file in files)
                 File.Copy(Path.Combine(OriginalFilesDir, file), Path.Combine(TestFilesDir, file), overwrite: true);
 
-            Instrumenter instrumenter = new Instrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, _mockLogger.Object, _instrumentationHelper);
+            Instrumenter instrumenter = new Instrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             Assert.True(instrumenter.CanInstrument());
             var result = instrumenter.Instrument();
             Assert.NotNull(result);
@@ -178,7 +176,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
 
             module = Path.Combine(directory.FullName, destModule);
-            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, false, _mockLogger.Object, _instrumentationHelper);
+            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             return new InstrumenterTest
             {
                 Instrumenter = instrumenter,
@@ -349,16 +347,16 @@ namespace Coverlet.Core.Instrumentation.Tests
         {
             string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.*.dll").First();
             var loggerMock = new Mock<ILogger>();
-            Instrumenter instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper);
+            Instrumenter instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper, new FileSystem());
             Assert.True(_instrumentationHelper.HasPdb(xunitDll, out bool embedded));
             Assert.True(embedded);
             Assert.False(instrumenter.CanInstrument());
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
 
             // Default case
-            string coverletCoreDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.core.dll").First();
-            instrumenter = new Instrumenter(coverletCoreDll, "_coverlet_core_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper);
-            Assert.True(_instrumentationHelper.HasPdb(coverletCoreDll, out embedded));
+            string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.empty.dll").First();
+            instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_empty", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper, new FileSystem());
+            Assert.True(_instrumentationHelper.HasPdb(sample, out embedded));
             Assert.False(embedded);
             Assert.True(instrumenter.CanInstrument());
             loggerMock.VerifyNoOtherCalls();
@@ -367,27 +365,53 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void SkipPpdbWithoutLocalSource()
         {
-            Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
-             {
-                 return Path.GetExtension(path) != ".cs";
-             });
-            InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), mockFileSystem.Object);
+            string dllFileName = "75d9f96508d74def860a568f426ea4a4.dll";
+            string pdbFileName = "75d9f96508d74def860a568f426ea4a4.pdb";
 
-            string coverletLib = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.core.dll").First();
-            var loggerMock = new Mock<ILogger>();
-            Instrumenter instrumenter = new Instrumenter(coverletLib, "_corelib_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper);
-            Assert.True(_instrumentationHelper.HasPdb(coverletLib, out bool embedded));
-            Assert.False(embedded);
-            Assert.False(instrumenter.CanInstrument());
-            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+            // We test only on win because sample dll/pdb were build on it
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
+                partialMockFileSystem.CallBase = true;
+                partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>())).Returns((string path, FileMode mode) =>
+                {
+                    if (Path.GetFileName(path) == pdbFileName)
+                    {
+                        return new FileStream(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName), mode);
+                    }
+                    else
+                    {
+                        return new FileStream(path, mode);
+                    }
+                });
+                partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
+                {
+                    if (Path.GetFileName(path) == pdbFileName)
+                    {
+                        return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName));
+                    }
+                    else
+                    {
+                        return File.Exists(path);
+                    }
+                });
+
+                InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object);
+                string sample = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), dllFileName).First();
+                var loggerMock = new Mock<ILogger>();
+                Instrumenter instrumenter = new Instrumenter(sample, "_75d9f96508d74def860a568f426ea4a4_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object);
+                Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
+                Assert.False(embedded);
+                Assert.False(instrumenter.CanInstrument());
+                loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+            }
         }
 
         [Fact]
         public void TestInstrument_MissingModule()
         {
             var loggerMock = new Mock<ILogger>();
-            var instrumenter = new Instrumenter("test", "_test_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper);
+            var instrumenter = new Instrumenter("test", "_test_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper, new FileSystem());
             Assert.False(instrumenter.CanInstrument());
             loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
         }

@@ -54,6 +54,30 @@ namespace Coverlet.Core.Tests
             return AssertBranchesCovered(document, BuildConfiguration.Debug | BuildConfiguration.Release, lines);
         }
 
+        public static Document ExpectedTotalNumberOfBranches(this Document document, BuildConfiguration configuration, int totalExpectedBranch)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
+            }
+
+            int totalBranch = document.Branches.GroupBy(g => g.Key.Line).Count();
+
+            if (totalBranch != totalExpectedBranch)
+            {
+                throw new XunitException($"Expected total branch is '{totalExpectedBranch}', actual '{totalBranch}'");
+            }
+
+            return document;
+        }
+
         public static Document AssertBranchesCovered(this Document document, BuildConfiguration configuration, params (int line, int ordinal, int hits)[] lines)
         {
             if (document is null)
@@ -191,7 +215,7 @@ namespace Coverlet.Core.Tests
             using (var result = new FileStream(filePath, FileMode.Open))
             {
                 CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem()));
+                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem()), new FileSystem());
                 return coverage.GetCoverageResult();
             }
         }
@@ -219,14 +243,14 @@ namespace Coverlet.Core.Tests
             Coverage coverage = new Coverage(newPath,
             new string[]
             {
-                $"[{Path.GetFileNameWithoutExtension(fileName)}*]*"
+                $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}"
             },
             Array.Empty<string>(),
             new string[]
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>());
+            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             // Load new assembly

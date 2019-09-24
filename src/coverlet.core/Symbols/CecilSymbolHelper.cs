@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 using Coverlet.Core.Extensions;
@@ -18,7 +19,47 @@ namespace Coverlet.Core.Symbols
     public static class CecilSymbolHelper
     {
         private const int StepOverLineCode = 0xFEEFEE;
-        private static readonly Regex IsMovenext = new Regex(@"\<[^\s>]+\>\w__\w(\w)?::MoveNext\(\)$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+
+        private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
+        {
+            if (!methodDefinition.FullName.EndsWith("::MoveNext()"))
+            {
+                return false;
+            }
+
+            if (methodDefinition.DeclaringType.CustomAttributes.Count(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName) > 0)
+            {
+                foreach (InterfaceImplementation implementedInterface in methodDefinition.DeclaringType.Interfaces)
+                {
+                    if (implementedInterface.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine")
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsMoveNextInsideEnumerator(MethodDefinition methodDefinition)
+        {
+            if (!methodDefinition.FullName.EndsWith("::MoveNext()"))
+            {
+                return false;
+            }
+            if (methodDefinition.DeclaringType.CustomAttributes.Count(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName) > 0)
+            {
+                foreach (InterfaceImplementation implementedInterface in methodDefinition.DeclaringType.Interfaces)
+                {
+                    if (implementedInterface.InterfaceType.FullName == "System.Collections.IEnumerator")
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
@@ -30,15 +71,25 @@ namespace Coverlet.Core.Symbols
             var instructions = methodDefinition.Body.Instructions;
 
             // if method is a generated MoveNext skip first branch (could be a switch or a branch)
-            var skipFirstBranch = IsMovenext.IsMatch(methodDefinition.FullName);
+            bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
+            bool skipFirstBranch = isAsyncStateMachineMoveNext || IsMoveNextInsideEnumerator(methodDefinition);
 
-            foreach (var instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
+            foreach (Instruction instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
             {
                 try
                 {
                     if (skipFirstBranch)
                     {
                         skipFirstBranch = false;
+                        continue;
+                    }
+
+                    // Skip get_IsCompleted to avoid unuseful branch due to async/await state machine
+                    if (isAsyncStateMachineMoveNext && instruction.Previous.Operand is MethodReference operand &&
+                            operand.Name == "get_IsCompleted" &&
+                            operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") &&
+                            operand.DeclaringType.Scope.Name == "System.Runtime")
+                    {
                         continue;
                     }
 
