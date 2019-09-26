@@ -38,7 +38,7 @@ Options:
   --use-source-link        Specifies whether to use SourceLink URIs in place of file system paths.
 ```
 
-For `--merge-with` check the sample [check the sample](Examples.md).
+For `--merge-with` [check the sample](Examples.md).
 
 ## Code Coverage
 
