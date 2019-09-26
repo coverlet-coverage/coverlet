@@ -38,6 +38,8 @@ Options:
   --use-source-link        Specifies whether to use SourceLink URIs in place of file system paths.
 ```
 
+For `--merge-with` check the sample [check the sample](Examples.md).
+
 ## Code Coverage
 
 The `coverlet` tool is invoked by specifying the path to the assembly that contains the unit tests. You also need to specify the test runner and the arguments to pass to the test runner using the `--target` and `--targetargs` options respectively. The invocation of the test runner with the supplied arguments **must not** involve a recompilation of the unit test assembly or no coverage data will be generated.
