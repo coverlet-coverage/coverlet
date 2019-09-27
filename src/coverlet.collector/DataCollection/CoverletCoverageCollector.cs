@@ -179,7 +179,7 @@ namespace Coverlet.Collector.DataCollection
             }
             catch (MissingMethodException ex)
             {
-                throw new Exception("Method not found, make sure to use .NET core SDK Version >= 2.2.300", ex);
+                throw new MissingMethodException("Make sure to use .NET core SDK Version >= 2.2.300", ex);
             }
             return testModules;
         }
