@@ -169,7 +169,7 @@ namespace Coverlet.Collector.DataCollection
 
             try
             {
-                testModules = GetTestSourcesValues(sessionStartEventArgs);
+                testModules = GetPropertyValueWrapper(sessionStartEventArgs);
                 if (_eqtTrace.IsInfoEnabled)
                 {
                     _eqtTrace.Info("{0}: TestModules: '{1}'",
@@ -184,7 +184,12 @@ namespace Coverlet.Collector.DataCollection
             return testModules;
         }
 
-        private static IEnumerable<string> GetTestSourcesValues(SessionStartEventArgs sessionStartEventArgs)
+        /// <summary>
+        /// Wraps GetPropertyValue to catch possible MissingMethodException on unsupported runtime
+        /// </summary>
+        /// <param name="sessionStartEventArgs"></param>
+        /// <returns></returns>
+        private static IEnumerable<string> GetPropertyValueWrapper(SessionStartEventArgs sessionStartEventArgs)
         {
             return sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
         }
