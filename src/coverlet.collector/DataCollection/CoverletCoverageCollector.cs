@@ -165,23 +165,21 @@ namespace Coverlet.Collector.DataCollection
         /// <returns>Test modules list</returns>
         private IEnumerable<string> GetTestModules(SessionStartEventArgs sessionStartEventArgs)
         {
-            IEnumerable<string> testModules;
-
             try
             {
-                testModules = GetPropertyValueWrapper(sessionStartEventArgs);
+                IEnumerable<string> testModules = GetPropertyValueWrapper(sessionStartEventArgs);
                 if (_eqtTrace.IsInfoEnabled)
                 {
                     _eqtTrace.Info("{0}: TestModules: '{1}'",
                         CoverletConstants.DataCollectorName,
                         string.Join(",", testModules ?? Enumerable.Empty<string>()));
                 }
+                return testModules;
             }
             catch (MissingMethodException ex)
             {
                 throw new MissingMethodException("Make sure to use .NET core SDK Version >= 2.2.300", ex);
             }
-            return testModules;
         }
 
         /// <summary>
