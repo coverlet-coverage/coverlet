@@ -128,7 +128,7 @@ namespace Coverlet.Core
             };
         }
 
-        public CoverageResult GetCoverageResult(bool revertModules = true)
+        public CoverageResult GetCoverageResult(bool restoreModules = true)
         {
             CalculateCoverage();
 
@@ -214,7 +214,7 @@ namespace Coverlet.Core
                 }
 
                 modules.Add(Path.GetFileName(result.ModulePath), documents);
-                if (revertModules) _instrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
+                if (restoreModules) _instrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
             var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
