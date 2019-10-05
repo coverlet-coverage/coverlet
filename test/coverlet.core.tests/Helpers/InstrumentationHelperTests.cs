@@ -146,6 +146,9 @@ namespace Coverlet.Core.Helpers.Tests
             var result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.Type", new string[]{ "[Module]Namespace.Namespace.*" });
             Assert.True(result);
 
+            result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.TypeB", new string[] { "[Module]Namespace.Namespace.*" });
+            Assert.True(result);
+
             result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.Type", new string[] { "[Module]Namespace.*" });
             Assert.True(result);
 
