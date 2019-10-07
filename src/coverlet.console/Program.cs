@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -45,6 +46,28 @@ namespace Coverlet.Console
             CommandOption singleHit = app.Option("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location", CommandOptionType.NoValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
+            CommandOption outputIncludeTimestamp = app.Option("--output-includetimestamp", "Specifies whether to include a timestamp in output name.", CommandOptionType.NoValue);
+            CommandOption timestampFormat = app.Option("--output-timestampformat", "Timestamp format of the output name.", CommandOptionType.SingleValue);
+
+            Func<string> timeStamp = () =>
+            {
+                if (outputIncludeTimestamp.HasValue())
+                {
+                    var defaultFormat = "yyyy-MM-dd_HH_mm_ss";
+                    var timeFormat = timestampFormat.HasValue()
+                        ? timestampFormat.Value()
+                        : defaultFormat;
+                    try
+                    {
+                        return $"_{DateTime.Now.ToString(timeFormat, CultureInfo.InvariantCulture)}";
+                    }
+                    catch (FormatException ex)
+                    {
+                        return $"_{DateTime.Now.ToString(defaultFormat, CultureInfo.InvariantCulture)}";
+                    }
+                }
+                return string.Empty;
+            };
 
             app.OnExecute(() =>
             {
@@ -137,7 +160,9 @@ namespace Coverlet.Console
                         // Output to file
                         var filename = Path.GetFileName(dOutput);
                         filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
-                        filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
+                        filename = Path.HasExtension(filename) ?
+                            $"{Path.GetFileNameWithoutExtension(filename)}{timeStamp()}{Path.GetExtension(filename)}" :
+                            $"{filename}{timeStamp()}.{reporter.Extension}";
 
                         var report = Path.Combine(directory, filename);
                         logger.LogInformation($"  Generating report '{report}'", important: true);
