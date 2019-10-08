@@ -92,15 +92,15 @@ namespace Coverlet.Core.Tests
                 // Similar to msbuild coverage result task
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
+                // Generate html report to check
+                // TestInstrumentationHelper.GenerateHtmlReport(result);
+
                 // Asserts on doc/lines/branches
                 result.Document("Instrumentation.SelectionStatements.cs")
                       // (line, hits)
                       .AssertLinesCovered((11, 1), (15, 0))
                       // (line,ordinal,hits)
                       .AssertBranchesCovered((9, 0, 1), (9, 1, 0));
-
-                // if need to generate html report for debugging purpose
-                // TestInstrumentationHelper.GenerateHtmlReport(result);
             }
             finally
             {
@@ -163,6 +163,7 @@ namespace Coverlet.Core.Tests
                 }, path).Dispose();
 
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
                 result.Document("Instrumentation.AsyncAwait.cs")
                       .AssertLinesCovered(BuildConfiguration.Debug,
                                             // AsyncExecution(bool)
@@ -186,6 +187,52 @@ namespace Coverlet.Core.Tests
                       // Real branch should be 2, we should try to remove compiler generated branch in method ContinuationNotCalled/ContinuationCalled
                       // for Continuation state machine
                       .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 4);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void Lambda_Issue343()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                RemoteExecutor.Invoke(async pathSerialize =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(instance =>
+                    {
+                        instance.InvokeAnonymous_Test();
+                        ((Task<bool>)instance.InvokeAnonymousAsync_Test()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        return Task.CompletedTask;
+                    }, pathSerialize);
+                    return 0;
+                }, path).Dispose();
+
+                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+                result.Document("Instrumentation.Lambda.cs")
+                      .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 23, 51)
+                      .AssertBranchesCovered(BuildConfiguration.Debug,
+                        // Expected branches
+                        (22, 0, 0),
+                        (22, 1, 1),
+                        (50, 2, 0),
+                        (50, 3, 1),
+                        // Unexpected branches
+                        (20, 0, 1),
+                        (20, 1, 1),
+                        (49, 0, 1),
+                        (49, 1, 0),
+                        (54, 4, 0),
+                        (54, 5, 1),
+                        (39, 0, 1),
+                        (39, 1, 0),
+                        (48, 0, 1),
+                        (48, 1, 1)
+                      );
             }
             finally
             {
