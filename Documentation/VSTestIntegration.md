@@ -30,7 +30,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 | Option         | Summary                                                                                  |
 |-------------   |------------------------------------------------------------------------------------------|
 |Format          | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.   | 
-|MergeWith       | Combine the output of multiple coverage runs into a single result.                       | 
+|MergeWith       | Combine the output of multiple coverage runs into a single result([check the sample](Examples.md)).                       | 
 |Exclude         | Exclude from code coverage analysing using filter expressions.                           | 
 |ExcludeByFile   | Ignore specific source files from code coverage.                                         | 
 |Include         | Explicitly set what to include in code coverage analysis using filter expressions.       | 

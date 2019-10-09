@@ -198,7 +198,7 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        public void RestoreOriginalModule(string module, string identifier)
+        public virtual void RestoreOriginalModule(string module, string identifier)
         {
             var backupPath = GetBackupPath(module, identifier);
             var backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
@@ -226,7 +226,7 @@ namespace Coverlet.Core.Helpers
             }, retryStrategy, 10);
         }
 
-        public void RestoreOriginalModules()
+        public virtual void RestoreOriginalModules()
         {
             // Restore the original module - retry up to 10 times, since the destination file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25

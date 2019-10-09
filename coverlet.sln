@@ -27,6 +27,20 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.remoteexecut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.empty", "test\coverlet.tests.projectsample.empty\coverlet.tests.projectsample.empty.csproj", "{085A3AFB-C086-4E98-86F1-1B481446EC5E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{77A15177-8262-488F-AF2B-91B9055715DA}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		eng\azure-pipelines-nightly.yml = eng\azure-pipelines-nightly.yml
+		azure-pipelines.yml = azure-pipelines.yml
+		build.yml = build.yml
+		codecov.yml = codecov.yml
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		global.json = global.json
+		eng\nightly.ps1 = eng\nightly.ps1
+		nuget.config = nuget.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

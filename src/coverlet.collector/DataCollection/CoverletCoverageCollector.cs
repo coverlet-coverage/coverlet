@@ -165,15 +165,31 @@ namespace Coverlet.Collector.DataCollection
         /// <returns>Test modules list</returns>
         private IEnumerable<string> GetTestModules(SessionStartEventArgs sessionStartEventArgs)
         {
-            var testModules = sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
-            if (_eqtTrace.IsInfoEnabled)
+            try
             {
-                _eqtTrace.Info("{0}: TestModules: '{1}'",
-                    CoverletConstants.DataCollectorName,
-                    string.Join(",", testModules ?? Enumerable.Empty<string>()));
+                IEnumerable<string> testModules = GetPropertyValueWrapper(sessionStartEventArgs);
+                if (_eqtTrace.IsInfoEnabled)
+                {
+                    _eqtTrace.Info("{0}: TestModules: '{1}'",
+                        CoverletConstants.DataCollectorName,
+                        string.Join(",", testModules ?? Enumerable.Empty<string>()));
+                }
+                return testModules;
             }
+            catch (MissingMethodException ex)
+            {
+                throw new MissingMethodException("Make sure to use .NET core SDK Version >= 2.2.300", ex);
+            }
+        }
 
-            return testModules;
+        /// <summary>
+        /// Wraps GetPropertyValue to catch possible MissingMethodException on unsupported runtime
+        /// </summary>
+        /// <param name="sessionStartEventArgs"></param>
+        /// <returns></returns>
+        private static IEnumerable<string> GetPropertyValueWrapper(SessionStartEventArgs sessionStartEventArgs)
+        {
+            return sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
         }
     }
 }
