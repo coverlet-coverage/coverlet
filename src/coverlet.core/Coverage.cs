@@ -217,6 +217,63 @@ namespace Coverlet.Core
                 _instrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
             }
 
+            // In case of anonymous delegate compiler generate a custom class and passes it as type.method delegate.
+            // If in delegate method we've a branches we need to move these to "actual" class/method that use it.
+            // We search "method" with same "Line" of closure class method and add missing branches to it,
+            // in this way we correctly report missing branch inside compiled generated anonymous delegate.
+            List<string> compileGeneratedClassToRemove = null;
+            foreach (var module in modules)
+            {
+                foreach (var document in module.Value)
+                {
+                    foreach (var @class in document.Value)
+                    {
+                        foreach (var method in @class.Value)
+                        {
+                            foreach (var branch in method.Value.Branches)
+                            {
+                                if (BranchInCompilerGeneratedClass(method.Key))
+                                {
+                                    Method actualMethod = GetMethodWithSameLineInSameDocument(document.Value, @class.Key, branch.Line);
+
+                                    if (actualMethod is null)
+                                    {
+                                        continue;
+                                    }
+
+                                    actualMethod.Branches.Add(branch);
+
+                                    if (compileGeneratedClassToRemove is null)
+                                    {
+                                        compileGeneratedClassToRemove = new List<string>();
+                                    }
+
+                                    if (!compileGeneratedClassToRemove.Contains(@class.Key))
+                                    {
+                                        compileGeneratedClassToRemove.Add(@class.Key);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // After method/branches analysis of compiled generated class we can remove noise from reports
+            if (!(compileGeneratedClassToRemove is null))
+            {
+                foreach (var module in modules)
+                {
+                    foreach (var document in module.Value)
+                    {
+                        foreach (var classToRemove in compileGeneratedClassToRemove)
+                        {
+                            document.Value.Remove(classToRemove);
+                        }
+                    }
+                }
+            }
+
             var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
 
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && _fileSystem.Exists(_mergeWith))
@@ -226,6 +283,41 @@ namespace Coverlet.Core
             }
 
             return coverageResult;
+        }
+
+        private bool BranchInCompilerGeneratedClass(string methodName)
+        {
+            foreach (var instrumentedResult in _results)
+            {
+                if (instrumentedResult.BranchesInCompiledGeneratedClass.Contains(methodName))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private Method GetMethodWithSameLineInSameDocument(Classes documentClasses, string compilerGeneratedClassName, int branchLine)
+        {
+            foreach (var @class in documentClasses)
+            {
+                if (@class.Key == compilerGeneratedClassName)
+                {
+                    continue;
+                }
+
+                foreach (var method in @class.Value)
+                {
+                    foreach (var line in method.Value.Lines)
+                    {
+                        if (line.Key == branchLine)
+                        {
+                            return method.Value;
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         private void CalculateCoverage()
@@ -253,14 +345,14 @@ namespace Coverlet.Core
                     }
                 }
 
+                List<(int docIndex, int line)> zeroHitsLines = new List<(int docIndex, int line)>();
+                var documentsList = result.Documents.Values.ToList();
                 using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
                 using (var br = new BinaryReader(fs))
                 {
                     int hitCandidatesCount = br.ReadInt32();
 
                     // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
-
-                    var documentsList = result.Documents.Values.ToList();
 
                     for (int i = 0; i < hitCandidatesCount; ++i)
                     {
@@ -279,10 +371,29 @@ namespace Coverlet.Core
                             {
                                 var line = document.Lines[j];
                                 line.Hits += hits;
+
+                                // We register 0 hit lines for later cleanup false positive of nested lambda closures
+                                if (hits == 0)
+                                {
+                                    zeroHitsLines.Add((hitLocation.docIndex, line.Number));
+                                }
                             }
                         }
                     }
                 }
+
+                // Cleanup nested state machine false positive hits
+                foreach (var (docIndex, line) in zeroHitsLines)
+                {
+                    foreach (var lineToCheck in documentsList[docIndex].Lines)
+                    {
+                        if (lineToCheck.Key == line)
+                        {
+                            lineToCheck.Value.Hits = 0;
+                        }
+                    }
+                }
+
                 _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
                 _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
             }
