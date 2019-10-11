@@ -12,6 +12,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 * [Consume nightly build](#Consume-nightly-build)
 * [Feature samples](Documentation/Examples.md)
 * [Cake Add-In](#Cake.-Add-In)
+* [Changelog](Documentation/Changelog.md)
 ## Installation
 
 **VSTest Integration**:
