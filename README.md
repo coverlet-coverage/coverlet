@@ -102,6 +102,10 @@ _Note: The assembly you'd like to get coverage for must be different from the as
 
 ## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)!
 
+## Know Issues
+
+Unfortunately we have some know issues, check it [here](Documentation/KnowIssues.md) 
+
 ## Cake Add-In
 
 If you're using [Cake Build](https://cakebuild.net) for your build script you can use the [Cake.Coverlet](https://github.com/Romanx/Cake.Coverlet) add-in to provide you extensions to dotnet test for passing Coverlet arguments in a strongly typed manner.
