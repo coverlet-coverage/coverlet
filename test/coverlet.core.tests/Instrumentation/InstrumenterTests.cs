@@ -419,9 +419,16 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument_AssemblyMarkedAsExcludeFromCodeCoverage()
         {
-            string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
+            Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
+            partialMockFileSystem.CallBase = true;
+            partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
+            {
+                return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            });
             var loggerMock = new Mock<ILogger>();
-            Instrumenter instrumenter = new Instrumenter(excludedbyattributeDll, "_xunit_excludedbyattribute", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper, new FileSystem());
+
+            string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
+            Instrumenter instrumenter = new Instrumenter(excludedbyattributeDll, "_xunit_excludedbyattribute", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper, partialMockFileSystem.Object);
             InstrumenterResult result = instrumenter.Instrument();
             Assert.Empty(result.Documents);
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));

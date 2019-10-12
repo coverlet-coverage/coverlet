@@ -40,6 +40,8 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _excludedSourceFiles;
         private List<string> _branchesInCompiledGeneratedClass;
 
+        public bool SkipModule { get; set; } = false;
+
         public Instrumenter(
             string module,
             string identifier,
@@ -156,6 +158,7 @@ namespace Coverlet.Core.Instrumentation
                         if (customAttribute.AttributeType.FullName == "System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute")
                         {
                             _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute 'System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute'");
+                            SkipModule = true;
                             return;
                         }
                     }

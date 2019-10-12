@@ -106,9 +106,12 @@ namespace Coverlet.Core
                     // Guard code path and restore if instrumentation fails.
                     try
                     {
-                        var result = instrumenter.Instrument();
-                        _results.Add(result);
-                        _logger.LogVerbose($"Instrumented module: '{module}'");
+                        InstrumenterResult result = instrumenter.Instrument();
+                        if (!instrumenter.SkipModule)
+                        {
+                            _results.Add(result);
+                            _logger.LogVerbose($"Instrumented module: '{module}'");
+                        }
                     }
                     catch (Exception ex)
                     {
