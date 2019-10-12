@@ -2,7 +2,7 @@
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <IsPackable>false</IsPackable>
     <LangVersion>preview</LangVersion>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
@@ -39,6 +39,7 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="copy $(ProjectDir)..\coverlet.tests.remoteexecutor\$(OutDir) $(TargetDir) /Y" />
     <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) OR $([MSBuild]::IsOSPlatform('Linux'))" Command="cp -r $(ProjectDir)..\coverlet.tests.remoteexecutor\$(OutDir). $(TargetDir)" />
+    <Exec Command="copy $(ProjectDir)..\coverlet.tests.projectsample.excludedbyattribute\$(OutDir) $(TargetDir)\TestAssets /Y" />
   </Target>
 
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />

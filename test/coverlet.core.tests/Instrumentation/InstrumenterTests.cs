@@ -416,5 +416,15 @@ namespace Coverlet.Core.Instrumentation.Tests
             loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
         }
 
+        [Fact]
+        public void TestInstrument_AssemblyMarkedAsExcludeFromCodeCoverage()
+        {
+            string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
+            var loggerMock = new Mock<ILogger>();
+            Instrumenter instrumenter = new Instrumenter(excludedbyattributeDll, "_xunit_excludedbyattribute", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper, new FileSystem());
+            InstrumenterResult result = instrumenter.Instrument();
+            Assert.Empty(result.Documents);
+            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+        }
     }
 }

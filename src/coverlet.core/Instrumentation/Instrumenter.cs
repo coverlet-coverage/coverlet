@@ -151,6 +151,15 @@ namespace Coverlet.Core.Instrumentation
 
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
+                    foreach (CustomAttribute customAttribute in module.Assembly.CustomAttributes)
+                    {
+                        if (customAttribute.AttributeType.FullName == "System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute")
+                        {
+                            _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute 'System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute'");
+                            return;
+                        }
+                    }
+
                     var containsAppContext = module.GetType(nameof(System), nameof(AppContext)) != null;
                     var types = module.GetTypes();
                     AddCustomModuleTrackerToModule(module);
