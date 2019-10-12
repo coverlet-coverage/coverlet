@@ -39,7 +39,7 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="copy $(ProjectDir)..\coverlet.tests.remoteexecutor\$(OutDir) $(TargetDir) /Y" />
     <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) OR $([MSBuild]::IsOSPlatform('Linux'))" Command="cp -r $(ProjectDir)..\coverlet.tests.remoteexecutor\$(OutDir). $(TargetDir)" />
-    <Exec Command="copy $(ProjectDir)..\coverlet.tests.projectsample.excludedbyattribute\$(OutDir) $(TargetDir)\TestAssets /Y" />
+    <Exec Command="copy $(ProjectDir)..\coverlet.tests.projectsample.excludedbyattribute\$(OutDir) $(TargetDir)TestAssets /Y" />
   </Target>
 
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />
