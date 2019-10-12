@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
--Add log to tracker [#553](https://github.com/tonerdo/coverlet/pull/553)
+-Add log to tracker [#553](https://github.com/tonerdo/coverlet/pull/553)  
+-Exclude by assembly level System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage [#589](https://github.com/tonerdo/coverlet/pull/589)
 
 ### Fixed
 
