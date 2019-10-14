@@ -84,3 +84,7 @@ The datacollectors will be bundled as a separate NuGet package, the reference to
     <PackageReference Include="coverlet.collector" Version="1.0.0" />
 </ItemGroup>
 ```
+
+## Know issue
+
+Thre is a know issue, check it here https://github.com/MarcoRossignoli/coverlet/blob/master/Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100
