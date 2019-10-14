@@ -87,4 +87,4 @@ The datacollectors will be bundled as a separate NuGet package, the reference to
 
 ## Know issue
 
-Thre is a know issue, check it here https://github.com/MarcoRossignoli/coverlet/blob/master/Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100
+Thre is a know issue, check it here https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100
