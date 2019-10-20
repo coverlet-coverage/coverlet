@@ -23,21 +23,25 @@ Options:
   -a|--targetargs          Arguments to be passed to the test runner.
   -o|--output              Output of the generated coverage report
   -v|--verbosity           Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
-  -f|--format              Format of the generated coverage report.
+  -f|--format              Format of the generated coverage report[multiple value].
   --threshold              Exits with error if the coverage % is below value.
-  --threshold-type         Coverage type to apply the threshold to.
+  --threshold-type         Coverage type to apply the threshold to[multiple value].
   --threshold-stat         Coverage statistic used to enforce the threshold value.
-  --exclude                Filter expressions to exclude specific modules and types.
-  --include                Filter expressions to include specific modules and types.
-  --include-directory      Include directories containing additional assemblies to be instrumented.
-  --exclude-by-file        Glob patterns specifying source files to exclude.
-  --exclude-by-attribute   Attributes to exclude from code coverage.
+  --exclude                Filter expressions to exclude specific modules and types[multiple value].
+  --include                Filter expressions to include specific modules and types[multiple value].
+  --include-directory      Include directories containing additional assemblies to be instrumented[multiple value].
+  --exclude-by-file        Glob patterns specifying source files to exclude[multiple value].
+  --exclude-by-attribute   Attributes to exclude from code coverage[multiple value].
   --include-test-assembly  Specifies whether to report code coverage of the test assembly.
   --single-hit             Specifies whether to limit code coverage hit reporting to a single hit for each location.
   --merge-with             Path to existing coverage result to merge.
   --use-source-link        Specifies whether to use SourceLink URIs in place of file system paths.
 ```
 
+NB. For a [multiple value] options you have to specify values multiple times i.e.
+```
+--exclude-by-attribute 'Obsolete' --exclude-by-attribute'GeneratedCode' --exclude-by-attribute 'CompilerGenerated'
+```
 For `--merge-with` [check the sample](Examples.md).
 
 ## Code Coverage
@@ -161,7 +165,7 @@ You can ignore a method or an entire class from code coverage by creating and ap
 You can also ignore additional attributes by using the `ExcludeByAttribute` property (short name or full name supported):
 
 ```bash
-coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-attribute "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute"
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-attribute 'Obsolete' --exclude-by-attribute'GeneratedCode' --exclude-by-attribute 'CompilerGenerated'
 ```
 
 ### Source Files

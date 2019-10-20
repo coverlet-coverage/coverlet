@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
@@ -38,6 +39,25 @@ namespace Coverlet.Core.Tests
             Assert.Empty(result.Modules);
 
             directory.Delete(true);
+        }
+
+        [Fact]
+        public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
+        {
+            Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
+            partialMockFileSystem.CallBase = true;
+            partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
+            {
+                return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            });
+            var loggerMock = new Mock<ILogger>();
+
+            string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
+            // test skip module includint test assembly feature
+            var coverage = new Coverage(excludedbyattributeDll, new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" }, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, loggerMock.Object, _instrumentationHelper, partialMockFileSystem.Object);
+            CoveragePrepareResult result = coverage.PrepareModules();
+            Assert.Empty(result.Results);
+            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
         }
 
         [Fact]
