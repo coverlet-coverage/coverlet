@@ -10,6 +10,7 @@ using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
+using Coverlet.Core.Extensions;
 using Coverlet.Core.Reporters;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -59,7 +60,7 @@ namespace Coverlet.Console
                     // Adjust log level based on user input.
                     logger.Level = verbosity.ParsedValue;
                 }
-                var fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
+                var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
                 Coverage coverage = new Coverage(module.Value,
                     includeFilters.Values.ToArray(),
                     includeDirectories.Values.ToArray(),
@@ -71,7 +72,7 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger,
-                    (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)),
+                    DependencyInjection.Current.GetService<IInstrumentationHelper>(),
                     fileSystem);
                 coverage.PrepareModules();
 
