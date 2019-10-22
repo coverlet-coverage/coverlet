@@ -15,7 +15,7 @@ using Xunit;
 using Coverlet.Collector.DataCollection;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Abstracts;
-using coverlet.core.Extensions;
+using Coverlet.Core.Extensions;
 
 namespace Coverlet.Collector.Tests
 {
@@ -75,10 +75,7 @@ namespace Coverlet.Collector.Tests
                     null,
                     _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
-            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true,
-                It.IsAny<ILogger>(),
-                DependencyInjection.Current.GetService<IInstrumentationHelper>(),
-                DependencyInjection.Current.GetService<IFileSystem>());
+            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>());
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
             _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>())).Returns(coverage);

@@ -1,7 +1,7 @@
 ﻿using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
-using coverlet.core.Extensions;
+using Coverlet.Core.Extensions;
 using Coverlet.Core.Logging;
 
 namespace Coverlet.Collector.DataCollection

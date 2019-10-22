@@ -10,7 +10,7 @@ using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
-using coverlet.core.Extensions;
+using Coverlet.Core.Extensions;
 using Coverlet.Core.Reporters;
 using McMaster.Extensions.CommandLineUtils;
 

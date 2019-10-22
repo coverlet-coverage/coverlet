@@ -3,7 +3,7 @@ using System.IO;
 
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
-using coverlet.core.Extensions;
+using Coverlet.Core.Extensions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
