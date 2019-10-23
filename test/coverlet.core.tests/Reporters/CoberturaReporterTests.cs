@@ -1,5 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Xml;
+using System.Xml.Linq;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -35,8 +42,83 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
 
+            CultureInfo currentCulture = Thread.CurrentThread.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("it-IT");
+            try
+            {
+                // Assert conversion behaviour to be sure to be in a Italian culture context
+                // where decimal char is comma.
+                Assert.Equal("1,5", (1.5).ToString());
+
+                CoberturaReporter reporter = new CoberturaReporter();
+                string report = reporter.Report(result);
+
+                Assert.NotEmpty(report);
+
+                var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+                Assert.All(doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate")).Select(attr => attr.Value),
+                value =>
+                {
+                    Assert.DoesNotContain(",", value);
+                    Assert.Contains(".", value);
+                    Assert.Equal(0.5, double.Parse(value, CultureInfo.InvariantCulture));
+                });
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = currentCulture;
+            }
+        }
+
+        [Theory]
+        [InlineData(
+            "Test.SearchRequest::pb::Google.Protobuf.IMessage.get_Descriptor()",
+            "Google.Protobuf.IMessage.get_Descriptor",
+            "()")]
+        [InlineData(
+            "Test.SearchRequest::pb::Google.Protobuf.IMessage.get_Descriptor(int i)",
+            "Google.Protobuf.IMessage.get_Descriptor",
+            "(int i)")]
+        public void TestEnsureParseMethodStringCorrectly(
+            string methodString,
+            string expectedMethodName,
+            string expectedSignature)
+        {
+            CoverageResult result = new CoverageResult();
+            result.Identifier = Guid.NewGuid().ToString();
+
+            Lines lines = new Lines();
+            lines.Add(1, 1);
+
+            Branches branches = new Branches();
+            branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 });
+
+            Methods methods = new Methods();
+            methods.Add(methodString, new Method());
+            methods[methodString].Lines = lines;
+            methods[methodString].Branches = branches;
+
+            Classes classes = new Classes();
+            classes.Add("Google.Protobuf.Reflection.MessageDescriptor", methods);
+
+            Documents documents = new Documents();
+            documents.Add("doc.cs", classes);
+
+            result.Modules = new Modules();
+            result.Modules.Add("module", documents);
+
             CoberturaReporter reporter = new CoberturaReporter();
-            Assert.NotEqual(string.Empty, reporter.Report(result));
+            string report = reporter.Report(result);
+
+            Assert.NotEmpty(report);
+
+            var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+            var methodAttrs = doc.Descendants()
+                .Where(o => o.Name.LocalName == "method")
+                .Attributes()
+                .ToDictionary(o => o.Name.LocalName, o => o.Value);
+            Assert.Equal(expectedMethodName, methodAttrs["name"]);
+            Assert.Equal(expectedSignature, methodAttrs["signature"]);
         }
     }
 }

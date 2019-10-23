@@ -8,11 +8,13 @@ namespace Coverlet.Core.Helpers.Tests
 {
     public class InstrumentationHelperTests
     {
+        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem());
+
         [Fact]
         public void TestGetDependencies()
         {
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
-            var modules = InstrumentationHelper.GetCoverableModules(module, Array.Empty<string>(), false);
+            var modules = _instrumentationHelper.GetCoverableModules(module, Array.Empty<string>(), false);
             Assert.False(Array.Exists(modules, m => m == module));
         }
 
@@ -20,14 +22,15 @@ namespace Coverlet.Core.Helpers.Tests
         public void TestGetDependenciesWithTestAssembly()
         {
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
-            var modules = InstrumentationHelper.GetCoverableModules(module, Array.Empty<string>(), true);
+            var modules = _instrumentationHelper.GetCoverableModules(module, Array.Empty<string>(), true);
             Assert.True(Array.Exists(modules, m => m == module));
         }
 
         [Fact]
         public void TestHasPdb()
         {
-            Assert.True(InstrumentationHelper.HasPdb(typeof(InstrumentationHelperTests).Assembly.Location));
+            Assert.True(_instrumentationHelper.HasPdb(typeof(InstrumentationHelperTests).Assembly.Location, out bool embeddedPdb));
+            Assert.False(embeddedPdb);
         }
 
         [Fact]
@@ -36,7 +39,7 @@ namespace Coverlet.Core.Helpers.Tests
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
             string identifier = Guid.NewGuid().ToString();
 
-            InstrumentationHelper.BackupOriginalModule(module, identifier);
+            _instrumentationHelper.BackupOriginalModule(module, identifier);
 
             var backupPath = Path.Combine(
                 Path.GetTempPath(),
@@ -49,16 +52,16 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestIsValidFilterExpression()
         {
-            Assert.True(InstrumentationHelper.IsValidFilterExpression("[*]*"));
-            Assert.True(InstrumentationHelper.IsValidFilterExpression("[*]*core"));
-            Assert.True(InstrumentationHelper.IsValidFilterExpression("[assembly]*"));
-            Assert.True(InstrumentationHelper.IsValidFilterExpression("[*]type"));
-            Assert.True(InstrumentationHelper.IsValidFilterExpression("[assembly]type"));
-            Assert.False(InstrumentationHelper.IsValidFilterExpression("[*]"));
-            Assert.False(InstrumentationHelper.IsValidFilterExpression("[-]*"));
-            Assert.False(InstrumentationHelper.IsValidFilterExpression("*"));
-            Assert.False(InstrumentationHelper.IsValidFilterExpression("]["));
-            Assert.False(InstrumentationHelper.IsValidFilterExpression(null));
+            Assert.True(_instrumentationHelper.IsValidFilterExpression("[*]*"));
+            Assert.True(_instrumentationHelper.IsValidFilterExpression("[*]*core"));
+            Assert.True(_instrumentationHelper.IsValidFilterExpression("[assembly]*"));
+            Assert.True(_instrumentationHelper.IsValidFilterExpression("[*]type"));
+            Assert.True(_instrumentationHelper.IsValidFilterExpression("[assembly]type"));
+            Assert.False(_instrumentationHelper.IsValidFilterExpression("[*]"));
+            Assert.False(_instrumentationHelper.IsValidFilterExpression("[-]*"));
+            Assert.False(_instrumentationHelper.IsValidFilterExpression("*"));
+            Assert.False(_instrumentationHelper.IsValidFilterExpression("]["));
+            Assert.False(_instrumentationHelper.IsValidFilterExpression(null));
         }
 
         [Fact]
@@ -67,69 +70,14 @@ namespace Coverlet.Core.Helpers.Tests
             var tempFile = Path.GetTempFileName();
             Assert.True(File.Exists(tempFile));
 
-            InstrumentationHelper.DeleteHitsFile(tempFile);
+            _instrumentationHelper.DeleteHitsFile(tempFile);
             Assert.False(File.Exists(tempFile));
-        }
-
-        public static IEnumerable<object[]> GetExcludedFilesReturnsEmptyArgs =>
-        new[]
-        {
-            new object[]{null},
-            new object[]{new string[0]},
-            new object[]{new string[]{ Path.GetRandomFileName() }},
-            new object[]{new string[]{Path.GetRandomFileName(),
-                Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName())}
-            }
-        };
-
-        [Theory]
-        [MemberData(nameof(GetExcludedFilesReturnsEmptyArgs))]
-        public void TestGetExcludedFilesReturnsEmpty(string[] excludedFiles)
-        {
-            Assert.False(InstrumentationHelper.GetExcludedFiles(excludedFiles)?.Any());
-        }
-
-        [Fact]
-        public void TestGetExcludedFilesUsingAbsFile()
-        {
-            var file = Path.GetRandomFileName();
-            File.Create(file).Dispose();
-            var excludedFiles = InstrumentationHelper.GetExcludedFiles(
-                new string[] { Path.Combine(Directory.GetCurrentDirectory(), file) }
-            );
-            File.Delete(file);
-            Assert.Single(excludedFiles);
-        }
-
-        [Fact]
-        public void TestGetExcludedFilesUsingGlobbing()
-        {
-            var fileExtension = Path.GetRandomFileName();
-            var paths = new string[]{
-                $"{Path.GetRandomFileName()}.{fileExtension}",
-                $"{Path.GetRandomFileName()}.{fileExtension}"
-            };
-
-            foreach (var path in paths)
-            {
-                File.Create(path).Dispose();
-            }
-
-            var excludedFiles = InstrumentationHelper.GetExcludedFiles(
-                new string[] { $"*.{fileExtension}" });
-
-            foreach (var path in paths)
-            {
-                File.Delete(path);
-            }
-
-            Assert.Equal(paths.Length, excludedFiles.Count());
         }
 
         [Fact]
         public void TestIsModuleExcludedWithoutFilter()
         {
-            var result = InstrumentationHelper.IsModuleExcluded("Module.dll", new string[0]);
+            var result = _instrumentationHelper.IsModuleExcluded("Module.dll", new string[0]);
 
             Assert.False(result);
         }
@@ -137,7 +85,7 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestIsModuleIncludedWithoutFilter()
         {
-            var result = InstrumentationHelper.IsModuleIncluded("Module.dll", new string[0]);
+            var result = _instrumentationHelper.IsModuleIncluded("Module.dll", new string[0]);
 
             Assert.True(result);
         }
@@ -147,7 +95,7 @@ namespace Coverlet.Core.Helpers.Tests
         [InlineData("[Mismatch]*")]
         public void TestIsModuleExcludedWithSingleMismatchFilter(string filter)
         {
-            var result = InstrumentationHelper.IsModuleExcluded("Module.dll", new[] { filter });
+            var result = _instrumentationHelper.IsModuleExcluded("Module.dll", new[] { filter });
 
             Assert.False(result);
         }
@@ -155,7 +103,7 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestIsModuleIncludedWithSingleMismatchFilter()
         {
-            var result = InstrumentationHelper.IsModuleIncluded("Module.dll", new[] { "[Mismatch]*" });
+            var result = _instrumentationHelper.IsModuleIncluded("Module.dll", new[] { "[Mismatch]*" });
 
             Assert.False(result);
         }
@@ -164,10 +112,10 @@ namespace Coverlet.Core.Helpers.Tests
         [MemberData(nameof(ValidModuleFilterData))]
         public void TestIsModuleExcludedAndIncludedWithFilter(string filter)
         {
-            var result = InstrumentationHelper.IsModuleExcluded("Module.dll", new[] { filter });
+            var result = _instrumentationHelper.IsModuleExcluded("Module.dll", new[] { filter });
             Assert.True(result);
 
-            result = InstrumentationHelper.IsModuleIncluded("Module.dll", new[] { filter });
+            result = _instrumentationHelper.IsModuleIncluded("Module.dll", new[] { filter });
             Assert.True(result);
         }
 
@@ -177,25 +125,41 @@ namespace Coverlet.Core.Helpers.Tests
         {
             var filters = new[] { "[Mismatch]*", filter, "[Mismatch]*" };
 
-            var result = InstrumentationHelper.IsModuleExcluded("Module.dll", filters);
+            var result = _instrumentationHelper.IsModuleExcluded("Module.dll", filters);
             Assert.True(result);
 
-            result = InstrumentationHelper.IsModuleIncluded("Module.dll", filters);
+            result = _instrumentationHelper.IsModuleIncluded("Module.dll", filters);
             Assert.True(result);
         }
 
         [Fact]
         public void TestIsTypeExcludedWithoutFilter()
         {
-            var result = InstrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new string[0]);
+            var result = _instrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new string[0]);
 
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void TestIsTypeExcludedNamespace()
+        {
+            var result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.Type", new string[]{ "[Module]Namespace.Namespace.*" });
+            Assert.True(result);
+
+            result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.TypeB", new string[] { "[Module]Namespace.Namespace.*" });
+            Assert.True(result);
+
+            result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.Type", new string[] { "[Module]Namespace.*" });
+            Assert.True(result);
+
+            result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.Type", new string[] { "[Module]Namespace.WrongNamespace.*" });
             Assert.False(result);
         }
 
         [Fact]
         public void TestIsTypeIncludedWithoutFilter()
         {
-            var result = InstrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", new string[0]);
+            var result = _instrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", new string[0]);
 
             Assert.True(result);
         }
@@ -206,10 +170,10 @@ namespace Coverlet.Core.Helpers.Tests
         [InlineData("[Mismatch]a.b.Dto")]
         public void TestIsTypeExcludedAndIncludedWithSingleMismatchFilter(string filter)
         {
-            var result = InstrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new[] { filter });
+            var result = _instrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new[] { filter });
             Assert.False(result);
 
-            result = InstrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", new[] { filter });
+            result = _instrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", new[] { filter });
             Assert.False(result);
         }
 
@@ -217,10 +181,10 @@ namespace Coverlet.Core.Helpers.Tests
         [MemberData(nameof(ValidModuleAndNamespaceFilterData))]
         public void TestIsTypeExcludedAndIncludedWithFilter(string filter)
         {
-            var result = InstrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new[] { filter });
+            var result = _instrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new[] { filter });
             Assert.True(result);
 
-            result = InstrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", new[] { filter });
+            result = _instrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", new[] { filter });
             Assert.True(result);
         }
 
@@ -230,10 +194,10 @@ namespace Coverlet.Core.Helpers.Tests
         {
             var filters = new[] { "[Mismatch]*", filter, "[Mismatch]*" };
 
-            var result = InstrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", filters);
+            var result = _instrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", filters);
             Assert.True(result);
 
-            result = InstrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", filters);
+            result = _instrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", filters);
             Assert.True(result);
         }
 
@@ -242,17 +206,20 @@ namespace Coverlet.Core.Helpers.Tests
         {
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
 
-            var currentDirModules = InstrumentationHelper.GetCoverableModules(module,
-                new[] { Environment.CurrentDirectory }, false);
+            var currentDirModules = _instrumentationHelper.GetCoverableModules(module,
+                new[] { Environment.CurrentDirectory }, false)
+                .Where(m => !m.StartsWith("testgen_")).ToArray();
 
-            var parentDirWildcardModules = InstrumentationHelper.GetCoverableModules(module,
-                new[] { Path.Combine(Directory.GetParent(Environment.CurrentDirectory).FullName, "*") }, false);
+            var parentDirWildcardModules = _instrumentationHelper.GetCoverableModules(module,
+                new[] { Path.Combine(Directory.GetParent(Environment.CurrentDirectory).FullName, "*") }, false)
+                .Where(m => !m.StartsWith("testgen_")).ToArray();
 
             // There are at least as many modules found when searching the parent directory's subdirectories
             Assert.True(parentDirWildcardModules.Length >= currentDirModules.Length);
 
-            var relativePathModules = InstrumentationHelper.GetCoverableModules(module,
-                new[] { "." }, false);
+            var relativePathModules = _instrumentationHelper.GetCoverableModules(module,
+                new[] { "." }, false)
+                .Where(m => !m.StartsWith("testgen_")).ToArray();
 
             // Same number of modules found when using a relative path
             Assert.Equal(currentDirModules.Length, relativePathModules.Length);

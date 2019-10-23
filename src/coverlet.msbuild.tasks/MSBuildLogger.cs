@@ -16,7 +16,7 @@ namespace Coverlet.MSbuild.Tasks
         public void LogVerbose(string message) => _log.LogMessage(MessageImportance.Low, $"{LogPrefix}{message}");
 
         // We use `MessageImportance.High` because with `MessageImportance.Normal` doesn't show anything
-        public void LogInformation(string message) => _log.LogMessage(MessageImportance.High, $"{LogPrefix}{message}");
+        public void LogInformation(string message, bool important = false) => _log.LogMessage(MessageImportance.High, $"{LogPrefix}{message}");
 
         public void LogWarning(string message) => _log.LogWarning($"{LogPrefix}{message}");
 

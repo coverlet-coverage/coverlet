@@ -1,0 +1,21 @@
+<Project>
+  <Import Project="$(RepoRoot)/Directory.Build.targets" />
+  <Choose>
+    <!-- This condition tests whether coverlet.msbuild.props has been imported by the project -->
+    <When Condition=" '$(ThresholdType)' != '' ">
+      <ItemGroup>
+        <!-- Arrange for the project that builds the build tools has built first. -->
+        <ProjectReference Include="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj">
+          <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+        </ProjectReference>
+      </ItemGroup>
+      <PropertyGroup>
+        <!-- Ensure that the built tools can be found at build time.
+             This is required when the coverlet.msbuild imports are made in their src directory
+             (so that msbuild eval works even before they are built)
+             so that they can still find the tooling that will be built by the build. -->
+        <CoverletToolsPath>$(RepoRoot)src\coverlet.msbuild.tasks\bin\$(Configuration)\netstandard2.0\</CoverletToolsPath>
+      </PropertyGroup>
+    </When>
+  </Choose>
+</Project>

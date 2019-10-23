@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <UsingTask TaskName="Coverlet.MSbuild.Tasks.InstrumentationTask" AssemblyFile="$(MSBuildThisFileDirectory)coverlet.msbuild.tasks.dll"/>
-  <UsingTask TaskName="Coverlet.MSbuild.Tasks.CoverageResultTask" AssemblyFile="$(MSBuildThisFileDirectory)coverlet.msbuild.tasks.dll"/>
+  <UsingTask TaskName="Coverlet.MSbuild.Tasks.InstrumentationTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
+  <UsingTask TaskName="Coverlet.MSbuild.Tasks.CoverageResultTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
 
   <Target Name="InstrumentModulesNoBuild" BeforeTargets="VSTest">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
@@ -15,7 +15,9 @@
       IncludeTestAssembly="$(IncludeTestAssembly)"
       SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
-      UseSourceLink="$(UseSourceLink)" />
+      UseSourceLink="$(UseSourceLink)" >
+      <Output TaskParameter="InstrumenterState" PropertyName="InstrumenterState"/>
+    </Coverlet.MSbuild.Tasks.InstrumentationTask>
   </Target>
 
   <Target Name="InstrumentModulesAfterBuild" AfterTargets="BuildProject">
@@ -30,7 +32,9 @@
       IncludeTestAssembly="$(IncludeTestAssembly)"
       SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
-      UseSourceLink="$(UseSourceLink)" />
+      UseSourceLink="$(UseSourceLink)" >
+      <Output TaskParameter="InstrumenterState" PropertyName="InstrumenterState"/>
+    </Coverlet.MSbuild.Tasks.InstrumentationTask>
   </Target>
 
   <Target Name="GenerateCoverageResult" AfterTargets="VSTest">
@@ -40,7 +44,8 @@
       OutputFormat="$(CoverletOutputFormat)"
       Threshold="$(Threshold)"
       ThresholdType="$(ThresholdType)"
-      ThresholdStat="$(ThresholdStat)" />
+      ThresholdStat="$(ThresholdStat)"
+      InstrumenterState="$(InstrumenterState)"/>
   </Target>
 
 </Project>

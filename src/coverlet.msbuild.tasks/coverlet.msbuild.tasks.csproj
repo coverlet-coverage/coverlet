@@ -4,21 +4,17 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyTitle>coverlet.msbuild.tasks</AssemblyTitle>
-    <AssemblyVersion>2.6.0</AssemblyVersion>
-
     <PackageId>coverlet.msbuild</PackageId>
-    <PackageVersion>$(AssemblyVersion)</PackageVersion>
     <Title>coverlet.msbuild</Title>
     <Authors>tonerdo</Authors>
-    <PackageLicenseUrl>https://github.com/tonerdo/coverlet/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>http://github.com/tonerdo/coverlet</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <DevelopmentDependency>true</DevelopmentDependency>
-    <Description>Coverlet is a cross platform code coverage library for .NET Core, with support for line, branch and method coverage.</Description>
+    <Description>Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.</Description>
     <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/tonerdo/coverlet</RepositoryUrl>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
     <ContentTargetFolders>build</ContentTargetFolders>
@@ -26,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

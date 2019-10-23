@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
+using Coverlet.Core.Extensions;
 using Coverlet.Core.Reporters;
-
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace Coverlet.Console
 {
@@ -25,11 +27,13 @@ namespace Coverlet.Console
             app.FullName = "Cross platform .NET Core code coverage tool";
             app.HelpOption("-h|--help");
             app.VersionOption("-v|--version", GetAssemblyVersion());
+            int exitCode = (int)CommandExitCodes.Success;
 
             CommandArgument module = app.Argument("<ASSEMBLY>", "Path to the test assembly.");
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
             CommandOption targs = app.Option("-a|--targetargs", "Arguments to be passed to the test runner.", CommandOptionType.SingleValue);
             CommandOption output = app.Option("-o|--output", "Output of the generated coverage report", CommandOptionType.SingleValue);
+            CommandOption<LogLevel> verbosity = app.Option<LogLevel>("-v|--verbosity", "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.", CommandOptionType.SingleValue);
             CommandOption formats = app.Option("-f|--format", "Format of the generated coverage report.", CommandOptionType.MultipleValue);
             CommandOption threshold = app.Option("--threshold", "Exits with error if the coverage % is below value.", CommandOptionType.SingleValue);
             CommandOption thresholdTypes = app.Option("--threshold-type", "Coverage type to apply the threshold to.", CommandOptionType.MultipleValue);
@@ -39,7 +43,7 @@ namespace Coverlet.Console
             CommandOption excludedSourceFiles = app.Option("--exclude-by-file", "Glob patterns specifying source files to exclude.", CommandOptionType.MultipleValue);
             CommandOption includeDirectories = app.Option("--include-directory", "Include directories containing additional assemblies to be instrumented.", CommandOptionType.MultipleValue);
             CommandOption excludeAttributes = app.Option("--exclude-by-attribute", "Attributes to exclude from code coverage.", CommandOptionType.MultipleValue);
-            CommandOption includeTestAssembly = app.Option("--include-test-assembly", "Specifies whether to report code coverage of the test assembly", CommandOptionType.NoValue);
+            CommandOption includeTestAssembly = app.Option("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.", CommandOptionType.NoValue);
             CommandOption singleHit = app.Option("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location", CommandOptionType.NoValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
@@ -52,6 +56,12 @@ namespace Coverlet.Console
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
 
+                if (verbosity.HasValue())
+                {
+                    // Adjust log level based on user input.
+                    logger.Level = verbosity.ParsedValue;
+                }
+                var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
                 Coverage coverage = new Coverage(module.Value,
                     includeFilters.Values.ToArray(),
                     includeDirectories.Values.ToArray(),
@@ -62,7 +72,9 @@ namespace Coverlet.Console
                     singleHit.HasValue(),
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
-                    logger);
+                    logger,
+                    DependencyInjection.Current.GetService<IInstrumentationHelper>(),
+                    fileSystem);
                 coverage.PrepareModules();
 
                 Process process = new Process();
@@ -74,7 +86,7 @@ namespace Coverlet.Console
                 process.OutputDataReceived += (sender, eventArgs) =>
                 {
                     if (!string.IsNullOrEmpty(eventArgs.Data))
-                        logger.LogInformation(eventArgs.Data);
+                        logger.LogInformation(eventArgs.Data, important: true);
                 };
 
                 process.ErrorDataReceived += (sender, eventArgs) =>
@@ -118,8 +130,8 @@ namespace Coverlet.Console
                     if (reporter.OutputType == ReporterOutputType.Console)
                     {
                         // Output to console
-                        logger.LogInformation("  Outputting results to console");
-                        logger.LogInformation(reporter.Report(result));
+                        logger.LogInformation("  Outputting results to console", important: true);
+                        logger.LogInformation(reporter.Report(result), important: true);
                     }
                     else
                     {
@@ -129,8 +141,8 @@ namespace Coverlet.Console
                         filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
                         var report = Path.Combine(directory, filename);
-                        logger.LogInformation($"  Generating report '{report}'");
-                        File.WriteAllText(report, reporter.Report(result));
+                        logger.LogInformation($"  Generating report '{report}'", important: true);
+                        fileSystem.WriteAllText(report, reporter.Report(result));
                     }
                 }
 
@@ -183,15 +195,23 @@ namespace Coverlet.Console
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
 
-                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
-                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
-                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
+                var linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
+                var branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
+                var methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
+
+                var totalLinePercent = linePercentCalculation.Percent;
+                var totalBranchPercent = branchPercentCalculation.Percent;
+                var totalMethodPercent = methodPercentCalculation.Percent;
+
+                var averageLinePercent = linePercentCalculation.AverageModulePercent;
+                var averageBranchPercent = branchPercentCalculation.AverageModulePercent;
+                var averageMethodPercent = methodPercentCalculation.AverageModulePercent;
 
                 foreach (var _module in result.Modules)
                 {
-                    var linePercent = summary.CalculateLineCoverage(_module.Value).Percent * 100;
-                    var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent * 100;
-                    var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent * 100;
+                    var linePercent = summary.CalculateLineCoverage(_module.Value).Percent;
+                    var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
+                    var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }
@@ -203,13 +223,19 @@ namespace Coverlet.Console
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
                 coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
+                coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
+
+                if (process.ExitCode > 0)
+                {
+                    exitCode += (int)CommandExitCodes.TestFailed;
+                }
 
                 thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdTypeFlags, dThresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
+                    exitCode += (int)CommandExitCodes.CoverageBelowThreshold;
                     var exceptionMessageBuilder = new StringBuilder();
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                     {
@@ -229,7 +255,7 @@ namespace Coverlet.Console
                     throw new Exception(exceptionMessageBuilder.ToString());
                 }
 
-                return process.ExitCode == 0 ? 0 : process.ExitCode;
+                return exitCode;
             });
 
             try
@@ -240,12 +266,17 @@ namespace Coverlet.Console
             {
                 logger.LogError(ex.Message);
                 app.ShowHelp();
-                return 1;
+                return (int)CommandExitCodes.CommandParsingException;
+            }
+            catch (Win32Exception we) when (we.Source == "System.Diagnostics.Process")
+            {
+                logger.LogError($"Start process '{target.Value()}' failed with '{we.Message}'");
+                return exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex.Message);
-                return 1;
+                return exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception;
             }
         }
 

@@ -108,6 +108,7 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(34, points[1].StartLine);
         }
 
+#if !RELEASE // Issue https://github.com/tonerdo/coverlet/issues/389
         [Fact]
         public void GetBranchPoints_Switch()
         {
@@ -200,6 +201,7 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(94, points[2].StartLine);
             Assert.Equal(94, points[3].StartLine);
         }
+#endif
 
         [Fact]
         public void GetBranchPoints_AssignsNegativeLineNumberToBranchesInMethodsThatHaveNoInstrumentablePoints()
@@ -258,6 +260,22 @@ namespace Coverlet.Core.Symbols.Tests
             // assert
             Assert.Empty(points);
 
+        }
+
+        [Fact]
+        public void GetBranchPoints_IgnoresBranchesIn_AsyncAwaitStateMachine()
+        {
+            // arrange
+            var nestedName = typeof(AsyncAwaitStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachine).FullName);
+            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+
+            // act
+            var points = CecilSymbolHelper.GetBranchPoints(method);
+
+            // assert
+            Assert.Empty(points);
         }
 
         [Fact]

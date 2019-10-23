@@ -4,12 +4,12 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-
+using System.Runtime.CompilerServices;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Attributes;
-using Coverlet.Core.Helpers;
 using Coverlet.Core.Logging;
 using Coverlet.Core.Symbols;
-
+using Microsoft.Extensions.FileSystemGlobbing;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
@@ -22,11 +22,13 @@ namespace Coverlet.Core.Instrumentation
         private readonly string _identifier;
         private readonly string[] _excludeFilters;
         private readonly string[] _includeFilters;
-        private readonly string[] _excludedFiles;
+        private readonly ExcludedFilesHelper _excludedFilesHelper;
         private readonly string[] _excludedAttributes;
         private readonly bool _singleHit;
         private readonly bool _isCoreLibrary;
         private readonly ILogger _logger;
+        private readonly IInstrumentationHelper _instrumentationHelper;
+        private readonly IFileSystem _fileSystem;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
@@ -35,26 +37,71 @@ namespace Coverlet.Core.Instrumentation
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
         private MethodReference _customTrackerRecordHitMethod;
-        private List<string> _asyncMachineStateMethod;
+        private List<string> _excludedSourceFiles;
+        private List<string> _branchesInCompiledGeneratedClass;
 
-        public Instrumenter(string module, string identifier, string[] excludeFilters, string[] includeFilters, string[] excludedFiles, string[] excludedAttributes, bool singleHit, ILogger logger)
+        public bool SkipModule { get; set; } = false;
+
+        public Instrumenter(
+            string module,
+            string identifier,
+            string[] excludeFilters,
+            string[] includeFilters,
+            string[] excludedFiles,
+            string[] excludedAttributes,
+            bool singleHit,
+            ILogger logger,
+            IInstrumentationHelper instrumentationHelper,
+            IFileSystem fileSystem)
         {
             _module = module;
             _identifier = identifier;
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
-            _excludedFiles = excludedFiles ?? Array.Empty<string>();
+            _excludedFilesHelper = new ExcludedFilesHelper(excludedFiles, logger);
             _excludedAttributes = excludedAttributes;
             _singleHit = singleHit;
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
             _logger = logger;
+            _instrumentationHelper = instrumentationHelper;
+            _fileSystem = fileSystem;
         }
 
         public bool CanInstrument()
         {
             try
             {
-                return InstrumentationHelper.HasPdb(_module);
+                if (_instrumentationHelper.HasPdb(_module, out bool embeddedPdb))
+                {
+                    if (embeddedPdb)
+                    {
+                        if (_instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            _logger.LogVerbose($"Unable to instrument module: {_module}, embedded pdb without local source files, [{firstNotFoundDocument}]");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (_instrumentationHelper.PortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            _logger.LogVerbose($"Unable to instrument module: {_module}, pdb without local source files, [{firstNotFoundDocument}]");
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    return false;
+                }
             }
             catch (Exception ex)
             {
@@ -79,15 +126,23 @@ namespace Coverlet.Core.Instrumentation
 
             InstrumentModule();
 
-            _result.AsyncMachineStateMethod = _asyncMachineStateMethod == null ? Array.Empty<string>() : _asyncMachineStateMethod.ToArray();
+            if (_excludedSourceFiles != null)
+            {
+                foreach (string sourceFile in _excludedSourceFiles)
+                {
+                    _logger.LogVerbose($"Excluded source file: '{sourceFile}'");
+                }
+            }
+
+            _result.BranchesInCompiledGeneratedClass = _branchesInCompiledGeneratedClass == null ? Array.Empty<string>() : _branchesInCompiledGeneratedClass.ToArray();
 
             return _result;
         }
 
         private void InstrumentModule()
         {
-            using (var stream = new FileStream(_module, FileMode.Open, FileAccess.ReadWrite))
-            using (var resolver = new DefaultAssemblyResolver())
+            using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
+            using (var resolver = new NetstandardAwareAssemblyResolver())
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
@@ -98,6 +153,16 @@ namespace Coverlet.Core.Instrumentation
 
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
+                    foreach (CustomAttribute customAttribute in module.Assembly.CustomAttributes)
+                    {
+                        if (customAttribute.AttributeType.FullName == "System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute")
+                        {
+                            _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute 'System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute'");
+                            SkipModule = true;
+                            return;
+                        }
+                    }
+
                     var containsAppContext = module.GetType(nameof(System), nameof(AppContext)) != null;
                     var types = module.GetTypes();
                     AddCustomModuleTrackerToModule(module);
@@ -114,8 +179,8 @@ namespace Coverlet.Core.Instrumentation
                         if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
                             // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
                             && (!_isCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
-                            && !InstrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
-                            && InstrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
+                            && !_instrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
+                            && _instrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                             InstrumentType(type);
                     }
 
@@ -273,10 +338,18 @@ namespace Coverlet.Core.Instrumentation
             foreach (var method in methods)
             {
                 MethodDefinition actualMethod = method;
-                if (InstrumentationHelper.IsLocalMethod(method.Name))
+                IEnumerable<CustomAttribute> customAttributes = method.CustomAttributes;
+                if (_instrumentationHelper.IsLocalMethod(method.Name))
                     actualMethod = methods.FirstOrDefault(m => m.Name == method.Name.Split('>')[0].Substring(1)) ?? method;
 
-                if (!actualMethod.CustomAttributes.Any(IsExcludeAttribute))
+                if (actualMethod.IsGetter || actualMethod.IsSetter)
+                {
+                    PropertyDefinition prop = type.Properties.FirstOrDefault(p => (p.GetMethod ?? p.SetMethod).FullName.Equals(actualMethod.FullName));
+                    if (prop?.HasCustomAttributes == true)
+                        customAttributes = customAttributes.Union(prop.CustomAttributes);
+                }
+
+                if (!customAttributes.Any(IsExcludeAttribute))
                     InstrumentMethod(method);
             }
 
@@ -291,9 +364,12 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentMethod(MethodDefinition method)
         {
             var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
-            if (!string.IsNullOrEmpty(sourceFile) && _excludedFiles.Contains(sourceFile))
+            if (!string.IsNullOrEmpty(sourceFile) && _excludedFilesHelper.Exclude(sourceFile))
             {
-                _logger.LogInformation($"Excluded source file: '{sourceFile}'");
+                if (!(_excludedSourceFiles ??= new List<string>()).Contains(sourceFile))
+                {
+                    _excludedSourceFiles.Add(sourceFile);
+                }
                 return;
             }
 
@@ -335,7 +411,7 @@ namespace Coverlet.Core.Instrumentation
                     index += 2;
                 }
 
-                foreach (var _branchTarget in targetedBranchPoints)
+                foreach (var branchTarget in targetedBranchPoints)
                 {
                     /*
                         * Skip branches with no sequence point reference for now.
@@ -343,10 +419,10 @@ namespace Coverlet.Core.Instrumentation
                         * The CecilSymbolHelper will create branch points with a start line of -1 and no document, which
                         * I am currently not sure how to handle.
                         */
-                    if (_branchTarget.StartLine == -1 || _branchTarget.Document == null)
+                    if (branchTarget.StartLine == -1 || branchTarget.Document == null)
                         continue;
 
-                    var target = AddInstrumentationCode(method, processor, instruction, _branchTarget);
+                    var target = AddInstrumentationCode(method, processor, instruction, branchTarget);
                     foreach (var _instruction in processor.Body.Instructions)
                         ReplaceInstructionTarget(_instruction, instruction, target);
 
@@ -377,8 +453,7 @@ namespace Coverlet.Core.Instrumentation
                     document.Lines.Add(i, new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
 
-            var entry = (false, document.Index, sequencePoint.StartLine, sequencePoint.EndLine);
-            _result.HitCandidates.Add(entry);
+            _result.HitCandidates.Add(new HitCandidate(false, document.Index, sequencePoint.StartLine, sequencePoint.EndLine));
 
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
         }
@@ -392,10 +467,11 @@ namespace Coverlet.Core.Instrumentation
                 _result.Documents.Add(document.Path, document);
             }
 
-            var key = (branchPoint.StartLine, (int)branchPoint.Ordinal);
+            BranchKey key = new BranchKey(branchPoint.StartLine, (int)branchPoint.Ordinal);
             if (!document.Branches.ContainsKey(key))
             {
-                document.Branches.Add(key,
+                document.Branches.Add(
+                    key,
                     new Branch
                     {
                         Number = branchPoint.StartLine,
@@ -408,41 +484,23 @@ namespace Coverlet.Core.Instrumentation
                     }
                 );
 
-                if (IsAsyncStateMachineBranch(method.DeclaringType, method))
+                if (method.DeclaringType.CustomAttributes.Any(x => x.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
                 {
-                    if (_asyncMachineStateMethod == null)
+                    if (_branchesInCompiledGeneratedClass == null)
                     {
-                        _asyncMachineStateMethod = new List<string>();
+                        _branchesInCompiledGeneratedClass = new List<string>();
                     }
 
-                    if (!_asyncMachineStateMethod.Contains(method.FullName))
+                    if (!_branchesInCompiledGeneratedClass.Contains(method.FullName))
                     {
-                        _asyncMachineStateMethod.Add(method.FullName);
+                        _branchesInCompiledGeneratedClass.Add(method.FullName);
                     }
                 }
             }
 
-            var entry = (true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal);
-            _result.HitCandidates.Add(entry);
+            _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));
 
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
-        }
-
-        private bool IsAsyncStateMachineBranch(TypeDefinition typeDef, MethodDefinition method)
-        {
-            if (!method.FullName.EndsWith("::MoveNext()"))
-            {
-                return false;
-            }
-
-            foreach (InterfaceImplementation implementedInterface in typeDef.Interfaces)
-            {
-                if (implementedInterface.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine")
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private Instruction AddInstrumentationInstructions(MethodDefinition method, ILProcessor processor, Instruction instruction, int hitEntryIndex)
@@ -534,7 +592,7 @@ namespace Coverlet.Core.Instrumentation
                 customAttribute.AttributeType.Name.Equals(a.EndsWith("Attribute") ? a : $"{a}Attribute"));
         }
 
-        private static Mono.Cecil.Cil.MethodBody GetMethodBody(MethodDefinition method)
+        private static MethodBody GetMethodBody(MethodDefinition method)
         {
             try
             {
@@ -611,6 +669,127 @@ namespace Coverlet.Core.Instrumentation
                     return importedRef;
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// In case of testing different runtime i.e. netfx we could find netstandard.dll in folder.
+    /// netstandard.dll is a forward only lib, there is no IL but only forwards to "runtime" implementation.
+    /// For some classes implementation are in different assembly for different runtime for instance:
+    /// 
+    /// For NetFx 4.7
+    /// // Token: 0x2700072C RID: 1836
+    /// .class extern forwarder System.Security.Cryptography.X509Certificates.StoreName
+    /// {
+    ///    .assembly extern System
+    /// }    
+    /// 
+    /// For netcoreapp2.2
+    /// Token: 0x2700072C RID: 1836
+    /// .class extern forwarder System.Security.Cryptography.X509Certificates.StoreName
+    /// {
+    ///    .assembly extern System.Security.Cryptography.X509Certificates
+    /// }
+    /// 
+    /// There is a concrete possibility that Cecil cannot find implementation and throws StackOverflow exception https://github.com/jbevain/cecil/issues/575
+    /// This custom resolver check if requested lib is a "official" netstandard.dll and load once of "current runtime" with
+    /// correct forwards.
+    /// Check compares 'assembly name' and 'public key token', because versions could differ between runtimes.
+    /// </summary>
+    internal class NetstandardAwareAssemblyResolver : DefaultAssemblyResolver
+    {
+        private static System.Reflection.Assembly _netStandardAssembly;
+        private static string _name;
+        private static byte[] _publicKeyToken;
+        private static AssemblyDefinition _assemblyDefinition;
+
+        static NetstandardAwareAssemblyResolver()
+        {
+            try
+            {
+                // To be sure to load information of "real" runtime netstandard implementation
+                _netStandardAssembly = System.Reflection.Assembly.LoadFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll"));
+                System.Reflection.AssemblyName name = _netStandardAssembly.GetName();
+                _name = name.Name;
+                _publicKeyToken = name.GetPublicKeyToken();
+                _assemblyDefinition = AssemblyDefinition.ReadAssembly(_netStandardAssembly.Location);
+            }
+            catch (FileNotFoundException)
+            {
+                // netstandard not supported
+            }
+        }
+
+        // Check name and public key but not version that could be different
+        private bool CheckIfSearchingNetstandard(AssemblyNameReference name)
+        {
+            if (_netStandardAssembly is null)
+            {
+                return false;
+            }
+
+            if (_name != name.Name)
+            {
+                return false;
+            }
+
+            if (name.PublicKeyToken.Length != _publicKeyToken.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < name.PublicKeyToken.Length; i++)
+            {
+                if (_publicKeyToken[i] != name.PublicKeyToken[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public override AssemblyDefinition Resolve(AssemblyNameReference name)
+        {
+            if (CheckIfSearchingNetstandard(name))
+            {
+                return _assemblyDefinition;
+            }
+            else
+            {
+                return base.Resolve(name);
+            }
+        }
+    }
+
+    // Exclude files helper https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.filesystemglobbing.matcher?view=aspnetcore-2.2
+    internal class ExcludedFilesHelper
+    {
+        Matcher _matcher;
+
+        public ExcludedFilesHelper(string[] excludes, ILogger logger)
+        {
+            if (excludes != null && excludes.Length > 0)
+            {
+                _matcher = new Matcher();
+                foreach (var excludeRule in excludes)
+                {
+                    if (excludeRule is null)
+                    {
+                        continue;
+                    }
+                    _matcher.AddInclude(Path.IsPathRooted(excludeRule) ? excludeRule.Substring(Path.GetPathRoot(excludeRule).Length) : excludeRule);
+                }
+            }
+        }
+
+        public bool Exclude(string sourceFile)
+        {
+            if (_matcher is null || sourceFile is null)
+                return false;
+
+            // We strip out drive because it doesn't work with globbing
+            return _matcher.Match(Path.IsPathRooted(sourceFile) ? sourceFile.Substring(Path.GetPathRoot(sourceFile).Length) : sourceFile).HasMatches;
         }
     }
 }

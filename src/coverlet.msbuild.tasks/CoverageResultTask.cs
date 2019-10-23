@@ -5,7 +5,9 @@ using System.Linq;
 using System.Text;
 using ConsoleTables;
 using Coverlet.Core;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
+using Coverlet.Core.Extensions;
 using Coverlet.Core.Reporters;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -19,6 +21,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _threshold;
         private string _thresholdType;
         private string _thresholdStat;
+        private ITaskItem _instrumenterState;
         private MSBuildLogger _logger;
 
         [Required]
@@ -56,6 +59,13 @@ namespace Coverlet.MSbuild.Tasks
             set { _thresholdStat = value; }
         }
 
+        [Required]
+        public ITaskItem InstrumenterState
+        {
+            get { return _instrumenterState; }
+            set { _instrumenterState = value; }
+        }
+
         public CoverageResultTask()
         {
             _logger = new MSBuildLogger(Log);
@@ -67,8 +77,20 @@ namespace Coverlet.MSbuild.Tasks
             {
                 Console.WriteLine("\nCalculating coverage result...");
 
-                var coverage = InstrumentationTask.Coverage;
-                var result = coverage.GetCoverageResult();
+                IFileSystem fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+                if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
+                {
+                    _logger.LogError("Result of instrumentation task not found");
+                    return false;
+                }
+
+                Coverage coverage = null;
+                using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
+                {
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, DependencyInjection.Current.GetService<IInstrumentationHelper>(), fileSystem);
+                }
+
+                CoverageResult result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);
                 if (directory == string.Empty)
@@ -104,7 +126,7 @@ namespace Coverlet.MSbuild.Tasks
 
                         var report = Path.Combine(directory, filename);
                         Console.WriteLine($"  Generating report '{report}'");
-                        File.WriteAllText(report, reporter.Report(result));
+                        fileSystem.WriteAllText(report, reporter.Report(result));
                     }
                 }
 
@@ -167,15 +189,23 @@ namespace Coverlet.MSbuild.Tasks
                 var summary = new CoverageSummary();
                 int numModules = result.Modules.Count;
 
-                var totalLinePercent = summary.CalculateLineCoverage(result.Modules).Percent * 100;
-                var totalBranchPercent = summary.CalculateBranchCoverage(result.Modules).Percent * 100;
-                var totalMethodPercent = summary.CalculateMethodCoverage(result.Modules).Percent * 100;
+                var linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
+                var branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
+                var methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
+
+                var totalLinePercent = linePercentCalculation.Percent;
+                var totalBranchPercent = branchPercentCalculation.Percent;
+                var totalMethodPercent = methodPercentCalculation.Percent;
+
+                var averageLinePercent = linePercentCalculation.AverageModulePercent;
+                var averageBranchPercent = branchPercentCalculation.AverageModulePercent;
+                var averageMethodPercent = methodPercentCalculation.AverageModulePercent;
 
                 foreach (var module in result.Modules)
                 {
-                    var linePercent = summary.CalculateLineCoverage(module.Value).Percent * 100;
-                    var branchPercent = summary.CalculateBranchCoverage(module.Value).Percent * 100;
-                    var methodPercent = summary.CalculateMethodCoverage(module.Value).Percent * 100;
+                    var linePercent = summary.CalculateLineCoverage(module.Value).Percent;
+                    var branchPercent = summary.CalculateBranchCoverage(module.Value).Percent;
+                    var methodPercent = summary.CalculateMethodCoverage(module.Value).Percent;
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
                 }
@@ -188,7 +218,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
                 coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{totalLinePercent / numModules}%", $"{totalBranchPercent / numModules}%", $"{totalMethodPercent / numModules}%");
+                coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
 
                 Console.WriteLine(coverageTable.ToStringAlternative());
 

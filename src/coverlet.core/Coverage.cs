@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
-using Coverlet.Core.Helpers;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Logging;
 
@@ -26,6 +25,8 @@ namespace Coverlet.Core
         private string _mergeWith;
         private bool _useSourceLink;
         private ILogger _logger;
+        private IInstrumentationHelper _instrumentationHelper;
+        private IFileSystem _fileSystem;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -43,7 +44,9 @@ namespace Coverlet.Core
             bool singleHit,
             string mergeWith,
             bool useSourceLink,
-            ILogger logger)
+            ILogger logger,
+            IInstrumentationHelper instrumentationHelper,
+            IFileSystem fileSystem)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -56,51 +59,76 @@ namespace Coverlet.Core
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
             _logger = logger;
+            _instrumentationHelper = instrumentationHelper;
+            _fileSystem = fileSystem;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
 
-        public void PrepareModules()
+        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
         {
-            string[] modules = InstrumentationHelper.GetCoverableModules(_module, _includeDirectories, _includeTestAssembly);
-            string[] excludes = InstrumentationHelper.GetExcludedFiles(_excludedSourceFiles);
+            _identifier = prepareResult.Identifier;
+            _module = prepareResult.Module;
+            _mergeWith = prepareResult.MergeWith;
+            _useSourceLink = prepareResult.UseSourceLink;
+            _results = new List<InstrumenterResult>(prepareResult.Results);
+            _logger = logger;
+            _instrumentationHelper = instrumentationHelper;
+            _fileSystem = fileSystem;
+        }
 
-            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded module filter '{filter}'"));
-            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogInformation($"Included module filter '{filter}'"));
-            Array.ForEach(excludes ?? Array.Empty<string>(), filter => _logger.LogInformation($"Excluded source files '{filter}'"));
+        public CoveragePrepareResult PrepareModules()
+        {
+            string[] modules = _instrumentationHelper.GetCoverableModules(_module, _includeDirectories, _includeTestAssembly);
 
-            _excludeFilters = _excludeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
-            _includeFilters = _includeFilters?.Where(f => InstrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded module filter '{filter}'"));
+            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Included module filter '{filter}'"));
+            Array.ForEach(_excludedSourceFiles ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded source files filter '{filter}'"));
+
+            _excludeFilters = _excludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            _includeFilters = _includeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
             foreach (var module in modules)
             {
-                if (InstrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
-                    !InstrumentationHelper.IsModuleIncluded(module, _includeFilters))
+                if (_instrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
+                    !_instrumentationHelper.IsModuleIncluded(module, _includeFilters))
                 {
-                    _logger.LogInformation($"Excluded module: '{module}'");
+                    _logger.LogVerbose($"Excluded module: '{module}'");
                     continue;
                 }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, excludes, _excludeAttributes, _singleHit, _logger);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem);
                 if (instrumenter.CanInstrument())
                 {
-                    InstrumentationHelper.BackupOriginalModule(module, _identifier);
+                    _instrumentationHelper.BackupOriginalModule(module, _identifier);
 
                     // Guard code path and restore if instrumentation fails.
                     try
                     {
-                        var result = instrumenter.Instrument();
-                        _results.Add(result);
-                        _logger.LogInformation($"Instrumented module: '{module}'");
+                        InstrumenterResult result = instrumenter.Instrument();
+                        if (!instrumenter.SkipModule)
+                        {
+                            _results.Add(result);
+                            _logger.LogVerbose($"Instrumented module: '{module}'");
+                        }
                     }
                     catch (Exception ex)
                     {
                         _logger.LogWarning($"Unable to instrument module: {module} because : {ex.Message}");
-                        InstrumentationHelper.RestoreOriginalModule(module, _identifier);
+                        _instrumentationHelper.RestoreOriginalModule(module, _identifier);
                     }
                 }
             }
+
+            return new CoveragePrepareResult()
+            {
+                Identifier = _identifier,
+                Module = _module,
+                MergeWith = _mergeWith,
+                UseSourceLink = _useSourceLink,
+                Results = _results.ToArray()
+            };
         }
 
         public CoverageResult GetCoverageResult()
@@ -189,27 +217,123 @@ namespace Coverlet.Core
                 }
 
                 modules.Add(Path.GetFileName(result.ModulePath), documents);
-                InstrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
+                _instrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
+            }
+
+            // In case of anonymous delegate compiler generate a custom class and passes it as type.method delegate.
+            // If in delegate method we've a branches we need to move these to "actual" class/method that use it.
+            // We search "method" with same "Line" of closure class method and add missing branches to it,
+            // in this way we correctly report missing branch inside compiled generated anonymous delegate.
+            List<string> compileGeneratedClassToRemove = null;
+            foreach (var module in modules)
+            {
+                foreach (var document in module.Value)
+                {
+                    foreach (var @class in document.Value)
+                    {
+                        foreach (var method in @class.Value)
+                        {
+                            foreach (var branch in method.Value.Branches)
+                            {
+                                if (BranchInCompilerGeneratedClass(method.Key))
+                                {
+                                    Method actualMethod = GetMethodWithSameLineInSameDocument(document.Value, @class.Key, branch.Line);
+
+                                    if (actualMethod is null)
+                                    {
+                                        continue;
+                                    }
+
+                                    actualMethod.Branches.Add(branch);
+
+                                    if (compileGeneratedClassToRemove is null)
+                                    {
+                                        compileGeneratedClassToRemove = new List<string>();
+                                    }
+
+                                    if (!compileGeneratedClassToRemove.Contains(@class.Key))
+                                    {
+                                        compileGeneratedClassToRemove.Add(@class.Key);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // After method/branches analysis of compiled generated class we can remove noise from reports
+            if (!(compileGeneratedClassToRemove is null))
+            {
+                foreach (var module in modules)
+                {
+                    foreach (var document in module.Value)
+                    {
+                        foreach (var classToRemove in compileGeneratedClassToRemove)
+                        {
+                            document.Value.Remove(classToRemove);
+                        }
+                    }
+                }
             }
 
             var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
 
-            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && File.Exists(_mergeWith))
+            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && _fileSystem.Exists(_mergeWith))
             {
-                string json = File.ReadAllText(_mergeWith);
+                string json = _fileSystem.ReadAllText(_mergeWith);
                 coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
             }
 
             return coverageResult;
         }
 
+        private bool BranchInCompilerGeneratedClass(string methodName)
+        {
+            foreach (var instrumentedResult in _results)
+            {
+                if (instrumentedResult.BranchesInCompiledGeneratedClass.Contains(methodName))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private Method GetMethodWithSameLineInSameDocument(Classes documentClasses, string compilerGeneratedClassName, int branchLine)
+        {
+            foreach (var @class in documentClasses)
+            {
+                if (@class.Key == compilerGeneratedClassName)
+                {
+                    continue;
+                }
+
+                foreach (var method in @class.Value)
+                {
+                    foreach (var line in method.Value.Lines)
+                    {
+                        if (line.Key == branchLine)
+                        {
+                            return method.Value;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
         private void CalculateCoverage()
         {
             foreach (var result in _results)
             {
-                if (!File.Exists(result.HitsFilePath))
+                if (!_fileSystem.Exists(result.HitsFilePath))
                 {
-                    _logger.LogWarning($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
+                    // Hits file could be missed mainly for two reason
+                    // 1) Issue during module Unload()
+                    // 2) Instrumented module is never loaded or used so we don't have any hit to register and
+                    //    module tracker is never used
+                    _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
                     continue;
                 }
 
@@ -224,14 +348,14 @@ namespace Coverlet.Core
                     }
                 }
 
-                using (var fs = new FileStream(result.HitsFilePath, FileMode.Open))
+                List<(int docIndex, int line)> zeroHitsLines = new List<(int docIndex, int line)>();
+                var documentsList = result.Documents.Values.ToList();
+                using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
                 using (var br = new BinaryReader(fs))
                 {
                     int hitCandidatesCount = br.ReadInt32();
 
                     // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
-
-                    var documentsList = result.Documents.Values.ToList();
 
                     for (int i = 0; i < hitCandidatesCount; ++i)
                     {
@@ -241,7 +365,7 @@ namespace Coverlet.Core
 
                         if (hitLocation.isBranch)
                         {
-                            var branch = document.Branches[(hitLocation.start, hitLocation.end)];
+                            var branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
                             branch.Hits += hits;
                         }
                         else
@@ -250,55 +374,32 @@ namespace Coverlet.Core
                             {
                                 var line = document.Lines[j];
                                 line.Hits += hits;
-                            }
-                        }
-                    }
-                }
 
-                // for MoveNext() compiler autogenerated method we need to patch false positive (IAsyncStateMachine for instance) 
-                // we'll remove all MoveNext() not covered branch
-                foreach (var document in result.Documents)
-                {
-                    List<KeyValuePair<(int, int), Branch>> branchesToRemove = new List<KeyValuePair<(int, int), Branch>>();
-                    foreach (var branch in document.Value.Branches)
-                    {
-                        //if one branch is covered we search the other one only if it's not covered
-                        if (IsAsyncStateMachineMethod(branch.Value.Method) && branch.Value.Hits > 0)
-                        {
-                            foreach (var moveNextBranch in document.Value.Branches)
-                            {
-                                if (moveNextBranch.Value.Method == branch.Value.Method && moveNextBranch.Value != branch.Value && moveNextBranch.Value.Hits == 0)
+                                // We register 0 hit lines for later cleanup false positive of nested lambda closures
+                                if (hits == 0)
                                 {
-                                    branchesToRemove.Add(moveNextBranch);
+                                    zeroHitsLines.Add((hitLocation.docIndex, line.Number));
                                 }
                             }
                         }
                     }
-                    foreach (var branchToRemove in branchesToRemove)
+                }
+
+                // Cleanup nested state machine false positive hits
+                foreach (var (docIndex, line) in zeroHitsLines)
+                {
+                    foreach (var lineToCheck in documentsList[docIndex].Lines)
                     {
-                        document.Value.Branches.Remove(branchToRemove.Key);
+                        if (lineToCheck.Key == line)
+                        {
+                            lineToCheck.Value.Hits = 0;
+                        }
                     }
                 }
 
-                InstrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+                _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+                _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
             }
-        }
-
-        private bool IsAsyncStateMachineMethod(string method)
-        {
-            if (!method.EndsWith("::MoveNext()"))
-            {
-                return false;
-            }
-
-            foreach (var instrumentationResult in _results)
-            {
-                if (instrumentationResult.AsyncMachineStateMethod.Contains(method))
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private string GetSourceLinkUrl(Dictionary<string, string> sourceLinkDocuments, string document)
@@ -316,10 +417,18 @@ namespace Coverlet.Core
                 string key = sourceLinkDocument.Key;
                 if (Path.GetFileName(key) != "*") continue;
 
-                if (!Path.GetDirectoryName(document).StartsWith(Path.GetDirectoryName(key) + Path.DirectorySeparatorChar))
-                    continue;
+                string directoryDocument = Path.GetDirectoryName(document);
+                string sourceLinkRoot = Path.GetDirectoryName(key);
+                string relativePath = "";
 
-                var relativePath = Path.GetDirectoryName(document).Substring(Path.GetDirectoryName(key).Length + 1);
+                // if document is on repo root we skip relative path calculation
+                if (directoryDocument != sourceLinkRoot)
+                {
+                    if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
+                        continue;
+
+                    relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
+                }
 
                 if (relativePathOfBestMatch.Length == 0)
                 {

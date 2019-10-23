@@ -172,6 +172,14 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
+    public class AsyncAwaitStateMachine
+    {
+        async public Task AsyncAwait()
+        {
+            await Task.CompletedTask;
+        }
+    }
+
     [ExcludeFromCoverage]
     public class ClassExcludedByCoverletCodeCoverageAttr
     {
@@ -188,7 +196,6 @@ namespace Coverlet.Core.Samples.Tests
     [ExcludeFromCodeCoverage]
     public class ClassExcludedByCodeAnalysisCodeCoverageAttr
     {
-
         public string Method(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -201,7 +208,6 @@ namespace Coverlet.Core.Samples.Tests
     [Obsolete]
     public class ClassExcludedByObsoleteAttr
     {
-
         public string Method(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -209,6 +215,38 @@ namespace Coverlet.Core.Samples.Tests
 
             return input;
         }
+    }
+
+    public class ClassWithMethodExcludedByObsoleteAttr
+    {
+        [Obsolete]
+        public string Method(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                throw new ArgumentException("Cannot be empty", nameof(input));
+
+            return input;
+        }
+    }
+
+    public class ClassWithPropertyExcludedByObsoleteAttr
+    {
+        [Obsolete]
+        public string Property { get; set; }
+    }
+
+    public class ClassWithSetterOnlyPropertyExcludedByObsoleteAttr
+    {
+        [Obsolete]
+        public string Property
+        {
+            set => _ = string.Empty;
+        }
+    }
+
+    public abstract class ClassWithEmptyMethod
+    {
+        public abstract void EmptyMethod();
     }
 
     public class ExceptionFilter

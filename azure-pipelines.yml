@@ -1,0 +1,64 @@
+trigger:
+  branches:
+    include: ["master", "*_validate"]
+  paths:
+    exclude: [".github", "doc", "*.md"]
+
+jobs:
+- job: Windows
+  displayName: Windows
+  continueOnError: true
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "Debug"
+      Release:
+        buildConfiguration: "Release"
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+  - template: build.yml
+  - task: CopyFiles@2
+    displayName: Collect packages
+    inputs:
+      SourceFolder: bin\$(BuildConfiguration)\Packages
+      Contents: |
+        *.nupkg
+        *.snupkg
+      TargetFolder: $(Build.ArtifactStagingDirectory)\Packages
+    condition: eq(variables['BuildConfiguration'], 'Release')
+  - task: PublishBuildArtifacts@1
+    displayName: Publish packages as build artifacts
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)\Packages
+      ArtifactName: Packages
+      publishLocation: Container
+    condition: eq(variables['BuildConfiguration'], 'Release')
+
+- job: macOS
+  displayName: macOS
+  continueOnError: true
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "Debug"
+      Release:
+        buildConfiguration: "Release"
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+  - template: build.yml
+
+- job: Linux
+  displayName: Linux
+  continueOnError: true
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "Debug"
+      Release:
+        buildConfiguration: "Release"
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - template: build.yml
