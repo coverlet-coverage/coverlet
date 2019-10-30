@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using ILogger = Coverlet.Core.Logging.ILogger;
+using ILogger = Coverlet.Core.Abstracts.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
 {

@@ -8,7 +8,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Moq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Coverlet.Core;
-using Coverlet.Core.Logging;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
 using Xunit;

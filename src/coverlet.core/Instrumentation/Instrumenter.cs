@@ -7,7 +7,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Attributes;
-using Coverlet.Core.Logging;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Mono.Cecil;

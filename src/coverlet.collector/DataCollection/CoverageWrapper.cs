@@ -2,7 +2,6 @@
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Extensions;
-using Coverlet.Core.Logging;
 
 namespace Coverlet.Collector.DataCollection
 {
