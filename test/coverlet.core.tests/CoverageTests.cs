@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Logging;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.RemoteExecutor;
 using Moq;

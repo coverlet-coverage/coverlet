@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Logging;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

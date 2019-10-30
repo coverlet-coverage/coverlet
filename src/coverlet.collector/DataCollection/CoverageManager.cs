@@ -6,7 +6,7 @@ using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
-using Coverlet.Core.Logging;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Reporters;
 
 namespace Coverlet.Collector.DataCollection

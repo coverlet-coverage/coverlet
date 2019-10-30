@@ -1,6 +1,6 @@
 ﻿using Coverlet.Collector.DataCollection;
 using Coverlet.Core;
-using Coverlet.Core.Logging;
+using Coverlet.Core.Abstracts;
 
 namespace Coverlet.Collector.Utilities.Interfaces
 {

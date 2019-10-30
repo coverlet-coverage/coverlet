@@ -1,6 +1,6 @@
 ﻿using System;
 using Coverlet.Collector.Utilities;
-using Coverlet.Core.Logging;
+using Coverlet.Core.Abstracts;
 
 namespace Coverlet.Collector.DataCollection
 {
