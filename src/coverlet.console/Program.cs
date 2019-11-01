@@ -46,6 +46,7 @@ namespace Coverlet.Console
             CommandOption singleHit = app.Option("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location", CommandOptionType.NoValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
+            CommandOption excludeFilesFromFile = app.Option("--exclude-from-file", "Imports filter expressions for source files from the provided file path", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
@@ -61,6 +62,13 @@ namespace Coverlet.Console
                     logger.Level = verbosity.ParsedValue;
                 }
                 var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+                
+                if (excludeFilesFromFile.HasValue())
+                {
+                    var exclusionsFromFileHelper = DependencyInjection.Current.GetService<IExclusionsFromFileHelper>();
+                    excludedSourceFiles.Values.AddRange(exclusionsFromFileHelper.ImportExclusionsFromFile(excludeFilesFromFile.Value()));
+                }
+
                 Coverage coverage = new Coverage(module.Value,
                     includeFilters.Values.ToArray(),
                     includeDirectories.Values.ToArray(),
