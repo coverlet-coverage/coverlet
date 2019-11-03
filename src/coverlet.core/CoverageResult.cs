@@ -41,6 +41,7 @@ namespace Coverlet.Core
     {
         public string Identifier;
         public Modules Modules;
+        public bool IsSourceLinkUsed;
         internal List<InstrumenterResult> InstrumentedResults;
 
         internal CoverageResult() { }

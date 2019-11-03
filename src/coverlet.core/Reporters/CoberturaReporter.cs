@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml.Linq;
 
@@ -30,7 +32,8 @@ namespace Coverlet.Core.Reporters
             coverage.Add(new XAttribute("timestamp", (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds));
 
             XElement sources = new XElement("sources");
-            sources.Add(new XElement("source", string.Empty));
+            var rootDirs = GetRootDirs(result.Modules, result.IsSourceLinkUsed);
+            rootDirs.ToList().ForEach(x => sources.Add(new XElement("source", x)));
 
             XElement packages = new XElement("packages");
             foreach (var module in result.Modules)
@@ -48,7 +51,7 @@ namespace Coverlet.Core.Reporters
                     {
                         XElement @class = new XElement("class");
                         @class.Add(new XAttribute("name", cls.Key));
-                        @class.Add(new XAttribute("filename", document.Key));
+                        @class.Add(new XAttribute("filename", GetRelativePathFromBase(rootDirs, document.Key, result.IsSourceLinkUsed)));
                         @class.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(cls.Value)));
@@ -128,6 +131,38 @@ namespace Coverlet.Core.Reporters
             xml.Save(stream);
 
             return Encoding.UTF8.GetString(stream.ToArray());
+        }
+
+        private string[] GetRootDirs(Modules modules, bool isSourceLinkUsed)
+        {
+            if (isSourceLinkUsed) return new[] { string.Empty };
+
+            List<string> sources = new List<string>();
+
+            foreach (var module in modules)
+            {
+
+                sources.AddRange(
+                    module.Value.Select(d => Path.GetDirectoryName(d.Key)));
+            }
+
+            sources = sources.Distinct().ToList();
+            return sources.Select(Directory.GetDirectoryRoot).Distinct().ToArray();
+        }
+
+        private string GetRelativePathFromBase(string[] basePaths, string path, bool isSourceLinkUsed)
+        {
+            if (isSourceLinkUsed) return path;
+
+            string relativePath = path;
+            basePaths.ToList().ForEach(basePath =>
+            {
+                if (path.StartsWith(basePath))
+                {
+                    relativePath = path.Substring(basePath.Length);
+                }
+            });
+            return relativePath;
         }
     }
 }
