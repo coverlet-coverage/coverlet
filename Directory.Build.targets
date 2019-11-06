@@ -8,7 +8,7 @@
     <PackageReference Update="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Update="Microsoft.TestPlatform.ObjectModel" Version="16.1.0" />
-    <PackageReference Update="Mono.Cecil" Version="0.10.4" />
+    <PackageReference Update="Mono.Cecil" Version="0.11.1" />
     <PackageReference Update="Moq" Version="4.10.1" />
     <!-- Do not upgrade this version or we won't support old SDK -->
     <PackageReference Update="Newtonsoft.Json" Version="9.0.1" />
