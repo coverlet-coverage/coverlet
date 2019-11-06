@@ -127,6 +127,15 @@ You can also ignore specific source files from code coverage using the `ExcludeB
 dotnet test /p:CollectCoverage=true /p:ExcludeByFile=\"../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs\"
 ```
 
+### Source Files From File
+If you have many files or just want to have the exclusions under version control, you can also ignore specific source files from code coverage using the `ExcludeFromFile` property
+ - Use single path to file with excludes (absolute or relative to the project directory)
+ - Use same patterns as with [Source Files](#Source-Files) but separate each pattern with a new line
+
+```bash
+dotnet test /p:CollectCoverage=true /p:ExcludeFromFile=\"../dir1/excludes.txt\"
+```
+
 ### Filters
 Coverlet gives the ability to have fine grained control over what gets excluded using "filter expressions".
 

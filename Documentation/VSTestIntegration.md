@@ -32,7 +32,8 @@ These are a list of options that are supported by coverlet. These can be specifi
 |Format          | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.   | 
 |MergeWith       | Combine the output of multiple coverage runs into a single result([check the sample](Examples.md)).                       | 
 |Exclude         | Exclude from code coverage analysing using filter expressions.                           | 
-|ExcludeByFile   | Ignore specific source files from code coverage.                                         | 
+|ExcludeByFile   | Ignore specific source files from code coverage. |             
+|ExcludeFromFile | Import source files to ignore from code coverage from a file.   | 
 |Include         | Explicitly set what to include in code coverage analysis using filter expressions.       | 
 |IncludeDirectory| Explicitly set which directories to include in code coverage analysis.                   |
 |SingleHit       | Specifies whether to limit code coverage hit reporting to a single hit for each location.| 
@@ -52,6 +53,7 @@ How to specify these options via runsettings?
           <Include>[coverlet.*]*,[*]Coverlet.Core*</Include> <!-- [Assembly-Filter]Type-Filter -->
           <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
           <ExcludeByFile>../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs,</ExcludeByFile> <!-- Absolute or relative file paths -->
+          <ExcludeFromFile>../dir1/excludes.txt</ExcludeFromFile> <!-- Absolute or relative file path -->
           <IncludeDirectory>../dir1/,../dir2/,</IncludeDirectory>
           <SingleHit>false</SingleHit>
           <UseSourceLink>true</UseSourceLink>
@@ -85,6 +87,6 @@ The datacollectors will be bundled as a separate NuGet package, the reference to
 </ItemGroup>
 ```
 
-## Know issue
+## Known issue
 
-Thre is a know issue, check it here https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100
+Thre is a known issue, check it here https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100

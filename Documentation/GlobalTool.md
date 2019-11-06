@@ -31,6 +31,7 @@ Options:
   --include                Filter expressions to include specific modules and types[multiple value].
   --include-directory      Include directories containing additional assemblies to be instrumented[multiple value].
   --exclude-by-file        Glob patterns specifying source files to exclude[multiple value].
+  --exclude-from-file      Imports filter expressions for source files from the provided file path
   --exclude-by-attribute   Attributes to exclude from code coverage[multiple value].
   --include-test-assembly  Specifies whether to report code coverage of the test assembly.
   --single-hit             Specifies whether to limit code coverage hit reporting to a single hit for each location.
@@ -177,6 +178,15 @@ You can also ignore specific source files from code coverage using the `--exclud
 
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-file "../dir1/class1.cs"
+```
+
+### Source Files From File
+If you have many files or just want to have the exclusions under version control, you can also ignore specific source files from code coverage using the `--exclude-from-file` option
+ - Use single path to file with excludes (absolute or relative to the project directory)
+ - Use same patterns as with [Source Files](#Source-Files) but separate each pattern with a new line
+
+```bash
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-from-file "../dir1/excludes.txt"
 ```
 
 ### Filters
