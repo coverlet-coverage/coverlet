@@ -7,12 +7,11 @@ namespace Coverlet.Core.Helpers
     {
         private static readonly string[] EmptyResult = new string[0];
         private readonly IFileSystem _fileSystem;
-        private readonly ILogger _logger;
+        private ILogger _logger;
 
-        public ExclusionsFromFileHelper(IFileSystem fileSystem, ILogger logger)
+        public ExclusionsFromFileHelper(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
-            _logger = logger;
         }
 
         public string[] ImportExclusionsFromFile(string path)
@@ -23,9 +22,14 @@ namespace Coverlet.Core.Helpers
             }
             catch (Exception e)
             {
-                _logger.LogWarning($"Failed to parse exclusion file at {path}. Received {e.Message}");
+                _logger?.LogWarning($"Failed to parse exclusion file at {path}. Received {e.Message}");
                 return EmptyResult;
             }
+        }
+
+        public void Init(ILogger logger)
+        {
+            _logger = logger;
         }
     }
 }

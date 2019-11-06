@@ -15,7 +15,8 @@ namespace Coverlet.Core.Tests
         
         public ExclusionsFromFileHelperTests()
         {
-            _sut = new ExclusionsFromFileHelper(_filesSystemMock.Object, _loggerMock.Object);
+            _sut = new ExclusionsFromFileHelper(_filesSystemMock.Object);
+            _sut.Init(_loggerMock.Object);
         }
 
         [Fact]

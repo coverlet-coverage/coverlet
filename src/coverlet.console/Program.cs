@@ -66,6 +66,7 @@ namespace Coverlet.Console
                 if (excludeSourceFilesFromFile.HasValue())
                 {
                     var exclusionsFromFileHelper = DependencyInjection.Current.GetService<IExclusionsFromFileHelper>();
+                    exclusionsFromFileHelper.Init(logger);
                     excludedSourceFiles.Values.AddRange(exclusionsFromFileHelper.ImportExclusionsFromFile(excludeSourceFilesFromFile.Value()));
                 }
 

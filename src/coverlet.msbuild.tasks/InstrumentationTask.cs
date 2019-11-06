@@ -117,6 +117,7 @@ namespace Coverlet.MSbuild.Tasks
                 if (!string.IsNullOrWhiteSpace(_excludeFromFile))
                 {
                     var exclusionsFromFileHelper = DependencyInjection.Current.GetService<IExclusionsFromFileHelper>();
+                    exclusionsFromFileHelper.Init(_logger);
                     excludedSourceFiles = excludedSourceFiles.Concat(exclusionsFromFileHelper.ImportExclusionsFromFile(_excludeFromFile)).ToArray();
                 }
 
