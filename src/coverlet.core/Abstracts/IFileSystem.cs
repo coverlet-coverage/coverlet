@@ -12,6 +12,8 @@ namespace Coverlet.Core.Abstracts
 
         string[] ReadAllLines(string path);
 
+        bool FileExists(string path);
+
         Stream OpenRead(string path);
 
         void Copy(string sourceFileName, string destFileName, bool overwrite);

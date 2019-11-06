@@ -1,5 +1,6 @@
 ﻿using Coverlet.Core.Abstracts;
 using System;
+using System.IO;
 
 namespace Coverlet.Core.Helpers
 {
@@ -18,11 +19,17 @@ namespace Coverlet.Core.Helpers
         {
             try
             {
+                if (!_fileSystem.FileExists(path))
+                {
+                    _logger?.LogWarning($"File with exclusions does not exists. Returning empty. Path: {path}");
+                    return EmptyResult;
+                }
+
                 return _fileSystem.ReadAllLines(path);
             }
             catch (Exception e)
             {
-                _logger?.LogWarning($"Failed to parse exclusion file at {path}. Received {e.Message}");
+                _logger?.LogWarning($"Failed to parse exclusion file at {path}. Received {e.Message}. Returning empty");
                 return EmptyResult;
             }
         }

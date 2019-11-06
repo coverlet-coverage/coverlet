@@ -21,10 +21,9 @@ namespace Coverlet.Core.Helpers
             return File.ReadAllText(path);
         }
 
-        public string[] ReadAllLines(string path)
-        {
-            return File.ReadAllLines(path);
-        }
+        public string[] ReadAllLines(string path) => File.ReadAllLines(path);
+
+        public bool FileExists(string path) => File.Exists(path);
 
         public Stream OpenRead(string path)
         {

@@ -24,6 +24,19 @@ namespace Coverlet.Core.Tests
         {
             var expected = new[] { "../dir1/class1.cs", "../dir2/*.cs", "../dir3/**/*.cs" };
             _filesSystemMock.Setup(m => m.ReadAllLines(It.IsAny<string>())).Returns(expected);
+            _filesSystemMock.Setup(m => m.FileExists(It.IsAny<string>())).Returns(true);
+            var path = Guid.NewGuid().ToString();
+
+            var actual = _sut.ImportExclusionsFromFile(path);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void TestImportExclusionsFromFileReturnsEmptyWhenFileDoesNotExists()
+        {
+            var expected = new string[0];
+            _filesSystemMock.Setup(m => m.FileExists(It.IsAny<string>())).Returns(false);
             var path = Guid.NewGuid().ToString();
 
             var actual = _sut.ImportExclusionsFromFile(path);
