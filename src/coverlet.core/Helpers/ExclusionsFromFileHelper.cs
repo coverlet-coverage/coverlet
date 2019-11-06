@@ -1,7 +1,7 @@
 ﻿using Coverlet.Core.Abstracts;
 using System;
 
-namespace coverlet.core.Helpers
+namespace Coverlet.Core.Helpers
 {
     internal class ExclusionsFromFileHelper : IExclusionsFromFileHelper
     {

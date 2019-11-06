@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using coverlet.core.Helpers;
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Abstracts;
 using Moq;
 using Xunit;
 
-namespace coverlet.core.tests.Helpers
+namespace Coverlet.Core.Tests
 {
     public class ExclusionsFromFileHelperTests
     {
