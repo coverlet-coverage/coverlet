@@ -29,7 +29,7 @@ namespace Coverlet.Core
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
-            serviceCollection.AddTransient<IExclusionsFromFileHelper, IExclusionsFromFileHelper>();
+            serviceCollection.AddTransient<IExclusionsFromFileHelper, ExclusionsFromFileHelper>();
 
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
