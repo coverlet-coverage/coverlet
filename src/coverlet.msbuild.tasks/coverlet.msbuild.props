@@ -5,6 +5,7 @@
     <IncludeDirectory Condition="$(IncludeDirectory) == ''"></IncludeDirectory>
     <Exclude Condition="$(Exclude) == ''"></Exclude>
     <ExcludeByFile Condition="$(ExcludeByFile) == ''"></ExcludeByFile>
+    <ExcludeFromFile Condition="$(ExcludeFromFile) == ''"></ExcludeFromFile>
     <ExcludeByAttribute Condition="$(ExcludeByAttribute) == ''"></ExcludeByAttribute>
     <IncludeTestAssembly Condition="'$(IncludeTestAssembly)' == ''">false</IncludeTestAssembly>
     <SingleHit Condition="'$(SingleHit)' == ''">false</SingleHit>

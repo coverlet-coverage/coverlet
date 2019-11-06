@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-
+using System.Linq;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Extensions;
@@ -16,6 +16,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _includeDirectory;
         private string _exclude;
         private string _excludeByFile;
+        private string _excludeFromFile;
         private string _excludeByAttribute;
         private bool _includeTestAssembly;
         private bool _singleHit;
@@ -53,6 +54,12 @@ namespace Coverlet.MSbuild.Tasks
         {
             get { return _excludeByFile; }
             set { _excludeByFile = value; }
+        }
+
+        public string ExcludeFromFile
+        {
+            get { return _excludeFromFile; }
+            set { _excludeFromFile = value; }
         }
 
         public string ExcludeByAttribute
@@ -107,6 +114,11 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
                 var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+                if (!string.IsNullOrWhiteSpace(_excludeFromFile))
+                {
+                    var exclusionsFromFileHelper = DependencyInjection.Current.GetService<IExclusionsFromFileHelper>();
+                    excludedSourceFiles = excludedSourceFiles.Concat(exclusionsFromFileHelper.ImportExclusionsFromFile(_excludeFromFile)).ToArray();
+                }
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
