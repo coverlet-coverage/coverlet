@@ -126,7 +126,7 @@ dotnet test --settings runsetting
  ...
 </PropertyGroup>
  ```
- NB. This **DOESN'T WORK** always, for instance in case of shared framework https://github.com/dotnet/cli/issues/12705#issuecomment-536686785
+ NB. This **DOESN'T ALWAYS WORK**, for instance in case of shared framework https://github.com/dotnet/cli/issues/12705#issuecomment-536686785
 
  We can do nothing at the moment this is a build behaviour out of our control.
 
