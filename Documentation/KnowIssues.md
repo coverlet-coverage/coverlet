@@ -85,7 +85,7 @@ And pass it to command line
 ```bash
 dotnet test --settings runsetting
 ```
-## 3) Nerdbank.GitVersioning and /p:UseSourceLink=true option
+## 3) Nerdbank.GitVersioning and `/p:UseSourceLink=true` option
 
 *Affected drivers*: all drivers that support /p:UseSourceLink=true
 
