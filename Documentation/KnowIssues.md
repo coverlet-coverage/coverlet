@@ -128,7 +128,8 @@ dotnet test --settings runsetting
  ```
  NB. This **DOESN'T ALWAYS WORK**, for instance in case of shared framework https://github.com/dotnet/cli/issues/12705#issuecomment-536686785
 
- We can do nothing at the moment this is a build behaviour out of our control.
+ We can do nothing at the moment this is a build behaviour out of our control.  
+ This issue should not happen for .net runtime version >= 3.0 because the new default behavior is copy all assets to the build output https://github.com/dotnet/cli/issues/12705#issuecomment-535150372  
 
  In this case the only workaround for the moment is to *manually copy* missing dll to output folder https://github.com/tonerdo/coverlet/issues/560#issue-496440052 "The only reliable way to work around this problem is to drop the DLL in the unit tests project's bin\Release\netcoreapp2.2 directory."
 
