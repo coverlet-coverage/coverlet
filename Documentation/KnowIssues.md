@@ -87,7 +87,7 @@ dotnet test --settings runsetting
 ```
 ## 3) Nerdbank.GitVersioning and `/p:UseSourceLink=true` option
 
-*Affected drivers*: all drivers that support /p:UseSourceLink=true
+*Affected drivers*: all drivers that support `/p:UseSourceLink=true`
 
  *Symptoms:* some tool like SonarSource doesn't work well see https://github.com/tonerdo/coverlet/issues/482
 
