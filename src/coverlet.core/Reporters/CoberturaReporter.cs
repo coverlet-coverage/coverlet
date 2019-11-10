@@ -32,8 +32,8 @@ namespace Coverlet.Core.Reporters
             coverage.Add(new XAttribute("timestamp", (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds));
 
             XElement sources = new XElement("sources");
-            var rootDirs = GetRootDirs(result.Modules, result.IsSourceLinkUsed);
-            rootDirs.ToList().ForEach(x => sources.Add(new XElement("source", x)));
+            var rootDirs = GetRootDirs(result.Modules, result.IsSourceLinkUsed).ToList();
+            rootDirs.ForEach(x => sources.Add(new XElement("source", x)));
 
             XElement packages = new XElement("packages");
             foreach (var module in result.Modules)
@@ -133,7 +133,7 @@ namespace Coverlet.Core.Reporters
             return Encoding.UTF8.GetString(stream.ToArray());
         }
 
-        private string[] GetRootDirs(Modules modules, bool isSourceLinkUsed)
+        private static IEnumerable<string> GetRootDirs(Modules modules, bool isSourceLinkUsed)
         {
             if (isSourceLinkUsed) return new[] { string.Empty };
 
@@ -147,10 +147,10 @@ namespace Coverlet.Core.Reporters
             }
 
             sources = sources.Distinct().ToList();
-            return sources.Select(Directory.GetDirectoryRoot).Distinct().ToArray();
+            return sources.Select(Directory.GetDirectoryRoot).Distinct();
         }
 
-        private string GetRelativePathFromBase(string[] basePaths, string path, bool isSourceLinkUsed)
+        private static string GetRelativePathFromBase(IEnumerable<string> basePaths, string path, bool isSourceLinkUsed)
         {
             if (isSourceLinkUsed) return path;
 
