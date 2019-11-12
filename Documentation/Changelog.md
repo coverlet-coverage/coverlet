@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 -Add log to tracker [#553](https://github.com/tonerdo/coverlet/pull/553)  
--Exclude by assembly level System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage [#589](https://github.com/tonerdo/coverlet/pull/589)
+-Exclude by assembly level System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage [#589](https://github.com/tonerdo/coverlet/pull/589)  
+-Allow coverlet integration with other MSBuild test strategies[#615](https://github.com/tonerdo/coverlet/pull/615) by https://github.com/sharwell  
 
 ### Fixed
 
@@ -17,8 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Improvements
 
--Improve exception message for unsupported runtime [#569](https://github.com/tonerdo/coverlet/pull/569) by https://github.com/daveMueller  
--Allow coverlet integration with other MSBuild test strategies[#615](https://github.com/tonerdo/coverlet/pull/615) by https://github.com/sharwell  
+-Improve exception message for unsupported runtime [#569](https://github.com/tonerdo/coverlet/pull/569) by https://github.com/daveMueller
 
 ## Release date 2019-09-23
 ### Packages  
