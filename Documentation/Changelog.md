@@ -17,7 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Improvements
 
--Improve exception message for unsupported runtime [#569](https://github.com/tonerdo/coverlet/pull/569) by https://github.com/daveMueller
+-Improve exception message for unsupported runtime [#569](https://github.com/tonerdo/coverlet/pull/569) by https://github.com/daveMueller  
+-Allow coverlet integration with other MSBuild test strategies[#615](https://github.com/tonerdo/coverlet/pull/615) by https://github.com/sharwell  
 
 ## Release date 2019-09-23
 ### Packages  
