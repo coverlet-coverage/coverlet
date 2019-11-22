@@ -68,7 +68,7 @@ For instance
   ...
 </ItemGroup>
 ```
-N.B. This document was updated after preview release of test platform package with fix, you should use official version of the package.  
+***N.B. This document was updated after preview release of test platform package with fix, you should use official version of the package.***  
 2) You can pass custom *runsetting* file like this
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
