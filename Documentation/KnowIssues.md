@@ -58,7 +58,17 @@ Check requirements https://github.com/tonerdo/coverlet#requirements you need to 
 There is a bug inside vstest platform https://github.com/microsoft/vstest/issues/2205.  
 If you upgrade collector package with version greather than 1.0.0 in-proc collector won't be loaded so you could incur in know issue number 1 and get zero coverage result
 
-*Solution:* you need to pass custom *runsetting* file like this
+*Solutions:*   
+1) Reference `Mcrosoft.NET.Test.Sdk` with version greater than 16.4.0  
+For instance
+```xml
+<ItemGroup>
+  ...
+  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20191115-01" />
+  ...
+</ItemGroup>
+```
+2) You can pass custom *runsetting* file like this
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
 <RunSettings>
