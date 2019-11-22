@@ -59,7 +59,7 @@ There is a bug inside vstest platform https://github.com/microsoft/vstest/issues
 If you upgrade collector package with version greather than 1.0.0 in-proc collector won't be loaded so you could incur in know issue number 1 and get zero coverage result
 
 *Solutions:*   
-1) Reference `Mcrosoft.NET.Test.Sdk` with version greater than 16.4.0  
+1) Reference `Mcrosoft.NET.Test.Sdk` with version *greater than* 16.4.0  
 For instance
 ```xml
 <ItemGroup>
