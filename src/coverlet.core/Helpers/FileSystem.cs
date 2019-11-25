@@ -42,7 +42,8 @@ namespace Coverlet.Core.Helpers
             return new FileStream(path, mode);
         }
 
-        public Stream NewFileStream(string path, FileMode mode, FileAccess access)
+        // We need to partial mock this method on tests
+        public virtual Stream NewFileStream(string path, FileMode mode, FileAccess access)
         {
             return new FileStream(path, mode, access);
         }

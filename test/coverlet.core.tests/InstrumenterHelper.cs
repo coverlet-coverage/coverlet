@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,6 +78,21 @@ namespace Coverlet.Core.Tests
             return document;
         }
 
+        public static string ToStringBranches(this Document document)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            StringBuilder builder = new StringBuilder();
+            foreach (KeyValuePair<BranchKey, Branch> branch in document.Branches)
+            {
+                builder.AppendLine($"({branch.Value.Number}, {branch.Value.Ordinal}, {branch.Value.Hits}),");
+            }
+            return builder.ToString();
+        }
+
         public static Document AssertBranchesCovered(this Document document, BuildConfiguration configuration, params (int line, int ordinal, int hits)[] lines)
         {
             if (document is null)
@@ -122,6 +138,47 @@ namespace Coverlet.Core.Tests
         public static Document AssertLinesCovered(this Document document, params (int line, int hits)[] lines)
         {
             return AssertLinesCovered(document, BuildConfiguration.Debug | BuildConfiguration.Release, lines);
+        }
+
+        public static Document AssertLinesCoveredAllBut(this Document document, BuildConfiguration configuration, params int[] linesNumber)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
+            }
+
+            foreach (KeyValuePair<int, Line> line in document.Lines)
+            {
+                bool skip = false;
+                foreach (int number in linesNumber)
+                {
+                    if (line.Value.Number == number)
+                    {
+                        skip = true;
+                        if (line.Value.Hits > 0)
+                        {
+                            throw new XunitException($"Hits not expected for line {line.Value.Number}");
+                        }
+                    }
+                }
+
+                if (skip)
+                    continue;
+
+                if (line.Value.Hits == 0)
+                {
+                    throw new XunitException($"Hits expected for line: {line.Value.Number}");
+                }
+            }
+
+            return document;
         }
 
         public static Document AssertLinesCovered(this Document document, BuildConfiguration configuration, params (int line, int hits)[] lines)
@@ -188,11 +245,14 @@ namespace Coverlet.Core.Tests
         /// </summary>
         public static void GenerateHtmlReport(CoverageResult coverageResult, IReporter reporter = null, string sourceFileFilter = "", [CallerMemberName]string directory = "")
         {
+            JsonReporter defaultReporter = new JsonReporter();
             reporter ??= new CoberturaReporter();
             DirectoryInfo dir = Directory.CreateDirectory(directory);
             dir.Delete(true);
             dir.Create();
-            string reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", reporter.Extension));
+            string reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", defaultReporter.Extension));
+            File.WriteAllText(reportFile, defaultReporter.Report(coverageResult));
+            reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", reporter.Extension));
             File.WriteAllText(reportFile, reporter.Report(coverageResult));
             // i.e. reportgenerator -reports:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If\report.cobertura.xml" -targetdir:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If" -filefilters:+**\Samples\Instrumentation.cs
             new Generator().GenerateReport(new ReportConfiguration(
@@ -214,20 +274,29 @@ namespace Coverlet.Core.Tests
             using (var result = new FileStream(filePath, FileMode.Open))
             {
                 CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem()), new FileSystem());
+                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, DependencyInjection.Current.GetService<IInstrumentationHelper>(), new FileSystem());
                 return coverage.GetCoverageResult();
             }
         }
 
-        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, string persistPrepareResultToFile)
+        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, string persistPrepareResultToFile, bool disableRestoreModules = false)
         {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            if (disableRestoreModules)
+            {
+                serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
+            }
+            else
+            {
+                serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+            }
+
             // Setup correct retry helper to avoid exception in InstrumentationHelper.RestoreOriginalModules on remote process exit
-            DependencyInjection.Set(new ServiceCollection()
-            .AddTransient<IRetryHelper, CustomRetryHelper>()
-            .AddTransient<IProcessExitHandler, CustomProcessExitHandler>()
-            .AddTransient<IFileSystem, FileSystem>()
-            .AddSingleton<IInstrumentationHelper, InstrumentationHelper>()
-            .BuildServiceProvider());
+            DependencyInjection.Set(serviceCollection.BuildServiceProvider());
+
 
             // Rename test file to avoid locks
             string location = typeof(T).Assembly.Location;
@@ -242,7 +311,7 @@ namespace Coverlet.Core.Tests
             Coverage coverage = new Coverage(newPath,
             new string[]
             {
-                $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}"
+                $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*"
             },
             Array.Empty<string>(),
             new string[]
@@ -360,6 +429,25 @@ namespace Coverlet.Core.Tests
         public void LogWarning(string message)
         {
             File.AppendAllText(_logFile, message + Environment.NewLine);
+        }
+    }
+
+    class InstrumentationHelperForDebugging : InstrumentationHelper
+    {
+        public InstrumentationHelperForDebugging(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem)
+            : base(processExitHandler, retryHelper, fileSystem)
+        {
+
+        }
+
+        public override void RestoreOriginalModule(string module, string identifier)
+        {
+            // DO NOT RESTORE
+        }
+
+        public override void RestoreOriginalModules()
+        {
+            // DO NOT RESTORE
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Coverlet.Core.Instrumentation
 {
+    [DebuggerDisplay("Number = {Number} Hits = {Hits} Class = {Class} Method = {Method}")]
     [DataContract]
     internal class Line
     {
@@ -73,6 +74,7 @@ namespace Coverlet.Core.Instrumentation
         public Dictionary<BranchKey, Branch> Branches { get; private set; }
     }
 
+    [DebuggerDisplay("isBranch = {isBranch} docIndex = {docIndex} start = {start} end = {end}")]
     [DataContract]
     internal class HitCandidate
     {
@@ -99,6 +101,8 @@ namespace Coverlet.Core.Instrumentation
 
         [DataMember]
         public string Module;
+        [DataMember]
+        public string[] BranchesInCompiledGeneratedClass;
         [DataMember]
         public string HitsFilePath;
         [DataMember]

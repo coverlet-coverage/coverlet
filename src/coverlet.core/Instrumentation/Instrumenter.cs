@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-
+using System.Runtime.CompilerServices;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Symbols;
@@ -37,6 +37,9 @@ namespace Coverlet.Core.Instrumentation
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
         private MethodReference _customTrackerRecordHitMethod;
         private List<string> _excludedSourceFiles;
+        private List<string> _branchesInCompiledGeneratedClass;
+
+        public bool SkipModule { get; set; } = false;
 
         public Instrumenter(
             string module,
@@ -130,6 +133,8 @@ namespace Coverlet.Core.Instrumentation
                 }
             }
 
+            _result.BranchesInCompiledGeneratedClass = _branchesInCompiledGeneratedClass == null ? Array.Empty<string>() : _branchesInCompiledGeneratedClass.ToArray();
+
             return _result;
         }
 
@@ -147,6 +152,16 @@ namespace Coverlet.Core.Instrumentation
 
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
+                    foreach (CustomAttribute customAttribute in module.Assembly.CustomAttributes)
+                    {
+                        if (customAttribute.AttributeType.FullName == "System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute")
+                        {
+                            _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute 'System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute'");
+                            SkipModule = true;
+                            return;
+                        }
+                    }
+
                     var containsAppContext = module.GetType(nameof(System), nameof(AppContext)) != null;
                     var types = module.GetTypes();
                     AddCustomModuleTrackerToModule(module);
@@ -454,7 +469,8 @@ namespace Coverlet.Core.Instrumentation
             BranchKey key = new BranchKey(branchPoint.StartLine, (int)branchPoint.Ordinal);
             if (!document.Branches.ContainsKey(key))
             {
-                document.Branches.Add(key,
+                document.Branches.Add(
+                    key,
                     new Branch
                     {
                         Number = branchPoint.StartLine,
@@ -466,6 +482,19 @@ namespace Coverlet.Core.Instrumentation
                         Ordinal = branchPoint.Ordinal
                     }
                 );
+
+                if (method.DeclaringType.CustomAttributes.Any(x => x.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
+                {
+                    if (_branchesInCompiledGeneratedClass == null)
+                    {
+                        _branchesInCompiledGeneratedClass = new List<string>();
+                    }
+
+                    if (!_branchesInCompiledGeneratedClass.Contains(method.FullName))
+                    {
+                        _branchesInCompiledGeneratedClass.Add(method.FullName);
+                    }
+                }
             }
 
             _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));

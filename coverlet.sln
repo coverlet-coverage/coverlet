@@ -27,6 +27,22 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.remoteexecut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.empty", "test\coverlet.tests.projectsample.empty\coverlet.tests.projectsample.empty.csproj", "{085A3AFB-C086-4E98-86F1-1B481446EC5E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{77A15177-8262-488F-AF2B-91B9055715DA}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		eng\azure-pipelines-nightly.yml = eng\azure-pipelines-nightly.yml
+		azure-pipelines.yml = azure-pipelines.yml
+		build.yml = build.yml
+		codecov.yml = codecov.yml
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		global.json = global.json
+		eng\nightly.ps1 = eng\nightly.ps1
+		nuget.config = nuget.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.projectsample.excludedbyattribute", "test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj", "{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +89,10 @@ Global
 		{085A3AFB-C086-4E98-86F1-1B481446EC5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{085A3AFB-C086-4E98-86F1-1B481446EC5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{085A3AFB-C086-4E98-86F1-1B481446EC5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,6 +108,7 @@ Global
 		{5ED4FA81-8F8C-4211-BA88-7573BD63262E} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{3E0F9E47-A1D7-4DF5-841D-A633486E2475} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{085A3AFB-C086-4E98-86F1-1B481446EC5E} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}

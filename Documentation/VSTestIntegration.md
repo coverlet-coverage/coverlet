@@ -30,7 +30,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 | Option         | Summary                                                                                  |
 |-------------   |------------------------------------------------------------------------------------------|
 |Format          | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.   | 
-|MergeWith       | Combine the output of multiple coverage runs into a single result.                       | 
+|MergeWith       | Combine the output of multiple coverage runs into a single result([check the sample](Examples.md)).                       | 
 |Exclude         | Exclude from code coverage analysing using filter expressions.                           | 
 |ExcludeByFile   | Ignore specific source files from code coverage.                                         | 
 |Include         | Explicitly set what to include in code coverage analysis using filter expressions.       | 
@@ -84,3 +84,7 @@ The datacollectors will be bundled as a separate NuGet package, the reference to
     <PackageReference Include="coverlet.collector" Version="1.0.0" />
 </ItemGroup>
 ```
+
+## Know issue
+
+Thre is a know issue, check it here https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100

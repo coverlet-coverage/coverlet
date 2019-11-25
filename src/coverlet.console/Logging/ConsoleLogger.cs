@@ -1,7 +1,6 @@
 using System;
-using static System.Console;
-
 using Coverlet.Core.Abstracts;
+using static System.Console;
 
 namespace Coverlet.Console.Logging
 {
