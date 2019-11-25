@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
