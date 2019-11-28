@@ -168,7 +168,11 @@ namespace Coverlet.Core.Instrumentation
                             continue;
                         }
 
-                        libraries.Add(library.Name, new Lazy<AssemblyDefinition>(() => AssemblyDefinition.ReadAssembly(path, new ReaderParameters() { AssemblyResolver = this })));
+                        // We could load more than one deps file, we need to check if lib is already found
+                        if (!libraries.ContainsKey(library.Name))
+                        {
+                            libraries.Add(library.Name, new Lazy<AssemblyDefinition>(() => AssemblyDefinition.ReadAssembly(path, new ReaderParameters() { AssemblyResolver = this })));
+                        }
                     }
                     catch
                     {
