@@ -26,7 +26,7 @@ namespace Coverlet.Core.Tests
         Release = 2
     }
 
-    public static class TestInstrumentationAssert
+    static class TestInstrumentationAssert
     {
         public static Document Document(this CoverageResult coverageResult, string docName)
         {
@@ -237,7 +237,7 @@ namespace Coverlet.Core.Tests
         }
     }
 
-    public static class TestInstrumentationHelper
+    static class TestInstrumentationHelper
     {
         /// <summary>
         /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");

@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core
 {
-    public class Coverage
+    internal class Coverage
     {
         private string _module;
         private string _identifier;

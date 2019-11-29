@@ -7,7 +7,7 @@ namespace Coverlet.Core.Instrumentation
 {
     [DebuggerDisplay("Number = {Number} Hits = {Hits} Class = {Class} Method = {Method}")]
     [DataContract]
-    public class Line
+    internal class Line
     {
         [DataMember]
         public int Number;
@@ -21,7 +21,7 @@ namespace Coverlet.Core.Instrumentation
 
     [DebuggerDisplay("Line = {Number} Offset = {Offset} EndOffset = {EndOffset} Path = {Path} Ordinal = {Ordinal} Hits = {Hits}")]
     [DataContract]
-    public class Branch : Line
+    internal class Branch : Line
     {
         [DataMember]
         public int Offset;
@@ -36,7 +36,7 @@ namespace Coverlet.Core.Instrumentation
     [DebuggerDisplay("line = {Line} Ordinal = {Ordinal}")]
     // Implements IEquatable because is used by dictionary key https://docs.microsoft.com/en-us/dotnet/api/system.iequatable-1?view=netcore-2.2#remarks
     [DataContract]
-    public class BranchKey : IEquatable<BranchKey>
+    internal class BranchKey : IEquatable<BranchKey>
     {
         public BranchKey(int line, int ordinal) => (Line, Ordinal) = (line, ordinal);
 
@@ -56,7 +56,7 @@ namespace Coverlet.Core.Instrumentation
     }
 
     [DataContract]
-    public class Document
+    internal class Document
     {
         public Document()
         {
@@ -76,7 +76,7 @@ namespace Coverlet.Core.Instrumentation
 
     [DebuggerDisplay("isBranch = {isBranch} docIndex = {docIndex} start = {start} end = {end}")]
     [DataContract]
-    public class HitCandidate
+    internal class HitCandidate
     {
         public HitCandidate(bool isBranch, int docIndex, int start, int end) => (this.isBranch, this.docIndex, this.start, this.end) = (isBranch, docIndex, start, end);
 
@@ -91,7 +91,7 @@ namespace Coverlet.Core.Instrumentation
     }
 
     [DataContract]
-    public class InstrumenterResult
+    internal class InstrumenterResult
     {
         public InstrumenterResult()
         {
