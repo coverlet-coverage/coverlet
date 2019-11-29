@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Samples.Tests;

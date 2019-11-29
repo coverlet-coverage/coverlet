@@ -8,7 +8,7 @@ using Coverlet.Core.Symbols;
 
 namespace Coverlet.Core
 {
-    public class BranchInfo
+    internal class BranchInfo
     {
         public int Line { get; set; }
         public int Offset { get; set; }
@@ -18,11 +18,11 @@ namespace Coverlet.Core
         public int Hits { get; set; }
     }
 
-    public class Lines : SortedDictionary<int, int> { }
+    internal class Lines : SortedDictionary<int, int> { }
 
-    public class Branches : List<BranchInfo> { }
+    internal class Branches : List<BranchInfo> { }
 
-    public class Method
+    internal class Method
     {
         internal Method()
         {
@@ -32,12 +32,12 @@ namespace Coverlet.Core
         public Lines Lines;
         public Branches Branches;
     }
-    public class Methods : Dictionary<string, Method> { }
-    public class Classes : Dictionary<string, Methods> { }
-    public class Documents : Dictionary<string, Classes> { }
-    public class Modules : Dictionary<string, Documents> { }
+    internal class Methods : Dictionary<string, Method> { }
+    internal class Classes : Dictionary<string, Methods> { }
+    internal class Documents : Dictionary<string, Classes> { }
+    internal class Modules : Dictionary<string, Documents> { }
 
-    public class CoverageResult
+    internal class CoverageResult
     {
         public string Identifier;
         public Modules Modules;

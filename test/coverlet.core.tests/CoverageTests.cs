@@ -2,13 +2,13 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.RemoteExecutor;
 using Moq;
 using Xunit;
-
 
 namespace Coverlet.Core.Tests
 {

@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 using Coverlet.Core.Extensions;
 
@@ -16,7 +15,7 @@ using Mono.Collections.Generic;
 
 namespace Coverlet.Core.Symbols
 {
-    public static class CecilSymbolHelper
+    internal static class CecilSymbolHelper
     {
         private const int StepOverLineCode = 0xFEEFEE;
 
