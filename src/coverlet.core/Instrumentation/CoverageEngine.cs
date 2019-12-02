@@ -197,9 +197,6 @@ namespace Coverlet.Core.Instrumentation
                             if (type.Namespace == "Coverlet.Core.Instrumentation.Tracker"
                                 && type.Name.StartsWith(asm.GetName().Name + "_"))
                             {
-
-                                Debug.Assert((string)type.GetField("HitsFilePath").GetValue(null) == path);
-
                                 int[] hitsArray = (int[])type.GetField("HitsArray").GetValue(null);
                                 MemoryStream ms = new MemoryStream();
                                 using BinaryWriter bw = new BinaryWriter(ms, Encoding.UTF8, true);
