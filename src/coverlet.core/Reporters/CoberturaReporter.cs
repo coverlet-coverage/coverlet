@@ -5,7 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace Coverlet.Core.Reporters
+using Coverlet.Core.ObjectModel;
+
+namespace Coverlet.Core.Abstracts
 {
     internal class CoberturaReporter : IReporter
     {

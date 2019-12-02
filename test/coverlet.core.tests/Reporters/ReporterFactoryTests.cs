@@ -1,7 +1,7 @@
-using Coverlet.Core.Reporters;
+using Coverlet.Core.Abstracts;
 using Xunit;
 
-namespace Coverlet.Core.Reporters.Tests
+namespace Coverlet.Core.Abstracts.Tests
 {
     public class ReporterFactoryTests
     {

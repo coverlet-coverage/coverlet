@@ -1,12 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+
+using Coverlet.Core.ObjectModel;
 using Xunit;
 
-namespace Coverlet.Core.Reporters.Tests
+namespace Coverlet.Core.Abstracts.Tests
 {
     public class OpenCoverReporterTests
     {

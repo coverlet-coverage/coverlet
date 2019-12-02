@@ -1,0 +1,1 @@
+dotnet Calculator/bin/Debug/netcoreapp2.2/Calculator.dll instrumentationResult

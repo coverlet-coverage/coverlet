@@ -3,7 +3,7 @@
     internal interface IInstrumentationHelper
     {
         void BackupOriginalModule(string module, string identifier);
-        void DeleteHitsFile(string path);
+        bool DeleteHitsFile(string path);
         string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly);
         bool HasPdb(string module, out bool embedded);
         bool IsModuleExcluded(string module, string[] excludeFilters);

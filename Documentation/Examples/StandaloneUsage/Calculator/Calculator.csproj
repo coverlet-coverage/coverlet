@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="coverlet.core">
+      <HintPath>..\..\..\..\src\coverlet.core\bin\Debug\netstandard2.0\coverlet.core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

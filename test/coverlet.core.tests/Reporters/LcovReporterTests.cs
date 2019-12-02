@@ -1,8 +1,9 @@
 using System;
-using System.Collections.Generic;
+
+using Coverlet.Core.ObjectModel;
 using Xunit;
 
-namespace Coverlet.Core.Reporters.Tests
+namespace Coverlet.Core.Abstracts.Tests
 {
     public class LcovReporterTests
     {

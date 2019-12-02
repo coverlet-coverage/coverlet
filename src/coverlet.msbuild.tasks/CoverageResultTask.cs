@@ -2,12 +2,13 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+
 using ConsoleTables;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Extensions;
-using Coverlet.Core.Reporters;
+using Coverlet.Core.ObjectModel;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 

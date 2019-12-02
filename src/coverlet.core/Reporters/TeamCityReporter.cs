@@ -1,9 +1,9 @@
 ﻿using System.Globalization;
-using Coverlet.Core;
-using Coverlet.Core.Reporters;
 using System.Text;
 
-namespace Coverlet.Core.Reporters
+using Coverlet.Core.ObjectModel;
+
+namespace Coverlet.Core.Abstracts
 {
     internal class TeamCityReporter : IReporter
     {

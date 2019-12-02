@@ -1,7 +1,9 @@
 using System;
+
+using Coverlet.Core.ObjectModel;
 using Xunit;
 
-namespace Coverlet.Core.Reporters.Tests
+namespace Coverlet.Core.Abstracts.Tests
 {
     public class JsonReporterTests
     {

@@ -1,3 +1,4 @@
+using Coverlet.Core.ObjectModel;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace Coverlet.Core.Reporters
+namespace Coverlet.Core.Abstracts
 {
     internal class OpenCoverReporter : IReporter
     {

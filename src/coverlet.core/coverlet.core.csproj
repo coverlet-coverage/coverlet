@@ -3,9 +3,21 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>5.2.0</AssemblyVersion>
-    <IsPackable>false</IsPackable>
+    <AssemblyTitle>coverlet.core</AssemblyTitle>
+    <PackageId>coverlet.core</PackageId>
+    <Title>coverlet.core</Title>
+    <Authors>tonerdo</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>http://github.com/tonerdo/coverlet</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Description>Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.</Description>
+    <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>	
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <LangVersion>preview</LangVersion>
+    <AssemblyVersion>5.2.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,5 +28,4 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
-
 </Project>

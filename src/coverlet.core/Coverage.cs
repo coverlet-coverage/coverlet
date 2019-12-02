@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Instrumentation;
-
+using Coverlet.Core.ObjectModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -132,10 +133,15 @@ namespace Coverlet.Core
 
         public CoverageResult GetCoverageResult()
         {
-            CalculateCoverage();
+            return GetCoverageResult(_results, _useSourceLink, _logger, _fileSystem, _instrumentationHelper, _identifier, _mergeWith);
+        }
+
+        public static CoverageResult GetCoverageResult(IEnumerable<InstrumenterResult> results, bool useSourceLink, ILogger logger, IFileSystem fileSystem, IInstrumentationHelper instrumentationHelper, string identifier, string mergeWith)
+        {
+            CalculateCoverage(results, useSourceLink, logger, fileSystem, instrumentationHelper);
 
             Modules modules = new Modules();
-            foreach (var result in _results)
+            foreach (var result in results)
             {
                 Documents documents = new Documents();
                 foreach (var doc in result.Documents.Values)
@@ -216,7 +222,7 @@ namespace Coverlet.Core
                 }
 
                 modules.Add(Path.GetFileName(result.ModulePath), documents);
-                _instrumentationHelper.RestoreOriginalModule(result.ModulePath, _identifier);
+                instrumentationHelper.RestoreOriginalModule(result.ModulePath, identifier);
             }
 
             // In case of anonymous delegate compiler generate a custom class and passes it as type.method delegate.
@@ -234,7 +240,7 @@ namespace Coverlet.Core
                         {
                             foreach (var branch in method.Value.Branches)
                             {
-                                if (BranchInCompilerGeneratedClass(method.Key))
+                                if (BranchInCompilerGeneratedClass(method.Key, results))
                                 {
                                     Method actualMethod = GetMethodWithSameLineInSameDocument(document.Value, @class.Key, branch.Line);
 
@@ -276,20 +282,20 @@ namespace Coverlet.Core
                 }
             }
 
-            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
+            var coverageResult = new CoverageResult { Identifier = identifier, Modules = modules, InstrumentedResults = results.ToList() };
 
-            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && _fileSystem.Exists(_mergeWith))
+            if (!string.IsNullOrEmpty(mergeWith) && !string.IsNullOrWhiteSpace(mergeWith) && fileSystem.Exists(mergeWith))
             {
-                string json = _fileSystem.ReadAllText(_mergeWith);
+                string json = fileSystem.ReadAllText(mergeWith);
                 coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
             }
 
             return coverageResult;
         }
 
-        private bool BranchInCompilerGeneratedClass(string methodName)
+        private static bool BranchInCompilerGeneratedClass(string methodName, IEnumerable<InstrumenterResult> results)
         {
-            foreach (var instrumentedResult in _results)
+            foreach (var instrumentedResult in results)
             {
                 if (instrumentedResult.BranchesInCompiledGeneratedClass.Contains(methodName))
                 {
@@ -299,7 +305,7 @@ namespace Coverlet.Core
             return false;
         }
 
-        private Method GetMethodWithSameLineInSameDocument(Classes documentClasses, string compilerGeneratedClassName, int branchLine)
+        private static Method GetMethodWithSameLineInSameDocument(Classes documentClasses, string compilerGeneratedClassName, int branchLine)
         {
             foreach (var @class in documentClasses)
             {
@@ -322,22 +328,22 @@ namespace Coverlet.Core
             return null;
         }
 
-        private void CalculateCoverage()
+        private static void CalculateCoverage(IEnumerable<InstrumenterResult> results, bool useSourceLink, ILogger logger, IFileSystem fileSystem, IInstrumentationHelper instrumentationHelper)
         {
-            foreach (var result in _results)
+            foreach (var result in results)
             {
-                if (!_fileSystem.Exists(result.HitsFilePath))
+                if (!fileSystem.Exists(result.HitsFilePath))
                 {
                     // Hits file could be missed mainly for two reason
                     // 1) Issue during module Unload()
                     // 2) Instrumented module is never loaded or used so we don't have any hit to register and
                     //    module tracker is never used
-                    _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
+                    logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
                     continue;
                 }
 
                 List<Document> documents = result.Documents.Values.ToList();
-                if (_useSourceLink && result.SourceLink != null)
+                if (useSourceLink && result.SourceLink != null)
                 {
                     var jObject = JObject.Parse(result.SourceLink)["documents"];
                     var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
@@ -349,7 +355,7 @@ namespace Coverlet.Core
 
                 List<(int docIndex, int line)> zeroHitsLines = new List<(int docIndex, int line)>();
                 var documentsList = result.Documents.Values.ToList();
-                using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
+                using (var fs = fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
                 using (var br = new BinaryReader(fs))
                 {
                     int hitCandidatesCount = br.ReadInt32();
@@ -396,12 +402,14 @@ namespace Coverlet.Core
                     }
                 }
 
-                _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
-                _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
+                if (instrumentationHelper.DeleteHitsFile(result.HitsFilePath))
+                {
+                    logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
+                }
             }
         }
 
-        private string GetSourceLinkUrl(Dictionary<string, string> sourceLinkDocuments, string document)
+        private static string GetSourceLinkUrl(Dictionary<string, string> sourceLinkDocuments, string document)
         {
             if (sourceLinkDocuments.TryGetValue(document, out string url))
             {

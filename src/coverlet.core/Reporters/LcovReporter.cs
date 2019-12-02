@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Coverlet.Core.ObjectModel;
 
-namespace Coverlet.Core.Reporters
+namespace Coverlet.Core.Abstracts
 {
     internal class LcovReporter : IReporter
     {

@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
-using Coverlet.Core.Reporters;
+using Coverlet.Core.ObjectModel;
 
 namespace Coverlet.Collector.DataCollection
 {

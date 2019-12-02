@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Reporters;
+using Coverlet.Core.ObjectModel;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;

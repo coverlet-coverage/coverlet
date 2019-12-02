@@ -8,13 +8,12 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Moq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Coverlet.Core;
+using Coverlet.Core.Abstracts;
+using Coverlet.Core.Extensions;
+using Coverlet.Collector.DataCollection;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
 using Xunit;
-using Coverlet.Collector.DataCollection;
-using Coverlet.Core.Reporters;
-using Coverlet.Core.Abstracts;
-using Coverlet.Core.Extensions;
 
 namespace Coverlet.Collector.Tests
 {

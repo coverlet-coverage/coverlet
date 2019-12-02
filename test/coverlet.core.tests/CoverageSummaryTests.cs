@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
-using Coverlet.Core;
-using Moq;
+using Coverlet.Core.ObjectModel;
 using Xunit;
 
 namespace Coverlet.Core.Tests
