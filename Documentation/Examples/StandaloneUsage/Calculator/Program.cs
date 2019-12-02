@@ -64,7 +64,7 @@ namespace Calculator
                                 }
                             case ConsoleKey.Subtract:
                                 {
-                                    Console.WriteLine($"Result: {runtime.Subtrac(operanda.Value, operandb.Value)}");
+                                    Console.WriteLine($"Result: {runtime.Subtract(operanda.Value, operandb.Value)}");
                                     break;
                                 }
                             case ConsoleKey.Multiply:

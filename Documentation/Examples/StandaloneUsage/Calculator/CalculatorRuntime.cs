@@ -7,7 +7,7 @@
             return a + b;
         }
 
-        public double Subtrac(double a, double b)
+        public double Subtract(double a, double b)
         {
             return a - b;
         }
