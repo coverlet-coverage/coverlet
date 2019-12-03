@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
@@ -42,15 +43,8 @@ namespace Coverlet.Core.Instrumentation
         private static readonly AssemblyDefinition _assemblyDefinition;
 
         private readonly string _modulePath;
-        // this is lazy because we cannot create AspNetCoreSharedFrameworkResolver if not on .NET Core runtime, 
-        // runtime folders are different
-        private readonly Lazy<CompositeCompilationAssemblyResolver> _compositeResolver = new Lazy<CompositeCompilationAssemblyResolver>(() => new CompositeCompilationAssemblyResolver(new ICompilationAssemblyResolver[]
-        {
-            new AppBaseCompilationAssemblyResolver(),
-            new ReferenceAssemblyPathResolver(),
-            new PackageCompilationAssemblyResolver(),
-            new AspNetCoreSharedFrameworkResolver()
-        }), true);
+        private readonly Lazy<CompositeCompilationAssemblyResolver> _compositeResolver;
+        private readonly ILogger _logger;
 
         static NetstandardAwareAssemblyResolver()
         {
@@ -69,7 +63,21 @@ namespace Coverlet.Core.Instrumentation
             }
         }
 
-        public NetstandardAwareAssemblyResolver(string modulePath) => _modulePath = modulePath;
+        public NetstandardAwareAssemblyResolver(string modulePath, ILogger logger)
+        {
+            _modulePath = modulePath;
+            _logger = logger;
+
+            // this is lazy because we cannot create AspNetCoreSharedFrameworkResolver if not on .NET Core runtime, 
+            // runtime folders are different
+            _compositeResolver = new Lazy<CompositeCompilationAssemblyResolver>(() => new CompositeCompilationAssemblyResolver(new ICompilationAssemblyResolver[]
+            {
+                new AppBaseCompilationAssemblyResolver(),
+                new ReferenceAssemblyPathResolver(),
+                new PackageCompilationAssemblyResolver(),
+                new AspNetCoreSharedFrameworkResolver(_logger)
+            }), true);
+        }
 
         // Check name and public key but not version that could be different
         private bool CheckIfSearchingNetstandard(AssemblyNameReference name)
@@ -141,6 +149,8 @@ namespace Coverlet.Core.Instrumentation
         /// </summary>
         private AssemblyDefinition TryWithCustomResolverOnDotNetCore(AssemblyNameReference name)
         {
+            _logger.LogVerbose($"TryWithCustomResolverOnDotNetCore for {name}");
+
             if (string.IsNullOrEmpty(_modulePath))
             {
                 throw new AssemblyResolutionException(name);
@@ -193,10 +203,12 @@ namespace Coverlet.Core.Instrumentation
 
     internal class AspNetCoreSharedFrameworkResolver : ICompilationAssemblyResolver
     {
-        private string[] _aspNetSharedFrameworkDirs = null;
+        private readonly string[] _aspNetSharedFrameworkDirs = null;
+        private readonly ILogger _logger = null;
 
-        public AspNetCoreSharedFrameworkResolver()
+        public AspNetCoreSharedFrameworkResolver(ILogger logger)
         {
+            _logger = logger;
             string runtimeRootPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
             string runtimeVersion = runtimeRootPath.Substring(runtimeRootPath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
             _aspNetSharedFrameworkDirs = new string[]
@@ -204,6 +216,12 @@ namespace Coverlet.Core.Instrumentation
                Path.GetFullPath(Path.Combine(runtimeRootPath,"../../Microsoft.AspNetCore.All", runtimeVersion)),
                Path.GetFullPath(Path.Combine(runtimeRootPath, "../../Microsoft.AspNetCore.App", runtimeVersion))
             };
+
+            _logger.LogVerbose("AspNetCoreSharedFrameworkResolver search paths:");
+            foreach (string searchPath in _aspNetSharedFrameworkDirs)
+            {
+                _logger.LogVerbose(searchPath);
+            }
         }
 
         public bool TryResolveAssemblyPaths(CompilationLibrary library, List<string> assemblies)
@@ -221,6 +239,7 @@ namespace Coverlet.Core.Instrumentation
                 {
                     if (Path.GetFileName(file).Equals(dllName, StringComparison.OrdinalIgnoreCase))
                     {
+                        _logger.LogVerbose($"'{dllName}' found in '{file}'");
                         assemblies.Add(file);
                         return true;
                     }

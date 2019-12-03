@@ -201,7 +201,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument_NetStandardAwareAssemblyResolver_FromRuntime()
         {
-            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(null);
+            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(null, _mockLogger.Object);
 
             // We ask for "official" netstandard.dll implementation with know MS public key cc7b13ffcd2ddd51 same in all runtime
             AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse("netstandard, Version=0.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51"));
@@ -235,7 +235,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 File.WriteAllBytes("netstandard.dll", dllStream.ToArray());
             }
 
-            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(null);
+            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(newAssemlby.Location, _mockLogger.Object);
             AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse(newAssemlby.FullName));
 
             // We check if final netstandard.dll resolved is local folder one and not "official" netstandard.dll
@@ -438,7 +438,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument_AspNetCoreSharedFrameworkResolver()
         {
-            AspNetCoreSharedFrameworkResolver resolver = new AspNetCoreSharedFrameworkResolver();
+            AspNetCoreSharedFrameworkResolver resolver = new AspNetCoreSharedFrameworkResolver(_mockLogger.Object);
             CompilationLibrary compilationLibrary = new CompilationLibrary(
                 "package",
                 "Microsoft.Extensions.Logging.Abstractions",

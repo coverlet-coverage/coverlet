@@ -142,7 +142,7 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentModule()
         {
             using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
-            using (var resolver = new NetstandardAwareAssemblyResolver(_module))
+            using (var resolver = new NetstandardAwareAssemblyResolver(_module, _logger))
             {
                 resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
