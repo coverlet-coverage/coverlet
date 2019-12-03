@@ -452,5 +452,13 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.True(resolver.TryResolveAssemblyPaths(compilationLibrary, assemblies));
             Assert.NotEmpty(assemblies);
         }
+
+        [Fact]
+        public void TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext()
+        {
+            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(Assembly.GetExecutingAssembly().Location, _mockLogger.Object);
+            AssemblyDefinition asm = netstandardResolver.TryWithCustomResolverOnDotNetCore(new AssemblyNameReference("Microsoft.Extensions.Logging.Abstractions", new Version("2.2.0")));
+            Assert.NotNull(asm);
+        }
     }
 }

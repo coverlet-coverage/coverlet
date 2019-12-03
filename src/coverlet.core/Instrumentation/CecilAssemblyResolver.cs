@@ -147,7 +147,7 @@ namespace Coverlet.Core.Instrumentation
         /// </PropertyGroup>
         ///
         /// </summary>
-        private AssemblyDefinition TryWithCustomResolverOnDotNetCore(AssemblyNameReference name)
+        internal AssemblyDefinition TryWithCustomResolverOnDotNetCore(AssemblyNameReference name)
         {
             _logger.LogVerbose($"TryWithCustomResolverOnDotNetCore for {name}");
 
