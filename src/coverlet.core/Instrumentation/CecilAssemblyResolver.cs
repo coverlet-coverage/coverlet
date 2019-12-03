@@ -122,10 +122,13 @@ namespace Coverlet.Core.Instrumentation
                 }
                 catch (AssemblyResolutionException)
                 {
-                    if (IsDotNetCore())
+                    AssemblyDefinition asm = TryWithCustomResolverOnDotNetCore(name);
+
+                    if (asm != null)
                     {
-                        return TryWithCustomResolverOnDotNetCore(name);
+                        return asm;
                     }
+
                     throw;
                 }
             }
@@ -150,6 +153,12 @@ namespace Coverlet.Core.Instrumentation
         internal AssemblyDefinition TryWithCustomResolverOnDotNetCore(AssemblyNameReference name)
         {
             _logger.LogVerbose($"TryWithCustomResolverOnDotNetCore for {name}");
+
+            if (!IsDotNetCore())
+            {
+                _logger.LogVerbose($"Not a dotnet core app");
+                return null;
+            }
 
             if (string.IsNullOrEmpty(_modulePath))
             {
