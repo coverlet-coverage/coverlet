@@ -86,7 +86,11 @@ namespace Coverlet.Core.Symbols
                     // Skip get_IsCompleted to avoid unuseful branch due to async/await state machine
                     if (isAsyncStateMachineMoveNext && instruction.Previous.Operand is MethodReference operand &&
                             operand.Name == "get_IsCompleted" &&
-                            operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") &&
+                            (
+                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") ||
+                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable")
+                            )
+                            &&
                             operand.DeclaringType.Scope.Name == "System.Runtime")
                     {
                         continue;
