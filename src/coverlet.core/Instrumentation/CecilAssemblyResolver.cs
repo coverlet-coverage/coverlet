@@ -184,10 +184,10 @@ namespace Coverlet.Core.Instrumentation
                             libraries.Add(library.Name, new Lazy<AssemblyDefinition>(() => AssemblyDefinition.ReadAssembly(path, new ReaderParameters() { AssemblyResolver = this })));
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         // if we don't find a lib go on
-                        // think about logging because it possible that we're hiding AspNetCoreSharedFrameworkResolver exception
+                        _logger.LogVerbose($"TryWithCustomResolverOnDotNetCore exception: {ex.ToString()}");
                     }
                 }
             }
