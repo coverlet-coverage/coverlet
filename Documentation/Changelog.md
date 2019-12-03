@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 -Fix and simplify async coverage [#549](https://github.com/tonerdo/coverlet/pull/549)  
--Improve lambda scenario coverage [#583](https://github.com/tonerdo/coverlet/pull/583)
+-Improve lambda scenario coverage [#583](https://github.com/tonerdo/coverlet/pull/583)  
+-Mitigate issue in case of failure in assembly loading by cecil [#625](https://github.com/tonerdo/coverlet/pull/625)
 
 ### Improvements
 
