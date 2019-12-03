@@ -6,6 +6,8 @@
     <IsPackable>false</IsPackable>
     <LangVersion>preview</LangVersion>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
+    <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
+    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +24,11 @@
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.remoteexecutor\coverlet.tests.remoteexecutor.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.empty\coverlet.tests.projectsample.empty.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj" />
+  </ItemGroup>
+
+  <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
