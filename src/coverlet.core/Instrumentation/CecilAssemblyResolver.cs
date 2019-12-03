@@ -161,6 +161,7 @@ namespace Coverlet.Core.Instrumentation
             foreach (string fileName in Directory.GetFiles(Path.GetDirectoryName(_modulePath), "*.deps.json"))
             {
                 using FileStream depsFile = File.OpenRead(fileName);
+                _logger.LogVerbose($"Loading {fileName}");
                 DependencyContext dependencyContext = contextJsonReader.Read(depsFile);
                 foreach (CompilationLibrary library in dependencyContext.CompileLibraries)
                 {
