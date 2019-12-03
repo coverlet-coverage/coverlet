@@ -175,6 +175,7 @@ namespace Coverlet.Core.Tests
                         res = ((Task<int>)instance.AsyncExecution(2)).ConfigureAwait(false).GetAwaiter().GetResult();
                         res = ((Task<int>)instance.AsyncExecution(3)).ConfigureAwait(false).GetAwaiter().GetResult();
                         res = ((Task<int>)instance.ContinuationCalled()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        res = ((Task<int>)instance.ConfigureAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
                     }, pathSerialize);
@@ -200,7 +201,9 @@ namespace Coverlet.Core.Tests
                                             // ContinuationNotCalled
                                             (74, 0), (75, 0), (76, 0), (77, 0), (78, 0),
                                             // ContinuationCalled -> line 83 should be 1 hit some issue with Continuation state machine
-                                            (81, 1), (82, 1), (83, 2), (84, 1), (85, 1)
+                                            (81, 1), (82, 1), (83, 2), (84, 1), (85, 1),
+                                            // ConfigureAwait
+                                            (89, 1), (90, 1)
                                          )
                       .AssertBranchesCovered(BuildConfiguration.Debug, (16, 0, 0), (16, 1, 1), (43, 0, 3), (43, 1, 1), (43, 2, 1), (43, 3, 1), (43, 4, 0))
                       // Real branch should be 2, we should try to remove compiler generated branch in method ContinuationNotCalled/ContinuationCalled
