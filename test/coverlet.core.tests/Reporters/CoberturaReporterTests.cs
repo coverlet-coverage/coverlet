@@ -36,11 +36,15 @@ namespace Coverlet.Core.Reporters.Tests
             classes.Add("Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods);
 
             Documents documents = new Documents();
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 documents.Add(@"C:\doc.cs", classes);
             }
-            documents.Add(@"/doc.cs", classes);
+            else
+            {
+                documents.Add(@"/doc.cs", classes);
+            }
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
@@ -109,7 +113,10 @@ namespace Coverlet.Core.Reporters.Tests
             {
                 documents.Add(@"C:\doc.cs", classes);
             }
-            documents.Add(@"/doc.cs", classes);
+            else
+            {
+                documents.Add(@"/doc.cs", classes);
+            }
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
@@ -134,12 +141,17 @@ namespace Coverlet.Core.Reporters.Tests
             CoverageResult result = new CoverageResult();
             result.Identifier = Guid.NewGuid().ToString();
 
-            var absolutePath1 = @"/proj/file.cs";
-            var absolutePath2 = @"/proj/file.cs";
+            string absolutePath1;
+            string absolutePath2;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                absolutePath1 = @"C:\proj\file.cs";
-                absolutePath2 = @"E:\proj\file.cs";
+                absolutePath1 = @"C:\projA\file.cs";
+                absolutePath2 = @"E:\projB\file.cs";
+            }
+            else
+            {
+                absolutePath1 = @"/projA/file.cs";
+                absolutePath2 = @"/projB/file.cs";
             }
 
             var classes = new Classes { { "Class", new Methods() } };
