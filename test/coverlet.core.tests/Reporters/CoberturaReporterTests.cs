@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Xml.Linq;
@@ -35,7 +36,11 @@ namespace Coverlet.Core.Reporters.Tests
             classes.Add("Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods);
 
             Documents documents = new Documents();
-            documents.Add(@"C:\doc.cs", classes);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                documents.Add(@"C:\doc.cs", classes);
+            }
+            documents.Add(@"/doc.cs", classes);
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
@@ -100,7 +105,11 @@ namespace Coverlet.Core.Reporters.Tests
             classes.Add("Google.Protobuf.Reflection.MessageDescriptor", methods);
 
             Documents documents = new Documents();
-            documents.Add(@"C:\doc.cs", classes);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                documents.Add(@"C:\doc.cs", classes);
+            }
+            documents.Add(@"/doc.cs", classes);
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
@@ -125,8 +134,13 @@ namespace Coverlet.Core.Reporters.Tests
             CoverageResult result = new CoverageResult();
             result.Identifier = Guid.NewGuid().ToString();
 
-            var absolutePath1 = @"C:\proj\file.cs";
-            var absolutePath2 = @"E:\proj\file.cs";
+            var absolutePath1 = @"/proj/file.cs";
+            var absolutePath2 = @"/proj/file.cs";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                absolutePath1 = @"C:\proj\file.cs";
+                absolutePath2 = @"E:\proj\file.cs";
+            }
 
             var classes = new Classes { { "Class", new Methods() } };
             var documents = new Documents { { absolutePath1, classes }, { absolutePath2, classes } };
