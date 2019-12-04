@@ -30,13 +30,17 @@
           Condition="'$(VSTestNoBuild)' != 'true' and '$(CollectCoverage)' == 'true'" />
 
   <Target Name="GenerateCoverageResult">
+    <PropertyGroup>
+      <_CoverletMultiTargetFrameworksCurrentTFM_ Condition="'$(TargetFrameworks)' != ''" >$(TargetFramework)</_CoverletMultiTargetFrameworksCurrentTFM_>
+    </PropertyGroup>
     <Coverlet.MSbuild.Tasks.CoverageResultTask
       Output="$(CoverletOutput)"
       OutputFormat="$(CoverletOutputFormat)"
       Threshold="$(Threshold)"
       ThresholdType="$(ThresholdType)"
       ThresholdStat="$(ThresholdStat)"
-      InstrumenterState="$(InstrumenterState)"/>
+      InstrumenterState="$(InstrumenterState)"
+      CoverletMultiTargetFrameworksCurrentTFM="$(_CoverletMultiTargetFrameworksCurrentTFM_)" />
   </Target>
 
   <Target Name="GenerateCoverageResultAfterTest"
