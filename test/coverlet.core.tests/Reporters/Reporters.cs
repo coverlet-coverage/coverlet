@@ -11,6 +11,7 @@ namespace Coverlet.Core.Reporters.Tests
     {
         // we use lcov with extension .info and cobertura with extension .cobertura.xml
         // to have all possible extension format
+        // empty coverletOutput is not possible thank's to props default
         [Theory]
         // single tfm
         [InlineData("", "/folder/reportFolder/", "lcov", "/folder/reportFolder/coverage.info")]

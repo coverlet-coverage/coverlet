@@ -28,14 +28,20 @@ namespace Coverlet.MSbuild.Tasks
 
             if (filename == string.Empty)
             {
+                // empty filename for instance only directory is passed to CoverletOutput c:\reportpath
+                // c:\reportpath\coverage.reportedextension
                 filename = $"coverage.{_coverletMultiTargetFrameworksCurrentTFM}{separatorPoint}{_reporter.Extension}";
             }
             else if (Path.HasExtension(filename))
             {
+                // filename with extension for instance c:\reportpath\file.ext
+                // c:\reportpath\file.ext.reportedextension
                 filename = $"{Path.GetFileNameWithoutExtension(filename)}{separatorPoint}{_coverletMultiTargetFrameworksCurrentTFM}{Path.GetExtension(filename)}.{_reporter.Extension}";
             }
             else
             {
+                // filename without extension for instance c:\reportpath\file
+                // c:\reportpath\file.reportedextension
                 filename = $"{filename}{separatorPoint}{_coverletMultiTargetFrameworksCurrentTFM}.{_reporter.Extension}";
             }
 
