@@ -35,7 +35,7 @@ namespace Coverlet.Core.Reporters.Tests
             classes.Add("Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods);
 
             Documents documents = new Documents();
-            documents.Add("/doc.cs", classes);
+            documents.Add(@"C:\doc.cs", classes);
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
@@ -100,7 +100,7 @@ namespace Coverlet.Core.Reporters.Tests
             classes.Add("Google.Protobuf.Reflection.MessageDescriptor", methods);
 
             Documents documents = new Documents();
-            documents.Add("/doc.cs", classes);
+            documents.Add(@"C:\doc.cs", classes);
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
