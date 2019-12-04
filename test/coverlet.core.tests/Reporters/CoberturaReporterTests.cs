@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Xml;
 using System.Xml.Linq;
 using Xunit;
 
@@ -119,6 +117,55 @@ namespace Coverlet.Core.Reporters.Tests
                 .ToDictionary(o => o.Name.LocalName, o => o.Value);
             Assert.Equal(expectedMethodName, methodAttrs["name"]);
             Assert.Equal(expectedSignature, methodAttrs["signature"]);
+        }
+
+        [Fact]
+        public void TestReportWithTwoDifferentWindowsRoots()
+        {
+            CoverageResult result = new CoverageResult();
+            result.Identifier = Guid.NewGuid().ToString();
+
+            var absolutePath1 = @"C:\proj\file.cs";
+            var absolutePath2 = @"E:\proj\file.cs";
+
+            var classes = new Classes { { "Class", new Methods() } };
+            var documents = new Documents { { absolutePath1, classes }, { absolutePath2, classes } };
+
+            result.Modules = new Modules { { "Module", documents } };
+
+            CoberturaReporter reporter = new CoberturaReporter();
+            string report = reporter.Report(result);
+
+            var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+            var rootPaths = doc.Descendants().Elements().Where(tag => tag.Name.LocalName.Equals("source"))
+                .Select(elem => elem.Value).ToList();
+            var relativePaths = doc.Descendants().Elements().Where(tag => tag.Name.LocalName.Equals("class"))
+                .Attributes("filename").Select(attr => attr.Value).ToList();
+
+            Assert.Equal(absolutePath1, Path.Combine(rootPaths[0], relativePaths[0]));
+            Assert.Equal(absolutePath2, Path.Combine(rootPaths[1], relativePaths[1]));
+        }
+
+        [Fact]
+        public void TestReportWithSourcelinkPaths()
+        {
+            CoverageResult result = new CoverageResult { UseSourceLink = true, Identifier = Guid.NewGuid().ToString() };
+
+            var absolutePath = @"https://raw.githubusercontent.com/johndoe/Coverlet/02c09baa8bfdee3b6cdf4be89bd98c8157b0bc08/Demo.cs";
+
+            var classes = new Classes { { "Class", new Methods() } };
+            var documents = new Documents { { absolutePath, classes } };
+
+            result.Modules = new Modules { { "Module", documents } };
+
+            CoberturaReporter reporter = new CoberturaReporter();
+            string report = reporter.Report(result);
+
+            var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+            var fileNames = doc.Descendants().Elements().Where(tag => tag.Name.LocalName.Equals("class"))
+                .Attributes("filename").Select(attr => attr.Value).ToList();
+
+            Assert.Equal(absolutePath, fileNames[0]);
         }
     }
 }
