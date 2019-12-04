@@ -22,7 +22,7 @@ namespace Coverlet.MSbuild.Tasks
 
         public void WriteReport()
         {
-            var filename = Path.GetFileName(_output);
+            string filename = Path.GetFileName(_output);
 
             string separatorPoint = string.IsNullOrWhiteSpace(_coverletMultiTargetFrameworksCurrentTFM) ? "" : ".";
 
@@ -45,7 +45,7 @@ namespace Coverlet.MSbuild.Tasks
                 filename = $"{filename}{separatorPoint}{_coverletMultiTargetFrameworksCurrentTFM}.{_reporter.Extension}";
             }
 
-            var report = Path.Combine(_directory, filename);
+            string report = Path.Combine(_directory, filename);
             _console.WriteLine($"  Generating report '{report}'");
             _fileSystem.WriteAllText(report, _reporter.Report(_result));
         }
