@@ -20,7 +20,7 @@ namespace Coverlet.Integration.Tests
 
             foreach (KeyValuePair<string, Documents> module in modules)
             {
-                foreach (var document in module.Value)
+                foreach (KeyValuePair<string, Classes> document in module.Value)
                 {
                     if (Path.GetFileName(document.Key) == docName)
                     {

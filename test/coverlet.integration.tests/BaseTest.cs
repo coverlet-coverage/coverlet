@@ -70,6 +70,8 @@ namespace Coverlet.Integration.Tests
 <Project>
 </Project>");
 
+            AddMicrosoftNETTestSdkRef(finalRoot.FullName);
+
             return new ClonedTemplateProject() { Path = finalRoot.FullName };
         }
 
@@ -115,6 +117,27 @@ namespace Coverlet.Integration.Tests
                .ElementAt(0)
                .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
             xml.Save(nugetFile);
+        }
+
+        private protected void AddMicrosoftNETTestSdkRef(string projectPath)
+        {
+            string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
+            if (!File.Exists(csproj))
+            {
+                throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+            }
+            XDocument xml;
+            using (var csprojStream = File.OpenRead(csproj))
+            {
+                xml = XDocument.Load(csprojStream);
+            }
+
+            xml.Element("Project")
+               .Element("ItemGroup")
+               .Add(new XElement("PackageReference", new XAttribute("Include", "Microsoft.NET.Test.Sdk"),
+               // We use this due to know issue until official release https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
+               new XAttribute("Version", "16.5.0-preview-20191115-01")));
+            xml.Save(csproj);
         }
 
         private protected void AddMsbuildRef(string projectPath)
