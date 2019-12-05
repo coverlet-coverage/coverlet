@@ -56,6 +56,7 @@ namespace Coverlet.Collector.Tests
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.MergeWithElementName, "/path/to/result.json");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.UseSourceLinkElementName, "false");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.SingleHitElementName, "true");
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeTestAssemblyElementName, "true");
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
@@ -70,6 +71,7 @@ namespace Coverlet.Collector.Tests
             Assert.Equal("[coverlet.*]*", coverletSettings.ExcludeFilters[0]);
             Assert.False(coverletSettings.UseSourceLink);
             Assert.True(coverletSettings.SingleHit);
+            Assert.True(coverletSettings.IncludeTestAssembly);
         }
 
         [Theory]

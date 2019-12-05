@@ -1,0 +1,201 @@
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Xml.Linq;
+
+using NuGet.Packaging;
+using Xunit.Sdk;
+
+namespace Coverlet.Integration.Tests
+{
+    [Flags]
+    enum BuildConfiguration
+    {
+        Debug = 1,
+        Release = 2
+    }
+
+    public abstract class BaseTest
+    {
+        private BuildConfiguration GetAssemblyBuildConfiguration()
+        {
+            var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();
+            if (configurationAttribute.Configuration.Equals("Debug", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return BuildConfiguration.Debug;
+            }
+            else if (configurationAttribute.Configuration.Equals("Release", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return BuildConfiguration.Release;
+            }
+            else
+            {
+                throw new NotSupportedException($"Build configuration '{configurationAttribute.Configuration}' not supported");
+            }
+        }
+
+        private protected string GetPackageVersion(string filter)
+        {
+            if (!Directory.Exists($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages"))
+            {
+                throw new DirectoryNotFoundException("Package directory not found, run 'dotnet pack' on repository root");
+            }
+
+            using Stream pkg = File.OpenRead(Directory.GetFiles($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages", filter).Single());
+            using var reader = new PackageArchiveReader(pkg);
+            using Stream nuspecStream = reader.GetNuspec();
+            Manifest manifest = Manifest.ReadFrom(nuspecStream, false);
+            return manifest.Metadata.Version.OriginalVersion;
+        }
+
+        private protected ClonedTemplateProject CloneTemplateProject()
+        {
+            DirectoryInfo finalRoot = Directory.CreateDirectory(Guid.NewGuid().ToString("N"));
+            foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
+                    .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "*.csproj")
+                    .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "nuget.config")))))
+            {
+                File.Copy(file, Path.Combine(finalRoot.FullName, Path.GetFileName(file)));
+            }
+
+            File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.props"),
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<Project>
+</Project>");
+
+            File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.targets"),
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<Project>
+</Project>");
+
+            return new ClonedTemplateProject() { Path = finalRoot.FullName };
+        }
+
+        private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
+        {
+            Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}");
+            ProcessStartInfo psi = new ProcessStartInfo(command, arguments);
+            psi.WorkingDirectory = workingDirectory;
+            psi.RedirectStandardError = true;
+            psi.RedirectStandardOutput = true;
+            Process dotnet = Process.Start(psi);
+            if (!dotnet.WaitForExit((int)TimeSpan.FromMinutes(5).TotalMilliseconds))
+            {
+                throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
+            }
+            standardOutput = dotnet.StandardOutput.ReadToEnd();
+            standardError = dotnet.StandardError.ReadToEnd();
+            return dotnet.ExitCode == 0;
+        }
+
+        private protected bool DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
+        {
+            return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
+        }
+
+        private protected void UpdateNuget(string projectPath)
+        {
+            string nugetFile = Path.Combine(projectPath, "nuget.config");
+            if (!File.Exists(nugetFile))
+            {
+                throw new FileNotFoundException("Nuget.config not found", "nuget.config");
+            }
+            XDocument xml;
+            using (var nugetFileStream = File.OpenRead(nugetFile))
+            {
+                xml = XDocument.Load(nugetFileStream);
+            }
+
+            string localPackageFolder = Path.GetFullPath($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages");
+            xml.Element("configuration")
+               .Element("packageSources")
+               .Elements()
+               .ElementAt(0)
+               .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
+            xml.Save(nugetFile);
+        }
+
+        private protected void AddMsbuildRef(string projectPath)
+        {
+            string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
+            if (!File.Exists(csproj))
+            {
+                throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+            }
+            XDocument xml;
+            using (var csprojStream = File.OpenRead(csproj))
+            {
+                xml = XDocument.Load(csprojStream);
+            }
+            string msbuildPkgVersion = GetPackageVersion("*msbuild*.nupkg");
+            xml.Element("Project")
+               .Element("ItemGroup")
+               .Add(new XElement("PackageReference", new XAttribute("Include", "coverlet.msbuild"), new XAttribute("Version", msbuildPkgVersion)));
+            xml.Save(csproj);
+        }
+
+        private protected void AddCollectorsRef(string projectPath)
+        {
+            string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
+            if (!File.Exists(csproj))
+            {
+                throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+            }
+            XDocument xml;
+            using (var csprojStream = File.OpenRead(csproj))
+            {
+                xml = XDocument.Load(csprojStream);
+            }
+            string msbuildPkgVersion = GetPackageVersion("*collector*.nupkg");
+            xml.Element("Project")
+               .Element("ItemGroup")
+               .Add(new XElement("PackageReference", new XAttribute("Include", "coverlet.collector"), new XAttribute("Version", msbuildPkgVersion)));
+            xml.Save(csproj);
+        }
+
+        private protected string AddRunsettings(string projectPath)
+        {
+            string runSettings =
+@"<?xml version=""1.0"" encoding=""utf-8"" ?>
+  <RunSettings>
+    <DataCollectionRunSettings>  
+      <DataCollectors>  
+        <DataCollector friendlyName=""XPlat code coverage"" >
+           <Configuration>
+            <Format>json,cobertura</Format>
+            <Include>[coverletsamplelib.integration.template]*DeepThought</Include>
+            <IncludeTestAssembly>true</IncludeTestAssembly>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>";
+
+            string runsettingsPath = Path.Combine(projectPath, "runSettings");
+            File.WriteAllText(runsettingsPath, runSettings);
+            return runsettingsPath;
+        }
+    }
+
+    class ClonedTemplateProject : IDisposable
+    {
+        public string Path { get; set; }
+
+        // We need to have a different asm name to avoid issue with collectors, we filter [coverlet.*]* by default
+        // https://github.com/tonerdo/coverlet/pull/410#discussion_r284526728
+        public static string AssemblyName { get; } = "coverletsamplelib.integration.template";
+        public static string ProjectFileName { get; } = "coverlet.integration.template.csproj";
+
+        public string[] GetFiles(string filter)
+        {
+            return Directory.GetFiles(this.Path, filter, SearchOption.AllDirectories);
+        }
+
+        public void Dispose()
+        {
+            Directory.Delete(Path, true);
+        }
+    }
+}
