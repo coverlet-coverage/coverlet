@@ -136,14 +136,17 @@ namespace Coverlet.Core.Reporters.Tests
         }
 
         [Fact]
-        public void TestReportWithTwoDifferentWindowsRoots()
+        public void TestReportWithTwoDifferentDirectories()
         {
             CoverageResult result = new CoverageResult();
             result.Identifier = Guid.NewGuid().ToString();
 
+            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
             string absolutePath1;
             string absolutePath2;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+
+            if (isWindows)
             {
                 absolutePath1 = @"C:\projA\file.cs";
                 absolutePath2 = @"E:\projB\file.cs";
@@ -169,7 +172,7 @@ namespace Coverlet.Core.Reporters.Tests
                 .Attributes("filename").Select(attr => attr.Value).ToList();
 
             Assert.Equal(absolutePath1, Path.Combine(rootPaths[0], relativePaths[0]));
-            Assert.Equal(absolutePath2, Path.Combine(rootPaths[1], relativePaths[1]));
+            Assert.Equal(absolutePath2, Path.Combine(isWindows ? rootPaths[1] : rootPaths[0], relativePaths[1]));
         }
 
         [Fact]
