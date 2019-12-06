@@ -10,12 +10,12 @@ steps:
 - script: dotnet build -c $(BuildConfiguration) --no-restore
   displayName: Build
 
+- script: dotnet pack -c $(BuildConfiguration) --no-build
+  displayName: Pack
+
 - task: DotNetCoreCLI@2
   displayName: Test
   inputs:
     command: test
     arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]*
     testRunTitle: $(Agent.JobName)
-
-- script: dotnet pack -c $(BuildConfiguration)
-  displayName: Pack

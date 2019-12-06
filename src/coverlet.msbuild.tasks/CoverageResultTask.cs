@@ -96,6 +96,16 @@ namespace Coverlet.MSbuild.Tasks
                     coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, DependencyInjection.Current.GetService<IInstrumentationHelper>(), fileSystem);
                 }
 
+                try
+                {
+                    fileSystem.Delete(InstrumenterState.ItemSpec);
+                }
+                catch (Exception ex)
+                {
+                    // We don't want to block coverage for I/O errors
+                    _logger.LogWarning($"Exception during instrument state deletion, file name '{InstrumenterState.ItemSpec}' exception message '{ex.Message}'");
+                }
+
                 CoverageResult result = coverage.GetCoverageResult();
 
                 var directory = Path.GetDirectoryName(_output);
