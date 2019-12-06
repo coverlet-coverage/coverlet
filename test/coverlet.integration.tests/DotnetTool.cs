@@ -1,8 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
-
-using Coverlet.Core;
-using Newtonsoft.Json;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Coverlet.Integration.Tests
@@ -19,6 +17,12 @@ namespace Coverlet.Integration.Tests
         [Fact]
         public void DotnetTool()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Disabled for the moment on unix system we get an exception(folder access denied) during tool installation
+                return;
+            }
+
             using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
             UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.Path);
             string coverletToolCommandPath = InstallTool(clonedTemplateProject.Path);

@@ -1,8 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
 
-using Coverlet.Core;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Coverlet.Integration.Tests
