@@ -4,7 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
-
+using Coverlet.Core;
+using Newtonsoft.Json;
 using NuGet.Packaging;
 using Xunit.Sdk;
 
@@ -60,6 +61,7 @@ namespace Coverlet.Integration.Tests
                 File.Copy(file, Path.Combine(finalRoot.FullName, Path.GetFileName(file)));
             }
 
+            // We need to prevent the inheritance of global props/targets for template project
             File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.props"),
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project>
@@ -82,14 +84,14 @@ namespace Coverlet.Integration.Tests
             psi.WorkingDirectory = workingDirectory;
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
-            Process dotnet = Process.Start(psi);
-            if (!dotnet.WaitForExit((int)TimeSpan.FromMinutes(5).TotalMilliseconds))
+            Process commandProcess = Process.Start(psi);
+            if (!commandProcess.WaitForExit((int)TimeSpan.FromMinutes(5).TotalMilliseconds))
             {
                 throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
             }
-            standardOutput = dotnet.StandardOutput.ReadToEnd();
-            standardError = dotnet.StandardError.ReadToEnd();
-            return dotnet.ExitCode == 0;
+            standardOutput = commandProcess.StandardOutput.ReadToEnd();
+            standardError = commandProcess.StandardError.ReadToEnd();
+            return commandProcess.ExitCode == 0;
         }
 
         private protected bool DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
@@ -97,7 +99,7 @@ namespace Coverlet.Integration.Tests
             return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
         }
 
-        private protected void UpdateNuget(string projectPath)
+        private protected void UpdateNugeConfigtWithLocalPackageFolder(string projectPath)
         {
             string nugetFile = Path.Combine(projectPath, "nuget.config");
             if (!File.Exists(nugetFile))
@@ -140,7 +142,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected void AddMsbuildRef(string projectPath)
+        private protected void AddCoverletMsbuildRef(string projectPath)
         {
             string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
             if (!File.Exists(csproj))
@@ -159,7 +161,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected void AddCollectorsRef(string projectPath)
+        private protected void AddCoverletCollectosRef(string projectPath)
         {
             string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
             if (!File.Exists(csproj))
@@ -178,7 +180,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected string AddRunsettings(string projectPath)
+        private protected string AddCollectorRunsettingsFile(string projectPath)
         {
             string runSettings =
 @"<?xml version=""1.0"" encoding=""utf-8"" ?>
@@ -189,6 +191,7 @@ namespace Coverlet.Integration.Tests
            <Configuration>
             <Format>json,cobertura</Format>
             <Include>[coverletsamplelib.integration.template]*DeepThought</Include>
+            <!-- We need to include test assembly because test and code to cover are in same template project -->
             <IncludeTestAssembly>true</IncludeTestAssembly>
         </Configuration>
       </DataCollector>
@@ -199,6 +202,16 @@ namespace Coverlet.Integration.Tests
             string runsettingsPath = Path.Combine(projectPath, "runSettings");
             File.WriteAllText(runsettingsPath, runSettings);
             return runsettingsPath;
+        }
+
+        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject)
+        {
+            Modules modules = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(clonedTemplateProject.GetFiles("coverage.json").Single()));
+            modules
+            .Document("DeepThought.cs")
+            .Class("Coverlet.Integration.Template.DeepThought")
+            .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
+            .AssertLinesCovered((6, 1), (7, 1), (8, 1));
         }
     }
 

@@ -20,19 +20,13 @@ namespace Coverlet.Integration.Tests
         public void DotnetTool()
         {
             using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
-            UpdateNuget(clonedTemplateProject.Path);
+            UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.Path);
             string coverletToolCommandPath = InstallTool(clonedTemplateProject.Path);
             DotnetCli($"build {clonedTemplateProject.Path}", out string standardOutput, out string standardError);
             string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj"));
             RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.Path, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{clonedTemplateProject.Path}\"\\", out standardOutput, out standardError);
             Assert.Contains("Test Run Successful.", standardOutput);
-
-            Modules modules = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(clonedTemplateProject.GetFiles("coverage.json").Single()));
-            modules
-            .Document("DeepThought.cs")
-            .Class("Coverlet.Integration.Template.DeepThought")
-            .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
-            .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+            AssertCoverage(clonedTemplateProject);
         }
     }
 }
