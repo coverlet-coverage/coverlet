@@ -137,4 +137,3 @@ This project enforces a code of conduct in line with the contributor covenant. S
 This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.  
   
 ## Supported by the [.NET Foundation](https://dotnetfoundation.org/)
-![.NET Foundation](_assets/dotnetfoundation_v4_horizontal.png)
