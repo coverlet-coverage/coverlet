@@ -52,7 +52,7 @@ namespace Coverlet.Core.Tests
             var loggerMock = new Mock<ILogger>();
 
             string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
-            // test skip module includint test assembly feature
+            // test skip module include test assembly feature
             var coverage = new Coverage(excludedbyattributeDll, new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" }, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, loggerMock.Object, _instrumentationHelper, partialMockFileSystem.Object);
             CoveragePrepareResult result = coverage.PrepareModules();
             Assert.Empty(result.Results);
@@ -69,8 +69,6 @@ namespace Coverlet.Core.Tests
 
             File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
-
-            // TODO: Find a way to mimick hits
 
             var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             coverage.PrepareModules();
