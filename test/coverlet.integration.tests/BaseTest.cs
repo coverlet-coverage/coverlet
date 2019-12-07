@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using Coverlet.Core;
 using Newtonsoft.Json;
 using NuGet.Packaging;
+using Xunit;
 using Xunit.Sdk;
 
 namespace Coverlet.Integration.Tests
@@ -205,16 +206,20 @@ namespace Coverlet.Integration.Tests
             return runsettingsPath;
         }
 
-        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject)
+        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json")
         {
-            foreach (string coverageFile in clonedTemplateProject.GetFiles("coverage.json"))
+            bool coverageChecked = false;
+            foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
             {
                 JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
                 .Document("DeepThought.cs")
                 .Class("Coverlet.Integration.Template.DeepThought")
                 .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
                 .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+                coverageChecked = true;
             }
+
+            Assert.True(coverageChecked, "Coverage check fail");
         }
 
         private protected void UpdateProjectTargetFramework(ClonedTemplateProject project, params string[] targetFrameworks)
