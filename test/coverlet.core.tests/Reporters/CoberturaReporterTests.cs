@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -157,44 +158,54 @@ namespace Coverlet.Core.Reporters.Tests
                 absolutePath2 = @"/projB/file.cs";
             }
 
-            var classes = new Classes { { "Class", new Methods() } };
-            var documents = new Documents { { absolutePath1, classes }, { absolutePath2, classes } };
+            var classes = new Classes {{"Class", new Methods()}};
+            var documents = new Documents {{absolutePath1, classes}, {absolutePath2, classes}};
 
-            result.Modules = new Modules { { "Module", documents } };
+            result.Modules = new Modules {{"Module", documents}};
 
             CoberturaReporter reporter = new CoberturaReporter();
             string report = reporter.Report(result);
 
             var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
-            var rootPaths = doc.Descendants().Elements().Where(tag => tag.Name.LocalName.Equals("source"))
-                .Select(elem => elem.Value).ToList();
-            var relativePaths = doc.Descendants().Elements().Where(tag => tag.Name.LocalName.Equals("class"))
-                .Attributes("filename").Select(attr => attr.Value).ToList();
 
-            Assert.Equal(absolutePath1, Path.Combine(rootPaths[0], relativePaths[0]));
-            Assert.Equal(absolutePath2, Path.Combine(isWindows ? rootPaths[1] : rootPaths[0], relativePaths[1]));
+            List<string> rootPaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
+            List<string> relativePaths = doc.Element("coverage").Element("packages").Element("package")
+                .Element("classes").Elements().Select(e => e.Attribute("filename").Value).ToList();
+
+            List<string> possiblePaths = new List<string>();
+            foreach (string root in rootPaths)
+            {
+                foreach (string relativePath in relativePaths)
+                {
+                    possiblePaths.Add(Path.Combine(root, relativePath));
+                }
+            }
+
+            Assert.Contains(absolutePath1, possiblePaths);
+            Assert.Contains(absolutePath2, possiblePaths);
         }
 
         [Fact]
         public void TestReportWithSourcelinkPaths()
         {
-            CoverageResult result = new CoverageResult { UseSourceLink = true, Identifier = Guid.NewGuid().ToString() };
+            CoverageResult result = new CoverageResult {UseSourceLink = true, Identifier = Guid.NewGuid().ToString()};
 
-            var absolutePath = @"https://raw.githubusercontent.com/johndoe/Coverlet/02c09baa8bfdee3b6cdf4be89bd98c8157b0bc08/Demo.cs";
+            var absolutePath =
+                @"https://raw.githubusercontent.com/johndoe/Coverlet/02c09baa8bfdee3b6cdf4be89bd98c8157b0bc08/Demo.cs";
 
-            var classes = new Classes { { "Class", new Methods() } };
-            var documents = new Documents { { absolutePath, classes } };
+            var classes = new Classes {{"Class", new Methods()}};
+            var documents = new Documents {{absolutePath, classes}};
 
-            result.Modules = new Modules { { "Module", documents } };
+            result.Modules = new Modules {{"Module", documents}};
 
             CoberturaReporter reporter = new CoberturaReporter();
             string report = reporter.Report(result);
 
             var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
-            var fileNames = doc.Descendants().Elements().Where(tag => tag.Name.LocalName.Equals("class"))
-                .Attributes("filename").Select(attr => attr.Value).ToList();
+            var fileName = doc.Element("coverage").Element("packages").Element("package").Element("classes").Elements()
+                .Select(e => e.Attribute("filename").Value).Single();
 
-            Assert.Equal(absolutePath, fileNames[0]);
+            Assert.Equal(absolutePath, fileName);
         }
     }
 }
