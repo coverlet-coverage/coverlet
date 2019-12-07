@@ -15,7 +15,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 
 ## Quick Start
 
-### VSTest Integration(Preferred)
+### VSTest Integration (preferred due to [know issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Insallation
 ```bash
@@ -65,7 +65,15 @@ See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 #### Requirements
 Requires a runtime that support _.NET Standard 2.0 and above_
 
-### Global Tool
+### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools))
+
+### Installation
+
+```bash
+dotnet tool install --global coverlet.console
+```
+
+### Usage
 
 The `coverlet` tool is invoked by specifying the path to the assembly that contains the unit tests. You also need to specify the test runner and the arguments to pass to the test runner using the `--target` and `--targetargs` options respectively. The invocation of the test runner with the supplied arguments **must not** involve a recompilation of the unit test assembly or no coverage result will be generated.
 
