@@ -31,7 +31,7 @@
 
   <Target Name="GenerateCoverageResult">
     <PropertyGroup>
-      <_CoverletMultiTargetFrameworksCurrentTFM_ Condition="'$(TargetFrameworks)' != ''" >$(TargetFramework)</_CoverletMultiTargetFrameworksCurrentTFM_>
+      <_coverletMultiTargetFrameworksCurrentTFM Condition="'$(TargetFrameworks)' != ''" >$(TargetFramework)</_coverletMultiTargetFrameworksCurrentTFM>
     </PropertyGroup>
     <Coverlet.MSbuild.Tasks.CoverageResultTask
       Output="$(CoverletOutput)"
@@ -40,7 +40,7 @@
       ThresholdType="$(ThresholdType)"
       ThresholdStat="$(ThresholdStat)"
       InstrumenterState="$(InstrumenterState)"
-      CoverletMultiTargetFrameworksCurrentTFM="$(_CoverletMultiTargetFrameworksCurrentTFM_)" />
+      CoverletMultiTargetFrameworksCurrentTFM="$(_coverletMultiTargetFrameworksCurrentTFM)" />
   </Target>
 
   <Target Name="GenerateCoverageResultAfterTest"
