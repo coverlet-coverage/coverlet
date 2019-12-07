@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using Coverlet.Core;
 using Newtonsoft.Json;
 using NuGet.Packaging;
+using Xunit;
 using Xunit.Sdk;
 
 namespace Coverlet.Integration.Tests
@@ -52,7 +53,7 @@ namespace Coverlet.Integration.Tests
             return manifest.Metadata.Version.OriginalVersion;
         }
 
-        private protected ClonedTemplateProject CloneTemplateProject()
+        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true)
         {
             DirectoryInfo finalRoot = Directory.CreateDirectory(Guid.NewGuid().ToString("N"));
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
@@ -75,7 +76,7 @@ namespace Coverlet.Integration.Tests
 
             AddMicrosoftNETTestSdkRef(finalRoot.FullName);
 
-            return new ClonedTemplateProject() { Path = finalRoot.FullName };
+            return new ClonedTemplateProject(finalRoot.FullName, cleanupOnDispose);
         }
 
         private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
@@ -205,34 +206,101 @@ namespace Coverlet.Integration.Tests
             return runsettingsPath;
         }
 
-        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject)
+        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json")
         {
-            Modules modules = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(clonedTemplateProject.GetFiles("coverage.json").Single()));
-            modules
-            .Document("DeepThought.cs")
-            .Class("Coverlet.Integration.Template.DeepThought")
-            .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
-            .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+            bool coverageChecked = false;
+            foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
+            {
+                JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
+                .Document("DeepThought.cs")
+                .Class("Coverlet.Integration.Template.DeepThought")
+                .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
+                .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+                coverageChecked = true;
+            }
+
+            Assert.True(coverageChecked, "Coverage check fail");
+        }
+
+        private protected void UpdateProjectTargetFramework(ClonedTemplateProject project, params string[] targetFrameworks)
+        {
+            if (targetFrameworks is null || targetFrameworks.Length == 0)
+            {
+                throw new ArgumentException("Invalid targetFrameworks", nameof(targetFrameworks));
+            }
+
+            if (!File.Exists(project.ProjectFileNamePath))
+            {
+                throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+            }
+            XDocument xml;
+            using (var csprojStream = File.OpenRead(project.ProjectFileNamePath))
+            {
+                xml = XDocument.Load(csprojStream);
+            }
+
+            xml.Element("Project")
+              .Element("PropertyGroup")
+              .Element("TargetFramework")
+              .Remove();
+
+            XElement targetFrameworkElement;
+
+            if (targetFrameworks.Length == 1)
+            {
+                targetFrameworkElement = new XElement("TargetFramework", targetFrameworks[0]);
+            }
+            else
+            {
+                targetFrameworkElement = new XElement("TargetFrameworks", string.Join(';', targetFrameworks));
+            }
+
+            xml.Element("Project").Element("PropertyGroup").Add(targetFrameworkElement);
+            xml.Save(project.ProjectFileNamePath);
+        }
+
+        private protected void PinSDK(ClonedTemplateProject project, string sdkVersion)
+        {
+            if (string.IsNullOrEmpty(sdkVersion))
+            {
+                throw new ArgumentException("Invalid sdkVersion", nameof(sdkVersion));
+            }
+
+            if (!File.Exists(project.ProjectFileNamePath))
+            {
+                throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+            }
+
+            File.WriteAllText(Path.Combine(project.ProjectRootPath, "global.json"), $"{{ \"sdk\": {{ \"version\": \"{sdkVersion}\" }} }}");
         }
     }
 
     class ClonedTemplateProject : IDisposable
     {
-        public string Path { get; set; }
+        public string? ProjectRootPath { get; private set; }
+        public bool _cleanupOnDispose { get; set; }
 
         // We need to have a different asm name to avoid issue with collectors, we filter [coverlet.*]* by default
         // https://github.com/tonerdo/coverlet/pull/410#discussion_r284526728
         public static string AssemblyName { get; } = "coverletsamplelib.integration.template";
         public static string ProjectFileName { get; } = "coverlet.integration.template.csproj";
+        public string ProjectFileNamePath => Path.Combine(ProjectRootPath, "coverlet.integration.template.csproj");
+
+        public ClonedTemplateProject(string projectRootPath, bool cleanupOnDispose) => (ProjectRootPath, _cleanupOnDispose) = (projectRootPath, cleanupOnDispose);
+
+
 
         public string[] GetFiles(string filter)
         {
-            return Directory.GetFiles(this.Path, filter, SearchOption.AllDirectories);
+            return Directory.GetFiles(ProjectRootPath, filter, SearchOption.AllDirectories);
         }
 
         public void Dispose()
         {
-            Directory.Delete(Path, true);
+            if (_cleanupOnDispose)
+            {
+                Directory.Delete(ProjectRootPath, true);
+            }
         }
     }
 }

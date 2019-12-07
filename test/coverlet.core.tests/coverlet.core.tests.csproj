@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.remoteexecutor\coverlet.tests.remoteexecutor.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.empty\coverlet.tests.projectsample.empty.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj" />
