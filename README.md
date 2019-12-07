@@ -15,6 +15,13 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 
 ## Quick Start
 
+Coverlet can be used through three different *drivers* 
+
+* VSTest engine integration
+* MSBuild task integration
+* As a .NET Global tool  
+
+
 ### VSTest Integration (preferred due to [know issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Insallation
