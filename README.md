@@ -5,7 +5,6 @@
 Coverlet is a cross platform code coverage framework for .NET, with support for line, branch and method coverage. It works with .NET Framework on Windows and .NET Core on all supported platforms.
 
 # Main contents
-* [Installation](#Installation)
 * [QuickStart](#Quick-Start)
 * [How It Works](#How-It-Works)
 * [Know Issues](#Know-Issues)
@@ -13,32 +12,18 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 * [Feature samples](Documentation/Examples.md)
 * [Cake Add-In](#Cake.-Add-In)
 * [Changelog](Documentation/Changelog.md)
-## Installation
-
-**VSTest Integration**:
-
-```bash
-dotnet add package coverlet.collector
-```
-N.B. You **MUST** add package only to test projects  
-
-**MSBuild Integration**:
-
-```bash
-dotnet add package coverlet.msbuild
-```
-N.B. You **MUST** add package only to test projects  
-
-**Global Tool**:
-
-```bash
-dotnet tool install --global coverlet.console
-```
 
 ## Quick Start
 
-### VSTest Integration
+### VSTest Integration(Preferred)
 
+### Insallation
+```bash
+dotnet add package coverlet.collector
+```
+N.B. You **MUST** add package only to test projects 
+
+### Usage
 Coverlet is integrated into the Visual Studio Test Platform as a [data collector](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md). To get coverage simply run the following command:
 
 ```bash
@@ -56,8 +41,16 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 ```
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
 ```
-
+* Important [know issue](Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100)
 ### MSBuild Integration
+
+### Insallation
+```bash
+dotnet add package coverlet.msbuild
+```
+N.B. You **MUST** add package only to test projects  
+
+### Usage
 
 Coverlet also integrates with the build system to run code coverage after tests. Enabling code coverage is as simple as setting the `CollectCoverage` property to `true`
 
