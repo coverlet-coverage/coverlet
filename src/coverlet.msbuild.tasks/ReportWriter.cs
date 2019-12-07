@@ -24,7 +24,7 @@ namespace Coverlet.MSbuild.Tasks
         {
             string filename = Path.GetFileName(_output);
 
-            string separatorPoint = string.IsNullOrWhiteSpace(_coverletMultiTargetFrameworksCurrentTFM) ? "" : ".";
+            string separatorPoint = string.IsNullOrEmpty(_coverletMultiTargetFrameworksCurrentTFM) ? "" : ".";
 
             if (filename == string.Empty)
             {
