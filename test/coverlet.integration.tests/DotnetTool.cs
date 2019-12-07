@@ -24,11 +24,11 @@ namespace Coverlet.Integration.Tests
             }
 
             using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
-            UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.Path);
-            string coverletToolCommandPath = InstallTool(clonedTemplateProject.Path);
-            DotnetCli($"build {clonedTemplateProject.Path}", out string standardOutput, out string standardError);
+            UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+            string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+            DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
             string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj"));
-            RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.Path, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{clonedTemplateProject.Path}\"\\", out standardOutput, out standardError);
+            RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError);
             Assert.Contains("Test Run Successful.", standardOutput);
             AssertCoverage(clonedTemplateProject);
         }
