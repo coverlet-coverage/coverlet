@@ -17,7 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -Improve lambda scenario coverage [#583](https://github.com/tonerdo/coverlet/pull/583)  
 -Mitigate issue in case of failure in assembly loading by cecil [#625](https://github.com/tonerdo/coverlet/pull/625)  
 -Fix ConfigureAwait state machine generated branches [#634](https://github.com/tonerdo/coverlet/pull/634)  
--Fix Coverage is overwritten if the project has multiple target frameworks [#636](https://github.com/tonerdo/coverlet/issues/177)  
+-Fix coverage overwritten if the project has multiple target frameworks [#636](https://github.com/tonerdo/coverlet/issues/177)  
+-Fix cobertura Jenkins reporter + source link support [#614](https://github.com/tonerdo/coverlet/pull/614) by https://github.com/daveMueller  
 
 ### Improvements
 
