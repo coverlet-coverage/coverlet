@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -Fix ConfigureAwait state machine generated branches [#634](https://github.com/tonerdo/coverlet/pull/634)  
 -Fix coverage overwritten if the project has multiple target frameworks [#636](https://github.com/tonerdo/coverlet/issues/177)  
 -Fix cobertura Jenkins reporter + source link support [#614](https://github.com/tonerdo/coverlet/pull/614) by https://github.com/daveMueller  
+-Fix pdb file locking during instrumentation [#656](https://github.com/tonerdo/coverlet/pull/656)
+
 
 ### Improvements
 
