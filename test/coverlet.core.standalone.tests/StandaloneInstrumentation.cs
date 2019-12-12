@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -6,6 +5,7 @@ using System.Threading.Tasks;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.ObjectModel;
+using Coverlet.Core.Reporters;
 using Coverlet.Tests.RemoteExecutor;
 using Xunit;
 
@@ -74,7 +74,7 @@ namespace Coverlet.Core.Standalone.Tests
             AssertCoverage(result, 2);
 
             // Create report
-            IReporter reporter = _coverageFactory.CreateReporter(Reporters.Cobertura);
+            IReporter reporter = _coverageFactory.CreateReporter(ReporterTypes.Cobertura);
             string reportResult = reporter.Report(result);
             Assert.NotEmpty(reportResult);
 

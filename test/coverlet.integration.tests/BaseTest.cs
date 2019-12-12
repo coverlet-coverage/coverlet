@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
-using Coverlet.Core;
+using Coverlet.Core.ObjectModel;
 using Newtonsoft.Json;
 using NuGet.Packaging;
 using Xunit;

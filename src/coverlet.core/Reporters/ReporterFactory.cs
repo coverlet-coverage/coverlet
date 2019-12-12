@@ -1,8 +1,19 @@
 using System;
 using System.Linq;
 
-namespace Coverlet.Core.Abstracts
+using Coverlet.Core.Abstracts;
+
+namespace Coverlet.Core.Reporters
 {
+    public static class ReporterTypes
+    {
+        public readonly static string Cobertura = "cobertura";
+        public readonly static string Json = "json";
+        public readonly static string Lcov = "lcov";
+        public readonly static string OpenCover = "opencover";
+        public readonly static string TeamCity = "teamcity";
+    }
+
     internal class ReporterFactory : IReporterFactory
     {
         private string _format;

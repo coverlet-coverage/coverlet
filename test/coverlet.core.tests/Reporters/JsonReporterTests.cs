@@ -1,6 +1,7 @@
 using System;
 
 using Coverlet.Core.ObjectModel;
+using Coverlet.Core.Reporters;
 using Xunit;
 
 namespace Coverlet.Core.Abstracts.Tests

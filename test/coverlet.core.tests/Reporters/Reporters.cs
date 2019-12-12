@@ -1,6 +1,7 @@
 ﻿using System.IO;
 
 using Coverlet.Core.Abstracts;
+using Coverlet.Core.ObjectModel;
 using Coverlet.MSbuild.Tasks;
 using Moq;
 using Xunit;

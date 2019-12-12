@@ -46,9 +46,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.integration.tests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.integration.template", "test\coverlet.integration.template\coverlet.integration.template.csproj", "{F6FE7678-C662-43D3-AC6A-64F6AC5A5935}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.core.standalone.tests", "test\coverlet.core.standalone.tests\coverlet.core.standalone.tests.csproj", "{D324E73F-69DB-41BA-BF54-A79FD292114C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.standalone.tests", "test\coverlet.core.standalone.tests\coverlet.core.standalone.tests.csproj", "{D324E73F-69DB-41BA-BF54-A79FD292114C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.core.standalone.sample", "test\coverlet.core.standalone.sample\coverlet.core.standalone.sample.csproj", "{F1617303-0F38-4D98-9BFA-370B57F3A154}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.standalone.sample", "test\coverlet.core.standalone.sample\coverlet.core.standalone.sample.csproj", "{F1617303-0F38-4D98-9BFA-370B57F3A154}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -108,6 +108,14 @@ Global
 		{F6FE7678-C662-43D3-AC6A-64F6AC5A5935}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6FE7678-C662-43D3-AC6A-64F6AC5A5935}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6FE7678-C662-43D3-AC6A-64F6AC5A5935}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D324E73F-69DB-41BA-BF54-A79FD292114C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D324E73F-69DB-41BA-BF54-A79FD292114C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D324E73F-69DB-41BA-BF54-A79FD292114C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D324E73F-69DB-41BA-BF54-A79FD292114C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1617303-0F38-4D98-9BFA-370B57F3A154}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1617303-0F38-4D98-9BFA-370B57F3A154}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1617303-0F38-4D98-9BFA-370B57F3A154}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1617303-0F38-4D98-9BFA-370B57F3A154}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -126,6 +134,8 @@ Global
 		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{99B4059C-B25C-4B82-8117-A0E9DC9B0949} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F6FE7678-C662-43D3-AC6A-64F6AC5A5935} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{D324E73F-69DB-41BA-BF54-A79FD292114C} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{F1617303-0F38-4D98-9BFA-370B57F3A154} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}

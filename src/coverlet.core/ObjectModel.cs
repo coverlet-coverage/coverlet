@@ -40,6 +40,7 @@ namespace Coverlet.Core.ObjectModel
     {
         public string Identifier;
         public Modules Modules;
+        public bool UseSourceLink;
         internal List<InstrumenterResult> InstrumentedResults;
 
         internal CoverageResult() { }

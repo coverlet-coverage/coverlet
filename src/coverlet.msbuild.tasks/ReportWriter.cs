@@ -1,7 +1,7 @@
 ﻿using System.IO;
 
-using Coverlet.Core;
 using Coverlet.Core.Abstracts;
+using Coverlet.Core.ObjectModel;
 using Coverlet.Core.Reporters;
 
 namespace Coverlet.MSbuild.Tasks

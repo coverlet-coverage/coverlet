@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using Coverlet.Core;
+using Coverlet.Core.ObjectModel;
 using Xunit.Sdk;
 
 namespace Coverlet.Integration.Tests

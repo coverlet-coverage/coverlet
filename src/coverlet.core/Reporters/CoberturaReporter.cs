@@ -7,9 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.ObjectModel;
 
-namespace Coverlet.Core.Abstracts
+namespace Coverlet.Core.Reporters
 {
     internal class CoberturaReporter : IReporter
     {

@@ -9,6 +9,7 @@ using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Extensions;
 using Coverlet.Core.ObjectModel;
+using Coverlet.Core.Reporters;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 

@@ -14,6 +14,7 @@ using Coverlet.Collector.DataCollection;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
 using Xunit;
+using Coverlet.Core.Reporters;
 
 namespace Coverlet.Collector.Tests
 {

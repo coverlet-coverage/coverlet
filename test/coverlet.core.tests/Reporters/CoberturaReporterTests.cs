@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading;
 using System.Xml.Linq;
 
 using Coverlet.Core.ObjectModel;
+using Coverlet.Core.Reporters;
 using Xunit;
 
 namespace Coverlet.Core.Abstracts.Tests

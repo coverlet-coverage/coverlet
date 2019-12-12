@@ -1,17 +1,16 @@
 ﻿#nullable enable
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
+
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.ObjectModel;
+using Coverlet.Core.Reporters;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Coverlet.Core.Instrumentation

@@ -12,6 +12,7 @@ using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Extensions;
 using Coverlet.Core.ObjectModel;
+using Coverlet.Core.Reporters;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Coverlet.Console

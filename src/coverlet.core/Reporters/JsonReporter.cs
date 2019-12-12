@@ -1,7 +1,8 @@
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.ObjectModel;
 using Newtonsoft.Json;
 
-namespace Coverlet.Core.Abstracts
+namespace Coverlet.Core.Reporters
 {
     internal class JsonReporter : IReporter
     {
