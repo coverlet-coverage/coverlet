@@ -21,6 +21,7 @@ namespace Coverlet.MSbuild.Tasks
         private double _threshold;
         private string _thresholdType;
         private string _thresholdStat;
+        private string _coverletMultiTargetFrameworksCurrentTFM;
         private ITaskItem _instrumenterState;
         private MSBuildLogger _logger;
 
@@ -66,6 +67,12 @@ namespace Coverlet.MSbuild.Tasks
             set { _instrumenterState = value; }
         }
 
+        public string CoverletMultiTargetFrameworksCurrentTFM
+        {
+            get { return _coverletMultiTargetFrameworksCurrentTFM; }
+            set { _coverletMultiTargetFrameworksCurrentTFM = value; }
+        }
+
         public CoverageResultTask()
         {
             _logger = new MSBuildLogger(Log);
@@ -88,6 +95,16 @@ namespace Coverlet.MSbuild.Tasks
                 using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
                 {
                     coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, DependencyInjection.Current.GetService<IInstrumentationHelper>(), fileSystem);
+                }
+
+                try
+                {
+                    fileSystem.Delete(InstrumenterState.ItemSpec);
+                }
+                catch (Exception ex)
+                {
+                    // We don't want to block coverage for I/O errors
+                    _logger.LogWarning($"Exception during instrument state deletion, file name '{InstrumenterState.ItemSpec}' exception message '{ex.Message}'");
                 }
 
                 CoverageResult result = coverage.GetCoverageResult();
@@ -119,14 +136,14 @@ namespace Coverlet.MSbuild.Tasks
                     }
                     else
                     {
-                        // Output to file
-                        var filename = Path.GetFileName(_output);
-                        filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
-                        filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
-
-                        var report = Path.Combine(directory, filename);
-                        Console.WriteLine($"  Generating report '{report}'");
-                        fileSystem.WriteAllText(report, reporter.Report(result));
+                        ReportWriter writer = new ReportWriter(_coverletMultiTargetFrameworksCurrentTFM,
+                                                                directory,
+                                                                _output,
+                                                                reporter,
+                                                                fileSystem,
+                                                                DependencyInjection.Current.GetService<IConsole>(),
+                                                                result);
+                        writer.WriteReport();
                     }
                 }
 

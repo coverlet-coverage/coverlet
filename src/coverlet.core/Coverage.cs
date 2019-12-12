@@ -282,7 +282,7 @@ namespace Coverlet.Core
                 }
             }
 
-            var coverageResult = new CoverageResult { Identifier = identifier, Modules = modules, InstrumentedResults = results.ToList() };
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results, UseSourceLink = _useSourceLink };
 
             if (!string.IsNullOrEmpty(mergeWith) && !string.IsNullOrWhiteSpace(mergeWith) && fileSystem.Exists(mergeWith))
             {

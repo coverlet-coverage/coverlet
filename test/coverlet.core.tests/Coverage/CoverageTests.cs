@@ -53,7 +53,7 @@ namespace Coverlet.Core.Tests
             var loggerMock = new Mock<ILogger>();
 
             string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
-            // test skip module includint test assembly feature
+            // test skip module include test assembly feature
             var coverage = new Coverage(excludedbyattributeDll, new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" }, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, loggerMock.Object, _instrumentationHelper, partialMockFileSystem.Object);
             CoveragePrepareResult result = coverage.PrepareModules();
             Assert.Empty(result.Results);
@@ -70,8 +70,6 @@ namespace Coverlet.Core.Tests
 
             File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
-
-            // TODO: Find a way to mimick hits
 
             var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             coverage.PrepareModules();
@@ -176,6 +174,7 @@ namespace Coverlet.Core.Tests
                         res = ((Task<int>)instance.AsyncExecution(2)).ConfigureAwait(false).GetAwaiter().GetResult();
                         res = ((Task<int>)instance.AsyncExecution(3)).ConfigureAwait(false).GetAwaiter().GetResult();
                         res = ((Task<int>)instance.ContinuationCalled()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        res = ((Task<int>)instance.ConfigureAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
                     }, pathSerialize);
@@ -201,7 +200,9 @@ namespace Coverlet.Core.Tests
                                             // ContinuationNotCalled
                                             (74, 0), (75, 0), (76, 0), (77, 0), (78, 0),
                                             // ContinuationCalled -> line 83 should be 1 hit some issue with Continuation state machine
-                                            (81, 1), (82, 1), (83, 2), (84, 1), (85, 1)
+                                            (81, 1), (82, 1), (83, 2), (84, 1), (85, 1),
+                                            // ConfigureAwait
+                                            (89, 1), (90, 1)
                                          )
                       .AssertBranchesCovered(BuildConfiguration.Debug, (16, 0, 0), (16, 1, 1), (43, 0, 3), (43, 1, 1), (43, 2, 1), (43, 3, 1), (43, 4, 0))
                       // Real branch should be 2, we should try to remove compiler generated branch in method ContinuationNotCalled/ContinuationCalled

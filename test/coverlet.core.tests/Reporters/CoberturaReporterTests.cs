@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Xml.Linq;
@@ -37,7 +38,15 @@ namespace Coverlet.Core.Abstracts.Tests
             classes.Add("Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods);
 
             Documents documents = new Documents();
-            documents.Add("doc.cs", classes);
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                documents.Add(@"C:\doc.cs", classes);
+            }
+            else
+            {
+                documents.Add(@"/doc.cs", classes);
+            }
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
@@ -102,7 +111,14 @@ namespace Coverlet.Core.Abstracts.Tests
             classes.Add("Google.Protobuf.Reflection.MessageDescriptor", methods);
 
             Documents documents = new Documents();
-            documents.Add("doc.cs", classes);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                documents.Add(@"C:\doc.cs", classes);
+            }
+            else
+            {
+                documents.Add(@"/doc.cs", classes);
+            }
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
@@ -119,6 +135,78 @@ namespace Coverlet.Core.Abstracts.Tests
                 .ToDictionary(o => o.Name.LocalName, o => o.Value);
             Assert.Equal(expectedMethodName, methodAttrs["name"]);
             Assert.Equal(expectedSignature, methodAttrs["signature"]);
+        }
+
+        [Fact]
+        public void TestReportWithTwoDifferentDirectories()
+        {
+            CoverageResult result = new CoverageResult();
+            result.Identifier = Guid.NewGuid().ToString();
+
+            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+            string absolutePath1;
+            string absolutePath2;
+
+            if (isWindows)
+            {
+                absolutePath1 = @"C:\projA\file.cs";
+                absolutePath2 = @"E:\projB\file.cs";
+            }
+            else
+            {
+                absolutePath1 = @"/projA/file.cs";
+                absolutePath2 = @"/projB/file.cs";
+            }
+
+            var classes = new Classes {{"Class", new Methods()}};
+            var documents = new Documents {{absolutePath1, classes}, {absolutePath2, classes}};
+
+            result.Modules = new Modules {{"Module", documents}};
+
+            CoberturaReporter reporter = new CoberturaReporter();
+            string report = reporter.Report(result);
+
+            var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+
+            List<string> rootPaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
+            List<string> relativePaths = doc.Element("coverage").Element("packages").Element("package")
+                .Element("classes").Elements().Select(e => e.Attribute("filename").Value).ToList();
+
+            List<string> possiblePaths = new List<string>();
+            foreach (string root in rootPaths)
+            {
+                foreach (string relativePath in relativePaths)
+                {
+                    possiblePaths.Add(Path.Combine(root, relativePath));
+                }
+            }
+
+            Assert.Contains(absolutePath1, possiblePaths);
+            Assert.Contains(absolutePath2, possiblePaths);
+        }
+
+        [Fact]
+        public void TestReportWithSourcelinkPaths()
+        {
+            CoverageResult result = new CoverageResult {UseSourceLink = true, Identifier = Guid.NewGuid().ToString()};
+
+            var absolutePath =
+                @"https://raw.githubusercontent.com/johndoe/Coverlet/02c09baa8bfdee3b6cdf4be89bd98c8157b0bc08/Demo.cs";
+
+            var classes = new Classes {{"Class", new Methods()}};
+            var documents = new Documents {{absolutePath, classes}};
+
+            result.Modules = new Modules {{"Module", documents}};
+
+            CoberturaReporter reporter = new CoberturaReporter();
+            string report = reporter.Report(result);
+
+            var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+            var fileName = doc.Element("coverage").Element("packages").Element("package").Element("classes").Elements()
+                .Select(e => e.Attribute("filename").Value).Single();
+
+            Assert.Equal(absolutePath, fileName);
         }
     }
 }
