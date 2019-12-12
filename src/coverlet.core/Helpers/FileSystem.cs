@@ -21,7 +21,8 @@ namespace Coverlet.Core.Helpers
             return File.ReadAllText(path);
         }
 
-        public Stream OpenRead(string path)
+        // We need to partial mock this method on tests
+        public virtual Stream OpenRead(string path)
         {
             return File.OpenRead(path);
         }

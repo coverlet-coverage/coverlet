@@ -374,15 +374,15 @@ namespace Coverlet.Core.Instrumentation.Tests
             {
                 Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
                 partialMockFileSystem.CallBase = true;
-                partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>())).Returns((string path, FileMode mode) =>
+                partialMockFileSystem.Setup(fs => fs.OpenRead(It.IsAny<string>())).Returns((string path) =>
                 {
                     if (Path.GetFileName(path) == pdbFileName)
                     {
-                        return new FileStream(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName), mode);
+                        return File.OpenRead(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName));
                     }
                     else
                     {
-                        return new FileStream(path, mode);
+                        return File.OpenRead(path);
                     }
                 });
                 partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
