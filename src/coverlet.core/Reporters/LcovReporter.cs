@@ -2,8 +2,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-using Coverlet.Core.ObjectModel;
 using Coverlet.Core.Abstracts;
+using Coverlet.Core.ObjectModel;
 
 namespace Coverlet.Core.Reporters
 {

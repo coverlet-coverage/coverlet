@@ -1,10 +1,9 @@
 ﻿using System;
-
+using Coverlet.Core.Abstracts;
 using Coverlet.Core.ObjectModel;
-using Coverlet.Core.Reporters;
 using Xunit;
 
-namespace Coverlet.Core.Abstracts.Tests
+namespace Coverlet.Core.Reporters.Tests
 {
     public class TestCreateReporterTests
     {

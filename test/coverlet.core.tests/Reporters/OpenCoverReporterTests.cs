@@ -5,10 +5,9 @@ using System.Text;
 using System.Xml.Linq;
 
 using Coverlet.Core.ObjectModel;
-using Coverlet.Core.Reporters;
 using Xunit;
 
-namespace Coverlet.Core.Abstracts.Tests
+namespace Coverlet.Core.Reporters.Tests
 {
     public class OpenCoverReporterTests
     {
