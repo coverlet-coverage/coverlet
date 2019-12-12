@@ -144,7 +144,7 @@ namespace Coverlet.Core.Helpers
                     if (entry.Type == DebugDirectoryEntryType.CodeView)
                     {
                         var codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                        using Stream pdbStream = _fileSystem.NewFileStream(codeViewData.Path, FileMode.Open);
+                        using Stream pdbStream = _fileSystem.OpenRead(codeViewData.Path);
                         using MetadataReaderProvider metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
                         MetadataReader metadataReader = null;
                         try
