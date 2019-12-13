@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
@@ -148,6 +148,8 @@ namespace Coverlet.Core.Instrumentation
         /// <PropertyGroup>
         ///     <PreserveCompilationContext>true</PreserveCompilationContext>
         /// </PropertyGroup>
+        /// 
+        /// Runtime configuration file doc https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md
         ///
         /// </summary>
         internal AssemblyDefinition TryWithCustomResolverOnDotNetCore(AssemblyNameReference name)
@@ -167,6 +169,7 @@ namespace Coverlet.Core.Instrumentation
 
             using DependencyContextJsonReader contextJsonReader = new DependencyContextJsonReader();
             Dictionary<string, Lazy<AssemblyDefinition>> libraries = new Dictionary<string, Lazy<AssemblyDefinition>>();
+
             foreach (string fileName in Directory.GetFiles(Path.GetDirectoryName(_modulePath), "*.deps.json"))
             {
                 using FileStream depsFile = File.OpenRead(fileName);
