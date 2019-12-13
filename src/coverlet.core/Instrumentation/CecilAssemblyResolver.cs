@@ -180,9 +180,24 @@ namespace Coverlet.Core.Instrumentation
                         continue;
                     }
 
+                    //Workaround for .NET Core 3.1 deps file changes
+                    var compilationLibrary = library;
+                    if (compilationLibrary.Assemblies.Count == 0)
+                    {
+                        compilationLibrary = new CompilationLibrary(library.Type,
+                            library.Name,
+                            library.Version,
+                            library.Hash,
+                            new[] { library.Name + ".dll" },
+                            library.Dependencies,
+                            library.Serviceable,
+                            library.Path,
+                            library.HashPath);
+                    }
+
                     try
                     {
-                        string path = library.ResolveReferencePaths(_compositeResolver.Value).FirstOrDefault();
+                        string path = compilationLibrary.ResolveReferencePaths(_compositeResolver.Value).FirstOrDefault();
                         if (string.IsNullOrEmpty(path))
                         {
                             continue;
