@@ -167,6 +167,8 @@ namespace Coverlet.Core.Instrumentation
 
             using DependencyContextJsonReader contextJsonReader = new DependencyContextJsonReader();
             Dictionary<string, Lazy<AssemblyDefinition>> libraries = new Dictionary<string, Lazy<AssemblyDefinition>>();
+
+            // https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md
             foreach (string fileName in Directory.GetFiles(Path.GetDirectoryName(_modulePath), "*.deps.json"))
             {
                 using FileStream depsFile = File.OpenRead(fileName);
