@@ -11,6 +11,7 @@
     <Description>Coverlet is a cross platform code coverage tool for .NET, with support for line, branch and method coverage.</Description>
     <PackageTags>coverage;testing;unit-test;lcov;opencover;quality</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
+    <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/tonerdo/coverlet</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
@@ -22,6 +23,10 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
