@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
