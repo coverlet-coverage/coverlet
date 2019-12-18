@@ -32,8 +32,8 @@ namespace Coverlet.Core.Reporters
             coverage.Add(new XAttribute("timestamp", (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds));
 
             XElement sources = new XElement("sources");
-            var rootDirs = GetRootDirs(result.Modules, result.UseSourceLink).ToList();
-            rootDirs.ForEach(x => sources.Add(new XElement("source", x)));
+            var basePaths = GetBasePaths(result.Modules, result.UseSourceLink).ToList();
+            basePaths.ForEach(x => sources.Add(new XElement("source", x)));
 
             XElement packages = new XElement("packages");
             foreach (var module in result.Modules)
@@ -51,7 +51,7 @@ namespace Coverlet.Core.Reporters
                     {
                         XElement @class = new XElement("class");
                         @class.Add(new XAttribute("name", cls.Key));
-                        @class.Add(new XAttribute("filename", GetRelativePathFromBase(rootDirs, document.Key, result.UseSourceLink)));
+                        @class.Add(new XAttribute("filename", GetRelativePathFromBase(basePaths, document.Key, result.UseSourceLink)));
                         @class.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(cls.Value)));
@@ -133,28 +133,44 @@ namespace Coverlet.Core.Reporters
             return Encoding.UTF8.GetString(stream.ToArray());
         }
 
-        private static IEnumerable<string> GetRootDirs(Modules modules, bool useSourceLink)
+        private static IEnumerable<string> GetBasePaths(Modules modules, bool useSourceLink)
         {
             if (useSourceLink)
             {
                 return new[] { string.Empty };
             }
 
-            return modules.Values.SelectMany(k => k.Keys).Select(Directory.GetDirectoryRoot).Distinct();
+            var pathsGroupedByRootDir = modules.Values.SelectMany(k => k.Keys).GroupBy(Directory.GetDirectoryRoot);
+            var basePaths = pathsGroupedByRootDir.Select(group =>
+            {
+                var splittedPaths = group.Select(x => x.Split(Path.DirectorySeparatorChar)).ToList();
+                var basePathSegments = new List<string>();
+
+                splittedPaths[0].Select((value, index) => (value, index)).ToList().ForEach(x =>
+                {
+                    if (splittedPaths.All(s => x.value.Equals(s[x.index])))
+                    {
+                        basePathSegments.Add(x.value);
+                    }
+                });
+
+                return Path.Combine(basePathSegments.ToArray());
+            });
+            return basePaths;
         }
 
-        private static string GetRelativePathFromBase(IEnumerable<string> rootPaths, string path, bool useSourceLink)
+        private static string GetRelativePathFromBase(IEnumerable<string> basePaths, string path, bool useSourceLink)
         {
             if (useSourceLink)
             {
                 return path;
             }
 
-            foreach (var root in rootPaths)
+            foreach (var basePath in basePaths)
             {
-                if (path.StartsWith(root))
+                if (path.StartsWith(basePath))
                 {
-                    return path.Substring(root.Length);
+                    return path.Substring(basePath.Length);
                 }
             }
 
