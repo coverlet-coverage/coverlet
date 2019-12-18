@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
+using Coverlet.Core.Extensions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -96,8 +98,27 @@ namespace Coverlet.MSbuild.Tasks
             _logger = new MSBuildLogger(Log);
         }
 
+        private void WaitForDebuggerIfEnabled()
+        {
+            if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_MSBUILD_INSTRUMENTATIONTASK_DEBUG"), out int result) && result == 1)
+            {
+                Console.WriteLine("Coverlet msbuild instrumentation task debugging is enabled. Please attach debugger to process to continue");
+                Process currentProcess = Process.GetCurrentProcess();
+                Console.WriteLine($"Process Id: {currentProcess.Id} Name: {currentProcess.ProcessName}");
+
+                while (!Debugger.IsAttached)
+                {
+                    System.Threading.Tasks.Task.Delay(1000).Wait();
+                }
+
+                Debugger.Break();
+            }
+        }
+
         public override bool Execute()
         {
+            WaitForDebuggerIfEnabled();
+
             try
             {
                 var includeFilters = _include?.Split(',');
@@ -105,7 +126,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludeFilters = _exclude?.Split(',');
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
-                var fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
+                var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
@@ -118,7 +139,7 @@ namespace Coverlet.MSbuild.Tasks
                     _mergeWith,
                     _useSourceLink,
                     _logger,
-                    (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)),
+                    DependencyInjection.Current.GetService<IInstrumentationHelper>(),
                     fileSystem);
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();

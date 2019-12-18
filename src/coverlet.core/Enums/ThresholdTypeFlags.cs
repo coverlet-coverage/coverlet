@@ -3,7 +3,7 @@ using System;
 namespace Coverlet.Core.Enums
 {
     [Flags]
-    public enum ThresholdTypeFlags
+    internal enum ThresholdTypeFlags
     {
         None = 0,
         Line = 2,

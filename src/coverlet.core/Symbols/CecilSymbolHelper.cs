@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 using Coverlet.Core.Extensions;
 
@@ -16,7 +15,7 @@ using Mono.Collections.Generic;
 
 namespace Coverlet.Core.Symbols
 {
-    public static class CecilSymbolHelper
+    internal static class CecilSymbolHelper
     {
         private const int StepOverLineCode = 0xFEEFEE;
 
@@ -87,7 +86,11 @@ namespace Coverlet.Core.Symbols
                     // Skip get_IsCompleted to avoid unuseful branch due to async/await state machine
                     if (isAsyncStateMachineMoveNext && instruction.Previous.Operand is MethodReference operand &&
                             operand.Name == "get_IsCompleted" &&
-                            operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") &&
+                            (
+                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") ||
+                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable")
+                            )
+                            &&
                             operand.DeclaringType.Scope.Name == "System.Runtime")
                     {
                         continue;

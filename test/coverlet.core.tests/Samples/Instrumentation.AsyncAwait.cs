@@ -23,7 +23,7 @@ namespace Coverlet.Core.Samples.Tests
 
         async public Task<int> Async()
         {
-            await Task.Delay(1000);
+            await Task.Delay(100);
             return 42;
         }
 
@@ -82,6 +82,12 @@ namespace Coverlet.Core.Samples.Tests
             int res = 0;
             res += await Async().ContinueWith(x => x.Result);
             return res;
+        }
+
+        async public Task<int> ConfigureAwait()
+        {
+            await Task.Delay(100).ConfigureAwait(false);
+            return 42;
         }
     }
 }

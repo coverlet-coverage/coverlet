@@ -1,1 +1,3 @@
-[assembly: System.Reflection.AssemblyKeyFileAttribute("coverlet.core.tests.snk")]
+using System.Reflection;
+
+[assembly: AssemblyKeyFile("coverlet.core.tests.snk")]

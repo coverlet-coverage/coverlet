@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Coverlet.Core
 {
-    public static class DependencyInjection
+    internal static class DependencyInjection
     {
         private static Lazy<IServiceProvider> _serviceProvider = new Lazy<IServiceProvider>(() => InitDefaultServices(), true);
 
@@ -29,6 +29,7 @@ namespace Coverlet.Core
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<IConsole, SystemConsole>();
 
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();

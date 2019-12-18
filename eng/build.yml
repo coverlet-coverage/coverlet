@@ -1,7 +1,7 @@
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 2.2.401
+    version: 2.2.402
   displayName: Install .NET Core SDK
 
 - script: dotnet restore
@@ -10,12 +10,12 @@ steps:
 - script: dotnet build -c $(BuildConfiguration) --no-restore
   displayName: Build
 
+- script: dotnet pack -c $(BuildConfiguration) --no-build
+  displayName: Pack
+
 - task: DotNetCoreCLI@2
   displayName: Test
   inputs:
     command: test
-    arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]*
+    arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]* /p:Exclude=[coverlet.tests.remoteexecutor]*
     testRunTitle: $(Agent.JobName)
-
-- script: dotnet pack -c $(BuildConfiguration)
-  displayName: Pack

@@ -8,12 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 -Add log to tracker [#553](https://github.com/tonerdo/coverlet/pull/553)  
--Exclude by assembly level System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage [#589](https://github.com/tonerdo/coverlet/pull/589)
+-Exclude by assembly level System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage [#589](https://github.com/tonerdo/coverlet/pull/589)  
+-Allow coverlet integration with other MSBuild test strategies[#615](https://github.com/tonerdo/coverlet/pull/615) by https://github.com/sharwell  
 
 ### Fixed
 
 -Fix and simplify async coverage [#549](https://github.com/tonerdo/coverlet/pull/549)  
--Improve lambda scenario coverage [#583](https://github.com/tonerdo/coverlet/pull/583)
+-Improve lambda scenario coverage [#583](https://github.com/tonerdo/coverlet/pull/583)  
+-Mitigate issue in case of failure in assembly loading by cecil [#625](https://github.com/tonerdo/coverlet/pull/625)  
+-Fix ConfigureAwait state machine generated branches [#634](https://github.com/tonerdo/coverlet/pull/634)  
+-Fix coverage overwritten if the project has multiple target frameworks [#636](https://github.com/tonerdo/coverlet/issues/177)  
+-Fix cobertura Jenkins reporter + source link support [#614](https://github.com/tonerdo/coverlet/pull/614) by https://github.com/daveMueller  
+-Fix pdb file locking during instrumentation [#656](https://github.com/tonerdo/coverlet/pull/656)
+
 
 ### Improvements
 

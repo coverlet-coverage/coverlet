@@ -1,5 +1,5 @@
 using System;
-using Coverlet.Core.Logging;
+using Coverlet.Core.Abstracts;
 using static System.Console;
 
 namespace Coverlet.Console.Logging

@@ -6,6 +6,7 @@ using ConsoleTables;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
+using Coverlet.Core.Extensions;
 using Coverlet.Core.Reporters;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -19,6 +20,7 @@ namespace Coverlet.MSbuild.Tasks
         private double _threshold;
         private string _thresholdType;
         private string _thresholdStat;
+        private string _coverletMultiTargetFrameworksCurrentTFM;
         private ITaskItem _instrumenterState;
         private MSBuildLogger _logger;
 
@@ -64,6 +66,12 @@ namespace Coverlet.MSbuild.Tasks
             set { _instrumenterState = value; }
         }
 
+        public string CoverletMultiTargetFrameworksCurrentTFM
+        {
+            get { return _coverletMultiTargetFrameworksCurrentTFM; }
+            set { _coverletMultiTargetFrameworksCurrentTFM = value; }
+        }
+
         public CoverageResultTask()
         {
             _logger = new MSBuildLogger(Log);
@@ -75,7 +83,7 @@ namespace Coverlet.MSbuild.Tasks
             {
                 Console.WriteLine("\nCalculating coverage result...");
 
-                IFileSystem fileSystem = (IFileSystem)DependencyInjection.Current.GetService(typeof(IFileSystem));
+                IFileSystem fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
                 if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
                 {
                     _logger.LogError("Result of instrumentation task not found");
@@ -85,7 +93,17 @@ namespace Coverlet.MSbuild.Tasks
                 Coverage coverage = null;
                 using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
                 {
-                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, (IInstrumentationHelper)DependencyInjection.Current.GetService(typeof(IInstrumentationHelper)), fileSystem);
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, DependencyInjection.Current.GetService<IInstrumentationHelper>(), fileSystem);
+                }
+
+                try
+                {
+                    fileSystem.Delete(InstrumenterState.ItemSpec);
+                }
+                catch (Exception ex)
+                {
+                    // We don't want to block coverage for I/O errors
+                    _logger.LogWarning($"Exception during instrument state deletion, file name '{InstrumenterState.ItemSpec}' exception message '{ex.Message}'");
                 }
 
                 CoverageResult result = coverage.GetCoverageResult();
@@ -117,14 +135,14 @@ namespace Coverlet.MSbuild.Tasks
                     }
                     else
                     {
-                        // Output to file
-                        var filename = Path.GetFileName(_output);
-                        filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
-                        filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
-
-                        var report = Path.Combine(directory, filename);
-                        Console.WriteLine($"  Generating report '{report}'");
-                        fileSystem.WriteAllText(report, reporter.Report(result));
+                        ReportWriter writer = new ReportWriter(_coverletMultiTargetFrameworksCurrentTFM,
+                                                                directory,
+                                                                _output,
+                                                                reporter,
+                                                                fileSystem,
+                                                                DependencyInjection.Current.GetService<IConsole>(),
+                                                                result);
+                        writer.WriteReport();
                     }
                 }
 

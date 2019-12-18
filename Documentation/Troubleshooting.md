@@ -223,3 +223,16 @@ We can collect logs from trackers through an enviroment variable
 ```
 When enabled, tracking event will be collected in log file near to module location.  
 File name will be something like `moduleName.dll_tracker.txt`
+
+## Enable msbuild task instrumentation debugging
+
+You can live attach and debug msbuild tasks with `COVERLET_MSBUILD_INSTRUMENTATIONTASK_DEBUG` env variable
+```
+ set COVERLET_MSBUILD_INSTRUMENTATIONTASK_DEBUG=1
+```
+You'll get this message during test run
+```
+dotnet test  -p:Include="[test_coverage.]"   -p:Exclude="[*.Test.*]*"   -p:CollectCoverage=true   -p:CoverletOutputFormat=cobertura   -p:CoverletOutput=coverage.cobertura.xml
+Coverlet msbuild instrumentation task debugging is enabled. Please attach debugger to process to continue
+Process Id: 29228 Name: dotnet
+```

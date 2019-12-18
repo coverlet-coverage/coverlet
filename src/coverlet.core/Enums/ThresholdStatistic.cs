@@ -1,6 +1,6 @@
 namespace Coverlet.Core.Enums
 {
-    public enum ThresholdStatistic
+    internal enum ThresholdStatistic
     {
         Minimum,
         Average,

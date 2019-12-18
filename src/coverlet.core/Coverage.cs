@@ -4,14 +4,13 @@ using System.IO;
 using System.Linq;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Logging;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core
 {
-    public class Coverage
+    internal class Coverage
     {
         private string _module;
         private string _identifier;
@@ -277,7 +276,7 @@ namespace Coverlet.Core
                 }
             }
 
-            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results };
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results, UseSourceLink = _useSourceLink };
 
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && _fileSystem.Exists(_mergeWith))
             {

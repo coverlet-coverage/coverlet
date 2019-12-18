@@ -27,13 +27,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ConsoleTables
 {
-    public class ConsoleTable
+    class ConsoleTable
     {
         public IList<object> Columns { get; set; }
         public IList<object[]> Rows { get; protected set; }

@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Logging;
 using Coverlet.Core.Reporters;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -27,7 +26,7 @@ namespace Coverlet.Core.Tests
         Release = 2
     }
 
-    public static class TestInstrumentationAssert
+    static class TestInstrumentationAssert
     {
         public static Document Document(this CoverageResult coverageResult, string docName)
         {
@@ -238,7 +237,7 @@ namespace Coverlet.Core.Tests
         }
     }
 
-    public static class TestInstrumentationHelper
+    static class TestInstrumentationHelper
     {
         /// <summary>
         /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");

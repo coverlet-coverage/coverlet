@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Coverlet.Core.Reporters
 {
-    public class LcovReporter : IReporter
+    internal class LcovReporter : IReporter
     {
         public ReporterOutputType OutputType => ReporterOutputType.File;
 

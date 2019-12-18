@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Coverlet.Core.Reporters
 {
-    public class ReporterFactory
+    internal class ReporterFactory
     {
         private string _format;
         private IReporter[] _reporters;

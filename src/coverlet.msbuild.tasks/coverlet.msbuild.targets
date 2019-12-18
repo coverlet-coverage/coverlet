@@ -3,9 +3,8 @@
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.InstrumentationTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.CoverageResultTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
 
-  <Target Name="InstrumentModulesNoBuild" BeforeTargets="VSTest">
+  <Target Name="InstrumentModules">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
-      Condition="'$(VSTestNoBuild)' == 'true' and $(CollectCoverage) == 'true'"
       Path="$(TargetPath)"
       Include="$(Include)"
       IncludeDirectory="$(IncludeDirectory)"
@@ -20,32 +19,32 @@
     </Coverlet.MSbuild.Tasks.InstrumentationTask>
   </Target>
 
-  <Target Name="InstrumentModulesAfterBuild" AfterTargets="BuildProject">
-    <Coverlet.MSbuild.Tasks.InstrumentationTask
-      Condition="'$(VSTestNoBuild)' != 'true' and $(CollectCoverage) == 'true'"
-      Path="$(TargetPath)"
-      Include="$(Include)"
-      IncludeDirectory="$(IncludeDirectory)"
-      Exclude="$(Exclude)"
-      ExcludeByFile="$(ExcludeByFile)"
-      ExcludeByAttribute="$(ExcludeByAttribute)"
-      IncludeTestAssembly="$(IncludeTestAssembly)"
-      SingleHit="$(SingleHit)"
-      MergeWith="$(MergeWith)"
-      UseSourceLink="$(UseSourceLink)" >
-      <Output TaskParameter="InstrumenterState" PropertyName="InstrumenterState"/>
-    </Coverlet.MSbuild.Tasks.InstrumentationTask>
-  </Target>
+  <Target Name="InstrumentModulesNoBuild"
+          BeforeTargets="VSTest"
+          DependsOnTargets="InstrumentModules"
+          Condition="'$(VSTestNoBuild)' == 'true' and '$(CollectCoverage)' == 'true'" />
 
-  <Target Name="GenerateCoverageResult" AfterTargets="VSTest">
+  <Target Name="InstrumentModulesAfterBuild"
+          AfterTargets="BuildProject"
+          DependsOnTargets="InstrumentModules"
+          Condition="'$(VSTestNoBuild)' != 'true' and '$(CollectCoverage)' == 'true'" />
+
+  <Target Name="GenerateCoverageResult">
+    <PropertyGroup>
+      <_coverletMultiTargetFrameworksCurrentTFM Condition="'$(TargetFrameworks)' != ''" >$(TargetFramework)</_coverletMultiTargetFrameworksCurrentTFM>
+    </PropertyGroup>
     <Coverlet.MSbuild.Tasks.CoverageResultTask
-      Condition="$(CollectCoverage) == 'true'"
       Output="$(CoverletOutput)"
       OutputFormat="$(CoverletOutputFormat)"
       Threshold="$(Threshold)"
       ThresholdType="$(ThresholdType)"
       ThresholdStat="$(ThresholdStat)"
-      InstrumenterState="$(InstrumenterState)"/>
+      InstrumenterState="$(InstrumenterState)"
+      CoverletMultiTargetFrameworksCurrentTFM="$(_coverletMultiTargetFrameworksCurrentTFM)" />
   </Target>
 
+  <Target Name="GenerateCoverageResultAfterTest"
+          AfterTargets="VSTest"
+          DependsOnTargets="GenerateCoverageResult"
+          Condition="'$(CollectCoverage)' == 'true'" />
 </Project>

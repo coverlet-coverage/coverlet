@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Coverlet.Core.Helpers
 {
-    public class FileSystem : IFileSystem
+    internal class FileSystem : IFileSystem
     {
         // We need to partial mock this method on tests
         public virtual bool Exists(string path)
@@ -21,7 +21,8 @@ namespace Coverlet.Core.Helpers
             return File.ReadAllText(path);
         }
 
-        public Stream OpenRead(string path)
+        // We need to partial mock this method on tests
+        public virtual Stream OpenRead(string path)
         {
             return File.OpenRead(path);
         }
