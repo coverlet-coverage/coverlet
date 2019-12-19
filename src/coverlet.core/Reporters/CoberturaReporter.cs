@@ -143,7 +143,7 @@ namespace Coverlet.Core.Reporters
             var pathsGroupedByRootDir = modules.Values.SelectMany(k => k.Keys).GroupBy(Directory.GetDirectoryRoot);
             var basePaths = pathsGroupedByRootDir.Select(group =>
             {
-                var splittedPaths = group.Select(x => x.Split(Path.DirectorySeparatorChar)).ToList();
+                var splittedPaths = group.Select(x => x.Split(Path.DirectorySeparatorChar)).OrderBy(x => x.Length).ToList();
                 if (splittedPaths.Count == 1)
                 {
                     return group.Key;

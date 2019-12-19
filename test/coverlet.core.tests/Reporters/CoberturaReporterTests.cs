@@ -156,7 +156,7 @@ namespace Coverlet.Core.Reporters.Tests
                 absolutePath1 = @"C:\projA\dir1\dir10\file1.cs";
                 absolutePath2 = @"C:\projA\dir1\dir10\file2.cs";
                 absolutePath3 = @"C:\projA\dir1\file3.cs";
-                absolutePath4 = @"E:\projB\dir1\file4.cs";
+                absolutePath4 = @"E:\projB\dir1\dir10\file4.cs";
                 absolutePath5 = @"E:\projB\dir2\file5.cs";
                 absolutePath6 = @"E:\projB\dir3\file6.cs";
             }
