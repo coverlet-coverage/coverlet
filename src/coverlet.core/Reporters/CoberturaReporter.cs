@@ -144,6 +144,11 @@ namespace Coverlet.Core.Reporters
             var basePaths = pathsGroupedByRootDir.Select(group =>
             {
                 var splittedPaths = group.Select(x => x.Split(Path.DirectorySeparatorChar)).ToList();
+                if (splittedPaths.Count == 1)
+                {
+                    return group.Key;
+                }
+
                 var basePathSegments = new List<string>();
 
                 splittedPaths[0].Select((value, index) => (value, index)).ToList().ForEach(x =>
@@ -153,8 +158,7 @@ namespace Coverlet.Core.Reporters
                         basePathSegments.Add(x.value);
                     }
                 });
-
-                return Path.Combine(basePathSegments.ToArray());
+                return string.Concat(string.Join(Path.DirectorySeparatorChar.ToString(), basePathSegments), Path.DirectorySeparatorChar);
             });
             return basePaths;
         }

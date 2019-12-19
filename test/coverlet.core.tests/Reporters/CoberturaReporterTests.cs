@@ -195,7 +195,7 @@ namespace Coverlet.Core.Reporters.Tests
             {
                 foreach (string relativePath in relativePaths)
                 {
-                    possiblePaths.Add(Path.Join(basePath, relativePath));
+                    possiblePaths.Add(Path.Combine(basePath, relativePath));
                 }
             }
 
