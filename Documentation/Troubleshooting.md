@@ -236,3 +236,11 @@ dotnet test  -p:Include="[test_coverage.]"   -p:Exclude="[*.Test.*]*"   -p:Colle
 Coverlet msbuild instrumentation task debugging is enabled. Please attach debugger to process to continue
 Process Id: 29228 Name: dotnet
 ```
+
+## Enable collector instrumentation debugging
+
+You can live attach and debug collectors with `COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG` env variable
+```
+ set COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG=1
+```
+You will be asket to attach a debugger through UI popup.
