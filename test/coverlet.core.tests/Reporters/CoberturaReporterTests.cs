@@ -137,52 +137,77 @@ namespace Coverlet.Core.Reporters.Tests
         }
 
         [Fact]
-        public void TestReportWithTwoDifferentDirectories()
+        public void TestReportWithDifferentDirectories()
         {
             CoverageResult result = new CoverageResult();
             result.Identifier = Guid.NewGuid().ToString();
 
-            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-
             string absolutePath1;
             string absolutePath2;
+            string absolutePath3;
+            string absolutePath4;
+            string absolutePath5;
+            string absolutePath6;
+            string absolutePath7;
 
-            if (isWindows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                absolutePath1 = @"C:\projA\file.cs";
-                absolutePath2 = @"E:\projB\file.cs";
+                absolutePath1 = @"C:\projA\dir1\dir10\file1.cs";
+                absolutePath2 = @"C:\projA\dir1\dir10\file2.cs";
+                absolutePath3 = @"C:\projA\dir1\file3.cs";
+                absolutePath4 = @"E:\projB\dir1\dir10\file4.cs";
+                absolutePath5 = @"E:\projB\dir2\file5.cs";
+                absolutePath6 = @"F:\file6.cs";
+                absolutePath7 = @"F:\";
             }
             else
             {
-                absolutePath1 = @"/projA/file.cs";
-                absolutePath2 = @"/projB/file.cs";
+                absolutePath1 = @"/projA/dir1/dir10/file1.cs";
+                absolutePath2 = @"/projA/dir1/file2.cs";
+                absolutePath3 = @"/projA/dir1/file3.cs";
+                absolutePath4 = @"/projA/dir2/file4.cs";
+                absolutePath5 = @"/projA/dir2/file5.cs";
+                absolutePath6 = @"/file1.cs";
+                absolutePath7 = @"/";
             }
 
-            var classes = new Classes {{"Class", new Methods()}};
-            var documents = new Documents {{absolutePath1, classes}, {absolutePath2, classes}};
+            var classes = new Classes { { "Class", new Methods() } };
+            var documents = new Documents { { absolutePath1, classes },
+                                            { absolutePath2, classes },
+                                            { absolutePath3, classes },
+                                            { absolutePath4, classes },
+                                            { absolutePath5, classes },
+                                            { absolutePath6, classes },
+                                            { absolutePath7, classes }
+            };
 
-            result.Modules = new Modules {{"Module", documents}};
+            result.Modules = new Modules { { "Module", documents } };
 
             CoberturaReporter reporter = new CoberturaReporter();
             string report = reporter.Report(result);
 
             var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
 
-            List<string> rootPaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
+            List<string> basePaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
             List<string> relativePaths = doc.Element("coverage").Element("packages").Element("package")
                 .Element("classes").Elements().Select(e => e.Attribute("filename").Value).ToList();
 
             List<string> possiblePaths = new List<string>();
-            foreach (string root in rootPaths)
+            foreach (string basePath in basePaths)
             {
                 foreach (string relativePath in relativePaths)
                 {
-                    possiblePaths.Add(Path.Combine(root, relativePath));
+                    possiblePaths.Add(Path.Combine(basePath, relativePath));
                 }
             }
 
             Assert.Contains(absolutePath1, possiblePaths);
             Assert.Contains(absolutePath2, possiblePaths);
+            Assert.Contains(absolutePath3, possiblePaths);
+            Assert.Contains(absolutePath4, possiblePaths);
+            Assert.Contains(absolutePath5, possiblePaths);
+            Assert.Contains(absolutePath6, possiblePaths);
+            Assert.Contains(absolutePath7, possiblePaths);
         }
 
         [Fact]
