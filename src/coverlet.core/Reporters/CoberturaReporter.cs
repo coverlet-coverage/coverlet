@@ -160,7 +160,7 @@ namespace Coverlet.Core.Reporters
             */
             if (useSourceLink)
             {
-                return new[] {string.Empty};
+                return new[] { string.Empty };
             }
 
             return modules.Values.SelectMany(k => k.Keys).GroupBy(Directory.GetDirectoryRoot).Select(group =>
@@ -176,13 +176,12 @@ namespace Coverlet.Core.Reporters
 
                 splittedPaths[0].Select((value, index) => (value, index)).ToList().ForEach(fragmentIndexPair =>
                 {
-                    if (splittedPaths.All(s => fragmentIndexPair.value.Equals(s[fragmentIndexPair.index])))
+                    if (splittedPaths.All(sp => fragmentIndexPair.value.Equals(sp[fragmentIndexPair.index])))
                     {
                         basePathFragments.Add(fragmentIndexPair.value);
                     }
                 });
-                return string.Concat(string.Join(Path.DirectorySeparatorChar.ToString(), basePathFragments),
-                    Path.DirectorySeparatorChar);
+                return string.Concat(string.Join(Path.DirectorySeparatorChar.ToString(), basePathFragments), Path.DirectorySeparatorChar);
             });
         }
 
