@@ -24,7 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Improvements
 
--Improve exception message for unsupported runtime [#569](https://github.com/tonerdo/coverlet/pull/569) by https://github.com/daveMueller
+-Improve exception message for unsupported runtime [#569](https://github.com/tonerdo/
+coverlet/pull/569) by https://github.com/daveMueller  
+-Improve cobertura absolute/relative path report generation [#661](https://github.com/tonerdo/coverlet/pull/661) by https://github.com/daveMueller
 
 ## Release date 2019-09-23
 ### Packages  
