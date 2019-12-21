@@ -32,8 +32,8 @@ namespace Coverlet.Core.Reporters
             coverage.Add(new XAttribute("timestamp", (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds));
 
             XElement sources = new XElement("sources");
-            var basePaths = GetBasePaths(result.Modules, result.UseSourceLink).ToList();
-            basePaths.ForEach(x => sources.Add(new XElement("source", x)));
+            var absolutePaths = GetBasePaths(result.Modules, result.UseSourceLink).ToList();
+            absolutePaths.ForEach(x => sources.Add(new XElement("source", x)));
 
             XElement packages = new XElement("packages");
             foreach (var module in result.Modules)
@@ -51,7 +51,7 @@ namespace Coverlet.Core.Reporters
                     {
                         XElement @class = new XElement("class");
                         @class.Add(new XAttribute("name", cls.Key));
-                        @class.Add(new XAttribute("filename", GetRelativePathFromBase(basePaths, document.Key, result.UseSourceLink)));
+                        @class.Add(new XAttribute("filename", GetRelativePathFromBase(absolutePaths, document.Key, result.UseSourceLink)));
                         @class.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(cls.Value)));
@@ -135,32 +135,55 @@ namespace Coverlet.Core.Reporters
 
         private static IEnumerable<string> GetBasePaths(Modules modules, bool useSourceLink)
         {
+            /*
+                 Workflow
+
+                 Path1 c:\dir1\dir2\file1.cs
+                 Path2 c:\dir1\file2.cs
+                 Path3 e:\dir1\file2.cs
+
+                 1) Search for root dir 
+                    c:\ ->	c:\dir1\dir2\file1.cs
+                            c:\dir1\file2.cs
+                    e:\ ->	e:\dir1\file2.cs
+
+                 2) Split path on directory separator i.e. for record c:\ ordered ascending by fragment elements
+                     Path1 = [c:|dir1|file2.cs]
+                     Path2 = [c:|dir1|dir2|file1.cs]
+
+                 3)  Find longest shared path comparing indexes		 
+                     Path1[0]    = Path2[0], ..., PathY[0]     -> add to final fragment list
+                     Path1[n]    = Path2[n], ..., PathY[n]     -> add to final fragment list
+                     Path1[n+1] != Path2[n+1], ..., PathY[n+1] -> break, Path1[n] was last shared fragment 		 
+
+                 4) Concat created fragment list
+            */
             if (useSourceLink)
             {
-                return new[] { string.Empty };
+                return new[] {string.Empty};
             }
 
-            var pathsGroupedByRootDir = modules.Values.SelectMany(k => k.Keys).GroupBy(Directory.GetDirectoryRoot);
-            var basePaths = pathsGroupedByRootDir.Select(group =>
+            return modules.Values.SelectMany(k => k.Keys).GroupBy(Directory.GetDirectoryRoot).Select(group =>
             {
-                var splittedPaths = group.Select(x => x.Split(Path.DirectorySeparatorChar)).OrderBy(x => x.Length).ToList();
+                var splittedPaths = group.Select(absolutePath => absolutePath.Split(Path.DirectorySeparatorChar))
+                                         .OrderBy(absolutePath => absolutePath.Length).ToList();
                 if (splittedPaths.Count == 1)
                 {
                     return group.Key;
                 }
 
-                var basePathSegments = new List<string>();
+                var basePathFragments = new List<string>();
 
-                splittedPaths[0].Select((value, index) => (value, index)).ToList().ForEach(x =>
+                splittedPaths[0].Select((value, index) => (value, index)).ToList().ForEach(fragmentIndexPair =>
                 {
-                    if (splittedPaths.All(s => x.value.Equals(s[x.index])))
+                    if (splittedPaths.All(s => fragmentIndexPair.value.Equals(s[fragmentIndexPair.index])))
                     {
-                        basePathSegments.Add(x.value);
+                        basePathFragments.Add(fragmentIndexPair.value);
                     }
                 });
-                return string.Concat(string.Join(Path.DirectorySeparatorChar.ToString(), basePathSegments), Path.DirectorySeparatorChar);
+                return string.Concat(string.Join(Path.DirectorySeparatorChar.ToString(), basePathFragments),
+                    Path.DirectorySeparatorChar);
             });
-            return basePaths;
         }
 
         private static string GetRelativePathFromBase(IEnumerable<string> basePaths, string path, bool useSourceLink)
