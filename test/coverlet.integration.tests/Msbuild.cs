@@ -1,5 +1,5 @@
 using System.IO;
-
+using System.Linq;
 using Xunit;
 
 namespace Coverlet.Integration.Tests
@@ -54,8 +54,21 @@ namespace Coverlet.Integration.Tests
             Assert.True(DotnetCli($"test \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError), standardOutput);
             Assert.Contains("Test Run Successful.", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
-            Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext.json")));
-            AssertCoverage(clonedTemplateProject, "file.ext.json");
+            Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext")));
+            AssertCoverage(clonedTemplateProject, "file.ext");
+        }
+
+        [Fact]
+        public void TestMsbuild_CoverletOutput_Folder_FileNameExtension_SpecifyFramework()
+        {
+            using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
+            Assert.False(clonedTemplateProject.IsMultipleTargetFramework());
+            string framework = clonedTemplateProject.GetTargetFrameworks().Single();
+            Assert.True(DotnetCli($"test -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError), standardOutput);
+            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
+            Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext")));
+            AssertCoverage(clonedTemplateProject, "file.ext");
         }
 
         [Fact]
@@ -65,8 +78,8 @@ namespace Coverlet.Integration.Tests
             Assert.True(DotnetCli($"test \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError), standardOutput);
             Assert.Contains("Test Run Successful.", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
-            Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext1.ext2.json")));
-            AssertCoverage(clonedTemplateProject, "file.ext1.ext2.json");
+            Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext1.ext2")));
+            AssertCoverage(clonedTemplateProject, "file.ext1.ext2");
         }
 
         [Fact]
@@ -124,6 +137,35 @@ namespace Coverlet.Integration.Tests
         }
 
         [Fact]
+        public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension_SpecifyFramework()
+        {
+            using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
+            string[] targetFrameworks = new string[] { "netcoreapp2.2", "netcoreapp2.1" };
+            UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
+            Assert.True(clonedTemplateProject.IsMultipleTargetFramework());
+            string[] frameworks = clonedTemplateProject.GetTargetFrameworks();
+            Assert.Equal(2, frameworks.Length);
+            string framework = frameworks.FirstOrDefault();
+            Assert.True(DotnetCli($"test -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
+            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
+
+            foreach (string targetFramework in targetFrameworks)
+            {
+                if (framework == targetFramework)
+                {
+                    Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.ext")));
+                }
+                else
+                {
+                    Assert.False(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.ext")));
+                }
+            }
+
+            AssertCoverage(clonedTemplateProject, "file.*.ext");
+        }
+
+        [Fact]
         public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
@@ -135,10 +177,10 @@ namespace Coverlet.Integration.Tests
 
             foreach (string targetFramework in targetFrameworks)
             {
-                Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.ext.json")));
+                Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.ext")));
             }
 
-            AssertCoverage(clonedTemplateProject, "file.*.ext.json");
+            AssertCoverage(clonedTemplateProject, "file.*.ext");
         }
 
         [Fact]
@@ -153,10 +195,10 @@ namespace Coverlet.Integration.Tests
 
             foreach (string targetFramework in targetFrameworks)
             {
-                Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.ext1.{targetFramework}.ext2.json")));
+                Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.ext1.{targetFramework}.ext2")));
             }
 
-            AssertCoverage(clonedTemplateProject, "file.ext1.*.ext2.json");
+            AssertCoverage(clonedTemplateProject, "file.ext1.*.ext2");
         }
     }
 }

@@ -35,8 +35,8 @@ namespace Coverlet.MSbuild.Tasks
             else if (Path.HasExtension(filename))
             {
                 // filename with extension for instance c:\reportpath\file.ext
-                // c:\reportpath\file.ext.reportedextension
-                filename = $"{Path.GetFileNameWithoutExtension(filename)}{separatorPoint}{_coverletMultiTargetFrameworksCurrentTFM}{Path.GetExtension(filename)}.{_reporter.Extension}";
+                // we keep user specified name
+                filename = $"{Path.GetFileNameWithoutExtension(filename)}{separatorPoint}{_coverletMultiTargetFrameworksCurrentTFM}{Path.GetExtension(filename)}";
             }
             else
             {
