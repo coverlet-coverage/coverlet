@@ -16,15 +16,15 @@ namespace Coverlet.Core.Reporters.Tests
         // single tfm
         [InlineData("", "/folder/reportFolder/", "lcov", "/folder/reportFolder/coverage.info")]
         [InlineData(null, "/folder/reportFolder/", "cobertura", "/folder/reportFolder/coverage.cobertura.xml")]
-        [InlineData(null, "/folder/reportFolder/file.ext", "cobertura", "/folder/reportFolder/file.ext.cobertura.xml")]
-        [InlineData(null, "/folder/reportFolder/file.ext1.ext2", "cobertura", "/folder/reportFolder/file.ext1.ext2.cobertura.xml")]
+        [InlineData(null, "/folder/reportFolder/file.ext", "cobertura", "/folder/reportFolder/file.ext")]
+        [InlineData(null, "/folder/reportFolder/file.ext1.ext2", "cobertura", "/folder/reportFolder/file.ext1.ext2")]
         [InlineData(null, "/folder/reportFolder/file", "cobertura", "/folder/reportFolder/file.cobertura.xml")]
         [InlineData(null, "file", "cobertura", "file.cobertura.xml")]
         // multiple tfm
         [InlineData("netcoreapp2.2", "/folder/reportFolder/", "lcov", "/folder/reportFolder/coverage.netcoreapp2.2.info")]
         [InlineData("netcoreapp2.2", "/folder/reportFolder/", "cobertura", "/folder/reportFolder/coverage.netcoreapp2.2.cobertura.xml")]
-        [InlineData("net472", "/folder/reportFolder/file.ext", "cobertura", "/folder/reportFolder/file.net472.ext.cobertura.xml")]
-        [InlineData("net472", "/folder/reportFolder/file.ext1.ext2", "cobertura", "/folder/reportFolder/file.ext1.net472.ext2.cobertura.xml")]
+        [InlineData("net472", "/folder/reportFolder/file.ext", "cobertura", "/folder/reportFolder/file.net472.ext")]
+        [InlineData("net472", "/folder/reportFolder/file.ext1.ext2", "cobertura", "/folder/reportFolder/file.ext1.net472.ext2")]
         [InlineData("netcoreapp2.2", "/folder/reportFolder/file", "cobertura", "/folder/reportFolder/file.netcoreapp2.2.cobertura.xml")]
         [InlineData("netcoreapp2.2", "file", "cobertura", "file.netcoreapp2.2.cobertura.xml")]
         public void Msbuild_ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string coverletOutput, string reportFormat, string expectedFileName)

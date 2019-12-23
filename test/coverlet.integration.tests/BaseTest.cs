@@ -288,7 +288,24 @@ namespace Coverlet.Integration.Tests
 
         public ClonedTemplateProject(string projectRootPath, bool cleanupOnDispose) => (ProjectRootPath, _cleanupOnDispose) = (projectRootPath, cleanupOnDispose);
 
+        public bool IsMultipleTargetFramework()
+        {
+            using var csprojStream = File.OpenRead(ProjectFileNamePath);
+            XDocument xml = XDocument.Load(csprojStream);
+            return xml.Element("Project").Element("PropertyGroup").Element("TargetFramework") == null;
+        }
 
+        public string[] GetTargetFrameworks()
+        {
+            using var csprojStream = File.OpenRead(ProjectFileNamePath);
+            XDocument xml = XDocument.Load(csprojStream);
+            XElement element = xml.Element("Project").Element("PropertyGroup").Element("TargetFramework") ?? xml.Element("Project").Element("PropertyGroup").Element("TargetFrameworks");
+            if (element is null)
+            {
+                throw new ArgumentNullException("No 'TargetFramework' neither 'TargetFrameworks' found in csproj file");
+            }
+            return element.Value.Split(";");
+        }
 
         public string[] GetFiles(string filter)
         {
