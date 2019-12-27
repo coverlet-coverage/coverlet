@@ -39,6 +39,7 @@ namespace Coverlet.Core.Instrumentation
         private MethodReference _customTrackerRecordHitMethod;
         private List<string> _excludedSourceFiles;
         private List<string> _branchesInCompiledGeneratedClass;
+        private List<(MethodDefinition, int)> _excludedMethods;
 
         public bool SkipModule { get; set; } = false;
 
@@ -180,7 +181,9 @@ namespace Coverlet.Core.Instrumentation
                             // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
                             && (!_isCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
                             && !_instrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
-                            && _instrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
+                            && _instrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters)
+                            && !IsSynthesizedTypeToBeExcluded(type)
+                            )
                             InstrumentType(type);
                     }
 
@@ -335,6 +338,7 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentType(TypeDefinition type)
         {
             var methods = type.GetMethods();
+            int ordinal = -1;
             foreach (var method in methods)
             {
                 MethodDefinition actualMethod = method;
@@ -349,8 +353,23 @@ namespace Coverlet.Core.Instrumentation
                         customAttributes = customAttributes.Union(prop.CustomAttributes);
                 }
 
+                if (IsSynthesizedMethodToBeExcluded(method))
+                {
+                    continue;
+                }
+
+                ordinal++;
                 if (!customAttributes.Any(IsExcludeAttribute))
+                {
                     InstrumentMethod(method);
+                }
+                else
+                {
+                    if (_excludedMethods is null)
+                        _excludedMethods = new List<(MethodDefinition, int)>();
+
+                    _excludedMethods.Add((method, ordinal));
+                }
             }
 
             var ctors = type.GetConstructors();
@@ -602,6 +621,47 @@ namespace Coverlet.Core.Instrumentation
             {
                 return null;
             }
+        }
+
+        // A compiler-generated method must be excluded if it's generated from a method with an exclude from coverage attribute
+        private bool IsSynthesizedMethodToBeExcluded(MethodDefinition methodToCheck)
+        {
+            if (_excludedMethods is null)
+            {
+                return false;
+            }
+
+            return _excludedMethods.Any(m => 
+                (methodToCheck.DeclaringType.FullName == m.Item1.DeclaringType.FullName ||
+                (methodToCheck.DeclaringType.DeclaringType != null && methodToCheck.DeclaringType.DeclaringType.FullName == m.Item1.DeclaringType.FullName)) && 
+                IsSynthesizedNameOf(methodToCheck.Name, m.Item1.Name, m.Item2));
+        }
+
+        // A compiler-generated type must be excluded if it's generated from a method with an exclude from coverage attribute
+        private bool IsSynthesizedTypeToBeExcluded(TypeDefinition typeToCheck)
+        {
+            if (_excludedMethods is null)
+            {
+                return false;
+            }
+
+            return _excludedMethods.Any(m =>
+                (typeToCheck.DeclaringType != null && typeToCheck.DeclaringType.FullName == m.Item1.DeclaringType.FullName) &&
+                IsSynthesizedNameOf(typeToCheck.Name, m.Item1.Name, m.Item2));
+        }
+
+        // Check if the name is synthesized from a method with an exclude from coverage attribute. 
+        // Refer https://github.com/dotnet/roslyn/blob/1fcbc51/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs
+        // to see how the compiler generate names for lambda, yield or async/await expressions
+        internal bool IsSynthesizedNameOf(string name, string methodName, int methodOrdinal)
+        {
+            return
+                // Lambda method
+                name.IndexOf($"<{methodName}>b__{methodOrdinal}") != -1 ||
+                // State machine
+                name.IndexOf($"<{methodName}>d__{methodOrdinal}") != -1 ||
+                // Local function
+                (name.IndexOf($"<{methodName}>g__") != -1 && name.IndexOf($"|{methodOrdinal}_") != -1);
         }
 
         /// <summary>
