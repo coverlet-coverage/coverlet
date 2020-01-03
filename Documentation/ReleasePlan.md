@@ -55,7 +55,8 @@ To get the list of commits between two version use git command
 
 This is the steps to do to release new packages to Nuget.org
 
-1) Clone repo, **remember to build packages from master and not from your fork or metadata links will point to your forked repo.**
+1) Clone repo, **remember to build packages from master and not from your fork or metadata links will point to your forked repo.**  
+Run `git log -5` from repo root to verify last commit.
 
 2) Update project versions in file:
 
