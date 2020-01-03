@@ -43,8 +43,8 @@ We MANUALLY bump versions on production release, so we have different release pl
 | :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
 | 03 January 2019      | 2.8.0 | 1.7.0 |   1.2.0 | 72a688f1c47fa92059540d5fbb1c4b0b4bf0dc8c |  |
 | 23 September 2019      | 2.7.0 | 1.6.0 |   1.1.0 | 4ca01eb239038808739699470a61fad675af6c79 |  |
-| 1 July 2019      | 2.6.3 | 1.5.3 |   1.0.1 | e1593359497fdfe6befbb86304b8f4e09a656d14 |  |
-| 6 June 2019      | 2.6.2 | 1.5.2 |   1.0.0 | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release |
+| 01 July 2019      | 2.6.3 | 1.5.3 |   1.0.1 | e1593359497fdfe6befbb86304b8f4e09a656d14 |  |
+| 06 June 2019      | 2.6.2 | 1.5.2 |   1.0.0 | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release |
 
 To get the list of commits between two version use git command
 ```bash
