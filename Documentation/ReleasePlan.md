@@ -72,7 +72,7 @@ The version of core lib project file is the version we'll report on github repo 
 
 Sample of updated version PR https://github.com/tonerdo/coverlet/pull/675/files  
 
-3) From new cloned and aligned repo root run pack command
+3) From new cloned, aligned and versions updated repo root run pack command
 ```
 dotnet pack -c release /p:PublicRelease=true
 ...
