@@ -28,9 +28,9 @@ We plan 1 release [once per quarter](https://en.wikipedia.org/wiki/Calendar_year
 
 | Package        | **coverlet.msbuild** |
 | :-------------: |:-------------:|
-|**coverlet.msbuild**      | 2.7.0  |  
-|**coverlet.console**      | 1.6.0  |
-|**coverlet.collector**      | 1.1.0 |  
+|**coverlet.msbuild**      | 2.8.0  |  
+|**coverlet.console**      | 1.7.0  |
+|**coverlet.collector**      | 1.2.0 |  
 
 ### Proposed next versions  
 
@@ -41,11 +41,56 @@ We MANUALLY bump versions on production release, so we have different release pl
 
 | Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **commit hash**| **notes** |
 | :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| 03 January 2019      | 2.8.0 | 1.7.0 |   1.2.0 | 72a688f1c47fa92059540d5fbb1c4b0b4bf0dc8c |  |
 | 23 September 2019      | 2.7.0 | 1.6.0 |   1.1.0 | 4ca01eb239038808739699470a61fad675af6c79 |  |
-| 1 July 2019      | 2.6.3 | 1.5.3 |   1.0.1 | e1593359497fdfe6befbb86304b8f4e09a656d14 |  |
-| 6 June 2019      | 2.6.2 | 1.5.2 |   1.0.0 | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release |
+| 01 July 2019      | 2.6.3 | 1.5.3 |   1.0.1 | e1593359497fdfe6befbb86304b8f4e09a656d14 |  |
+| 06 June 2019      | 2.6.2 | 1.5.2 |   1.0.0 | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release |
 
 To get the list of commits between two version use git command
 ```bash
  git log --oneline hashbefore currenthash
 ```
+
+# How to manually release packages to Nuget.org
+
+This is the steps to do to release new packages to Nuget.org
+
+1) Clone repo, **remember to build packages from master and not from your fork or metadata links will point to your forked repo.**  
+Run `git log -5` from repo root to verify last commit.
+
+2) Update project versions in file:
+
+Collector 
+https://github.com/tonerdo/coverlet/blob/master/src/coverlet.collector/version.json  
+.NET tool
+https://github.com/tonerdo/coverlet/blob/master/src/coverlet.console/version.json  
+Msbuild tasks
+https://github.com/tonerdo/coverlet/blob/master/src/coverlet.msbuild.tasks/version.json  
+
+Core lib project file https://github.com/tonerdo/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj.
+The version of core lib project file is the version we'll report on github repo releases https://github.com/tonerdo/coverlet/releases
+
+
+Sample of updated version PR https://github.com/tonerdo/coverlet/pull/675/files  
+
+3) From new cloned, aligned and versions updated repo root run pack command
+```
+dotnet pack -c release /p:PublicRelease=true
+...
+ coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\netcoreapp2.2\coverlet.console.dll
+  coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\netcoreapp2.2\publish\
+  Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.2.8.1.nupkg'.
+  Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.2.8.1.snupkg'.
+  Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.1.7.1.nupkg'.
+  Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.1.7.1.snupkg'.
+  Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.1.2.1.nupkg'.
+  Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.1.2.1.snupkg'.
+```
+
+4) Upload *.nupkg files to Nuget.org site. **Check all metadata(url links etc...) before "Submit"**
+
+5) **On your fork**:
+*   Align to master
+*   Update versions in files accordingly to new release and commit/merge to master
+*   Create release on repo https://github.com/tonerdo/coverlet/releases using https://github.com/tonerdo/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj assembly version
+*   Update the [Release Plan](https://github.com/tonerdo/coverlet/blob/master/Documentation/ReleasePlan.md)(this document) and [ChangeLog](https://github.com/tonerdo/coverlet/blob/master/Documentation/Changelog.md)
