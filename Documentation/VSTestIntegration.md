@@ -36,6 +36,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 |IncludeDirectory| Explicitly set which directories to include in code coverage analysis.                   |
 |SingleHit       | Specifies whether to limit code coverage hit reporting to a single hit for each location.| 
 |UseSourceLink   | Specifies whether to use SourceLink URIs in place of file system paths.                  |
+|IncludeTestAssembly    | Include coverage of the test assembly.                  |
 
 How to specify these options via runsettings?
 ```
@@ -53,6 +54,7 @@ How to specify these options via runsettings?
           <IncludeDirectory>../dir1/,../dir2/,</IncludeDirectory>
           <SingleHit>false</SingleHit>
           <UseSourceLink>true</UseSourceLink>
+          <IncludeTestAssembly>true<IncludeTestAssembly>
         </Configuration>
       </DataCollector>
     </DataCollectors>
