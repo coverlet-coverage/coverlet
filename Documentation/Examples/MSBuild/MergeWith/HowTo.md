@@ -9,7 +9,7 @@ dotnet test XUnitTestProject2\XUnitTestProject2.csproj /p:CollectCoverage=true  
 dotnet test XUnitTestProject3\XUnitTestProject3.csproj /p:CollectCoverage=true  /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json" /p:CoverletOutputFormat="opencover"
 ```
 
-You can merge also running `dotnet test` and merge with a single command, but you need to ensure that tests will run sequentially. This slow down testing but avoid invalid coverage result.
+You can merge also running `dotnet test` and merge with single command from a solution file, but you need to ensure that tests will run sequentially(`-m:1`). This slow down testing but avoid invalid coverage result.
 
 ```
 dotnet test /p:CollectCoverage=true  /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json" /p:CoverletOutputFormat=\"opencover,json\" -m:1
