@@ -67,7 +67,7 @@ This runsettings file can easily be provided using command line option as given 
 
 2. `dotnet vstest --settings coverletArgs.runsettings`
 
-Take a look at our [`HelloWorld`]((Documentation/Examples/VSTest/HowTo.md)) sample.
+Take a look at our [`HelloWorld`](Documentation/Examples/VSTest/HowTo.md) sample.
 
 ## Implementation Details
 
