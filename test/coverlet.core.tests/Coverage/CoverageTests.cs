@@ -17,12 +17,6 @@ namespace Coverlet.Core.Tests
     {
         private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem());
         private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
-        private readonly ITestOutputHelper _output;
-
-        public CoverageTests(ITestOutputHelper output)
-        {
-            this._output = output;
-        }
 
         [Fact]
         public void TestCoverage()
@@ -294,8 +288,6 @@ namespace Coverlet.Core.Tests
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
                 //TestInstrumentationHelper.GenerateHtmlReport(result);
-
-                _output.WriteLine(new Reporters.CoberturaReporter().Report(result));
 
                 var document = result.Document("Instrumentation.ExcludeFromCoverage.cs");
 
