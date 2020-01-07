@@ -280,11 +280,8 @@ namespace Coverlet.Core.Tests
                     // Run load and call a delegate passing class as dynamic to simplify method call
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(instance =>
                     {
-                        instance.Test("test");
-
-                        // For now we have only async Run helper
+                        ((Task<int>)instance.Test("test")).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
-
                     }, pathSerialize);
 
                     // we return 0 if we return something different assert fail
