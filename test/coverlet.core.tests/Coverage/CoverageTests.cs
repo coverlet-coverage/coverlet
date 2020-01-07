@@ -298,7 +298,7 @@ namespace Coverlet.Core.Tests
 
                 //TestInstrumentationHelper.GenerateHtmlReport(result);
 
-                _output.WriteLine(File.ReadAllText(path));
+                _output.WriteLine(new Reporters.CoberturaReporter().Report(result));
 
                 var document = result.Document("Instrumentation.ExcludeFromCoverage.cs");
 
