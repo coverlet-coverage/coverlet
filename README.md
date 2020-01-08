@@ -51,7 +51,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 * Important [know issue](Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100)
 ### MSBuild Integration
 
-### Insallation
+### Installation
 ```bash
 dotnet add package coverlet.msbuild
 ```
