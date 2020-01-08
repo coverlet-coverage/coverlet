@@ -42,17 +42,24 @@ namespace Coverlet.Collector.Tests
             Assert.Equal("module1.dll", coverletSettings.TestModule);
         }
 
-        [Fact]
-        public void ParseShouldCorrectlyParseConfigurationElement()
+        [Theory]
+        [InlineData("[*]*,[coverlet]*", "[coverlet.*.tests?]*,[coverlet.*.tests.*]*", @"E:\temp,/var/tmp", "module1.cs,module2.cs", "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute")]
+        [InlineData("[*]*, [coverlet]*", "[coverlet.*.tests?]*, [coverlet.*.tests.*]*", @"E:\temp, /var/tmp", "module1.cs, module2.cs", "Obsolete, GeneratedCodeAttribute, CompilerGeneratedAttribute")]
+        [InlineData("[*]*,\r\n[coverlet]*", "[coverlet.*.tests?]*,\r\n[coverlet.*.tests.*]*", "E:\\temp,\r\n/var/tmp", "module1.cs,\r\nmodule2.cs", "Obsolete,\r\nGeneratedCodeAttribute,\r\nCompilerGeneratedAttribute")]
+        public void ParseShouldCorrectlyParseConfigurationElement(string includeFilters,
+            string excludeFilters,
+            string includeDirectories,
+            string excludeSourceFiles,
+            string excludeAttributes)
         {
             var testModules = new List<string> { "abc.dll" };
             var doc = new XmlDocument();
             var configElement = doc.CreateElement("Configuration");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName, "[*]*");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName, "[coverlet.*.tests?]*");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName, @"E:\temp");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName, "module1.cs,module2.cs");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName, "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute");
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName, includeFilters);
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName, excludeFilters);
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName, includeDirectories);
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName, excludeSourceFiles);
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName, excludeAttributes);
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.MergeWithElementName, "/path/to/result.json");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.UseSourceLinkElementName, "false");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.SingleHitElementName, "true");
@@ -62,13 +69,19 @@ namespace Coverlet.Collector.Tests
 
             Assert.Equal("abc.dll", coverletSettings.TestModule);
             Assert.Equal("[*]*", coverletSettings.IncludeFilters[0]);
+            Assert.Equal("[coverlet]*", coverletSettings.IncludeFilters[1]);
             Assert.Equal(@"E:\temp", coverletSettings.IncludeDirectories[0]);
+            Assert.Equal("/var/tmp", coverletSettings.IncludeDirectories[1]);
             Assert.Equal("module1.cs", coverletSettings.ExcludeSourceFiles[0]);
             Assert.Equal("module2.cs", coverletSettings.ExcludeSourceFiles[1]);
             Assert.Equal("Obsolete", coverletSettings.ExcludeAttributes[0]);
             Assert.Equal("GeneratedCodeAttribute", coverletSettings.ExcludeAttributes[1]);
+            Assert.Equal("CompilerGeneratedAttribute", coverletSettings.ExcludeAttributes[2]);
             Assert.Equal("/path/to/result.json", coverletSettings.MergeWith);
             Assert.Equal("[coverlet.*]*", coverletSettings.ExcludeFilters[0]);
+            Assert.Equal("[coverlet.*.tests?]*", coverletSettings.ExcludeFilters[1]);
+            Assert.Equal("[coverlet.*.tests.*]*", coverletSettings.ExcludeFilters[2]);
+            
             Assert.False(coverletSettings.UseSourceLink);
             Assert.True(coverletSettings.SingleHit);
             Assert.True(coverletSettings.IncludeTestAssembly);
@@ -78,6 +91,7 @@ namespace Coverlet.Collector.Tests
         [InlineData(" , json", 1, new[] { "json" })]
         [InlineData(" , json, ", 1, new[] { "json" })]
         [InlineData("json,cobertura", 2, new[] { "json", "cobertura" })]
+        [InlineData("json,\r\ncobertura", 2, new[] { "json", "cobertura" })]
         [InlineData(" , json,, cobertura ", 2, new[] { "json", "cobertura" })]
         [InlineData(" , json, , cobertura ", 2, new[] { "json", "cobertura" })]
         public void ParseShouldCorrectlyParseMultipleFormats(string formats, int formatsCount, string[] expectedReportFormats)
