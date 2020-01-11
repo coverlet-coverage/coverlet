@@ -140,7 +140,7 @@ namespace Coverlet.Integration.Tests
                .Element("ItemGroup")
                .Add(new XElement("PackageReference", new XAttribute("Include", "Microsoft.NET.Test.Sdk"),
                // We use this due to know issue until official release https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
-               new XAttribute("Version", "16.5.0-preview-20191115-01")));
+               new XAttribute("Version", "16.5.0-preview-20200110-02")));
             xml.Save(csproj);
         }
 
