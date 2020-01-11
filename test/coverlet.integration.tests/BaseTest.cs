@@ -139,7 +139,6 @@ namespace Coverlet.Integration.Tests
             xml.Element("Project")
                .Element("ItemGroup")
                .Add(new XElement("PackageReference", new XAttribute("Include", "Microsoft.NET.Test.Sdk"),
-               // We use this due to know issue until official release https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
                new XAttribute("Version", version)));
             xml.Save(csproj);
         }
