@@ -276,8 +276,9 @@ namespace Coverlet.Integration.Tests
 
     class ClonedTemplateProject : IDisposable
     {
+        private bool _cleanupOnDispose;
+
         public string? ProjectRootPath { get; private set; }
-        public bool _cleanupOnDispose { get; set; }
 
         // We need to have a different asm name to avoid issue with collectors, we filter [coverlet.*]* by default
         // https://github.com/tonerdo/coverlet/pull/410#discussion_r284526728
