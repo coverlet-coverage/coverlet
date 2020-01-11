@@ -1,21 +1,55 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 
 using Xunit;
 
 namespace Coverlet.Integration.Tests
 {
-    public class Collectors : BaseTest
+    public class TestSDK_16_2_0 : Collectors
     {
+        public TestSDK_16_2_0()
+        {
+            TestSDKVersion = "16.2.0";
+        }
+
+        private protected override void AssertCollectorsInjection(ClonedTemplateProject clonedTemplateProject)
+        {
+            // Check out/in process collectors injection
+            Assert.Contains("[coverlet]", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()));
+
+            // There is a bug in this SDK version https://github.com/microsoft/vstest/pull/2221
+            // in-proc coverlet.collector.dll collector with version != 1.0.0.0 won't be loaded
+            // Assert.Contains("[coverlet]", File.ReadAllText(clonedTemplateProject.GetFiles("log.host.*.txt").Single()));
+        }
+    }
+
+    public class TestSDK_Preview : Collectors
+    {
+        public TestSDK_Preview()
+        {
+            TestSDKVersion = "16.5.0-preview-20200110-02";
+        }
+    }
+
+    public abstract class Collectors : BaseTest
+    {
+        protected string? TestSDKVersion { get; set; }
+
         private ClonedTemplateProject PrepareTemplateProject()
         {
-            ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
+            if (TestSDKVersion is null)
+            {
+                throw new ArgumentNullException("Invalid TestSDKVersion");
+            }
+
+            ClonedTemplateProject clonedTemplateProject = CloneTemplateProject(testSDKVersion: TestSDKVersion);
             UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
             AddCoverletCollectosRef(clonedTemplateProject.ProjectRootPath!);
             return clonedTemplateProject;
         }
 
-        private void AssertCollectorsInjection(ClonedTemplateProject clonedTemplateProject)
+        private protected virtual void AssertCollectorsInjection(ClonedTemplateProject clonedTemplateProject)
         {
             // Check out/in process collectors injection
             Assert.Contains("[coverlet]", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()));
