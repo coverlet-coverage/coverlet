@@ -44,8 +44,11 @@ namespace Coverlet.Collector.Tests
 
         [Theory]
         [InlineData("[*]*,[coverlet]*", "[coverlet.*.tests?]*,[coverlet.*.tests.*]*", @"E:\temp,/var/tmp", "module1.cs,module2.cs", "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute")]
+        [InlineData("[*]*,,[coverlet]*", "[coverlet.*.tests?]*,,[coverlet.*.tests.*]*", @"E:\temp,,/var/tmp", "module1.cs,,module2.cs", "Obsolete,,GeneratedCodeAttribute,,CompilerGeneratedAttribute")]
+        [InlineData("[*]*, ,[coverlet]*", "[coverlet.*.tests?]*, ,[coverlet.*.tests.*]*", @"E:\temp, ,/var/tmp", "module1.cs, ,module2.cs", "Obsolete, ,GeneratedCodeAttribute, ,CompilerGeneratedAttribute")]
         [InlineData("[*]*, [coverlet]*", "[coverlet.*.tests?]*, [coverlet.*.tests.*]*", @"E:\temp, /var/tmp", "module1.cs, module2.cs", "Obsolete, GeneratedCodeAttribute, CompilerGeneratedAttribute")]
         [InlineData("[*]*,\r\n[coverlet]*", "[coverlet.*.tests?]*,\r\n[coverlet.*.tests.*]*", "E:\\temp,\r\n/var/tmp", "module1.cs,\r\nmodule2.cs", "Obsolete,\r\nGeneratedCodeAttribute,\r\nCompilerGeneratedAttribute")]
+        [InlineData(" [*]* , [coverlet]* ", " [coverlet.*.tests?]* , [coverlet.*.tests.*]* ", " E:\\temp , /var/tmp ", " module1.cs , module2.cs ", " Obsolete , GeneratedCodeAttribute , CompilerGeneratedAttribute ")]
         public void ParseShouldCorrectlyParseConfigurationElement(string includeFilters,
             string excludeFilters,
             string includeDirectories,
@@ -85,6 +88,45 @@ namespace Coverlet.Collector.Tests
             Assert.False(coverletSettings.UseSourceLink);
             Assert.True(coverletSettings.SingleHit);
             Assert.True(coverletSettings.IncludeTestAssembly);
+        }
+
+        [Fact]
+        public void ParseShouldCorrectlyParseConfigurationElementWithNullInnerText()
+        {
+            var testModules = new List<string> { "abc.dll" };
+            var doc = new XmlDocument();
+            var configElement = doc.CreateElement("Configuration");
+            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName);
+            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName);
+            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName);
+            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName);
+            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName);
+
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
+
+            Assert.Equal("abc.dll", coverletSettings.TestModule);
+            Assert.Empty(coverletSettings.IncludeFilters);
+            Assert.Empty(coverletSettings.IncludeDirectories);
+            Assert.Empty(coverletSettings.ExcludeSourceFiles);
+            Assert.Empty(coverletSettings.ExcludeAttributes);
+            Assert.Single(coverletSettings.ExcludeFilters, "[coverlet.*]*");
+        }
+
+        [Fact]
+        public void ParseShouldCorrectlyParseConfigurationElementWithNullElements()
+        {
+            var testModules = new List<string> { "abc.dll" };
+            var doc = new XmlDocument();
+            var configElement = doc.CreateElement("Configuration");
+
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
+
+            Assert.Equal("abc.dll", coverletSettings.TestModule);
+            Assert.Empty(coverletSettings.IncludeFilters);
+            Assert.Empty(coverletSettings.IncludeDirectories);
+            Assert.Empty(coverletSettings.ExcludeSourceFiles);
+            Assert.Empty(coverletSettings.ExcludeAttributes);
+            Assert.Single(coverletSettings.ExcludeFilters, "[coverlet.*]*");
         }
 
         [Theory]
@@ -127,6 +169,12 @@ namespace Coverlet.Collector.Tests
         {
             var node = doc.CreateNode("element", nodeSetting, string.Empty);
             node.InnerText = nodeValue;
+            configElement.AppendChild(node);
+        }
+
+        private void CreateCoverleteNullInnerTextNodes(XmlDocument doc, XmlElement configElement, string nodeSetting)
+        {
+            var node = doc.CreateNode("element", nodeSetting, string.Empty);
             configElement.AppendChild(node);
         }
     }

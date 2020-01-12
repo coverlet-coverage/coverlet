@@ -86,8 +86,7 @@ namespace Coverlet.Collector.DataCollection
             if (configurationElement != null)
             {
                 XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
-                formats = this.SplitElement(reportFormatElement)?
-                    .Where(format => !string.IsNullOrEmpty(format)).ToArray();
+                formats = this.SplitElement(reportFormatElement);
             }
 
             return formats is null || formats.Length == 0 ? new[] { CoverletConstants.DefaultReportFormat } : formats;
@@ -213,7 +212,7 @@ namespace Coverlet.Collector.DataCollection
         /// <returns>An array of the values in the element</returns>
         private string[] SplitElement(XmlElement element)
         {
-            return element?.InnerText?.Split(',')?.Select(value => value.Trim())?.ToArray();
+            return element?.InnerText?.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).ToArray() ?? Array.Empty<string>();
         }
     }
 }
