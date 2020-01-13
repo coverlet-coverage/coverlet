@@ -40,7 +40,7 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _excludedSourceFiles;
         private List<string> _branchesInCompiledGeneratedClass;
         private List<(MethodDefinition, int)> _excludedMethods;
-        private List<string> _compilerGeneratedExcludedTypes;
+        private List<string> _excludedCompilerGeneratedTypes;
 
         public bool SkipModule { get; set; } = false;
 
@@ -187,10 +187,10 @@ namespace Coverlet.Core.Instrumentation
                         {
                             if (IsSynthesizedMemberToBeExcluded(type))
                             {
-                                if (_compilerGeneratedExcludedTypes is null)
-                                    _compilerGeneratedExcludedTypes = new List<string>();
+                                if (_excludedCompilerGeneratedTypes is null)
+                                    _excludedCompilerGeneratedTypes = new List<string>();
 
-                                _compilerGeneratedExcludedTypes.Add(type.FullName);
+                                _excludedCompilerGeneratedTypes.Add(type.FullName);
                             }
                             else
                             {
@@ -646,8 +646,8 @@ namespace Coverlet.Core.Instrumentation
             TypeDefinition declaringType = definition.DeclaringType;
             while (declaringType != null)
             {
-                if (_compilerGeneratedExcludedTypes != null &&
-                    _compilerGeneratedExcludedTypes.Any(t => t == declaringType.FullName))
+                if (_excludedCompilerGeneratedTypes != null &&
+                    _excludedCompilerGeneratedTypes.Any(t => t == declaringType.FullName))
                 {
                     return true;
                 }

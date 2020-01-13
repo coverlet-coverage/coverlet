@@ -9,7 +9,6 @@ using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.RemoteExecutor;
 using Moq;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Coverlet.Core.Tests
 {
