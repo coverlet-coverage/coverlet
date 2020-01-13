@@ -24,7 +24,7 @@ Coverlet can be used through three different *drivers*
 
 ### VSTest Integration (preferred due to [know issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
-### Insallation
+### Installation
 ```bash
 dotnet add package coverlet.collector
 ```
@@ -51,7 +51,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 * Important [know issue](Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100)
 ### MSBuild Integration
 
-### Insallation
+### Installation
 ```bash
 dotnet add package coverlet.msbuild
 ```

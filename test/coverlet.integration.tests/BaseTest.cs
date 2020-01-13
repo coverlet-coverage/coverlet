@@ -59,7 +59,7 @@ namespace Coverlet.Integration.Tests
             return manifest.Metadata.Version.OriginalVersion;
         }
 
-        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true)
+        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.4.0")
         {
             DirectoryInfo finalRoot = Directory.CreateDirectory(Guid.NewGuid().ToString("N"));
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
@@ -80,7 +80,7 @@ namespace Coverlet.Integration.Tests
 <Project>
 </Project>");
 
-            AddMicrosoftNETTestSdkRef(finalRoot.FullName);
+            AddMicrosoftNETTestSdkRef(finalRoot.FullName, testSDKVersion);
 
             return new ClonedTemplateProject(finalRoot.FullName, cleanupOnDispose);
         }
@@ -129,7 +129,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(nugetFile);
         }
 
-        private protected void AddMicrosoftNETTestSdkRef(string projectPath)
+        private protected void AddMicrosoftNETTestSdkRef(string projectPath, string version)
         {
             string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
             if (!File.Exists(csproj))
@@ -145,8 +145,7 @@ namespace Coverlet.Integration.Tests
             xml.Element("Project")
                .Element("ItemGroup")
                .Add(new XElement("PackageReference", new XAttribute("Include", "Microsoft.NET.Test.Sdk"),
-               // We use this due to know issue until official release https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
-               new XAttribute("Version", "16.5.0-preview-20191115-01")));
+               new XAttribute("Version", version)));
             xml.Save(csproj);
         }
 

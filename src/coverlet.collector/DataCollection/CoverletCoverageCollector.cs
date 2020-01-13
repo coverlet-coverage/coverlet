@@ -37,6 +37,15 @@ namespace Coverlet.Collector.DataCollection
             _countDownEventFactory = countDownEventFactory;
         }
 
+        private void AttachDebugger()
+        {
+            if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG"), out int result) && result == 1)
+            {
+                Debugger.Launch();
+                Debugger.Break();
+            }
+        }
+
         /// <summary>
         /// Initializes data collector
         /// </summary>
@@ -52,6 +61,9 @@ namespace Coverlet.Collector.DataCollection
             DataCollectionLogger logger,
             DataCollectionEnvironmentContext environmentContext)
         {
+
+            AttachDebugger();
+
             if (_eqtTrace.IsInfoEnabled)
             {
                 _eqtTrace.Info("Initializing {0} with configuration: '{1}'", CoverletConstants.DataCollectorName, configurationElement?.OuterXml);

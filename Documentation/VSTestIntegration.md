@@ -30,13 +30,13 @@ These are a list of options that are supported by coverlet. These can be specifi
 | Option         | Summary                                                                                  |
 |-------------   |------------------------------------------------------------------------------------------|
 |Format          | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.   | 
-|MergeWith       | Combine the output of multiple coverage runs into a single result([check the sample](Examples.md)).                       | 
 |Exclude         | Exclude from code coverage analysing using filter expressions.                           | 
 |ExcludeByFile   | Ignore specific source files from code coverage.                                         | 
 |Include         | Explicitly set what to include in code coverage analysis using filter expressions.       | 
 |IncludeDirectory| Explicitly set which directories to include in code coverage analysis.                   |
 |SingleHit       | Specifies whether to limit code coverage hit reporting to a single hit for each location.| 
 |UseSourceLink   | Specifies whether to use SourceLink URIs in place of file system paths.                  |
+|IncludeTestAssembly    | Include coverage of the test assembly.                  |
 
 How to specify these options via runsettings?
 ```
@@ -46,8 +46,7 @@ How to specify these options via runsettings?
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Format>json,cobertura</Format>
-          <MergeWith>/custom/path/result.json</MergeWith>
+          <Format>json,cobertura</Format>          
           <Exclude>[coverlet.*.tests?]*,[*]Coverlet.Core*</Exclude> <!-- [Assembly-Filter]Type-Filter -->
           <Include>[coverlet.*]*,[*]Coverlet.Core*</Include> <!-- [Assembly-Filter]Type-Filter -->
           <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
@@ -55,6 +54,7 @@ How to specify these options via runsettings?
           <IncludeDirectory>../dir1/,../dir2/,</IncludeDirectory>
           <SingleHit>false</SingleHit>
           <UseSourceLink>true</UseSourceLink>
+          <IncludeTestAssembly>true<IncludeTestAssembly>
         </Configuration>
       </DataCollector>
     </DataCollectors>
@@ -66,6 +66,8 @@ This runsettings file can easily be provided using command line option as given 
 1. `dotnet test --settings coverletArgs.runsettings`
 
 2. `dotnet vstest --settings coverletArgs.runsettings`
+
+Take a look at our [`HelloWorld`](Examples/VSTest/HelloWorld/HowTo.md) sample.
 
 ## Implementation Details
 
