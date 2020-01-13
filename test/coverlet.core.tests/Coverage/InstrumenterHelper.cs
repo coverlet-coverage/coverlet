@@ -140,6 +140,24 @@ namespace Coverlet.Core.Tests
             return AssertLinesCovered(document, BuildConfiguration.Debug | BuildConfiguration.Release, lines);
         }
 
+        public static Document AssertAllLinesCovered(this Document document)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            foreach (KeyValuePair<int, Line> line in document.Lines)
+            {
+                if (line.Value.Hits == 0)
+                {
+                    throw new XunitException($"Line {line.Value.Number} has not been covered.");
+                }
+            }
+
+            return document;
+        }
+
         public static Document AssertLinesCoveredAllBut(this Document document, BuildConfiguration configuration, params int[] linesNumber)
         {
             if (document is null)

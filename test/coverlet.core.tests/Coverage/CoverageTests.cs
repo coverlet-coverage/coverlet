@@ -317,7 +317,7 @@ namespace Coverlet.Core.Tests
                 RemoteExecutor.Invoke(async pathSerialize =>
                 {
                     // Run load and call a delegate passing class as dynamic to simplify method call
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr3>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_NestedStateMachines>(instance =>
                     {
                         instance.Test();
                         return Task.CompletedTask;
@@ -334,12 +334,45 @@ namespace Coverlet.Core.Tests
 
                 //TestInstrumentationHelper.GenerateHtmlReport(result);
 
-                var document = result.Document("Instrumentation.ExcludeFromCoverage.cs");
+                var document = result.Document("Instrumentation.ExcludeFromCoverage.NestedStateMachines.cs")
+                    .AssertAllLinesCovered();
+            }
+            finally
+            {
+                // Cleanup tmp file
+                File.Delete(path);
+            }
+        }
 
-                // Invoking method "Test" of class "MethodsWithExcludeFromCodeCoverageAttr3" we aspect 100% lines covered
-                Assert.DoesNotContain(document.Lines, l =>
-                    (l.Value.Class == "Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr3" || l.Value.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr3/")) &&
-                    l.Value.Hits == 0);
+        [Fact]
+        public void ExcludeFromCodeCoverageCompilerGeneratedMethodsAndTypes_Issue670()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                // Lambda will run in a custom process to avoid issue with statics and file locking
+                RemoteExecutor.Invoke(async pathSerialize =>
+                {
+                    // Run load and call a delegate passing class as dynamic to simplify method call
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_Issue670>(instance =>
+                    {
+                        instance.Test("test");
+                        return Task.CompletedTask;
+                    }, pathSerialize);
+
+                    // we return 0 if we return something different assert fail
+                    return 0;
+
+                }, path).Dispose();
+
+                // We retrive and load CoveragePrepareResult and run coverage calculation
+                // Similar to msbuild coverage result task
+                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+                //TestInstrumentationHelper.GenerateHtmlReport(result);
+
+                var document = result.Document("Instrumentation.ExcludeFromCoverage.Issue670.cs")
+                    .AssertAllLinesCovered();
             }
             finally
             {

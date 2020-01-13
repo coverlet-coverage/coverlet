@@ -40,6 +40,7 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _excludedSourceFiles;
         private List<string> _branchesInCompiledGeneratedClass;
         private List<(MethodDefinition, int)> _excludedMethods;
+        private List<string> _compilerGeneratedExcludedTypes;
 
         public bool SkipModule { get; set; } = false;
 
@@ -182,9 +183,20 @@ namespace Coverlet.Core.Instrumentation
                             && (!_isCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
                             && !_instrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
                             && _instrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters)
-                            && !IsSynthesizedMemberToBeExcluded(type)
                             )
-                            InstrumentType(type);
+                        {
+                            if (IsSynthesizedMemberToBeExcluded(type))
+                            {
+                                if (_compilerGeneratedExcludedTypes is null)
+                                    _compilerGeneratedExcludedTypes = new List<string>();
+
+                                _compilerGeneratedExcludedTypes.Add(type.FullName);
+                            }
+                            else
+                            {
+                                InstrumentType(type);
+                            }
+                        }
                     }
 
                     // Fixup the custom tracker class constructor, according to all instrumented types
@@ -353,12 +365,12 @@ namespace Coverlet.Core.Instrumentation
                         customAttributes = customAttributes.Union(prop.CustomAttributes);
                 }
 
+                ordinal++;
                 if (IsSynthesizedMemberToBeExcluded(method))
                 {
                     continue;
                 }
 
-                ordinal++;
                 if (!customAttributes.Any(IsExcludeAttribute))
                 {
                     InstrumentMethod(method);
@@ -634,6 +646,12 @@ namespace Coverlet.Core.Instrumentation
             TypeDefinition declaringType = definition.DeclaringType;
             while (declaringType != null)
             {
+                if (_compilerGeneratedExcludedTypes != null &&
+                    _compilerGeneratedExcludedTypes.Any(t => t == declaringType.FullName))
+                {
+                    return true;
+                }
+
                 foreach (var excludedMethods in _excludedMethods)
                 {
                     // Exclude this member if declaring type if the same of the excluded method and the name is synthesized from the name of the excluded method
@@ -657,6 +675,8 @@ namespace Coverlet.Core.Instrumentation
             return
                 // Lambda method
                 name.IndexOf($"<{methodName}>b__{methodOrdinal}") != -1 ||
+                // Lambda display class
+                name.IndexOf($"<>c__DisplayClass{methodOrdinal}_") != -1 ||
                 // State machine
                 name.IndexOf($"<{methodName}>d__{methodOrdinal}") != -1 ||
                 // Local function
