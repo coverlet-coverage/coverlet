@@ -4,7 +4,7 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <PackageOutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\Packages\</PackageOutputPath>
-
+    <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
