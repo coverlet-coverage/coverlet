@@ -25,6 +25,12 @@ namespace Coverlet.Integration.Tests
         private BuildConfiguration GetAssemblyBuildConfiguration()
         {
             var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();
+
+            if (configurationAttribute is null)
+            {
+                throw new ArgumentNullException("AssemblyConfigurationAttribute not found");
+            }
+
             if (configurationAttribute.Configuration.Equals("Debug", StringComparison.InvariantCultureIgnoreCase))
             {
                 return BuildConfiguration.Debug;
@@ -261,6 +267,11 @@ namespace Coverlet.Integration.Tests
 
         private protected void PinSDK(ClonedTemplateProject project, string sdkVersion)
         {
+            if (project is null)
+            {
+                throw new ArgumentNullException(nameof(project));
+            }
+
             if (string.IsNullOrEmpty(sdkVersion))
             {
                 throw new ArgumentException("Invalid sdkVersion", nameof(sdkVersion));
@@ -271,24 +282,31 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
 
+            if (project.ProjectRootPath is null || Directory.Exists(project.ProjectRootPath))
+            {
+                throw new ArgumentException("Invalid ProjectRootPath");
+            }
+
             File.WriteAllText(Path.Combine(project.ProjectRootPath, "global.json"), $"{{ \"sdk\": {{ \"version\": \"{sdkVersion}\" }} }}");
         }
     }
 
     class ClonedTemplateProject : IDisposable
     {
-        public string? ProjectRootPath { get; private set; }
-        public bool _cleanupOnDispose { get; set; }
+        public string ProjectRootPath { get; private set; }
+        public bool _cleanupOnDispose { get; private set; }
 
         // We need to have a different asm name to avoid issue with collectors, we filter [coverlet.*]* by default
         // https://github.com/tonerdo/coverlet/pull/410#discussion_r284526728
         public static string AssemblyName { get; } = "coverletsamplelib.integration.template";
         public static string ProjectFileName { get; } = "coverlet.integration.template.csproj";
-        public string ProjectFileNamePath => Path.Combine(ProjectRootPath, "coverlet.integration.template.csproj");
+        public string ProjectFileNamePath => Path.Combine(ProjectRootPath!, "coverlet.integration.template.csproj");
 
-        public ClonedTemplateProject(string projectRootPath, bool cleanupOnDispose) => (ProjectRootPath, _cleanupOnDispose) = (projectRootPath, cleanupOnDispose);
-
-
+        public ClonedTemplateProject(string? projectRootPath, bool cleanupOnDispose)
+        {
+            ProjectRootPath = (projectRootPath ?? throw new ArgumentNullException(nameof(projectRootPath)));
+            _cleanupOnDispose = cleanupOnDispose;
+        }
 
         public string[] GetFiles(string filter)
         {
