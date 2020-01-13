@@ -14,7 +14,7 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
     <!-- Open issue https://github.com/NuGet/Home/issues/8941 -->
-    <NoWarn>NU5127</NoWarn>
+    <NoWarn>$(NoWarn);NU5127</NoWarn>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
@@ -38,7 +38,7 @@
 
   <ItemGroup>
     <None Update="build\**" Pack="true" PackagePath="" />
-    <None Include="..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
