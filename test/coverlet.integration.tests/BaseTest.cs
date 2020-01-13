@@ -281,7 +281,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
 
-            if (project.ProjectRootPath is null || Directory.Exists(project.ProjectRootPath))
+            if (project.ProjectRootPath is null || !Directory.Exists(project.ProjectRootPath))
             {
                 throw new ArgumentException("Invalid ProjectRootPath");
             }
