@@ -41,10 +41,13 @@ We MANUALLY bump versions on production release, so we have different release pl
 
 | Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **commit hash**| **notes** |
 | :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| <01 April 2020>      | 2.8.1 | 1.7.1 |   1.2.1 | 
 | 03 January 2019      | 2.8.0 | 1.7.0 |   1.2.0 | 72a688f1c47fa92059540d5fbb1c4b0b4bf0dc8c |  |
 | 23 September 2019      | 2.7.0 | 1.6.0 |   1.1.0 | 4ca01eb239038808739699470a61fad675af6c79 |  |
 | 01 July 2019      | 2.6.3 | 1.5.3 |   1.0.1 | e1593359497fdfe6befbb86304b8f4e09a656d14 |  |
 | 06 June 2019      | 2.6.2 | 1.5.2 |   1.0.0 | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release |
+
+*< date >  Expected next release date
 
 To get the list of commits between two version use git command
 ```bash

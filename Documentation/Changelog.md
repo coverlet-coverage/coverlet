@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+-Fixed [#129](https://github.com/tonerdo/coverlet/issues/129) and [#670](https://github.com/tonerdo/coverlet/issues/670) with [#671](https://github.com/tonerdo/coverlet/pull/671) by https://github.com/matteoerigozzi
+
+
 ## Release date 2020-01-03
 ### Packages  
 coverlet.msbuild 2.8.0  
