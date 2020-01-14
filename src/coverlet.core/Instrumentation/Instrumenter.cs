@@ -187,9 +187,7 @@ namespace Coverlet.Core.Instrumentation
                         {
                             if (IsSynthesizedMemberToBeExcluded(type))
                             {
-                                if (_excludedCompilerGeneratedTypes is null)
-                                    _excludedCompilerGeneratedTypes = new List<string>();
-
+                                _excludedCompilerGeneratedTypes ??= new List<string>();
                                 _excludedCompilerGeneratedTypes.Add(type.FullName);
                             }
                             else
@@ -350,6 +348,9 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentType(TypeDefinition type)
         {
             var methods = type.GetMethods();
+
+            // We keep ordinal index because it's the way used by compiler for generated types/methods to 
+            // avoid ambiguity
             int ordinal = -1;
             foreach (var method in methods)
             {
@@ -377,9 +378,7 @@ namespace Coverlet.Core.Instrumentation
                 }
                 else
                 {
-                    if (_excludedMethods is null)
-                        _excludedMethods = new List<(MethodDefinition, int)>();
-
+                    _excludedMethods ??= new List<(MethodDefinition, int)>();
                     _excludedMethods.Add((method, ordinal));
                 }
             }
@@ -644,17 +643,24 @@ namespace Coverlet.Core.Instrumentation
             }
 
             TypeDefinition declaringType = definition.DeclaringType;
+
+            // We check all parent type of current one bottom-up
             while (declaringType != null)
             {
+
+                // If parent type is excluded return
                 if (_excludedCompilerGeneratedTypes != null &&
                     _excludedCompilerGeneratedTypes.Any(t => t == declaringType.FullName))
                 {
                     return true;
                 }
 
+                // Check methods members and compiler generated types
                 foreach (var excludedMethods in _excludedMethods)
                 {
-                    // Exclude this member if declaring type if the same of the excluded method and the name is synthesized from the name of the excluded method
+                    // Exclude this member if declaring type is the same of the excluded method and 
+                    // the name is synthesized from the name of the excluded method.
+                    // 
                     if (declaringType.FullName == excludedMethods.Item1.DeclaringType.FullName &&
                         IsSynthesizedNameOf(definition.Name, excludedMethods.Item1.Name, excludedMethods.Item2))
                     {

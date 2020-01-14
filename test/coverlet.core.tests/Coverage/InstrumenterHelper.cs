@@ -140,24 +140,6 @@ namespace Coverlet.Core.Tests
             return AssertLinesCovered(document, BuildConfiguration.Debug | BuildConfiguration.Release, lines);
         }
 
-        public static Document AssertAllLinesCovered(this Document document)
-        {
-            if (document is null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-
-            foreach (KeyValuePair<int, Line> line in document.Lines)
-            {
-                if (line.Value.Hits == 0)
-                {
-                    throw new XunitException($"Line {line.Value.Number} has not been covered.");
-                }
-            }
-
-            return document;
-        }
-
         public static Document AssertLinesCoveredAllBut(this Document document, BuildConfiguration configuration, params int[] linesNumber)
         {
             if (document is null)
@@ -232,6 +214,30 @@ namespace Coverlet.Core.Tests
             if (linesToCover.Count != 0)
             {
                 throw new XunitException($"Not all requested line found, {linesToCover.Select(l => l.ToString()).Aggregate((a, b) => $"{a}, {b}")}");
+            }
+
+            return document;
+        }
+
+        public static Document AssertNonInstrumentedLines(this Document document, BuildConfiguration configuration, int from, int to)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
+            }
+
+            int[] lineRange = Enumerable.Range(from, to - from + 1).ToArray();
+
+            if (document.Lines.Select(l => l.Value.Number).Intersect(lineRange).Count() > 0)
+            {
+                throw new XunitException($"Unexpected instrumented lines, '{string.Join(',', lineRange)}'");
             }
 
             return document;
