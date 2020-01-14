@@ -143,7 +143,7 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestIsTypeExcludedNamespace()
         {
-            var result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.Type", new string[]{ "[Module]Namespace.Namespace.*" });
+            var result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.Type", new string[] { "[Module]Namespace.Namespace.*" });
             Assert.True(result);
 
             result = _instrumentationHelper.IsTypeExcluded("Module.dll", "Namespace.Namespace.TypeB", new string[] { "[Module]Namespace.Namespace.*" });
@@ -206,23 +206,24 @@ namespace Coverlet.Core.Helpers.Tests
         {
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
 
-            var currentDirModules = _instrumentationHelper.GetCoverableModules(module,
-                new[] { Environment.CurrentDirectory }, false)
-                .Where(m => !m.StartsWith("testgen_")).ToArray();
+            DirectoryInfo newDir = Directory.CreateDirectory("TestIncludeDirectories");
+            DirectoryInfo newDir2 = Directory.CreateDirectory("TestIncludeDirectories2");
+            File.Copy(module, Path.Combine(newDir.FullName, Path.GetFileName(module)));
+            module = Path.Combine(newDir.FullName, Path.GetFileName(module));
+            File.Copy("coverlet.msbuild.tasks.dll", Path.Combine(newDir.FullName, "coverlet.msbuild.tasks.dll"));
+            File.Copy("coverlet.core.dll", Path.Combine(newDir2.FullName, "coverlet.core.dll"));
 
-            var parentDirWildcardModules = _instrumentationHelper.GetCoverableModules(module,
-                new[] { Path.Combine(Directory.GetParent(Environment.CurrentDirectory).FullName, "*") }, false)
-                .Where(m => !m.StartsWith("testgen_")).ToArray();
+            var currentDirModules = _instrumentationHelper.GetCoverableModules(module, Array.Empty<string>(), false);
+            Assert.Single(currentDirModules);
+            Assert.Equal("coverlet.msbuild.tasks.dll", Path.GetFileName(currentDirModules[0]));
 
-            // There are at least as many modules found when searching the parent directory's subdirectories
-            Assert.True(parentDirWildcardModules.Length >= currentDirModules.Length);
+            var moreThanOneDirectory = _instrumentationHelper.GetCoverableModules(module, new string[] { newDir2.FullName }, false);
+            Assert.Equal(2, moreThanOneDirectory.Length);
+            Assert.Equal("coverlet.msbuild.tasks.dll", Path.GetFileName(moreThanOneDirectory[0]));
+            Assert.Equal("coverlet.core.dll", Path.GetFileName(moreThanOneDirectory[1]));
 
-            var relativePathModules = _instrumentationHelper.GetCoverableModules(module,
-                new[] { "." }, false)
-                .Where(m => !m.StartsWith("testgen_")).ToArray();
-
-            // Same number of modules found when using a relative path
-            Assert.Equal(currentDirModules.Length, relativePathModules.Length);
+            newDir.Delete(true);
+            newDir2.Delete(true);
         }
 
         public static IEnumerable<object[]> ValidModuleFilterData =>
