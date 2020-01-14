@@ -212,7 +212,7 @@ namespace Coverlet.Collector.DataCollection
         /// <returns>An array of the values in the element</returns>
         private string[] SplitElement(XmlElement element)
         {
-            return element?.InnerText?.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).ToArray() ?? Array.Empty<string>();
+            return element?.InnerText?.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).ToArray();
         }
     }
 }
