@@ -211,7 +211,7 @@ namespace Coverlet.Integration.Tests
             return runsettingsPath;
         }
 
-        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json")
+        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json", string standardOutput = ""
         {
             bool coverageChecked = false;
             foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
@@ -224,7 +224,7 @@ namespace Coverlet.Integration.Tests
                 coverageChecked = true;
             }
 
-            Assert.True(coverageChecked, "Coverage check fail");
+            Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
         }
 
         private protected void UpdateProjectTargetFramework(ClonedTemplateProject project, params string[] targetFrameworks)

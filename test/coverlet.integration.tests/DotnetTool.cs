@@ -30,7 +30,7 @@ namespace Coverlet.Integration.Tests
             string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj"));
             RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError);
             Assert.Contains("Test Run Successful.", standardOutput);
-            AssertCoverage(clonedTemplateProject);
+            AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
         }
     }
 }
