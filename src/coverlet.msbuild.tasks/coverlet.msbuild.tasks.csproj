@@ -4,21 +4,33 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyTitle>coverlet.msbuild.tasks</AssemblyTitle>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
+    <ContentTargetFolders>build</ContentTargetFolders>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- 
+          suppress warning https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128 
+          If your package does not contain any lib/ or ref/ files and is not a meta-package, 
+          it likely does not have any dependencies that the package consumer needs. 
+          If you are packing with NuGet's MSBuild Pack target, you can set <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking> in any PropertyGroup in your project file.
+    -->
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+
+  <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
+  <PropertyGroup>
     <PackageId>coverlet.msbuild</PackageId>
     <Title>coverlet.msbuild</Title>
     <Authors>tonerdo</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>http://github.com/tonerdo/coverlet</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
+    <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <DevelopmentDependency>true</DevelopmentDependency>
     <Description>Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.</Description>
     <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
-    <ContentTargetFolders>build</ContentTargetFolders>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,12 +42,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\coverlet.console\ConsoleTables\ConsoleTable.cs" Link="ConsoleTables\ConsoleTable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\coverlet.console\ConsoleTables\ConsoleTable.cs" Link="ConsoleTables\ConsoleTable.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="coverlet.msbuild.props" />
     <Content Include="coverlet.msbuild.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <Target Name="PackBuildOutputs" DependsOnTargets="ResolveProjectReferences;SatelliteDllsProjectOutputGroup;DebugSymbolsProjectOutputGroup;SatelliteDllsProjectOutputGroupDependencies;ResolveAssemblyReferences">

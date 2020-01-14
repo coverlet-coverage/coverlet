@@ -2,6 +2,11 @@
 
 Contributions are highly welcome, however, except for very small changes, kindly file an issue and let's have a discussion before you open a pull request.
 
+## Requirements
+
+.NET SDK 2.2  https://dotnet.microsoft.com/download/dotnet-core/2.2  
+.NET SDK 3.1  https://dotnet.microsoft.com/download/dotnet-core/3.1
+
 ## Building the Project
 
 Clone this repo:

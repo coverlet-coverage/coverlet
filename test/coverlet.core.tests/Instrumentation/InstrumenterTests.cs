@@ -346,7 +346,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void SkipEmbeddedPpdbWithoutLocalSource()
         {
-            string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.*.dll").First();
+            string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.core.dll").First();
             var loggerMock = new Mock<ILogger>();
             Instrumenter instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, _instrumentationHelper, new FileSystem());
             Assert.True(_instrumentationHelper.HasPdb(xunitDll, out bool embedded));
