@@ -46,7 +46,7 @@ namespace Coverlet.Collector.Tests
         [InlineData("[*]*,[coverlet]*", "[coverlet.*.tests?]*,[coverlet.*.tests.*]*", @"E:\temp,/var/tmp", "module1.cs,module2.cs", "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute")]
         [InlineData("[*]*,,[coverlet]*", "[coverlet.*.tests?]*,,[coverlet.*.tests.*]*", @"E:\temp,,/var/tmp", "module1.cs,,module2.cs", "Obsolete,,GeneratedCodeAttribute,,CompilerGeneratedAttribute")]
         [InlineData("[*]*, ,[coverlet]*", "[coverlet.*.tests?]*, ,[coverlet.*.tests.*]*", @"E:\temp, ,/var/tmp", "module1.cs, ,module2.cs", "Obsolete, ,GeneratedCodeAttribute, ,CompilerGeneratedAttribute")]
-        [InlineData("[*]*,\t,[coverlet]*", "[coverlet.*.tests?]*,\t,[coverlet.*.tests.*]*", @"E:\temp,\t,/var/tmp", "module1.cs,\t,module2.cs", "Obsolete,\t,GeneratedCodeAttribute,\t,CompilerGeneratedAttribute")]
+        [InlineData("[*]*,\t,[coverlet]*", "[coverlet.*.tests?]*,\t,[coverlet.*.tests.*]*", "E:\\temp,\t,/var/tmp", "module1.cs,\t,module2.cs", "Obsolete,\t,GeneratedCodeAttribute,\t,CompilerGeneratedAttribute")]
         [InlineData("[*]*, [coverlet]*", "[coverlet.*.tests?]*, [coverlet.*.tests.*]*", @"E:\temp, /var/tmp", "module1.cs, module2.cs", "Obsolete, GeneratedCodeAttribute, CompilerGeneratedAttribute")]
         [InlineData("[*]*,\t[coverlet]*", "[coverlet.*.tests?]*,\t[coverlet.*.tests.*]*", "E:\\temp,\t/var/tmp", "module1.cs,\tmodule2.cs", "Obsolete,\tGeneratedCodeAttribute,\tCompilerGeneratedAttribute")]
         [InlineData("[*]*, \t[coverlet]*", "[coverlet.*.tests?]*, \t[coverlet.*.tests.*]*", "E:\\temp, \t/var/tmp", "module1.cs, \tmodule2.cs", "Obsolete, \tGeneratedCodeAttribute, \tCompilerGeneratedAttribute")]
@@ -140,8 +140,14 @@ namespace Coverlet.Collector.Tests
         [InlineData(" , json, ", 1, new[] { "json" })]
         [InlineData("json,cobertura", 2, new[] { "json", "cobertura" })]
         [InlineData("json,\r\ncobertura", 2, new[] { "json", "cobertura" })]
+        [InlineData("json, \r\n cobertura", 2, new[] { "json", "cobertura" })]
+        [InlineData("json,\tcobertura", 2, new[] { "json", "cobertura" })]
+        [InlineData("json, \t cobertura", 2, new[] { "json", "cobertura" })]
+        [InlineData("json,\t\r\n\tcobertura", 2, new[] { "json", "cobertura" })]
+        [InlineData("json, \t \r\n \tcobertura", 2, new[] { "json", "cobertura" })]
         [InlineData(" , json,, cobertura ", 2, new[] { "json", "cobertura" })]
         [InlineData(" , json, , cobertura ", 2, new[] { "json", "cobertura" })]
+        [InlineData(",json,\t,\r\n,cobertura", 2, new[] { "json", "cobertura" })]
         public void ParseShouldCorrectlyParseMultipleFormats(string formats, int formatsCount, string[] expectedReportFormats)
         {
             var testModules = new List<string> { "abc.dll" };
