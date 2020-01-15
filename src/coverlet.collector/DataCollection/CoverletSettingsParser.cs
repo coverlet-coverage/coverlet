@@ -86,8 +86,7 @@ namespace Coverlet.Collector.DataCollection
             if (configurationElement != null)
             {
                 XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
-                formats = reportFormatElement?.InnerText?.Split(',').Select(format => format.Trim())
-                    .Where(format => !string.IsNullOrEmpty(format)).ToArray();
+                formats = this.SplitElement(reportFormatElement);
             }
 
             return formats is null || formats.Length == 0 ? new[] { CoverletConstants.DefaultReportFormat } : formats;
@@ -101,7 +100,7 @@ namespace Coverlet.Collector.DataCollection
         private string[] ParseIncludeFilters(XmlElement configurationElement)
         {
             XmlElement includeFiltersElement = configurationElement[CoverletConstants.IncludeFiltersElementName];
-            return includeFiltersElement?.InnerText?.Split(',');
+            return this.SplitElement(includeFiltersElement);
         }
 
         /// <summary>
@@ -112,7 +111,7 @@ namespace Coverlet.Collector.DataCollection
         private string[] ParseIncludeDirectories(XmlElement configurationElement)
         {
             XmlElement includeDirectoriesElement = configurationElement[CoverletConstants.IncludeDirectoriesElementName];
-            return includeDirectoriesElement?.InnerText?.Split(',');
+            return this.SplitElement(includeDirectoriesElement);
         }
 
         /// <summary>
@@ -127,7 +126,7 @@ namespace Coverlet.Collector.DataCollection
             if (configurationElement != null)
             {
                 XmlElement excludeFiltersElement = configurationElement[CoverletConstants.ExcludeFiltersElementName];
-                string[] filters = excludeFiltersElement?.InnerText?.Split(',');
+                string[] filters = this.SplitElement(excludeFiltersElement);
                 if (filters != null)
                 {
                     excludeFilters.AddRange(filters);
@@ -145,7 +144,7 @@ namespace Coverlet.Collector.DataCollection
         private string[] ParseExcludeSourceFiles(XmlElement configurationElement)
         {
             XmlElement excludeSourceFilesElement = configurationElement[CoverletConstants.ExcludeSourceFilesElementName];
-            return excludeSourceFilesElement?.InnerText?.Split(',');
+            return this.SplitElement(excludeSourceFilesElement);
         }
 
         /// <summary>
@@ -156,7 +155,7 @@ namespace Coverlet.Collector.DataCollection
         private string[] ParseExcludeAttributes(XmlElement configurationElement)
         {
             XmlElement excludeAttributesElement = configurationElement[CoverletConstants.ExcludeAttributesElementName];
-            return excludeAttributesElement?.InnerText?.Split(',');
+            return this.SplitElement(excludeAttributesElement);
         }
 
         /// <summary>
@@ -204,6 +203,16 @@ namespace Coverlet.Collector.DataCollection
             XmlElement includeTestAssemblyElement = configurationElement[CoverletConstants.IncludeTestAssemblyElementName];
             bool.TryParse(includeTestAssemblyElement?.InnerText, out bool includeTestAssembly);
             return includeTestAssembly;
+        }
+
+        /// <summary>
+        /// Splits a comma separated elements into an array
+        /// </summary>
+        /// <param name="element">The element to split</param>
+        /// <returns>An array of the values in the element</returns>
+        private string[] SplitElement(XmlElement element)
+        {
+            return element?.InnerText?.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).ToArray();
         }
     }
 }
