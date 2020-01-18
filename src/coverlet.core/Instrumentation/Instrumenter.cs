@@ -178,20 +178,15 @@ namespace Coverlet.Core.Instrumentation
                     foreach (TypeDefinition type in types)
                     {
                         TypeDefinition actualType = type.DeclaringType ?? type;
-                        if (
-                            !actualType.CustomAttributes.Any(IsExcludeAttribute)
-
+                        if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
                             // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
                             && (!_isCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
-
                             && (
                                  !_instrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters) &&
                                  // Check exclusion for nested types
                                  (type.IsNested ? !_instrumentationHelper.IsTypeExcluded(_module, type.FullName, _excludeFilters) : true)
                                 )
-
-                            && _instrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters)
-                            )
+                            && _instrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
                         {
                             if (IsSynthesizedMemberToBeExcluded(type))
                             {
