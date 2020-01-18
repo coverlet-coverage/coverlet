@@ -362,8 +362,6 @@ namespace Coverlet.Core.Tests
             File.Copy(Path.ChangeExtension(location, ".pdb"), Path.ChangeExtension(newPath, ".pdb"));
 
             static string[] defaultFilters(string _) => Array.Empty<string>();
-            string newPathFileName = Path.GetFileName(newPath);
-
             // Instrument module
             Coverage coverage = new Coverage(newPath,
             includeFilters: (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
