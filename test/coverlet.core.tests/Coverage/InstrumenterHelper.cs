@@ -219,6 +219,30 @@ namespace Coverlet.Core.Tests
             return document;
         }
 
+        public static Document AssertNonInstrumentedLines(this Document document, BuildConfiguration configuration, int from, int to)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
+            }
+
+            int[] lineRange = Enumerable.Range(from, to - from + 1).ToArray();
+
+            if (document.Lines.Select(l => l.Value.Number).Intersect(lineRange).Count() > 0)
+            {
+                throw new XunitException($"Unexpected instrumented lines, '{string.Join(',', lineRange)}'");
+            }
+
+            return document;
+        }
+
         private static BuildConfiguration GetAssemblyBuildConfiguration()
         {
             var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();

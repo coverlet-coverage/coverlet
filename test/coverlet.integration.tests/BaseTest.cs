@@ -25,6 +25,12 @@ namespace Coverlet.Integration.Tests
         private BuildConfiguration GetAssemblyBuildConfiguration()
         {
             var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();
+
+            if (configurationAttribute is null)
+            {
+                throw new ArgumentNullException("AssemblyConfigurationAttribute not found");
+            }
+
             if (configurationAttribute.Configuration.Equals("Debug", StringComparison.InvariantCultureIgnoreCase))
             {
                 return BuildConfiguration.Debug;
@@ -53,7 +59,7 @@ namespace Coverlet.Integration.Tests
             return manifest.Metadata.Version.OriginalVersion;
         }
 
-        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true)
+        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.4.0")
         {
             DirectoryInfo finalRoot = Directory.CreateDirectory(Guid.NewGuid().ToString("N"));
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
@@ -74,7 +80,7 @@ namespace Coverlet.Integration.Tests
 <Project>
 </Project>");
 
-            AddMicrosoftNETTestSdkRef(finalRoot.FullName);
+            AddMicrosoftNETTestSdkRef(finalRoot.FullName, testSDKVersion);
 
             return new ClonedTemplateProject(finalRoot.FullName, cleanupOnDispose);
         }
@@ -123,7 +129,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(nugetFile);
         }
 
-        private protected void AddMicrosoftNETTestSdkRef(string projectPath)
+        private protected void AddMicrosoftNETTestSdkRef(string projectPath, string version)
         {
             string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
             if (!File.Exists(csproj))
@@ -139,8 +145,7 @@ namespace Coverlet.Integration.Tests
             xml.Element("Project")
                .Element("ItemGroup")
                .Add(new XElement("PackageReference", new XAttribute("Include", "Microsoft.NET.Test.Sdk"),
-               // We use this due to know issue until official release https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
-               new XAttribute("Version", "16.5.0-preview-20191115-01")));
+               new XAttribute("Version", version)));
             xml.Save(csproj);
         }
 
@@ -206,7 +211,7 @@ namespace Coverlet.Integration.Tests
             return runsettingsPath;
         }
 
-        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json")
+        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json", string standardOutput = "")
         {
             bool coverageChecked = false;
             foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
@@ -219,7 +224,7 @@ namespace Coverlet.Integration.Tests
                 coverageChecked = true;
             }
 
-            Assert.True(coverageChecked, "Coverage check fail");
+            Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
         }
 
         private protected void UpdateProjectTargetFramework(ClonedTemplateProject project, params string[] targetFrameworks)
@@ -261,6 +266,11 @@ namespace Coverlet.Integration.Tests
 
         private protected void PinSDK(ClonedTemplateProject project, string sdkVersion)
         {
+            if (project is null)
+            {
+                throw new ArgumentNullException(nameof(project));
+            }
+
             if (string.IsNullOrEmpty(sdkVersion))
             {
                 throw new ArgumentException("Invalid sdkVersion", nameof(sdkVersion));
@@ -271,14 +281,19 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
 
+            if (project.ProjectRootPath is null || !Directory.Exists(project.ProjectRootPath))
+            {
+                throw new ArgumentException("Invalid ProjectRootPath");
+            }
+
             File.WriteAllText(Path.Combine(project.ProjectRootPath, "global.json"), $"{{ \"sdk\": {{ \"version\": \"{sdkVersion}\" }} }}");
         }
     }
 
     class ClonedTemplateProject : IDisposable
     {
-        public string? ProjectRootPath { get; private set; }
-        public bool _cleanupOnDispose { get; set; }
+        public string ProjectRootPath { get; private set; }
+        public bool CleanupOnDispose { get; private set; }
 
         // We need to have a different asm name to avoid issue with collectors, we filter [coverlet.*]* by default
         // https://github.com/tonerdo/coverlet/pull/410#discussion_r284526728
@@ -286,9 +301,30 @@ namespace Coverlet.Integration.Tests
         public static string ProjectFileName { get; } = "coverlet.integration.template.csproj";
         public string ProjectFileNamePath => Path.Combine(ProjectRootPath, "coverlet.integration.template.csproj");
 
-        public ClonedTemplateProject(string projectRootPath, bool cleanupOnDispose) => (ProjectRootPath, _cleanupOnDispose) = (projectRootPath, cleanupOnDispose);
+        public ClonedTemplateProject(string? projectRootPath, bool cleanupOnDispose)
+        {
+            ProjectRootPath = (projectRootPath ?? throw new ArgumentNullException(nameof(projectRootPath)));
+            CleanupOnDispose = cleanupOnDispose;
+        }
 
+        public bool IsMultipleTargetFramework()
+        {
+            using var csprojStream = File.OpenRead(ProjectFileNamePath);
+            XDocument xml = XDocument.Load(csprojStream);
+            return xml.Element("Project").Element("PropertyGroup").Element("TargetFramework") == null;
+        }
 
+        public string[] GetTargetFrameworks()
+        {
+            using var csprojStream = File.OpenRead(ProjectFileNamePath);
+            XDocument xml = XDocument.Load(csprojStream);
+            XElement element = xml.Element("Project").Element("PropertyGroup").Element("TargetFramework") ?? xml.Element("Project").Element("PropertyGroup").Element("TargetFrameworks");
+            if (element is null)
+            {
+                throw new ArgumentNullException("No 'TargetFramework' neither 'TargetFrameworks' found in csproj file");
+            }
+            return element.Value.Split(";");
+        }
 
         public string[] GetFiles(string filter)
         {
@@ -297,7 +333,7 @@ namespace Coverlet.Integration.Tests
 
         public void Dispose()
         {
-            if (_cleanupOnDispose)
+            if (CleanupOnDispose)
             {
                 Directory.Delete(ProjectRootPath, true);
             }

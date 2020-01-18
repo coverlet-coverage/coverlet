@@ -259,5 +259,107 @@ namespace Coverlet.Core.Tests
                 File.Delete(path);
             }
         }
+
+
+        [Fact]
+        public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                RemoteExecutor.Invoke(async pathSerialize =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(instance =>
+                    {
+                        ((Task<int>)instance.Test("test")).ConfigureAwait(false).GetAwaiter().GetResult();
+                        return Task.CompletedTask;
+                    }, pathSerialize);
+
+                    return 0;
+
+                }, path).Dispose();
+
+                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+                var document = result.Document("Instrumentation.ExcludeFromCoverage.cs");
+
+                // Invoking method "Test" of class "MethodsWithExcludeFromCodeCoverageAttr" we expect to cover 100% lines for MethodsWithExcludeFromCodeCoverageAttr 
+                Assert.DoesNotContain(document.Lines, l =>
+                    (l.Value.Class == "Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr" ||
+                    // Compiler generated
+                    l.Value.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/")) &&
+                    l.Value.Hits == 0);
+                // and 0% for MethodsWithExcludeFromCodeCoverageAttr2
+                Assert.DoesNotContain(document.Lines, l =>
+                    (l.Value.Class == "Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2" ||
+                    // Compiler generated
+                    l.Value.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/")) &&
+                    l.Value.Hits == 1);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes_NestedMembers()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                RemoteExecutor.Invoke(async pathSerialize =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_NestedStateMachines>(instance =>
+                    {
+                        instance.Test();
+                        return Task.CompletedTask;
+                    }, pathSerialize);
+
+                    return 0;
+
+                }, path).Dispose();
+
+                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+                result.Document("Instrumentation.ExcludeFromCoverage.NestedStateMachines.cs")
+                        .AssertLinesCovered(BuildConfiguration.Debug, (14, 1), (15, 1), (16, 1))
+                        .AssertNonInstrumentedLines(BuildConfiguration.Debug, 9, 11);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void ExcludeFromCodeCoverageCompilerGeneratedMethodsAndTypes_Issue670()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                RemoteExecutor.Invoke(async pathSerialize =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_Issue670>(instance =>
+                    {
+                        instance.Test("test");
+                        return Task.CompletedTask;
+                    }, pathSerialize);
+
+                    return 0;
+
+                }, path).Dispose();
+
+                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+                result.Document("Instrumentation.ExcludeFromCoverage.Issue670.cs")
+                        .AssertLinesCovered(BuildConfiguration.Debug, (8, 1), (9, 1), (10, 1), (11, 1))
+                        .AssertNonInstrumentedLines(BuildConfiguration.Debug, 15, 53);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
     }
 }

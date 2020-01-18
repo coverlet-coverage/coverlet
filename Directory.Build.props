@@ -4,11 +4,12 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <PackageOutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\Packages\</PackageOutputPath>
-
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

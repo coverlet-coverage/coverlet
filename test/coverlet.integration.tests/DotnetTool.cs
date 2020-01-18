@@ -9,7 +9,7 @@ namespace Coverlet.Integration.Tests
     {
         private string InstallTool(string projectPath)
         {
-            DotnetCli($"tool install coverlet.console --version {GetPackageVersion("*console*.nupkg")} --tool-path \"{Path.Combine(projectPath, "coverletTool")}\"", out string standardOutput, out string standardError, projectPath);
+            _ = DotnetCli($"tool install coverlet.console --version {GetPackageVersion("*console*.nupkg")} --tool-path \"{Path.Combine(projectPath, "coverletTool")}\"", out string standardOutput, out _, projectPath);
             Assert.Contains("was successfully installed.", standardOutput);
             return Path.Combine(projectPath, "coverletTool", "coverlet ");
         }
@@ -30,7 +30,7 @@ namespace Coverlet.Integration.Tests
             string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj"));
             RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError);
             Assert.Contains("Test Run Successful.", standardOutput);
-            AssertCoverage(clonedTemplateProject);
+            AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
         }
     }
 }

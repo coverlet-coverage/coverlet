@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+-Fixed ExcludeFromCodeCoverage attribute bugs [#129](https://github.com/tonerdo/coverlet/issues/129) and [#670](https://github.com/tonerdo/coverlet/issues/670) with [#671](https://github.com/tonerdo/coverlet/pull/671) by https://github.com/matteoerigozzi
+
+### Improvements
+
+-Trim whitespace between values when reading from configuration from runsettings [#679](https://github.com/tonerdo/coverlet/pull/679) by https://github.com/EricStG
+
+## Release date 2020-01-03
+### Packages  
+coverlet.msbuild 2.8.0  
+coverlet.console 1.7.0  
+coverlet.collector 1.2.0
+
 ### Added
 -Add log to tracker [#553](https://github.com/tonerdo/coverlet/pull/553)  
 -Exclude by assembly level System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage [#589](https://github.com/tonerdo/coverlet/pull/589)  
@@ -24,7 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Improvements
 
--Improve exception message for unsupported runtime [#569](https://github.com/tonerdo/coverlet/pull/569) by https://github.com/daveMueller
+-Improve exception message for unsupported runtime [#569](https://github.com/tonerdo/
+coverlet/pull/569) by https://github.com/daveMueller  
+-Improve cobertura absolute/relative path report generation [#661](https://github.com/tonerdo/coverlet/pull/661) by https://github.com/daveMueller
 
 ## Release date 2019-09-23
 ### Packages  
