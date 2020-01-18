@@ -317,15 +317,18 @@ namespace Coverlet.Core.Tests
 
         public static CoverageResult GetCoverageResult(string filePath)
         {
-            using (var result = new FileStream(filePath, FileMode.Open))
+            using var result = new FileStream(filePath, FileMode.Open);
+            var logger = new Mock<ILogger>();
+            logger.Setup(l => l.LogVerbose(It.IsAny<string>())).Callback((string message) =>
             {
-                CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, DependencyInjection.Current.GetService<IInstrumentationHelper>(), new FileSystem());
-                return coverage.GetCoverageResult();
-            }
+                Assert.DoesNotContain("not found for module: ", message);
+            });
+            CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
+            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, DependencyInjection.Current.GetService<IInstrumentationHelper>(), new FileSystem());
+            return coverage.GetCoverageResult();
         }
 
-        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, string[] includeFilter = null, string[] excludeFilter = null, string persistPrepareResultToFile = null, bool disableRestoreModules = false)
+        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, Func<string, string[]> includeFilter = null, Func<string, string[]> excludeFilter = null, string persistPrepareResultToFile = null, bool disableRestoreModules = false)
         {
             if (persistPrepareResultToFile is null)
             {
@@ -358,20 +361,25 @@ namespace Coverlet.Core.Tests
             File.Copy(location, newPath);
             File.Copy(Path.ChangeExtension(location, ".pdb"), Path.ChangeExtension(newPath, ".pdb"));
 
+            static string[] defaultFilters(string _) => Array.Empty<string>();
+            string newPathFileName = Path.GetFileName(newPath);
+
             // Instrument module
             Coverage coverage = new Coverage(newPath,
-            (includeFilter ?? Array.Empty<string>()).Concat(
+            includeFilters: (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
             new string[]
             {
                 $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*"
             }).ToArray(),
             Array.Empty<string>(),
-            (excludeFilter ?? Array.Empty<string>()).Concat(new string[]
+            excludeFilters: (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)).Concat(new string[]
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
             }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>()); ;
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
+
+            Assert.Single(prepareResult.Results);
 
             // Load new assembly
             Assembly asm = Assembly.LoadFile(newPath);
@@ -382,13 +390,16 @@ namespace Coverlet.Core.Tests
             // Flush tracker
             Type tracker = asm.GetTypes().Single(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker"));
 
+            int[] hitsArray = (int[])tracker.GetField("HitsArray").GetValue(null);
+            string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
+
             // Void UnloadModule(System.Object, System.EventArgs)
             tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, new object[2] { null, null });
 
             // Persist CoveragePrepareResult
             using (FileStream fs = new FileStream(persistPrepareResultToFile, FileMode.Open))
             {
-                CoveragePrepareResult.Serialize(prepareResult).CopyTo(fs);
+                await CoveragePrepareResult.Serialize(prepareResult).CopyToAsync(fs);
             }
 
             return prepareResult;
