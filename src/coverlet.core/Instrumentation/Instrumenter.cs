@@ -177,18 +177,25 @@ namespace Coverlet.Core.Instrumentation
 
                     foreach (TypeDefinition type in types)
                     {
-                        var actualType = type.DeclaringType ?? type;
-                        if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
+                        TypeDefinition actualType = type.DeclaringType ?? type;
+                        if (
+                            !actualType.CustomAttributes.Any(IsExcludeAttribute)
+
                             // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
                             && (!_isCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
-                            && !_instrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters)
+
+                            && (
+                                 !_instrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters) &&
+                                 // Check exclusion for nested types
+                                 (type.IsNested ? !_instrumentationHelper.IsTypeExcluded(_module, type.FullName, _excludeFilters) : true)
+                                )
+
                             && _instrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters)
                             )
                         {
                             if (IsSynthesizedMemberToBeExcluded(type))
                             {
-                                _excludedCompilerGeneratedTypes ??= new List<string>();
-                                _excludedCompilerGeneratedTypes.Add(type.FullName);
+                                (_excludedCompilerGeneratedTypes ??= new List<string>()).Add(type.FullName);
                             }
                             else
                             {
@@ -378,8 +385,7 @@ namespace Coverlet.Core.Instrumentation
                 }
                 else
                 {
-                    _excludedMethods ??= new List<(MethodDefinition, int)>();
-                    _excludedMethods.Add((method, ordinal));
+                    (_excludedMethods ??= new List<(MethodDefinition, int)>()).Add((method, ordinal));
                 }
             }
 

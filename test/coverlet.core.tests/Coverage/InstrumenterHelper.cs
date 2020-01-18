@@ -15,6 +15,7 @@ using Coverlet.Core.Reporters;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
+using Xunit;
 using Xunit.Sdk;
 
 namespace Coverlet.Core.Tests
@@ -279,7 +280,7 @@ namespace Coverlet.Core.Tests
             reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", reporter.Extension));
             File.WriteAllText(reportFile, reporter.Report(coverageResult));
             // i.e. reportgenerator -reports:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If\report.cobertura.xml" -targetdir:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If" -filefilters:+**\Samples\Instrumentation.cs
-            new Generator().GenerateReport(new ReportConfiguration(
+            Assert.True(new Generator().GenerateReport(new ReportConfiguration(
             new[] { reportFile },
             dir.FullName,
             new string[0],
@@ -290,7 +291,7 @@ namespace Coverlet.Core.Tests
             new string[0],
             string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : new[] { sourceFileFilter },
             null,
-            null));
+            null)));
         }
 
         public static CoverageResult GetCoverageResult(string filePath)
@@ -303,8 +304,13 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, string persistPrepareResultToFile, bool disableRestoreModules = false)
+        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, string[] includeFilter = null, string[] excludeFilter = null, string persistPrepareResultToFile = null, bool disableRestoreModules = false)
         {
+            if (persistPrepareResultToFile is null)
+            {
+                throw new ArgumentNullException(nameof(persistPrepareResultToFile));
+            }
+
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
@@ -333,16 +339,17 @@ namespace Coverlet.Core.Tests
 
             // Instrument module
             Coverage coverage = new Coverage(newPath,
+            (includeFilter ?? Array.Empty<string>()).Concat(
             new string[]
             {
                 $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*"
-            },
+            }).ToArray(),
             Array.Empty<string>(),
-            new string[]
+            (excludeFilter ?? Array.Empty<string>()).Concat(new string[]
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>());
+            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>()); ;
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             // Load new assembly
