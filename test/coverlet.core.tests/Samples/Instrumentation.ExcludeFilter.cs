@@ -51,4 +51,20 @@ namespace Coverlet.Core.Samples.Tests
             Handle?.Invoke(new object(), new object());
         }
     }
+
+    public class ExcludeOuterTypes
+    {
+        public int Run()
+        {
+            return new ExcludeOuterTypes2().Run();
+        }
+    }
+
+    public class ExcludeOuterTypes2
+    {
+        public int Run()
+        {
+            return 42;
+        }
+    }
 }

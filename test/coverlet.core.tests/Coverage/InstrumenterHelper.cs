@@ -29,6 +29,27 @@ namespace Coverlet.Core.Tests
 
     static class TestInstrumentationAssert
     {
+        public static bool IsPresent(this CoverageResult coverageResult, string docName)
+        {
+            if (docName is null)
+            {
+                throw new ArgumentNullException(nameof(docName));
+            }
+
+            foreach (InstrumenterResult instrumenterResult in coverageResult.InstrumentedResults)
+            {
+                foreach (KeyValuePair<string, Document> document in instrumenterResult.Documents)
+                {
+                    if (Path.GetFileName(document.Key) == docName)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public static Document Document(this CoverageResult coverageResult, string docName)
         {
             if (docName is null)
