@@ -374,7 +374,7 @@ namespace Coverlet.Core.Tests
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>()); ;
+            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
