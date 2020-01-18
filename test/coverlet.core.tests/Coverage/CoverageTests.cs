@@ -438,8 +438,6 @@ namespace Coverlet.Core.Tests
                     return 0;
                 }, path).Dispose();
 
-                TestInstrumentationHelper.GenerateHtmlReport(TestInstrumentationHelper.GetCoverageResult(path));
-
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.ExcludeFilter.cs")
                 .AssertNonInstrumentedLines(BuildConfiguration.Debug, 1, 62)
