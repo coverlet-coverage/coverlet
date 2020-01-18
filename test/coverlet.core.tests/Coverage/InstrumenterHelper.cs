@@ -388,8 +388,9 @@ namespace Coverlet.Core.Tests
             // Flush tracker
             Type tracker = asm.GetTypes().Single(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker"));
 
-            int[] hitsArray = (int[])tracker.GetField("HitsArray").GetValue(null);
-            string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
+            // For debugging purpouse
+            // int[] hitsArray = (int[])tracker.GetField("HitsArray").GetValue(null);
+            // string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
 
             // Void UnloadModule(System.Object, System.EventArgs)
             tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, new object[2] { null, null });
