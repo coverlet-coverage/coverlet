@@ -65,7 +65,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 }
                 else
                 {
-                    if (path.Contains(@"D:\git\runtime"))
+                    if (path.Contains(@":\git\runtime"))
                     {
                         return true;
                     }
