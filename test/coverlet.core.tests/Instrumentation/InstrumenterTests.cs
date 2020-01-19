@@ -26,7 +26,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestCoreLibInstrumentation()
         {
-            DirectoryInfo directory = Directory.CreateDirectory(nameof(TestCoreLibInstrumentation));
+            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), nameof(TestCoreLibInstrumentation)));
 
             string[] files = new[]
             {
@@ -35,9 +35,11 @@ namespace Coverlet.Core.Instrumentation.Tests
             };
 
             foreach (var file in files)
-                File.Copy(Path.Combine("TestAssets", file), Path.Combine(nameof(TestCoreLibInstrumentation), file), overwrite: true);
+            {
+                File.Copy(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets", file), Path.Combine(directory.FullName, file), overwrite: true);
+            }
 
-            Instrumenter instrumenter = new Instrumenter(Path.Combine(nameof(TestCoreLibInstrumentation), files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
+            Instrumenter instrumenter = new Instrumenter(Path.Combine(directory.FullName, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             Assert.True(instrumenter.CanInstrument());
             InstrumenterResult result = instrumenter.Instrument();
             Assert.NotNull(result);
