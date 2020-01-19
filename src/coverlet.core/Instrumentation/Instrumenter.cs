@@ -147,14 +147,8 @@ namespace Coverlet.Core.Instrumentation
         {
             for (TypeDefinition current = type; current != null; current = current.DeclaringType)
             {
-                // Check exclude attribute
-                if (current.CustomAttributes.Any(IsExcludeAttribute))
-                {
-                    return true;
-                }
-
-                // Check filters
-                if (_instrumentationHelper.IsTypeExcluded(_module, current.FullName, _excludeFilters))
+                // Check exclude attribute and filters
+                if (current.CustomAttributes.Any(IsExcludeAttribute) || _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _excludeFilters))
                 {
                     return true;
                 }
