@@ -29,6 +29,18 @@ namespace Coverlet.Core.Tests
 
     static class TestInstrumentationAssert
     {
+        public static CoverageResult GenerateReport(this CoverageResult coverageResult, [CallerMemberName]string directory = "")
+        {
+            if (coverageResult is null)
+            {
+                throw new ArgumentNullException(nameof(coverageResult));
+            }
+
+            TestInstrumentationHelper.GenerateHtmlReport(coverageResult, directory: directory);
+
+            return coverageResult;
+        }
+
         public static bool IsPresent(this CoverageResult coverageResult, string docName)
         {
             if (docName is null)

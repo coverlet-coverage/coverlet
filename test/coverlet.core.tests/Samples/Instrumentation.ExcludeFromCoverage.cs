@@ -137,4 +137,25 @@ namespace Coverlet.Core.Samples.Tests
             }
         }
     }
+
+    public class ExcludeFromCoverageAttrFilterClass1
+    {
+        public int Run() => 10 + new ExcludeFromCoverageAttrFilterClass2().Run();
+
+        [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+        public class ExcludeFromCoverageAttrFilterClass2
+        {
+            public int Run() => 10 + new ExcludeFromCoverageAttrFilterClass3().Run();
+
+            public class ExcludeFromCoverageAttrFilterClass3
+            {
+                public int Run() => 10 + new ExcludeFromCoverageAttrFilterClass4().Run();
+
+                public class ExcludeFromCoverageAttrFilterClass4
+                {
+                    public int Run() => 12;
+                }
+            }
+        }
+    }
 }

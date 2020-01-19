@@ -52,19 +52,39 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
-    public class ExcludeOuterTypes
+    public class ExcludeFilterOuterTypes
     {
         public int Run()
         {
-            return new ExcludeOuterTypes2().Run();
+            return new ExcludeFilterOuterTypes2().Run();
         }
     }
 
-    public class ExcludeOuterTypes2
+    public class ExcludeFilterOuterTypes2
     {
         public int Run()
         {
             return 42;
+        }
+    }
+
+    public class ExcludeFilterClass1
+    {
+        public int Run() => 10 + new ExcludeFilterClass2().Run();
+
+        public class ExcludeFilterClass2
+        {
+            public int Run() => 10 + new ExcludeFilterClass3().Run();
+
+            public class ExcludeFilterClass3
+            {
+                public int Run() => 10 + new ExcludeFilterClass4().Run();
+
+                public class ExcludeFilterClass4
+                {
+                    public int Run() => 12;
+                }
+            }
         }
     }
 }

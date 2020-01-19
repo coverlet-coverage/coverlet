@@ -141,6 +141,37 @@ namespace Coverlet.Core.Instrumentation
             return _result;
         }
 
+        // If current type or one of his parent is excluded we'll exclude it
+        // If I'm out every my children and every children of my children will be out
+        private bool IsTypeExcluded(TypeDefinition type)
+        {
+            // Check exclude attribute
+            for (TypeDefinition current = type; current != null; current = current.DeclaringType)
+            {
+                if (current.CustomAttributes.Any(IsExcludeAttribute))
+                {
+                    return true;
+                }
+            }
+
+            // Check filters
+            for (TypeDefinition current = type; current != null; current = current.DeclaringType)
+            {
+                if (_instrumentationHelper.IsTypeExcluded(_module, current.FullName, _excludeFilters))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
+        private bool Is_System_Threading_Interlocked_CoreLib_Type(TypeDefinition type)
+        {
+            return _isCoreLibrary && type.FullName == "System.Threading.Interlocked";
+        }
+
         private void InstrumentModule()
         {
             using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
@@ -177,16 +208,11 @@ namespace Coverlet.Core.Instrumentation
 
                     foreach (TypeDefinition type in types)
                     {
-                        TypeDefinition actualType = type.DeclaringType ?? type;
-                        if (!actualType.CustomAttributes.Any(IsExcludeAttribute)
-                            // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
-                            && (!_isCoreLibrary || actualType.FullName != "System.Threading.Interlocked")
-                            && (
-                                 !_instrumentationHelper.IsTypeExcluded(_module, actualType.FullName, _excludeFilters) &&
-                                 // Check exclusion for nested types
-                                 (type.IsNested ? !_instrumentationHelper.IsTypeExcluded(_module, type.FullName, _excludeFilters) : true)
-                                )
-                            && _instrumentationHelper.IsTypeIncluded(_module, actualType.FullName, _includeFilters))
+                        if (
+                            !Is_System_Threading_Interlocked_CoreLib_Type(type) &&
+                            !IsTypeExcluded(type) &&
+                            _instrumentationHelper.IsTypeIncluded(_module, type.FullName, _includeFilters)
+                            )
                         {
                             if (IsSynthesizedMemberToBeExcluded(type))
                             {

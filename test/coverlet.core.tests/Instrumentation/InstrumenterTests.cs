@@ -23,14 +23,10 @@ namespace Coverlet.Core.Instrumentation.Tests
         private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem());
         private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
 
-        [Fact(Skip = "To be used only validating System.Private.CoreLib instrumentation")]
+        [Fact]
         public void TestCoreLibInstrumentation()
         {
-            // Attention: to run this test adjust the paths and copy the IL only version of corelib
-            const string OriginalFilesDir = @"c:\s\tmp\Coverlet-CoreLib\Original\";
-            const string TestFilesDir = @"c:\s\tmp\Coverlet-CoreLib\Test\";
-
-            Directory.CreateDirectory(TestFilesDir);
+            DirectoryInfo directory = Directory.CreateDirectory(nameof(TestCoreLibInstrumentation));
 
             string[] files = new[]
             {
@@ -39,12 +35,17 @@ namespace Coverlet.Core.Instrumentation.Tests
             };
 
             foreach (var file in files)
-                File.Copy(Path.Combine(OriginalFilesDir, file), Path.Combine(TestFilesDir, file), overwrite: true);
+                File.Copy(Path.Combine("TestAssets", file), Path.Combine(nameof(TestCoreLibInstrumentation), file), overwrite: true);
 
-            Instrumenter instrumenter = new Instrumenter(Path.Combine(TestFilesDir, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
+            Instrumenter instrumenter = new Instrumenter(Path.Combine(nameof(TestCoreLibInstrumentation), files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             Assert.True(instrumenter.CanInstrument());
-            var result = instrumenter.Instrument();
+            InstrumenterResult result = instrumenter.Instrument();
             Assert.NotNull(result);
+            foreach ((string docName, Document _) in result.Documents)
+            {
+                Assert.False(docName.EndsWith(@"System.Private.CoreLib\src\System\Threading\Interlocked.cs"));
+            }
+            directory.Delete(true);
         }
 
         [Theory]
@@ -472,7 +473,7 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             Assert.Contains(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLambda(System.String,System.Int32)");
             Assert.DoesNotContain(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLambda(System.String)");
-            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") && 
+            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestLambda", 0));
             Assert.DoesNotContain(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2::TestLambda(System.String,System.Int32)");
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
@@ -516,9 +517,9 @@ namespace Coverlet.Core.Instrumentation.Tests
             var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
             Assert.NotNull(doc);
 
-            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") && 
+            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 2));
-            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") && 
+            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 3));
             Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 2));
