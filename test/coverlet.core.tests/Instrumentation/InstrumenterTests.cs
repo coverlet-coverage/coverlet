@@ -26,8 +26,13 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestCoreLibInstrumentation()
         {
-            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), nameof(TestCoreLibInstrumentation)));
+            // We test only on win because sample dll/pdb were build on it
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
 
+            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), nameof(TestCoreLibInstrumentation)));
             string[] files = new[]
             {
                 "System.Private.CoreLib.dll",
@@ -39,7 +44,41 @@ namespace Coverlet.Core.Instrumentation.Tests
                 File.Copy(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets", file), Path.Combine(directory.FullName, file), overwrite: true);
             }
 
-            Instrumenter instrumenter = new Instrumenter(Path.Combine(directory.FullName, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
+            Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
+            partialMockFileSystem.CallBase = true;
+            partialMockFileSystem.Setup(fs => fs.OpenRead(It.IsAny<string>())).Returns((string path) =>
+            {
+                if (Path.GetFileName(path) == files[1])
+                {
+                    return File.OpenRead(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), files[1]));
+                }
+                else
+                {
+                    return File.OpenRead(path);
+                }
+            });
+            partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
+            {
+                if (Path.GetFileName(path) == files[1])
+                {
+                    return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), files[1]));
+                }
+                else
+                {
+                    if (path.Contains(@"D:\git\runtime"))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return File.Exists(path);
+                    }
+                }
+            });
+
+            InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object);
+            Instrumenter instrumenter = new Instrumenter(Path.Combine(directory.FullName, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, _mockLogger.Object, instrumentationHelper, partialMockFileSystem.Object);
+
             Assert.True(instrumenter.CanInstrument());
             InstrumenterResult result = instrumenter.Instrument();
             Assert.NotNull(result);
