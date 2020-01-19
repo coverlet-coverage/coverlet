@@ -145,18 +145,15 @@ namespace Coverlet.Core.Instrumentation
         // If I'm out every my children and every children of my children will be out
         private bool IsTypeExcluded(TypeDefinition type)
         {
-            // Check exclude attribute
             for (TypeDefinition current = type; current != null; current = current.DeclaringType)
             {
+                // Check exclude attribute
                 if (current.CustomAttributes.Any(IsExcludeAttribute))
                 {
                     return true;
                 }
-            }
 
-            // Check filters
-            for (TypeDefinition current = type; current != null; current = current.DeclaringType)
-            {
+                // Check filters
                 if (_instrumentationHelper.IsTypeExcluded(_module, current.FullName, _excludeFilters))
                 {
                     return true;
