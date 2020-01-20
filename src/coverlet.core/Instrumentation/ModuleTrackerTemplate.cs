@@ -78,7 +78,7 @@ namespace Coverlet.Core.Instrumentation
             {
                 WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}'");
                 // Claim the current hits array and reset it to prevent double-counting scenarios.
-                var hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
+                int[] hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
 
                 // The same module can be unloaded multiple times in the same process via different app domains.
                 // Use a global mutex to ensure no concurrent access.
@@ -101,8 +101,9 @@ namespace Coverlet.Core.Instrumentation
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        WriteLog($"Failed to create new hits file '{HitsFilePath}'\n{ex}");
                         failedToCreateNewHitsFile = true;
                     }
 
