@@ -111,7 +111,7 @@ namespace Coverlet.Core.Tests
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
                 // Generate html report to check
-                // TestInstrumentationHelper.GenerateHtmlReport(result);
+                TestInstrumentationHelper.GenerateHtmlReport(result);
 
                 // Asserts on doc/lines/branches
                 result.Document("Instrumentation.SelectionStatements.cs")
@@ -433,14 +433,14 @@ namespace Coverlet.Core.Tests
                     return 0;
                 }, path).Dispose();
 
-               TestInstrumentationHelper.GetCoverageResult(path)
-               .Document("Instrumentation.ExcludeFilter.cs")
-               .AssertLinesCovered(BuildConfiguration.Debug, (12, 1), (13, 1), (14, 1))
-               .AssertLinesCovered(BuildConfiguration.Debug, (27, 1), (28, 1), (29, 1), (30, 1), (31, 1))
-               .AssertLinesCovered(BuildConfiguration.Debug, (39, 2), (40, 2), (41, 2), (43, 5))
-               .AssertLinesCovered(BuildConfiguration.Debug, (50, 1), (51, 1), (52, 1))
-               .AssertNonInstrumentedLines(BuildConfiguration.Debug, 17, 21)
-               .AssertNonInstrumentedLines(BuildConfiguration.Debug, 33, 36);
+                TestInstrumentationHelper.GetCoverageResult(path)
+                .Document("Instrumentation.ExcludeFilter.cs")
+                .AssertLinesCovered(BuildConfiguration.Debug, (12, 1), (13, 1), (14, 1))
+                .AssertLinesCovered(BuildConfiguration.Debug, (27, 1), (28, 1), (29, 1), (30, 1), (31, 1))
+                .AssertLinesCovered(BuildConfiguration.Debug, (39, 2), (40, 2), (41, 2), (43, 5))
+                .AssertLinesCovered(BuildConfiguration.Debug, (50, 1), (51, 1), (52, 1))
+                .AssertNonInstrumentedLines(BuildConfiguration.Debug, 17, 21)
+                .AssertNonInstrumentedLines(BuildConfiguration.Debug, 33, 36);
             }
             finally
             {
