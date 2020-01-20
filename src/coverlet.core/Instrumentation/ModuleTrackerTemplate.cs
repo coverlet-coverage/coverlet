@@ -103,7 +103,7 @@ namespace Coverlet.Core.Instrumentation
                     }
                     catch (Exception ex)
                     {
-                        WriteLog($"failedToCreateNewHitsFile\n'{HitsFilePath}'\n{ex}");
+                        WriteLog($"Failed to create new hits file '{HitsFilePath}'\n{ex}");
                         failedToCreateNewHitsFile = true;
                     }
 

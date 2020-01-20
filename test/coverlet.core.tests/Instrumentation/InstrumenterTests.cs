@@ -82,6 +82,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.True(instrumenter.CanInstrument());
             InstrumenterResult result = instrumenter.Instrument();
             Assert.NotNull(result);
+            Assert.Equal(1052, result.Documents.Count);
             foreach ((string docName, Document _) in result.Documents)
             {
                 Assert.False(docName.EndsWith(@"System.Private.CoreLib\src\System\Threading\Interlocked.cs"));
