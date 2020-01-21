@@ -86,13 +86,46 @@ namespace Coverlet.Core.Tests
                 }, path, invokeInProcess: true).Dispose();
 
                 TestInstrumentationHelper.GetCoverageResult(path)
-                .GenerateReport(show: true)
                 .Document("Instrumentation.AsyncAwait.cs")
                 .AssertLinesCovered(BuildConfiguration.Debug,
                     (97, 1), (98, 1), (99, 1), (101, 1), (102, 1), (103, 1),
                     (110, 1), (111, 1), (112, 1), (113, 1),
                     (116, 1), (117, 1), (118, 1), (119, 1)
                 );
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void AsyncAwait_Issue_669_2()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                RemoteExecutor.Invoke(async pathSerialize =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(instance =>
+                    {
+                        ((ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        return Task.CompletedTask;
+                    },
+                    persistPrepareResultToFile: pathSerialize, disableRestoreModules: true);
+
+                    return 0;
+                }, path, invokeInProcess: true).Dispose();
+
+                TestInstrumentationHelper.GetCoverageResult(path)
+                .GenerateReport(show: true)
+                //.Document("Instrumentation.AsyncAwait.cs")
+                //.AssertLinesCovered(BuildConfiguration.Debug,
+                //    (97, 1), (98, 1), (99, 1), (101, 1), (102, 1), (103, 1),
+                //    (110, 1), (111, 1), (112, 1), (113, 1),
+                //    (116, 1), (117, 1), (118, 1), (119, 1)
+                //)
+                ;
             }
             finally
             {

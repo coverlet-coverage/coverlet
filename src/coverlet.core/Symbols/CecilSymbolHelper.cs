@@ -114,7 +114,11 @@ namespace Coverlet.Core.Symbols
                                 operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable")
                             )
                             &&
-                            operand.DeclaringType.Scope.Name == "System.Runtime")
+                            (
+                            operand.DeclaringType.Scope.Name == "System.Runtime" ||
+                            operand.DeclaringType.Scope.Name == "netstandard"
+                            )
+                       )
                     {
                         continue;
                     }
