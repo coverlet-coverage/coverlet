@@ -2,7 +2,7 @@
 
 namespace Coverlet.Core.Tests
 {
-    public class Issue_669_2
+    public class Issue_669_UC2
     {
         private readonly System.Net.Http.HttpClient _httpClient = new System.Net.Http.HttpClient();
 
