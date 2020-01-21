@@ -395,7 +395,16 @@ namespace Coverlet.Core.Tests
             }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
-            Assert.Single(prepareResult.Results);
+            StringBuilder log = new StringBuilder();
+
+            log.AppendLine($"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*");
+
+            foreach (var item in prepareResult.Results)
+            {
+                log.AppendLine(item.Module);
+            }
+
+            Assert.True(prepareResult.Results.Length == 1, log.ToString());
 
             // Load new assembly
             Assembly asm = Assembly.LoadFile(newPath);
