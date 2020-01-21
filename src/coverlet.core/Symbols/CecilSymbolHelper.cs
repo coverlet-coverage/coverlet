@@ -63,10 +63,10 @@ namespace Coverlet.Core.Symbols
         private static bool IsRecognizedMoveNextInsideAsyncStateMachineProlog(MethodDefinition methodDefinition)
         {
             /*
-                // int num = <>1__state;
-	            IL_0000: ldarg.0
+                int num = <>1__state;
+                IL_0000: ldarg.0
                 IL_0001: ldfld ...::'<>1__state'
-	            IL_0006: stloc.0
+                IL_0006: stloc.0
             */
             return (methodDefinition.Body.Instructions[0].OpCode == OpCodes.Ldarg_0 ||
                     methodDefinition.Body.Instructions[0].OpCode == OpCodes.Ldarg) &&
@@ -102,9 +102,52 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
-                    // If method is a generated MoveNext skip first branches (could be a switch or a series of branches) 
-                    // that check state machine value to jump to correct state(for instance after a true async call)
-                    // Check if it's a Cond_Branch on state machine current value [int num = <>1__state;]
+                    /* 
+                       If method is a generated MoveNext we'll skip first branches (could be a switch or a series of branches) 
+                       that check state machine value to jump to correct state(for instance after a true async call)
+                       Check if it's a Cond_Branch on state machine current value int num = <>1__state;
+                       We are on branch OpCode so we need to go back by max 2 operation to reach ldloc.0 the load of "num"
+                       Max 2 because we handle following patterns
+
+                        Swich
+
+                        // switch (num)
+                        IL_0007: ldloc.0                        2
+                        // (no C# code)
+                        IL_0008: switch (IL_0037, IL_003c, ...  1
+                        ...
+
+                        Single branch
+
+                        // if (num != 0)
+                        IL_0007: ldloc.0           2
+                        // (no C# code)
+                        IL_0008: brfalse.s IL_000c 1
+                        IL_000a: br.s IL_000e
+                        IL_000c: br.s IL_0049
+                        IL_000e: nop
+                        ...
+
+                        More tha one branch
+
+                        // if (num != 0)
+                        IL_0007: ldloc.0
+                        // (no C# code)
+                        IL_0008: brfalse.s IL_0012
+                        IL_000a: br.s IL_000c
+                        // if (num == 1)
+                        IL_000c: ldloc.0       3
+                        IL_000d: ldc.i4.1      2
+                        IL_000e: beq.s IL_0014 1
+                        // (no C# code)
+                        IL_0010: br.s IL_0019
+                        IL_0012: br.s IL_0060
+                        IL_0014: br IL_00e5
+                        IL_0019: nop
+                        ...
+
+                        so we know that current branch are checking that field and we're not interested in.
+                    */
                     if (isAsyncStateMachineMoveNext && isRecognizedMoveNextInsideAsyncStateMachineProlog)
                     {
                         bool skipInstruction = false;
@@ -127,7 +170,8 @@ namespace Coverlet.Core.Symbols
                     }
 
                     // Skip get_IsCompleted to avoid unuseful branch due to async/await state machine
-                    if (isAsyncStateMachineMoveNext && instruction.Previous.Operand is MethodReference operand &&
+                    if (
+                            isAsyncStateMachineMoveNext && instruction.Previous.Operand is MethodReference operand &&
                             operand.Name == "get_IsCompleted" &&
                             (
                                 operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") ||
