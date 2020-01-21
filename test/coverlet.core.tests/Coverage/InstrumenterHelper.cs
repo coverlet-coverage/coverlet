@@ -412,6 +412,15 @@ namespace Coverlet.Core.Tests
             // Instance type and call method
             await callMethod(Activator.CreateInstance(asm.GetType(typeof(T).FullName)));
 
+            List<string> trackers = new List<string>();
+            foreach (var item in asm.GetTypes().Where(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker")))
+            {
+                trackers.Add(item.FullName);
+                log.AppendLine(item.FullName);
+            }
+
+            Assert.True(trackers.Count == 1, log.ToString());
+
             // Flush tracker
             Type tracker = asm.GetTypes().Single(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker"));
 
