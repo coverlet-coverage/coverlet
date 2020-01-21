@@ -14,8 +14,8 @@ namespace Coverlet.Core.Tests
 {
     public class CoverageTests
     {
-        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem());
-        private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
+        private static readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
+        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), _mockLogger.Object);
 
         [Fact]
         public void TestCoverage()

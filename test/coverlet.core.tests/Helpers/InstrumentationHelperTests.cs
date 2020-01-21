@@ -3,12 +3,15 @@ using System.IO;
 using Xunit;
 using System.Collections.Generic;
 using System.Linq;
+using Coverlet.Core.Abstracts;
+using Moq;
 
 namespace Coverlet.Core.Helpers.Tests
 {
     public class InstrumentationHelperTests
     {
-        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem());
+        private static readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
+        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), _mockLogger.Object);
 
         [Fact]
         public void TestGetDependencies()

@@ -458,8 +458,8 @@ namespace Coverlet.Core.Tests
 
     class InstrumentationHelperForDebugging : InstrumentationHelper
     {
-        public InstrumentationHelperForDebugging(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem)
-            : base(processExitHandler, retryHelper, fileSystem)
+        public InstrumentationHelperForDebugging(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger)
+            : base(processExitHandler, retryHelper, fileSystem, logger)
         {
 
         }
