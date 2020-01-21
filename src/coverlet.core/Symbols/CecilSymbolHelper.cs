@@ -69,9 +69,8 @@ namespace Coverlet.Core.Symbols
             UInt32 ordinal = 0;
             var instructions = methodDefinition.Body.Instructions;
 
-            // if method is a generated MoveNext skip first branch (could be a switch or a branch)
             bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
-            bool skipFirstBranch = isAsyncStateMachineMoveNext || IsMoveNextInsideEnumerator(methodDefinition);
+            bool skipFirstBranch = IsMoveNextInsideEnumerator(methodDefinition);
 
             foreach (Instruction instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
             {
@@ -81,6 +80,30 @@ namespace Coverlet.Core.Symbols
                     {
                         skipFirstBranch = false;
                         continue;
+                    }
+
+                    // If method is a generated MoveNext skip first branches (could be a switch or a series of branches) 
+                    // that check state machine value to jump to correct state(for instance after a true async call)
+                    // Check if it's a Cond_Branch on state machine current value [int num = <>1__state;]
+                    if (isAsyncStateMachineMoveNext)
+                    {
+                        bool skipInstruction = false;
+                        Instruction current = instruction.Previous;
+                        for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
+                        {
+                            if (
+                                (current.OpCode == OpCodes.Ldloc && current.Operand is VariableDefinition vo && vo.Index == 0) ||
+                                current.OpCode == OpCodes.Ldloc_0
+                                )
+                            {
+                                skipInstruction = true;
+                                break;
+                            }
+                        }
+                        if (skipInstruction)
+                        {
+                            continue;
+                        }
                     }
 
                     // Skip get_IsCompleted to avoid unuseful branch due to async/await state machine

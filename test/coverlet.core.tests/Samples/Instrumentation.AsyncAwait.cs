@@ -90,4 +90,39 @@ namespace Coverlet.Core.Samples.Tests
             return 42;
         }
     }
+
+    public class Issue_669
+    {
+        async public Task Test()
+        {
+            var service = new Moq.Mock<IService>();
+            service.Setup(c => c.GetCat()).Returns(Task.FromResult("cat"));
+
+            var foo = new Foo(service.Object);
+            await foo.Bar();
+        }
+
+
+        public class Foo
+        {
+            private readonly IService _service;
+
+            public Foo(IService service)
+            {
+                _service = service;
+            }
+
+            public async Task Bar()
+            {
+                var cat = await _service.GetCat();
+                await _service.Process(cat);
+            }
+        }
+
+        public interface IService
+        {
+            Task<string> GetCat();
+            Task Process(string cat);
+        }
+    }
 }
