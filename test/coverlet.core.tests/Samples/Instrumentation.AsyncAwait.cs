@@ -91,7 +91,7 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
-    public class Issue_669_UC1
+    public class Issue_669_1
     {
         async public Task Test()
         {

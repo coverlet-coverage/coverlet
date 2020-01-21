@@ -75,7 +75,7 @@ namespace Coverlet.Core.Tests
             {
                 RemoteExecutor.Invoke(async pathSerialize =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_UC1>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_1>(instance =>
                     {
                         ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
@@ -106,7 +106,7 @@ namespace Coverlet.Core.Tests
             {
                 RemoteExecutor.Invoke(async pathSerialize =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_UC2>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(instance =>
                     {
                         ((ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;

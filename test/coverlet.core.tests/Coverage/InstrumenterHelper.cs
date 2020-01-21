@@ -395,31 +395,13 @@ namespace Coverlet.Core.Tests
             }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
-            StringBuilder log = new StringBuilder();
-
-            log.AppendLine($"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*");
-
-            foreach (var item in prepareResult.Results)
-            {
-                log.AppendLine(item.Module);
-            }
-
-            Assert.True(prepareResult.Results.Length == 1, log.ToString());
+            Assert.Single(prepareResult.Results);
 
             // Load new assembly
             Assembly asm = Assembly.LoadFile(newPath);
 
             // Instance type and call method
             await callMethod(Activator.CreateInstance(asm.GetType(typeof(T).FullName)));
-
-            List<string> trackers = new List<string>();
-            foreach (var item in asm.GetTypes().Where(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker")))
-            {
-                trackers.Add(item.FullName);
-                log.AppendLine(item.FullName);
-            }
-
-            Assert.True(trackers.Count == 1, log.ToString());
 
             // Flush tracker
             Type tracker = asm.GetTypes().Single(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker"));
