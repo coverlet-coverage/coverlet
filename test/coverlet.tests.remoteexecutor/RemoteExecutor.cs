@@ -20,14 +20,9 @@ namespace Coverlet.Tests.RemoteExecutor
         // 1) Add a Debug.Launch() inside lambda and attach(slow)
         // 2) Temporary pass true to invoke local, it will throw because code try to replace locked files,
         //    but if you temporary "comment" offensive code(RestoreOriginalModule/s) you can debug all procedure and it's very very very useful
-        public static IRemoteInvokeHandle Invoke(Func<Task<int>> method, bool invokeLocal = false)
+        public static IRemoteInvokeHandle Invoke(Func<string, Task<int>> method, string arg = "", bool invokeInProcess = false)
         {
-            return Invoke(GetMethodInfo(method), Array.Empty<string>(), invokeLocal);
-        }
-
-        public static IRemoteInvokeHandle Invoke(Func<string, Task<int>> method, string arg, bool invokeLocal = false)
-        {
-            if (invokeLocal)
+            if (invokeInProcess)
             {
                 return new LocalInvoker(method.Invoke(arg).GetAwaiter().GetResult());
             }
@@ -83,19 +78,17 @@ namespace Coverlet.Tests.RemoteExecutor
         int ExitCode { get; }
     }
 
-    public class LocalInvoker : IRemoteInvokeHandle
+    public struct LocalInvoker : IRemoteInvokeHandle
     {
-        public int ExitCode => _result;
+        public readonly int ExitCode { get; }
 
-        private int _result;
-
-        public LocalInvoker(int result) => _result = result;
+        public LocalInvoker(int exitCode) => ExitCode = exitCode;
 
         public void Dispose()
         {
-            if (_result != 0)
+            if (ExitCode != 0)
             {
-                throw new RemoteExecutionException($"Result '{_result}'");
+                throw new RemoteExecutionException($"Result '{ExitCode}'");
             }
         }
     }

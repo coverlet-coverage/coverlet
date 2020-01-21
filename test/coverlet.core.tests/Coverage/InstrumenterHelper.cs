@@ -15,6 +15,7 @@ using Coverlet.Core.Reporters;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
+using Xunit;
 using Xunit.Sdk;
 
 namespace Coverlet.Core.Tests
@@ -28,6 +29,39 @@ namespace Coverlet.Core.Tests
 
     static class TestInstrumentationAssert
     {
+        public static CoverageResult GenerateReport(this CoverageResult coverageResult, [CallerMemberName]string directory = "")
+        {
+            if (coverageResult is null)
+            {
+                throw new ArgumentNullException(nameof(coverageResult));
+            }
+
+            TestInstrumentationHelper.GenerateHtmlReport(coverageResult, directory: directory);
+
+            return coverageResult;
+        }
+
+        public static bool IsPresent(this CoverageResult coverageResult, string docName)
+        {
+            if (docName is null)
+            {
+                throw new ArgumentNullException(nameof(docName));
+            }
+
+            foreach (InstrumenterResult instrumenterResult in coverageResult.InstrumentedResults)
+            {
+                foreach (KeyValuePair<string, Document> document in instrumenterResult.Documents)
+                {
+                    if (Path.GetFileName(document.Key) == docName)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public static Document Document(this CoverageResult coverageResult, string docName)
         {
             if (docName is null)
@@ -279,7 +313,7 @@ namespace Coverlet.Core.Tests
             reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", reporter.Extension));
             File.WriteAllText(reportFile, reporter.Report(coverageResult));
             // i.e. reportgenerator -reports:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If\report.cobertura.xml" -targetdir:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If" -filefilters:+**\Samples\Instrumentation.cs
-            new Generator().GenerateReport(new ReportConfiguration(
+            Assert.True(new Generator().GenerateReport(new ReportConfiguration(
             new[] { reportFile },
             dir.FullName,
             new string[0],
@@ -290,21 +324,29 @@ namespace Coverlet.Core.Tests
             new string[0],
             string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : new[] { sourceFileFilter },
             null,
-            null));
+            null)));
         }
 
         public static CoverageResult GetCoverageResult(string filePath)
         {
-            using (var result = new FileStream(filePath, FileMode.Open))
+            using var result = new FileStream(filePath, FileMode.Open);
+            var logger = new Mock<ILogger>();
+            logger.Setup(l => l.LogVerbose(It.IsAny<string>())).Callback((string message) =>
             {
-                CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-                Coverage coverage = new Coverage(coveragePrepareResultLoaded, new Mock<ILogger>().Object, DependencyInjection.Current.GetService<IInstrumentationHelper>(), new FileSystem());
-                return coverage.GetCoverageResult();
-            }
+                Assert.DoesNotContain("not found for module: ", message);
+            });
+            CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
+            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, DependencyInjection.Current.GetService<IInstrumentationHelper>(), new FileSystem());
+            return coverage.GetCoverageResult();
         }
 
-        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, string persistPrepareResultToFile, bool disableRestoreModules = false)
+        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, Func<string, string[]> includeFilter = null, Func<string, string[]> excludeFilter = null, string persistPrepareResultToFile = null, bool disableRestoreModules = false)
         {
+            if (persistPrepareResultToFile is null)
+            {
+                throw new ArgumentNullException(nameof(persistPrepareResultToFile));
+            }
+
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
@@ -331,19 +373,23 @@ namespace Coverlet.Core.Tests
             File.Copy(location, newPath);
             File.Copy(Path.ChangeExtension(location, ".pdb"), Path.ChangeExtension(newPath, ".pdb"));
 
+            static string[] defaultFilters(string _) => Array.Empty<string>();
             // Instrument module
             Coverage coverage = new Coverage(newPath,
+            includeFilters: (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
             new string[]
             {
                 $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*"
-            },
+            }).ToArray(),
             Array.Empty<string>(),
-            new string[]
+            excludeFilters: (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)).Concat(new string[]
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }, Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>());
+            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
+
+            Assert.Single(prepareResult.Results);
 
             // Load new assembly
             Assembly asm = Assembly.LoadFile(newPath);
@@ -354,13 +400,17 @@ namespace Coverlet.Core.Tests
             // Flush tracker
             Type tracker = asm.GetTypes().Single(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker"));
 
+            // For debugging purpouse
+            // int[] hitsArray = (int[])tracker.GetField("HitsArray").GetValue(null);
+            // string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
+
             // Void UnloadModule(System.Object, System.EventArgs)
             tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, new object[2] { null, null });
 
             // Persist CoveragePrepareResult
             using (FileStream fs = new FileStream(persistPrepareResultToFile, FileMode.Open))
             {
-                CoveragePrepareResult.Serialize(prepareResult).CopyTo(fs);
+                await CoveragePrepareResult.Serialize(prepareResult).CopyToAsync(fs);
             }
 
             return prepareResult;
