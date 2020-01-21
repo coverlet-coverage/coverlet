@@ -28,7 +28,7 @@ namespace Coverlet.Core.Tests
 
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
-                result.GenerateReport(show: true).Document("Instrumentation.Lambda.cs")
+                result.Document("Instrumentation.Lambda.cs")
                       .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 23, 51)
                       .AssertBranchesCovered(BuildConfiguration.Debug,
                         // Expected branches
