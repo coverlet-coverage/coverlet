@@ -118,14 +118,9 @@ namespace Coverlet.Core.Tests
                 }, path, invokeInProcess: true).Dispose();
 
                 TestInstrumentationHelper.GetCoverageResult(path)
-                .GenerateReport(show: true)
-                //.Document("Instrumentation.AsyncAwait.cs")
-                //.AssertLinesCovered(BuildConfiguration.Debug,
-                //    (97, 1), (98, 1), (99, 1), (101, 1), (102, 1), (103, 1),
-                //    (110, 1), (111, 1), (112, 1), (113, 1),
-                //    (116, 1), (117, 1), (118, 1), (119, 1)
-                //)
-                ;
+                .Document("Instrumentation.AsyncAwait.cs")
+                .AssertLinesCovered(BuildConfiguration.Debug, (7, 1), (10, 1), (11, 1), (12, 1), (13, 1), (15, 1))
+                .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
             }
             finally
             {

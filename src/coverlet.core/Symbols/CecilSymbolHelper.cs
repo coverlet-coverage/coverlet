@@ -60,6 +60,25 @@ namespace Coverlet.Core.Symbols
             return false;
         }
 
+        private static bool IsRecognizedMoveNextInsideAsyncStateMachineProlog(MethodDefinition methodDefinition)
+        {
+            /*
+                // int num = <>1__state;
+	            IL_0000: ldarg.0
+                IL_0001: ldfld ...::'<>1__state'
+	            IL_0006: stloc.0
+            */
+            return (methodDefinition.Body.Instructions[0].OpCode == OpCodes.Ldarg_0 ||
+                    methodDefinition.Body.Instructions[0].OpCode == OpCodes.Ldarg) &&
+
+                    methodDefinition.Body.Instructions[1].OpCode == OpCodes.Ldfld &&
+                    methodDefinition.Body.Instructions[1].Operand is FieldDefinition fd && fd.Name == "<>1__state" &&
+
+                    (methodDefinition.Body.Instructions[2].OpCode == OpCodes.Stloc &&
+                    methodDefinition.Body.Instructions[2].Operand is VariableDefinition vd && vd.Index == 0) ||
+                    methodDefinition.Body.Instructions[2].OpCode == OpCodes.Stloc_0;
+        }
+
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
@@ -70,6 +89,7 @@ namespace Coverlet.Core.Symbols
             var instructions = methodDefinition.Body.Instructions;
 
             bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
+            bool isRecognizedMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsRecognizedMoveNextInsideAsyncStateMachineProlog(methodDefinition);
             bool skipFirstBranch = IsMoveNextInsideEnumerator(methodDefinition);
 
             foreach (Instruction instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
@@ -85,15 +105,15 @@ namespace Coverlet.Core.Symbols
                     // If method is a generated MoveNext skip first branches (could be a switch or a series of branches) 
                     // that check state machine value to jump to correct state(for instance after a true async call)
                     // Check if it's a Cond_Branch on state machine current value [int num = <>1__state;]
-                    if (isAsyncStateMachineMoveNext)
+                    if (isAsyncStateMachineMoveNext && isRecognizedMoveNextInsideAsyncStateMachineProlog)
                     {
                         bool skipInstruction = false;
                         Instruction current = instruction.Previous;
                         for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
                         {
                             if (
-                                (current.OpCode == OpCodes.Ldloc && current.Operand is VariableDefinition vo && vo.Index == 0) ||
-                                current.OpCode == OpCodes.Ldloc_0
+                                    (current.OpCode == OpCodes.Ldloc && current.Operand is VariableDefinition vo && vo.Index == 0) ||
+                                    current.OpCode == OpCodes.Ldloc_0
                                 )
                             {
                                 skipInstruction = true;
@@ -115,8 +135,8 @@ namespace Coverlet.Core.Symbols
                             )
                             &&
                             (
-                            operand.DeclaringType.Scope.Name == "System.Runtime" ||
-                            operand.DeclaringType.Scope.Name == "netstandard"
+                                operand.DeclaringType.Scope.Name == "System.Runtime" ||
+                                operand.DeclaringType.Scope.Name == "netstandard"
                             )
                        )
                     {
