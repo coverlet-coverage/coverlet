@@ -68,7 +68,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
-        public void AsyncAwait_Issue_669()
+        public void AsyncAwait_Issue_669_1()
         {
             string path = Path.GetTempFileName();
             try
@@ -88,10 +88,9 @@ namespace Coverlet.Core.Tests
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.AsyncAwait.cs")
                 .AssertLinesCovered(BuildConfiguration.Debug,
-                    (97, 1), (98, 1), (99, 1), (101, 1), (102, 1), (103, 1),
-                    (110, 1), (111, 1), (112, 1), (113, 1),
-                    (116, 1), (117, 1), (118, 1), (119, 1)
-                );
+                (97, 1), (98, 1), (99, 1), (101, 1), (102, 1), (103, 1),
+                (110, 1), (111, 1), (112, 1), (113, 1),
+                (116, 1), (117, 1), (118, 1), (119, 1));
             }
             finally
             {
