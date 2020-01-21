@@ -335,7 +335,15 @@ namespace Coverlet.Integration.Tests
         {
             if (CleanupOnDispose)
             {
-                Directory.Delete(ProjectRootPath, true);
+                try
+                {
+                    Directory.Delete(ProjectRootPath, true);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Sometimes on CI AzDo we get Access Denied on delete
+                    // swallowed exception to not waste time
+                }
             }
         }
     }
