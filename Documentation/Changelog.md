@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 -Fix ExcludeFromCodeCoverage attribute bugs [#129](https://github.com/tonerdo/coverlet/issues/129) and [#670](https://github.com/tonerdo/coverlet/issues/670) with [#671](https://github.com/tonerdo/coverlet/pull/671) by https://github.com/matteoerigozzi  
--Fix bug with nested types filtering [#689](https://github.com/tonerdo/coverlet/issues/689)
+-Fix bug with nested types filtering [#689](https://github.com/tonerdo/coverlet/issues/689)  
+-Fix Coverage Issue - New Using + Async/Await + ConfigureAwait [#669](https://github.com/tonerdo/coverlet/issues/669)
+
 
 ### Improvements
 
