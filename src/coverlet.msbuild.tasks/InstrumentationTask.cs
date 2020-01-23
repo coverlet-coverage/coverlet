@@ -5,8 +5,10 @@ using System.IO;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Extensions;
+using coverlet.msbuild.tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using ILogger = Coverlet.Core.Abstracts.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
 {
@@ -23,7 +25,6 @@ namespace Coverlet.MSbuild.Tasks
         private string _mergeWith;
         private bool _useSourceLink;
         private ITaskItem _instrumenterState;
-        private readonly MSBuildLogger _logger;
 
         [Required]
         public string Path
@@ -93,11 +94,6 @@ namespace Coverlet.MSbuild.Tasks
             set { _instrumenterState = value; }
         }
 
-        public InstrumentationTask()
-        {
-            _logger = new MSBuildLogger(Log);
-        }
-
         private void WaitForDebuggerIfEnabled()
         {
             if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_MSBUILD_INSTRUMENTATIONTASK_DEBUG"), out int result) && result == 1)
@@ -117,6 +113,8 @@ namespace Coverlet.MSbuild.Tasks
 
         public override bool Execute()
         {
+            var logger = Services.Current.GetService<ILogger>();
+
             WaitForDebuggerIfEnabled();
 
             try
@@ -126,7 +124,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludeFilters = _exclude?.Split(',');
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
-                var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+                var fileSystem = Services.Current.GetService<IFileSystem>();
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
@@ -138,8 +136,8 @@ namespace Coverlet.MSbuild.Tasks
                     _singleHit,
                     _mergeWith,
                     _useSourceLink,
-                    _logger,
-                    DependencyInjection.Current.GetService<IInstrumentationHelper>(),
+                    logger,
+                    Services.Current.GetService<IInstrumentationHelper>(),
                     fileSystem);
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
@@ -154,7 +152,7 @@ namespace Coverlet.MSbuild.Tasks
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex);
+                logger.LogError(ex);
                 return false;
             }
 

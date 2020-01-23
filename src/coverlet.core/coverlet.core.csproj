@@ -17,4 +17,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Logging\" />
+  </ItemGroup>
+
 </Project>

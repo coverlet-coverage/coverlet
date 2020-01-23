@@ -8,8 +8,10 @@ using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Extensions;
 using Coverlet.Core.Reporters;
+using coverlet.msbuild.tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using ILogger = Coverlet.Core.Abstracts.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
 {
@@ -22,7 +24,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _thresholdStat;
         private string _coverletMultiTargetFrameworksCurrentTFM;
         private ITaskItem _instrumenterState;
-        private MSBuildLogger _logger;
+        private ILogger _logger;
 
         [Required]
         public string Output
@@ -74,7 +76,7 @@ namespace Coverlet.MSbuild.Tasks
 
         public CoverageResultTask()
         {
-            _logger = new MSBuildLogger(Log);
+            _logger = Services.Current.GetService<ILogger>();
         }
 
         public override bool Execute()
@@ -83,7 +85,7 @@ namespace Coverlet.MSbuild.Tasks
             {
                 Console.WriteLine("\nCalculating coverage result...");
 
-                IFileSystem fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+                IFileSystem fileSystem = Services.Current.GetService<IFileSystem>();
                 if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
                 {
                     _logger.LogError("Result of instrumentation task not found");

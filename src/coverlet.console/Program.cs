@@ -6,9 +6,11 @@ using System.IO;
 using System.Text;
 
 using ConsoleTables;
+using coverlet.console;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
+using coverlet.core.Enums;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Extensions;
 using Coverlet.Core.Reporters;
@@ -20,7 +22,8 @@ namespace Coverlet.Console
     {
         static int Main(string[] args)
         {
-            var logger = new ConsoleLogger();
+            var logger = Services.Current.GetService<ILogger>();
+            var fileSystem = Services.Current.GetService<IFileSystem>();
             var app = new CommandLineApplication();
             app.Name = "coverlet";
             app.FullName = "Cross platform .NET Core code coverage tool";
@@ -60,7 +63,7 @@ namespace Coverlet.Console
                     // Adjust log level based on user input.
                     logger.Level = verbosity.ParsedValue;
                 }
-                var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+
                 Coverage coverage = new Coverage(module.Value,
                     includeFilters.Values.ToArray(),
                     includeDirectories.Values.ToArray(),
