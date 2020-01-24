@@ -60,7 +60,7 @@ namespace Coverlet.Core.Samples.Tests
             Lambda_Issue343 demoClass = new Lambda_Issue343();
             return await demoClass.InvokeAnonymousAsync();
         }
-
+        
         public bool InvokeAnonymous_WithBranch()
         {
             if (WriteToStream((stream, condition) =>

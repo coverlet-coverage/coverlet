@@ -101,11 +101,6 @@ namespace Coverlet.Core.Symbols
             if (methodDefinition == null)
                 return list;
 
-            //if (methodDefinition.DeclaringType.Name.Contains("Lambda_Issue343"))
-            if (methodDefinition.FullName == "System.Boolean Coverlet.Core.Samples.Tests.Lambda_Issue343::InvokeAnonymous_MoreTests()")
-            {
-            }
-
             UInt32 ordinal = 0;
             var instructions = methodDefinition.Body.Instructions;
 
