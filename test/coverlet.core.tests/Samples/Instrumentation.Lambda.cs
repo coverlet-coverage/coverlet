@@ -82,12 +82,12 @@ namespace Coverlet.Core.Samples.Tests
 
         public bool InvokeAnonymous_NoLamda()
         {
-            return WriteToStream_NoLambda();
+            return WriteToStream_NoLambda(Lambda_Issue343_Nested.GetCondition());
         }
 
         public bool InvokeAnonymous_NoLambda_WithBranch()
         {
-            if (WriteToStream_NoLambda())
+            if (WriteToStream_NoLambda(Lambda_Issue343_Nested.GetCondition()))
             {
                 return true;
             }
@@ -97,11 +97,11 @@ namespace Coverlet.Core.Samples.Tests
             }
         }
 
-        protected bool WriteToStream_NoLambda()
+        protected bool WriteToStream_NoLambda(bool condition)
         {
             using (var stream = new System.IO.MemoryStream())
             {
-                var result = GetResult(stream, false);
+                var result = GetResult(stream, condition);
                 return result;
             }
         }
@@ -118,19 +118,17 @@ namespace Coverlet.Core.Samples.Tests
         public bool InvokeAnonymous_MoreTests()
         {
             Lambda_Issue343 demoClass = new Lambda_Issue343();
-            return demoClass.InvokeAnonymous_WithBranch() ||
-                   demoClass.InvokeAnonymous_NoLamda() ||
+            return demoClass.InvokeAnonymous_WithBranch() &
+                   demoClass.InvokeAnonymous_NoLamda() &
                    demoClass.InvokeAnonymous_NoLambda_WithBranch();
         }
 
-        public bool InvokeAnonymous_MoreTests2()
+        public static class Lambda_Issue343_Nested
         {
-            Lambda_Issue343 demoClass = new Lambda_Issue343();
-            bool val1 = demoClass.InvokeAnonymous_WithBranch();
-            bool val2 = demoClass.InvokeAnonymous_NoLamda();
-            bool val3 = demoClass.InvokeAnonymous_NoLambda_WithBranch();
-
-            return val1 || val2 || val3;
+            public static bool GetCondition()
+            {
+                return false;
+            }
         }
     }
 }

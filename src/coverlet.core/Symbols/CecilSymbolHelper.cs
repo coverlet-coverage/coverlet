@@ -105,7 +105,7 @@ namespace Coverlet.Core.Symbols
             if (methodDefinition.FullName == "System.Boolean Coverlet.Core.Samples.Tests.Lambda_Issue343::InvokeAnonymous_MoreTests()")
             {
             }
-            
+
             UInt32 ordinal = 0;
             var instructions = methodDefinition.Body.Instructions;
 
@@ -123,14 +123,18 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
-                    //if (instruction.Operand is Instruction i && i.OpCode.FlowControl == FlowControl.Call)
-                    //{
-                    //    continue;
-                    //}
+                    /*
+                        Invoking a method with a delegate parameter the compiler seems to generates a 'brtrue.s' instruction 
+                        with a call instruction as Operand to check the parameter.
+                    */
+                    if (instruction.Operand is Instruction i && i.OpCode.FlowControl == FlowControl.Call)
+                    {
+                        continue;
+                    }
 
                     /* 
                        If method is a generated MoveNext we'll skip first branches (could be a switch or a series of branches) 
-                       that check state machine value to jump to correct state(for instance after a true async call)
+                       that check state machine value to jump to correct state (for instance after a true async call)
                        Check if it's a Cond_Branch on state machine current value int num = <>1__state;
                        We are on branch OpCode so we need to go back by max 2 operation to reach ldloc.0 the load of "num"
                        Max 2 because we handle following patterns

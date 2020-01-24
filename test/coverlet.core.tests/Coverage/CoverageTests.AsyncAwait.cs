@@ -59,7 +59,7 @@ namespace Coverlet.Core.Tests
                       .AssertBranchesCovered(BuildConfiguration.Debug, (16, 0, 0), (16, 1, 1), (43, 0, 3), (43, 1, 1), (43, 2, 1), (43, 3, 1), (43, 4, 0))
                       // Real branch should be 2, we should try to remove compiler generated branch in method ContinuationNotCalled/ContinuationCalled
                       // for Continuation state machine
-                      .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 4);
+                      .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 2);
             }
             finally
             {

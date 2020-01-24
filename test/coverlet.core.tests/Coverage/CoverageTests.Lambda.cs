@@ -51,7 +51,6 @@ namespace Coverlet.Core.Tests
                         (111, 1, 2)
 
                         // Unexpected branches
-
                       // Lamda issue - Fixed
                       //(20, 0, 1),
                       //(20, 1, 1),
