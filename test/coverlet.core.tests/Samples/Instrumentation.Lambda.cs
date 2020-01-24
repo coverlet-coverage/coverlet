@@ -60,5 +60,77 @@ namespace Coverlet.Core.Samples.Tests
             Lambda_Issue343 demoClass = new Lambda_Issue343();
             return await demoClass.InvokeAnonymousAsync();
         }
+
+        public bool InvokeAnonymous_WithBranch()
+        {
+            if (WriteToStream((stream, condition) =>
+            {
+                if (condition)
+                    stream.WriteByte(1);
+                else
+                    stream.WriteByte(0);
+                return condition;
+            }))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool InvokeAnonymous_NoLamda()
+        {
+            return WriteToStream_NoLambda();
+        }
+
+        public bool InvokeAnonymous_NoLambda_WithBranch()
+        {
+            if (WriteToStream_NoLambda())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        protected bool WriteToStream_NoLambda()
+        {
+            using (var stream = new System.IO.MemoryStream())
+            {
+                var result = GetResult(stream, false);
+                return result;
+            }
+        }
+
+        public bool GetResult(System.IO.Stream stream, bool condition)
+        {
+            if (condition)
+                stream.WriteByte(1);
+            else
+                stream.WriteByte(0);
+            return condition;
+        }
+
+        public bool InvokeAnonymous_MoreTests()
+        {
+            Lambda_Issue343 demoClass = new Lambda_Issue343();
+            return demoClass.InvokeAnonymous_WithBranch() ||
+                   demoClass.InvokeAnonymous_NoLamda() ||
+                   demoClass.InvokeAnonymous_NoLambda_WithBranch();
+        }
+
+        public bool InvokeAnonymous_MoreTests2()
+        {
+            Lambda_Issue343 demoClass = new Lambda_Issue343();
+            bool val1 = demoClass.InvokeAnonymous_WithBranch();
+            bool val2 = demoClass.InvokeAnonymous_NoLamda();
+            bool val3 = demoClass.InvokeAnonymous_NoLambda_WithBranch();
+
+            return val1 || val2 || val3;
+        }
     }
 }

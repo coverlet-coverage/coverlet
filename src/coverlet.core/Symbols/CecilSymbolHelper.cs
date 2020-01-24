@@ -19,6 +19,21 @@ namespace Coverlet.Core.Symbols
     {
         private const int StepOverLineCode = 0xFEEFEE;
 
+        private static bool IsCompilerGenerated(MethodDefinition methodDefinition)
+        {
+            TypeDefinition declaringType = methodDefinition.DeclaringType;
+            while (declaringType != null)
+            {
+                if (declaringType.CustomAttributes.Count(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName) > 0)
+                {
+                    return true;
+                }
+                declaringType = declaringType.DeclaringType;
+            }
+
+            return false;
+        }
+
         private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
         {
             if (!methodDefinition.FullName.EndsWith("::MoveNext()"))
@@ -26,7 +41,7 @@ namespace Coverlet.Core.Symbols
                 return false;
             }
 
-            if (methodDefinition.DeclaringType.CustomAttributes.Count(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName) > 0)
+            if (IsCompilerGenerated(methodDefinition))
             {
                 foreach (InterfaceImplementation implementedInterface in methodDefinition.DeclaringType.Interfaces)
                 {
@@ -72,7 +87,8 @@ namespace Coverlet.Core.Symbols
                     methodDefinition.Body.Instructions[0].OpCode == OpCodes.Ldarg) &&
 
                     methodDefinition.Body.Instructions[1].OpCode == OpCodes.Ldfld &&
-                    methodDefinition.Body.Instructions[1].Operand is FieldDefinition fd && fd.Name == "<>1__state" &&
+                    ((methodDefinition.Body.Instructions[1].Operand is FieldDefinition fd && fd.Name == "<>1__state") ||
+                    (methodDefinition.Body.Instructions[1].Operand is FieldReference fr && fr.Name == "<>1__state")) &&
 
                     (methodDefinition.Body.Instructions[2].OpCode == OpCodes.Stloc &&
                     methodDefinition.Body.Instructions[2].Operand is VariableDefinition vd && vd.Index == 0) ||
@@ -85,6 +101,11 @@ namespace Coverlet.Core.Symbols
             if (methodDefinition == null)
                 return list;
 
+            //if (methodDefinition.DeclaringType.Name.Contains("Lambda_Issue343"))
+            if (methodDefinition.FullName == "System.Boolean Coverlet.Core.Samples.Tests.Lambda_Issue343::InvokeAnonymous_MoreTests()")
+            {
+            }
+            
             UInt32 ordinal = 0;
             var instructions = methodDefinition.Body.Instructions;
 
@@ -101,6 +122,11 @@ namespace Coverlet.Core.Symbols
                         skipFirstBranch = false;
                         continue;
                     }
+
+                    //if (instruction.Operand is Instruction i && i.OpCode.FlowControl == FlowControl.Call)
+                    //{
+                    //    continue;
+                    //}
 
                     /* 
                        If method is a generated MoveNext we'll skip first branches (could be a switch or a series of branches) 
