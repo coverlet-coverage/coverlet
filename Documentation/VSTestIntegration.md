@@ -54,7 +54,7 @@ How to specify these options via runsettings?
           <IncludeDirectory>../dir1/,../dir2/,</IncludeDirectory>
           <SingleHit>false</SingleHit>
           <UseSourceLink>true</UseSourceLink>
-          <IncludeTestAssembly>true<IncludeTestAssembly>
+          <IncludeTestAssembly>true</IncludeTestAssembly>
         </Configuration>
       </DataCollector>
     </DataCollectors>
@@ -63,9 +63,9 @@ How to specify these options via runsettings?
 ```
 This runsettings file can easily be provided using command line option as given :
 
-1. `dotnet test --settings coverletArgs.runsettings`
+1. `dotnet test --settings coverlet.runsettings`
 
-2. `dotnet vstest --settings coverletArgs.runsettings`
+2. `dotnet vstest --settings coverlet.runsettings`
 
 Take a look at our [`HelloWorld`](Examples/VSTest/HelloWorld/HowTo.md) sample.
 
@@ -83,7 +83,7 @@ The datacollectors will be bundled as a separate NuGet package, the reference to
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="x.x.x" />
     <PackageReference Include="MSTest.TestAdapter" Version="x.x.x" />
     <PackageReference Include="MSTest.TestFramework" Version="x.x.x" />
-    <PackageReference Include="coverlet.collector" Version="1.0.0" />
+    <PackageReference Include="coverlet.collector" Version="x.x.x" />
 </ItemGroup>
 ```
 
