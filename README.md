@@ -37,7 +37,7 @@ Coverlet is integrated into the Visual Studio Test Platform as a [data collector
 dotnet test --collect:"XPlat Code Coverage"
 ```
 
-After the above command is run, a `coverage.cobertura.xml` file containing the results will be published to the `TestResults` directory as an attachment. A summary of the results will also be displayed in the terminal.
+After the above command is run, a `coverage.cobertura.xml` file containing the results will be published to the `TestResults` directory as an attachment.
 
 See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
