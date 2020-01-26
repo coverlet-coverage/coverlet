@@ -117,7 +117,7 @@ namespace Coverlet.Core.Instrumentation
                         using (var bw = new BinaryWriter(fs))
                         {
                             int hitsLength = br.ReadInt32();
-                            WriteLog($"Current hit found '{hitsLength}'");
+                            WriteLog($"Current hits found '{hitsLength}'");
 
                             if (hitsLength != hitsArray.Length)
                             {
