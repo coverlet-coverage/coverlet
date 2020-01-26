@@ -1,6 +1,6 @@
 # Coverlet
 
-[![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/tonerdo.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=3&branchName=master)
+[![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/tonerdo.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=3&branchName=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/tonerdo/coverlet/blob/master/LICENSE)
 
 Coverlet is a cross platform code coverage framework for .NET, with support for line, branch and method coverage. It works with .NET Framework on Windows and .NET Core on all supported platforms.
 
@@ -37,7 +37,7 @@ Coverlet is integrated into the Visual Studio Test Platform as a [data collector
 dotnet test --collect:"XPlat Code Coverage"
 ```
 
-After the above command is run, a `coverage.cobertura.json` file containing the results will be published to the `TestResults` directory as an attachment. A summary of the results will also be displayed in the terminal.
+After the above command is run, a `coverage.cobertura.xml` file containing the results will be published to the `TestResults` directory as an attachment. A summary of the results will also be displayed in the terminal.
 
 See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
@@ -48,7 +48,13 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 ```
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
 ```
-* Important [know issue](Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100)
+* Important temporary [know issue](Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100)
+
+*Current* recommended test sdk package to reference
+```
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20200116-01" />
+```
+
 ### MSBuild Integration
 
 ### Installation
