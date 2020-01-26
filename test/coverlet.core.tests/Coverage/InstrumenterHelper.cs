@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -29,7 +30,7 @@ namespace Coverlet.Core.Tests
 
     static class TestInstrumentationAssert
     {
-        public static CoverageResult GenerateReport(this CoverageResult coverageResult, [CallerMemberName]string directory = "")
+        public static CoverageResult GenerateReport(this CoverageResult coverageResult, [CallerMemberName]string directory = "", bool show = false)
         {
             if (coverageResult is null)
             {
@@ -37,6 +38,11 @@ namespace Coverlet.Core.Tests
             }
 
             TestInstrumentationHelper.GenerateHtmlReport(coverageResult, directory: directory);
+
+            if (show && Debugger.IsAttached)
+            {
+                Process.Start("cmd", "/C " + Path.GetFullPath(Path.Combine(directory, "index.htm")));
+            }
 
             return coverageResult;
         }
