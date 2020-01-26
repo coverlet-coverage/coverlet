@@ -222,7 +222,7 @@ We can collect logs from trackers through an enviroment variable
  set COVERLET_ENABLETRACKERLOG=1
 ```
 When enabled, tracking event will be collected in log file near to module location.  
-File name will be something like `moduleName.dll_tracker.txt`
+File name will be something like `moduleName.dll_tracker.txt` and files with detailed hits will be in a folder named `TrackersHitsLog`.
 
 ## Enable msbuild task instrumentation debugging
 

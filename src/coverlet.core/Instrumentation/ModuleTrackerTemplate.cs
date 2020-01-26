@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
@@ -116,6 +117,8 @@ namespace Coverlet.Core.Instrumentation
                         using (var bw = new BinaryWriter(fs))
                         {
                             int hitsLength = br.ReadInt32();
+                            WriteLog($"Current hit found '{hitsLength}'");
+
                             if (hitsLength != hitsArray.Length)
                             {
                                 throw new InvalidOperationException(
@@ -134,6 +137,8 @@ namespace Coverlet.Core.Instrumentation
                         }
                     }
 
+                    WriteHits();
+
                     // On purpose this is not under a try-finally: it is better to have an exception if there was any error writing the hits file
                     // this case is relevant when instrumenting corelib since multiple processes can be running against the same instrumented dll.
                     mutex.ReleaseMutex();
@@ -147,21 +152,38 @@ namespace Coverlet.Core.Instrumentation
             }
         }
 
+        private static void WriteHits()
+        {
+            if (_enableLog)
+            {
+                Assembly currentAssembly = Assembly.GetExecutingAssembly();
+                DirectoryInfo location = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(currentAssembly.Location), "TrackersHitsLog"));
+                location.Create();
+                string logFile = Path.Combine(location.FullName, $"{Path.GetFileName(currentAssembly.Location)}_{DateTime.UtcNow.Ticks}_{Process.GetCurrentProcess().Id}.txt");
+                using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                using (var log = new FileStream(logFile, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
+                using (var logWriter = new StreamWriter(log))
+                using (var br = new BinaryReader(fs))
+                {
+                    int hitsLength = br.ReadInt32();
+                    for (int i = 0; i < hitsLength; ++i)
+                    {
+                        logWriter.WriteLine($"{i},{br.ReadInt32()}");
+                    }
+                }
+
+                File.AppendAllText(logFile, "Hits flushed");
+            }
+        }
+
         private static void WriteLog(string logText)
         {
             if (_enableLog)
             {
-                try
-                {
-                    // We don't set path as global var to keep benign possible errors inside try/catch
-                    // I'm not sure that location will be ok in every scenario
-                    string location = Assembly.GetExecutingAssembly().Location;
-                    File.AppendAllText(Path.Combine(Path.GetDirectoryName(location), Path.GetFileName(location) + "_tracker.txt"), $"[{DateTime.UtcNow} {Thread.CurrentThread.ManagedThreadId}]{logText}{Environment.NewLine}");
-                }
-                catch
-                {
-                    // do nothing if log fail
-                }
+                // We don't set path as global var to keep benign possible errors inside try/catch
+                // I'm not sure that location will be ok in every scenario
+                string location = Assembly.GetExecutingAssembly().Location;
+                File.AppendAllText(Path.Combine(Path.GetDirectoryName(location), Path.GetFileName(location) + "_tracker.txt"), $"[{DateTime.UtcNow} P:{Process.GetCurrentProcess().Id} T:{Thread.CurrentThread.ManagedThreadId}]{logText}{Environment.NewLine}");
             }
         }
     }
