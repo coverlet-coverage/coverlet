@@ -48,7 +48,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 ```
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
 ```
-* Important temporary [know issue](Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100)
+#### Important temporary [know issue](Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100)
 
 *Current* recommended test sdk package to reference
 ```
