@@ -22,5 +22,5 @@ steps:
   displayName: Test
   inputs:
     command: test
-    arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]* /p:Exclude=[coverlet.tests.remoteexecutor]*
+    arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.collector]*%2c[coverlet.core]*%2c[coverlet.msbuild.tasks]*" /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.remoteexecutor]*"
     testRunTitle: $(Agent.JobName)
