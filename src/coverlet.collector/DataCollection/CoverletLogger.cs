@@ -2,6 +2,7 @@
 
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Abstracts;
+using coverlet.core.Enums;
 
 namespace Coverlet.Collector.DataCollection
 {
@@ -12,6 +13,8 @@ namespace Coverlet.Collector.DataCollection
     {
         private readonly TestPlatformEqtTrace _eqtTrace;
         private readonly TestPlatformLogger _logger;
+
+        public LogLevel Level { get; set; }
 
         public CoverletLogger(TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger)
         {

@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Coverlet.Console.Logging;
+using Coverlet.Collector.DataCollection;
+using Coverlet.Collector.Utilities;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
-namespace coverlet.console
+namespace coverlet.collector
 {
     internal static class Services
     {
@@ -28,11 +28,16 @@ namespace coverlet.console
         private static IServiceProvider InitDefaultServices()
         {
             IServiceCollection serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddTransient<DataCollectionLogger>();
+            serviceCollection.AddTransient<DataCollectionContext>();
+            serviceCollection.AddTransient<DataCollectionEnvironmentContext>();
+            serviceCollection.AddSingleton<TestPlatformLogger>();
+            serviceCollection.AddTransient<TestPlatformEqtTrace>();
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
-            serviceCollection.AddTransient<ILogger, ConsoleLogger>();
-
+            serviceCollection.AddTransient<ILogger, CoverletLogger>();
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
 

@@ -75,7 +75,7 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger,
-                    DependencyInjection.Current.GetService<IInstrumentationHelper>(),
+                    Services.Current.GetService<IInstrumentationHelper>(),
                     fileSystem);
                 coverage.PrepareModules();
 

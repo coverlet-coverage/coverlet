@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml;
+using coverlet.collector;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
@@ -26,7 +27,7 @@ namespace Coverlet.Collector.DataCollection
         private ICoverageWrapper _coverageWrapper;
         private ICountDownEventFactory _countDownEventFactory;
 
-        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper(), new CollectorCountdownEventFactory())
+        public CoverletCoverageCollector() : this((TestPlatformEqtTrace)Services.Current.GetService(typeof(TestPlatformEqtTrace)), new CoverageWrapper(), new CollectorCountdownEventFactory())
         {
         }
 

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using coverlet.collector;
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Reporters;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Coverlet.Collector.DataCollection
 {
@@ -37,8 +39,8 @@ namespace Coverlet.Collector.DataCollection
                     return reporterFactory.CreateReporter();
                 }
             }).Where(r => r != null).ToArray(),
-            new CoverletLogger(eqtTrace, logger),
-            coverageWrapper)
+            Services.Current.GetService<ILogger>(),
+        coverageWrapper)
         {
         }
 

@@ -95,7 +95,7 @@ namespace Coverlet.MSbuild.Tasks
                 Coverage coverage = null;
                 using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
                 {
-                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, DependencyInjection.Current.GetService<IInstrumentationHelper>(), fileSystem);
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, Services.Current.GetService<IInstrumentationHelper>(), fileSystem);
                 }
 
                 try
@@ -142,7 +142,7 @@ namespace Coverlet.MSbuild.Tasks
                                                                 _output,
                                                                 reporter,
                                                                 fileSystem,
-                                                                DependencyInjection.Current.GetService<IConsole>(),
+                                                                Services.Current.GetService<IConsole>(),
                                                                 result);
                         writer.WriteReport();
                     }

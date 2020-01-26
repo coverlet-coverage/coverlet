@@ -9,14 +9,17 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Abstracts;
+using coverlet.core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Reporters;
+using coverlet.core.tests;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
 using Xunit;
 using Xunit.Sdk;
+using Coverlet.MSbuild.Tasks;
 
 namespace Coverlet.Core.Tests
 {
@@ -336,7 +339,7 @@ namespace Coverlet.Core.Tests
                 Assert.DoesNotContain("not found for module: ", message);
             });
             CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, DependencyInjection.Current.GetService<IInstrumentationHelper>(), new FileSystem());
+            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, TestServices.Current.GetService<IInstrumentationHelper>(), new FileSystem());
             return coverage.GetCoverageResult();
         }
 
@@ -361,7 +364,7 @@ namespace Coverlet.Core.Tests
             }
 
             // Setup correct retry helper to avoid exception in InstrumentationHelper.RestoreOriginalModules on remote process exit
-            DependencyInjection.Set(serviceCollection.BuildServiceProvider());
+            TestServices.Set(serviceCollection.BuildServiceProvider());
 
 
             // Rename test file to avoid locks
@@ -386,7 +389,7 @@ namespace Coverlet.Core.Tests
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), DependencyInjection.Current.GetService<IInstrumentationHelper>(), DependencyInjection.Current.GetService<IFileSystem>());
+            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), TestServices.Current.GetService<IInstrumentationHelper>(), TestServices.Current.GetService<IFileSystem>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
@@ -477,6 +480,8 @@ namespace Coverlet.Core.Tests
     class Logger : ILogger
     {
         string _logFile;
+
+        public LogLevel Level { get; set; }
 
         public Logger(string logFile) => _logFile = logFile;
 

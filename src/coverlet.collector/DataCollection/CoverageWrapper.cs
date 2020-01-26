@@ -1,4 +1,5 @@
-﻿using Coverlet.Collector.Utilities.Interfaces;
+﻿using coverlet.collector;
+using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Extensions;
@@ -30,8 +31,8 @@ namespace Coverlet.Collector.DataCollection
                 settings.MergeWith,
                 settings.UseSourceLink,
                 coverletLogger,
-                DependencyInjection.Current.GetService<IInstrumentationHelper>(),
-                DependencyInjection.Current.GetService<IFileSystem>());
+                Services.Current.GetService<IInstrumentationHelper>(),
+                Services.Current.GetService<IFileSystem>());
         }
 
         /// <summary>
