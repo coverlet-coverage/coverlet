@@ -108,4 +108,4 @@ When we specify `--collect:"XPlat Code Coverage"` vstest platform tries to load 
 
 ## Known Issues
 
-For a comprehensive list of know issues check the detailed documentation https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
+For a comprehensive list of Known issues check the detailed documentation https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
