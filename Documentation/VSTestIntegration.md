@@ -1,23 +1,51 @@
-# Coverlet Integration with VSTest
+# Coverlet integration with VSTest (a.k.a. Visual Studio Test Platform)
 
+As explained in quick start section to use collectors you need to run SDK v2.2.401 or newer and your project file must reference `coverlet.collector.dll` and a minimum version of `Microsoft.NET.Test.Sdk`.  
+A sample project file looks like:
 
-| Entry point | How will code coverage be enabled? | Syntax                                                               |
-|-------------|------------------------------------|----------------------------------------------------------------------|
-|dotnet test CLI              | Through a switch to condition data collection | `dotnet test --collect:"XPlat Code Coverage"`   |
-|dotnet vstest CLI            | Through a switch to condition data collection | `dotnet vstest --collect:"XPlat Code Coverage"` |
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>netcoreapp3.0;netcoreapp2.1;net46</TargetFrameworks>
+	</PropertyGroup>
+	<ItemGroup>
+      <!-- Temporary preview reference with essential vstest bug fix -->
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20200116-01" />
+      <!-- Update this reference when new version is released -->
+      <PackageReference Include="coverlet.collector" Version="1.2.0"
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+...
+	</ItemGroup>
+...
+</Project>
+```
+As you can see in sample above we're referencing a preview version of `Microsoft.NET.Test.Sdk`, this is temporary needed because there is a bug inside vstest platform during collectors loading([details](https://github.com/microsoft/vstest/issues/2205)). **At the moment there isn't a stable package released with fix so we need to use a preview**.
 
-NB. If you're using `dotnet vstest` you MUST `publish` your test project before i.e.
-```bash
-C:\project
+The reference to `coverlet.collector` package is included by default with xunit template test (`dotnet new xunit`), you only need to update the package for new versions like any other package reference.
+
+With correct reference in place you can run coverage through default dotnet test CLI verbs:
+
+```
+dotnet test --collect:"XPlat Code Coverage"
+```
+or
+```
 dotnet publish
 ...
-  vstest -> C:\project\bin\Debug\netcoreapp3.0\testdll.dll
-  vstest -> C:\project\bin\Debug\netcoreapp3.0\publish\
+  ... -> C:\project\bin\Debug\netcoreapp3.0\testdll.dll
+  ... -> C:\project\bin\Debug\netcoreapp3.0\publish\
 ...
 dotnet vstest C:\project\bin\Debug\netcoreapp3.0\publish\testdll.dll --collect:"XPlat Code Coverage"
 ```
+As you can see in case of `vstest` verb you **must** publish project before.
 
-### Coverlet Options Supported with VSTest
+## Coverlet options supported by VSTest integration
+
+At the moment VSTest integration doesn't support all features of msbuild and .NET tool, for instance show result on console, report merging and threshold validation.
+We're working to fill the gaps.
+
 
 #### Default
 | Option | Summary |
@@ -69,24 +97,14 @@ This runsettings file can easily be provided using command line option as given 
 
 Take a look at our [`HelloWorld`](Examples/VSTest/HelloWorld/HowTo.md) sample.
 
-## Implementation Details
+## How it works
 
-The proposed solution is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md).
+Coverlet integration is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md).
 
-1. Outproc Datacollector : The outproc collector would always run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector would be responsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
+1. Outproc Datacollector : The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector would be responsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
 
-2. Inproc Datacollector : The inproc collector in the testhost process executing the tests. This collector will be needed to remove the dependency on the exit handler to flush the hit files.
+2. Inproc Datacollector : The inproc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the exit handler to flush the hit files and avoid to hit this [serious know issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
 
-The datacollectors will be bundled as a separate NuGet package, the reference to which will be added by default in the .NET Core test templates, thus making it the default solution for collecting code coverage for .NET core projects.
-```
-<ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="x.x.x" />
-    <PackageReference Include="MSTest.TestAdapter" Version="x.x.x" />
-    <PackageReference Include="MSTest.TestFramework" Version="x.x.x" />
-    <PackageReference Include="coverlet.collector" Version="x.x.x" />
-</ItemGroup>
-```
+## Known Issues
 
-## Know issue
-
-Thre is a know issue, check it here https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100
+For a comprehensive list of know issues check the detailed documentation https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
