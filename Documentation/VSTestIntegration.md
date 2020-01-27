@@ -91,15 +91,16 @@ How to specify these options via runsettings?
 ```
 This runsettings file can easily be provided using command line option as given :
 
-1. `dotnet test --settings coverlet.runsettings`
+1. `dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings`
 
-2. `dotnet vstest --settings coverlet.runsettings`
+2. `dotnet vstest C:\project\bin\Debug\netcoreapp3.0\publish\testdll.dll --collect:"XPlat Code Coverage" --settings coverlet.runsettings`
 
 Take a look at our [`HelloWorld`](Examples/VSTest/HelloWorld/HowTo.md) sample.
 
 ## How it works
 
-Coverlet integration is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md).
+Coverlet integration is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md).  
+When we specify 
 
 1. Outproc Datacollector : The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector is responsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
 
