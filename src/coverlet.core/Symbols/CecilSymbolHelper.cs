@@ -148,7 +148,7 @@ namespace Coverlet.Core.Symbols
 
                         so we know that current branch are checking that field and we're not interested in.
                     */
-                    if (isAsyncStateMachineMoveNext && isRecognizedMoveNextInsideAsyncStateMachineProlog)
+                    if (isRecognizedMoveNextInsideAsyncStateMachineProlog)
                     {
                         bool skipInstruction = false;
                         Instruction current = instruction.Previous;
@@ -171,16 +171,18 @@ namespace Coverlet.Core.Symbols
 
                     // Skip get_IsCompleted to avoid unuseful branch due to async/await state machine
                     if (
-                            isAsyncStateMachineMoveNext && instruction.Previous.Operand is MethodReference operand &&
+                            isRecognizedMoveNextInsideAsyncStateMachineProlog && instruction.Previous.Operand is MethodReference operand &&
                             operand.Name == "get_IsCompleted" &&
                             (
                                 operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") ||
-                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable")
+                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable") ||
+                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable")
                             )
                             &&
                             (
                                 operand.DeclaringType.Scope.Name == "System.Runtime" ||
-                                operand.DeclaringType.Scope.Name == "netstandard"
+                                operand.DeclaringType.Scope.Name == "netstandard" ||
+                                operand.DeclaringType.Scope.Name == "System.Threading.Tasks.Extensions"
                             )
                        )
                     {
