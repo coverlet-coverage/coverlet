@@ -5,19 +5,19 @@ A sample project file looks like:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFrameworks>netcoreapp3.0;netcoreapp2.1;net46</TargetFrameworks>
-	</PropertyGroup>
-	<ItemGroup>
-      <!-- Temporary preview reference with essential vstest bug fix -->
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20200116-01" />
-      <!-- Update this reference when new version is released -->
-      <PackageReference Include="coverlet.collector" Version="1.2.0"
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-...
-	</ItemGroup>
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.0;netcoreapp2.1;net46</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Temporary preview reference with essential vstest bug fix -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20200116-01" />
+    <!-- Update this reference when new version is released -->
+    <PackageReference Include="coverlet.collector" Version="1.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  ...
+  </ItemGroup>
 ...
 </Project>
 ```
@@ -101,9 +101,9 @@ Take a look at our [`HelloWorld`](Examples/VSTest/HelloWorld/HowTo.md) sample.
 
 Coverlet integration is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md).
 
-1. Outproc Datacollector : The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector would be responsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
+1. Outproc Datacollector : The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector is responsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
 
-2. Inproc Datacollector : The inproc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the exit handler to flush the hit files and avoid to hit this [serious know issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
+2. Inproc Datacollector : The inproc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [serious know issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
 
 ## Known Issues
 
