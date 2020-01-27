@@ -31,7 +31,7 @@ namespace Coverlet.Core.Tests
 
                 result.GenerateReport(show: true)
                       .Document("Instrumentation.Lambda.cs")
-                      .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 23, 51, 69, 74, 75, 91, 92, 112)
+                      .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 23, 51)
                       .AssertBranchesCovered(BuildConfiguration.Debug,
                         // Expected branches
                         (22, 0, 0),
