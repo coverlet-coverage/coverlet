@@ -6,6 +6,9 @@ using System.Xml;
 using coverlet.collector;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
+using Coverlet.Core.Abstracts;
+using Coverlet.Core.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
 namespace Coverlet.Collector.DataCollection
@@ -26,8 +29,9 @@ namespace Coverlet.Collector.DataCollection
         private CoverageManager _coverageManager;
         private ICoverageWrapper _coverageWrapper;
         private ICountDownEventFactory _countDownEventFactory;
+        private IServiceProvider _serviceProvider;
 
-        public CoverletCoverageCollector() : this((TestPlatformEqtTrace)Services.Current.GetService(typeof(TestPlatformEqtTrace)), new CoverageWrapper(), new CollectorCountdownEventFactory())
+        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper(), new CollectorCountdownEventFactory())
         {
         }
 
@@ -76,6 +80,7 @@ namespace Coverlet.Collector.DataCollection
             _dataSink = dataSink;
             _dataCollectionContext = environmentContext.SessionDataCollectionContext;
             _logger = new TestPlatformLogger(logger, _dataCollectionContext);
+            _serviceProvider = GetServiceProvider(_eqtTrace, _logger);
 
             // Register events
             _events.SessionStart += OnSessionStart;
@@ -120,9 +125,12 @@ namespace Coverlet.Collector.DataCollection
                 IEnumerable<string> testModules = this.GetTestModules(sessionStartEventArgs);
                 var coverletSettingsParser = new CoverletSettingsParser(_eqtTrace);
                 CoverletSettings coverletSettings = coverletSettingsParser.Parse(_configurationElement, testModules);
+                IInstrumentationHelper instrumentationHelper = _serviceProvider.GetService<IInstrumentationHelper>();
+                IFileSystem fileSystem = _serviceProvider.GetService<IFileSystem>();
+                ILogger logger = _serviceProvider.GetService<ILogger>();
 
                 // Get coverage and attachment managers
-                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _logger, _coverageWrapper);
+                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, logger, _coverageWrapper, instrumentationHelper, fileSystem);
 
                 // Instrument modules
                 _coverageManager.InstrumentModules();
@@ -203,6 +211,19 @@ namespace Coverlet.Collector.DataCollection
         private static IEnumerable<string> GetPropertyValueWrapper(SessionStartEventArgs sessionStartEventArgs)
         {
             return sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
+        }
+
+        private static IServiceProvider GetServiceProvider(TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger)
+        {
+            IServiceCollection serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+
+            return serviceCollection.BuildServiceProvider();
         }
     }
 }

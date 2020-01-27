@@ -16,8 +16,10 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="settings">Coverlet settings</param>
         /// <param name="coverletLogger">Coverlet logger</param>
+        /// <param name="instrumentationHelper">Helper for instrumentation</param>
+        /// <param name="fileSystem">Coverlet file system adapter</param>
         /// <returns>Coverage object</returns>
-        public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger)
+        public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
         {
             return new Coverage(
                 settings.TestModule,
@@ -31,8 +33,8 @@ namespace Coverlet.Collector.DataCollection
                 settings.MergeWith,
                 settings.UseSourceLink,
                 coverletLogger,
-                Services.Current.GetService<IInstrumentationHelper>(),
-                Services.Current.GetService<IFileSystem>());
+                instrumentationHelper,
+                fileSystem);
         }
 
         /// <summary>

@@ -113,7 +113,8 @@ namespace Coverlet.MSbuild.Tasks
 
         public override bool Execute()
         {
-            var logger = Services.Current.GetService<ILogger>();
+            var serviceProvider = new Services().GetServiceProvider();
+            var logger = serviceProvider.GetService<ILogger>();
 
             WaitForDebuggerIfEnabled();
 
@@ -124,7 +125,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludeFilters = _exclude?.Split(',');
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
-                var fileSystem = Services.Current.GetService<IFileSystem>();
+                var fileSystem = serviceProvider.GetService<IFileSystem>();
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
@@ -137,7 +138,7 @@ namespace Coverlet.MSbuild.Tasks
                     _mergeWith,
                     _useSourceLink,
                     logger,
-                    Services.Current.GetService<IInstrumentationHelper>(),
+                    serviceProvider.GetService<IInstrumentationHelper>(),
                     fileSystem);
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();

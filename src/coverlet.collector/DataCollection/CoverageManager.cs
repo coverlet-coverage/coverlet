@@ -24,7 +24,7 @@ namespace Coverlet.Collector.DataCollection
 
         public IReporter[] Reporters { get; }
 
-        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper)
+        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, ILogger logger, ICoverageWrapper coverageWrapper, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
             : this(settings,
             settings.ReportFormats.Select(format =>
             {
@@ -39,19 +39,18 @@ namespace Coverlet.Collector.DataCollection
                     return reporterFactory.CreateReporter();
                 }
             }).Where(r => r != null).ToArray(),
-            Services.Current.GetService<ILogger>(),
-        coverageWrapper)
+            logger, coverageWrapper, instrumentationHelper, fileSystem)
         {
         }
 
-        public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper)
+        public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
         {
             // Store input vars
             Reporters = reporters;
             _coverageWrapper = coverageWrapper;
 
             // Coverage object
-            _coverage = _coverageWrapper.CreateCoverage(settings, logger);
+            _coverage = _coverageWrapper.CreateCoverage(settings, logger, instrumentationHelper, fileSystem);
         }
 
         /// <summary>

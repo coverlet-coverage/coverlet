@@ -6,15 +6,16 @@ using System.IO;
 using System.Text;
 
 using ConsoleTables;
-using coverlet.console;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using coverlet.core.Enums;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Extensions;
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using McMaster.Extensions.CommandLineUtils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Coverlet.Console
 {
@@ -22,8 +23,9 @@ namespace Coverlet.Console
     {
         static int Main(string[] args)
         {
-            var logger = Services.Current.GetService<ILogger>();
-            var fileSystem = Services.Current.GetService<IFileSystem>();
+            var serviceProvider = GetServiceProvider();
+            var logger = DependencyInjectionExtensions.GetService<ILogger>(serviceProvider);
+            var fileSystem = DependencyInjectionExtensions.GetService<IFileSystem>(serviceProvider);
             var app = new CommandLineApplication();
             app.Name = "coverlet";
             app.FullName = "Cross platform .NET Core code coverage tool";
@@ -75,7 +77,7 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger,
-                    Services.Current.GetService<IInstrumentationHelper>(),
+                    DependencyInjectionExtensions.GetService<IInstrumentationHelper>(serviceProvider),
                     fileSystem);
                 coverage.PrepareModules();
 
@@ -252,6 +254,20 @@ namespace Coverlet.Console
                 logger.LogError(ex.Message);
                 return exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception;
             }
+        }
+
+        private static IServiceProvider GetServiceProvider()
+        {
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<ILogger, ConsoleLogger>();
+
+            // We need to keep singleton/static semantics
+            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+
+            return serviceCollection.BuildServiceProvider();
         }
 
         static string GetAssemblyVersion() => typeof(Program).Assembly.GetName().Version.ToString();

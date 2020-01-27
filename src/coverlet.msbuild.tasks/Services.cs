@@ -8,24 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace coverlet.msbuild.tasks
 {
-    internal static class Services
+    public class Services
     {
-        private static Lazy<IServiceProvider> _serviceProvider = new Lazy<IServiceProvider>(() => InitDefaultServices(), true);
-
-        public static IServiceProvider Current
-        {
-            get
-            {
-                return _serviceProvider.Value;
-            }
-        }
-
-        public static void Set(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = new Lazy<IServiceProvider>(() => serviceProvider);
-        }
-
-        private static IServiceProvider InitDefaultServices()
+        public IServiceProvider GetServiceProvider()
         {
             IServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
