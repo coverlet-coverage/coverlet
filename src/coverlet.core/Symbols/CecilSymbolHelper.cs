@@ -118,15 +118,6 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
-                    /*
-                        Invoking a method with a delegate parameter the compiler seems to generates a 'brtrue.s' instruction 
-                        with a call instruction as Operand to check the parameter.
-                    */
-                    if (instruction.Operand is Instruction i && i.OpCode.FlowControl == FlowControl.Call)
-                    {
-                        continue;
-                    }
-
                     /* 
                        If method is a generated MoveNext we'll skip first branches (could be a switch or a series of branches) 
                        that check state machine value to jump to correct state (for instance after a true async call)
