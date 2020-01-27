@@ -89,6 +89,8 @@ How to specify these options via runsettings?
   </DataCollectionRunSettings>
 </RunSettings>
 ```
+Filtering details are present on [msbuild guide](https://github.com/tonerdo/coverlet/blob/master/Documentation/MSBuildIntegration.md#excluding-from-coverage).
+
 This runsettings file can easily be provided using command line option as given :
 
 1. `dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings`
