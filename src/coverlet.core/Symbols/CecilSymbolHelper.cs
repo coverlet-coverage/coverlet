@@ -19,14 +19,26 @@ namespace Coverlet.Core.Symbols
     {
         private const int StepOverLineCode = 0xFEEFEE;
 
-        private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
+        // In case of nested compiler generated classes, only the root one presents the CompilerGenerated attribute.
+        // So let's search up to the outermost declaring type to find the attribute
+        private static bool IsCompilerGenerated(MethodDefinition methodDefinition)
         {
-            if (!methodDefinition.FullName.EndsWith("::MoveNext()"))
+            TypeDefinition declaringType = methodDefinition.DeclaringType;
+            while (declaringType != null)
             {
-                return false;
+                if (declaringType.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
+                {
+                    return true;
+                }
+                declaringType = declaringType.DeclaringType;
             }
 
-            if (methodDefinition.DeclaringType.CustomAttributes.Count(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName) > 0)
+            return false;
+        }
+
+        private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
+        {
+            if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
             {
                 foreach (InterfaceImplementation implementedInterface in methodDefinition.DeclaringType.Interfaces)
                 {
@@ -72,7 +84,8 @@ namespace Coverlet.Core.Symbols
                     methodDefinition.Body.Instructions[0].OpCode == OpCodes.Ldarg) &&
 
                     methodDefinition.Body.Instructions[1].OpCode == OpCodes.Ldfld &&
-                    methodDefinition.Body.Instructions[1].Operand is FieldDefinition fd && fd.Name == "<>1__state" &&
+                    ((methodDefinition.Body.Instructions[1].Operand is FieldDefinition fd && fd.Name == "<>1__state") ||
+                    (methodDefinition.Body.Instructions[1].Operand is FieldReference fr && fr.Name == "<>1__state")) &&
 
                     (methodDefinition.Body.Instructions[2].OpCode == OpCodes.Stloc &&
                     methodDefinition.Body.Instructions[2].Operand is VariableDefinition vd && vd.Index == 0) ||
@@ -104,7 +117,7 @@ namespace Coverlet.Core.Symbols
 
                     /* 
                        If method is a generated MoveNext we'll skip first branches (could be a switch or a series of branches) 
-                       that check state machine value to jump to correct state(for instance after a true async call)
+                       that check state machine value to jump to correct state (for instance after a true async call)
                        Check if it's a Cond_Branch on state machine current value int num = <>1__state;
                        We are on branch OpCode so we need to go back by max 2 operation to reach ldloc.0 the load of "num"
                        Max 2 because we handle following patterns
