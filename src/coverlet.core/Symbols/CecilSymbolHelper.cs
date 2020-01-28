@@ -24,7 +24,7 @@ namespace Coverlet.Core.Symbols
             TypeDefinition declaringType = methodDefinition.DeclaringType;
             while (declaringType != null)
             {
-                if (declaringType.CustomAttributes.Count(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName) > 0)
+                if (declaringType.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
                 {
                     return true;
                 }

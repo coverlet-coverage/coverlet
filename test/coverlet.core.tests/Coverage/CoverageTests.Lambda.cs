@@ -23,14 +23,13 @@ namespace Coverlet.Core.Tests
                         ((Task<bool>)instance.InvokeAnonymousAsync_Test()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize, disableRestoreModules: true);
+                    }, persistPrepareResultToFile: pathSerialize);
                     return 0;
-                }, path, invokeInProcess: true).Dispose();
+                }, path).Dispose();
 
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
-                result.GenerateReport(show: true)
-                      .Document("Instrumentation.Lambda.cs")
+                result.Document("Instrumentation.Lambda.cs")
                       .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 23, 51)
                       .AssertBranchesCovered(BuildConfiguration.Debug,
                         // Expected branches
