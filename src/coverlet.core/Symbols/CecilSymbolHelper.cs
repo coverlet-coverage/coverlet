@@ -19,6 +19,8 @@ namespace Coverlet.Core.Symbols
     {
         private const int StepOverLineCode = 0xFEEFEE;
 
+        // In case of nested compiler generated classes, only the root one presents the CompilerGenerated attribute.
+        // So let's search up to the outermost declaring type to find the attribute
         private static bool IsCompilerGenerated(MethodDefinition methodDefinition)
         {
             TypeDefinition declaringType = methodDefinition.DeclaringType;
@@ -36,12 +38,7 @@ namespace Coverlet.Core.Symbols
 
         private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
         {
-            if (!methodDefinition.FullName.EndsWith("::MoveNext()"))
-            {
-                return false;
-            }
-
-            if (IsCompilerGenerated(methodDefinition))
+            if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
             {
                 foreach (InterfaceImplementation implementedInterface in methodDefinition.DeclaringType.Interfaces)
                 {
