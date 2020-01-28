@@ -113,7 +113,7 @@ namespace Coverlet.Integration.Tests
             foreach (string targetFramework in targetFrameworks)
             {
                 string fileToCheck = Path.Combine(clonedTemplateProject.ProjectRootPath, $"coverage.{targetFramework}.json");
-                Assert.True(File.Exists(fileToCheck), $"Expected file '{fileToCheck}'");
+                Assert.True(File.Exists(fileToCheck), $"Expected file '{fileToCheck}'\nOutput:\n{standardOutput}");
             }
 
             AssertCoverage(clonedTemplateProject, "coverage.*.json");
