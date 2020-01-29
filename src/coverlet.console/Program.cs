@@ -9,7 +9,6 @@ using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
-using coverlet.core.Enums;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
@@ -28,9 +27,9 @@ namespace Coverlet.Console
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<ILogger, ConsoleLogger>();
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
-            var logger = serviceProvider.GetService<ILogger>();
+            var logger = (ConsoleLogger)serviceProvider.GetService<ILogger>();
             var fileSystem = serviceProvider.GetService<IFileSystem>();
 
             var app = new CommandLineApplication();
@@ -261,20 +260,6 @@ namespace Coverlet.Console
                 logger.LogError(ex.Message);
                 return exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception;
             }
-        }
-
-        private static IServiceProvider GetServiceProvider()
-        {
-            IServiceCollection serviceCollection = new ServiceCollection();
-            serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
-            serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
-            serviceCollection.AddTransient<IFileSystem, FileSystem>();
-            serviceCollection.AddTransient<ILogger, ConsoleLogger>();
-
-            // We need to keep singleton/static semantics
-            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-
-            return serviceCollection.BuildServiceProvider();
         }
 
         static string GetAssemblyVersion() => typeof(Program).Assembly.GetName().Version.ToString();

@@ -2,7 +2,6 @@
 
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Abstracts;
-using coverlet.core.Enums;
 
 namespace Coverlet.Collector.DataCollection
 {

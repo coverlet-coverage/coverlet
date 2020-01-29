@@ -1,4 +1,4 @@
-namespace coverlet.core.Enums
+namespace Coverlet.Console.Logging
 {
     /// <summary>
     /// Defines logging severity levels.

@@ -1,6 +1,6 @@
 using System;
+using coverlet.console.Logging;
 using Coverlet.Core.Abstracts;
-using coverlet.core.Enums;
 using static System.Console;
 
 namespace Coverlet.Console.Logging

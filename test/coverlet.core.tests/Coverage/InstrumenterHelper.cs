@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Abstracts;
-using coverlet.core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Reporters;
@@ -486,8 +485,6 @@ namespace Coverlet.Core.Tests
     class Logger : ILogger
     {
         string _logFile;
-
-        public LogLevel Level { get; set; }
 
         public Logger(string logFile) => _logFile = logFile;
 

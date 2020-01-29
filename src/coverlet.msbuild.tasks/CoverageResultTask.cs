@@ -25,7 +25,6 @@ namespace Coverlet.MSbuild.Tasks
         private string _coverletMultiTargetFrameworksCurrentTFM;
         private ITaskItem _instrumenterState;
         private ILogger _logger;
-        private IServiceProvider _serviceProvider;
 
         [Required]
         public string Output
@@ -75,20 +74,16 @@ namespace Coverlet.MSbuild.Tasks
             set { _coverletMultiTargetFrameworksCurrentTFM = value; }
         }
 
-        public CoverageResultTask()
-        {
-           _serviceProvider = new Services().GetServiceProvider(Log);
-        }
-
         public override bool Execute()
         {
-            _logger = _serviceProvider.GetService<ILogger>();
+            IServiceProvider serviceProvider = new Services().GetServiceProvider(Log);
+            _logger = serviceProvider.GetService<ILogger>();
 
             try
             {
                 Console.WriteLine("\nCalculating coverage result...");
 
-                IFileSystem fileSystem = _serviceProvider.GetService<IFileSystem>();
+                IFileSystem fileSystem = serviceProvider.GetService<IFileSystem>();
                 if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
                 {
                     _logger.LogError("Result of instrumentation task not found");
@@ -98,7 +93,7 @@ namespace Coverlet.MSbuild.Tasks
                 Coverage coverage = null;
                 using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
                 {
-                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, _serviceProvider.GetService<IInstrumentationHelper>(), fileSystem);
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, serviceProvider.GetService<IInstrumentationHelper>(), fileSystem);
                 }
 
                 try
@@ -145,7 +140,7 @@ namespace Coverlet.MSbuild.Tasks
                                                                 _output,
                                                                 reporter,
                                                                 fileSystem,
-                                                                _serviceProvider.GetService<IConsole>(),
+                                                                serviceProvider.GetService<IConsole>(),
                                                                 result);
                         writer.WriteReport();
                     }

@@ -113,7 +113,7 @@ namespace Coverlet.MSbuild.Tasks
 
         public override bool Execute()
         {
-            var serviceProvider = new Services().GetServiceProvider(Log);
+            IServiceProvider serviceProvider = new Services().GetServiceProvider(Log);
             var logger = serviceProvider.GetService<ILogger>();
 
             WaitForDebuggerIfEnabled();

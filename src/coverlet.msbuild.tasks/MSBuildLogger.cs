@@ -1,5 +1,4 @@
 using System;
-using coverlet.core.Enums;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using ILogger = Coverlet.Core.Abstracts.ILogger;
@@ -13,8 +12,6 @@ namespace Coverlet.MSbuild.Tasks
         private readonly TaskLoggingHelper _log;
 
         public MSBuildLogger(TaskLoggingHelper log) => _log = log;
-
-        public LogLevel Level { get; set; }
 
         public void LogVerbose(string message) => _log.LogMessage(MessageImportance.Low, $"{LogPrefix}{message}");
 
