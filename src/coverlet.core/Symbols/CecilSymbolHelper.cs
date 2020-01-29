@@ -202,6 +202,89 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
+                    /*
+                        Handle try/catch blocks inside async state machine
+                     */
+                    if (isAsyncStateMachineMoveNext)
+                    {
+                        /*
+                            Typical generated code for catch block (inside async state machine MoveNext() method) 
+                            is this:
+
+                            catch ...
+		                    {
+			                    // (no C# code)
+			                    IL_0028: stloc.2
+			                    // object obj2 = <>s__1 = obj;
+			                    IL_0029: ldarg.0
+			                    // (no C# code)
+			                    IL_002a: ldloc.2
+			                    IL_002b: stfld object ...::'<>s__1'
+			                    // <>s__2 = 1;
+			                    IL_0030: ldarg.0
+			                    IL_0031: ldc.i4.1
+			                    IL_0032: stfld int32 ...::'<>s__2'      <- store 1 into <>s__2
+			                    // (no C# code)
+			                    IL_0037: leave.s IL_0039
+		                    } // end handle
+
+                            // int num2 = <>s__2;
+                            IL_0039: ldarg.0
+		                    IL_003a: ldfld int32 ...::'<>s__2'          <- load <>s__2 value and check if 1
+		                    IL_003f: stloc.3
+                            // if (num2 == 1)
+		                    IL_0040: ldloc.3
+		                    IL_0041: ldc.i4.1
+		                    IL_0042: beq.s IL_0049                      <- if <>s__2 value is 1 go to exception handler code
+
+                            IL_0044: br IL_00d6
+
+                            IL_0049: nop                                <- start exception handler code
+                            ...
+
+                            
+                            So starting from branch instruction 'beq.s', we can go back to starting block instruction 
+                            which is always 5 step before and then check if this istruction is the end of an exception handler block
+                        */
+
+                        Instruction catchBranchInstruction = GetIthPreviousInstruction(instructions, instruction, 5);
+                        if (
+                                catchBranchInstruction.OpCode == OpCodes.Ldarg &&
+                                methodDefinition.Body.ExceptionHandlers.Any(h => h.HandlerEnd == catchBranchInstruction)
+                            )
+                        {
+                            continue;
+                        }
+
+                        /* 
+                            In case of exception re-thrown inside the catch block, 
+                            the compiler generates a branch to check if the exception reference is null.
+                            
+                            A sample of generated code:
+                         
+                            IL_00b4: isinst [System.Runtime]System.Exception
+                            IL_00b9: stloc.s 6
+                            // if (ex == null)
+                            IL_00bb: ldloc.s 6
+                            // (no C# code)
+                            IL_00bd: brtrue.s IL_00c6
+
+                            So we can go back to previous instructions and skip this branch if recognize that type of code block
+                        */
+
+                        int branchIndex = instructions.IndexOf(instruction);
+                        if (
+                                branchIndex >= 3 && // avoid out of range exception (need almost 3 instruction before the branch)
+                                instructions[branchIndex - 3].OpCode == OpCodes.Isinst &&
+                                instructions[branchIndex - 3].Operand is TypeReference tr && tr.FullName == "System.Exception" &&
+                                instructions[branchIndex - 2].OpCode == OpCodes.Stloc &&
+                                instructions[branchIndex - 1].OpCode == OpCodes.Ldloc
+                           )
+                        {
+                            continue;
+                        }
+                    }
+
                     if (BranchIsInGeneratedExceptionFilter(instruction, methodDefinition))
                         continue;
 
@@ -277,6 +360,14 @@ namespace Coverlet.Core.Symbols
                     document, branchOffset, ordinal, ref pathCounter);
             }
             return true;
+        }
+
+        // Helper method to get i-th previous instruction
+        private static Instruction GetIthPreviousInstruction(Collection<Instruction> instructions, Instruction current, int i)
+        {
+            Instruction instruction = current;
+            for (int index = 0; index < i && instruction != null; instruction = instruction.Previous, index++) { }
+            return instruction;
         }
 
         private static uint BuildPointsForBranch(List<BranchPoint> list, Instruction then, int branchingInstructionLine, string document,
