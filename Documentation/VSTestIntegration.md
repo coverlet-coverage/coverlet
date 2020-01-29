@@ -41,6 +41,18 @@ dotnet vstest C:\project\bin\Debug\netcoreapp3.0\publish\testdll.dll --collect:"
 ```
 As you can see in case of `vstest` verb you **must** publish project before.
 
+At the end of tests you'll find the coverage file data under default vstest plat directory `TestResults`
+```
+Attachments:
+  C:\git\coverlet\Documentation\Examples\VSTest\HelloWorld\XUnitTestProject1\TestResults\bc5e983b-d7a8-4f17-8c0a-8a8831a4a891\coverage.cobertura.xml
+Test Run Successful.
+Total tests: 1
+     Passed: 1
+ Total time: 2,5451 Seconds
+```
+You can change the position of files using standard `dotnet test` switch `[-r|--results-directory]`  
+*NB: By design vstest platform will create your file under a random named folder(guid string) so if you need stable path to load file to some gui report system(i.e. coveralls, codecov, reportgenerator etc..) that doesn't support glob patterns or hierarchical  search, you'll need to manually move resulting file to a predictable folder*
+
 ## Coverlet options supported by VSTest integration
 
 At the moment VSTest integration doesn't support all features of msbuild and .NET tool, for instance show result on console, report merging and threshold validation.
