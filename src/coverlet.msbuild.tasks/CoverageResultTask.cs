@@ -6,11 +6,11 @@ using ConsoleTables;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
-using Coverlet.Core.Extensions;
 using Coverlet.Core.Reporters;
 using coverlet.msbuild.tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using ILogger = Coverlet.Core.Abstracts.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
@@ -77,7 +77,7 @@ namespace Coverlet.MSbuild.Tasks
 
         public CoverageResultTask()
         {
-           _serviceProvider = new Services().GetServiceProvider();
+           _serviceProvider = new Services().GetServiceProvider(Log);
         }
 
         public override bool Execute()

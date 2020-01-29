@@ -4,10 +4,10 @@ using System.IO;
 
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
-using Coverlet.Core.Extensions;
 using coverlet.msbuild.tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using ILogger = Coverlet.Core.Abstracts.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
@@ -113,7 +113,7 @@ namespace Coverlet.MSbuild.Tasks
 
         public override bool Execute()
         {
-            var serviceProvider = new Services().GetServiceProvider();
+            var serviceProvider = new Services().GetServiceProvider(Log);
             var logger = serviceProvider.GetService<ILogger>();
 
             WaitForDebuggerIfEnabled();

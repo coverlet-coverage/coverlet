@@ -7,6 +7,7 @@ using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Moq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.Extensions.DependencyInjection;
 using Coverlet.Core;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
@@ -15,7 +16,6 @@ using Coverlet.Collector.DataCollection;
 using coverlet.collector.tests;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Abstracts;
-using Coverlet.Core.Extensions;
 
 namespace Coverlet.Collector.Tests
 {

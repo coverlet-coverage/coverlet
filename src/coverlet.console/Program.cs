@@ -11,7 +11,6 @@ using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using coverlet.core.Enums;
 using Coverlet.Core.Enums;
-using Coverlet.Core.Extensions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using McMaster.Extensions.CommandLineUtils;
@@ -23,9 +22,17 @@ namespace Coverlet.Console
     {
         static int Main(string[] args)
         {
-            var serviceProvider = GetServiceProvider();
-            var logger = DependencyInjectionExtensions.GetService<ILogger>(serviceProvider);
-            var fileSystem = DependencyInjectionExtensions.GetService<IFileSystem>(serviceProvider);
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<ILogger, ConsoleLogger>();
+            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var logger = serviceProvider.GetService<ILogger>();
+            var fileSystem = serviceProvider.GetService<IFileSystem>();
+
             var app = new CommandLineApplication();
             app.Name = "coverlet";
             app.FullName = "Cross platform .NET Core code coverage tool";
@@ -77,7 +84,7 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger,
-                    DependencyInjectionExtensions.GetService<IInstrumentationHelper>(serviceProvider),
+                    serviceProvider.GetService<IInstrumentationHelper>(),
                     fileSystem);
                 coverage.PrepareModules();
 
