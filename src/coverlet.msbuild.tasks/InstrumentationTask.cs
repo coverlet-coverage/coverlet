@@ -4,7 +4,6 @@ using System.IO;
 
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
-using coverlet.msbuild.tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;

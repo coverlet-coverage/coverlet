@@ -7,7 +7,6 @@ using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Reporters;
-using coverlet.msbuild.tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;

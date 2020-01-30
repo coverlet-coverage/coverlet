@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml;
-using coverlet.collector;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core.Abstracts;

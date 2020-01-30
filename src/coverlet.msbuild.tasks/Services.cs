@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
-using Coverlet.MSbuild.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace coverlet.msbuild.tasks
+namespace Coverlet.MSbuild.Tasks
 {
     internal class Services
     {

@@ -18,7 +18,6 @@ using Moq;
 using Palmmedia.ReportGenerator.Core;
 using Xunit;
 using Xunit.Sdk;
-using Coverlet.MSbuild.Tasks;
 
 namespace Coverlet.Core.Tests
 {
@@ -381,7 +380,6 @@ namespace Coverlet.Core.Tests
 
             // Setup correct retry helper to avoid exception in InstrumentationHelper.RestoreOriginalModules on remote process exit
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-
 
             // Rename test file to avoid locks
             string location = typeof(T).Assembly.Location;
