@@ -36,7 +36,7 @@ namespace Coverlet.Core.Symbols
             return false;
         }
 
-        private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
+        internal static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
         {
             if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
             {
@@ -247,10 +247,11 @@ namespace Coverlet.Core.Symbols
                             which is always 5 step before and then check if this istruction is the end of an exception handler block
                         */
 
-                        Instruction catchBranchInstruction = GetIthPreviousInstruction(instructions, instruction, 5);
+                        int branchIndex = instructions.IndexOf(instruction);
                         if (
-                                catchBranchInstruction.OpCode == OpCodes.Ldarg &&
-                                methodDefinition.Body.ExceptionHandlers.Any(h => h.HandlerEnd == catchBranchInstruction)
+                                branchIndex >= 5 &&
+                                instructions[branchIndex - 5].OpCode == OpCodes.Ldarg &&
+                                methodDefinition.Body.ExceptionHandlers.Any(h => h.HandlerEnd == instructions[branchIndex - 5])
                             )
                         {
                             continue;
@@ -272,7 +273,6 @@ namespace Coverlet.Core.Symbols
                             So we can go back to previous instructions and skip this branch if recognize that type of code block
                         */
 
-                        int branchIndex = instructions.IndexOf(instruction);
                         if (
                                 branchIndex >= 3 && // avoid out of range exception (need almost 3 instruction before the branch)
                                 instructions[branchIndex - 3].OpCode == OpCodes.Isinst &&
@@ -362,11 +362,10 @@ namespace Coverlet.Core.Symbols
             return true;
         }
 
-        // Helper method to get i-th previous instruction
-        private static Instruction GetIthPreviousInstruction(Collection<Instruction> instructions, Instruction current, int i)
+        internal static Instruction GetPreviousNoNopInstruction(Instruction current)
         {
-            Instruction instruction = current;
-            for (int index = 0; index < i && instruction != null; instruction = instruction.Previous, index++) { }
+            Instruction instruction = current.Previous;
+            for (; instruction != null && instruction.OpCode == OpCodes.Nop; instruction = instruction.Previous) { }
             return instruction;
         }
 

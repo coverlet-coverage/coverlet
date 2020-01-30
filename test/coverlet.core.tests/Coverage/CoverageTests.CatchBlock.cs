@@ -32,9 +32,7 @@ namespace Coverlet.Core.Tests
                 result.Document("Instrumentation.CatchBlock.cs")
                     .AssertLinesCoveredAllBut(BuildConfiguration.Debug,
                         41, 
-                        51,
-                        // expected not coverable line
-                        32)
+                        51)
                     .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0) 
                     ;
             }
