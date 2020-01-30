@@ -1,5 +1,4 @@
 using System;
-using coverlet.console.Logging;
 using Coverlet.Core.Abstracts;
 using static System.Console;
 
