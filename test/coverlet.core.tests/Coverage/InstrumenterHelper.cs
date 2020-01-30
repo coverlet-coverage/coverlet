@@ -13,7 +13,6 @@ using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Reporters;
-using coverlet.core.tests;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
@@ -343,8 +342,19 @@ namespace Coverlet.Core.Tests
             {
                 Assert.DoesNotContain("not found for module: ", message);
             });
+
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<ILogger, Logger>();
+            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
+
+            // Setup correct retry helper to avoid exception in InstrumentationHelper.RestoreOriginalModules on remote process exit
+            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+
             CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, TestServices.Current.GetService<IInstrumentationHelper>(), new FileSystem());
+            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, serviceProvider.GetService<IInstrumentationHelper>(), new FileSystem());
             return coverage.GetCoverageResult();
         }
 
@@ -359,6 +369,7 @@ namespace Coverlet.Core.Tests
             serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<ILogger, Logger>();
             if (disableRestoreModules)
             {
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
@@ -369,7 +380,7 @@ namespace Coverlet.Core.Tests
             }
 
             // Setup correct retry helper to avoid exception in InstrumentationHelper.RestoreOriginalModules on remote process exit
-            TestServices.Set(serviceCollection.BuildServiceProvider());
+            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
 
             // Rename test file to avoid locks
@@ -394,7 +405,7 @@ namespace Coverlet.Core.Tests
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), TestServices.Current.GetService<IInstrumentationHelper>(), TestServices.Current.GetService<IFileSystem>());
+            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), serviceProvider.GetService<IInstrumentationHelper>(), serviceProvider.GetService<IFileSystem>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
@@ -486,31 +497,36 @@ namespace Coverlet.Core.Tests
     {
         string _logFile;
 
-        public Logger(string logFile) => _logFile = logFile;
+        public Logger(string logFile = "") => _logFile = logFile;
 
         public void LogError(string message)
         {
-            File.AppendAllText(_logFile, message + Environment.NewLine);
+            if (!string.IsNullOrEmpty(_logFile))
+                File.AppendAllText(_logFile, message + Environment.NewLine);
         }
 
         public void LogError(Exception exception)
         {
-            File.AppendAllText(_logFile, exception.ToString() + Environment.NewLine);
+            if (!string.IsNullOrEmpty(_logFile))
+                File.AppendAllText(_logFile, exception.ToString() + Environment.NewLine);
         }
 
         public void LogInformation(string message, bool important = false)
         {
-            File.AppendAllText(_logFile, message + Environment.NewLine);
+            if (!string.IsNullOrEmpty(_logFile))
+                File.AppendAllText(_logFile, message + Environment.NewLine);
         }
 
         public void LogVerbose(string message)
         {
-            File.AppendAllText(_logFile, message + Environment.NewLine);
+            if (!string.IsNullOrEmpty(_logFile))
+                File.AppendAllText(_logFile, message + Environment.NewLine);
         }
 
         public void LogWarning(string message)
         {
-            File.AppendAllText(_logFile, message + Environment.NewLine);
+            if (!string.IsNullOrEmpty(_logFile))
+                File.AppendAllText(_logFile, message + Environment.NewLine);
         }
     }
 

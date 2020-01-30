@@ -13,9 +13,9 @@ using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
 using Xunit;
 using Coverlet.Collector.DataCollection;
-using coverlet.collector.tests;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Abstracts;
+using Coverlet.Core.Helpers;
 
 namespace Coverlet.Collector.Tests
 {
@@ -30,6 +30,7 @@ namespace Coverlet.Collector.Tests
         private Mock<ICountDownEventFactory> _mockCountDownEventFactory;
         private XmlElement _configurationElement;
         private Mock<DataCollectionLogger> _mockLogger;
+        private ServiceProvider _serviceProvider;
 
         public CoverletCoverageDataCollectorTests()
         {
@@ -43,6 +44,36 @@ namespace Coverlet.Collector.Tests
             _context = new DataCollectionEnvironmentContext(_dataCollectionContext);
             _mockCoverageWrapper = new Mock<ICoverageWrapper>();
             _mockCountDownEventFactory = new Mock<ICountDownEventFactory>();
+
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+            serviceCollection.AddTransient<ILogger, TestCoverletLogger>();
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+        }
+
+        class TestCoverletLogger : ILogger {
+            public void LogVerbose(string message)
+            {
+            }
+
+            public void LogInformation(string message, bool important = false)
+            {
+            }
+
+            public void LogWarning(string message)
+            {
+            }
+
+            public void LogError(string message)
+            {
+            }
+
+            public void LogError(Exception exception)
+            {
+            }
         }
 
         [Fact]
@@ -61,7 +92,7 @@ namespace Coverlet.Collector.Tests
 
             _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
-            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => string.Equals(y.TestModule, "abc.dll")), It.IsAny<ILogger>()), Times.Once);
+            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => string.Equals(y.TestModule, "abc.dll")), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>()), Times.Once);
         }
 
         [Fact]
@@ -75,14 +106,14 @@ namespace Coverlet.Collector.Tests
                     null,
                     _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
-            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), TestServices.Current.GetService<IInstrumentationHelper>(), TestServices.Current.GetService<IFileSystem>());
+            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), _serviceProvider.GetService<IInstrumentationHelper>(), _serviceProvider.GetService<IFileSystem>());
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
-            _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>())).Returns(coverage);
+            _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>(), _serviceProvider.GetService<IInstrumentationHelper>(), _serviceProvider.GetService<IFileSystem>())).Returns(coverage);
 
             _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
-            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => y.TestModule.Contains("abc.dll")), It.IsAny<ILogger>()), Times.Once);
+            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => y.TestModule.Contains("abc.dll")), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>()), Times.Once);
             _mockCoverageWrapper.Verify(x => x.PrepareModules(It.IsAny<Coverage>()), Times.Once);
         }
 
