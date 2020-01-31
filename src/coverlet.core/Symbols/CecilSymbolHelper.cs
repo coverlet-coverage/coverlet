@@ -19,14 +19,26 @@ namespace Coverlet.Core.Symbols
     {
         private const int StepOverLineCode = 0xFEEFEE;
 
-        private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
+        // In case of nested compiler generated classes, only the root one presents the CompilerGenerated attribute.
+        // So let's search up to the outermost declaring type to find the attribute
+        private static bool IsCompilerGenerated(MethodDefinition methodDefinition)
         {
-            if (!methodDefinition.FullName.EndsWith("::MoveNext()"))
+            TypeDefinition declaringType = methodDefinition.DeclaringType;
+            while (declaringType != null)
             {
-                return false;
+                if (declaringType.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
+                {
+                    return true;
+                }
+                declaringType = declaringType.DeclaringType;
             }
 
-            if (methodDefinition.DeclaringType.CustomAttributes.Count(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName) > 0)
+            return false;
+        }
+
+        private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
+        {
+            if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
             {
                 foreach (InterfaceImplementation implementedInterface in methodDefinition.DeclaringType.Interfaces)
                 {
@@ -72,7 +84,8 @@ namespace Coverlet.Core.Symbols
                     methodDefinition.Body.Instructions[0].OpCode == OpCodes.Ldarg) &&
 
                     methodDefinition.Body.Instructions[1].OpCode == OpCodes.Ldfld &&
-                    methodDefinition.Body.Instructions[1].Operand is FieldDefinition fd && fd.Name == "<>1__state" &&
+                    ((methodDefinition.Body.Instructions[1].Operand is FieldDefinition fd && fd.Name == "<>1__state") ||
+                    (methodDefinition.Body.Instructions[1].Operand is FieldReference fr && fr.Name == "<>1__state")) &&
 
                     (methodDefinition.Body.Instructions[2].OpCode == OpCodes.Stloc &&
                     methodDefinition.Body.Instructions[2].Operand is VariableDefinition vd && vd.Index == 0) ||
@@ -104,7 +117,7 @@ namespace Coverlet.Core.Symbols
 
                     /* 
                        If method is a generated MoveNext we'll skip first branches (could be a switch or a series of branches) 
-                       that check state machine value to jump to correct state(for instance after a true async call)
+                       that check state machine value to jump to correct state (for instance after a true async call)
                        Check if it's a Cond_Branch on state machine current value int num = <>1__state;
                        We are on branch OpCode so we need to go back by max 2 operation to reach ldloc.0 the load of "num"
                        Max 2 because we handle following patterns
@@ -148,7 +161,7 @@ namespace Coverlet.Core.Symbols
 
                         so we know that current branch are checking that field and we're not interested in.
                     */
-                    if (isAsyncStateMachineMoveNext && isRecognizedMoveNextInsideAsyncStateMachineProlog)
+                    if (isRecognizedMoveNextInsideAsyncStateMachineProlog)
                     {
                         bool skipInstruction = false;
                         Instruction current = instruction.Previous;
@@ -171,16 +184,18 @@ namespace Coverlet.Core.Symbols
 
                     // Skip get_IsCompleted to avoid unuseful branch due to async/await state machine
                     if (
-                            isAsyncStateMachineMoveNext && instruction.Previous.Operand is MethodReference operand &&
+                            isRecognizedMoveNextInsideAsyncStateMachineProlog && instruction.Previous.Operand is MethodReference operand &&
                             operand.Name == "get_IsCompleted" &&
                             (
                                 operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") ||
-                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable")
+                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable") ||
+                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable")
                             )
                             &&
                             (
                                 operand.DeclaringType.Scope.Name == "System.Runtime" ||
-                                operand.DeclaringType.Scope.Name == "netstandard"
+                                operand.DeclaringType.Scope.Name == "netstandard" ||
+                                operand.DeclaringType.Scope.Name == "System.Threading.Tasks.Extensions"
                             )
                        )
                     {

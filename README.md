@@ -7,7 +7,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 # Main contents
 * [QuickStart](#Quick-Start)
 * [How It Works](#How-It-Works)
-* [Know Issues](#Know-Issues)
+* [Known Issues](#Know-Issues)
 * [Consume nightly build](#Consume-nightly-build)
 * [Feature samples](Documentation/Examples.md)
 * [Cake Add-In](#Cake.-Add-In)
@@ -125,7 +125,7 @@ _Note: The assembly you'd like to get coverage for must be different from the as
 
 ## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)!
 
-## Know Issues
+## Known Issues
 
 Unfortunately we have some know issues, check it [here](Documentation/KnowIssues.md) 
 
