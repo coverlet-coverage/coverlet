@@ -142,6 +142,16 @@ See the [documentation](Documentation/ConsumeNightlyBuild.md)
 
 If you find a bug or have a feature request, please report them at this repository's issues section. See the [CONTRIBUTING GUIDE](CONTRIBUTING.md) for details on building and contributing to this project.
 
+## Coverlet Team
+
+Author and owner    
+* [Toni Solarin-Sodara](https://github.com/tonerdo)  
+
+Co-maintainers
+
+* [Peter Liljenberg](https://github.com/petli)  
+* [Marco Rossignoli](https://github.com/MarcoRossignoli)
+
 ## Code of Conduct
 
 This project enforces a code of conduct in line with the contributor covenant. See [CODE OF CONDUCT](CODE_OF_CONDUCT.md) for details.
