@@ -39,6 +39,7 @@
       Threshold="$(Threshold)"
       ThresholdType="$(ThresholdType)"
       ThresholdStat="$(ThresholdStat)"
+      ThresholdAct="$(ThresholdAct)"
       InstrumenterState="$(InstrumenterState)"
       CoverletMultiTargetFrameworksCurrentTFM="$(_coverletMultiTargetFrameworksCurrentTFM)" />
   </Target>

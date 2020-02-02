@@ -15,6 +15,7 @@
     <Threshold Condition="$(Threshold) == ''">0</Threshold>
     <ThresholdType Condition="$(ThresholdType) == ''">line,branch,method</ThresholdType>
     <ThresholdStat Condition="$(ThresholdStat) == ''">minimum</ThresholdStat>
+    <ThresholdAct Condition="$(ThresholdAct) == ''">fail</ThresholdAct>
   </PropertyGroup>
   <PropertyGroup>
     <CoverletToolsPath Condition=" '$(CoverletToolsPath)' == '' ">$(MSBuildThisFileDirectory)</CoverletToolsPath>

@@ -37,6 +37,7 @@ namespace Coverlet.Console
             CommandOption threshold = app.Option("--threshold", "Exits with error if the coverage % is below value.", CommandOptionType.SingleValue);
             CommandOption thresholdTypes = app.Option("--threshold-type", "Coverage type to apply the threshold to.", CommandOptionType.MultipleValue);
             CommandOption thresholdStat = app.Option("--threshold-stat", "Coverage statistic used to enforce the threshold value.", CommandOptionType.SingleValue);
+            CommandOption thresholdAct = app.Option("--threshold-act", "The action to take when coverage is below the threshold value. Defaults to fail the build", CommandOptionType.SingleValue);
             CommandOption excludeFilters = app.Option("--exclude", "Filter expressions to exclude specific modules and types.", CommandOptionType.MultipleValue);
             CommandOption includeFilters = app.Option("--include", "Filter expressions to include only specific modules and types.", CommandOptionType.MultipleValue);
             CommandOption excludedSourceFiles = app.Option("--exclude-by-file", "Glob patterns specifying source files to exclude.", CommandOptionType.MultipleValue);
@@ -105,6 +106,7 @@ namespace Coverlet.Console
                 var dThreshold = threshold.HasValue() ? double.Parse(threshold.Value()) : 0;
                 var dThresholdTypes = thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" });
                 var dThresholdStat = thresholdStat.HasValue() ? Enum.Parse<ThresholdStatistic>(thresholdStat.Value(), true) : Enum.Parse<ThresholdStatistic>("minimum", true);
+                var dThresholdAct = thresholdAct.HasValue() ? Enum.Parse<ThresholdAction>(thresholdAct.Value(), true) : Enum.Parse<ThresholdAction>("fail", true);
 
                 logger.LogInformation("\nCalculating coverage result...");
 
@@ -223,7 +225,12 @@ namespace Coverlet.Console
                         exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} method coverage is below the specified {dThreshold}");
                     }
 
-                    throw new Exception(exceptionMessageBuilder.ToString());
+                    if (dThresholdAct == ThresholdAction.Fail)
+                    {
+                        throw new Exception(exceptionMessageBuilder.ToString());
+                    }
+
+                    logger.LogWarning(exceptionMessageBuilder.ToString());
                 }
 
                 return exitCode;

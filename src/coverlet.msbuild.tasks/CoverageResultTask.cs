@@ -20,6 +20,7 @@ namespace Coverlet.MSbuild.Tasks
         private double _threshold;
         private string _thresholdType;
         private string _thresholdStat;
+        private string _thresholdAct;
         private string _coverletMultiTargetFrameworksCurrentTFM;
         private ITaskItem _instrumenterState;
         private MSBuildLogger _logger;
@@ -57,6 +58,13 @@ namespace Coverlet.MSbuild.Tasks
         {
             get { return _thresholdStat; }
             set { _thresholdStat = value; }
+        }
+
+        [Required]
+        public string ThresholdAct
+        {
+            get { return _thresholdAct; }
+            set { _thresholdAct = value; }
         }
 
         [Required]
@@ -148,6 +156,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 var thresholdTypeFlags = ThresholdTypeFlags.None;
                 var thresholdStat = ThresholdStatistic.Minimum;
+                var thresholdAct = ThresholdAction.Fail;
 
                 foreach (var thresholdType in _thresholdType.Split(',').Select(t => t.Trim()))
                 {
@@ -172,6 +181,15 @@ namespace Coverlet.MSbuild.Tasks
                 else if (_thresholdStat.Equals("total", StringComparison.OrdinalIgnoreCase))
                 {
                     thresholdStat = ThresholdStatistic.Total;
+                }
+
+                if (_thresholdAct.Equals("fail", StringComparison.OrdinalIgnoreCase))
+                {
+                    thresholdAct = ThresholdAction.Fail;
+                }
+                else if (_thresholdAct.Equals("warning", StringComparison.OrdinalIgnoreCase))
+                {
+                    thresholdAct = ThresholdAction.Warning;
                 }
 
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
@@ -230,7 +248,12 @@ namespace Coverlet.MSbuild.Tasks
                         exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {_threshold}");
                     }
 
-                    throw new Exception(exceptionMessageBuilder.ToString());
+                    if(thresholdAct == ThresholdAction.Fail)
+                    {
+                        throw new Exception(exceptionMessageBuilder.ToString());
+                    }
+
+                    _logger.LogWarning(exceptionMessageBuilder.ToString());
                 }
             }
             catch (Exception ex)
