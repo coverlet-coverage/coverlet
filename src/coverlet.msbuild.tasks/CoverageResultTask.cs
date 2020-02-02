@@ -23,7 +23,7 @@ namespace Coverlet.MSbuild.Tasks
         private string _thresholdStat;
         private string _coverletMultiTargetFrameworksCurrentTFM;
         private ITaskItem _instrumenterState;
-        private ILogger _logger;
+        private ILogger logger;
 
         [Required]
         public string Output
@@ -76,7 +76,7 @@ namespace Coverlet.MSbuild.Tasks
         public override bool Execute()
         {
             IServiceProvider serviceProvider = new Services().GetServiceProvider(Log);
-            _logger = serviceProvider.GetService<ILogger>();
+            logger = serviceProvider.GetService<ILogger>();
 
             try
             {
@@ -85,14 +85,14 @@ namespace Coverlet.MSbuild.Tasks
                 IFileSystem fileSystem = serviceProvider.GetService<IFileSystem>();
                 if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
                 {
-                    _logger.LogError("Result of instrumentation task not found");
+                    logger.LogError("Result of instrumentation task not found");
                     return false;
                 }
 
                 Coverage coverage = null;
                 using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
                 {
-                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, serviceProvider.GetService<IInstrumentationHelper>(), fileSystem);
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this.logger, serviceProvider.GetService<IInstrumentationHelper>(), fileSystem);
                 }
 
                 try
@@ -102,7 +102,7 @@ namespace Coverlet.MSbuild.Tasks
                 catch (Exception ex)
                 {
                     // We don't want to block coverage for I/O errors
-                    _logger.LogWarning($"Exception during instrument state deletion, file name '{InstrumenterState.ItemSpec}' exception message '{ex.Message}'");
+                    logger.LogWarning($"Exception during instrument state deletion, file name '{InstrumenterState.ItemSpec}' exception message '{ex.Message}'");
                 }
 
                 CoverageResult result = coverage.GetCoverageResult();
@@ -234,7 +234,7 @@ namespace Coverlet.MSbuild.Tasks
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex);
+                logger.LogError(ex);
                 return false;
             }
 

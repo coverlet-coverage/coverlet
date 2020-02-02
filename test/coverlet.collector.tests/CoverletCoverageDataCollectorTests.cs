@@ -7,7 +7,6 @@ using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Moq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.Extensions.DependencyInjection;
 using Coverlet.Core;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
@@ -15,7 +14,6 @@ using Xunit;
 using Coverlet.Collector.DataCollection;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Abstracts;
-using Coverlet.Core.Helpers;
 
 namespace Coverlet.Collector.Tests
 {
@@ -29,14 +27,13 @@ namespace Coverlet.Collector.Tests
         private Mock<ICoverageWrapper> _mockCoverageWrapper;
         private Mock<ICountDownEventFactory> _mockCountDownEventFactory;
         private XmlElement _configurationElement;
-        private Mock<DataCollectionLogger> _mockLogger;
-        private ServiceProvider _serviceProvider;
+        private Mock<DataCollectionLogger> _mockCollectionLogger;
 
         public CoverletCoverageDataCollectorTests()
         {
             _mockDataColectionEvents = new Mock<DataCollectionEvents>();
             _mockDataCollectionSink = new Mock<DataCollectionSink>();
-            _mockLogger = new Mock<DataCollectionLogger>();
+            _mockCollectionLogger = new Mock<DataCollectionLogger>();
             _configurationElement = null;
 
             TestCase testcase = new TestCase { Id = Guid.NewGuid() };
@@ -44,36 +41,6 @@ namespace Coverlet.Collector.Tests
             _context = new DataCollectionEnvironmentContext(_dataCollectionContext);
             _mockCoverageWrapper = new Mock<ICoverageWrapper>();
             _mockCountDownEventFactory = new Mock<ICountDownEventFactory>();
-
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
-            serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
-            serviceCollection.AddTransient<IFileSystem, FileSystem>();
-            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-            serviceCollection.AddTransient<ILogger, TestCoverletLogger>();
-            _serviceProvider = serviceCollection.BuildServiceProvider();
-        }
-
-        class TestCoverletLogger : ILogger {
-            public void LogVerbose(string message)
-            {
-            }
-
-            public void LogInformation(string message, bool important = false)
-            {
-            }
-
-            public void LogWarning(string message)
-            {
-            }
-
-            public void LogError(string message)
-            {
-            }
-
-            public void LogError(Exception exception)
-            {
-            }
         }
 
         [Fact]
@@ -84,7 +51,7 @@ namespace Coverlet.Collector.Tests
                     _configurationElement,
                     _mockDataColectionEvents.Object,
                     _mockDataCollectionSink.Object,
-                    _mockLogger.Object,
+                    _mockCollectionLogger.Object,
                     _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
 
@@ -106,10 +73,10 @@ namespace Coverlet.Collector.Tests
                     null,
                     _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
-            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), _serviceProvider.GetService<IInstrumentationHelper>(), _serviceProvider.GetService<IFileSystem>());
+            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), new Mock<IInstrumentationHelper>().Object, new Mock<IFileSystem>().Object);
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
-            _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>(), _serviceProvider.GetService<IInstrumentationHelper>(), _serviceProvider.GetService<IFileSystem>())).Returns(coverage);
+            _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>(), new Mock<IInstrumentationHelper>().Object, new Mock<IFileSystem>().Object)).Returns(coverage);
 
             _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
@@ -125,7 +92,7 @@ namespace Coverlet.Collector.Tests
                     _configurationElement,
                     _mockDataColectionEvents.Object,
                     _mockDataCollectionSink.Object,
-                    _mockLogger.Object,
+                    _mockCollectionLogger.Object,
                     _context);
 
             string module = GetType().Assembly.Location;
@@ -176,7 +143,7 @@ namespace Coverlet.Collector.Tests
                 _configurationElement,
                 _mockDataColectionEvents.Object,
                 mockDataCollectionSink.Object,
-                _mockLogger.Object,
+                _mockCollectionLogger.Object,
                 _context);
 
             var sessionStartProperties = new Dictionary<string, object> { { "TestSources", new List<string> { "Test" } } };
@@ -196,7 +163,7 @@ namespace Coverlet.Collector.Tests
                     _configurationElement,
                     _mockDataColectionEvents.Object,
                     _mockDataCollectionSink.Object,
-                    _mockLogger.Object,
+                    _mockCollectionLogger.Object,
                     _context);
             IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
 
@@ -206,7 +173,7 @@ namespace Coverlet.Collector.Tests
 
             _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
-            _mockLogger.Verify(x => x.LogWarning(_dataCollectionContext,
+            _mockCollectionLogger.Verify(x => x.LogWarning(_dataCollectionContext,
                 It.Is<string>(y => y.Contains("CoverletDataCollectorException"))));
         }
     }

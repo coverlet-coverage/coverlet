@@ -303,6 +303,8 @@ namespace Coverlet.Core.Tests
 
     static class TestInstrumentationHelper
     {
+        static IServiceProvider _processWideContainer;
+
         /// <summary>
         /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");
         ///                 TestInstrumentationHelper.GenerateHtmlReport(result);
@@ -342,18 +344,8 @@ namespace Coverlet.Core.Tests
                 Assert.DoesNotContain("not found for module: ", message);
             });
 
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
-            serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
-            serviceCollection.AddTransient<IFileSystem, FileSystem>();
-            serviceCollection.AddTransient<ILogger, Logger>();
-            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
-
-            // Setup correct retry helper to avoid exception in InstrumentationHelper.RestoreOriginalModules on remote process exit
-            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-
             CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, serviceProvider.GetService<IInstrumentationHelper>(), new FileSystem());
+            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem());
             return coverage.GetCoverageResult();
         }
 
@@ -364,22 +356,7 @@ namespace Coverlet.Core.Tests
                 throw new ArgumentNullException(nameof(persistPrepareResultToFile));
             }
 
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
-            serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
-            serviceCollection.AddTransient<IFileSystem, FileSystem>();
-            serviceCollection.AddTransient<ILogger, Logger>();
-            if (disableRestoreModules)
-            {
-                serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
-            }
-            else
-            {
-                serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-            }
-
-            // Setup correct retry helper to avoid exception in InstrumentationHelper.RestoreOriginalModules on remote process exit
-            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+            SetContainer(disableRestoreModules);
 
             // Rename test file to avoid locks
             string location = typeof(T).Assembly.Location;
@@ -403,7 +380,7 @@ namespace Coverlet.Core.Tests
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), serviceProvider.GetService<IInstrumentationHelper>(), serviceProvider.GetService<IFileSystem>());
+            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
@@ -431,6 +408,24 @@ namespace Coverlet.Core.Tests
             }
 
             return prepareResult;
+        }
+
+        static void SetContainer(bool disableRestoreModules)
+        {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<ILogger, Logger>();
+            if (disableRestoreModules)
+            {
+                serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
+            }
+            else
+            {
+                serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+            }
+            _processWideContainer = serviceCollection.BuildServiceProvider();
         }
     }
 
@@ -519,6 +514,7 @@ namespace Coverlet.Core.Tests
         {
             if (!string.IsNullOrEmpty(_logFile))
                 File.AppendAllText(_logFile, message + Environment.NewLine);
+            Assert.DoesNotContain("not found for module:", message);
         }
 
         public void LogWarning(string message)

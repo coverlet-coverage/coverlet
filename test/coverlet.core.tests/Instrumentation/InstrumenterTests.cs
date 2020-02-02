@@ -20,8 +20,7 @@ namespace Coverlet.Core.Instrumentation.Tests
 {
     public class InstrumenterTests
     {
-        private static readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
-        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), _mockLogger.Object);
+        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object);
 
         [Fact]
         public void TestCoreLibInstrumentation()
@@ -76,8 +75,8 @@ namespace Coverlet.Core.Instrumentation.Tests
                 }
             });
 
-            InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object, _mockLogger.Object);
-            Instrumenter instrumenter = new Instrumenter(Path.Combine(directory.FullName, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, _mockLogger.Object, instrumentationHelper, partialMockFileSystem.Object);
+            InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object, new Mock<ILogger>().Object);
+            Instrumenter instrumenter = new Instrumenter(Path.Combine(directory.FullName, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, new Mock<ILogger>().Object, instrumentationHelper, partialMockFileSystem.Object);
 
             Assert.True(instrumenter.CanInstrument());
             InstrumenterResult result = instrumenter.Instrument();
@@ -220,7 +219,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
 
             module = Path.Combine(directory.FullName, destModule);
-            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
+            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, false, new Mock<ILogger>().Object, _instrumentationHelper, new FileSystem());
             return new InstrumenterTest
             {
                 Instrumenter = instrumenter,
@@ -244,7 +243,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument_NetStandardAwareAssemblyResolver_FromRuntime()
         {
-            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(null, _mockLogger.Object);
+            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(null, new Mock<ILogger>().Object);
 
             // We ask for "official" netstandard.dll implementation with know MS public key cc7b13ffcd2ddd51 same in all runtime
             AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse("netstandard, Version=0.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51"));
@@ -278,7 +277,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 File.WriteAllBytes("netstandard.dll", dllStream.ToArray());
             }
 
-            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(newAssemlby.Location, _mockLogger.Object);
+            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(newAssemlby.Location, new Mock<ILogger>().Object);
             AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse(newAssemlby.FullName));
 
             // We check if final netstandard.dll resolved is local folder one and not "official" netstandard.dll
@@ -440,7 +439,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                     }
                 });
 
-                InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object, _mockLogger.Object);
+                InstrumentationHelper instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object, new Mock<ILogger>().Object);
                 string sample = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), dllFileName).First();
                 var loggerMock = new Mock<ILogger>();
                 Instrumenter instrumenter = new Instrumenter(sample, "_75d9f96508d74def860a568f426ea4a4_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object);
@@ -481,7 +480,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument_AspNetCoreSharedFrameworkResolver()
         {
-            AspNetCoreSharedFrameworkResolver resolver = new AspNetCoreSharedFrameworkResolver(_mockLogger.Object);
+            AspNetCoreSharedFrameworkResolver resolver = new AspNetCoreSharedFrameworkResolver(new Mock<ILogger>().Object);
             CompilationLibrary compilationLibrary = new CompilationLibrary(
                 "package",
                 "Microsoft.Extensions.Logging.Abstractions",
@@ -499,7 +498,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext()
         {
-            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(Assembly.GetExecutingAssembly().Location, _mockLogger.Object);
+            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(Assembly.GetExecutingAssembly().Location, new Mock<ILogger>().Object);
             AssemblyDefinition asm = netstandardResolver.TryWithCustomResolverOnDotNetCore(new AssemblyNameReference("Microsoft.Extensions.Logging.Abstractions", new Version("2.2.0")));
             Assert.NotNull(asm);
         }
