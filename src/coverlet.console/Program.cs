@@ -10,7 +10,6 @@ using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Enums;
-using Coverlet.Core.Extensions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using McMaster.Extensions.CommandLineUtils;
@@ -30,7 +29,9 @@ namespace Coverlet.Console
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             DependencyInjection.Set(serviceCollection.BuildServiceProvider());
 
-            var logger = new ConsoleLogger();
+            var logger = (ConsoleLogger) DependencyInjection.Current.GetService<ILogger>();
+            var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+
             var app = new CommandLineApplication();
             app.Name = "coverlet";
             app.FullName = "Cross platform .NET Core code coverage tool";
@@ -70,7 +71,6 @@ namespace Coverlet.Console
                     // Adjust log level based on user input.
                     logger.Level = verbosity.ParsedValue;
                 }
-                var fileSystem = DependencyInjectionExtensions.GetService<IFileSystem>(DependencyInjection.Current);
                 Coverage coverage = new Coverage(module.Value,
                     includeFilters.Values.ToArray(),
                     includeDirectories.Values.ToArray(),
@@ -82,7 +82,7 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger,
-                    DependencyInjectionExtensions.GetService<IInstrumentationHelper>(DependencyInjection.Current),
+                    DependencyInjection.Current.GetService<IInstrumentationHelper>(),
                     fileSystem);
                 coverage.PrepareModules();
 
