@@ -24,11 +24,19 @@ namespace Coverlet.Integration.Tests
         }
     }
 
+    public class TestSDK_16_5_0 : Collectors
+    {
+        public TestSDK_16_5_0()
+        {
+            TestSDKVersion = "16.5.0";
+        }
+    }
+
     public class TestSDK_Preview : Collectors
     {
         public TestSDK_Preview()
         {
-            TestSDKVersion = "16.5.0-preview-20200110-02";
+            TestSDKVersion = "16.5.0-preview-20200203-01";
         }
     }
 
