@@ -105,12 +105,12 @@ The following command will compare the threshold value with the overall total co
 dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line /p:ThresholdStat=total
 ```
 
-You can also specify what action to take when the the coverage is below the threshold value using the `/p:ThresholdAct` option. the accepted values are:
+You can also specify what action to take when the the coverage is below the threshold value using the `/p:ThresholdAct` option. The accepted values are:
 
 * `fail`: which fails the build and is the default option
-* `warning`: which will not stop the build and only gives warning
+* `warning`: which will not stop the build and only gives a warning console message
 
-The following will give give a warning (but let's the build to continue) when the threshold value is below 80:
+The following will give a warning (but let's the build to continue) when the threshold value is below 80:
 
 ```bash
 dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdAct=warning

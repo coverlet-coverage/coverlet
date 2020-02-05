@@ -248,12 +248,15 @@ namespace Coverlet.MSbuild.Tasks
                         exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {_threshold}");
                     }
 
-                    if(thresholdAct == ThresholdAction.Fail)
+                    switch (thresholdAct)
                     {
-                        throw new Exception(exceptionMessageBuilder.ToString());
+                        case ThresholdAction.Warning:
+                            _logger.LogWarning(exceptionMessageBuilder.ToString());
+                            break;
+                        case ThresholdAction.Fail:
+                        default:
+                            throw new Exception(exceptionMessageBuilder.ToString());
                     }
-
-                    _logger.LogWarning(exceptionMessageBuilder.ToString());
                 }
             }
             catch (Exception ex)

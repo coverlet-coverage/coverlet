@@ -205,10 +205,10 @@ namespace Coverlet.Console
                 {
                     exitCode += (int)CommandExitCodes.TestFailed;
                 }
+
                 thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, dThreshold, thresholdTypeFlags, dThresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
-                    exitCode += (int)CommandExitCodes.CoverageBelowThreshold;
                     var exceptionMessageBuilder = new StringBuilder();
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                     {
@@ -225,12 +225,16 @@ namespace Coverlet.Console
                         exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} method coverage is below the specified {dThreshold}");
                     }
 
-                    if (dThresholdAct == ThresholdAction.Fail)
+                    switch (dThresholdAct)
                     {
-                        throw new Exception(exceptionMessageBuilder.ToString());
+                        case ThresholdAction.Warning:
+                            logger.LogWarning(exceptionMessageBuilder.ToString());
+                            break;
+                        case ThresholdAction.Fail:
+                        default:
+                            exitCode += (int)CommandExitCodes.CoverageBelowThreshold;
+                            throw new Exception(exceptionMessageBuilder.ToString());
                     }
-
-                    logger.LogWarning(exceptionMessageBuilder.ToString());
                 }
 
                 return exitCode;
