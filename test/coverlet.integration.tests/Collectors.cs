@@ -60,8 +60,8 @@ namespace Coverlet.Integration.Tests
         private protected virtual void AssertCollectorsInjection(ClonedTemplateProject clonedTemplateProject)
         {
             // Check out/in process collectors injection
-            Assert.Contains("[coverlet]", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()));
-            Assert.Contains("[coverlet]", File.ReadAllText(clonedTemplateProject.GetFiles("log.host.*.txt").Single()));
+            Assert.Contains("[coverlet]Initializing CoverletCoverageDataCollector with configuration:", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()));
+            Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(clonedTemplateProject.GetFiles("log.host.*.txt").Single()));
         }
 
         [Fact]
