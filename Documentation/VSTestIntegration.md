@@ -9,8 +9,8 @@ A sample project file looks like:
     <TargetFrameworks>netcoreapp3.0;netcoreapp2.1;net46</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Temporary preview reference with essential vstest bug fix -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20200116-01" />
+    <!-- Minimum version 16.5.0 -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <!-- Update this reference when new version is released -->
     <PackageReference Include="coverlet.collector" Version="1.2.0">
       <PrivateAssets>all</PrivateAssets>
@@ -21,7 +21,6 @@ A sample project file looks like:
 ...
 </Project>
 ```
-As you can see in sample above we're referencing a preview version of `Microsoft.NET.Test.Sdk`, this is temporary needed because there is a bug inside vstest platform during collectors loading([details](https://github.com/microsoft/vstest/issues/2205)). **At the moment there isn't a stable package released with fix so we need to use a preview**.
 
 The reference to `coverlet.collector` package is included by default with xunit template test (`dotnet new xunit`), you only need to update the package for new versions like any other package reference.
 
