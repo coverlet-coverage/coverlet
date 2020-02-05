@@ -64,11 +64,10 @@ For instance
 ```xml
 <ItemGroup>
   ...
-  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20191115-01" />
+  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
   ...
 </ItemGroup>
 ```
-***N.B. This document was updated after preview release of test platform package with fix, you should use official version of the package.***  
 2) You can pass custom *runsetting* file like this
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
