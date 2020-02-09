@@ -5,8 +5,11 @@ using System.IO;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Extensions;
+using Coverlet.Core.Helpers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.Extensions.DependencyInjection;
+using ILogger = Coverlet.Core.Abstracts.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
 {
@@ -119,6 +122,18 @@ namespace Coverlet.MSbuild.Tasks
         {
             WaitForDebuggerIfEnabled();
 
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton<IRetryHelper, RetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<IConsole, SystemConsole>();
+            serviceCollection.AddTransient<ILogger, MSBuildLogger>(x => _logger);
+
+            // We need to keep singleton/static semantics
+            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+
+            DependencyInjection.Set(serviceCollection.BuildServiceProvider());
+
             try
             {
                 var includeFilters = _include?.Split(',');
@@ -126,7 +141,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludeFilters = _exclude?.Split(',');
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
-                var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+                var fileSystem = DependencyInjectionExtensions.GetService<IFileSystem>(DependencyInjection.Current);
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
@@ -139,7 +154,7 @@ namespace Coverlet.MSbuild.Tasks
                     _mergeWith,
                     _useSourceLink,
                     _logger,
-                    DependencyInjection.Current.GetService<IInstrumentationHelper>(),
+                    DependencyInjectionExtensions.GetService<IInstrumentationHelper>(DependencyInjection.Current),
                     fileSystem);
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
