@@ -21,7 +21,6 @@ namespace Coverlet.Core.Instrumentation.Tests
     public class InstrumenterTests
     {
         private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object);
-        //private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
 
         [Fact]
         public void TestCoreLibInstrumentation()
