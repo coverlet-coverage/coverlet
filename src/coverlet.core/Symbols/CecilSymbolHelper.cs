@@ -99,7 +99,7 @@ namespace Coverlet.Core.Symbols
                 return list;
 
             UInt32 ordinal = 0;
-            var instructions = methodDefinition.Body.Instructions;
+            var instructions = methodDefinition.Body.Instructions.ToList();
 
             bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
             bool isRecognizedMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsRecognizedMoveNextInsideAsyncStateMachineProlog(methodDefinition);
@@ -244,10 +244,9 @@ namespace Coverlet.Core.Symbols
 
                             
                             So starting from branch instruction 'beq.s', we can go back to starting block instruction 
-                            which is always 5 step before and then check if this istruction is the end of an exception handler block
+                            which is always 5 step before and then check if this instruction is the end of an exception handler block
                         */
-
-                        int branchIndex = instructions.IndexOf(instruction);
+                        int branchIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
                         if (
                                 branchIndex >= 5 &&
                                 instructions[branchIndex - 5].OpCode == OpCodes.Ldarg &&
@@ -272,7 +271,6 @@ namespace Coverlet.Core.Symbols
 
                             So we can go back to previous instructions and skip this branch if recognize that type of code block
                         */
-
                         if (
                                 branchIndex >= 3 && // avoid out of range exception (need almost 3 instruction before the branch)
                                 instructions[branchIndex - 3].OpCode == OpCodes.Isinst &&
@@ -315,7 +313,7 @@ namespace Coverlet.Core.Symbols
 
         private static bool BuildPointsForConditionalBranch(List<BranchPoint> list, Instruction instruction,
             int branchingInstructionLine, string document, int branchOffset, int pathCounter,
-            Collection<Instruction> instructions, ref uint ordinal, MethodDefinition methodDefinition)
+            List<Instruction> instructions, ref uint ordinal, MethodDefinition methodDefinition)
         {
             // Add Default branch (Path=0)
 
@@ -362,15 +360,92 @@ namespace Coverlet.Core.Symbols
             return true;
         }
 
-        internal static Instruction GetPreviousNoNopInstruction(Instruction current)
+        /*
+            Need to skip instrumentation after exception re-throw inside catch block (only for async state machine MoveNext())
+            es:
+            try 
+            {
+                ...
+            }
+            catch
+            {
+                await ...
+                throw; 
+            } // need to skip instrumentation here
+
+            We can detect this type of code block by searching for method ExceptionDispatchInfo.Throw() inside the compiled IL
+            ...
+            // ExceptionDispatchInfo.Capture(ex).Throw();
+		    IL_00c6: ldloc.s 6
+		    IL_00c8: call class [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Capture(class [System.Runtime]System.Exception)
+		    IL_00cd: callvirt instance void [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()
+            // NOT COVERABLE
+		    IL_00d2: nop
+		    IL_00d3: nop
+            ...
+
+            In case of nested code blocks inside catch we need to detect also goto calls
+            ...
+            // ExceptionDispatchInfo.Capture(ex).Throw();
+		    IL_00d3: ldloc.s 7
+		    IL_00d5: call class [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Capture(class [System.Runtime]System.Exception)
+		    IL_00da: callvirt instance void [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()
+            // NOT COVERABLE
+		    IL_00df: nop
+		    IL_00e0: nop
+		    IL_00e1: br.s IL_00ea
+            ...
+            // NOT COVERABLE
+            IL_00ea: nop                
+		    IL_00eb: br.s IL_00ed
+            ...
+        */
+        internal static bool IsNotCoverableInstructionAfterExceptionThrown(Instruction instruction)
         {
-            Instruction instruction = current.Previous;
-            for (; instruction != null && instruction.OpCode == OpCodes.Nop; instruction = instruction.Previous) { }
-            return instruction;
+            // detect if current instruction is not coverable
+            Instruction prev = GetPreviousNoNopInstruction(instruction);
+            if (prev != null &&
+                prev.OpCode == OpCodes.Callvirt &&
+                prev.Operand is MethodReference mr && mr.FullName == "System.Void System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()")
+            {
+                return true;
+            }
+
+            // find the caller of current instruction and detect if not coverable
+            prev = instruction.Previous;
+            while (prev != null)
+            {
+                if (prev.Operand is Instruction i && i.Offset == instruction.Offset) // caller
+                {
+                    prev = GetPreviousNoNopInstruction(prev);
+                    break;
+                }
+                prev = prev.Previous;
+            }
+
+            return prev != null &&
+                prev.OpCode == OpCodes.Callvirt &&
+                prev.Operand is MethodReference mr1 && mr1.FullName == "System.Void System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()";
+
+            // local helper
+            static Instruction GetPreviousNoNopInstruction(Instruction i)
+            {
+                Instruction instruction = i.Previous;
+                while (instruction != null)
+                {
+                    if (instruction.OpCode != OpCodes.Nop)
+                    {
+                        return instruction;
+                    }
+                    instruction = instruction.Previous;
+                }
+
+                return null;
+            }
         }
 
         private static uint BuildPointsForBranch(List<BranchPoint> list, Instruction then, int branchingInstructionLine, string document,
-            int branchOffset, uint ordinal, int pathCounter, BranchPoint path0, Collection<Instruction> instructions, MethodDefinition methodDefinition)
+            int branchOffset, uint ordinal, int pathCounter, BranchPoint path0, List<Instruction> instructions, MethodDefinition methodDefinition)
         {
             var pathOffsetList1 = GetBranchPath(@then);
 

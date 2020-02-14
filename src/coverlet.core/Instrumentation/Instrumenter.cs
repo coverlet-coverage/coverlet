@@ -447,39 +447,11 @@ namespace Coverlet.Core.Instrumentation
                 var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
                 var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
 
-                /*
-                    Skip instrumentation after exception re-throw insiede catch block (only for async state machine MoveNext())
-                    es:
-                    try 
-                    {
-                        ...
-                    }
-                    catch
-                    {
-                        await ...
-                        throw; 
-                    } // need to skip instrumentation here
-
-                    We can detect this type of code block by searching for method ExceptionDispatchInfo.Throw() inside the compiled IL
-                    ...
-                    // ExceptionDispatchInfo.Capture(ex).Throw();
-		            IL_00c6: ldloc.s 6
-		            IL_00c8: call class [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Capture(class [System.Runtime]System.Exception)
-		            IL_00cd: callvirt instance void [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()
-		            // (no C# code)
-		            IL_00d2: nop
-		            IL_00d3: nop
-                    ...
-                */
-                Instruction previous;
-                if (
-                        CecilSymbolHelper.IsMoveNextInsideAsyncStateMachine(method) &&
-                        (previous = CecilSymbolHelper.GetPreviousNoNopInstruction(instruction)) != null &&
-                        previous != null &&
-                        previous.OpCode == OpCodes.Callvirt &&
-                        previous.Operand is MethodReference mr && mr.FullName == "System.Void System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()"
-                    )
+                // Check if the instruction is coverable
+                if (CecilSymbolHelper.IsMoveNextInsideAsyncStateMachine(method) &&
+                    CecilSymbolHelper.IsNotCoverableInstructionAfterExceptionThrown(instruction))
                 {
+                    index++;
                     continue;
                 }
 

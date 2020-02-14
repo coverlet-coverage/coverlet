@@ -20,20 +20,30 @@ namespace Coverlet.Core.Tests
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<CatchBlock>(instance =>
                     {
                         instance.Test();
+                        instance.Test_Catch();
                         ((Task)instance.TestAsync()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task)instance.TestAsync_Catch()).ConfigureAwait(false).GetAwaiter().GetResult();
+
+                        instance.Test(true);
+                        instance.Test_Catch(true);
+                        ((Task)instance.TestAsync(true)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task)instance.TestAsync_Catch(true)).ConfigureAwait(false).GetAwaiter().GetResult();
+
+                        instance.Test(false);
+                        instance.Test_Catch(false);
+                        ((Task)instance.TestAsync(false)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task)instance.TestAsync_Catch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize);
+                    }, persistPrepareResultToFile: pathSerialize, disableRestoreModules: true);
                     return 0;
-                }, path).Dispose();
+                }, path, invokeInProcess: true).Dispose();
 
-                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
-
-                result.Document("Instrumentation.CatchBlock.cs")
-                    .AssertLinesCoveredAllBut(BuildConfiguration.Debug,
-                        41, 
-                        51)
-                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0) 
+                var res = TestInstrumentationHelper.GetCoverageResult(path);
+                res.GenerateReport(show: true)
+                    .Document("Instrumentation.CatchBlock.cs")
+                    .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 45, 59, 113, 127)
+                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 2)
                     ;
             }
             finally
