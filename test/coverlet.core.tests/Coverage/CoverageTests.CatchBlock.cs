@@ -34,6 +34,21 @@ namespace Coverlet.Core.Tests
                         ((Task)instance.TestAsync(false)).ConfigureAwait(false).GetAwaiter().GetResult();
                         ((Task)instance.TestAsync_Catch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
 
+                        instance.Test_WithTypedCatch();
+                        instance.Test_Catch_WithTypedCatch();
+                        ((Task)instance.TestAsync_WithTypedCatch()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task)instance.TestAsync_Catch_WithTypedCatch()).ConfigureAwait(false).GetAwaiter().GetResult();
+
+                        instance.Test_WithTypedCatch(true);
+                        instance.Test_Catch_WithTypedCatch(true);
+                        ((Task)instance.TestAsync_WithTypedCatch(true)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task)instance.TestAsync_Catch_WithTypedCatch(true)).ConfigureAwait(false).GetAwaiter().GetResult();
+
+                        instance.Test_WithTypedCatch(false);
+                        instance.Test_Catch_WithTypedCatch(false);
+                        ((Task)instance.TestAsync_WithTypedCatch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task)instance.TestAsync_Catch_WithTypedCatch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
+
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize, disableRestoreModules: true);
                     return 0;
@@ -42,8 +57,8 @@ namespace Coverlet.Core.Tests
                 var res = TestInstrumentationHelper.GetCoverageResult(path);
                 res.GenerateReport(show: true)
                     .Document("Instrumentation.CatchBlock.cs")
-                    .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 45, 59, 113, 127)
-                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 2)
+                    .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 45, 59, 113, 127, 137, 138, 139, 153, 154, 155, 156, 175, 189, 199, 200, 201, 222, 223, 224, 225, 252, 266)
+                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 4)
                     ;
             }
             finally
