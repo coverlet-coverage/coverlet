@@ -337,7 +337,7 @@ namespace Coverlet.Core.Tests
 
         public static CoverageResult GetCoverageResult(string filePath)
         {
-            SetTestContainer();
+            if (_processWideContainer == null) SetTestContainer();
             using var result = new FileStream(filePath, FileMode.Open);
             var logger = new Mock<ILogger>();
             logger.Setup(l => l.LogVerbose(It.IsAny<string>())).Callback((string message) =>
@@ -412,24 +412,20 @@ namespace Coverlet.Core.Tests
 
         private static void SetTestContainer(bool disableRestoreModules = false)
         {
-            LazyInitializer.EnsureInitialized(ref _processWideContainer,
-                () =>
-                {
-                    var serviceCollection = new ServiceCollection();
-                    serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
-                    serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
-                    serviceCollection.AddTransient<IFileSystem, FileSystem>();
-                    serviceCollection.AddTransient<ILogger, Logger>();
-                    if (disableRestoreModules)
-                    {
-                        serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
-                    }
-                    else
-                    {
-                        serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-                    }
-                    return serviceCollection.BuildServiceProvider();
-                });
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<ILogger, Logger>();
+            if (disableRestoreModules)
+            {
+                serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
+            }
+            else
+            {
+                serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+            }
+            _processWideContainer = serviceCollection.BuildServiceProvider();
         }
     }
 
