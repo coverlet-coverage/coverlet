@@ -80,10 +80,10 @@ namespace Coverlet.Core.Tests
                         ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize, disableRestoreModules: true);
+                    persistPrepareResultToFile: pathSerialize);
 
                     return 0;
-                }, path, invokeInProcess: true).Dispose();
+                }, path).Dispose();
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.AsyncAwait.cs")
@@ -111,10 +111,10 @@ namespace Coverlet.Core.Tests
                         ((ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize, disableRestoreModules: true);
+                    persistPrepareResultToFile: pathSerialize);
 
                     return 0;
-                }, path, invokeInProcess: true).Dispose();
+                }, path).Dispose();
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.AsyncAwait.cs")

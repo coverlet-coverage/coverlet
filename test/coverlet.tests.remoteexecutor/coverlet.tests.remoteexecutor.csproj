@@ -15,7 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
   </ItemGroup>
 
 </Project>

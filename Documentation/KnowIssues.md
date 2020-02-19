@@ -45,9 +45,8 @@ This happen also if there are other "piece of code" during testing that slow dow
 We found problem for instance with test that uses RabbitMQ.
 
 *Solution:* 
-The only way to solve this issue is to use collectors integration https://github.com/tonerdo/coverlet#vstest-integration.  
+The only way to solve this issue is to use collectors integration https://github.com/tonerdo/coverlet#vstest-integration-preferred-due-to-know-issue.  
 With collector we're injected in test host throught a in-proc collector that talk with vstest platform so we can signal when we end our work.  
-Check requirements https://github.com/tonerdo/coverlet#requirements you need to run *.NET Core SDK v2.2.401 or newer*.
 
 ## 2) Upgrade `coverlet.collector` to version > 1.0.0
 
@@ -64,11 +63,10 @@ For instance
 ```xml
 <ItemGroup>
   ...
-  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20191115-01" />
+  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
   ...
 </ItemGroup>
 ```
-***N.B. This document was updated after preview release of test platform package with fix, you should use official version of the package.***  
 2) You can pass custom *runsetting* file like this
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
