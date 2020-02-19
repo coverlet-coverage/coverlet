@@ -24,11 +24,19 @@ namespace Coverlet.Integration.Tests
         }
     }
 
+    public class TestSDK_16_5_0 : Collectors
+    {
+        public TestSDK_16_5_0()
+        {
+            TestSDKVersion = "16.5.0";
+        }
+    }
+
     public class TestSDK_Preview : Collectors
     {
         public TestSDK_Preview()
         {
-            TestSDKVersion = "16.5.0-preview-20200110-02";
+            TestSDKVersion = "16.5.0-preview-20200203-01";
         }
     }
 
@@ -52,8 +60,8 @@ namespace Coverlet.Integration.Tests
         private protected virtual void AssertCollectorsInjection(ClonedTemplateProject clonedTemplateProject)
         {
             // Check out/in process collectors injection
-            Assert.Contains("[coverlet]", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()));
-            Assert.Contains("[coverlet]", File.ReadAllText(clonedTemplateProject.GetFiles("log.host.*.txt").Single()));
+            Assert.Contains("[coverlet]Initializing CoverletCoverageDataCollector with configuration:", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()));
+            Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(clonedTemplateProject.GetFiles("log.host.*.txt").Single()));
         }
 
         [Fact]

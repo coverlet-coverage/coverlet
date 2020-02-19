@@ -42,17 +42,10 @@ After the above command is run, a `coverage.cobertura.xml` file containing the r
 See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
 #### Requirements
-* _You need to be running .NET Core SDK v2.2.300 or newer_
-* _To run fully-featured collectors ([see #110](https://github.com/tonerdo/coverlet/issues/110)) you need to be running  .NET Core SDK v2.2.401 or newer_
-* _You need to reference version 16.1.0 and above of Microsoft.NET.Test.Sdk_
+* _You need to be running .NET Core SDK v2.2.401 or newer_
+* _You need to reference version 16.5.0 and above of Microsoft.NET.Test.Sdk_
 ```
-<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
-```
-#### Important temporary [know issue](Documentation/KnowIssues.md#2-upgrade-coverletcollector-to-version--100)
-
-*Current* recommended test sdk package to reference
-```
-<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20200116-01" />
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
 ```
 
 ### MSBuild Integration
@@ -141,6 +134,16 @@ See the [documentation](Documentation/ConsumeNightlyBuild.md)
 ## Issues & Contributions
 
 If you find a bug or have a feature request, please report them at this repository's issues section. See the [CONTRIBUTING GUIDE](CONTRIBUTING.md) for details on building and contributing to this project.
+
+## Coverlet Team
+
+Author and owner    
+* [Toni Solarin-Sodara](https://github.com/tonerdo)  
+
+Co-maintainers
+
+* [Peter Liljenberg](https://github.com/petli)  
+* [Marco Rossignoli](https://github.com/MarcoRossignoli)
 
 ## Code of Conduct
 
