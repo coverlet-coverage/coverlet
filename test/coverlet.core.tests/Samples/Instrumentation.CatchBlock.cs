@@ -266,5 +266,88 @@ namespace Coverlet.Core.Samples.Tests
             }
             catch { }
         }
+
+        public int Parse_WithNestedCatch(string str, bool condition)
+        {
+            try
+            {
+                try
+                {
+                    return int.Parse(str);
+                }
+                catch
+                {
+                    if (condition)
+                        throw new System.Exception();
+                    else
+                        throw;
+                }
+            }
+            catch (System.FormatException)
+            {
+                throw;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> ParseAsync_WithNestedCatch(string str, bool condition)
+        {
+            try
+            {
+                try
+                {
+                    return int.Parse(str);
+                }
+                catch 
+                {
+                    await Task.Delay(0);
+                    if (condition)
+                        throw new System.Exception();
+                    else
+                        throw;
+                }
+            }
+            catch (System.FormatException)
+            {
+                await Task.Delay(0);
+                throw;
+            }
+            catch
+            {
+                await Task.Delay(0); 
+                throw;
+            }
+        }
+
+        public void Test_WithNestedCatch(bool condition)
+        {
+            Parse_WithNestedCatch(nameof(Test).Length.ToString(), condition);
+        }
+
+        public void Test_Catch_WithNestedCatch(bool condition)
+        {
+            try
+            {
+                Parse_WithNestedCatch(nameof(Test), condition);
+            }
+            catch { }
+        }
+
+        public async Task TestAsync_WithNestedCatch(bool condition)
+        {
+            await ParseAsync_WithNestedCatch(nameof(Test).Length.ToString(), condition);
+        }
+
+        public async Task TestAsync_Catch_WithNestedCatch(bool condition)
+        {
+            try
+            {
+                await ParseAsync_WithNestedCatch(nameof(Test), condition);
+            }
+            catch { }
+        }
     }
 }

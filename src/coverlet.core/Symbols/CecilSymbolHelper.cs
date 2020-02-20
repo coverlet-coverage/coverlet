@@ -189,7 +189,7 @@ namespace Coverlet.Core.Symbols
                 */
                 if (instructions.Count - currentIndex > 3 && // check boundary
                     instructions[currentIndex].OpCode == OpCodes.Ldarg &&
-                    instructions[currentIndex + 1].OpCode == OpCodes.Ldfld && instructions[currentIndex + 1].Operand is FieldReference fr && fr.Name == "<>s__2" &&
+                    instructions[currentIndex + 1].OpCode == OpCodes.Ldfld && instructions[currentIndex + 1].Operand is FieldReference fr && fr.Name.StartsWith("<>s__") &&
                     instructions[currentIndex + 2].OpCode == OpCodes.Stloc)
                 {
                     currentIndex += 3;
@@ -490,6 +490,11 @@ namespace Coverlet.Core.Symbols
         */
         internal static bool IsNotCoverableInstructionAfterExceptionThrown(Instruction instruction)
         {
+            if (instruction.OpCode != OpCodes.Nop)
+            {
+                return false;
+            }
+
             // detect if current instruction is not coverable
             Instruction prev = GetPreviousNoNopInstruction(instruction);
             if (prev != null &&
@@ -503,7 +508,8 @@ namespace Coverlet.Core.Symbols
             prev = instruction.Previous;
             while (prev != null)
             {
-                if (prev.Operand is Instruction i && i.Offset == instruction.Offset) // caller
+                if (prev.Operand is Instruction i && (i.Offset == instruction.Offset || i.Offset == prev.Next.Offset)) // caller
+                //if (prev.Operand is Instruction i && i.Offset == instruction.Offset) // caller
                 {
                     prev = GetPreviousNoNopInstruction(prev);
                     break;
