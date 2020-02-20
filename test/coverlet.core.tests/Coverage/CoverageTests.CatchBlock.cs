@@ -60,16 +60,14 @@ namespace Coverlet.Core.Tests
                         ((Task)instance.TestAsync_Catch_WithNestedCatch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize, disableRestoreModules: true);
+                    }, persistPrepareResultToFile: pathSerialize);
                     return 0;
-                }, path, invokeInProcess: true).Dispose();
+                }, path).Dispose();
 
                 var res = TestInstrumentationHelper.GetCoverageResult(path);
-                res.GenerateReport(show: true)
-                    .Document("Instrumentation.CatchBlock.cs")
+                res.Document("Instrumentation.CatchBlock.cs")
                     .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 45, 59, 113, 127, 137, 138, 139, 153, 154, 155, 156, 175, 189, 199, 200, 201, 222, 223, 224, 225, 252, 266, 335, 349)
-                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 6)
-                    ;
+                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 6);
             }
             finally
             {
