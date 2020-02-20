@@ -165,7 +165,7 @@ namespace Coverlet.Core.Symbols
 		    // (no C# code)
 		    IL_006f: br IL_0191
          */
-        private static List<int> DetectCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(List<Instruction> instructions, Collection<ExceptionHandler> handlers)
+        private static int[] DetectCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(List<Instruction> instructions, Collection<ExceptionHandler> handlers)
         {
             List<int> detectedBranches = new List<int>();
 
@@ -217,7 +217,7 @@ namespace Coverlet.Core.Symbols
                 }
             }
 
-            return detectedBranches;
+            return detectedBranches.ToArray();
         }
 
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
@@ -233,11 +233,10 @@ namespace Coverlet.Core.Symbols
             bool isRecognizedMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsRecognizedMoveNextInsideAsyncStateMachineProlog(methodDefinition);
             bool skipFirstBranch = IsMoveNextInsideEnumerator(methodDefinition);
 
-            List<int> branchesToExclude = new List<int>();
-            if (isAsyncStateMachineMoveNext)
-            {
-                branchesToExclude.AddRange(DetectCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(instructions, methodDefinition.Body.ExceptionHandlers));
-            }
+            // Detect compiler generated branches to exclude
+            int[] compilerGeneratedBranchesToExclude = isAsyncStateMachineMoveNext ?
+                DetectCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(instructions, methodDefinition.Body.ExceptionHandlers) :
+                new int[0];
 
             foreach (Instruction instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
             {
@@ -249,7 +248,7 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
-                    if (branchesToExclude.Contains(instruction.Offset))
+                    if (compilerGeneratedBranchesToExclude.Contains(instruction.Offset))
                     {
                         continue;
                     }
