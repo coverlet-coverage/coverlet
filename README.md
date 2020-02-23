@@ -7,7 +7,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 # Main contents
 * [QuickStart](#Quick-Start)
 * [How It Works](#How-It-Works)
-* [Known Issues](#Know-Issues)
+* [Known Issues](#Known-Issues)
 * [Consume nightly build](#Consume-nightly-build)
 * [Feature samples](Documentation/Examples.md)
 * [Cake Add-In](#Cake.-Add-In)
@@ -22,7 +22,7 @@ Coverlet can be used through three different *drivers*
 * As a .NET Global tool  
 
 
-### VSTest Integration (preferred due to [know issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
+### VSTest Integration (preferred due to [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation
 ```bash
@@ -120,7 +120,7 @@ _Note: The assembly you'd like to get coverage for must be different from the as
 
 ## Known Issues
 
-Unfortunately we have some know issues, check it [here](Documentation/KnowIssues.md) 
+Unfortunately we have some known issues, check it [here](Documentation/KnownIssues.md) 
 
 ## Cake Add-In
 
