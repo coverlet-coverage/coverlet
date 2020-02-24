@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Instrumentation;
 
@@ -326,78 +327,86 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                if (!_fileSystem.Exists(result.HitsFilePath))
+                using (var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(result.HitsFilePath) + "_Mutex", out bool createdNew))
                 {
-                    // Hits file could be missed mainly for two reason
-                    // 1) Issue during module Unload()
-                    // 2) Instrumented module is never loaded or used so we don't have any hit to register and
-                    //    module tracker is never used
-                    _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
-                    continue;
-                }
+                    if (!createdNew)
+                        mutex.WaitOne();
 
-                List<Document> documents = result.Documents.Values.ToList();
-                if (_useSourceLink && result.SourceLink != null)
-                {
-                    var jObject = JObject.Parse(result.SourceLink)["documents"];
-                    var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
-                    foreach (var document in documents)
+                    if (!_fileSystem.Exists(result.HitsFilePath))
                     {
-                        document.Path = GetSourceLinkUrl(sourceLinkDocuments, document.Path);
+                        // Hits file could be missed mainly for two reason
+                        // 1) Issue during module Unload()
+                        // 2) Instrumented module is never loaded or used so we don't have any hit to register and
+                        //    module tracker is never used
+                        _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
+                        continue;
                     }
-                }
 
-                List<(int docIndex, int line)> zeroHitsLines = new List<(int docIndex, int line)>();
-                var documentsList = result.Documents.Values.ToList();
-                using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
-                using (var br = new BinaryReader(fs))
-                {
-                    int hitCandidatesCount = br.ReadInt32();
-
-                    // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
-
-                    for (int i = 0; i < hitCandidatesCount; ++i)
+                    List<Document> documents = result.Documents.Values.ToList();
+                    if (_useSourceLink && result.SourceLink != null)
                     {
-                        var hitLocation = result.HitCandidates[i];
-                        var document = documentsList[hitLocation.docIndex];
-                        int hits = br.ReadInt32();
-
-                        if (hitLocation.isBranch)
+                        var jObject = JObject.Parse(result.SourceLink)["documents"];
+                        var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
+                        foreach (var document in documents)
                         {
-                            var branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
-                            branch.Hits += hits;
+                            document.Path = GetSourceLinkUrl(sourceLinkDocuments, document.Path);
                         }
-                        else
-                        {
-                            for (int j = hitLocation.start; j <= hitLocation.end; j++)
-                            {
-                                var line = document.Lines[j];
-                                line.Hits += hits;
+                    }
 
-                                // We register 0 hit lines for later cleanup false positive of nested lambda closures
-                                if (hits == 0)
+                    List<(int docIndex, int line)> zeroHitsLines = new List<(int docIndex, int line)>();
+                    var documentsList = result.Documents.Values.ToList();
+                    using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
+                    using (var br = new BinaryReader(fs))
+                    {
+                        int hitCandidatesCount = br.ReadInt32();
+
+                        // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
+
+                        for (int i = 0; i < hitCandidatesCount; ++i)
+                        {
+                            var hitLocation = result.HitCandidates[i];
+                            var document = documentsList[hitLocation.docIndex];
+                            int hits = br.ReadInt32();
+
+                            if (hitLocation.isBranch)
+                            {
+                                var branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
+                                branch.Hits += hits;
+                            }
+                            else
+                            {
+                                for (int j = hitLocation.start; j <= hitLocation.end; j++)
                                 {
-                                    zeroHitsLines.Add((hitLocation.docIndex, line.Number));
+                                    var line = document.Lines[j];
+                                    line.Hits += hits;
+
+                                    // We register 0 hit lines for later cleanup false positive of nested lambda closures
+                                    if (hits == 0)
+                                    {
+                                        zeroHitsLines.Add((hitLocation.docIndex, line.Number));
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Cleanup nested state machine false positive hits
-                foreach (var (docIndex, line) in zeroHitsLines)
-                {
-                    foreach (var lineToCheck in documentsList[docIndex].Lines)
+                    // Cleanup nested state machine false positive hits
+                    foreach (var (docIndex, line) in zeroHitsLines)
                     {
-                        if (lineToCheck.Key == line)
+                        foreach (var lineToCheck in documentsList[docIndex].Lines)
                         {
-                            lineToCheck.Value.Hits = 0;
+                            if (lineToCheck.Key == line)
+                            {
+                                lineToCheck.Value.Hits = 0;
+                            }
                         }
                     }
-                }
 
-                _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
-                _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
+                    _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+                    _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
+
+                    mutex.ReleaseMutex();
+                }
             }
         }
 
