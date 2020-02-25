@@ -92,6 +92,7 @@ namespace Coverlet.Integration.Tests
             psi.WorkingDirectory = workingDirectory;
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
+            psi.EnvironmentVariables.Add("COVERLET_ENABLETRACKERLOG", "1");
             Process commandProcess = Process.Start(psi);
             if (!commandProcess.WaitForExit((int)TimeSpan.FromMinutes(5).TotalMilliseconds))
             {

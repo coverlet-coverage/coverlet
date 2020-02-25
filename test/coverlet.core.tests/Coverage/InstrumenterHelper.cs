@@ -411,7 +411,7 @@ namespace Coverlet.Core.Tests
             // string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
 
             // Void UnloadModule(System.Object, System.EventArgs)
-            tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, new object[2] { null, null });
+            tracker.GetTypeInfo().GetMethod(nameof(ModuleTrackerTemplate.InProcessCollectorFlush)).Invoke(null, new object[0]);
 
             // Persist CoveragePrepareResult
             using (FileStream fs = new FileStream(persistPrepareResultToFile, FileMode.Open))

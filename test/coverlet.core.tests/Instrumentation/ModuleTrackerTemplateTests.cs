@@ -18,8 +18,8 @@ namespace Coverlet.Core.Tests.Instrumentation
         public void Dispose()
         {
             File.Delete(ModuleTrackerTemplate.HitsFilePath);
-            AppDomain.CurrentDomain.ProcessExit -= ModuleTrackerTemplate.UnloadModule;
-            AppDomain.CurrentDomain.DomainUnload -= ModuleTrackerTemplate.UnloadModule;
+            AppDomain.CurrentDomain.ProcessExit -= ModuleTrackerTemplate.ProcessExitEvent;
+            AppDomain.CurrentDomain.DomainUnload -= ModuleTrackerTemplate.DomainUnloadEvent;
         }
     }
 
@@ -34,7 +34,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             {
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 1, 2, 0, 3 };
-                ModuleTrackerTemplate.UnloadModule(null, null);
+                ModuleTrackerTemplate.InProcessCollectorFlush();
 
                 var expectedHitsArray = new[] { 1, 2, 0, 3 };
                 Assert.Equal(expectedHitsArray, ReadHitsFile());
@@ -51,7 +51,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                 using var ctx = new TrackerContext();
                 WriteHitsFile(new[] { 1, 2, 3 });
                 ModuleTrackerTemplate.HitsArray = new[] { 1 };
-                Assert.Throws<InvalidOperationException>(() => ModuleTrackerTemplate.UnloadModule(null, null));
+                Assert.Throws<InvalidOperationException>(() => ModuleTrackerTemplate.InProcessCollectorFlush());
                 return _success;
             });
         }
@@ -69,7 +69,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                     t.Start(i);
                 }
 
-                ModuleTrackerTemplate.UnloadModule(null, null);
+                ModuleTrackerTemplate.InProcessCollectorFlush();
                 var expectedHitsArray = new[] { 4, 3, 2, 1 };
                 Assert.Equal(expectedHitsArray, ReadHitsFile());
 
@@ -93,10 +93,10 @@ namespace Coverlet.Core.Tests.Instrumentation
             {
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 0, 3, 2, 1 };
-                ModuleTrackerTemplate.UnloadModule(null, null);
+                ModuleTrackerTemplate.InProcessCollectorFlush();
 
                 ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
-                ModuleTrackerTemplate.UnloadModule(null, null);
+                ModuleTrackerTemplate.InProcessCollectorFlush();
 
                 var expectedHitsArray = new[] { 0, 4, 4, 4 };
                 Assert.Equal(expectedHitsArray, ReadHitsFile());
@@ -117,7 +117,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                     Assert.True(createdNew);
 
                     ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
-                    var unloadTask = Task.Run(() => ModuleTrackerTemplate.UnloadModule(null, null));
+                    var unloadTask = Task.Run(() => ModuleTrackerTemplate.InProcessCollectorFlush());
 
                     Assert.False(unloadTask.Wait(5));
 

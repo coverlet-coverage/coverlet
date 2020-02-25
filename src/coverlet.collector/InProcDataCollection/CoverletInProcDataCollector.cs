@@ -53,10 +53,10 @@ namespace Coverlet.Collector.DataCollection
 
                 try
                 {
-                    _eqtTrace.Verbose($"Calling ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
-                    var unloadModule = injectedInstrumentationClass.GetMethod(nameof(ModuleTrackerTemplate.UnloadModule), new[] { typeof(object), typeof(EventArgs) });
-                    unloadModule.Invoke(null, new[] { null, EventArgs.Empty });
-                    _eqtTrace.Verbose($"Called ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
+                    _eqtTrace.Verbose($"Calling ModuleTrackerTemplate.InProcessCollectorFlush for '{injectedInstrumentationClass.Assembly.FullName}'");
+                    var unloadModule = injectedInstrumentationClass.GetMethod(nameof(ModuleTrackerTemplate.InProcessCollectorFlush));
+                    unloadModule.Invoke(null, new object[0]);
+                    _eqtTrace.Verbose($"Called ModuleTrackerTemplate.InProcessCollectorFlush for '{injectedInstrumentationClass.Assembly.FullName}'");
                 }
                 catch (Exception ex)
                 {

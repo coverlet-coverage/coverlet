@@ -31,7 +31,8 @@ namespace Coverlet.Collector.DataCollection
                 settings.UseSourceLink,
                 coverletLogger,
                 DependencyInjection.Current.GetService<IInstrumentationHelper>(),
-                DependencyInjection.Current.GetService<IFileSystem>());
+                DependencyInjection.Current.GetService<IFileSystem>(),
+                true);
         }
 
         /// <summary>

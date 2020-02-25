@@ -21,6 +21,7 @@ namespace Coverlet.Core.Instrumentation
         public static string HitsFilePath;
         public static int[] HitsArray;
         public static bool SingleHit;
+        public static bool IsCalledByInProcessCollector;
         private static readonly bool _enableLog = int.TryParse(Environment.GetEnvironmentVariable("COVERLET_ENABLETRACKERLOG"), out int result) ? result == 1 : false;
 
         static ModuleTrackerTemplate()
@@ -35,8 +36,8 @@ namespace Coverlet.Core.Instrumentation
         // to UnloadModule will be injected in System.AppContext.OnProcessExit.
         public static void RegisterUnloadEvents()
         {
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(UnloadModule);
-            AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(ProcessExitEvent);
+            AppDomain.CurrentDomain.DomainUnload += new EventHandler(DomainUnloadEvent);
         }
 
         public static void RecordHitInCoreLibrary(int hitLocationIndex)
@@ -73,11 +74,42 @@ namespace Coverlet.Core.Instrumentation
                 location = 1;
         }
 
-        public static void UnloadModule(object sender, EventArgs e)
+        private static bool IsDotNetCore()
+        {
+            // object for .NET Framework is inside mscorlib.dll
+            return Path.GetFileName(typeof(object).Assembly.Location) == "System.Private.CoreLib.dll";
+        }
+
+        public static void ProcessExitEvent(object sender, EventArgs e)
+        {
+            if (IsCalledByInProcessCollector && IsDotNetCore())
+            {
+                return;
+            }
+
+            Flush(nameof(ProcessExitEvent));
+        }
+
+        public static void DomainUnloadEvent(object sender, EventArgs e)
+        {
+            Flush(nameof(DomainUnloadEvent));
+        }
+
+        public static void AppContextOnProcessExitEvent(object sender, EventArgs e)
+        {
+            Flush(nameof(AppContextOnProcessExitEvent));
+        }
+
+        public static void InProcessCollectorFlush()
+        {
+            Flush(nameof(InProcessCollectorFlush));
+        }
+
+        private static void Flush(string flushType)
         {
             try
             {
-                WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}'");
+                WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}' FlushType: {flushType}");
                 // Claim the current hits array and reset it to prevent double-counting scenarios.
                 int[] hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
 

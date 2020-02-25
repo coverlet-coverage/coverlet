@@ -25,6 +25,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly ExcludedFilesHelper _excludedFilesHelper;
         private readonly string[] _excludedAttributes;
         private readonly bool _singleHit;
+        private readonly bool _isInstrumentedByOutOfProcessCollector;
         private readonly bool _isCoreLibrary;
         private readonly ILogger _logger;
         private readonly IInstrumentationHelper _instrumentationHelper;
@@ -33,6 +34,7 @@ namespace Coverlet.Core.Instrumentation
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
         private FieldDefinition _customTrackerSingleHit;
+        private FieldDefinition _customIsCalledByInProcessCollector;
         private ILProcessor _customTrackerClassConstructorIl;
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
@@ -54,7 +56,8 @@ namespace Coverlet.Core.Instrumentation
             bool singleHit,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
-            IFileSystem fileSystem)
+            IFileSystem fileSystem,
+            bool isInstrumentedByOutOfProcessCollector = false)
         {
             _module = module;
             _identifier = identifier;
@@ -63,6 +66,7 @@ namespace Coverlet.Core.Instrumentation
             _excludedFilesHelper = new ExcludedFilesHelper(excludedFiles, logger);
             _excludedAttributes = excludedAttributes;
             _singleHit = singleHit;
+            _isInstrumentedByOutOfProcessCollector = isInstrumentedByOutOfProcessCollector;
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
@@ -240,6 +244,8 @@ namespace Coverlet.Core.Instrumentation
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(_singleHit ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerSingleHit));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(_isInstrumentedByOutOfProcessCollector ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customIsCalledByInProcessCollector));
 
                     if (containsAppContext)
                     {
@@ -248,7 +254,7 @@ namespace Coverlet.Core.Instrumentation
                         // initialization of the custom tracker and the static initialization of the hosting AppDomain
                         // (which for the core library case will be instrumented code).
                         var eventArgsType = new TypeReference(nameof(System), nameof(EventArgs), module, module.TypeSystem.CoreLibrary);
-                        var customTrackerUnloadModule = new MethodReference(nameof(ModuleTrackerTemplate.UnloadModule), module.TypeSystem.Void, _customTrackerTypeDef);
+                        var customTrackerUnloadModule = new MethodReference(nameof(ModuleTrackerTemplate.AppContextOnProcessExitEvent), module.TypeSystem.Void, _customTrackerTypeDef);
                         customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(module.TypeSystem.Object));
                         customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(eventArgsType));
 
@@ -291,6 +297,8 @@ namespace Coverlet.Core.Instrumentation
                         _customTrackerHitsFilePath = fieldClone;
                     else if (fieldClone.Name == nameof(ModuleTrackerTemplate.SingleHit))
                         _customTrackerSingleHit = fieldClone;
+                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.IsCalledByInProcessCollector))
+                        _customIsCalledByInProcessCollector = fieldClone;
                 }
 
                 foreach (MethodDefinition methodDef in moduleTrackerTemplate.Methods)

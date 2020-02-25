@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Instrumentation;
 
@@ -22,6 +21,7 @@ namespace Coverlet.Core
         private string[] _excludeAttributes;
         private bool _includeTestAssembly;
         private bool _singleHit;
+        private bool _isInstrumentedByOutOfProcessCollector;
         private string _mergeWith;
         private bool _useSourceLink;
         private ILogger _logger;
@@ -46,7 +46,8 @@ namespace Coverlet.Core
             bool useSourceLink,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
-            IFileSystem fileSystem)
+            IFileSystem fileSystem,
+            bool isInstrumentedByOutOfProcessCollector = false)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -56,6 +57,7 @@ namespace Coverlet.Core
             _excludeAttributes = excludeAttributes;
             _includeTestAssembly = includeTestAssembly;
             _singleHit = singleHit;
+            _isInstrumentedByOutOfProcessCollector = isInstrumentedByOutOfProcessCollector;
             _mergeWith = mergeWith;
             _useSourceLink = useSourceLink;
             _logger = logger;
@@ -98,7 +100,18 @@ namespace Coverlet.Core
                     continue;
                 }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem);
+                var instrumenter = new Instrumenter(module,
+                                                    _identifier,
+                                                    _excludeFilters,
+                                                    _includeFilters,
+                                                    _excludedSourceFiles,
+                                                    _excludeAttributes,
+                                                    _singleHit,
+                                                    _logger,
+                                                    _instrumentationHelper,
+                                                    _fileSystem,
+                                                    _isInstrumentedByOutOfProcessCollector);
+
                 if (instrumenter.CanInstrument())
                 {
                     _instrumentationHelper.BackupOriginalModule(module, _identifier);
@@ -327,86 +340,78 @@ namespace Coverlet.Core
         {
             foreach (var result in _results)
             {
-                using (var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(result.HitsFilePath) + "_Mutex", out bool createdNew))
+                if (!_fileSystem.Exists(result.HitsFilePath))
                 {
-                    if (!createdNew)
-                        mutex.WaitOne();
+                    // Hits file could be missed mainly for two reason
+                    // 1) Issue during module Unload()
+                    // 2) Instrumented module is never loaded or used so we don't have any hit to register and
+                    //    module tracker is never used
+                    _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
+                    continue;
+                }
 
-                    if (!_fileSystem.Exists(result.HitsFilePath))
+                List<Document> documents = result.Documents.Values.ToList();
+                if (_useSourceLink && result.SourceLink != null)
+                {
+                    var jObject = JObject.Parse(result.SourceLink)["documents"];
+                    var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
+                    foreach (var document in documents)
                     {
-                        // Hits file could be missed mainly for two reason
-                        // 1) Issue during module Unload()
-                        // 2) Instrumented module is never loaded or used so we don't have any hit to register and
-                        //    module tracker is never used
-                        _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
-                        continue;
+                        document.Path = GetSourceLinkUrl(sourceLinkDocuments, document.Path);
                     }
+                }
 
-                    List<Document> documents = result.Documents.Values.ToList();
-                    if (_useSourceLink && result.SourceLink != null)
+                List<(int docIndex, int line)> zeroHitsLines = new List<(int docIndex, int line)>();
+                var documentsList = result.Documents.Values.ToList();
+                using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
+                using (var br = new BinaryReader(fs))
+                {
+                    int hitCandidatesCount = br.ReadInt32();
+
+                    // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
+
+                    for (int i = 0; i < hitCandidatesCount; ++i)
                     {
-                        var jObject = JObject.Parse(result.SourceLink)["documents"];
-                        var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
-                        foreach (var document in documents)
+                        var hitLocation = result.HitCandidates[i];
+                        var document = documentsList[hitLocation.docIndex];
+                        int hits = br.ReadInt32();
+
+                        if (hitLocation.isBranch)
                         {
-                            document.Path = GetSourceLinkUrl(sourceLinkDocuments, document.Path);
+                            var branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
+                            branch.Hits += hits;
                         }
-                    }
-
-                    List<(int docIndex, int line)> zeroHitsLines = new List<(int docIndex, int line)>();
-                    var documentsList = result.Documents.Values.ToList();
-                    using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
-                    using (var br = new BinaryReader(fs))
-                    {
-                        int hitCandidatesCount = br.ReadInt32();
-
-                        // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
-
-                        for (int i = 0; i < hitCandidatesCount; ++i)
+                        else
                         {
-                            var hitLocation = result.HitCandidates[i];
-                            var document = documentsList[hitLocation.docIndex];
-                            int hits = br.ReadInt32();
+                            for (int j = hitLocation.start; j <= hitLocation.end; j++)
+                            {
+                                var line = document.Lines[j];
+                                line.Hits += hits;
 
-                            if (hitLocation.isBranch)
-                            {
-                                var branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
-                                branch.Hits += hits;
-                            }
-                            else
-                            {
-                                for (int j = hitLocation.start; j <= hitLocation.end; j++)
+                                // We register 0 hit lines for later cleanup false positive of nested lambda closures
+                                if (hits == 0)
                                 {
-                                    var line = document.Lines[j];
-                                    line.Hits += hits;
-
-                                    // We register 0 hit lines for later cleanup false positive of nested lambda closures
-                                    if (hits == 0)
-                                    {
-                                        zeroHitsLines.Add((hitLocation.docIndex, line.Number));
-                                    }
+                                    zeroHitsLines.Add((hitLocation.docIndex, line.Number));
                                 }
                             }
                         }
                     }
+                }
 
-                    // Cleanup nested state machine false positive hits
-                    foreach (var (docIndex, line) in zeroHitsLines)
+                // Cleanup nested state machine false positive hits
+                foreach (var (docIndex, line) in zeroHitsLines)
+                {
+                    foreach (var lineToCheck in documentsList[docIndex].Lines)
                     {
-                        foreach (var lineToCheck in documentsList[docIndex].Lines)
+                        if (lineToCheck.Key == line)
                         {
-                            if (lineToCheck.Key == line)
-                            {
-                                lineToCheck.Value.Hits = 0;
-                            }
+                            lineToCheck.Value.Hits = 0;
                         }
                     }
-
-                    _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
-                    _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
-
-                    mutex.ReleaseMutex();
                 }
+
+                _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+                _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
             }
         }
 
