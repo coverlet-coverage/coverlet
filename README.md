@@ -114,8 +114,6 @@ Coverlet generates code coverage information by going through the following proc
 * Read the recorded hits information from the temporary file.
 * Generate the coverage result from the hits information and write it to a file.
 
-_Note: The assembly you'd like to get coverage for must be different from the assembly that contains the tests_
-
 ## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)!
 
 ## Known Issues
