@@ -48,7 +48,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
 ```
 
-### MSBuild Integration
+### MSBuild Integration (suffers of possible [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation
 ```bash
@@ -71,7 +71,7 @@ See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 #### Requirements
 Requires a runtime that support _.NET Standard 2.0 and above_
 
-### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools))
+### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), suffers of possible [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation
 
