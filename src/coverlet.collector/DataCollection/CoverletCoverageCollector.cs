@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
 namespace Coverlet.Collector.DataCollection
@@ -201,7 +202,25 @@ namespace Coverlet.Collector.DataCollection
         /// <returns></returns>
         private static IEnumerable<string> GetPropertyValueWrapper(SessionStartEventArgs sessionStartEventArgs)
         {
-            return sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
+            try
+            {
+                return sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
+            }
+            catch (MissingMethodException)
+            {
+                using (var enumProperties = sessionStartEventArgs.GetProperties())
+                {
+                    while (enumProperties.MoveNext())
+                    {
+                        if (enumProperties.Current.Key == CoverletConstants.TestSourcesPropertyName &&
+                            enumProperties.Current.Value is IEnumerable<string> propertyValue)
+                        {
+                            return propertyValue;
+                        }
+                    }
+                }
+                throw;
+            }
         }
     }
 }
