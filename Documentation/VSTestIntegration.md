@@ -55,7 +55,8 @@ You can change the position of files using standard `dotnet test` switch `[-r|--
 ## Coverlet options supported by VSTest integration
 
 At the moment VSTest integration doesn't support all features of msbuild and .NET tool, for instance show result on console, report merging and threshold validation.
-We're working to fill the gaps.
+We're working to fill the gaps.  
+*PS: if you don't have any other way to merge reports(for instance your report generator doesn't support multi coverage file) you can for the moment exploit a trick reported by one of our contributor Daniel Paz(@p4p3) https://github.com/tonerdo/coverlet/pull/225#issuecomment-573896446*
 
 
 #### Default
