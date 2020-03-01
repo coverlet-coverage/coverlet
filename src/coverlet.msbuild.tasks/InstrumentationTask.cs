@@ -127,7 +127,6 @@ namespace Coverlet.MSbuild.Tasks
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<IConsole, SystemConsole>();
             serviceCollection.AddTransient<ILogger, MSBuildLogger>(x => _logger);
-
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
 
             DependencyInjection.Set(serviceCollection.BuildServiceProvider());

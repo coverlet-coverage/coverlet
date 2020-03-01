@@ -212,7 +212,6 @@ namespace Coverlet.Collector.DataCollection
         private static IServiceProvider GetServiceProvider(TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger)
         {
             IServiceCollection serviceCollection = new ServiceCollection();
-
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();

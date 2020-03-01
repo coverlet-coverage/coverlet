@@ -303,7 +303,7 @@ namespace Coverlet.Core.Tests
 
     static class TestInstrumentationHelper
     {
-        static IServiceProvider _processWideContainer;
+        private static IServiceProvider _processWideContainer;
 
         /// <summary>
         /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");
@@ -419,7 +419,7 @@ namespace Coverlet.Core.Tests
                     serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
                     serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
                     serviceCollection.AddTransient<IFileSystem, FileSystem>();
-                    serviceCollection.AddTransient<ILogger, Logger>();
+                    serviceCollection.AddTransient<ILogger, Logger>(_ => new Logger(""));
                     if (disableRestoreModules)
                     {
                         serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
@@ -494,7 +494,7 @@ namespace Coverlet.Core.Tests
     {
         string _logFile;
 
-        public Logger(string logFile = "") => _logFile = logFile;
+        public Logger(string logFile) => _logFile = logFile;
 
         public void LogError(string message)
         {

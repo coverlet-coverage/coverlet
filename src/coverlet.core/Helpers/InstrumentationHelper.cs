@@ -155,8 +155,7 @@ namespace Coverlet.Core.Helpers
                         }
                         catch (BadImageFormatException)
                         {
-                            _logger.LogWarning($"{nameof(BadImageFormatException)} during MetadataReaderProvider.FromPortablePdbStream in " +
-                                               "InstrumentationHelper.PortablePdbHasLocalSource, unable to check if module has got local source.");
+                            _logger.LogWarning($"{nameof(BadImageFormatException)} during MetadataReaderProvider.FromPortablePdbStream in InstrumentationHelper.PortablePdbHasLocalSource, unable to check if module has got local source.");
                             return true;
                         }
                         foreach (DocumentHandle docHandle in metadataReader.Documents)
