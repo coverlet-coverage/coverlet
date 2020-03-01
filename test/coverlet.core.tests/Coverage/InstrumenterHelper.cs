@@ -419,7 +419,7 @@ namespace Coverlet.Core.Tests
                     serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
                     serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
                     serviceCollection.AddTransient<IFileSystem, FileSystem>();
-                    serviceCollection.AddTransient<ILogger, Logger>(_ => new Logger(""));
+                    serviceCollection.AddTransient(_ => new Mock<ILogger>().Object);
                     if (disableRestoreModules)
                     {
                         serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
