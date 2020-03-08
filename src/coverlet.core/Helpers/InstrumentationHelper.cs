@@ -18,7 +18,7 @@ namespace Coverlet.Core.Helpers
         private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
         private readonly IRetryHelper _retryHelper;
         private readonly IFileSystem _fileSystem;
-        private readonly ILogger _logger;
+        private ILogger _logger;
 
         public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger)
         {
@@ -367,6 +367,11 @@ namespace Coverlet.Core.Helpers
 
         public bool IsLocalMethod(string method)
             => new Regex(WildcardToRegex("<*>*__*|*")).IsMatch(method);
+
+        public void SetLogger(ILogger logger)
+        {
+            _logger = logger;
+        }
 
         private bool IsTypeFilterMatch(string module, string type, string[] filters)
         {

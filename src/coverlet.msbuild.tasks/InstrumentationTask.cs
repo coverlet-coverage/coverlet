@@ -126,6 +126,8 @@ namespace Coverlet.MSbuild.Tasks
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<IConsole, SystemConsole>();
+            serviceCollection.AddTransient<ILogger, MSBuildLogger>(x => _logger);
+            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
 
             DependencyInjection.Set(serviceCollection.BuildServiceProvider());
 
@@ -137,7 +139,6 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
                 var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
-                var instrumentationHelper = new InstrumentationHelper(DependencyInjection.Current.GetService<IProcessExitHandler>(), DependencyInjection.Current.GetService<IRetryHelper>(), fileSystem, _logger);
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
@@ -150,7 +151,7 @@ namespace Coverlet.MSbuild.Tasks
                     _mergeWith,
                     _useSourceLink,
                     _logger,
-                    instrumentationHelper,
+                    DependencyInjection.Current.GetService<IInstrumentationHelper>(),
                     fileSystem);
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
