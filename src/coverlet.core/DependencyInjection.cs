@@ -16,7 +16,7 @@ namespace Coverlet.Core
 
         public static void Set(IServiceProvider serviceProvider)
         {
-            _serviceProvider =serviceProvider;
+            _serviceProvider = serviceProvider;
         }
     }
 }

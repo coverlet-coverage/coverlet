@@ -412,24 +412,26 @@ namespace Coverlet.Core.Tests
 
         private static void SetTestContainer(bool disableRestoreModules = false)
         {
-            LazyInitializer.EnsureInitialized(ref _processWideContainer,
-                () =>
+            LazyInitializer.EnsureInitialized(ref _processWideContainer, () =>
+            {
+                var serviceCollection = new ServiceCollection();
+                serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
+                serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
+                serviceCollection.AddTransient<IFileSystem, FileSystem>();
+                serviceCollection.AddTransient(_ => new Mock<ILogger>().Object);
+
+                // We need to keep singleton/static semantics
+                if (disableRestoreModules)
                 {
-                    var serviceCollection = new ServiceCollection();
-                    serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
-                    serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
-                    serviceCollection.AddTransient<IFileSystem, FileSystem>();
-                    serviceCollection.AddTransient(_ => new Mock<ILogger>().Object);
-                    if (disableRestoreModules)
-                    {
-                        serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
-                    }
-                    else
-                    {
-                        serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-                    }
-                    return serviceCollection.BuildServiceProvider();
-                });
+                    serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
+                }
+                else
+                {
+                    serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+                }
+
+                return serviceCollection.BuildServiceProvider();
+            });
         }
     }
 
