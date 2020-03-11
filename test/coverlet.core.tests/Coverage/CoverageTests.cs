@@ -11,6 +11,7 @@ namespace Coverlet.Core.Tests
     public partial class CoverageTests
     {
         private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object);
+        private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
 
         [Fact]
         public void TestCoverage()
@@ -25,7 +26,7 @@ namespace Coverlet.Core.Tests
 
             // TODO: Find a way to mimick hits
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, new Mock<ILogger>().Object, _instrumentationHelper, new FileSystem());
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
@@ -46,7 +47,7 @@ namespace Coverlet.Core.Tests
             File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, new Mock<ILogger>().Object, _instrumentationHelper, new FileSystem());
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
