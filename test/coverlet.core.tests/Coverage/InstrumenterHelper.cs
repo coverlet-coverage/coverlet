@@ -344,6 +344,7 @@ namespace Coverlet.Core.Tests
             {
                 Assert.DoesNotContain("not found for module: ", message);
             });
+            _processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
             CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
             Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem());
             return coverage.GetCoverageResult();
