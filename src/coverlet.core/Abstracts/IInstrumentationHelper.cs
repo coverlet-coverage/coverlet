@@ -15,5 +15,6 @@
         bool EmbeddedPortablePdbHasLocalSource(string module, out string firstNotFoundDocument);
         bool PortablePdbHasLocalSource(string module, out string firstNotFoundDocument);
         bool IsLocalMethod(string method);
+        void SetLogger(ILogger logger);
     }
 }

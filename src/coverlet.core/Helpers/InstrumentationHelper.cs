@@ -18,12 +18,14 @@ namespace Coverlet.Core.Helpers
         private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
         private readonly IRetryHelper _retryHelper;
         private readonly IFileSystem _fileSystem;
+        private ILogger _logger;
 
-        public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem)
+        public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger)
         {
             processExitHandler.Add((s, e) => RestoreOriginalModules());
             _retryHelper = retryHelper;
             _fileSystem = fileSystem;
+            _logger = logger;
         }
 
         public string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly)
@@ -153,8 +155,7 @@ namespace Coverlet.Core.Helpers
                         }
                         catch (BadImageFormatException)
                         {
-                            // TODO log this to warning
-                            // In case of non portable pdb we get exception so we skip file sources check
+                            _logger.LogWarning($"{nameof(BadImageFormatException)} during MetadataReaderProvider.FromPortablePdbStream in InstrumentationHelper.PortablePdbHasLocalSource, unable to check if module has got local source.");
                             return true;
                         }
                         foreach (DocumentHandle docHandle in metadataReader.Documents)
@@ -366,6 +367,11 @@ namespace Coverlet.Core.Helpers
 
         public bool IsLocalMethod(string method)
             => new Regex(WildcardToRegex("<*>*__*|*")).IsMatch(method);
+
+        public void SetLogger(ILogger logger)
+        {
+            _logger = logger;
+        }
 
         private bool IsTypeFilterMatch(string module, string type, string[] filters)
         {
