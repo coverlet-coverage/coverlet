@@ -1,41 +1,22 @@
 ﻿using System;
 
-using Coverlet.Core.Abstracts;
-using Coverlet.Core.Helpers;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Coverlet.Core
 {
     internal static class DependencyInjection
     {
-        private static Lazy<IServiceProvider> _serviceProvider = new Lazy<IServiceProvider>(() => InitDefaultServices(), true);
+        private static IServiceProvider _serviceProvider;
 
         public static IServiceProvider Current
         {
             get
             {
-                return _serviceProvider.Value;
+                return _serviceProvider;
             }
         }
 
         public static void Set(IServiceProvider serviceProvider)
         {
-            _serviceProvider = new Lazy<IServiceProvider>(() => serviceProvider);
+            _serviceProvider = serviceProvider;
         }
-
-        private static IServiceProvider InitDefaultServices()
-        {
-            IServiceCollection serviceCollection = new ServiceCollection();
-            serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
-            serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
-            serviceCollection.AddTransient<IFileSystem, FileSystem>();
-            serviceCollection.AddTransient<IConsole, SystemConsole>();
-
-            // We need to keep singleton/static semantics
-            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-
-            return serviceCollection.BuildServiceProvider();
-        }
-
     }
 }

@@ -239,8 +239,9 @@ Process Id: 29228 Name: dotnet
 
 ## Enable collector instrumentation debugging
 
-You can live attach and debug collectors with `COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG` env variable
+You can live attach and debug collectors with `COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG` and `COVERLET_DATACOLLECTOR_INPROC_DEBUG` env variable
 ```
  set COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG=1
+ set COVERLET_DATACOLLECTOR_INPROC_DEBUG=1
 ```
-You will be asket to attach a debugger through UI popup.
+You will be asked to attach a debugger through UI popup.

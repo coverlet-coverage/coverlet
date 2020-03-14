@@ -5,6 +5,10 @@ using System.Linq;
 using System.Xml;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
+using Coverlet.Core;
+using Coverlet.Core.Abstracts;
+using Coverlet.Core.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
 namespace Coverlet.Collector.DataCollection
@@ -75,6 +79,7 @@ namespace Coverlet.Collector.DataCollection
             _dataSink = dataSink;
             _dataCollectionContext = environmentContext.SessionDataCollectionContext;
             _logger = new TestPlatformLogger(logger, _dataCollectionContext);
+            DependencyInjection.Set(GetServiceProvider(_eqtTrace, _logger));
 
             // Register events
             _events.SessionStart += OnSessionStart;
@@ -202,6 +207,20 @@ namespace Coverlet.Collector.DataCollection
         private static IEnumerable<string> GetPropertyValueWrapper(SessionStartEventArgs sessionStartEventArgs)
         {
             return sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
+        }
+
+        private static IServiceProvider GetServiceProvider(TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger)
+        {
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+            serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+            serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+
+            // We need to keep singleton/static semantics
+            serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+
+            return serviceCollection.BuildServiceProvider();
         }
     }
 }

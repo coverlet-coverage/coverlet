@@ -9,8 +9,8 @@ A sample project file looks like:
     <TargetFrameworks>netcoreapp3.0;netcoreapp2.1;net46</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Temporary preview reference with essential vstest bug fix -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20200116-01" />
+    <!-- Minimum version 16.5.0 -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <!-- Update this reference when new version is released -->
     <PackageReference Include="coverlet.collector" Version="1.2.0">
       <PrivateAssets>all</PrivateAssets>
@@ -21,7 +21,6 @@ A sample project file looks like:
 ...
 </Project>
 ```
-As you can see in sample above we're referencing a preview version of `Microsoft.NET.Test.Sdk`, this is temporary needed because there is a bug inside vstest platform during collectors loading([details](https://github.com/microsoft/vstest/issues/2205)). **At the moment there isn't a stable package released with fix so we need to use a preview**.
 
 The reference to `coverlet.collector` package is included by default with xunit template test (`dotnet new xunit`), you only need to update the package for new versions like any other package reference.
 
@@ -41,10 +40,23 @@ dotnet vstest C:\project\bin\Debug\netcoreapp3.0\publish\testdll.dll --collect:"
 ```
 As you can see in case of `vstest` verb you **must** publish project before.
 
+At the end of tests you'll find the coverage file data under default vstest plat directory `TestResults`
+```
+Attachments:
+  C:\git\coverlet\Documentation\Examples\VSTest\HelloWorld\XUnitTestProject1\TestResults\bc5e983b-d7a8-4f17-8c0a-8a8831a4a891\coverage.cobertura.xml
+Test Run Successful.
+Total tests: 1
+     Passed: 1
+ Total time: 2,5451 Seconds
+```
+You can change the position of files using standard `dotnet test` switch `[-r|--results-directory]`  
+*NB: By design vstest platform will create your file under a random named folder(guid string) so if you need stable path to load file to some gui report system(i.e. coveralls, codecov, reportgenerator etc..) that doesn't support glob patterns or hierarchical  search, you'll need to manually move resulting file to a predictable folder*
+
 ## Coverlet options supported by VSTest integration
 
 At the moment VSTest integration doesn't support all features of msbuild and .NET tool, for instance show result on console, report merging and threshold validation.
-We're working to fill the gaps.
+We're working to fill the gaps.  
+*PS: if you don't have any other way to merge reports(for instance your report generator doesn't support multi coverage file) you can for the moment exploit a trick reported by one of our contributor Daniel Paz(@p4p3) https://github.com/tonerdo/coverlet/pull/225#issuecomment-573896446*
 
 
 #### Default
@@ -106,8 +118,8 @@ When we specify `--collect:"XPlat Code Coverage"` vstest platform tries to load 
 
 1. Outproc Datacollector : The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector is responsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
 
-2. Inproc Datacollector : The inproc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [serious know issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
+2. Inproc Datacollector : The inproc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [serious known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
 
 ## Known Issues
 
-For a comprehensive list of known issues check the detailed documentation https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
+For a comprehensive list of known issues check the detailed documentation https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md

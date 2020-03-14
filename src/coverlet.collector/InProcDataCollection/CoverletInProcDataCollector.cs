@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 
 using coverlet.collector.Resources;
@@ -14,8 +15,20 @@ namespace Coverlet.Collector.DataCollection
     {
         private TestPlatformEqtTrace _eqtTrace;
 
+        private void AttachDebugger()
+        {
+            if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_DATACOLLECTOR_INPROC_DEBUG"), out int result) && result == 1)
+            {
+                Debugger.Launch();
+                Debugger.Break();
+            }
+        }
+
         public void Initialize(IDataCollectionSink dataCollectionSink)
         {
+
+            AttachDebugger();
+
             _eqtTrace = new TestPlatformEqtTrace();
             _eqtTrace.Verbose("Initialize CoverletInProcDataCollector");
         }
