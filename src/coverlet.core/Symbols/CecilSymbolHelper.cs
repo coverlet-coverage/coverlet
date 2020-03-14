@@ -41,7 +41,7 @@ namespace Coverlet.Core.Symbols
             return fieldDefinition.DeclaringType.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);
         }
 
-        private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
+        internal static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
         {
             if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
             {
@@ -227,6 +227,159 @@ namespace Coverlet.Core.Symbols
             return false;
         }
 
+        private static bool SkipGeneratedBranchForExceptionRethrown(List<Instruction> instructions, Instruction instruction)
+        {
+            /* 
+                In case of exception re-thrown inside the catch block, 
+                the compiler generates a branch to check if the exception reference is null.
+
+                A sample of generated code:
+
+                IL_00b4: isinst [System.Runtime]System.Exception
+                IL_00b9: stloc.s 6
+                // if (ex == null)
+                IL_00bb: ldloc.s 6
+                // (no C# code)
+                IL_00bd: brtrue.s IL_00c6
+
+                So we can go back to previous instructions and skip this branch if recognize that type of code block
+            */
+            int branchIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
+            return branchIndex >= 3 && // avoid out of range exception (need almost 3 instruction before the branch)
+                    instructions[branchIndex - 3].OpCode == OpCodes.Isinst &&
+                    instructions[branchIndex - 3].Operand is TypeReference tr && tr.FullName == "System.Exception" &&
+                    instructions[branchIndex - 2].OpCode == OpCodes.Stloc &&
+                    instructions[branchIndex - 1].OpCode == OpCodes.Ldloc;
+        }
+
+        private static int[] DetectCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(List<Instruction> instructions, Collection<ExceptionHandler> handlers)
+        {
+            /*
+              This method is used to parse compiler generated code inside async state machine and find branches generated for exception catch blocks
+              Typical generated code for catch block is:
+
+              catch ...
+              {
+                  // (no C# code)
+                  IL_0028: stloc.2
+                  // object obj2 = <>s__1 = obj;
+                  IL_0029: ldarg.0
+                  // (no C# code)
+                  IL_002a: ldloc.2
+                  IL_002b: stfld object ...::'<>s__1'
+                  // <>s__2 = 1;
+                  IL_0030: ldarg.0
+                  IL_0031: ldc.i4.1
+                  IL_0032: stfld int32 ...::'<>s__2'      <- store 1 into <>s__2
+                  // (no C# code)
+                  IL_0037: leave.s IL_0039
+              } // end handle
+
+              // int num2 = <>s__2;
+              IL_0039: ldarg.0
+              IL_003a: ldfld int32 ...::'<>s__2'          <- load <>s__2 value and check if 1
+              IL_003f: stloc.3
+              // if (num2 == 1)
+              IL_0040: ldloc.3
+              IL_0041: ldc.i4.1
+              IL_0042: beq.s IL_0049                      <- BRANCH : if <>s__2 value is 1 go to exception handler code
+
+              IL_0044: br IL_00d6                         
+
+              IL_0049: nop                                <- start exception handler code
+
+              In case of multiple catch blocks as
+              try
+              {
+              }
+              catch (ExceptionType1)
+              {
+              }
+              catch (ExceptionType2)
+              {
+              }
+
+              generated IL contains multiple branches:
+              catch ...(type1)
+              {
+                  ...
+              }
+              catch ...(type2)
+              {
+                  ...
+              }
+              // int num2 = <>s__2;
+              IL_0039: ldarg.0
+              IL_003a: ldfld int32 ...::'<>s__2'          <- load <>s__2 value and check if 1
+              IL_003f: stloc.3
+              // if (num2 == 1)
+              IL_0040: ldloc.3
+              IL_0041: ldc.i4.1
+              IL_0042: beq.s IL_0049                      <- BRANCH 1 (type 1)
+
+              IL_0044: br IL_00d6                         
+
+              // if (num2 == 2)
+              IL_0067: ldloc.s 4
+              IL_0069: ldc.i4.2
+              IL_006a: beq IL_0104                        <- BRANCH 2 (type 2)
+
+              // (no C# code)
+              IL_006f: br IL_0191
+           */
+            List<int> detectedBranches = new List<int>();
+
+            int numberOfCatchBlocks = 1;
+            foreach (var handler in handlers)
+            {
+                if (handlers.Any(h => h.HandlerStart == handler.HandlerEnd))
+                {
+                    // In case of multiple consecutive catch block
+                    numberOfCatchBlocks++;
+                    continue;
+                }
+
+                int currentIndex = instructions.BinarySearch(handler.HandlerEnd, new InstructionByOffsetComparer());
+
+                /* Detect flag load
+                    // int num2 = <>s__2;
+                    IL_0058: ldarg.0
+                    IL_0059: ldfld int32 ...::'<>s__2'
+                    IL_005e: stloc.s 4
+                */
+                if (instructions.Count - currentIndex > 3 && // check boundary
+                    instructions[currentIndex].OpCode == OpCodes.Ldarg &&
+                    instructions[currentIndex + 1].OpCode == OpCodes.Ldfld && instructions[currentIndex + 1].Operand is FieldReference fr && fr.Name.StartsWith("<>s__") &&
+                    instructions[currentIndex + 2].OpCode == OpCodes.Stloc)
+                {
+                    currentIndex += 3;
+                    for (int i = 0; i < numberOfCatchBlocks; i++)
+                    {
+                        /*
+                            // if (num2 == 1)
+		                    IL_0060: ldloc.s 4
+		                    IL_0062: ldc.i4.1
+		                    IL_0063: beq.s IL_0074
+
+                            // (no C# code)
+		                    IL_0065: br.s IL_0067
+                        */
+                        if (instructions.Count - currentIndex > 4 && // check boundary
+                            instructions[currentIndex].OpCode == OpCodes.Ldloc &&
+                            instructions[currentIndex + 1].OpCode == OpCodes.Ldc_I4 &&
+                            instructions[currentIndex + 2].OpCode == OpCodes.Beq &&
+                            instructions[currentIndex + 3].OpCode == OpCodes.Br)
+                        {
+                            detectedBranches.Add(instructions[currentIndex + 2].Offset);
+                        }
+                        currentIndex += 4;
+                    }
+                }
+            }
+
+            return detectedBranches.ToArray();
+        }
+
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
@@ -236,11 +389,16 @@ namespace Coverlet.Core.Symbols
             }
 
             uint ordinal = 0;
-            var instructions = methodDefinition.Body.Instructions;
+            var instructions = methodDefinition.Body.Instructions.ToList();
 
             bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
             bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
             bool skipFirstBranch = IsMoveNextInsideEnumerator(methodDefinition);
+
+            // Detect compiler generated branches to exclude
+            int[] compilerGeneratedBranchesToExclude = isAsyncStateMachineMoveNext ?
+                DetectCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(instructions, methodDefinition.Body.ExceptionHandlers) :
+                new int[0];
 
             foreach (Instruction instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
             {
@@ -249,6 +407,11 @@ namespace Coverlet.Core.Symbols
                     if (skipFirstBranch)
                     {
                         skipFirstBranch = false;
+                        continue;
+                    }
+
+                    if (compilerGeneratedBranchesToExclude.Contains(instruction.Offset))
+                    {
                         continue;
                     }
 
@@ -261,6 +424,11 @@ namespace Coverlet.Core.Symbols
                     }
 
                     if (SkipLambdaCachedField(instruction))
+                    {
+                        continue;
+                    }
+
+                    if (isAsyncStateMachineMoveNext && SkipGeneratedBranchForExceptionRethrown(instructions, instruction))
                     {
                         continue;
                     }
@@ -303,7 +471,7 @@ namespace Coverlet.Core.Symbols
 
         private static bool BuildPointsForConditionalBranch(List<BranchPoint> list, Instruction instruction,
             int branchingInstructionLine, string document, int branchOffset, int pathCounter,
-            Collection<Instruction> instructions, ref uint ordinal, MethodDefinition methodDefinition)
+            List<Instruction> instructions, ref uint ordinal, MethodDefinition methodDefinition)
         {
             // Add Default branch (Path=0)
 
@@ -351,7 +519,7 @@ namespace Coverlet.Core.Symbols
         }
 
         private static uint BuildPointsForBranch(List<BranchPoint> list, Instruction then, int branchingInstructionLine, string document,
-            int branchOffset, uint ordinal, int pathCounter, BranchPoint path0, Collection<Instruction> instructions, MethodDefinition methodDefinition)
+            int branchOffset, uint ordinal, int pathCounter, BranchPoint path0, List<Instruction> instructions, MethodDefinition methodDefinition)
         {
             var pathOffsetList1 = GetBranchPath(@then);
 
@@ -429,6 +597,96 @@ namespace Coverlet.Core.Symbols
                 }));
             pathCounter = counter;
             return ordinal;
+        }
+
+        /*
+           Need to skip instrumentation after exception re-throw inside catch block (only for async state machine MoveNext())
+           es:
+           try 
+           {
+               ...
+           }
+           catch
+           {
+               await ...
+               throw; 
+           } // need to skip instrumentation here
+
+           We can detect this type of code block by searching for method ExceptionDispatchInfo.Throw() inside the compiled IL
+           ...
+           // ExceptionDispatchInfo.Capture(ex).Throw();
+           IL_00c6: ldloc.s 6
+           IL_00c8: call class [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Capture(class [System.Runtime]System.Exception)
+           IL_00cd: callvirt instance void [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()
+           // NOT COVERABLE
+           IL_00d2: nop
+           IL_00d3: nop
+           ...
+
+           In case of nested code blocks inside catch we need to detect also goto calls
+           ...
+           // ExceptionDispatchInfo.Capture(ex).Throw();
+           IL_00d3: ldloc.s 7
+           IL_00d5: call class [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Capture(class [System.Runtime]System.Exception)
+           IL_00da: callvirt instance void [System.Runtime]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()
+           // NOT COVERABLE
+           IL_00df: nop
+           IL_00e0: nop
+           IL_00e1: br.s IL_00ea
+           ...
+           // NOT COVERABLE
+           IL_00ea: nop                
+           IL_00eb: br.s IL_00ed
+           ...
+       */
+        internal static bool IsNotCoverableInstructionAfterExceptionThrown(Instruction instruction)
+        {
+            if (instruction.OpCode != OpCodes.Nop)
+            {
+                return false;
+            }
+
+            // detect if current instruction is not coverable
+            Instruction prev = GetPreviousNoNopInstruction(instruction);
+            if (prev != null &&
+                prev.OpCode == OpCodes.Callvirt &&
+                prev.Operand is MethodReference mr && mr.FullName == "System.Void System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()")
+            {
+                return true;
+            }
+
+            // find the caller of current instruction and detect if not coverable
+            prev = instruction.Previous;
+            while (prev != null)
+            {
+                if (prev.Operand is Instruction i && (i.Offset == instruction.Offset || i.Offset == prev.Next.Offset)) // caller
+                //if (prev.Operand is Instruction i && i.Offset == instruction.Offset) // caller
+                {
+                    prev = GetPreviousNoNopInstruction(prev);
+                    break;
+                }
+                prev = prev.Previous;
+            }
+
+            return prev != null &&
+                prev.OpCode == OpCodes.Callvirt &&
+                prev.Operand is MethodReference mr1 && mr1.FullName == "System.Void System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()";
+
+            // local helper
+            static Instruction GetPreviousNoNopInstruction(Instruction i)
+            {
+                Instruction instruction = i.Previous;
+                while (instruction != null)
+                {
+                    if (instruction.OpCode != OpCodes.Nop)
+                    {
+                        return instruction;
+                    }
+                    instruction = instruction.Previous;
+                }
+
+                return null;
+            }
         }
 
         private static bool SkipBranchGeneratedExceptionFilter(Instruction branchInstruction, MethodDefinition methodDefinition)
