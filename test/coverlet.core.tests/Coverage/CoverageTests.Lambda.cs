@@ -57,10 +57,10 @@ namespace Coverlet.Core.Tests
                         ((Task)instance.Invoke()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize, disableRestoreModules: true);
+                    persistPrepareResultToFile: pathSerialize);
 
                     return 0;
-                }, path, invokeInProcess: true).Dispose();
+                }, path).Dispose();
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.Lambda.cs")
