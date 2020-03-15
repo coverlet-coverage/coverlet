@@ -244,4 +244,4 @@ You can live attach and debug collectors with `COVERLET_DATACOLLECTOR_OUTOFPROC_
  set COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG=1
  set COVERLET_DATACOLLECTOR_INPROC_DEBUG=1
 ```
-You will be asket to attach a debugger through UI popup.
+You will be asked to attach a debugger through UI popup.

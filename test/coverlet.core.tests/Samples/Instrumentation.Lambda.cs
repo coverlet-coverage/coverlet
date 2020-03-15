@@ -61,4 +61,18 @@ namespace Coverlet.Core.Samples.Tests
             return await demoClass.InvokeAnonymousAsync();
         }
     }
+
+    public class Issue_730
+    {
+        async public Task Invoke()
+        {
+            await DoSomethingAsyncWithLinq(new object[100]);
+        }
+        async public Task DoSomethingAsyncWithLinq(System.Collections.Generic.IEnumerable<object> objects)
+        {
+            await Task.Delay(System.TimeSpan.FromMilliseconds(1));
+            var selected = System.Linq.Enumerable.Select(objects, o => o);
+            _ = System.Linq.Enumerable.ToArray(selected);
+        }
+    }
 }

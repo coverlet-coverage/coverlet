@@ -55,7 +55,8 @@ You can change the position of files using standard `dotnet test` switch `[-r|--
 ## Coverlet options supported by VSTest integration
 
 At the moment VSTest integration doesn't support all features of msbuild and .NET tool, for instance show result on console, report merging and threshold validation.
-We're working to fill the gaps.
+We're working to fill the gaps.  
+*PS: if you don't have any other way to merge reports(for instance your report generator doesn't support multi coverage file) you can for the moment exploit a trick reported by one of our contributor Daniel Paz(@p4p3) https://github.com/tonerdo/coverlet/pull/225#issuecomment-573896446*
 
 
 #### Default
@@ -117,8 +118,8 @@ When we specify `--collect:"XPlat Code Coverage"` vstest platform tries to load 
 
 1. Outproc Datacollector : The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector is responsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
 
-2. Inproc Datacollector : The inproc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [serious know issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
+2. Inproc Datacollector : The inproc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [serious known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
 
 ## Known Issues
 
-For a comprehensive list of known issues check the detailed documentation https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md
+For a comprehensive list of known issues check the detailed documentation https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md

@@ -36,6 +36,11 @@ namespace Coverlet.Core.Symbols
             return false;
         }
 
+        private static bool IsCompilerGenerated(FieldDefinition fieldDefinition)
+        {
+            return fieldDefinition.DeclaringType.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);
+        }
+
         private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
         {
             if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
@@ -72,7 +77,7 @@ namespace Coverlet.Core.Symbols
             return false;
         }
 
-        private static bool IsRecognizedMoveNextInsideAsyncStateMachineProlog(MethodDefinition methodDefinition)
+        private static bool IsMoveNextInsideAsyncStateMachineProlog(MethodDefinition methodDefinition)
         {
             /*
                 int num = <>1__state;
@@ -80,6 +85,7 @@ namespace Coverlet.Core.Symbols
                 IL_0001: ldfld ...::'<>1__state'
                 IL_0006: stloc.0
             */
+
             return (methodDefinition.Body.Instructions[0].OpCode == OpCodes.Ldarg_0 ||
                     methodDefinition.Body.Instructions[0].OpCode == OpCodes.Ldarg) &&
 
@@ -92,17 +98,148 @@ namespace Coverlet.Core.Symbols
                     methodDefinition.Body.Instructions[2].OpCode == OpCodes.Stloc_0;
         }
 
+        private static bool SkipMoveNextPrologueBranches(Instruction instruction)
+        {
+            /*
+                   If method is a generated MoveNext we'll skip first branches (could be a switch or a series of branches) 
+                   that check state machine value to jump to correct state (for instance after a true async call)
+                   Check if it's a Cond_Branch on state machine current value int num = <>1__state;
+                   We are on branch OpCode so we need to go back by max 2 operation to reach ldloc.0 the load of "num"
+                   Max 2 because we handle following patterns
+
+                    Swich
+
+                    // switch (num)
+                    IL_0007: ldloc.0                        2
+                    // (no C# code)
+                    IL_0008: switch (IL_0037, IL_003c, ...  1
+                    ...
+
+                    Single branch
+
+                    // if (num != 0)
+                    IL_0007: ldloc.0           2
+                    // (no C# code)
+                    IL_0008: brfalse.s IL_000c 1
+                    IL_000a: br.s IL_000e
+                    IL_000c: br.s IL_0049
+                    IL_000e: nop
+                    ...
+
+                    More tha one branch
+
+                    // if (num != 0)
+                    IL_0007: ldloc.0
+                    // (no C# code)
+                    IL_0008: brfalse.s IL_0012
+                    IL_000a: br.s IL_000c
+                    // if (num == 1)
+                    IL_000c: ldloc.0       3
+                    IL_000d: ldc.i4.1      2
+                    IL_000e: beq.s IL_0014 1
+                    // (no C# code)
+                    IL_0010: br.s IL_0019
+                    IL_0012: br.s IL_0060
+                    IL_0014: br IL_00e5
+                    IL_0019: nop
+                    ...
+
+                    so we know that current branch are checking that field and we're not interested in.
+            */
+
+            Instruction current = instruction.Previous;
+            for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
+            {
+                if (
+                        (current.OpCode == OpCodes.Ldloc && current.Operand is VariableDefinition vo && vo.Index == 0) ||
+                        current.OpCode == OpCodes.Ldloc_0
+                    )
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool SkipIsCompleteAwaiters(Instruction instruction)
+        {
+            // Skip get_IsCompleted to avoid unuseful branch due to async/await state machine
+            if (
+                    instruction.Previous.Operand is MethodReference operand &&
+                    operand.Name == "get_IsCompleted" &&
+                    (
+                        operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") ||
+                        operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable") ||
+                        operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable")
+                    )
+                    &&
+                    (
+                        operand.DeclaringType.Scope.Name == "System.Runtime" ||
+                        operand.DeclaringType.Scope.Name == "netstandard" ||
+                        operand.DeclaringType.Scope.Name == "System.Threading.Tasks.Extensions"
+                    )
+               )
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static bool SkipLambdaCachedField(Instruction instruction)
+        {
+            /*
+                Lambda cached field pattern
+
+                IL_0074: ldloca.s 1
+                IL_0076: call instance void [System.Runtime]System.Runtime.CompilerServices.TaskAwaiter::GetResult()
+                IL_007b: nop
+                IL_007c: ldarg.0
+                IL_007d: ldarg.0
+                IL_007e: ldfld class [System.Runtime]System.Collections.Generic.IEnumerable`1<object> Coverlet.Core.Samples.Tests.Issue_730/'<DoSomethingAsyncWithLinq>d__1'::objects
+                IL_0083: ldsfld class [System.Runtime]System.Func`2<object, object> Coverlet.Core.Samples.Tests.Issue_730/'<>c'::'<>9__1_0'
+                IL_0088: dup
+                IL_0089: brtrue.s IL_00a2 -> CHECK IF CACHED FIELD IS NULL OR JUMP TO DELEGATE USAGE
+
+                (INIT STATIC FIELD)
+                IL_008b: pop
+                IL_008c: ldsfld class Coverlet.Core.Samples.Tests.Issue_730/'<>c' Coverlet.Core.Samples.Tests.Issue_730/'<>c'::'<>9'
+                IL_0091: ldftn instance object Coverlet.Core.Samples.Tests.Issue_730/'<>c'::'<DoSomethingAsyncWithLinq>b__1_0'(object)
+                IL_0097: newobj instance void class [System.Runtime]System.Func`2<object, object>::.ctor(object, native int)
+                IL_009c: dup
+                IL_009d: stsfld class [System.Runtime]System.Func`2<object, object> Coverlet.Core.Samples.Tests.Issue_730/'<>c'::'<>9__1_0'
+
+                (USE DELEGATE FIELD)
+                IL_00a2: call class [System.Runtime]System.Collections.Generic.IEnumerable`1<!!1> [System.Linq]System.Linq.Enumerable::Select<object, object>(class [System.Runtime]System.Collections.Generic.IEnumerable`1<!!0>, class [System.Runtime]System.Func`2<!!0, !!1>)
+             */
+
+            Instruction current = instruction.Previous;
+            for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
+            {
+                if (current.OpCode == OpCodes.Ldsfld && current.Operand is FieldDefinition fd &&
+                    // LambdaCacheField  https://github.com/dotnet/roslyn/blob/e704ca635bd6de70a0250e34c4567c7a28fa9f6d/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L31
+                    // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs#L145
+                    fd.Name.StartsWith("<>9_") &&
+                    IsCompilerGenerated(fd))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
-            if (methodDefinition == null)
+            if (methodDefinition is null)
+            {
                 return list;
+            }
 
-            UInt32 ordinal = 0;
+            uint ordinal = 0;
             var instructions = methodDefinition.Body.Instructions;
 
             bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
-            bool isRecognizedMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsRecognizedMoveNextInsideAsyncStateMachineProlog(methodDefinition);
+            bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
             bool skipFirstBranch = IsMoveNextInsideEnumerator(methodDefinition);
 
             foreach (Instruction instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
@@ -115,98 +252,28 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
-                    /* 
-                       If method is a generated MoveNext we'll skip first branches (could be a switch or a series of branches) 
-                       that check state machine value to jump to correct state (for instance after a true async call)
-                       Check if it's a Cond_Branch on state machine current value int num = <>1__state;
-                       We are on branch OpCode so we need to go back by max 2 operation to reach ldloc.0 the load of "num"
-                       Max 2 because we handle following patterns
-
-                        Swich
-
-                        // switch (num)
-                        IL_0007: ldloc.0                        2
-                        // (no C# code)
-                        IL_0008: switch (IL_0037, IL_003c, ...  1
-                        ...
-
-                        Single branch
-
-                        // if (num != 0)
-                        IL_0007: ldloc.0           2
-                        // (no C# code)
-                        IL_0008: brfalse.s IL_000c 1
-                        IL_000a: br.s IL_000e
-                        IL_000c: br.s IL_0049
-                        IL_000e: nop
-                        ...
-
-                        More tha one branch
-
-                        // if (num != 0)
-                        IL_0007: ldloc.0
-                        // (no C# code)
-                        IL_0008: brfalse.s IL_0012
-                        IL_000a: br.s IL_000c
-                        // if (num == 1)
-                        IL_000c: ldloc.0       3
-                        IL_000d: ldc.i4.1      2
-                        IL_000e: beq.s IL_0014 1
-                        // (no C# code)
-                        IL_0010: br.s IL_0019
-                        IL_0012: br.s IL_0060
-                        IL_0014: br IL_00e5
-                        IL_0019: nop
-                        ...
-
-                        so we know that current branch are checking that field and we're not interested in.
-                    */
-                    if (isRecognizedMoveNextInsideAsyncStateMachineProlog)
+                    if (isMoveNextInsideAsyncStateMachineProlog)
                     {
-                        bool skipInstruction = false;
-                        Instruction current = instruction.Previous;
-                        for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
-                        {
-                            if (
-                                    (current.OpCode == OpCodes.Ldloc && current.Operand is VariableDefinition vo && vo.Index == 0) ||
-                                    current.OpCode == OpCodes.Ldloc_0
-                                )
-                            {
-                                skipInstruction = true;
-                                break;
-                            }
-                        }
-                        if (skipInstruction)
+                        if (SkipMoveNextPrologueBranches(instruction) || SkipIsCompleteAwaiters(instruction))
                         {
                             continue;
                         }
                     }
 
-                    // Skip get_IsCompleted to avoid unuseful branch due to async/await state machine
-                    if (
-                            isRecognizedMoveNextInsideAsyncStateMachineProlog && instruction.Previous.Operand is MethodReference operand &&
-                            operand.Name == "get_IsCompleted" &&
-                            (
-                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") ||
-                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable") ||
-                                operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable")
-                            )
-                            &&
-                            (
-                                operand.DeclaringType.Scope.Name == "System.Runtime" ||
-                                operand.DeclaringType.Scope.Name == "netstandard" ||
-                                operand.DeclaringType.Scope.Name == "System.Threading.Tasks.Extensions"
-                            )
-                       )
+                    if (SkipLambdaCachedField(instruction))
                     {
                         continue;
                     }
 
-                    if (BranchIsInGeneratedExceptionFilter(instruction, methodDefinition))
+                    if (SkipBranchGeneratedExceptionFilter(instruction, methodDefinition))
+                    {
                         continue;
+                    }
 
-                    if (BranchIsInGeneratedFinallyBlock(instruction, methodDefinition))
+                    if (SkipBranchGeneratedFinallyBlock(instruction, methodDefinition))
+                    {
                         continue;
+                    }
 
                     var pathCounter = 0;
 
@@ -217,10 +284,14 @@ namespace Coverlet.Core.Symbols
                     var document = closestSeqPt.Maybe(x => x.Document.Url);
 
                     if (instruction.Next == null)
+                    {
                         return list;
+                    }
 
                     if (!BuildPointsForConditionalBranch(list, instruction, branchingInstructionLine, document, branchOffset, pathCounter, instructions, ref ordinal, methodDefinition))
+                    {
                         return list;
+                    }
                 }
                 catch (Exception)
                 {
@@ -360,7 +431,7 @@ namespace Coverlet.Core.Symbols
             return ordinal;
         }
 
-        private static bool BranchIsInGeneratedExceptionFilter(Instruction branchInstruction, MethodDefinition methodDefinition)
+        private static bool SkipBranchGeneratedExceptionFilter(Instruction branchInstruction, MethodDefinition methodDefinition)
         {
             if (!methodDefinition.Body.HasExceptionHandlers)
                 return false;
@@ -389,7 +460,7 @@ namespace Coverlet.Core.Symbols
             return false;
         }
 
-        private static bool BranchIsInGeneratedFinallyBlock(Instruction branchInstruction, MethodDefinition methodDefinition)
+        private static bool SkipBranchGeneratedFinallyBlock(Instruction branchInstruction, MethodDefinition methodDefinition)
         {
             if (!methodDefinition.Body.HasExceptionHandlers)
                 return false;
