@@ -30,10 +30,10 @@ namespace Coverlet.Console
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
 
-            DependencyInjection.Set(serviceCollection.BuildServiceProvider());
+            var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            var logger = (ConsoleLogger) DependencyInjection.Current.GetService<ILogger>();
-            var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+            var logger = (ConsoleLogger) serviceProvider.GetService<ILogger>();
+            var fileSystem = serviceProvider.GetService<IFileSystem>();
 
             var app = new CommandLineApplication();
             app.Name = "coverlet";
@@ -85,7 +85,7 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger,
-                    DependencyInjection.Current.GetService<IInstrumentationHelper>(),
+                    serviceProvider.GetService<IInstrumentationHelper>(),
                     fileSystem);
                 coverage.PrepareModules();
 
