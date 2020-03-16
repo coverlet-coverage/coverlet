@@ -41,7 +41,7 @@ namespace Coverlet.Core.Symbols
             return fieldDefinition.DeclaringType.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);
         }
 
-        internal static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
+        private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
         {
             if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
             {
@@ -639,8 +639,13 @@ namespace Coverlet.Core.Symbols
            IL_00eb: br.s IL_00ed
            ...
        */
-        internal static bool IsNotCoverableInstructionAfterExceptionThrown(Instruction instruction)
+        internal static bool SkipNotCoverableInstructionAfterExceptionThrownInsideMoveNextAsyncStateMachine(MethodDefinition methodDefinition, Instruction instruction)
         {
+            if (!IsMoveNextInsideAsyncStateMachine(methodDefinition))
+            {
+                return false;
+            }
+
             if (instruction.OpCode != OpCodes.Nop)
             {
                 return false;
@@ -660,7 +665,6 @@ namespace Coverlet.Core.Symbols
             while (prev != null)
             {
                 if (prev.Operand is Instruction i && (i.Offset == instruction.Offset || i.Offset == prev.Next.Offset)) // caller
-                //if (prev.Operand is Instruction i && i.Offset == instruction.Offset) // caller
                 {
                     prev = GetPreviousNoNopInstruction(prev);
                     break;
