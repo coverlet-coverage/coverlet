@@ -1,7 +1,6 @@
 ﻿using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
-using Coverlet.Core.Extensions;
 
 namespace Coverlet.Collector.DataCollection
 {
@@ -16,7 +15,7 @@ namespace Coverlet.Collector.DataCollection
         /// <param name="settings">Coverlet settings</param>
         /// <param name="coverletLogger">Coverlet logger</param>
         /// <returns>Coverage object</returns>
-        public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger)
+        public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
         {
             return new Coverage(
                 settings.TestModule,
@@ -30,8 +29,8 @@ namespace Coverlet.Collector.DataCollection
                 settings.MergeWith,
                 settings.UseSourceLink,
                 coverletLogger,
-                DependencyInjection.Current.GetService<IInstrumentationHelper>(),
-                DependencyInjection.Current.GetService<IFileSystem>());
+                instrumentationHelper,
+                fileSystem);
         }
 
         /// <summary>

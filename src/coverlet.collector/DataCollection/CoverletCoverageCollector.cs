@@ -5,7 +5,6 @@ using System.Linq;
 using System.Xml;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
-using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +28,7 @@ namespace Coverlet.Collector.DataCollection
         private CoverageManager _coverageManager;
         private ICoverageWrapper _coverageWrapper;
         private ICountDownEventFactory _countDownEventFactory;
+        private IServiceProvider _serviceProvider;
 
         public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper(), new CollectorCountdownEventFactory())
         {
@@ -79,7 +79,7 @@ namespace Coverlet.Collector.DataCollection
             _dataSink = dataSink;
             _dataCollectionContext = environmentContext.SessionDataCollectionContext;
             _logger = new TestPlatformLogger(logger, _dataCollectionContext);
-            DependencyInjection.Set(GetServiceProvider(_eqtTrace, _logger));
+            _serviceProvider = GetServiceProvider(_eqtTrace, _logger);
 
             // Register events
             _events.SessionStart += OnSessionStart;
@@ -124,9 +124,12 @@ namespace Coverlet.Collector.DataCollection
                 IEnumerable<string> testModules = this.GetTestModules(sessionStartEventArgs);
                 var coverletSettingsParser = new CoverletSettingsParser(_eqtTrace);
                 CoverletSettings coverletSettings = coverletSettingsParser.Parse(_configurationElement, testModules);
+                IInstrumentationHelper instrumentationHelper = _serviceProvider.GetService<IInstrumentationHelper>();
+                IFileSystem fileSystem = _serviceProvider.GetService<IFileSystem>();
+                ILogger logger = _serviceProvider.GetService<ILogger>();
 
                 // Get coverage and attachment managers
-                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _logger, _coverageWrapper);
+                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, logger, _coverageWrapper, instrumentationHelper, fileSystem);
 
                 // Instrument modules
                 _coverageManager.InstrumentModules();

@@ -16,7 +16,7 @@ namespace Coverlet.Collector.Utilities.Interfaces
         /// <param name="settings">Coverlet settings</param>
         /// <param name="coverletLogger">Coverlet logger</param>
         /// <returns>Coverage object</returns>
-        Coverage CreateCoverage(CoverletSettings settings, ILogger logger);
+        Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem);
 
         /// <summary>
         /// Gets the coverage result from provided coverage object
