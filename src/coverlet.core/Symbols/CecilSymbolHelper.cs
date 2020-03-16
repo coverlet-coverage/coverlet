@@ -253,7 +253,7 @@ namespace Coverlet.Core.Symbols
                     instructions[branchIndex - 1].OpCode == OpCodes.Ldloc;
         }
 
-        private static bool SkipCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(MethodDefinition methodDefinition, Instruction instruction)
+        private static bool SkipGeneratedBranchesForExceptionHandlers(MethodDefinition methodDefinition, Instruction instruction)
         {
             if (CompilerGeneratedBranchesToExclude == null || !CompilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
             {
@@ -427,16 +427,14 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
-                    if (isAsyncStateMachineMoveNext && SkipCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(methodDefinition, instruction))
+                    if (isAsyncStateMachineMoveNext)
                     {
-                        continue;
+                        if (SkipGeneratedBranchesForExceptionHandlers(methodDefinition, instruction) || 
+                            SkipGeneratedBranchForExceptionRethrown(instructions, instruction))
+                        {
+                            continue;
+                        }
                     }
-
-                    if (isAsyncStateMachineMoveNext && SkipGeneratedBranchForExceptionRethrown(instructions, instruction))
-                    {
-                        continue;
-                    }
-
                     if (SkipBranchGeneratedExceptionFilter(instruction, methodDefinition))
                     {
                         continue;
