@@ -18,6 +18,7 @@ namespace Coverlet.Core.Symbols
     internal static class CecilSymbolHelper
     {
         private const int StepOverLineCode = 0xFEEFEE;
+        private static Dictionary<string, int[]> CompilerGeneratedBranchesToExclude = null;
 
         // In case of nested compiler generated classes, only the root one presents the CompilerGenerated attribute.
         // So let's search up to the outermost declaring type to find the attribute
@@ -252,132 +253,140 @@ namespace Coverlet.Core.Symbols
                     instructions[branchIndex - 1].OpCode == OpCodes.Ldloc;
         }
 
-        private static int[] DetectCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(List<Instruction> instructions, Collection<ExceptionHandler> handlers)
+        private static bool SkipCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(MethodDefinition methodDefinition, Instruction instruction)
         {
-            /*
-              This method is used to parse compiler generated code inside async state machine and find branches generated for exception catch blocks
-              Typical generated code for catch block is:
-
-              catch ...
-              {
-                  // (no C# code)
-                  IL_0028: stloc.2
-                  // object obj2 = <>s__1 = obj;
-                  IL_0029: ldarg.0
-                  // (no C# code)
-                  IL_002a: ldloc.2
-                  IL_002b: stfld object ...::'<>s__1'
-                  // <>s__2 = 1;
-                  IL_0030: ldarg.0
-                  IL_0031: ldc.i4.1
-                  IL_0032: stfld int32 ...::'<>s__2'      <- store 1 into <>s__2
-                  // (no C# code)
-                  IL_0037: leave.s IL_0039
-              } // end handle
-
-              // int num2 = <>s__2;
-              IL_0039: ldarg.0
-              IL_003a: ldfld int32 ...::'<>s__2'          <- load <>s__2 value and check if 1
-              IL_003f: stloc.3
-              // if (num2 == 1)
-              IL_0040: ldloc.3
-              IL_0041: ldc.i4.1
-              IL_0042: beq.s IL_0049                      <- BRANCH : if <>s__2 value is 1 go to exception handler code
-
-              IL_0044: br IL_00d6                         
-
-              IL_0049: nop                                <- start exception handler code
-
-              In case of multiple catch blocks as
-              try
-              {
-              }
-              catch (ExceptionType1)
-              {
-              }
-              catch (ExceptionType2)
-              {
-              }
-
-              generated IL contains multiple branches:
-              catch ...(type1)
-              {
-                  ...
-              }
-              catch ...(type2)
-              {
-                  ...
-              }
-              // int num2 = <>s__2;
-              IL_0039: ldarg.0
-              IL_003a: ldfld int32 ...::'<>s__2'          <- load <>s__2 value and check if 1
-              IL_003f: stloc.3
-              // if (num2 == 1)
-              IL_0040: ldloc.3
-              IL_0041: ldc.i4.1
-              IL_0042: beq.s IL_0049                      <- BRANCH 1 (type 1)
-
-              IL_0044: br IL_00d6                         
-
-              // if (num2 == 2)
-              IL_0067: ldloc.s 4
-              IL_0069: ldc.i4.2
-              IL_006a: beq IL_0104                        <- BRANCH 2 (type 2)
-
-              // (no C# code)
-              IL_006f: br IL_0191
-           */
-            List<int> detectedBranches = new List<int>();
-
-            int numberOfCatchBlocks = 1;
-            foreach (var handler in handlers)
+            if (CompilerGeneratedBranchesToExclude == null || !CompilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
             {
-                if (handlers.Any(h => h.HandlerStart == handler.HandlerEnd))
-                {
-                    // In case of multiple consecutive catch block
-                    numberOfCatchBlocks++;
-                    continue;
-                }
+                CompilerGeneratedBranchesToExclude ??= new Dictionary<string, int[]>();
+                /*
+                  This method is used to parse compiler generated code inside async state machine and find branches generated for exception catch blocks
+                  Typical generated code for catch block is:
 
-                int currentIndex = instructions.BinarySearch(handler.HandlerEnd, new InstructionByOffsetComparer());
+                  catch ...
+                  {
+                      // (no C# code)
+                      IL_0028: stloc.2
+                      // object obj2 = <>s__1 = obj;
+                      IL_0029: ldarg.0
+                      // (no C# code)
+                      IL_002a: ldloc.2
+                      IL_002b: stfld object ...::'<>s__1'
+                      // <>s__2 = 1;
+                      IL_0030: ldarg.0
+                      IL_0031: ldc.i4.1
+                      IL_0032: stfld int32 ...::'<>s__2'      <- store 1 into <>s__2
+                      // (no C# code)
+                      IL_0037: leave.s IL_0039
+                  } // end handle
 
-                /* Detect flag load
-                    // int num2 = <>s__2;
-                    IL_0058: ldarg.0
-                    IL_0059: ldfld int32 ...::'<>s__2'
-                    IL_005e: stloc.s 4
-                */
-                if (instructions.Count - currentIndex > 3 && // check boundary
-                    instructions[currentIndex].OpCode == OpCodes.Ldarg &&
-                    instructions[currentIndex + 1].OpCode == OpCodes.Ldfld && instructions[currentIndex + 1].Operand is FieldReference fr && fr.Name.StartsWith("<>s__") &&
-                    instructions[currentIndex + 2].OpCode == OpCodes.Stloc)
+                  // int num2 = <>s__2;
+                  IL_0039: ldarg.0
+                  IL_003a: ldfld int32 ...::'<>s__2'          <- load <>s__2 value and check if 1
+                  IL_003f: stloc.3
+                  // if (num2 == 1)
+                  IL_0040: ldloc.3
+                  IL_0041: ldc.i4.1
+                  IL_0042: beq.s IL_0049                      <- BRANCH : if <>s__2 value is 1 go to exception handler code
+
+                  IL_0044: br IL_00d6                         
+
+                  IL_0049: nop                                <- start exception handler code
+
+                  In case of multiple catch blocks as
+                  try
+                  {
+                  }
+                  catch (ExceptionType1)
+                  {
+                  }
+                  catch (ExceptionType2)
+                  {
+                  }
+
+                  generated IL contains multiple branches:
+                  catch ...(type1)
+                  {
+                      ...
+                  }
+                  catch ...(type2)
+                  {
+                      ...
+                  }
+                  // int num2 = <>s__2;
+                  IL_0039: ldarg.0
+                  IL_003a: ldfld int32 ...::'<>s__2'          <- load <>s__2 value and check if 1
+                  IL_003f: stloc.3
+                  // if (num2 == 1)
+                  IL_0040: ldloc.3
+                  IL_0041: ldc.i4.1
+                  IL_0042: beq.s IL_0049                      <- BRANCH 1 (type 1)
+
+                  IL_0044: br IL_00d6                         
+
+                  // if (num2 == 2)
+                  IL_0067: ldloc.s 4
+                  IL_0069: ldc.i4.2
+                  IL_006a: beq IL_0104                        <- BRANCH 2 (type 2)
+
+                  // (no C# code)
+                  IL_006f: br IL_0191
+               */
+                List<int> detectedBranches = new List<int>();
+                Collection<ExceptionHandler> handlers = methodDefinition.Body.ExceptionHandlers;
+                List<Instruction> instructions = methodDefinition.Body.Instructions.ToList();
+
+                int numberOfCatchBlocks = 1;
+                foreach (var handler in handlers)
                 {
-                    currentIndex += 3;
-                    for (int i = 0; i < numberOfCatchBlocks; i++)
+                    if (handlers.Any(h => h.HandlerStart == handler.HandlerEnd))
                     {
-                        /*
-                            // if (num2 == 1)
-		                    IL_0060: ldloc.s 4
-		                    IL_0062: ldc.i4.1
-		                    IL_0063: beq.s IL_0074
+                        // In case of multiple consecutive catch block
+                        numberOfCatchBlocks++;
+                        continue;
+                    }
 
-                            // (no C# code)
-		                    IL_0065: br.s IL_0067
-                        */
-                        if (instructions.Count - currentIndex > 4 && // check boundary
-                            instructions[currentIndex].OpCode == OpCodes.Ldloc &&
-                            instructions[currentIndex + 1].OpCode == OpCodes.Ldc_I4 &&
-                            instructions[currentIndex + 2].OpCode == OpCodes.Beq &&
-                            instructions[currentIndex + 3].OpCode == OpCodes.Br)
+                    int currentIndex = instructions.BinarySearch(handler.HandlerEnd, new InstructionByOffsetComparer());
+
+                    /* Detect flag load
+                        // int num2 = <>s__2;
+                        IL_0058: ldarg.0
+                        IL_0059: ldfld int32 ...::'<>s__2'
+                        IL_005e: stloc.s 4
+                    */
+                    if (instructions.Count - currentIndex > 3 && // check boundary
+                        instructions[currentIndex].OpCode == OpCodes.Ldarg &&
+                        instructions[currentIndex + 1].OpCode == OpCodes.Ldfld && instructions[currentIndex + 1].Operand is FieldReference fr && fr.Name.StartsWith("<>s__") &&
+                        instructions[currentIndex + 2].OpCode == OpCodes.Stloc)
+                    {
+                        currentIndex += 3;
+                        for (int i = 0; i < numberOfCatchBlocks; i++)
                         {
-                            detectedBranches.Add(instructions[currentIndex + 2].Offset);
+                            /*
+                                // if (num2 == 1)
+                                IL_0060: ldloc.s 4
+                                IL_0062: ldc.i4.1
+                                IL_0063: beq.s IL_0074
+
+                                // (no C# code)
+                                IL_0065: br.s IL_0067
+                            */
+                            if (instructions.Count - currentIndex > 4 && // check boundary
+                                instructions[currentIndex].OpCode == OpCodes.Ldloc &&
+                                instructions[currentIndex + 1].OpCode == OpCodes.Ldc_I4 &&
+                                instructions[currentIndex + 2].OpCode == OpCodes.Beq &&
+                                instructions[currentIndex + 3].OpCode == OpCodes.Br)
+                            {
+                                detectedBranches.Add(instructions[currentIndex + 2].Offset);
+                            }
+                            currentIndex += 4;
                         }
-                        currentIndex += 4;
                     }
                 }
+
+                CompilerGeneratedBranchesToExclude.Add(methodDefinition.FullName, detectedBranches.ToArray());
             }
 
-            return detectedBranches.ToArray();
+            return CompilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
         }
 
         public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
@@ -395,11 +404,6 @@ namespace Coverlet.Core.Symbols
             bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
             bool skipFirstBranch = IsMoveNextInsideEnumerator(methodDefinition);
 
-            // Detect compiler generated branches to exclude
-            int[] compilerGeneratedBranchesToExclude = isAsyncStateMachineMoveNext ?
-                DetectCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(instructions, methodDefinition.Body.ExceptionHandlers) :
-                new int[0];
-
             foreach (Instruction instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
             {
                 try
@@ -407,11 +411,6 @@ namespace Coverlet.Core.Symbols
                     if (skipFirstBranch)
                     {
                         skipFirstBranch = false;
-                        continue;
-                    }
-
-                    if (compilerGeneratedBranchesToExclude.Contains(instruction.Offset))
-                    {
                         continue;
                     }
 
@@ -424,6 +423,11 @@ namespace Coverlet.Core.Symbols
                     }
 
                     if (SkipLambdaCachedField(instruction))
+                    {
+                        continue;
+                    }
+
+                    if (isAsyncStateMachineMoveNext && SkipCompilerGeneratedBranchesForExceptionHandlersInsideAsyncStateMachine(methodDefinition, instruction))
                     {
                         continue;
                     }
