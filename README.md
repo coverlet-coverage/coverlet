@@ -22,7 +22,9 @@ Coverlet can be used through three different *drivers*
 * As a .NET Global tool  
 
 
-### VSTest Integration (preferred due to [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
+### VSTest Integration (preferred due to [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test) supports only .NET Core application)
+
+At the moment collectors integration **does not support** .NET Framework application.
 
 ### Installation
 ```bash
