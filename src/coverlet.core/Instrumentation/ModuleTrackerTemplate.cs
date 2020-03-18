@@ -82,11 +82,6 @@ namespace Coverlet.Core.Instrumentation
 
         public static void ProcessExitEvent(object sender, EventArgs e)
         {
-            if (IsCalledByInProcessCollector && IsDotNetCore())
-            {
-                return;
-            }
-
             Flush(nameof(ProcessExitEvent));
         }
 
@@ -140,7 +135,7 @@ namespace Coverlet.Core.Instrumentation
                         failedToCreateNewHitsFile = true;
                     }
 
-                    if (failedToCreateNewHitsFile)
+                    if (failedToCreateNewHitsFile && !IsDotNetCore())
                     {
                         // Update the number of hits by adding value on disk with the ones on memory.
                         // This path should be triggered only in the case of multiple AppDomain unloads.
