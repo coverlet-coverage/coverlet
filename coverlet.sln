@@ -35,7 +35,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.targets = Directory.Build.targets
 		global.json = global.json
 		eng\nightly.ps1 = eng\nightly.ps1
-		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.excludedbyattribute", "test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj", "{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}"
@@ -46,7 +45,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.integration.templa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.tests.samples.netstandard", "test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj", "{5FF404AD-7C0B-465A-A1E9-558CDC642B0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.xunit.extensions", "test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj", "{F8199E19-FA9A-4559-9101-CAD7028121B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.xunit.extensions", "test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj", "{F8199E19-FA9A-4559-9101-CAD7028121B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
