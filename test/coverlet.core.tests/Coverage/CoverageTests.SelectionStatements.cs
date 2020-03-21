@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    public partial class CoverageTests : ExternalProcessExecutionTestClass
+    public partial class CoverageTests : ExternalProcessExecutionTest
     {
         [Fact]
         public void SelectionStatements_If()

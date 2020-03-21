@@ -22,7 +22,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
     }
 
-    public class ModuleTrackerTemplateTests : ExternalProcessExecutionTestClass
+    public class ModuleTrackerTemplateTests : ExternalProcessExecutionTest
     {
         private static readonly Task<int> _success = Task.FromResult(0);
 
