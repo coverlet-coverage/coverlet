@@ -18,24 +18,6 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    public abstract class ExternalProcessExecutionTestClass
-    {
-        protected FunctionExecutor FunctionExecutor = new FunctionExecutor(
-        o =>
-        {
-            o.StartInfo.RedirectStandardError = true;
-            o.OnExit = p =>
-            {
-                if (p.ExitCode != 0)
-                {
-                    string message = $"Function exit code failed with exit code: {p.ExitCode}" + Environment.NewLine +
-                                      p.StandardError.ReadToEnd();
-                    throw new Xunit.Sdk.XunitException(message);
-                }
-            };
-        });
-    }
-
     static class TestInstrumentationHelper
     {
         private static IServiceProvider _processWideContainer;
@@ -276,6 +258,32 @@ namespace Coverlet.Core.Tests
         public override void RestoreOriginalModules()
         {
             // DO NOT RESTORE
+        }
+    }
+
+    public abstract class ExternalProcessExecutionTestClass
+    {
+        protected FunctionExecutor FunctionExecutor = new FunctionExecutor(
+        o =>
+        {
+            o.StartInfo.RedirectStandardError = true;
+            o.OnExit = p =>
+            {
+                if (p.ExitCode != 0)
+                {
+                    string message = $"Function exit code failed with exit code: {p.ExitCode}" + Environment.NewLine +
+                                      p.StandardError.ReadToEnd();
+                    throw new Xunit.Sdk.XunitException(message);
+                }
+            };
+        });
+    }
+
+    public static class FunctionExecutorExtensions
+    {
+        public static void RunInProcess(this FunctionExecutor executor, Func<string[], Task<int>> func, string[] args)
+        {
+            Assert.Equal(0, func(args).Result);
         }
     }
 }
