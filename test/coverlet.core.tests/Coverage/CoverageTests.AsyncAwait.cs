@@ -9,7 +9,7 @@ namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests
     {
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void AsyncAwait()
         {
@@ -67,7 +67,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void AsyncAwait_Issue_669_1()
         {
@@ -99,7 +99,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void AsyncAwait_Issue_669_2()
         {

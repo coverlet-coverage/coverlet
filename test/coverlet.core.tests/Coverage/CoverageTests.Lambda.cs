@@ -9,7 +9,7 @@ namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests
     {
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void Lambda_Issue343()
         {
@@ -45,7 +45,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void AsyncAwait_Issue_730()
         {

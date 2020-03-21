@@ -34,7 +34,7 @@ namespace Coverlet.Core.Tests
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
         }
 
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
         {
@@ -76,7 +76,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes_NestedMembers()
         {
@@ -107,7 +107,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void ExcludeFromCodeCoverageCompilerGeneratedMethodsAndTypes_Issue670()
         {
@@ -138,7 +138,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void ExcludeFromCodeCoverageNextedTypes()
         {

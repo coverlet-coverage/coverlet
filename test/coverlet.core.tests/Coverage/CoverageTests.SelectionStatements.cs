@@ -10,7 +10,7 @@ namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests : ExternalProcessExecutionTest
     {
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void SelectionStatements_If()
         {
@@ -57,7 +57,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
         public void SelectionStatements_Switch()
         {
