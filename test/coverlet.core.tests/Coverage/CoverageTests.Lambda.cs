@@ -2,7 +2,6 @@ using System.IO;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
-using Coverlet.Tests.RemoteExecutor;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -15,7 +14,7 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                RemoteExecutor.Invoke(async pathSerialize =>
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(instance =>
                     {
@@ -23,9 +22,9 @@ namespace Coverlet.Core.Tests
                         ((Task<bool>)instance.InvokeAnonymousAsync_Test()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize);
+                    }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
-                }, path).Dispose();
+                }, new string[] { path });
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.Lambda.cs")
@@ -50,17 +49,17 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                RemoteExecutor.Invoke(async pathSerialize =>
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_730>(instance =>
                     {
                         ((Task)instance.Invoke()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize, disableRestoreModules: true);
+                    persistPrepareResultToFile: pathSerialize[0]);
 
                     return 0;
-                }, path, invokeInProcess: true).Dispose();
+                }, new string[] { path });
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.Lambda.cs")

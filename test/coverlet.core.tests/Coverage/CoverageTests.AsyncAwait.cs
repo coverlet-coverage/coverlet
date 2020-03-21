@@ -2,7 +2,6 @@ using System.IO;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
-using Coverlet.Tests.RemoteExecutor;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -15,7 +14,7 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                RemoteExecutor.Invoke(async pathSerialize =>
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwait>(instance =>
                     {
@@ -29,9 +28,9 @@ namespace Coverlet.Core.Tests
                         res = ((Task<int>)instance.ConfigureAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize);
+                    }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
-                }, path).Dispose();
+                }, new string[] { path });
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.AsyncAwait.cs")
@@ -72,17 +71,17 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                RemoteExecutor.Invoke(async pathSerialize =>
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_1>(instance =>
                     {
                         ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize);
+                    persistPrepareResultToFile: pathSerialize[0]);
 
                     return 0;
-                }, path).Dispose();
+                }, new string[] { path });
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.AsyncAwait.cs")
@@ -103,17 +102,17 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                RemoteExecutor.Invoke(async pathSerialize =>
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(instance =>
                     {
                         ((ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize);
+                    persistPrepareResultToFile: pathSerialize[0]);
 
                     return 0;
-                }, path).Dispose();
+                }, new string[] { path });
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.AsyncAwait.cs")

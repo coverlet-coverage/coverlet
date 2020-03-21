@@ -1,5 +1,4 @@
 ﻿using Coverlet.Core.Instrumentation;
-using Coverlet.Tests.RemoteExecutor;
 using System;
 using System.IO;
 using System.Threading;
@@ -23,14 +22,14 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
     }
 
-    public class ModuleTrackerTemplateTests
+    public class ModuleTrackerTemplateTests : ExternalProcessExecutionTestClass
     {
         private static readonly Task<int> _success = Task.FromResult(0);
 
         [Fact]
         public void HitsFileCorrectlyWritten()
         {
-            using var invoker = RemoteExecutor.Invoke(_ =>
+            FunctionExecutor.Run(() =>
             {
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 1, 2, 0, 3 };
@@ -46,7 +45,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         [Fact]
         public void HitsFileWithDifferentNumberOfEntriesCausesExceptionOnUnload()
         {
-            using var invoker = RemoteExecutor.Invoke(_ =>
+            FunctionExecutor.Run(() =>
             {
                 using var ctx = new TrackerContext();
                 WriteHitsFile(new[] { 1, 2, 3 });
@@ -59,7 +58,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         [Fact]
         public void HitsOnMultipleThreadsCorrectlyCounted()
         {
-            using var invoker = RemoteExecutor.Invoke(_ =>
+            FunctionExecutor.Run(() =>
             {
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 0, 0, 0, 0 };
@@ -89,7 +88,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         [Fact]
         public void MultipleSequentialUnloadsHaveCorrectTotalData()
         {
-            using var invoker = RemoteExecutor.Invoke(_ =>
+            FunctionExecutor.Run(() =>
             {
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 0, 3, 2, 1 };
@@ -108,7 +107,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         [Fact]
         public void MutexBlocksMultipleWriters()
         {
-            using var invoker = RemoteExecutor.Invoke(async _ =>
+            FunctionExecutor.Run(async () =>
             {
                 using var ctx = new TrackerContext();
                 using (var mutex = new Mutex(
