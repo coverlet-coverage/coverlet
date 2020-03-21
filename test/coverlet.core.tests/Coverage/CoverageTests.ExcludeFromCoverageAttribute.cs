@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
 
@@ -33,6 +34,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
         {
             string path = Path.GetTempFileName();
@@ -74,6 +76,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes_NestedMembers()
         {
             string path = Path.GetTempFileName();
@@ -104,6 +107,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void ExcludeFromCodeCoverageCompilerGeneratedMethodsAndTypes_Issue670()
         {
             string path = Path.GetTempFileName();
@@ -134,6 +138,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void ExcludeFromCodeCoverageNextedTypes()
         {
             string path = Path.GetTempFileName();

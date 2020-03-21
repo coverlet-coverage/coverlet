@@ -1,8 +1,10 @@
-﻿using Coverlet.Core.Instrumentation;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Coverlet.Core.Instrumentation;
+using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Instrumentation
@@ -27,6 +29,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         private static readonly Task<int> _success = Task.FromResult(0);
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void HitsFileCorrectlyWritten()
         {
             FunctionExecutor.Run(() =>
@@ -43,6 +46,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void HitsFileWithDifferentNumberOfEntriesCausesExceptionOnUnload()
         {
             FunctionExecutor.Run(() =>
@@ -56,6 +60,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void HitsOnMultipleThreadsCorrectlyCounted()
         {
             FunctionExecutor.Run(() =>
@@ -86,6 +91,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void MultipleSequentialUnloadsHaveCorrectTotalData()
         {
             FunctionExecutor.Run(() =>
@@ -105,6 +111,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void MutexBlocksMultipleWriters()
         {
             FunctionExecutor.Run(async () =>

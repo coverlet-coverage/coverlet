@@ -1,8 +1,8 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Tests.Xunit.Extensions;
 using Tmds.Utils;
 using Xunit;
 
@@ -11,6 +11,7 @@ namespace Coverlet.Core.Tests
     public partial class CoverageTests : ExternalProcessExecutionTest
     {
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void SelectionStatements_If()
         {
             // We need to pass file name to remote process where it save instrumentation result
@@ -57,6 +58,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void SelectionStatements_Switch()
         {
             string path = Path.GetTempFileName();

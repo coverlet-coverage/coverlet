@@ -2,6 +2,7 @@ using System.IO;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -9,6 +10,7 @@ namespace Coverlet.Core.Tests
     public partial class CoverageTests
     {
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void Lambda_Issue343()
         {
             string path = Path.GetTempFileName();
@@ -44,6 +46,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
+        [SkipOnOS(OS.MacOS)]
         public void AsyncAwait_Issue_730()
         {
             string path = Path.GetTempFileName();
