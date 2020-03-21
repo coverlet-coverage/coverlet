@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Abstracts;
@@ -141,29 +142,30 @@ namespace Coverlet.Core.Tests
         [SkipOnOS(OS.MacOS)]
         public void ExcludeFromCodeCoverageNextedTypes()
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ExcludeFromCoverageAttrFilterClass1>(instance =>
-                    {
-                        Assert.Equal(42, instance.Run());
-                        return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+            throw new Exception("Log " +  RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
+            //string path = Path.GetTempFileName();
+            //try
+            //{
+            //    FunctionExecutor.Run(async (string[] pathSerialize) =>
+            //    {
+            //        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ExcludeFromCoverageAttrFilterClass1>(instance =>
+            //        {
+            //            Assert.Equal(42, instance.Run());
+            //            return Task.CompletedTask;
+            //        }, persistPrepareResultToFile: pathSerialize[0]);
 
-                    return 0;
-                }, new string[] { path });
+            //        return 0;
+            //    }, new string[] { path });
 
-                TestInstrumentationHelper.GetCoverageResult(path)
-                .Document("Instrumentation.ExcludeFromCoverage.cs")
-                .AssertLinesCovered(BuildConfiguration.Debug, (143, 1))
-                .AssertNonInstrumentedLines(BuildConfiguration.Debug, 146, 160);
-            }
-            finally
-            {
-                File.Delete(path);
-            }
+            //    TestInstrumentationHelper.GetCoverageResult(path)
+            //    .Document("Instrumentation.ExcludeFromCoverage.cs")
+            //    .AssertLinesCovered(BuildConfiguration.Debug, (143, 1))
+            //    .AssertNonInstrumentedLines(BuildConfiguration.Debug, 146, 160);
+            //}
+            //finally
+            //{
+            //    File.Delete(path);
+            //}
         }
     }
 }
