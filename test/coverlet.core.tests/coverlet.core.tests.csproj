@@ -16,7 +16,7 @@
     <PackageReference Include="ReportGenerator.Core" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
-    <PackageReference Include="Tmds.ExecFunction" Version="0.3.0" />
+    <PackageReference Include="Tmds.ExecFunction" />
   </ItemGroup>
 
   <ItemGroup>
