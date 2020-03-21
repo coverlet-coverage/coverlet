@@ -261,7 +261,7 @@ namespace Coverlet.Core.Tests
         }
     }
 
-    public abstract class ExternalProcessExecutionTestClass
+    public abstract class ExternalProcessExecutionTest
     {
         protected FunctionExecutor FunctionExecutor = new FunctionExecutor(
         o =>
