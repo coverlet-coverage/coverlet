@@ -12,10 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -Fix bug with nested types filtering [#689](https://github.com/tonerdo/coverlet/issues/689)  
 -Fix Coverage Issue - New Using + Async/Await + ConfigureAwait [#669](https://github.com/tonerdo/coverlet/issues/669)  
 -Improve branch detection for lambda functions and async/await statements [#702](https://github.com/tonerdo/coverlet/pull/702) by https://github.com/matteoerigozzi  
+-Improve coverage, hide compiler generated branches for try/catch blocks inside async state machine [#716](https://github.com/tonerdo/coverlet/pull/716) by https://github.com/matteoerigozzi  
 
 ### Improvements
 
--Trim whitespace between values when reading from configuration from runsettings [#679](https://github.com/tonerdo/coverlet/pull/679) by https://github.com/EricStG
+-Trim whitespace between values when reading from configuration from runsettings [#679](https://github.com/tonerdo/coverlet/pull/679) by https://github.com/EricStG  
+-Code improvement, flow ILogger to InstrumentationHelper [#727](https://github.com/tonerdo/coverlet/pull/727) by https://github.com/daveMueller  
+-Add support for line branch coverage in OpenCover format [#772](https://github.com/tonerdo/coverlet/pull/772) by https://github.com/costin-zaharia  
 
 ## Release date 2020-01-03
 ### Packages  
