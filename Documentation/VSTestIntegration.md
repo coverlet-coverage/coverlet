@@ -1,5 +1,7 @@
 # Coverlet integration with VSTest (a.k.a. Visual Studio Test Platform)
 
+**At the moment collectors integration supports only .NET Core applications and not .NET Framework ones.**
+
 As explained in quick start section to use collectors you need to run *SDK v2.2.401* or newer and your project file must reference `coverlet.collector.dll` and a minimum version of `Microsoft.NET.Test.Sdk`.  
 A sample project file looks like:
 

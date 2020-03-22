@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -113,6 +112,9 @@ namespace Coverlet.Core.Reporters
 
                             foreach (var lines in meth.Value.Lines)
                             {
+                                var lineBranches = meth.Value.Branches.Where(branchInfo => branchInfo.Line == lines.Key).ToArray();
+                                var branchCoverage = summary.CalculateBranchCoverage(lineBranches);
+                                
                                 XElement sequencePoint = new XElement("SequencePoint");
                                 sequencePoint.Add(new XAttribute("vc", lines.Value.ToString()));
                                 sequencePoint.Add(new XAttribute("uspid", lines.Key.ToString()));
@@ -121,8 +123,8 @@ namespace Coverlet.Core.Reporters
                                 sequencePoint.Add(new XAttribute("sc", "1"));
                                 sequencePoint.Add(new XAttribute("el", lines.Key.ToString()));
                                 sequencePoint.Add(new XAttribute("ec", "2"));
-                                sequencePoint.Add(new XAttribute("bec", "0"));
-                                sequencePoint.Add(new XAttribute("bev", "0"));
+                                sequencePoint.Add(new XAttribute("bec", branchCoverage.Total));
+                                sequencePoint.Add(new XAttribute("bev", branchCoverage.Covered));
                                 sequencePoint.Add(new XAttribute("fileid", i.ToString()));
                                 sequencePoints.Add(sequencePoint);
 
