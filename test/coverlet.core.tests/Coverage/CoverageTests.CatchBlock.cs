@@ -2,13 +2,14 @@ using System.IO;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
-using Xunit;
+using Coverlet.Tests.Xunit.Extensions;
 
 namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests
     {
-        [Fact]
+        [ConditionalFact]
+        [SkipOnOS(OS.MacOS)]
         public void CatchBlock_Issue465()
         {
             string path = Path.GetTempFileName();
