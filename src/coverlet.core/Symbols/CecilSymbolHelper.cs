@@ -3,6 +3,7 @@
 // team in OpenCover.Framework.Symbols.CecilSymbolManager
 //
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -18,7 +19,13 @@ namespace Coverlet.Core.Symbols
     internal static class CecilSymbolHelper
     {
         private const int StepOverLineCode = 0xFEEFEE;
-        private static Dictionary<string, int[]> CompilerGeneratedBranchesToExclude = null;
+        private static ConcurrentDictionary<string, int[]> CompilerGeneratedBranchesToExclude = null;
+
+        static CecilSymbolHelper()
+        {
+            // Create single instance, we cannot collide because we use full method name as key
+            CompilerGeneratedBranchesToExclude = new ConcurrentDictionary<string, int[]>();
+        }
 
         // In case of nested compiler generated classes, only the root one presents the CompilerGenerated attribute.
         // So let's search up to the outermost declaring type to find the attribute
@@ -250,14 +257,18 @@ namespace Coverlet.Core.Symbols
                     instructions[branchIndex - 3].OpCode == OpCodes.Isinst &&
                     instructions[branchIndex - 3].Operand is TypeReference tr && tr.FullName == "System.Exception" &&
                     instructions[branchIndex - 2].OpCode == OpCodes.Stloc &&
-                    instructions[branchIndex - 1].OpCode == OpCodes.Ldloc;
+                    instructions[branchIndex - 1].OpCode == OpCodes.Ldloc &&
+                    // check for throw opcode after branch
+                    instructions.Count - branchIndex >= 3 &&
+                    instructions[branchIndex + 1].OpCode == OpCodes.Ldarg &&
+                    instructions[branchIndex + 2].OpCode == OpCodes.Ldfld &&
+                    instructions[branchIndex + 3].OpCode == OpCodes.Throw;
         }
 
-        private static bool SkipGeneratedBranchesForExceptionHandlers(MethodDefinition methodDefinition, Instruction instruction)
+        private static bool SkipGeneratedBranchesForExceptionHandlers(MethodDefinition methodDefinition, Instruction instruction, List<Instruction> bodyInstructions)
         {
-            if (CompilerGeneratedBranchesToExclude == null || !CompilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
+            if (!CompilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
             {
-                CompilerGeneratedBranchesToExclude ??= new Dictionary<string, int[]>();
                 /*
                   This method is used to parse compiler generated code inside async state machine and find branches generated for exception catch blocks
                   Typical generated code for catch block is:
@@ -333,7 +344,6 @@ namespace Coverlet.Core.Symbols
                */
                 List<int> detectedBranches = new List<int>();
                 Collection<ExceptionHandler> handlers = methodDefinition.Body.ExceptionHandlers;
-                List<Instruction> instructions = methodDefinition.Body.Instructions.ToList();
 
                 int numberOfCatchBlocks = 1;
                 foreach (var handler in handlers)
@@ -345,7 +355,7 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
-                    int currentIndex = instructions.BinarySearch(handler.HandlerEnd, new InstructionByOffsetComparer());
+                    int currentIndex = bodyInstructions.BinarySearch(handler.HandlerEnd, new InstructionByOffsetComparer());
 
                     /* Detect flag load
                         // int num2 = <>s__2;
@@ -353,10 +363,10 @@ namespace Coverlet.Core.Symbols
                         IL_0059: ldfld int32 ...::'<>s__2'
                         IL_005e: stloc.s 4
                     */
-                    if (instructions.Count - currentIndex > 3 && // check boundary
-                        instructions[currentIndex].OpCode == OpCodes.Ldarg &&
-                        instructions[currentIndex + 1].OpCode == OpCodes.Ldfld && instructions[currentIndex + 1].Operand is FieldReference fr && fr.Name.StartsWith("<>s__") &&
-                        instructions[currentIndex + 2].OpCode == OpCodes.Stloc)
+                    if (bodyInstructions.Count - currentIndex > 3 && // check boundary
+                        bodyInstructions[currentIndex].OpCode == OpCodes.Ldarg &&
+                        bodyInstructions[currentIndex + 1].OpCode == OpCodes.Ldfld && bodyInstructions[currentIndex + 1].Operand is FieldReference fr && fr.Name.StartsWith("<>s__") &&
+                        bodyInstructions[currentIndex + 2].OpCode == OpCodes.Stloc)
                     {
                         currentIndex += 3;
                         for (int i = 0; i < numberOfCatchBlocks; i++)
@@ -370,20 +380,20 @@ namespace Coverlet.Core.Symbols
                                 // (no C# code)
                                 IL_0065: br.s IL_0067
                             */
-                            if (instructions.Count - currentIndex > 4 && // check boundary
-                                instructions[currentIndex].OpCode == OpCodes.Ldloc &&
-                                instructions[currentIndex + 1].OpCode == OpCodes.Ldc_I4 &&
-                                instructions[currentIndex + 2].OpCode == OpCodes.Beq &&
-                                instructions[currentIndex + 3].OpCode == OpCodes.Br)
+                            if (bodyInstructions.Count - currentIndex > 4 && // check boundary
+                                bodyInstructions[currentIndex].OpCode == OpCodes.Ldloc &&
+                                bodyInstructions[currentIndex + 1].OpCode == OpCodes.Ldc_I4 &&
+                                bodyInstructions[currentIndex + 2].OpCode == OpCodes.Beq &&
+                                bodyInstructions[currentIndex + 3].OpCode == OpCodes.Br)
                             {
-                                detectedBranches.Add(instructions[currentIndex + 2].Offset);
+                                detectedBranches.Add(bodyInstructions[currentIndex + 2].Offset);
                             }
                             currentIndex += 4;
                         }
                     }
                 }
 
-                CompilerGeneratedBranchesToExclude.Add(methodDefinition.FullName, detectedBranches.ToArray());
+                CompilerGeneratedBranchesToExclude.TryAdd(methodDefinition.FullName, detectedBranches.ToArray());
             }
 
             return CompilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
@@ -429,7 +439,7 @@ namespace Coverlet.Core.Symbols
 
                     if (isAsyncStateMachineMoveNext)
                     {
-                        if (SkipGeneratedBranchesForExceptionHandlers(methodDefinition, instruction) || 
+                        if (SkipGeneratedBranchesForExceptionHandlers(methodDefinition, instruction, instructions) ||
                             SkipGeneratedBranchForExceptionRethrown(instructions, instruction))
                         {
                             continue;
@@ -641,7 +651,7 @@ namespace Coverlet.Core.Symbols
            IL_00eb: br.s IL_00ed
            ...
        */
-        internal static bool SkipNotCoverableInstructionAfterExceptionThrownInsideMoveNextAsyncStateMachine(MethodDefinition methodDefinition, Instruction instruction)
+        internal static bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction)
         {
             if (!IsMoveNextInsideAsyncStateMachine(methodDefinition))
             {

@@ -448,7 +448,7 @@ namespace Coverlet.Core.Instrumentation
                 var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
 
                 // Check if the instruction is coverable
-                if (CecilSymbolHelper.SkipNotCoverableInstructionAfterExceptionThrownInsideMoveNextAsyncStateMachine(method, instruction))
+                if (CecilSymbolHelper.SkipNotCoverableInstruction(method, instruction))
                 {
                     index++;
                     continue;
