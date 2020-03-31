@@ -22,7 +22,9 @@ Coverlet can be used through three different *drivers*
 * As a .NET Global tool  
 
 
-### VSTest Integration (preferred due to [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
+### VSTest Integration (preferred due to [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test) supports only .NET Core application)
+
+At the moment collectors integration **does not support** .NET Framework application.
 
 ### Installation
 ```bash
@@ -48,7 +50,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
 ```
 
-### MSBuild Integration
+### MSBuild Integration (suffers of possible [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation
 ```bash
@@ -71,7 +73,7 @@ See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 #### Requirements
 Requires a runtime that support _.NET Standard 2.0 and above_
 
-### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools))
+### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), suffers of possible [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation
 
@@ -113,8 +115,6 @@ Coverlet generates code coverage information by going through the following proc
 * Restore the original non-instrumented assembly files.
 * Read the recorded hits information from the temporary file.
 * Generate the coverage result from the hits information and write it to a file.
-
-_Note: The assembly you'd like to get coverage for must be different from the assembly that contains the tests_
 
 ## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)!
 

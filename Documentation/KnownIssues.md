@@ -46,7 +46,7 @@ We found problem for instance with test that uses RabbitMQ.
 
 *Solution:* 
 The only way to solve this issue is to use collectors integration https://github.com/tonerdo/coverlet#vstest-integration-preferred-due-to-known-issue.  
-With collector we're injected in test host throught a in-proc collector that talk with vstest platform so we can signal when we end our work.  
+With collector we're injected in test host through a in-proc collector that talk with vstest platform so we can signal when we end our work.  
 
 ## 2) Upgrade `coverlet.collector` to version > 1.0.0
 
