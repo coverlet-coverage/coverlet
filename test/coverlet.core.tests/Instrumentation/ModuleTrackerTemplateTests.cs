@@ -1,9 +1,10 @@
-﻿using Coverlet.Core.Instrumentation;
-using Coverlet.Tests.RemoteExecutor;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Coverlet.Core.Instrumentation;
+using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Instrumentation
@@ -23,14 +24,15 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
     }
 
-    public class ModuleTrackerTemplateTests
+    public class ModuleTrackerTemplateTests : ExternalProcessExecutionTest
     {
         private static readonly Task<int> _success = Task.FromResult(0);
 
-        [Fact]
+        [ConditionalFact]
+        [SkipOnOS(OS.MacOS)]
         public void HitsFileCorrectlyWritten()
         {
-            using var invoker = RemoteExecutor.Invoke(_ =>
+            FunctionExecutor.Run(() =>
             {
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 1, 2, 0, 3 };
@@ -43,10 +45,11 @@ namespace Coverlet.Core.Tests.Instrumentation
             });
         }
 
-        [Fact]
+        [ConditionalFact]
+        [SkipOnOS(OS.MacOS)]
         public void HitsFileWithDifferentNumberOfEntriesCausesExceptionOnUnload()
         {
-            using var invoker = RemoteExecutor.Invoke(_ =>
+            FunctionExecutor.Run(() =>
             {
                 using var ctx = new TrackerContext();
                 WriteHitsFile(new[] { 1, 2, 3 });
@@ -56,10 +59,11 @@ namespace Coverlet.Core.Tests.Instrumentation
             });
         }
 
-        [Fact]
+        [ConditionalFact]
+        [SkipOnOS(OS.MacOS)]
         public void HitsOnMultipleThreadsCorrectlyCounted()
         {
-            using var invoker = RemoteExecutor.Invoke(_ =>
+            FunctionExecutor.Run(() =>
             {
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 0, 0, 0, 0 };
@@ -86,10 +90,11 @@ namespace Coverlet.Core.Tests.Instrumentation
             });
         }
 
-        [Fact]
+        [ConditionalFact]
+        [SkipOnOS(OS.MacOS)]
         public void MultipleSequentialUnloadsHaveCorrectTotalData()
         {
-            using var invoker = RemoteExecutor.Invoke(_ =>
+            FunctionExecutor.Run(() =>
             {
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 0, 3, 2, 1 };
@@ -105,10 +110,11 @@ namespace Coverlet.Core.Tests.Instrumentation
             });
         }
 
-        [Fact]
+        [ConditionalFact]
+        [SkipOnOS(OS.MacOS)]
         public void MutexBlocksMultipleWriters()
         {
-            using var invoker = RemoteExecutor.Invoke(async _ =>
+            FunctionExecutor.Run(async () =>
             {
                 using var ctx = new TrackerContext();
                 using (var mutex = new Mutex(

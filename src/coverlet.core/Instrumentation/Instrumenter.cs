@@ -447,6 +447,13 @@ namespace Coverlet.Core.Instrumentation
                 var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
                 var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
 
+                // Check if the instruction is coverable
+                if (CecilSymbolHelper.SkipNotCoverableInstruction(method, instruction))
+                {
+                    index++;
+                    continue;
+                }
+
                 if (sequencePoint != null && !sequencePoint.IsHidden)
                 {
                     var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);

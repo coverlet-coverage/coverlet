@@ -1,5 +1,7 @@
 # Coverlet integration with VSTest (a.k.a. Visual Studio Test Platform)
 
+**At the moment collectors integration supports only .NET Core applications and not .NET Framework ones.**
+
 As explained in quick start section to use collectors you need to run *SDK v2.2.401* or newer and your project file must reference `coverlet.collector.dll` and a minimum version of `Microsoft.NET.Test.Sdk`.  
 A sample project file looks like:
 
@@ -114,7 +116,7 @@ Take a look at our [`HelloWorld`](Examples/VSTest/HelloWorld/HowTo.md) sample.
 ## How it works
 
 Coverlet integration is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md).  
-When we specify `--collect:"XPlat Code Coverage"` vstest platform tries to load coverlet collectors present inside `coverlet.collector.dll`
+When we specify `--collect:"XPlat Code Coverage"` vstest platform tries to load coverlet collectors inside `coverlet.collector.dll`
 
 1. Outproc Datacollector : The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector is responsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
 
