@@ -5,7 +5,6 @@ using System.IO;
 using Coverlet.Core;
 using Coverlet.Core.Abstracts;
 using Coverlet.Core.Helpers;
-using coverlet.msbuild.tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +12,7 @@ using ILogger = Coverlet.Core.Abstracts.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
 {
-    public class InstrumentationTask : Task
+    public class InstrumentationTask : BaseTask
     {
         private string _path;
         private string _include;
@@ -132,7 +131,7 @@ namespace Coverlet.MSbuild.Tasks
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
 
-            Services.ServiceProvider = serviceCollection.BuildServiceProvider();
+            ServiceProvider = serviceCollection.BuildServiceProvider();
 
             try
             {
@@ -141,7 +140,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludeFilters = _exclude?.Split(',');
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
-                var fileSystem = Services.ServiceProvider.GetService<IFileSystem>();
+                var fileSystem = ServiceProvider.GetService<IFileSystem>();
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
@@ -154,7 +153,7 @@ namespace Coverlet.MSbuild.Tasks
                     _mergeWith,
                     _useSourceLink,
                     _logger,
-                    Services.ServiceProvider.GetService<IInstrumentationHelper>(),
+                    ServiceProvider.GetService<IInstrumentationHelper>(),
                     fileSystem);
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
