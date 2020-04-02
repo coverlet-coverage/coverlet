@@ -28,9 +28,9 @@ We plan 1 release [once per quarter](https://en.wikipedia.org/wiki/Calendar_year
 
 | Package        | **coverlet.msbuild** |
 | :-------------: |:-------------:|
-|**coverlet.msbuild**      | 2.8.0  |  
-|**coverlet.console**      | 1.7.0  |
-|**coverlet.collector**      | 1.2.0 |  
+|**coverlet.msbuild**      | 2.8.1  |  
+|**coverlet.console**      | 1.7.1  |
+|**coverlet.collector**      | 1.2.1 |  
 
 ### Proposed next versions  
 
@@ -41,7 +41,7 @@ We MANUALLY bump versions on production release, so we have different release pl
 
 | Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **commit hash**| **notes** |
 | :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
-| <01 April 2020>      | 2.8.1 | 1.7.1 |   1.2.1 | 
+| 04 April 2020      | 2.8.1 | 1.7.1 |   1.2.1 | 3f81828821d07d756e02a4105b2533cedf0b543c
 | 03 January 2019      | 2.8.0 | 1.7.0 |   1.2.0 | 72a688f1c47fa92059540d5fbb1c4b0b4bf0dc8c |  |
 | 23 September 2019      | 2.7.0 | 1.6.0 |   1.1.0 | 4ca01eb239038808739699470a61fad675af6c79 |  |
 | 01 July 2019      | 2.6.3 | 1.5.3 |   1.0.1 | e1593359497fdfe6befbb86304b8f4e09a656d14 |  |
