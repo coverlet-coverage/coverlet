@@ -74,7 +74,7 @@ With Coverlet you can combine the output of multiple coverage runs into a single
 dotnet test /p:CollectCoverage=true /p:MergeWith='/path/to/result.json'
 ```
 
-The value given to `/p:MergeWith` **must** be a path to Coverlet's own json result format. The results in `result.json` will be read, and added to the new results written to by Coverlet.  
+The value given to `/p:MergeWith` **must** be a path to Coverlet's own json result format. The results in `result.json` will be read, and added to the new results written to by Coverlet.
 [Check the sample](Examples.md).
 
 ## Threshold
@@ -167,6 +167,19 @@ VSTS builds do not require double quotes to be unescaped:
 ```
 dotnet test --configuration $(buildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/ /p:Exclude="[MyAppName.DebugHost]*%2c[MyAppNamet.WebHost]*%2c[MyAppName.App]*"
 ```
+
+## Note for Linux users
+
+[There is an issue with MSBuild on Linux](https://github.com/microsoft/msbuild/issues/3468) affects the ability to escape quotes while specifying multiple comma-separated values. Linux MSBuild automatically translates `\` to `/` in properties, tasks, etc. before using them, which means if you specified `/p:CoverletOutputFormat=\"json,opencover\"` in an MSBuild script, it will be converted to `/p:CoverletOutputFormat=/"json,opencover/"` before execution. This yields an error similar to the following:
+
+```text
+MSBUILD : error MSB1006: Property is not valid. [/home/vsts/work/1/s/default.proj]
+  Switch: opencover/
+```
+
+You'll see this if directly consuming Linux MSBuild or if using the Azure DevOps `MSBuild` task on a Linux agent.
+
+The workaround is to use the .NET Core `dotnet msbuild` command instead of using MSBuild directly. The issue is not present in `dotnet msbuild` and the script will run with correctly escaped quotes.
 
 ## SourceLink
 
