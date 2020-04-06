@@ -26,6 +26,7 @@ namespace Coverlet.Core
         private ILogger _logger;
         private IInstrumentationHelper _instrumentationHelper;
         private IFileSystem _fileSystem;
+        private ISourceRootTranslator _sourceRootTranslator;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -45,7 +46,8 @@ namespace Coverlet.Core
             bool useSourceLink,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
-            IFileSystem fileSystem)
+            IFileSystem fileSystem,
+            ISourceRootTranslator sourceRootTranslator)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -60,6 +62,7 @@ namespace Coverlet.Core
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
+            _sourceRootTranslator = sourceRootTranslator;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
@@ -97,7 +100,8 @@ namespace Coverlet.Core
                     continue;
                 }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator);
+
                 if (instrumenter.CanInstrument())
                 {
                     _instrumentationHelper.BackupOriginalModule(module, _identifier);

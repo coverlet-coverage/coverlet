@@ -21,24 +21,28 @@ namespace Coverlet.Collector.DataCollection
     public class CoverletCoverageCollector : DataCollector
     {
         private readonly TestPlatformEqtTrace _eqtTrace;
+        private readonly ICoverageWrapper _coverageWrapper;
+        private readonly ICountDownEventFactory _countDownEventFactory;
+        private readonly Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> _serviceCollectionFactory;
+
         private DataCollectionEvents _events;
         private TestPlatformLogger _logger;
         private XmlElement _configurationElement;
         private DataCollectionSink _dataSink;
         private DataCollectionContext _dataCollectionContext;
         private CoverageManager _coverageManager;
-        private ICoverageWrapper _coverageWrapper;
-        private ICountDownEventFactory _countDownEventFactory;
+        private IServiceProvider _serviceProvider;
 
-        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper(), new CollectorCountdownEventFactory())
+        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper(), new CollectorCountdownEventFactory(), GetDefaultServiceCollection)
         {
         }
 
-        internal CoverletCoverageCollector(TestPlatformEqtTrace eqtTrace, ICoverageWrapper coverageWrapper, ICountDownEventFactory countDownEventFactory) : base()
+        internal CoverletCoverageCollector(TestPlatformEqtTrace eqtTrace, ICoverageWrapper coverageWrapper, ICountDownEventFactory countDownEventFactory, Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory) : base()
         {
             _eqtTrace = eqtTrace;
             _coverageWrapper = coverageWrapper;
             _countDownEventFactory = countDownEventFactory;
+            _serviceCollectionFactory = serviceCollectionFactory;
         }
 
         private void AttachDebugger()
@@ -79,7 +83,6 @@ namespace Coverlet.Collector.DataCollection
             _dataSink = dataSink;
             _dataCollectionContext = environmentContext.SessionDataCollectionContext;
             _logger = new TestPlatformLogger(logger, _dataCollectionContext);
-            DependencyInjection.Set(GetServiceProvider(_eqtTrace, _logger));
 
             // Register events
             _events.SessionStart += OnSessionStart;
@@ -125,8 +128,13 @@ namespace Coverlet.Collector.DataCollection
                 var coverletSettingsParser = new CoverletSettingsParser(_eqtTrace);
                 CoverletSettings coverletSettings = coverletSettingsParser.Parse(_configurationElement, testModules);
 
+                // Build services container
+                _serviceProvider = _serviceCollectionFactory(_eqtTrace, _logger, coverletSettings.TestModule).BuildServiceProvider();
+
                 // Get coverage and attachment managers
-                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _logger, _coverageWrapper);
+                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _logger, _coverageWrapper,
+                                                        _serviceProvider.GetRequiredService<IInstrumentationHelper>(), _serviceProvider.GetRequiredService<IFileSystem>(),
+                                                        _serviceProvider.GetRequiredService<ISourceRootTranslator>());
 
                 // Instrument modules
                 _coverageManager.InstrumentModules();
@@ -209,18 +217,18 @@ namespace Coverlet.Collector.DataCollection
             return sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
         }
 
-        private static IServiceProvider GetServiceProvider(TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger)
+        private static IServiceCollection GetDefaultServiceCollection(TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule)
         {
             IServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
-
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-
-            return serviceCollection.BuildServiceProvider();
+            // We cache resolutions
+            serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+            return serviceCollection;
         }
     }
 }

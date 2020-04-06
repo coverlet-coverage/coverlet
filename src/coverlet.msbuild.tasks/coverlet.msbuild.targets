@@ -3,6 +3,21 @@
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.InstrumentationTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.CoverageResultTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
 
+  <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" >
+    <MSBuild Projects="@(ProjectReference->'%(FullPath)')"
+         Targets="CoverletGetPathMap" SkipNonexistentTargets="true">
+      <Output TaskParameter="TargetOutputs"
+              ItemName="_LocalTopLevelSourceRoot" />
+    </MSBuild>
+    <ItemGroup>
+      <_byProject Include="@(_LocalTopLevelSourceRoot->'%(MSBuildSourceProjectFile)')" OriginalPath="%(Identity)" />
+      <_mapping Include="@(_byProject->'%(Identity)|%(OriginalPath)=%(MappedPath)')" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(OutputPath)CoverletSourceRootsMapping" Lines="@(_mapping)"
+                      Overwrite="true" Encoding="Unicode"
+                      Condition="'@(_mapping)'!=''" />
+  </Target>
+
   <Target Name="InstrumentModules">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Path="$(TargetPath)"

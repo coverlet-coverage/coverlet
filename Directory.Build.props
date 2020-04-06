@@ -15,6 +15,11 @@
     </RestoreSources>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.0.28" PrivateAssets="all" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="all" />

@@ -298,3 +298,6 @@ __pycache__/
 
 # OSX
 .DS_Store
+
+# DeterministicSourcePaths workaround generated file DeterministicBuild.targets
+.AssemblyAttributes
