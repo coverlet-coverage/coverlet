@@ -9,7 +9,7 @@ namespace Coverlet.Core.Helpers.Tests
 {
     public class SourceRootTranslatorTests
     {
-        [Fact]
+        [ConditionalFact]
         [SkipOnOS(OS.Linux, "Windows path format only")]
         [SkipOnOS(OS.MacOS, "Windows path format only")]
         public void Translate_Success()
