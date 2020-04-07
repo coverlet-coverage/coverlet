@@ -13,9 +13,16 @@
       <_byProject Include="@(_LocalTopLevelSourceRoot->'%(MSBuildSourceProjectFile)')" OriginalPath="%(Identity)" />
       <_mapping Include="@(_byProject->'%(Identity)|%(OriginalPath)=%(MappedPath)')" />
     </ItemGroup>
-    <WriteLinesToFile File="$(OutputPath)CoverletSourceRootsMapping" Lines="@(_mapping)"
+    <PropertyGroup>
+      <_sourceRootMappingFilePath>$(OutputPath)CoverletSourceRootsMapping</_sourceRootMappingFilePath>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(_sourceRootMappingFilePath)" Lines="@(_mapping)"
                       Overwrite="true" Encoding="Unicode"
-                      Condition="'@(_mapping)'!=''" />
+                      Condition="'@(_mapping)'!=''"
+                      WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <FileWrites Include="$(_sourceRootMappingFilePath)" Condition="'@(_mapping)'!=''" />
+    </ItemGroup>
   </Target>
 
   <Target Name="InstrumentModules">
