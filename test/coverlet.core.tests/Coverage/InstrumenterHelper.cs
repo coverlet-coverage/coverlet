@@ -74,8 +74,6 @@ namespace Coverlet.Core.Tests
                 throw new ArgumentNullException(nameof(persistPrepareResultToFile));
             }
 
-            SetTestContainer(disableRestoreModules);
-
             // Rename test file to avoid locks
             string location = typeof(T).Assembly.Location;
             string fileName = Path.ChangeExtension($"testgen_{Path.GetFileNameWithoutExtension(Path.GetRandomFileName())}", ".dll");
@@ -84,6 +82,8 @@ namespace Coverlet.Core.Tests
 
             File.Copy(location, newPath);
             File.Copy(Path.ChangeExtension(location, ".pdb"), Path.ChangeExtension(newPath, ".pdb"));
+
+            SetTestContainer(newPath, disableRestoreModules);
 
             static string[] defaultFilters(string _) => Array.Empty<string>();
             // Instrument module
@@ -98,7 +98,8 @@ namespace Coverlet.Core.Tests
             {
                 "[xunit.*]*",
                 "[coverlet.*]*"
-            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile), _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>());
+            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile),
+            _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
@@ -128,7 +129,7 @@ namespace Coverlet.Core.Tests
             return prepareResult;
         }
 
-        private static void SetTestContainer(bool disableRestoreModules = false)
+        private static void SetTestContainer(string testModule = null, bool disableRestoreModules = false)
         {
             LazyInitializer.EnsureInitialized(ref _processWideContainer, () =>
             {
@@ -147,6 +148,10 @@ namespace Coverlet.Core.Tests
                 {
                     serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 }
+                serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider =>
+                string.IsNullOrEmpty(testModule) ?
+                new SourceRootTranslator(serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()) :
+                new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
 
                 return serviceCollection.BuildServiceProvider();
             });
@@ -244,8 +249,8 @@ namespace Coverlet.Core.Tests
 
     class InstrumentationHelperForDebugging : InstrumentationHelper
     {
-        public InstrumentationHelperForDebugging(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger)
-            : base(processExitHandler, retryHelper, fileSystem, logger)
+        public InstrumentationHelperForDebugging(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger, ISourceRootTranslator sourceTranslator)
+            : base(processExitHandler, retryHelper, fileSystem, logger, sourceTranslator)
         {
 
         }

@@ -10,7 +10,6 @@ namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests
     {
-        private readonly InstrumentationHelper _instrumentationHelper = new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object);
         private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
 
         [Fact]
@@ -25,8 +24,12 @@ namespace Coverlet.Core.Tests
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
             // TODO: Find a way to mimick hits
+            InstrumentationHelper instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                                          new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem()));
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
+                                        Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()));
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
@@ -47,7 +50,13 @@ namespace Coverlet.Core.Tests
             File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, _mockLogger.Object, _instrumentationHelper, new FileSystem());
+            InstrumentationHelper instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                                          new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem()));
+
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
+                                        Array.Empty<string>(), true, false, string.Empty, false, _mockLogger.Object, instrumentationHelper, new FileSystem(),
+                                        new SourceRootTranslator(module, _mockLogger.Object, new FileSystem()));
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();

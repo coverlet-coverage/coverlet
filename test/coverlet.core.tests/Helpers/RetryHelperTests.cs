@@ -1,8 +1,6 @@
 using System;
-using System.IO;
 
 using Xunit;
-using Coverlet.Core.Helpers;
 
 namespace Coverlet.Core.Helpers.Tests
 {

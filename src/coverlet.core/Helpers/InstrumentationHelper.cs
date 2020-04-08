@@ -18,14 +18,16 @@ namespace Coverlet.Core.Helpers
         private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
         private readonly IRetryHelper _retryHelper;
         private readonly IFileSystem _fileSystem;
+        private readonly ISourceRootTranslator _sourceRootTranslator;
         private ILogger _logger;
 
-        public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger)
+        public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger, ISourceRootTranslator sourceRootTranslator)
         {
             processExitHandler.Add((s, e) => RestoreOriginalModules());
             _retryHelper = retryHelper;
             _fileSystem = fileSystem;
             _logger = logger;
+            _sourceRootTranslator = sourceRootTranslator;
         }
 
         public string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly)
@@ -83,14 +85,14 @@ namespace Coverlet.Core.Helpers
                     if (entry.Type == DebugDirectoryEntryType.CodeView)
                     {
                         var codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                        if (codeViewData.Path == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
+                        if (_sourceRootTranslator.ResolveFilePath(codeViewData.Path) == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
                         {
                             // PDB is embedded
                             embedded = true;
                             return true;
                         }
 
-                        return _fileSystem.Exists(codeViewData.Path);
+                        return _fileSystem.Exists(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
                     }
                 }
 
@@ -114,7 +116,7 @@ namespace Coverlet.Core.Helpers
                             foreach (DocumentHandle docHandle in metadataReader.Documents)
                             {
                                 Document document = metadataReader.GetDocument(docHandle);
-                                string docName = metadataReader.GetString(document.Name);
+                                string docName = _sourceRootTranslator.ResolveFilePath(metadataReader.GetString(document.Name));
 
                                 // We verify all docs and return false if not all are present in local
                                 // We could have false negative if doc is not a source
@@ -146,7 +148,7 @@ namespace Coverlet.Core.Helpers
                     if (entry.Type == DebugDirectoryEntryType.CodeView)
                     {
                         var codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                        using Stream pdbStream = _fileSystem.OpenRead(codeViewData.Path);
+                        using Stream pdbStream = _fileSystem.OpenRead(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
                         using MetadataReaderProvider metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
                         MetadataReader metadataReader = null;
                         try
@@ -161,7 +163,7 @@ namespace Coverlet.Core.Helpers
                         foreach (DocumentHandle docHandle in metadataReader.Documents)
                         {
                             Document document = metadataReader.GetDocument(docHandle);
-                            string docName = metadataReader.GetString(document.Name);
+                            string docName = _sourceRootTranslator.ResolveFilePath(metadataReader.GetString(document.Name));
 
                             // We verify all docs and return false if not all are present in local
                             // We could have false negative if doc is not a source

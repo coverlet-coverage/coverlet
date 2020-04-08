@@ -48,5 +48,10 @@ namespace Coverlet.Core.Helpers
         {
             return new FileStream(path, mode, access);
         }
+
+        public string[] ReadAllLines(string path)
+        {
+            return File.ReadAllLines(path);
+        }
     }
 }
