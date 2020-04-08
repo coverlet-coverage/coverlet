@@ -173,12 +173,21 @@ namespace Coverlet.Core.Reporters
                 }
 
                 var basePathFragments = new List<string>();
-
+                bool stopSearch = false;
                 splittedPaths[0].Select((value, index) => (value, index)).ToList().ForEach(fragmentIndexPair =>
                 {
+                    if(stopSearch)
+                    {
+                        return;
+                    }
+
                     if (splittedPaths.All(sp => fragmentIndexPair.value.Equals(sp[fragmentIndexPair.index])))
                     {
                         basePathFragments.Add(fragmentIndexPair.value);
+                    }
+                    else
+                    {
+                        stopSearch = true;
                     }
                 });
                 return string.Concat(string.Join(Path.DirectorySeparatorChar.ToString(), basePathFragments), Path.DirectorySeparatorChar);

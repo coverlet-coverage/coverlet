@@ -149,6 +149,8 @@ namespace Coverlet.Core.Reporters.Tests
             string absolutePath5;
             string absolutePath6;
             string absolutePath7;
+            string absolutePath8;
+            string absolutePath9;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -159,6 +161,8 @@ namespace Coverlet.Core.Reporters.Tests
                 absolutePath5 = @"E:\projB\dir2\file5.cs";
                 absolutePath6 = @"F:\file6.cs";
                 absolutePath7 = @"F:\";
+                absolutePath8 = @"c:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary1\Class1.cs";
+                absolutePath9 = @"c:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary2\Class1.cs";
             }
             else
             {
@@ -169,16 +173,21 @@ namespace Coverlet.Core.Reporters.Tests
                 absolutePath5 = @"/projA/dir2/file5.cs";
                 absolutePath6 = @"/file1.cs";
                 absolutePath7 = @"/";
+                absolutePath8 = @"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary1/Class1.cs";
+                absolutePath9 = @"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary2/Class1.cs";
             }
 
             var classes = new Classes { { "Class", new Methods() } };
-            var documents = new Documents { { absolutePath1, classes },
+            var documents = new Documents {
+                                            { absolutePath1, classes },
                                             { absolutePath2, classes },
                                             { absolutePath3, classes },
                                             { absolutePath4, classes },
                                             { absolutePath5, classes },
                                             { absolutePath6, classes },
-                                            { absolutePath7, classes }
+                                            { absolutePath7, classes },
+                                            { absolutePath8, classes },
+                                            { absolutePath9, classes }
             };
 
             result.Modules = new Modules { { "Module", documents } };
@@ -208,20 +217,22 @@ namespace Coverlet.Core.Reporters.Tests
             Assert.Contains(absolutePath5, possiblePaths);
             Assert.Contains(absolutePath6, possiblePaths);
             Assert.Contains(absolutePath7, possiblePaths);
+            Assert.Contains(absolutePath8, possiblePaths);
+            Assert.Contains(absolutePath9, possiblePaths);
         }
 
         [Fact]
         public void TestReportWithSourcelinkPaths()
         {
-            CoverageResult result = new CoverageResult {UseSourceLink = true, Identifier = Guid.NewGuid().ToString()};
+            CoverageResult result = new CoverageResult { UseSourceLink = true, Identifier = Guid.NewGuid().ToString() };
 
             var absolutePath =
                 @"https://raw.githubusercontent.com/johndoe/Coverlet/02c09baa8bfdee3b6cdf4be89bd98c8157b0bc08/Demo.cs";
 
-            var classes = new Classes {{"Class", new Methods()}};
-            var documents = new Documents {{absolutePath, classes}};
+            var classes = new Classes { { "Class", new Methods() } };
+            var documents = new Documents { { absolutePath, classes } };
 
-            result.Modules = new Modules {{"Module", documents}};
+            result.Modules = new Modules { { "Module", documents } };
 
             CoberturaReporter reporter = new CoberturaReporter();
             string report = reporter.Report(result);
