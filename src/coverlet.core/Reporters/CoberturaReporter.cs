@@ -176,7 +176,7 @@ namespace Coverlet.Core.Reporters
                 bool stopSearch = false;
                 splittedPaths[0].Select((value, index) => (value, index)).ToList().ForEach(fragmentIndexPair =>
                 {
-                    if(stopSearch)
+                    if (stopSearch)
                     {
                         return;
                     }
