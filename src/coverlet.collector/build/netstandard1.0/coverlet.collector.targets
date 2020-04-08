@@ -12,7 +12,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
   <Target Name="CopyCoverletDataCollectorFiles" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
       <CoverletDataCollectorFiles Include="$(MSBuildThisFileDirectory)\*.*" />
-    </ItemGroup> 
+    </ItemGroup>
     <Copy SourceFiles="@(CoverletDataCollectorFiles)" DestinationFolder="$(PublishDir)%(RecursiveDir)" />
 
   </Target>
@@ -20,5 +20,27 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     <PropertyGroup>
       <VSTestTestAdapterPath>$(VSTestTestAdapterPath);$(MSBuildThisFileDirectory)</VSTestTestAdapterPath>
     </PropertyGroup>
+  </Target>
+
+  <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" >
+    <MSBuild Projects="@(ProjectReference->'%(FullPath)')"
+         Targets="CoverletGetPathMap" SkipNonexistentTargets="true">
+      <Output TaskParameter="TargetOutputs"
+              ItemName="_LocalTopLevelSourceRoot" />
+    </MSBuild>
+    <ItemGroup>
+      <_byProject Include="@(_LocalTopLevelSourceRoot->'%(MSBuildSourceProjectFile)')" OriginalPath="%(Identity)" />
+      <_mapping Include="@(_byProject->'%(Identity)|%(OriginalPath)=%(MappedPath)')" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_sourceRootMappingFilePath>$(OutputPath)CoverletSourceRootsMapping</_sourceRootMappingFilePath>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(_sourceRootMappingFilePath)" Lines="@(_mapping)"
+                      Overwrite="true" Encoding="Unicode"
+                      Condition="'@(_mapping)'!=''"
+                      WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <FileWrites Include="$(_sourceRootMappingFilePath)" Condition="'@(_mapping)'!=''" />
+    </ItemGroup>
   </Target>
 </Project>
