@@ -64,12 +64,29 @@ namespace Coverlet.Core.Reporters.Tests
                 Assert.NotEmpty(report);
 
                 var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
-                Assert.All(doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate")).Select(attr => attr.Value),
+
+                var matchingRateAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate"));
+                var rateParentNodeNames = matchingRateAttributes.Select(attr => attr.Parent.Name.LocalName);
+                Assert.Contains("package", rateParentNodeNames);
+                Assert.Contains("class", rateParentNodeNames);
+                Assert.Contains("method", rateParentNodeNames);
+                Assert.All(matchingRateAttributes.Select(attr => attr.Value),
                 value =>
                 {
                     Assert.DoesNotContain(",", value);
                     Assert.Contains(".", value);
                     Assert.Equal(0.5, double.Parse(value, CultureInfo.InvariantCulture));
+                });
+
+                var matchingComplexityAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.Equals("complexity"));
+                var complexityParentNodeNames = matchingComplexityAttributes.Select(attr => attr.Parent.Name.LocalName);
+                Assert.Contains("package", complexityParentNodeNames);
+                Assert.Contains("class", complexityParentNodeNames);
+                Assert.Contains("method", complexityParentNodeNames);
+                Assert.All(matchingComplexityAttributes.Select(attr => attr.Value),
+                value =>
+                {
+                    Assert.Equal(branches.Count, int.Parse(value, CultureInfo.InvariantCulture));
                 });
             }
             finally
