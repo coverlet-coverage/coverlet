@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+-Added support for deterministic build for msbuild/collectors driver [#802](https://github.com/tonerdo/coverlet/pull/802)  [#796](https://github.com/tonerdo/coverlet/pull/796) with the help of https://github.com/clairernovotny and https://github.com/tmat
+
+### Improvements
+
+-Fix for code complexity not being generated for methods for cobertura reporter [#738](https://github.com/tonerdo/coverlet/pull/798) by https://github.com/dannyBies
+
 ## Release date 2020-04-02
 ### Packages  
 coverlet.msbuild 2.8.1  

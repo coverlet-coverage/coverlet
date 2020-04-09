@@ -41,6 +41,7 @@ We MANUALLY bump versions on production release, so we have different release pl
 
 | Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **commit hash**| **notes** |
 | :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| <01 August 2020>      | 2.9.0 | 1.7.2 |   1.3.0 | | deterministic build support
 | 04 April 2020      | 2.8.1 | 1.7.1 |   1.2.1 | 3f81828821d07d756e02a4105b2533cedf0b543c
 | 03 January 2019      | 2.8.0 | 1.7.0 |   1.2.0 | 72a688f1c47fa92059540d5fbb1c4b0b4bf0dc8c |  |
 | 23 September 2019      | 2.7.0 | 1.6.0 |   1.1.0 | 4ca01eb239038808739699470a61fad675af6c79 |  |
@@ -78,7 +79,7 @@ Sample of updated version PR https://github.com/tonerdo/coverlet/pull/675/files
 
 3) From new cloned, aligned and versions updated repo root run pack command
 ```
-dotnet pack -c release /p:PublicRelease=true
+dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
 ...
  coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\netcoreapp2.2\coverlet.console.dll
   coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\netcoreapp2.2\publish\
@@ -90,7 +91,7 @@ dotnet pack -c release /p:PublicRelease=true
   Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.1.2.1.snupkg'.
 ```
 
-4) Upload *.nupkg files to Nuget.org site. **Check all metadata(url links etc...) before "Submit"**
+4) Upload *.nupkg files to Nuget.org site. **Check all metadata(url links, deterministic build etc...) before "Submit"**
 
 5) **On your fork**:
 *   Align to master
