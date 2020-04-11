@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Xml.Linq;
 
 using Coverlet.Core;
@@ -22,6 +23,7 @@ namespace Coverlet.Integration.Tests
 
     public abstract class BaseTest
     {
+        private static int _folderSuffix = 0;
         private BuildConfiguration GetAssemblyBuildConfiguration()
         {
             var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();
@@ -59,9 +61,9 @@ namespace Coverlet.Integration.Tests
             return manifest.Metadata.Version.OriginalVersion;
         }
 
-        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.4.0")
+        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
         {
-            DirectoryInfo finalRoot = Directory.CreateDirectory(Guid.NewGuid().ToString("N"));
+            DirectoryInfo finalRoot = Directory.CreateDirectory($"template{Interlocked.Increment(ref _folderSuffix)}");
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "*.csproj")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "nuget.config")))))
