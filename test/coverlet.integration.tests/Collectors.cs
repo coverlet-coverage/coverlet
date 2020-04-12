@@ -68,7 +68,6 @@ namespace Coverlet.Integration.Tests
         public void TestVsTest_Test()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-            string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
             Assert.True(DotnetCli($"test \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
             // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
             // IncludeTestAssembly=true we do it in other test

@@ -15,7 +15,7 @@ using Xunit.Sdk;
 namespace Coverlet.Integration.Tests
 {
     [Flags]
-    enum BuildConfiguration
+    public enum BuildConfiguration
     {
         Debug = 1,
         Release = 2
@@ -24,7 +24,8 @@ namespace Coverlet.Integration.Tests
     public abstract class BaseTest
     {
         private static int _folderSuffix = 0;
-        private BuildConfiguration GetAssemblyBuildConfiguration()
+
+        protected BuildConfiguration GetAssemblyBuildConfiguration()
         {
             var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();
 
@@ -63,7 +64,7 @@ namespace Coverlet.Integration.Tests
 
         private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
         {
-            DirectoryInfo finalRoot = Directory.CreateDirectory($"template{Interlocked.Increment(ref _folderSuffix)}");
+            DirectoryInfo finalRoot = Directory.CreateDirectory($"tmpprj{Interlocked.Increment(ref _folderSuffix)}");
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "*.csproj")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "nuget.config")))))
@@ -189,17 +190,17 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected string AddCollectorRunsettingsFile(string projectPath)
+        private protected string AddCollectorRunsettingsFile(string projectPath,string includeFilter = "[coverletsamplelib.integration.template]*DeepThought")
         {
             string runSettings =
-@"<?xml version=""1.0"" encoding=""utf-8"" ?>
+$@"<?xml version=""1.0"" encoding=""utf-8"" ?>
   <RunSettings>
     <DataCollectionRunSettings>  
       <DataCollectors>  
         <DataCollector friendlyName=""XPlat code coverage"" >
            <Configuration>
             <Format>json,cobertura</Format>
-            <Include>[coverletsamplelib.integration.template]*DeepThought</Include>
+            <Include>{includeFilter}</Include>
             <!-- We need to include test assembly because test and code to cover are in same template project -->
             <IncludeTestAssembly>true</IncludeTestAssembly>
         </Configuration>
