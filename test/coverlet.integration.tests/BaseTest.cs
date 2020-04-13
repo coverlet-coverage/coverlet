@@ -52,7 +52,7 @@ namespace Coverlet.Integration.Tests
 
         private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
         {
-            DirectoryInfo finalRoot = Directory.CreateDirectory($"tmpprj{Interlocked.Increment(ref _folderSuffix)}");
+            DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N").Substring(0, 6)}{Interlocked.Increment(ref _folderSuffix)}");
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "*.csproj")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "nuget.config")))))
@@ -72,6 +72,8 @@ namespace Coverlet.Integration.Tests
 </Project>");
 
             AddMicrosoftNETTestSdkRef(finalRoot.FullName, testSDKVersion);
+
+            SetIsTestProjectTrue(finalRoot.FullName);
 
             return new ClonedTemplateProject(finalRoot.FullName, cleanupOnDispose);
         }
@@ -118,6 +120,26 @@ namespace Coverlet.Integration.Tests
                .ElementAt(0)
                .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
             xml.Save(nugetFile);
+        }
+
+        private void SetIsTestProjectTrue(string projectPath)
+        {
+            string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
+            if (!File.Exists(csproj))
+            {
+                throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+            }
+            XDocument xml;
+            using (var csprojStream = File.OpenRead(csproj))
+            {
+                xml = XDocument.Load(csprojStream);
+            }
+
+            xml.Element("Project")
+               .Element("PropertyGroup")
+               .Element("IsTestProject").Value = "true";
+
+            xml.Save(csproj);
         }
 
         private protected void AddMicrosoftNETTestSdkRef(string projectPath, string version)
@@ -204,18 +226,21 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
 
         private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json", string standardOutput = "")
         {
-            bool coverageChecked = false;
-            foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
+            if (GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
             {
-                JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
-                .Document("DeepThought.cs")
-                .Class("Coverlet.Integration.Template.DeepThought")
-                .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
-                .AssertLinesCovered((6, 1), (7, 1), (8, 1));
-                coverageChecked = true;
-            }
+                bool coverageChecked = false;
+                foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
+                {
+                    JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
+                    .Document("DeepThought.cs")
+                    .Class("Coverlet.Integration.Template.DeepThought")
+                    .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
+                    .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+                    coverageChecked = true;
+                }
 
-            Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
+                Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
+            }
         }
 
         private protected void UpdateProjectTargetFramework(ClonedTemplateProject project, params string[] targetFrameworks)

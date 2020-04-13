@@ -14,6 +14,12 @@ namespace Coverlet.Integration.Tests
         private string _testProjectPath = Path.GetFullPath("../../../../coverlet.integration.determisticbuild");
         private string? _testProjectTfm;
         private const string PropsFileName = "DeterministicTest.props";
+        private string _buildConfiguration;
+
+        public DeterministicBuild()
+        {
+            _buildConfiguration = GetAssemblyBuildConfiguration().ToString();
+        }
 
         private void CreateDeterministicTestPropsFile()
         {
@@ -31,36 +37,38 @@ namespace Coverlet.Integration.Tests
 
         private protected void AssertCoverage(string standardOutput = "")
         {
-            bool coverageChecked = false;
-            string reportFilePath = "";
-            foreach (string coverageFile in Directory.GetFiles(_testProjectPath, "coverage.json", SearchOption.AllDirectories))
+            if (_buildConfiguration == "Debug")
             {
-                JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
-                .Document("DeepThought.cs")
-                .Class("Coverlet.Integration.DeterministicBuild.DeepThought")
-                .Method("System.Int32 Coverlet.Integration.DeterministicBuild.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
-                .AssertLinesCovered((6, 1), (7, 1), (8, 1));
-                coverageChecked = true;
-                reportFilePath = coverageFile;
+                bool coverageChecked = false;
+                string reportFilePath = "";
+                foreach (string coverageFile in Directory.GetFiles(_testProjectPath, "coverage.json", SearchOption.AllDirectories))
+                {
+                    JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
+                    .Document("DeepThought.cs")
+                    .Class("Coverlet.Integration.DeterministicBuild.DeepThought")
+                    .Method("System.Int32 Coverlet.Integration.DeterministicBuild.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
+                    .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+                    coverageChecked = true;
+                    reportFilePath = coverageFile;
+                }
+                Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
+                File.Delete(reportFilePath);
+                Assert.False(File.Exists(reportFilePath));
             }
-            Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
-            File.Delete(reportFilePath);
-            Assert.False(File.Exists(reportFilePath));
         }
 
         [Fact]
         public void Msbuild()
         {
-            string buildConfiguration = GetAssemblyBuildConfiguration().ToString();
             CreateDeterministicTestPropsFile();
-            DotnetCli($"build -c {buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
+            DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "Bin", buildConfiguration, _testProjectTfm!, "CoverletSourceRootsMapping");
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "Bin", _buildConfiguration, _testProjectTfm!, "CoverletSourceRootsMapping");
             Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
             Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
             Assert.Equal(2, File.ReadAllLines(sourceRootMappingFilePath).Length);
 
-            DotnetCli($"test -c {buildConfiguration} --no-build /p:CollectCoverage=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out standardError, _testProjectPath);
+            DotnetCli($"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out standardError, _testProjectPath);
             Assert.Contains("Test Run Successful.", standardOutput);
             Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(_testProjectPath, "coverage.json")));
