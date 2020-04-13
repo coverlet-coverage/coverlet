@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 
 using Xunit;
@@ -64,7 +65,12 @@ namespace Coverlet.Integration.Tests
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
             string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "Bin", _buildConfiguration, _testProjectTfm!, "CoverletSourceRootsMapping");
-            Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
+            StringBuilder buidler = new StringBuilder();
+            foreach (var item in Directory.GetFiles(Path.Combine(_testProjectPath, "Bin", _buildConfiguration, _testProjectTfm!)))
+            {
+                buidler.AppendLine(item);
+            }
+            Assert.True(File.Exists(sourceRootMappingFilePath), buidler.ToString());
             Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
             Assert.Equal(2, File.ReadAllLines(sourceRootMappingFilePath).Length);
 
