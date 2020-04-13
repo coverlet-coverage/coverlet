@@ -27,25 +27,13 @@ namespace Coverlet.Integration.Tests
 
         protected BuildConfiguration GetAssemblyBuildConfiguration()
         {
-            var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();
-
-            if (configurationAttribute is null)
-            {
-                throw new ArgumentNullException("AssemblyConfigurationAttribute not found");
-            }
-
-            if (configurationAttribute.Configuration.Equals("Debug", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return BuildConfiguration.Debug;
-            }
-            else if (configurationAttribute.Configuration.Equals("Release", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return BuildConfiguration.Release;
-            }
-            else
-            {
-                throw new NotSupportedException($"Build configuration '{configurationAttribute.Configuration}' not supported");
-            }
+#if DEBUG
+            return BuildConfiguration.Debug;
+#endif
+#if RELEASE
+            return BuildConfiguration.Release;
+#endif
+            throw new NotSupportedException($"Build configuration not supported");
         }
 
         private protected string GetPackageVersion(string filter)
@@ -190,7 +178,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected string AddCollectorRunsettingsFile(string projectPath,string includeFilter = "[coverletsamplelib.integration.template]*DeepThought")
+        private protected string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought")
         {
             string runSettings =
 $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
