@@ -15,7 +15,7 @@ steps:
 - script: dotnet build -c $(BuildConfiguration) --no-restore
   displayName: Build
 
-- script: dotnet pack -c $(BuildConfiguration) --no-restore --no-build
+- script: dotnet pack -c $(BuildConfiguration) --no-restore
   displayName: Pack
 
 - task: DotNetCoreCLI@2
