@@ -68,36 +68,36 @@ namespace Coverlet.Integration.Tests
             // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
             // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
             // Assert.False(File.Exists(sourceRootMappingFilePath));
-            RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
+            // RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
         }
 
-        [Fact]
-        public void Collectors()
-        {
-            CreateDeterministicTestPropsFile();
-            DotnetCli("build /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
-            Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "Bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, "CoverletSourceRootsMapping");
-            Assert.True(File.Exists(sourceRootMappingFilePath));
-            Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
-            Assert.Equal(2, File.ReadAllLines(sourceRootMappingFilePath).Length);
+        //[Fact]
+        //public void Collectors()
+        //{
+        //    CreateDeterministicTestPropsFile();
+        //    DotnetCli("build /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
+        //    Assert.Contains("Build succeeded.", standardOutput);
+        //    string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "Bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, "CoverletSourceRootsMapping");
+        //    Assert.True(File.Exists(sourceRootMappingFilePath));
+        //    Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
+        //    Assert.Equal(2, File.ReadAllLines(sourceRootMappingFilePath).Length);
 
-            string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought");
-            Assert.True(DotnetCli($"test --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out standardError), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
-            AssertCoverage(standardOutput);
+        //    string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought");
+        //    Assert.True(DotnetCli($"test --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out standardError), standardOutput);
+        //    Assert.Contains("Test Run Successful.", standardOutput);
+        //    AssertCoverage(standardOutput);
 
-            // Check out/in process collectors injection
-            string dataCollectorLogContent = File.ReadAllText(Directory.GetFiles(_testProjectPath, "log.datacollector.*.txt").Single());
-            Assert.Contains("[coverlet]Initializing CoverletCoverageDataCollector with configuration:", dataCollectorLogContent);
-            Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(Directory.GetFiles(_testProjectPath, "log.host.*.txt").Single()));
-            Assert.Contains("[coverlet]Mapping resolved", dataCollectorLogContent);
+        //    // Check out/in process collectors injection
+        //    string dataCollectorLogContent = File.ReadAllText(Directory.GetFiles(_testProjectPath, "log.datacollector.*.txt").Single());
+        //    Assert.Contains("[coverlet]Initializing CoverletCoverageDataCollector with configuration:", dataCollectorLogContent);
+        //    Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(Directory.GetFiles(_testProjectPath, "log.host.*.txt").Single()));
+        //    Assert.Contains("[coverlet]Mapping resolved", dataCollectorLogContent);
 
-            // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
-            // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
-            // Assert.False(File.Exists(sourceRootMappingFilePath));
-            RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
-        }
+        //    // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
+        //    // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
+        //    // Assert.False(File.Exists(sourceRootMappingFilePath));
+        //    RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
+        //}
 
         public void Dispose()
         {
