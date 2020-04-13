@@ -28,8 +28,7 @@ namespace Coverlet.Core.Tests.Instrumentation
     {
         private static readonly Task<int> _success = Task.FromResult(0);
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void HitsFileCorrectlyWritten()
         {
             FunctionExecutor.Run(() =>
@@ -45,8 +44,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             });
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void HitsFileWithDifferentNumberOfEntriesCausesExceptionOnUnload()
         {
             FunctionExecutor.Run(() =>
@@ -59,8 +57,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             });
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void HitsOnMultipleThreadsCorrectlyCounted()
         {
             FunctionExecutor.Run(() =>
@@ -90,8 +87,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             });
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void MultipleSequentialUnloadsHaveCorrectTotalData()
         {
             FunctionExecutor.Run(() =>
@@ -110,8 +106,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             });
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void MutexBlocksMultipleWriters()
         {
             FunctionExecutor.Run(async () =>

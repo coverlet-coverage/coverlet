@@ -41,8 +41,7 @@ namespace Coverlet.Core.Tests
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
         {
             string path = Path.GetTempFileName();
@@ -83,8 +82,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes_NestedMembers()
         {
             string path = Path.GetTempFileName();
@@ -114,8 +112,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void ExcludeFromCodeCoverageCompilerGeneratedMethodsAndTypes_Issue670()
         {
             string path = Path.GetTempFileName();
@@ -145,8 +142,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void ExcludeFromCodeCoverageNextedTypes()
         {
             string path = Path.GetTempFileName();
