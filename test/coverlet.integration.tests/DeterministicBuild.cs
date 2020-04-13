@@ -64,9 +64,9 @@ namespace Coverlet.Integration.Tests
             CreateDeterministicTestPropsFile();
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "Bin", _buildConfiguration, _testProjectTfm!, "CoverletSourceRootsMapping");
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, "CoverletSourceRootsMapping");
             StringBuilder buidler = new StringBuilder();
-            foreach (var item in Directory.GetFiles(Path.Combine(_testProjectPath, "Bin", _buildConfiguration, _testProjectTfm!)))
+            foreach (var item in Directory.GetFiles(Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!)))
             {
                 buidler.AppendLine(item);
             }
