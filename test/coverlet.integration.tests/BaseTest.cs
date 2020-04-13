@@ -15,7 +15,7 @@ using Xunit.Sdk;
 namespace Coverlet.Integration.Tests
 {
     [Flags]
-    enum BuildConfiguration
+    public enum BuildConfiguration
     {
         Debug = 1,
         Release = 2
@@ -24,27 +24,16 @@ namespace Coverlet.Integration.Tests
     public abstract class BaseTest
     {
         private static int _folderSuffix = 0;
-        private BuildConfiguration GetAssemblyBuildConfiguration()
+
+        protected BuildConfiguration GetAssemblyBuildConfiguration()
         {
-            var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();
-
-            if (configurationAttribute is null)
-            {
-                throw new ArgumentNullException("AssemblyConfigurationAttribute not found");
-            }
-
-            if (configurationAttribute.Configuration.Equals("Debug", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return BuildConfiguration.Debug;
-            }
-            else if (configurationAttribute.Configuration.Equals("Release", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return BuildConfiguration.Release;
-            }
-            else
-            {
-                throw new NotSupportedException($"Build configuration '{configurationAttribute.Configuration}' not supported");
-            }
+#if DEBUG
+            return BuildConfiguration.Debug;
+#endif
+#if RELEASE
+            return BuildConfiguration.Release;
+#endif
+            throw new NotSupportedException($"Build configuration not supported");
         }
 
         private protected string GetPackageVersion(string filter)
@@ -63,7 +52,7 @@ namespace Coverlet.Integration.Tests
 
         private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
         {
-            DirectoryInfo finalRoot = Directory.CreateDirectory($"template{Interlocked.Increment(ref _folderSuffix)}");
+            DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N").Substring(0, 6)}{Interlocked.Increment(ref _folderSuffix)}");
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "*.csproj")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "nuget.config")))))
@@ -83,6 +72,8 @@ namespace Coverlet.Integration.Tests
 </Project>");
 
             AddMicrosoftNETTestSdkRef(finalRoot.FullName, testSDKVersion);
+
+            SetIsTestProjectTrue(finalRoot.FullName);
 
             return new ClonedTemplateProject(finalRoot.FullName, cleanupOnDispose);
         }
@@ -129,6 +120,26 @@ namespace Coverlet.Integration.Tests
                .ElementAt(0)
                .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
             xml.Save(nugetFile);
+        }
+
+        private void SetIsTestProjectTrue(string projectPath)
+        {
+            string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
+            if (!File.Exists(csproj))
+            {
+                throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+            }
+            XDocument xml;
+            using (var csprojStream = File.OpenRead(csproj))
+            {
+                xml = XDocument.Load(csprojStream);
+            }
+
+            xml.Element("Project")
+               .Element("PropertyGroup")
+               .Element("IsTestProject").Value = "true";
+
+            xml.Save(csproj);
         }
 
         private protected void AddMicrosoftNETTestSdkRef(string projectPath, string version)
@@ -189,17 +200,17 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected string AddCollectorRunsettingsFile(string projectPath)
+        private protected string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought")
         {
             string runSettings =
-@"<?xml version=""1.0"" encoding=""utf-8"" ?>
+$@"<?xml version=""1.0"" encoding=""utf-8"" ?>
   <RunSettings>
     <DataCollectionRunSettings>  
       <DataCollectors>  
         <DataCollector friendlyName=""XPlat code coverage"" >
            <Configuration>
             <Format>json,cobertura</Format>
-            <Include>[coverletsamplelib.integration.template]*DeepThought</Include>
+            <Include>{includeFilter}</Include>
             <!-- We need to include test assembly because test and code to cover are in same template project -->
             <IncludeTestAssembly>true</IncludeTestAssembly>
         </Configuration>
@@ -215,18 +226,21 @@ namespace Coverlet.Integration.Tests
 
         private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json", string standardOutput = "")
         {
-            bool coverageChecked = false;
-            foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
+            if (GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
             {
-                JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
-                .Document("DeepThought.cs")
-                .Class("Coverlet.Integration.Template.DeepThought")
-                .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
-                .AssertLinesCovered((6, 1), (7, 1), (8, 1));
-                coverageChecked = true;
-            }
+                bool coverageChecked = false;
+                foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
+                {
+                    JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
+                    .Document("DeepThought.cs")
+                    .Class("Coverlet.Integration.Template.DeepThought")
+                    .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
+                    .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+                    coverageChecked = true;
+                }
 
-            Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
+                Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
+            }
         }
 
         private protected void UpdateProjectTargetFramework(ClonedTemplateProject project, params string[] targetFrameworks)

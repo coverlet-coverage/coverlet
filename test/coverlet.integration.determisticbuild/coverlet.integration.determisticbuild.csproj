@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Import coverlet version-->
+  <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" />
+  
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>coverletsample.integration.determisticbuild</AssemblyName>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      $(RepoRoot)bin\$(Configuration)\Packages
+    </RestoreSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.msbuild" Version="$(coverletMsbuilVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="$(coverletCollectorsVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+  </ItemGroup>
+</Project>
