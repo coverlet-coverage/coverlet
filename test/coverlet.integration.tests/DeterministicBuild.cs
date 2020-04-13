@@ -55,8 +55,8 @@ namespace Coverlet.Integration.Tests
             DotnetCli("build /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
             string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "Bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, "CoverletSourceRootsMapping");
-            Assert.True(File.Exists(sourceRootMappingFilePath));
-            Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
+            Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
+            Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
             Assert.Equal(2, File.ReadAllLines(sourceRootMappingFilePath).Length);
 
             DotnetCli($"test --no-build /p:CollectCoverage=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out standardError, _testProjectPath);
