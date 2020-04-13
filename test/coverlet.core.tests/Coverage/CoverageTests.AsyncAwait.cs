@@ -9,8 +9,7 @@ namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests
     {
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void AsyncAwait()
         {
             string path = Path.GetTempFileName();
@@ -67,8 +66,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void AsyncAwait_Issue_669_1()
         {
             string path = Path.GetTempFileName();
@@ -99,8 +97,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void AsyncAwait_Issue_669_2()
         {
             string path = Path.GetTempFileName();
