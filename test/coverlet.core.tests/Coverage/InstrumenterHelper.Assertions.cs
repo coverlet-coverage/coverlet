@@ -84,6 +84,11 @@ namespace Coverlet.Core.Tests
             return AssertBranchesCovered(document, BuildConfiguration.Debug | BuildConfiguration.Release, lines);
         }
 
+        public static Document ExpectedTotalNumberOfBranches(this Document document, int totalExpectedBranch)
+        {
+            return ExpectedTotalNumberOfBranches(document, BuildConfiguration.Debug | BuildConfiguration.Release, totalExpectedBranch);
+        }
+
         public static Document ExpectedTotalNumberOfBranches(this Document document, BuildConfiguration configuration, int totalExpectedBranch)
         {
             if (document is null)

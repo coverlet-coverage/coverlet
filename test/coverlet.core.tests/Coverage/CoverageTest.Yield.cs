@@ -12,7 +12,7 @@ namespace Coverlet.Core.Tests
     {
         [ConditionalFact]
         [SkipOnOS(OS.MacOS)]
-        public void Yield_Singleton()
+        public void Yield_Single()
         {
             // We need to pass file name to remote process where it save instrumentation result
             // Similar to msbuild input/output
@@ -26,7 +26,7 @@ namespace Coverlet.Core.Tests
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
                         // We call method to trigger coverage hits
-                        _ = instance.One().Single();
+                        foreach(var _ in instance.One());
 
                         // For now we have only async Run helper
                         return Task.CompletedTask;
@@ -46,7 +46,8 @@ namespace Coverlet.Core.Tests
                 // Asserts on doc/lines/branches
                 result.Document("Instrumentation.Yield.cs")
                       // (line, hits)
-                      .AssertLinesCovered((9, 1));
+                      .AssertLinesCovered((9, 1))
+                      .ExpectedTotalNumberOfBranches(0);
             }
             finally
             {
@@ -66,7 +67,7 @@ namespace Coverlet.Core.Tests
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
-                        _ = instance.Two().ToArray();
+                        foreach (var _ in instance.Two());
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
@@ -74,8 +75,9 @@ namespace Coverlet.Core.Tests
 
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
-                result.Document("Instrumentation.SelectionStatements.cs")
-                      .AssertLinesCovered((14, 1), (15, 0));
+                result.Document("Instrumentation.Yield.cs")
+                      .AssertLinesCovered((14, 1), (15, 1))
+                      .ExpectedTotalNumberOfBranches(0);
             }
             finally
             {
