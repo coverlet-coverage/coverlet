@@ -22,9 +22,11 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     </PropertyGroup>
   </Target>
 
-  <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" >
-    <MSBuild Projects="@(ProjectReference->'%(FullPath)')"
-         Targets="CoverletGetPathMap" SkipNonexistentTargets="true">
+  <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" DependsOnTargets="ResolveProjectReferences" >
+    <MSBuild Projects="@(AnnotatedProjects->'%(FullPath)')"
+             Targets="CoverletGetPathMap"             
+             Properties="TargetFramework=%(AnnotatedProjects.NearestTargetFramework)"
+             SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs"
               ItemName="_LocalTopLevelSourceRoot" />
     </MSBuild>
