@@ -3,9 +3,11 @@
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.InstrumentationTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.CoverageResultTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
 
-  <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" >
-    <MSBuild Projects="@(ProjectReference->'%(FullPath)')"
-         Targets="CoverletGetPathMap" SkipNonexistentTargets="true">
+  <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" DependsOnTargets="ResolveProjectReferences" >
+    <MSBuild Projects="@(AnnotatedProjects->'%(FullPath)')"
+             Targets="CoverletGetPathMap" 
+             Properties="TargetFramework=%(AnnotatedProjects.NearestTargetFramework)"
+             SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs"
               ItemName="_LocalTopLevelSourceRoot" />
     </MSBuild>
