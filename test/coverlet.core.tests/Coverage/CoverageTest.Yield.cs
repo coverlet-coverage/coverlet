@@ -30,6 +30,7 @@ namespace Coverlet.Core.Tests
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
                 result.Document("Instrumentation.Yield.cs")
+                      .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<One>d__0::MoveNext()")
                       .AssertLinesCovered((9, 1))
                       .ExpectedTotalNumberOfBranches(0);
             }
@@ -59,8 +60,40 @@ namespace Coverlet.Core.Tests
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
                 result.Document("Instrumentation.Yield.cs")
+                      .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<Two>d__1::MoveNext()")
                       .AssertLinesCovered((14, 1), (15, 1))
                       .ExpectedTotalNumberOfBranches(0);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void Yield_SingleWithSwitch()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                    {
+                        foreach (var _ in instance.OneWithSwitch(2)) ;
+
+                        return Task.CompletedTask;
+                    }, persistPrepareResultToFile: pathSerialize[0]);
+
+                    return 0;
+                }, new string[] { path });
+
+                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+                result.Document("Instrumentation.Yield.cs")
+                      .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<OneWithSwitch>d__2::MoveNext()")
+                      .AssertLinesCovered((30, 1), (31, 1), (37, 1))
+                      .ExpectedTotalNumberOfBranches(1);
             }
             finally
             {

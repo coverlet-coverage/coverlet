@@ -79,6 +79,36 @@ namespace Coverlet.Core.Tests
             throw new XunitException($"Document not found '{docName}'");
         }
 
+        public static Document Method(this Document document, string methodName)
+        {
+            var methodDoc = new Document { Path = document.Path, Index = document.Index };
+
+            if (!document.Lines.Any() && !document.Branches.Any())
+            {
+                return methodDoc;
+            }
+
+            if (document.Lines.Values.All(l => l.Method != methodName) && document.Branches.Values.All(l => l.Method != methodName))
+            {
+                var methods = document.Lines.Values.Select(l => $"'{l.Method}'")
+                    .Concat(document.Branches.Values.Select(b => $"'{b.Method}'"))
+                    .Distinct();
+                throw new XunitException($"Method '{methodName}' not found. Methods in document: {string.Join(", ", methods)}");
+            }
+
+            foreach (var line in document.Lines.Where(l => l.Value.Method == methodName))
+            {
+                methodDoc.Lines[line.Key] = line.Value;
+            }
+
+            foreach (var branch in document.Branches.Where(b => b.Value.Method == methodName))
+            {
+                methodDoc.Branches[branch.Key] = branch.Value;
+            }
+
+            return methodDoc;
+        }
+
         public static Document AssertBranchesCovered(this Document document, params (int line, int ordinal, int hits)[] lines)
         {
             return AssertBranchesCovered(document, BuildConfiguration.Debug | BuildConfiguration.Release, lines);

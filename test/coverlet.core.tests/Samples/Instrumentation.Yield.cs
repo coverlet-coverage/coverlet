@@ -14,5 +14,27 @@ namespace Coverlet.Core.Samples.Tests
             yield return 1;
             yield return 2;
         }
+
+        public System.Collections.Generic.IEnumerable<int> OneWithSwitch(int n)
+        {
+            int result;
+            switch (n)
+            {
+                case 0:
+                    result = 10;
+                    break;
+                case 1:
+                    result = 11;
+                    break;
+                case 2:
+                    result = 12;
+                    break;
+                default:
+                    result = -1;
+                    break;
+            }
+
+            yield return result;
+        }
     }
 }
