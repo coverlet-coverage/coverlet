@@ -15,10 +15,10 @@ namespace Coverlet.Core.Samples.Tests
             yield return 2;
         }
 
-        public System.Collections.Generic.IEnumerable<int> OneWithSwitch(int n)
+        public System.Collections.Generic.IEnumerable<int> OneWithSwitch()
         {
             int result;
-            switch (n)
+            switch (new System.Random().Next())
             {
                 case 0:
                     result = 10;
