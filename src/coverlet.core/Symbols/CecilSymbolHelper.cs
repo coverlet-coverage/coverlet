@@ -413,7 +413,7 @@ namespace Coverlet.Core.Symbols
             bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
             bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
             bool skipFirstBranch = IsMoveNextInsideEnumerator(methodDefinition);
-            bool skipSecondBranch = skipFirstBranch && instructions.All(i => i.OpCode.Code != Code.Switch);
+            bool skipSecondBranch = false;
 
             foreach (Instruction instruction in instructions.Where(instruction => instruction.OpCode.FlowControl == FlowControl.Cond_Branch))
             {
@@ -422,6 +422,7 @@ namespace Coverlet.Core.Symbols
                     if (skipFirstBranch)
                     {
                         skipFirstBranch = false;
+                        skipSecondBranch = instruction.OpCode.Code != Code.Switch;
                         continue;
                     }
 
