@@ -29,6 +29,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly ILogger _logger;
         private readonly IInstrumentationHelper _instrumentationHelper;
         private readonly IFileSystem _fileSystem;
+        private readonly ISourceRootTranslator _sourceRootTranslator;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
@@ -54,7 +55,8 @@ namespace Coverlet.Core.Instrumentation
             bool singleHit,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
-            IFileSystem fileSystem)
+            IFileSystem fileSystem,
+            ISourceRootTranslator sourceRootTranslator)
         {
             _module = module;
             _identifier = identifier;
@@ -67,6 +69,7 @@ namespace Coverlet.Core.Instrumentation
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
+            _sourceRootTranslator = sourceRootTranslator;
         }
 
         public bool CanInstrument()
@@ -411,7 +414,7 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentMethod(MethodDefinition method)
         {
-            var sourceFile = method.DebugInformation.SequencePoints.Select(s => s.Document.Url).FirstOrDefault();
+            var sourceFile = method.DebugInformation.SequencePoints.Select(s => _sourceRootTranslator.ResolveFilePath(s.Document.Url)).FirstOrDefault();
             if (!string.IsNullOrEmpty(sourceFile) && _excludedFilesHelper.Exclude(sourceFile))
             {
                 if (!(_excludedSourceFiles ??= new List<string>()).Contains(sourceFile))
@@ -495,9 +498,9 @@ namespace Coverlet.Core.Instrumentation
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
         {
-            if (!_result.Documents.TryGetValue(sequencePoint.Document.Url, out var document))
+            if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(sequencePoint.Document.Url), out var document))
             {
-                document = new Document { Path = sequencePoint.Document.Url };
+                document = new Document { Path = _sourceRootTranslator.ResolveFilePath(sequencePoint.Document.Url) };
                 document.Index = _result.Documents.Count;
                 _result.Documents.Add(document.Path, document);
             }
@@ -515,9 +518,9 @@ namespace Coverlet.Core.Instrumentation
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, BranchPoint branchPoint)
         {
-            if (!_result.Documents.TryGetValue(branchPoint.Document, out var document))
+            if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(branchPoint.Document), out var document))
             {
-                document = new Document { Path = branchPoint.Document };
+                document = new Document { Path = _sourceRootTranslator.ResolveFilePath(branchPoint.Document) };
                 document.Index = _result.Documents.Count;
                 _result.Documents.Add(document.Path, document);
             }

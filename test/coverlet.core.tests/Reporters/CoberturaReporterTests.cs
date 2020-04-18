@@ -64,12 +64,29 @@ namespace Coverlet.Core.Reporters.Tests
                 Assert.NotEmpty(report);
 
                 var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
-                Assert.All(doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate")).Select(attr => attr.Value),
+
+                var matchingRateAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate"));
+                var rateParentNodeNames = matchingRateAttributes.Select(attr => attr.Parent.Name.LocalName);
+                Assert.Contains("package", rateParentNodeNames);
+                Assert.Contains("class", rateParentNodeNames);
+                Assert.Contains("method", rateParentNodeNames);
+                Assert.All(matchingRateAttributes.Select(attr => attr.Value),
                 value =>
                 {
                     Assert.DoesNotContain(",", value);
                     Assert.Contains(".", value);
                     Assert.Equal(0.5, double.Parse(value, CultureInfo.InvariantCulture));
+                });
+
+                var matchingComplexityAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.Equals("complexity"));
+                var complexityParentNodeNames = matchingComplexityAttributes.Select(attr => attr.Parent.Name.LocalName);
+                Assert.Contains("package", complexityParentNodeNames);
+                Assert.Contains("class", complexityParentNodeNames);
+                Assert.Contains("method", complexityParentNodeNames);
+                Assert.All(matchingComplexityAttributes.Select(attr => attr.Value),
+                value =>
+                {
+                    Assert.Equal(branches.Count, int.Parse(value, CultureInfo.InvariantCulture));
                 });
             }
             finally
@@ -149,6 +166,8 @@ namespace Coverlet.Core.Reporters.Tests
             string absolutePath5;
             string absolutePath6;
             string absolutePath7;
+            string absolutePath8;
+            string absolutePath9;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -159,6 +178,8 @@ namespace Coverlet.Core.Reporters.Tests
                 absolutePath5 = @"E:\projB\dir2\file5.cs";
                 absolutePath6 = @"F:\file6.cs";
                 absolutePath7 = @"F:\";
+                absolutePath8 = @"c:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary1\Class1.cs";
+                absolutePath9 = @"c:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary2\Class1.cs";
             }
             else
             {
@@ -169,16 +190,21 @@ namespace Coverlet.Core.Reporters.Tests
                 absolutePath5 = @"/projA/dir2/file5.cs";
                 absolutePath6 = @"/file1.cs";
                 absolutePath7 = @"/";
+                absolutePath8 = @"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary1/Class1.cs";
+                absolutePath9 = @"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary2/Class1.cs";
             }
 
             var classes = new Classes { { "Class", new Methods() } };
-            var documents = new Documents { { absolutePath1, classes },
+            var documents = new Documents {
+                                            { absolutePath1, classes },
                                             { absolutePath2, classes },
                                             { absolutePath3, classes },
                                             { absolutePath4, classes },
                                             { absolutePath5, classes },
                                             { absolutePath6, classes },
-                                            { absolutePath7, classes }
+                                            { absolutePath7, classes },
+                                            { absolutePath8, classes },
+                                            { absolutePath9, classes }
             };
 
             result.Modules = new Modules { { "Module", documents } };
@@ -208,20 +234,22 @@ namespace Coverlet.Core.Reporters.Tests
             Assert.Contains(absolutePath5, possiblePaths);
             Assert.Contains(absolutePath6, possiblePaths);
             Assert.Contains(absolutePath7, possiblePaths);
+            Assert.Contains(absolutePath8, possiblePaths);
+            Assert.Contains(absolutePath9, possiblePaths);
         }
 
         [Fact]
         public void TestReportWithSourcelinkPaths()
         {
-            CoverageResult result = new CoverageResult {UseSourceLink = true, Identifier = Guid.NewGuid().ToString()};
+            CoverageResult result = new CoverageResult { UseSourceLink = true, Identifier = Guid.NewGuid().ToString() };
 
             var absolutePath =
                 @"https://raw.githubusercontent.com/johndoe/Coverlet/02c09baa8bfdee3b6cdf4be89bd98c8157b0bc08/Demo.cs";
 
-            var classes = new Classes {{"Class", new Methods()}};
-            var documents = new Documents {{absolutePath, classes}};
+            var classes = new Classes { { "Class", new Methods() } };
+            var documents = new Documents { { absolutePath, classes } };
 
-            result.Modules = new Modules {{"Module", documents}};
+            result.Modules = new Modules { { "Module", documents } };
 
             CoberturaReporter reporter = new CoberturaReporter();
             string report = reporter.Report(result);

@@ -298,3 +298,9 @@ __pycache__/
 
 # OSX
 .DS_Store
+
+# DeterministicSourcePaths workaround generated file DeterministicBuild.targets
+.AssemblyAttributes
+DeterministicTest.props
+test/coverlet.integration.determisticbuild/*.txt
+test/coverlet.integration.determisticbuild/runsettings

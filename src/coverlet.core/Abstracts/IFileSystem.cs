@@ -19,5 +19,7 @@ namespace Coverlet.Core.Abstracts
         Stream NewFileStream(string path, FileMode mode);
 
         Stream NewFileStream(string path, FileMode mode, FileAccess access);
+
+        string[] ReadAllLines(string path);
     }
 }

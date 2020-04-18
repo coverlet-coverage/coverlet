@@ -122,12 +122,13 @@ namespace Coverlet.MSbuild.Tasks
             WaitForDebuggerIfEnabled();
 
             IServiceCollection serviceCollection = new ServiceCollection();
-            serviceCollection.AddSingleton<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<IConsole, SystemConsole>();
-            serviceCollection.AddTransient<ILogger, MSBuildLogger>(x => _logger);
-
+            serviceCollection.AddTransient<ILogger, MSBuildLogger>(_ => _logger);
+            serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+            // We cache resolutions
+            serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(_path, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
 
@@ -154,7 +155,8 @@ namespace Coverlet.MSbuild.Tasks
                     _useSourceLink,
                     _logger,
                     DependencyInjection.Current.GetService<IInstrumentationHelper>(),
-                    fileSystem);
+                    fileSystem,
+                    DependencyInjection.Current.GetService<ISourceRootTranslator>());
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());

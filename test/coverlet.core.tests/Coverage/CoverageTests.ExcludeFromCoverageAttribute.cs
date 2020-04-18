@@ -27,15 +27,21 @@ namespace Coverlet.Core.Tests
             var loggerMock = new Mock<ILogger>();
 
             string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
+
+            InstrumentationHelper instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                                          new SourceRootTranslator(excludedbyattributeDll, new Mock<ILogger>().Object, new FileSystem()));
+
             // test skip module include test assembly feature
-            var coverage = new Coverage(excludedbyattributeDll, new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" }, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, loggerMock.Object, _instrumentationHelper, partialMockFileSystem.Object);
+            var coverage = new Coverage(excludedbyattributeDll, new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" }, Array.Empty<string>(), Array.Empty<string>(),
+                                        Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object,
+                                        new SourceRootTranslator(loggerMock.Object, new FileSystem()));
             CoveragePrepareResult result = coverage.PrepareModules();
             Assert.Empty(result.Results);
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
         {
             string path = Path.GetTempFileName();
@@ -76,8 +82,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes_NestedMembers()
         {
             string path = Path.GetTempFileName();
@@ -107,8 +112,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void ExcludeFromCodeCoverageCompilerGeneratedMethodsAndTypes_Issue670()
         {
             string path = Path.GetTempFileName();
@@ -138,8 +142,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void ExcludeFromCodeCoverageNextedTypes()
         {
             string path = Path.GetTempFileName();

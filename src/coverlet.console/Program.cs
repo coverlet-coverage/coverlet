@@ -26,14 +26,15 @@ namespace Coverlet.Console
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<ILogger, ConsoleLogger>();
-
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+            serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
 
             DependencyInjection.Set(serviceCollection.BuildServiceProvider());
 
-            var logger = (ConsoleLogger) DependencyInjection.Current.GetService<ILogger>();
+            var logger = (ConsoleLogger)DependencyInjection.Current.GetService<ILogger>();
             var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+            var sourceTranslator = DependencyInjection.Current.GetService<ISourceRootTranslator>();
 
             var app = new CommandLineApplication();
             app.Name = "coverlet";
@@ -86,7 +87,8 @@ namespace Coverlet.Console
                     useSourceLink.HasValue(),
                     logger,
                     DependencyInjection.Current.GetService<IInstrumentationHelper>(),
-                    fileSystem);
+                    fileSystem,
+                    sourceTranslator);
                 coverage.PrepareModules();
 
                 Process process = new Process();

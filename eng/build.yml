@@ -1,12 +1,12 @@
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 2.2.207
+    version: 2.2.402
   displayName: Install .NET Core SDK
 
 - task: UseDotNet@2
   inputs:
-    version: 3.1.200
+    version: 3.1.201
   displayName: Install .NET Core SDK
 
 - script: dotnet restore
@@ -15,7 +15,7 @@ steps:
 - script: dotnet build -c $(BuildConfiguration) --no-restore
   displayName: Build
 
-- script: dotnet pack -c $(BuildConfiguration)
+- script: dotnet pack -c $(BuildConfiguration) --no-restore
   displayName: Pack
 
 - task: DotNetCoreCLI@2

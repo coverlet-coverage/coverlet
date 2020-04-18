@@ -9,8 +9,7 @@ namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests
     {
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void Lambda_Issue343()
         {
             string path = Path.GetTempFileName();
@@ -45,8 +44,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void AsyncAwait_Issue_730()
         {
             string path = Path.GetTempFileName();

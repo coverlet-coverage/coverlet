@@ -16,9 +16,10 @@ Clone this repo:
 
 Building, testing, and packing use all the standard dotnet commands:
 
-    dotnet build
+    dotnet restore
+    dotnet build --no-restore
     dotnet pack
-    dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.*]*"
+    dotnet test --no-build /p:CollectCoverage=true /p:Include=\"[coverlet.collector]*,[coverlet.core]*,[coverlet.msbuild.tasks]*\" /p:Exclude=\"[coverlet.core.tests.samples.netstandard]*,[coverlet.tests.xunit.extensions]*\"
 
 NB. You need to `pack` before testing because we have some integration testing that consume packages
 

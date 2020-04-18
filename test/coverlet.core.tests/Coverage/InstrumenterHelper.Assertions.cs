@@ -275,19 +275,13 @@ namespace Coverlet.Core.Tests
 
         private static BuildConfiguration GetAssemblyBuildConfiguration()
         {
-            var configurationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyConfigurationAttribute>();
-            if (configurationAttribute.Configuration.Equals("Debug", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return Tests.BuildConfiguration.Debug;
-            }
-            else if (configurationAttribute.Configuration.Equals("Release", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return Tests.BuildConfiguration.Release;
-            }
-            else
-            {
-                throw new NotSupportedException($"Build configuration '{configurationAttribute.Configuration}' not supported");
-            }
+#if DEBUG
+            return BuildConfiguration.Debug;
+#endif
+#if RELEASE
+            return BuildConfiguration.Release;
+#endif
+            throw new NotSupportedException($"Build configuration not supported");
         }
     }
 }
