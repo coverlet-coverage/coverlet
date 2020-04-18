@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.nupkg'.
   Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.snupkg'.
 ```
-Add msbuild package version generated to `"..\Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\XUnitTestProject1.csproj"`
+Add collectors package version generated to `"..\Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\XUnitTestProject1.csproj"`
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -47,12 +47,8 @@ Add msbuild package version generated to `"..\Documentation\Examples\MSBuild\Det
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
-    <PackageReference Include="coverlet.collector" Version="1.2.0" />
-    <!-- version comes from  coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.nupkg -->
-    <PackageReference Include="coverlet.msbuild" Version="2.9.0-preview.6.ga0e22ec622" >
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <!-- version comes from coverlet.collector.1.3.0-preview.6.ga0e22ec622.snupkg -->
+    <PackageReference Include="coverlet.collector" Version="1.3.0-preview.6.ga0e22ec622" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,9 +60,9 @@ Add msbuild package version generated to `"..\Documentation\Examples\MSBuild\Det
 ```
 Go to test project folder and run
 ```
-C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild (detbuilddocs -> origin)
-λ dotnet test /p:CollectCoverage=true /p:DeterministicSourcePaths=true
-Test run for C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\XUnitTestProject1.dll(.NETCoreApp,Version=v3.1)
+C:\git\coverlet\Documentation\Examples\VSTest\DeterministicBuild (detbuilddocs -> origin)
+λ dotnet test --collect:"XPlat Code Coverage" /p:DeterministicSourcePaths=true
+Test run for C:\git\coverlet\Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\XUnitTestProject1.dll(.NETCoreApp,Version=v3.1)
 Microsoft (R) Test Execution Command Line Tool Version 16.5.0
 Copyright (c) Microsoft Corporation.  All rights reserved.
 
@@ -74,30 +70,15 @@ Starting test execution, please wait...
 
 A total of 1 test files matched the specified pattern.
 
+Attachments:
+  C:\git\coverlet\Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\TestResults\7305d38e-0134-4fda-a99c-3672b410f472\coverage.cobertura.xml
 Test Run Successful.
 Total tests: 1
      Passed: 1
- Total time: 1,1471 Seconds
-
-Calculating coverage result...
-  Generating report 'C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\coverage.json'
-
-+---------------+------+--------+--------+
-| Module        | Line | Branch | Method |
-+---------------+------+--------+--------+
-| ClassLibrary1 | 100% | 100%   | 100%   |
-+---------------+------+--------+--------+
-
-+---------+------+--------+--------+
-|         | Line | Branch | Method |
-+---------+------+--------+--------+
-| Total   | 100% | 100%   | 100%   |
-+---------+------+--------+--------+
-| Average | 100% | 100%   | 100%   |
-+---------+------+--------+--------+
+ Total time: 1,3472 Seconds
 ```
 You should see on output folder the coverlet source root mapping file generated.  
 This is the confirmation that you're running coverage on deterministic build.
 ```
-Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\CoverletSourceRootsMapping
+Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\CoverletSourceRootsMapping
 ```
