@@ -1,6 +1,4 @@
-﻿**Run from solution root sln**
-
-To run test we need to generates packages to reference in on test project.
+﻿To run test we need to generates packages to reference in on test project.  
 Run from repo root
 ```
 C:\git\coverlet
