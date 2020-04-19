@@ -7,6 +7,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 # Main contents
 * [QuickStart](#Quick-Start)
 * [How It Works](#How-It-Works)
+* [Deterministic build support](#Deterministic-build-support)
 * [Known Issues](#Known-Issues)
 * [Consume nightly build](#Consume-nightly-build)
 * [Feature samples](Documentation/Examples.md)
@@ -115,6 +116,11 @@ Coverlet generates code coverage information by going through the following proc
 * Restore the original non-instrumented assembly files.
 * Read the recorded hits information from the temporary file.
 * Generate the coverage result from the hits information and write it to a file.
+
+## Deterministic build support
+
+Coverlet supports coverage for deterministic builds. The solution at the moment is not optimal and need a workaround.  
+Take a look at [documentation](Documentation/DeterministicBuild.md).
 
 ## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)!
 
