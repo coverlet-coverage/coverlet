@@ -10,7 +10,7 @@ These files are reported inside `pdb` files, where are stored debugging informat
 In a normal(non deterministic) build metadata emitted to pdbs are not "deterministic", that means that for instance source files path are reported with full path.  
 If for instance we build same project on different machine we'll have different paths emitted inside pdbs, so builds are "non deterministic" because same project build won't generates same artifacts.  
 
-As explained above to improve the level of security of generated artifacts(suppose for instance dlls inside nuget package) we need to apply some signature(signing with certificate) and validate before usage to avoid possible security issues like tampering.  
+As explained above, to improve the level of security of generated artifacts (suppose for instance DLLs inside the nuget package), we need to apply some signature (signing with certificate) and validate before usage to avoid possible security issues like tampering.  
 Finally thanks to deterministic build plus signature we can validate artifacts and be sure that binary was build from a specific sources(because there is no hard-coded variables metadata like paths from different build machines).
 
 At the moment deterministic build works thanks to Roslyn compiler that emits deterministic metadata if `DeterministicSourcePaths` is enabled. Take a look here for more information https://github.com/dotnet/sourcelink/tree/master/docs#deterministicsourcepaths.  
