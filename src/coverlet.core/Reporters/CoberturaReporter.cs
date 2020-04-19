@@ -70,6 +70,7 @@ namespace Coverlet.Core.Reporters
                             method.Add(new XAttribute("signature", "(" + meth.Key.Split(':').Last().Split('(').Last()));
                             method.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(meth.Value.Lines).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                             method.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(meth.Value.Branches).Percent / 100).ToString(CultureInfo.InvariantCulture)));
+                            method.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(meth.Value.Branches)));
 
                             XElement lines = new XElement("lines");
                             foreach (var ln in meth.Value.Lines)
@@ -173,12 +174,21 @@ namespace Coverlet.Core.Reporters
                 }
 
                 var basePathFragments = new List<string>();
-
+                bool stopSearch = false;
                 splittedPaths[0].Select((value, index) => (value, index)).ToList().ForEach(fragmentIndexPair =>
                 {
+                    if (stopSearch)
+                    {
+                        return;
+                    }
+
                     if (splittedPaths.All(sp => fragmentIndexPair.value.Equals(sp[fragmentIndexPair.index])))
                     {
                         basePathFragments.Add(fragmentIndexPair.value);
+                    }
+                    else
+                    {
+                        stopSearch = true;
                     }
                 });
                 return string.Concat(string.Join(Path.DirectorySeparatorChar.ToString(), basePathFragments), Path.DirectorySeparatorChar);

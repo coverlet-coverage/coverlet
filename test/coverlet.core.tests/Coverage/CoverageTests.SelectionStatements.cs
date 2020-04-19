@@ -10,8 +10,7 @@ namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests : ExternalProcessExecutionTest
     {
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void SelectionStatements_If()
         {
             // We need to pass file name to remote process where it save instrumentation result
@@ -57,8 +56,7 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void SelectionStatements_Switch()
         {
             string path = Path.GetTempFileName();

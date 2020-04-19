@@ -10,7 +10,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 * [Known Issues](#Known-Issues)
 * [Consume nightly build](#Consume-nightly-build)
 * [Feature samples](Documentation/Examples.md)
-* [Cake Add-In](#Cake.-Add-In)
+* [Cake Add-In](#Cake-Add-In)
 * [Changelog](Documentation/Changelog.md)
 
 ## Quick Start
@@ -147,7 +147,10 @@ Co-maintainers
 
 ## Code of Conduct
 
-This project enforces a code of conduct in line with the contributor covenant. See [CODE OF CONDUCT](CODE_OF_CONDUCT.md) for details.
+This project has adopted the code of conduct defined by the Contributor Covenant
+to clarify expected behavior in our community.
+
+For more information, see the [.NET Foundation Code of Conduct](https://dotnetfoundation.org/code-of-conduct).
 
 ## License
 

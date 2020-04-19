@@ -31,6 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		eng\azure-pipelines-nightly.yml = eng\azure-pipelines-nightly.yml
 		eng\azure-pipelines.yml = eng\azure-pipelines.yml
 		eng\build.yml = eng\build.yml
+		DeterministicBuild.targets = DeterministicBuild.targets
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		global.json = global.json
@@ -46,6 +47,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.tests.samples.netstandard", "test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj", "{5FF404AD-7C0B-465A-A1E9-558CDC642B0C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.xunit.extensions", "test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj", "{F8199E19-FA9A-4559-9101-CAD7028121B4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{9A8B19D4-4A24-4217-AEFE-159B68F029A1}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+		test\Directory.Build.targets = test\Directory.Build.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -128,6 +135,7 @@ Global
 		{F6FE7678-C662-43D3-AC6A-64F6AC5A5935} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{5FF404AD-7C0B-465A-A1E9-558CDC642B0C} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F8199E19-FA9A-4559-9101-CAD7028121B4} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{9A8B19D4-4A24-4217-AEFE-159B68F029A1} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}

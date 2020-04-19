@@ -3,20 +3,20 @@ using System.Runtime.InteropServices;
 
 namespace Coverlet.Tests.Xunit.Extensions
 {
-    [Flags]
     public enum OS
     {
-        Linux = 1,
-        MacOS = 2,
-        Windows = 4
+        Linux,
+        MacOS,
+        Windows
     }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
     public class SkipOnOSAttribute : Attribute, ITestCondition
     {
         private readonly OS _os;
+        private readonly string _reason;
 
-        public SkipOnOSAttribute(OS os) => _os = os;
+        public SkipOnOSAttribute(OS os, string reason = "") => (_os, _reason) = (os, reason);
 
         public bool IsMet => _os switch
         {
@@ -26,6 +26,6 @@ namespace Coverlet.Tests.Xunit.Extensions
             _ => throw new NotSupportedException($"Not supported OS {_os}")
         };
 
-        public string SkipReason => "OS not supported";
+        public string SkipReason => $"OS not supported{(string.IsNullOrEmpty(_reason) ? "" : $", {_reason}")}";
     }
 }

@@ -22,33 +22,27 @@ namespace Coverlet.Collector.DataCollection
 
         public IReporter[] Reporters { get; }
 
-        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, ILogger logger, ICoverageWrapper coverageWrapper, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
+        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, ILogger logger, ICoverageWrapper coverageWrapper,
+                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
             : this(settings,
                 settings.ReportFormats.Select(format =>
                 {
-                    var reporterFactory = new ReporterFactory(format);
-                    if (!reporterFactory.IsValidFormat())
-                    {
-                        eqtTrace.Warning($"Invalid report format '{format}'");
-                        return null;
-                    }
-                    else
-                    {
-                        return reporterFactory.CreateReporter();
-                    }
-                }).Where(r => r != null).ToArray(),
-                logger, coverageWrapper, instrumentationHelper, fileSystem)
+                    return reporterFactory.CreateReporter();
+                }
+            }).Where(r => r != null).ToArray(),
+            logger, coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator)
         {
         }
 
-        public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
+        public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper,
+                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
         {
             // Store input vars
             Reporters = reporters;
             _coverageWrapper = coverageWrapper;
 
             // Coverage object
-            _coverage = _coverageWrapper.CreateCoverage(settings, logger, instrumentationHelper, fileSystem);
+            _coverage = _coverageWrapper.CreateCoverage(settings, logger, instrumentationHelper, fileSystem, sourceRootTranslator);
         }
 
         /// <summary>

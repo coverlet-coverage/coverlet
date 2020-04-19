@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-Added support for deterministic build for msbuild/collectors driver [#802](https://github.com/tonerdo/coverlet/pull/802)  [#796](https://github.com/tonerdo/coverlet/pull/796) with the help of https://github.com/clairernovotny and https://github.com/tmat
+
+### Improvements
+
+-Fix for code complexity not being generated for methods for cobertura reporter [#738](https://github.com/tonerdo/coverlet/pull/798) by https://github.com/dannyBies
+
+## Release date 2020-04-02
+### Packages  
+coverlet.msbuild 2.8.1  
+coverlet.console 1.7.1  
+coverlet.collector 1.2.1  
+
 ### Fixed
 
 -Fix ExcludeFromCodeCoverage attribute bugs [#129](https://github.com/tonerdo/coverlet/issues/129) and [#670](https://github.com/tonerdo/coverlet/issues/670) with [#671](https://github.com/tonerdo/coverlet/pull/671) by https://github.com/matteoerigozzi  
