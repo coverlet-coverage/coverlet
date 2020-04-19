@@ -22,10 +22,8 @@ namespace Coverlet.Collector.DataCollection
 
         public IReporter[] Reporters { get; }
 
-        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, ILogger logger,
-            ICoverageWrapper coverageWrapper,
-            IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem,
-            ISourceRootTranslator sourceRootTranslator)
+        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, ILogger logger, ICoverageWrapper coverageWrapper,
+            IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
             : this(settings,
                 settings.ReportFormats.Select(format =>
                 {
@@ -35,14 +33,17 @@ namespace Coverlet.Collector.DataCollection
                         eqtTrace.Warning($"Invalid report format '{format}'");
                         return null;
                     }
-                    return reporterFactory.CreateReporter();
+                    else
+                    {
+                        return reporterFactory.CreateReporter();
+                    }
                 }).Where(r => r != null).ToArray(),
                 logger, coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator)
         {
         }
 
         public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper,
-                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
+            IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
         {
             // Store input vars
             Reporters = reporters;
