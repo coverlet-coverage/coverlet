@@ -5,7 +5,7 @@ Deterministic build **is supported only** by `msbuild`(`/p:CollectCoverage=true`
 Deterministic builds are important as they enable verification that the resulting binary was built from the specified source and provides traceability.  
 For more information on how to enable deterministic build I recommend you to take a look at [@clairernovotny](https://github.com/clairernovotny)'s guide https://github.com/clairernovotny/DeterministicBuilds
 
-From coverage perspective deterministic build put some challenge because usually coverage tools need access to source file metadata(ie. local path) during instrumentation and report generation.  
+From coverage perspective deterministic build put some challenge because usually coverage tools need access to source file metadata (ie. local path) during instrumentation and report generation.  
 These files are reported inside `pdb` files, where are stored debugging information needed by debuggers and also by tools that needs to work with "build" metadata information, for example generated `dll` modules and `source files` used.  
 In a normal(non deterministic) build metadata emitted to pdbs are not "deterministic", that means that for instance source files path are reported with full path.  
 If for instance we build same project on different machine we'll have different paths emitted inside pdbs, so builds are "non deterministic" because same project build won't generates same artifacts.  
