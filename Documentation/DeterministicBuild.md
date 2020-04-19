@@ -7,7 +7,7 @@ For more information on how to enable deterministic build I recommend you to tak
 
 From coverage perspective deterministic build put some challenge because usually coverage tools need access to source file metadata (ie. local path) during instrumentation and report generation.  
 These files are reported inside `pdb` files, where are stored debugging information needed by debuggers and also by tools that needs to work with "build" metadata information, for example generated `dll` modules and `source files` used.  
-In a normal(non deterministic) build metadata emitted to pdbs are not "deterministic", that means that for instance source files path are reported with full path.  
+In local (non-CI) builds metadata emitted to pdbs are not "deterministic", that means that for instance source files path are reported with full path.  
 If for instance we build same project on different machine we'll have different paths emitted inside pdbs, so builds are "non deterministic" because same project build won't generates same artifacts.  
 
 As explained above, to improve the level of security of generated artifacts (suppose for instance DLLs inside the nuget package), we need to apply some signature (signing with certificate) and validate before usage to avoid possible security issues like tampering.  
