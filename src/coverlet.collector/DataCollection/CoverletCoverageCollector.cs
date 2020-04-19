@@ -126,17 +126,14 @@ namespace Coverlet.Collector.DataCollection
                 IEnumerable<string> testModules = this.GetTestModules(sessionStartEventArgs);
                 var coverletSettingsParser = new CoverletSettingsParser(_eqtTrace);
                 CoverletSettings coverletSettings = coverletSettingsParser.Parse(_configurationElement, testModules);
-                IInstrumentationHelper instrumentationHelper = _serviceProvider.GetService<IInstrumentationHelper>();
-                IFileSystem fileSystem = _serviceProvider.GetService<IFileSystem>();
-                ILogger logger = _serviceProvider.GetService<ILogger>();
 
                 // Build services container
                 _serviceProvider = _serviceCollectionFactory(_eqtTrace, _logger, coverletSettings.TestModule).BuildServiceProvider();
 
                 // Get coverage and attachment managers
-                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _logger, _coverageWrapper,
-                                                        _serviceProvider.GetService<IInstrumentationHelper>(), _serviceProvider.GetService<IFileSystem>(),
-                                                        _serviceProvider.GetService<ISourceRootTranslator>());
+                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _serviceProvider.GetRequiredService<ILogger>(), _coverageWrapper,
+                                                        _serviceProvider.GetRequiredService<IInstrumentationHelper>(), _serviceProvider.GetRequiredService<IFileSystem>(),
+                                                        _serviceProvider.GetRequiredService<ISourceRootTranslator>());
 
                 // Instrument modules
                 _coverageManager.InstrumentModules();
