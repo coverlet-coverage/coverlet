@@ -131,7 +131,7 @@ namespace Coverlet.Collector.DataCollection
                 _serviceProvider = _serviceCollectionFactory(_eqtTrace, _logger, coverletSettings.TestModule).BuildServiceProvider();
 
                 // Get coverage and attachment managers
-                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _serviceProvider.GetRequiredService<ILogger>(), _coverageWrapper,
+                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _logger, _coverageWrapper,
                                                         _serviceProvider.GetRequiredService<IInstrumentationHelper>(), _serviceProvider.GetRequiredService<IFileSystem>(),
                                                         _serviceProvider.GetRequiredService<ISourceRootTranslator>());
 

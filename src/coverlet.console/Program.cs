@@ -34,7 +34,7 @@ namespace Coverlet.Console
 
             var logger = (ConsoleLogger) serviceProvider.GetService<ILogger>();
             var fileSystem = serviceProvider.GetService<IFileSystem>();
-			var sourceTranslator = serviceProvider.GetService<ISourceRootTranslator>();
+            var sourceTranslator = serviceProvider.GetService<ISourceRootTranslator>();
 
             var app = new CommandLineApplication();
             app.Name = "coverlet";

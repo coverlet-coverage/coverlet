@@ -22,7 +22,7 @@ namespace Coverlet.Collector.DataCollection
 
         public IReporter[] Reporters { get; }
 
-        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, ILogger logger, ICoverageWrapper coverageWrapper,
+        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper,
             IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
             : this(settings,
                 settings.ReportFormats.Select(format =>
@@ -38,7 +38,8 @@ namespace Coverlet.Collector.DataCollection
                         return reporterFactory.CreateReporter();
                     }
                 }).Where(r => r != null).ToArray(),
-                logger, coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator)
+                new CoverletLogger(eqtTrace, logger),
+                coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator)
         {
         }
 
