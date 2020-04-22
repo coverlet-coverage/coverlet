@@ -412,6 +412,11 @@ namespace Coverlet.Core.Symbols
 
             bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
             bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
+
+            // State machine for enumerator uses `brfalse.s`/`beq` or `switch` opcode depending on how many `yield` we have in the method body.
+            // For more than one `yield` a `switch` is emitted so we should only skip the first branch. In case of a single `yield` we need to
+            // skip the first two branches to avoid reporting a phantom branch. The first branch (`brfalse.s`) jumps to the `yield`ed value,
+            // the second one (`beq`) exits the enumeration.
             bool skipFirstBranch = IsMoveNextInsideEnumerator(methodDefinition);
             bool skipSecondBranch = false;
 
