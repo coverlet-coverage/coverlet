@@ -36,5 +36,20 @@ namespace Coverlet.Core.Samples.Tests
 
             yield return result;
         }
+
+        public System.Collections.Generic.IEnumerable<int> Three()
+        {
+            yield return 1;
+            yield return 2;
+            yield return 3;
+        }
+
+        public System.Collections.Generic.IEnumerable<string> Enumerable(System.Collections.Generic.IList<string> ls)
+        {
+            foreach (var item in ls)
+            {
+                yield return item;
+            }
+        }
     }
 }

@@ -41,7 +41,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
-        public void Yield_Multiple()
+        public void Yield_Two()
         {
             string path = Path.GetTempFileName();
             try
@@ -93,6 +93,66 @@ namespace Coverlet.Core.Tests
                 result.Document("Instrumentation.Yield.cs")
                       .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<OneWithSwitch>d__2::MoveNext()")
                       .AssertLinesCovered((30, 1), (31, 1), (37, 1))
+                      .ExpectedTotalNumberOfBranches(1);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void Yield_Three()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                    {
+                        foreach (var _ in instance.Three()) ;
+
+                        return Task.CompletedTask;
+                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    return 0;
+                }, new string[] { path });
+
+                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+                result.Document("Instrumentation.Yield.cs")
+                      .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<Three>d__3::MoveNext()")
+                      .AssertLinesCovered((42, 1), (43, 1), (44, 1))
+                      .ExpectedTotalNumberOfBranches(0);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void Yield_Enumerable()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                    {
+                        foreach (var _ in instance.Enumerable(new[] { "one", "two", "three", "four" })) ;
+
+                        return Task.CompletedTask;
+                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    return 0;
+                }, new string[] { path });
+
+                CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+                result.Document("Instrumentation.Yield.cs")
+                      .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<Enumerable>d__4::MoveNext()")
+                      .AssertLinesCovered((51, 4))
                       .ExpectedTotalNumberOfBranches(1);
             }
             finally
