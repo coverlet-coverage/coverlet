@@ -27,7 +27,7 @@ coverlet.collector 1.2.1
 -Fix Coverage Issue - New Using + Async/Await + ConfigureAwait [#669](https://github.com/tonerdo/coverlet/issues/669)  
 -Improve branch detection for lambda functions and async/await statements [#702](https://github.com/tonerdo/coverlet/pull/702) by https://github.com/matteoerigozzi  
 -Improve coverage, hide compiler generated branches for try/catch blocks inside async state machine [#716](https://github.com/tonerdo/coverlet/pull/716) by https://github.com/matteoerigozzi  
--Improve coverage skip lambda cached field [#753](https://github.com/tonerdo/coverlet/pull/753)
+-Improve coverage, skip lambda cached field [#753](https://github.com/tonerdo/coverlet/pull/753)
 
 ### Improvements
 
