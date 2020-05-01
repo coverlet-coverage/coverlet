@@ -19,6 +19,7 @@ namespace Coverlet.Core
         private string[] _excludeFilters;
         private string[] _excludedSourceFiles;
         private string[] _excludeAttributes;
+        private string[] _pathOverrides;
         private bool _includeTestAssembly;
         private bool _singleHit;
         private string _mergeWith;
@@ -47,7 +48,8 @@ namespace Coverlet.Core
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
             IFileSystem fileSystem,
-            ISourceRootTranslator sourceRootTranslator)
+            ISourceRootTranslator sourceRootTranslator,
+            string[] pathOverrides)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -63,7 +65,7 @@ namespace Coverlet.Core
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
-
+            _pathOverrides = pathOverrides;
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
@@ -74,6 +76,7 @@ namespace Coverlet.Core
             _module = prepareResult.Module;
             _mergeWith = prepareResult.MergeWith;
             _useSourceLink = prepareResult.UseSourceLink;
+            _pathOverrides = prepareResult.PathOverrides;
             _results = new List<InstrumenterResult>(prepareResult.Results);
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
@@ -130,6 +133,7 @@ namespace Coverlet.Core
                 Module = _module,
                 MergeWith = _mergeWith,
                 UseSourceLink = _useSourceLink,
+                PathOverrides = _pathOverrides,
                 Results = _results.ToArray()
             };
         }
@@ -280,7 +284,7 @@ namespace Coverlet.Core
                 }
             }
 
-            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results, UseSourceLink = _useSourceLink };
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results, UseSourceLink = _useSourceLink,PathOverrides = _pathOverrides};
 
             if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && _fileSystem.Exists(_mergeWith))
             {

@@ -20,6 +20,8 @@ namespace Coverlet.Core
         public bool UseSourceLink { get; set; }
         [DataMember]
         public InstrumenterResult[] Results { get; set; }
+        [DataMember]
+        public string[] PathOverrides { get; set; }
 
         public static CoveragePrepareResult Deserialize(Stream serializedInstrumentState)
         {

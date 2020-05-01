@@ -19,6 +19,7 @@ namespace Coverlet.Core.Reporters
 
         public string Report(CoverageResult result)
         {
+            System.Diagnostics.Debugger.Launch();
             CoverageSummary summary = new CoverageSummary();
 
             var lineCoverage = summary.CalculateLineCoverage(result.Modules);
@@ -32,8 +33,7 @@ namespace Coverlet.Core.Reporters
             coverage.Add(new XAttribute("timestamp", (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds));
 
             XElement sources = new XElement("sources");
-            var absolutePaths = GetBasePaths(result.Modules, result.UseSourceLink).ToList();
-            absolutePaths.ForEach(x => sources.Add(new XElement("source", x)));
+            var absolutePaths = SetSource(result, sources);
 
             XElement packages = new XElement("packages");
             foreach (var module in result.Modules)
@@ -132,6 +132,21 @@ namespace Coverlet.Core.Reporters
             xml.Save(stream);
 
             return Encoding.UTF8.GetString(stream.ToArray());
+        }
+
+        private static List<string> SetSource(CoverageResult result, XElement sources)
+        {
+            if (result.PathOverrides is null)
+            {
+                var absolutePaths = GetBasePaths(result.Modules, result.UseSourceLink).ToList();
+                absolutePaths.ForEach(x => sources.Add(new XElement("source", x)));
+                return absolutePaths;
+            }
+            else
+            {
+                sources.Add(new XElement("source", result.PathOverrides[0]));
+                return new List<string>{result.PathOverrides[1]};
+            }
         }
 
         private static IEnumerable<string> GetBasePaths(Modules modules, bool useSourceLink)

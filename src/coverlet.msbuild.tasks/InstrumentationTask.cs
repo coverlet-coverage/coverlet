@@ -24,6 +24,7 @@ namespace Coverlet.MSbuild.Tasks
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
+        private string _pathOverrides;
         private ITaskItem _instrumenterState;
         private readonly MSBuildLogger _logger;
 
@@ -88,6 +89,11 @@ namespace Coverlet.MSbuild.Tasks
             set { _useSourceLink = value; }
         }
 
+        public string PathOverrides
+        {
+            get { return _pathOverrides; }
+            set { _pathOverrides = value; }
+        }
         [Output]
         public ITaskItem InstrumenterState
         {
@@ -142,6 +148,7 @@ namespace Coverlet.MSbuild.Tasks
                 var excludedSourceFiles = _excludeByFile?.Split(',');
                 var excludeAttributes = _excludeByAttribute?.Split(',');
                 var fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+                var pathOverrides = _pathOverrides?.Split(',');
 
                 Coverage coverage = new Coverage(_path,
                     includeFilters,
@@ -156,7 +163,8 @@ namespace Coverlet.MSbuild.Tasks
                     _logger,
                     DependencyInjection.Current.GetService<IInstrumentationHelper>(),
                     fileSystem,
-                    DependencyInjection.Current.GetService<ISourceRootTranslator>());
+                    DependencyInjection.Current.GetService<ISourceRootTranslator>(),
+                    pathOverrides);
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());

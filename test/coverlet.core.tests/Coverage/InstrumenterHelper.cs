@@ -99,7 +99,8 @@ namespace Coverlet.Core.Tests
                 "[xunit.*]*",
                 "[coverlet.*]*"
             }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile),
-            _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>());
+            _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>(),
+            null);
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);

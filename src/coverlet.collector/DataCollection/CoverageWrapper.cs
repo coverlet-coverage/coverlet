@@ -32,7 +32,8 @@ namespace Coverlet.Collector.DataCollection
                 coverletLogger,
                 instrumentationHelper,
                 fileSystem,
-                sourceRootTranslator);
+                sourceRootTranslator,
+                null);
         }
 
         /// <summary>

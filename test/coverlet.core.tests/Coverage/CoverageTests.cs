@@ -29,7 +29,7 @@ namespace Coverlet.Core.Tests
                                           new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem()));
 
             var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                        Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()));
+                                        Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()),null);
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
@@ -56,7 +56,7 @@ namespace Coverlet.Core.Tests
 
             var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
                                         Array.Empty<string>(), true, false, string.Empty, false, _mockLogger.Object, instrumentationHelper, new FileSystem(),
-                                        new SourceRootTranslator(module, _mockLogger.Object, new FileSystem()));
+                                        new SourceRootTranslator(module, _mockLogger.Object, new FileSystem()),null);
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();

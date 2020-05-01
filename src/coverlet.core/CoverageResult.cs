@@ -45,6 +45,7 @@ namespace Coverlet.Core
         internal List<InstrumenterResult> InstrumentedResults;
 
         internal CoverageResult() { }
+        public string[] PathOverrides;
 
         internal void Merge(Modules modules)
         {

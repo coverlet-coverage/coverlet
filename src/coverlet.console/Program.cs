@@ -61,6 +61,7 @@ namespace Coverlet.Console
             CommandOption singleHit = app.Option("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location", CommandOptionType.NoValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
+            CommandOption pathOverrides = app.Option("--path-overrides", "Specifies the source path and the base path where filename is overrided from", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
@@ -69,6 +70,9 @@ namespace Coverlet.Console
 
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
+
+                if(pathOverrides.HasValue() && pathOverrides.Value().Split(",").Length != 2)
+                    throw new CommandParsingException(app, "The source path and base path overrides are required");
 
                 if (verbosity.HasValue())
                 {
@@ -88,7 +92,8 @@ namespace Coverlet.Console
                     logger,
                     DependencyInjection.Current.GetService<IInstrumentationHelper>(),
                     fileSystem,
-                    sourceTranslator);
+                    sourceTranslator,
+                    pathOverrides.Value().Split(","));
                 coverage.PrepareModules();
 
                 Process process = new Process();
