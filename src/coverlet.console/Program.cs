@@ -93,7 +93,7 @@ namespace Coverlet.Console
                     DependencyInjection.Current.GetService<IInstrumentationHelper>(),
                     fileSystem,
                     sourceTranslator,
-                    pathOverrides.Value().Split(","));
+                    pathOverrides.HasValue() ? pathOverrides.Value().Split(","):null);
                 coverage.PrepareModules();
 
                 Process process = new Process();
