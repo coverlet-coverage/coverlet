@@ -19,7 +19,6 @@ namespace Coverlet.Core.Reporters
 
         public string Report(CoverageResult result)
         {
-            System.Diagnostics.Debugger.Launch();
             CoverageSummary summary = new CoverageSummary();
 
             var lineCoverage = summary.CalculateLineCoverage(result.Modules);
