@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Moq;
 using Xunit;

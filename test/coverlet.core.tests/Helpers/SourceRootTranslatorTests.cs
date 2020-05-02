@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
