@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.Xunit.Extensions;

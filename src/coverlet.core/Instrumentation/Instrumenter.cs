@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.FileSystemGlobbing;

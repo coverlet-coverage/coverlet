@@ -4,7 +4,7 @@ using Xunit;
 using System.Collections.Generic;
 using System.Linq;
 using Moq;
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers.Tests
 {
