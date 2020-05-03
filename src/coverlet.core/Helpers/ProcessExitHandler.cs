@@ -1,5 +1,5 @@
 ﻿using System;
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {

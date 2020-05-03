@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.Xunit.Extensions;
 using Microsoft.CodeAnalysis;

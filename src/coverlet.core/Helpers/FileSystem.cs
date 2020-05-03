@@ -1,4 +1,4 @@
-﻿using Coverlet.Core.Abstracts;
+﻿using Coverlet.Core.Abstractions;
 using System.IO;
 
 namespace Coverlet.Core.Helpers

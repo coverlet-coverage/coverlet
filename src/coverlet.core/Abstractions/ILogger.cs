@@ -1,6 +1,6 @@
 using System;
 
-namespace Coverlet.Core.Abstracts
+namespace Coverlet.Core.Abstractions
 {
     internal interface ILogger
     {

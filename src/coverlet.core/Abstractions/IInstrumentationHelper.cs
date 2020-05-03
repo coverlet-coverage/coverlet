@@ -1,4 +1,4 @@
-﻿namespace Coverlet.Core.Abstracts
+﻿namespace Coverlet.Core.Abstractions
 {
     internal interface IInstrumentationHelper
     {
