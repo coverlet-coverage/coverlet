@@ -33,15 +33,13 @@ This is the list of features we should develop soon as possible:
 ### High priority
 
 - https://github.com/tonerdo/coverlet/issues/328 Option to ignore field/property initializers and auto-implemented properties
-- https://github.com/tonerdo/coverlet/issues/705 Support coverage on netfx for collectors integration
 - https://github.com/tonerdo/coverlet/issues/662 Allow merge reports solution wide, related PR https://github.com/tonerdo/coverlet/pull/704 
+- https://github.com/tonerdo/coverlet/issues/804#issuecomment-611487750 Some perf improvements
 
 ### Low priority
 
-
 - https://github.com/tonerdo/coverlet/issues/808 Rethink hits reports strategy
-- https://github.com/tonerdo/coverlet/issues/804#issuecomment-611487750 Some perf improvements
-
+- https://github.com/tonerdo/coverlet/issues/705 Support coverage on netfx for collectors integration
 
 ## Maintainers discussion channel
 
