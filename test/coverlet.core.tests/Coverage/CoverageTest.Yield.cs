@@ -92,7 +92,8 @@ namespace Coverlet.Core.Tests
 
                 result.Document("Instrumentation.Yield.cs")
                       .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<OneWithSwitch>d__2::MoveNext()")
-                      .AssertLinesCovered((21, 1), (30, 1), (31, 1), (37, 1))
+                      .AssertLinesCovered(BuildConfiguration.Debug, (21, 1), (30, 1), (31, 1), (37, 1))
+                      .AssertLinesCovered(BuildConfiguration.Release, (30, 1), (31, 1), (37, 1))
                       .ExpectedTotalNumberOfBranches(1);
             }
             finally
@@ -152,7 +153,8 @@ namespace Coverlet.Core.Tests
 
                 result.Document("Instrumentation.Yield.cs")
                       .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<Enumerable>d__4::MoveNext()")
-                      .AssertLinesCovered((48, 1), (49, 11), (50, 4), (51, 4), (52, 4), (53, 1))
+                      .AssertLinesCovered(BuildConfiguration.Debug, (48, 1), (49, 11), (50, 4), (51, 4), (52, 4), (53, 1))
+                      .AssertLinesCovered(BuildConfiguration.Release, (49, 10), (51, 4), (53, 1))
                       .ExpectedTotalNumberOfBranches(1);
             }
             finally
