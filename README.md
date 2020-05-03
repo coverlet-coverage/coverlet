@@ -13,6 +13,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 * [Feature samples](Documentation/Examples.md)
 * [Cake Add-In](#Cake-Add-In)
 * [Changelog](Documentation/Changelog.md)
+* [Roadmap](Documentation/Roadmap.md)
 
 ## Quick Start
 
