@@ -152,7 +152,7 @@ namespace Coverlet.Core.Tests
 
                 result.Document("Instrumentation.Yield.cs")
                       .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<Enumerable>d__4::MoveNext()")
-                      .AssertLinesCovered((51, 4))
+                      .AssertLinesCovered((48, 1), (49, 11), (50, 4), (51, 4), (52, 4), (53, 1))
                       .ExpectedTotalNumberOfBranches(1);
             }
             finally
