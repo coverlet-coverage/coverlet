@@ -30,7 +30,7 @@ namespace Coverlet.Console
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(provider => new SourceRootTranslator(provider.GetRequiredService<ILogger>(), provider.GetRequiredService<IFileSystem>()));
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
             var logger = (ConsoleLogger) serviceProvider.GetService<ILogger>();
             var fileSystem = serviceProvider.GetService<IFileSystem>();

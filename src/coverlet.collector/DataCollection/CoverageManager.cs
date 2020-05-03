@@ -23,28 +23,28 @@ namespace Coverlet.Collector.DataCollection
         public IReporter[] Reporters { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper,
-            IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
+                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
             : this(settings,
-                settings.ReportFormats.Select(format =>
+            settings.ReportFormats.Select(format =>
+            {
+                var reporterFactory = new ReporterFactory(format);
+                if (!reporterFactory.IsValidFormat())
                 {
-                    var reporterFactory = new ReporterFactory(format);
-                    if (!reporterFactory.IsValidFormat())
-                    {
-                        eqtTrace.Warning($"Invalid report format '{format}'");
-                        return null;
-                    }
-                    else
-                    {
-                        return reporterFactory.CreateReporter();
-                    }
-                }).Where(r => r != null).ToArray(),
-                new CoverletLogger(eqtTrace, logger),
-                coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator)
+                    eqtTrace.Warning($"Invalid report format '{format}'");
+                    return null;
+                }
+                else
+                {
+                    return reporterFactory.CreateReporter();
+                }
+            }).Where(r => r != null).ToArray(),
+            new CoverletLogger(eqtTrace, logger),
+            coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator)
         {
         }
 
         public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper,
-            IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
+                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
         {
             // Store input vars
             Reporters = reporters;
