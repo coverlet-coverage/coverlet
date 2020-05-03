@@ -43,3 +43,8 @@ This is the list of features we should develop soon as possible:
 - https://github.com/tonerdo/coverlet/issues/804#issuecomment-611487750 Some perf improvements
 
 
+## Maintainers discussion channel
+
+[As maintainers we should try to find a way to keep in synch, we could use a chat where we can "take note" of progress and if possible answer to questions/doubt, I know this is OSS, but it's hard keep project at high level without "more ideas".]
+
+
