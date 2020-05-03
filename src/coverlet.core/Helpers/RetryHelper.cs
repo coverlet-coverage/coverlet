@@ -1,4 +1,4 @@
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Threading;

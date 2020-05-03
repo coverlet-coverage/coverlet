@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using ConsoleTables;
 using Coverlet.Core;
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Reporters;
 using Microsoft.Build.Framework;

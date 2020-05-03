@@ -3,12 +3,12 @@ using System.Diagnostics;
 using System.IO;
 
 using Coverlet.Core;
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using ILogger = Coverlet.Core.Abstracts.ILogger;
+using ILogger = Coverlet.Core.Abstractions.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
 {

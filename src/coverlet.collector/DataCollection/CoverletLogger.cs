@@ -1,7 +1,7 @@
 ﻿using System;
 
 using Coverlet.Collector.Utilities;
-using Coverlet.Core.Abstracts;
+using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Collector.DataCollection
 {
