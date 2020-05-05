@@ -21,6 +21,7 @@ namespace Coverlet.Core.Instrumentation
         public static string HitsFilePath;
         public static int[] HitsArray;
         public static bool SingleHit;
+        public static bool FlushHitFile;
         private static readonly bool _enableLog = int.TryParse(Environment.GetEnvironmentVariable("COVERLET_ENABLETRACKERLOG"), out int result) ? result == 1 : false;
 
         static ModuleTrackerTemplate()
@@ -75,6 +76,11 @@ namespace Coverlet.Core.Instrumentation
 
         public static void UnloadModule(object sender, EventArgs e)
         {
+            if (!FlushHitFile)
+            {
+                return;
+            }
+
             try
             {
                 WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}'");

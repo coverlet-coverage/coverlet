@@ -34,6 +34,7 @@ namespace Coverlet.Core.Instrumentation
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
         private FieldDefinition _customTrackerSingleHit;
+        private FieldDefinition _customTrackerFlushHitFile;
         private ILProcessor _customTrackerClassConstructorIl;
         private TypeDefinition _customTrackerTypeDef;
         private MethodReference _customTrackerRegisterUnloadEventsMethod;
@@ -243,6 +244,8 @@ namespace Coverlet.Core.Instrumentation
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(_singleHit ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerSingleHit));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4_1));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerFlushHitFile));
 
                     if (containsAppContext)
                     {
@@ -294,6 +297,8 @@ namespace Coverlet.Core.Instrumentation
                         _customTrackerHitsFilePath = fieldClone;
                     else if (fieldClone.Name == nameof(ModuleTrackerTemplate.SingleHit))
                         _customTrackerSingleHit = fieldClone;
+                    else if (fieldClone.Name == nameof(ModuleTrackerTemplate.FlushHitFile))
+                        _customTrackerFlushHitFile = fieldClone;
                 }
 
                 foreach (MethodDefinition methodDef in moduleTrackerTemplate.Methods)
