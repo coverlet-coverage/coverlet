@@ -40,8 +40,8 @@ This is the list of features we should develop soon as possible:
 
 ### Low priority
 
-- https://github.com/tonerdo/coverlet/issues/808 Rethink hits reports strategy
-- https://github.com/tonerdo/coverlet/issues/705 Support coverage on netfx for collectors integration
+- Rethink hits reports strategy https://github.com/tonerdo/coverlet/issues/808 
+- Support coverage on netfx for collectors integration https://github.com/tonerdo/coverlet/issues/705 
 
 ## Maintainers discussion channel
 
