@@ -120,11 +120,10 @@ dotnet test /p:CollectCoverage=true /p:ExcludeByAttribute="Obsolete,GeneratedCod
 ### Source Files
 You can also ignore specific source files from code coverage using the `ExcludeByFile` property
  - Use single or multiple paths (separate by comma)
- - Use absolute or relative paths (relative to the project directory)
  - Use file path or directory path with globbing (e.g `dir1/*.cs`)
 
 ```bash
-dotnet test /p:CollectCoverage=true /p:ExcludeByFile=\"../dir1/class1.cs,../dir2/*.cs,../dir3/**/*.cs\"
+dotnet test /p:CollectCoverage=true /p:ExcludeByFile=\"**/dir1/class1.cs,**/dir2/*.cs,**/dir3/**/*.cs\"
 ```
 
 ### Filters

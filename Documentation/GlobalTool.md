@@ -172,11 +172,10 @@ coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-att
 
 You can also ignore specific source files from code coverage using the `--exclude-by-file` option
  - Can be specified multiple times
- - Use absolute or relative paths (relative to the project directory)
  - Use file path or directory path with globbing (e.g `dir1/*.cs`)
 
 ```bash
-coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-file "../dir1/class1.cs"
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-file "**/dir1/class1.cs"
 ```
 
 ### Filters
