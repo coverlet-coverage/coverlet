@@ -36,7 +36,7 @@ This is the list of features we should develop soon as possible:
 
 - Allow merge reports solution wide on all flavours  https://github.com/tonerdo/coverlet/issues/662 https://github.com/tonerdo/coverlet/issues/357
 
-- https://github.com/tonerdo/coverlet/issues/804#issuecomment-611487750 Some perf improvements
+- https://github.com/coverlet-coverage/coverlet/issues/836 Some perf improvements
 
 ### Low priority
 
