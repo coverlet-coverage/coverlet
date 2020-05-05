@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Instrumentation;
-using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Instrumentation
