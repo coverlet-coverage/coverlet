@@ -76,9 +76,6 @@ namespace Coverlet.Core.Instrumentation
 
         public static void UnloadModule(object sender, EventArgs e)
         {
-            // Claim the current hits array and reset it to prevent double-counting scenarios.
-            int[] hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
-
             // The same module can be unloaded multiple times in the same process via different app domains.
             // Use a global mutex to ensure no concurrent access.
             using (var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew))
@@ -88,11 +85,13 @@ namespace Coverlet.Core.Instrumentation
                     mutex.WaitOne();
                 }
 
+                // Claim the current hits array and reset it to prevent double-counting scenarios.
+                int[] hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
+
                 if (FlushHitFile)
                 {
                     try
                     {
-
                         WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}' by '{sender}'");
                         WriteLog($"Flushing hit file '{HitsFilePath}'");
 
