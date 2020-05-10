@@ -142,6 +142,7 @@ namespace Coverlet.Core.Tests
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
                         foreach (var _ in instance.Enumerable(new[] { "one", "two", "three", "four" })) ;
+
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
