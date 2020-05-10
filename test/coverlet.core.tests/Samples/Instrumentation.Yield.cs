@@ -46,7 +46,11 @@ namespace Coverlet.Core.Samples.Tests
 
         public System.Collections.Generic.IEnumerable<string> Enumerable(System.Collections.Generic.IList<string> ls)
         {
-            foreach (var item in ls)
+            foreach (
+                    var item
+                    in
+                    ls
+                    )
             {
                 yield return item;
             }

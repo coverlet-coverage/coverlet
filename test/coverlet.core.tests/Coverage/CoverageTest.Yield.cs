@@ -19,7 +19,7 @@ namespace Coverlet.Core.Tests
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
-                        foreach(var _ in instance.One());
+                        foreach (var _ in instance.One()) ;
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
@@ -50,7 +50,7 @@ namespace Coverlet.Core.Tests
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
-                        foreach (var _ in instance.Two());
+                        foreach (var _ in instance.Two()) ;
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
@@ -142,7 +142,6 @@ namespace Coverlet.Core.Tests
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
                         foreach (var _ in instance.Enumerable(new[] { "one", "two", "three", "four" })) ;
-
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
@@ -152,7 +151,7 @@ namespace Coverlet.Core.Tests
 
                 result.Document("Instrumentation.Yield.cs")
                       .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<Enumerable>d__4::MoveNext()")
-                      .AssertLinesCovered(BuildConfiguration.Debug, (48, 1), (49, 11), (50, 4), (51, 4), (52, 4), (53, 1))
+                      .AssertLinesCovered(BuildConfiguration.Debug, (48, 1), (49, 1), (50, 4), (51, 5), (52, 1), (54, 4), (55, 4), (56, 4), (57, 1))
                       .ExpectedTotalNumberOfBranches(1);
             }
             finally
