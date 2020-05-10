@@ -127,8 +127,7 @@ namespace Coverlet.Core.Instrumentation
 
                                 if (hitsLength != hitsArray.Length)
                                 {
-                                    throw new InvalidOperationException(
-                                        $"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {hitsArray.Length}");
+                                    throw new InvalidOperationException($"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {hitsArray.Length}");
                                 }
 
                                 for (int i = 0; i < hitsLength; ++i)
