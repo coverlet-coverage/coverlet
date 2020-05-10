@@ -26,7 +26,7 @@ namespace Coverlet.Core.Tests
         /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");
         ///                 TestInstrumentationHelper.GenerateHtmlReport(result);
         /// </summary>
-        public static void GenerateHtmlReport(CoverageResult coverageResult, IReporter reporter = null, string sourceFileFilter = "", [CallerMemberName]string directory = "")
+        public static void GenerateHtmlReport(CoverageResult coverageResult, IReporter reporter = null, string sourceFileFilter = "", [CallerMemberName] string directory = "")
         {
             JsonReporter defaultReporter = new JsonReporter();
             reporter ??= new CoberturaReporter();
@@ -289,6 +289,11 @@ namespace Coverlet.Core.Tests
         public static void RunInProcess(this FunctionExecutor executor, Func<string[], Task<int>> func, string[] args)
         {
             Assert.Equal(0, func(args).Result);
+        }
+
+        public static void RunInProcess(this FunctionExecutor executor, Func<Task<int>> func)
+        {
+            Assert.Equal(0, func().Result);
         }
     }
 }

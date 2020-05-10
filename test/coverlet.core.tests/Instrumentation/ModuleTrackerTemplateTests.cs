@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Instrumentation;
-using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Instrumentation
@@ -14,6 +13,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         public TrackerContext()
         {
             ModuleTrackerTemplate.HitsFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            ModuleTrackerTemplate.FlushHitFile = true;
         }
 
         public void Dispose()
