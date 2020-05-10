@@ -92,7 +92,7 @@ namespace Coverlet.Core.Instrumentation
                 {
                     try
                     {
-                        WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}' by '{sender}'");
+                        WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}' by '{sender ?? "null"}'");
                         WriteLog($"Flushing hit file '{HitsFilePath}'");
 
                         bool failedToCreateNewHitsFile = false;
@@ -185,7 +185,7 @@ namespace Coverlet.Core.Instrumentation
                     }
                 }
 
-                File.AppendAllText(logFile, $"Hits flushed file path {HitsFilePath} location '{Assembly.GetExecutingAssembly().Location}' by '{sender}'");
+                File.AppendAllText(logFile, $"Hits flushed file path {HitsFilePath} location '{Assembly.GetExecutingAssembly().Location}' by '{sender ?? "null"}'");
             }
         }
 
