@@ -85,13 +85,13 @@ namespace Coverlet.Core.Instrumentation
                     mutex.WaitOne();
                 }
 
-                // Claim the current hits array and reset it to prevent double-counting scenarios.
-                int[] hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
-
                 if (FlushHitFile)
                 {
                     try
                     {
+                        // Claim the current hits array and reset it to prevent double-counting scenarios.
+                        int[] hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
+
                         WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}' by '{sender ?? "null"}'");
                         WriteLog($"Flushing hit file '{HitsFilePath}'");
 
