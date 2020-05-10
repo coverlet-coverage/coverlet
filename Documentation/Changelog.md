@@ -6,13 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+-Fix for code complexity not being generated for methods for cobertura reporter [#738](https://github.com/tonerdo/coverlet/pull/798) by https://github.com/dannyBies  
+-Fix coverage, skip branches in generated `MoveNext()` for singleton iterators [#813](https://github.com/coverlet-coverage/coverlet/pull/813) by https://github.com/bert2  
+-Fix 'The process cannot access the file...because it is being used by another process' due to double flush for collectors driver [#https://github.com/coverlet-coverage/coverlet/pull/835](https://github.com/coverlet-coverage/coverlet/pull/835)
+
 ### Added
 
 -Added support for deterministic build for msbuild/collectors driver [#802](https://github.com/tonerdo/coverlet/pull/802)  [#796](https://github.com/tonerdo/coverlet/pull/796) with the help of https://github.com/clairernovotny and https://github.com/tmat
 
 ### Improvements
 
--Fix for code complexity not being generated for methods for cobertura reporter [#738](https://github.com/tonerdo/coverlet/pull/798) by https://github.com/dannyBies
+-Refactore DependencyInjection [#728](https://github.com/coverlet-coverage/coverlet/pull/768) by https://github.com/daveMueller
 
 ## Release date 2020-04-02
 ### Packages  
