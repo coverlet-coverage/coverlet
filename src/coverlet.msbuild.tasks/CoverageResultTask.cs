@@ -6,14 +6,13 @@ using ConsoleTables;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
-using Coverlet.Core.Extensions;
 using Coverlet.Core.Reporters;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Coverlet.MSbuild.Tasks
 {
-    public class CoverageResultTask : Task
+    public class CoverageResultTask : BaseTask
     {
         private string _output;
         private string _format;
@@ -83,7 +82,7 @@ namespace Coverlet.MSbuild.Tasks
             {
                 Console.WriteLine("\nCalculating coverage result...");
 
-                IFileSystem fileSystem = DependencyInjection.Current.GetService<IFileSystem>();
+                IFileSystem fileSystem = ServiceProvider.GetService<IFileSystem>();
                 if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
                 {
                     _logger.LogError("Result of instrumentation task not found");
@@ -93,11 +92,11 @@ namespace Coverlet.MSbuild.Tasks
                 Coverage coverage = null;
                 using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
                 {
-                    var instrumentationHelper = DependencyInjection.Current.GetService<IInstrumentationHelper>();
+                    var instrumentationHelper = ServiceProvider.GetService<IInstrumentationHelper>();
                     // Task.Log is teared down after a task and thus the new MSBuildLogger must be passed to the InstrumentationHelper
                     // https://github.com/microsoft/msbuild/issues/5153
                     instrumentationHelper.SetLogger(_logger);
-                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, DependencyInjection.Current.GetService<IInstrumentationHelper>(), fileSystem);
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, ServiceProvider.GetService<IInstrumentationHelper>(), fileSystem);
                 }
 
                 try
@@ -144,7 +143,7 @@ namespace Coverlet.MSbuild.Tasks
                                                                 _output,
                                                                 reporter,
                                                                 fileSystem,
-                                                                DependencyInjection.Current.GetService<IConsole>(),
+                                                                ServiceProvider.GetService<IConsole>(),
                                                                 result);
                         writer.WriteReport();
                     }

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Xml;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
-using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Microsoft.Extensions.DependencyInjection;
