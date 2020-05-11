@@ -172,6 +172,14 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
+    public class SingletonIterator
+    {
+        public IEnumerable<string> Fetch()
+        {
+            yield return "one";
+        }
+    }
+
     public class AsyncAwaitStateMachine
     {
         async public Task AsyncAwait()
