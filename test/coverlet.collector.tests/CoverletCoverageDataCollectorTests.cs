@@ -12,9 +12,11 @@ using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
 using Xunit;
 using Coverlet.Collector.DataCollection;
+using coverlet.core.Abstractions;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
+using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Coverlet.Collector.Tests
@@ -61,6 +63,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+                serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
                 return serviceCollection;
             };
             _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object, serviceCollectionFactory);
@@ -76,7 +79,7 @@ namespace Coverlet.Collector.Tests
 
             _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
-            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => string.Equals(y.TestModule, "abc.dll")), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>()), Times.Once);
+            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => string.Equals(y.TestModule, "abc.dll")), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>(), It.IsAny<ICecilSymbolHelper>()), Times.Once);
         }
 
         [Fact]
@@ -94,6 +97,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+                serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
                 return serviceCollection;
             };
             _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object, serviceCollectionFactory);
@@ -111,14 +115,14 @@ namespace Coverlet.Collector.Tests
                                           new Mock<ILogger>().Object,
                                           new Mock<ISourceRootTranslator>().Object);
 
-            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), instrumentationHelper, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object);
+            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), instrumentationHelper, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new Mock<ICecilSymbolHelper>().Object);
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
-            _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>())).Returns(coverage);
+            _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>(), It.IsAny<ICecilSymbolHelper>())).Returns(coverage);
 
             _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
-            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => y.TestModule.Contains("abc.dll")), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>()), Times.Once);
+            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => y.TestModule.Contains("abc.dll")), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>(), It.IsAny<ICecilSymbolHelper>()), Times.Once);
             _mockCoverageWrapper.Verify(x => x.PrepareModules(It.IsAny<Coverage>()), Times.Once);
         }
 
@@ -134,6 +138,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+                serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
                 return serviceCollection;
             };
             _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, serviceCollectionFactory);
@@ -181,6 +186,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+                serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
                 return serviceCollection;
             };
             _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, serviceCollectionFactory);
@@ -233,6 +239,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+                serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
                 return serviceCollection;
             };
             _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), _mockCoverageWrapper.Object, _mockCountDownEventFactory.Object, serviceCollectionFactory);

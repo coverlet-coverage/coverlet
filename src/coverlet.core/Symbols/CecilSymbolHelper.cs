@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-
+using coverlet.core.Abstractions;
 using Coverlet.Core.Extensions;
 
 using Mono.Cecil;
@@ -16,12 +16,12 @@ using Mono.Collections.Generic;
 
 namespace Coverlet.Core.Symbols
 {
-    internal static class CecilSymbolHelper
+    internal class CecilSymbolHelper : ICecilSymbolHelper
     {
         private const int StepOverLineCode = 0xFEEFEE;
         private static ConcurrentDictionary<string, int[]> CompilerGeneratedBranchesToExclude = null;
 
-        static CecilSymbolHelper()
+        public CecilSymbolHelper()
         {
             // Create single instance, we cannot collide because we use full method name as key
             CompilerGeneratedBranchesToExclude = new ConcurrentDictionary<string, int[]>();
@@ -399,7 +399,7 @@ namespace Coverlet.Core.Symbols
             return CompilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
         }
 
-        public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
+        public List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
             if (methodDefinition is null)
@@ -664,7 +664,7 @@ namespace Coverlet.Core.Symbols
            IL_00eb: br.s IL_00ed
            ...
        */
-        internal static bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction)
+        public bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction)
         {
             if (!IsMoveNextInsideAsyncStateMachine(methodDefinition))
             {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using coverlet.core.Abstractions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Instrumentation;
 
@@ -27,6 +28,7 @@ namespace Coverlet.Core
         private IInstrumentationHelper _instrumentationHelper;
         private IFileSystem _fileSystem;
         private ISourceRootTranslator _sourceRootTranslator;
+        private ICecilSymbolHelper _cecilSymbolHelper;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -47,7 +49,8 @@ namespace Coverlet.Core
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
             IFileSystem fileSystem,
-            ISourceRootTranslator sourceRootTranslator)
+            ISourceRootTranslator sourceRootTranslator,
+            ICecilSymbolHelper cecilSymbolHelper)
         {
             _module = module;
             _includeFilters = includeFilters;
@@ -63,6 +66,7 @@ namespace Coverlet.Core
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
+            _cecilSymbolHelper = cecilSymbolHelper;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
@@ -100,7 +104,7 @@ namespace Coverlet.Core
                     continue;
                 }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator, _cecilSymbolHelper);
 
                 if (instrumenter.CanInstrument())
                 {

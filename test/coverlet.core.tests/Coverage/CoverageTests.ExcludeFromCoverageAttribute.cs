@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Core.Symbols;
 using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
@@ -35,7 +36,7 @@ namespace Coverlet.Core.Tests
             // test skip module include test assembly feature
             var coverage = new Coverage(excludedbyattributeDll, new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" }, Array.Empty<string>(), Array.Empty<string>(),
                                         Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object,
-                                        new SourceRootTranslator(loggerMock.Object, new FileSystem()));
+                                        new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
             CoveragePrepareResult result = coverage.PrepareModules();
             Assert.Empty(result.Results);
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));

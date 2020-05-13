@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-
+using coverlet.core.Abstractions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Symbols;
@@ -30,6 +30,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly IInstrumentationHelper _instrumentationHelper;
         private readonly IFileSystem _fileSystem;
         private readonly ISourceRootTranslator _sourceRootTranslator;
+        private readonly ICecilSymbolHelper _cecilSymbolHelper;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
@@ -57,7 +58,8 @@ namespace Coverlet.Core.Instrumentation
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
             IFileSystem fileSystem,
-            ISourceRootTranslator sourceRootTranslator)
+            ISourceRootTranslator sourceRootTranslator,
+            ICecilSymbolHelper cecilSymbolHelper)
         {
             _module = module;
             _identifier = identifier;
@@ -71,6 +73,7 @@ namespace Coverlet.Core.Instrumentation
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
+            _cecilSymbolHelper = cecilSymbolHelper;
         }
 
         public bool CanInstrument()
@@ -447,7 +450,7 @@ namespace Coverlet.Core.Instrumentation
             var index = 0;
             var count = processor.Body.Instructions.Count;
 
-            var branchPoints = CecilSymbolHelper.GetBranchPoints(method);
+            var branchPoints = _cecilSymbolHelper.GetBranchPoints(method);
 
             for (int n = 0; n < count; n++)
             {
@@ -456,7 +459,7 @@ namespace Coverlet.Core.Instrumentation
                 var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
 
                 // Check if the instruction is coverable
-                if (CecilSymbolHelper.SkipNotCoverableInstruction(method, instruction))
+                if (_cecilSymbolHelper.SkipNotCoverableInstruction(method, instruction))
                 {
                     index++;
                     continue;

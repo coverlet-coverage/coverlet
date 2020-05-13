@@ -8,10 +8,12 @@ using System.Text;
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
+using coverlet.core.Abstractions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
+using Coverlet.Core.Symbols;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,6 +31,7 @@ namespace Coverlet.Console
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(provider => new SourceRootTranslator(provider.GetRequiredService<ILogger>(), provider.GetRequiredService<IFileSystem>()));
+            serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
 
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -88,7 +91,8 @@ namespace Coverlet.Console
                     logger,
                     serviceProvider.GetService<IInstrumentationHelper>(),
                     fileSystem,
-                    sourceTranslator);
+                    sourceTranslator,
+                    serviceProvider.GetService<ICecilSymbolHelper>());
                 coverage.PrepareModules();
 
                 Process process = new Process();

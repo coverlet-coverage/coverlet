@@ -6,10 +6,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-
+using coverlet.core.Abstractions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
+using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
@@ -99,7 +100,7 @@ namespace Coverlet.Core.Tests
                 "[xunit.*]*",
                 "[coverlet.*]*"
             }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile),
-            _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>());
+            _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>(), _processWideContainer.GetService<ICecilSymbolHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
@@ -152,6 +153,8 @@ namespace Coverlet.Core.Tests
                 string.IsNullOrEmpty(testModule) ?
                 new SourceRootTranslator(serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()) :
                 new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+
+                serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
 
                 return serviceCollection.BuildServiceProvider();
             });

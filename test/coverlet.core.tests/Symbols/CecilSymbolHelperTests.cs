@@ -13,7 +13,9 @@ namespace Coverlet.Core.Symbols.Tests
 {
     public class CecilSymbolHelperTests
     {
-        private ModuleDefinition _module;
+        private readonly ModuleDefinition _module;
+        private readonly CecilSymbolHelper _cecilSymbolHelper;
+
         public CecilSymbolHelperTests()
         {
             var location = GetType().Assembly.Location;
@@ -21,6 +23,7 @@ namespace Coverlet.Core.Symbols.Tests
             resolver.AddSearchDirectory(Path.GetDirectoryName(location));
             var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
             _module = ModuleDefinition.ReadModule(location, parameters);
+            _cecilSymbolHelper = new CecilSymbolHelper();
         }
 
         [Fact]
@@ -31,7 +34,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSingleDecision)}"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -53,7 +56,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSimpleUsingStatement)}"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             Assert.Equal(2, points.Count());
         }
@@ -66,7 +69,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSimpleTaskWithLambda)}"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             Assert.Empty(points);
         }
@@ -79,7 +82,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasTwoDecisions)}"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -98,7 +101,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasCompleteIf)}"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -117,7 +120,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitch)}"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -140,7 +143,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithDefault)}"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -163,7 +166,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithBreaks)}"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -186,7 +189,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithMultipleCases)}"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -215,7 +218,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = type.Methods.First(x => x.FullName.Contains("::Equals"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -239,7 +242,7 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.True(method.Body.Instructions.First(i => i.OpCode.FlowControl == FlowControl.Cond_Branch).Offset > method.Body.ExceptionHandlers[0].HandlerStart.Offset);
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -255,7 +258,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -271,7 +274,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -287,7 +290,7 @@ namespace Coverlet.Core.Symbols.Tests
             var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -300,7 +303,7 @@ namespace Coverlet.Core.Symbols.Tests
             var type = _module.Types.Single(x => x.FullName == typeof(ExceptionFilter).FullName);
             var method = type.Methods.Single(x => x.FullName.Contains($"::{nameof(ExceptionFilter.Test)}"));
             // act
-            var points = CecilSymbolHelper.GetBranchPoints(method);
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
 
             Assert.Empty(points);
         }
