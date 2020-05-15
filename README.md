@@ -23,6 +23,8 @@ Coverlet can be used through three different *drivers*
 * MSBuild task integration
 * As a .NET Global tool  
 
+Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk?view=vs-2019  
+
 
 ### VSTest Integration (preferred due to [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test) supports only .NET Core application)
 
