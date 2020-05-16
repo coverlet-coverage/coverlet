@@ -445,7 +445,9 @@ namespace Coverlet.Core.Instrumentation
             foreach (var ctor in ctors)
             {
                 if (!ctor.CustomAttributes.Any(IsExcludeAttribute))
+                {
                     InstrumentMethod(ctor);
+                }
             }
         }
 
