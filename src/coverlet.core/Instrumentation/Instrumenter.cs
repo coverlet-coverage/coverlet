@@ -372,6 +372,33 @@ namespace Coverlet.Core.Instrumentation
             Debug.Assert(_customTrackerClassConstructorIl != null);
         }
 
+        private bool IsMethodOfCompilerGeneratedClassOfAsyncStateMachineToBeExcluded(MethodDefinition method)
+        {
+            // Type compiler generated, async state machine
+            TypeDefinition typeDefinition = method.DeclaringType;
+            if (typeDefinition.DeclaringType is null)
+            {
+                return false;
+            }
+
+            // Search in type that contains async state machine, compiler generate class as private nested class
+            foreach (MethodDefinition typeMethod in typeDefinition.DeclaringType.Methods)
+            {
+                CustomAttribute attribute;
+                if ((attribute = typeMethod.CustomAttributes.SingleOrDefault(a => a.AttributeType.FullName == typeof(AsyncStateMachineAttribute).FullName)) is object)
+                {
+                    if (attribute.ConstructorArguments[0].Value == method.DeclaringType)
+                    {
+                        if (typeMethod.CustomAttributes.Any(IsExcludeAttribute))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         private void InstrumentType(TypeDefinition type)
         {
             var methods = type.GetMethods();
@@ -391,6 +418,11 @@ namespace Coverlet.Core.Instrumentation
                     PropertyDefinition prop = type.Properties.FirstOrDefault(p => (p.GetMethod ?? p.SetMethod).FullName.Equals(actualMethod.FullName));
                     if (prop?.HasCustomAttributes == true)
                         customAttributes = customAttributes.Union(prop.CustomAttributes);
+                }
+
+                if (IsMethodOfCompilerGeneratedClassOfAsyncStateMachineToBeExcluded(method))
+                {
+                    continue;
                 }
 
                 ordinal++;
