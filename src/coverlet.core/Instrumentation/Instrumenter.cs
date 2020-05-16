@@ -374,14 +374,14 @@ namespace Coverlet.Core.Instrumentation
 
         private bool IsMethodOfCompilerGeneratedClassOfAsyncStateMachineToBeExcluded(MethodDefinition method)
         {
-            // Type compiler generated, async state machine
+            // Type compiler generated, the async state machine
             TypeDefinition typeDefinition = method.DeclaringType;
             if (typeDefinition.DeclaringType is null)
             {
                 return false;
             }
 
-            // Search in type that contains async state machine, compiler generate class as private nested class
+            // Search in type that contains async state machine, compiler generates async state machine in private nested class
             foreach (MethodDefinition typeMethod in typeDefinition.DeclaringType.Methods)
             {
                 CustomAttribute attribute;
