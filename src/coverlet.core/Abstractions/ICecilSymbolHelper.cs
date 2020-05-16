@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Coverlet.Core.Symbols;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace coverlet.core.Abstractions
+namespace Coverlet.Core.Abstractions
 {
     internal interface ICecilSymbolHelper
     {
-        List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition);
-
+        IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition);
         bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction);
     }
 }

@@ -4,12 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using coverlet.core.Abstractions;
+
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
-using Coverlet.Core.Symbols.Tests;
 using Coverlet.Tests.Xunit.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

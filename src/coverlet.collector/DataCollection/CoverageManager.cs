@@ -6,7 +6,6 @@ using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
-using coverlet.core.Abstractions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Reporters;
 

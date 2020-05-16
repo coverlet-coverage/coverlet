@@ -1,11 +1,9 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 
 using Xunit;
 using Coverlet.Core.Samples.Tests;
-
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 

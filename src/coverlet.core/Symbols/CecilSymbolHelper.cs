@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using coverlet.core.Abstractions;
+using Coverlet.Core.Abstractions;
 using Coverlet.Core.Extensions;
 
 using Mono.Cecil;
@@ -19,12 +19,12 @@ namespace Coverlet.Core.Symbols
     internal class CecilSymbolHelper : ICecilSymbolHelper
     {
         private const int StepOverLineCode = 0xFEEFEE;
-        private static ConcurrentDictionary<string, int[]> CompilerGeneratedBranchesToExclude = null;
+        private readonly ConcurrentDictionary<string, int[]> _compilerGeneratedBranchesToExclude;
 
         public CecilSymbolHelper()
         {
             // Create single instance, we cannot collide because we use full method name as key
-            CompilerGeneratedBranchesToExclude = new ConcurrentDictionary<string, int[]>();
+            _compilerGeneratedBranchesToExclude = new ConcurrentDictionary<string, int[]>();
         }
 
         // In case of nested compiler generated classes, only the root one presents the CompilerGenerated attribute.
@@ -267,7 +267,7 @@ namespace Coverlet.Core.Symbols
 
         private static bool SkipGeneratedBranchesForExceptionHandlers(MethodDefinition methodDefinition, Instruction instruction, List<Instruction> bodyInstructions)
         {
-            if (!CompilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
+            if (!_compilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
             {
                 /*
                   This method is used to parse compiler generated code inside async state machine and find branches generated for exception catch blocks
@@ -393,13 +393,13 @@ namespace Coverlet.Core.Symbols
                     }
                 }
 
-                CompilerGeneratedBranchesToExclude.TryAdd(methodDefinition.FullName, detectedBranches.ToArray());
+                _compilerGeneratedBranchesToExclude.TryAdd(methodDefinition.FullName, detectedBranches.ToArray());
             }
 
-            return CompilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
+            return _compilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
         }
 
-        public List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
+        public IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
             if (methodDefinition is null)
