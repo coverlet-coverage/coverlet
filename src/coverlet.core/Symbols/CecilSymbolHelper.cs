@@ -265,7 +265,7 @@ namespace Coverlet.Core.Symbols
                     instructions[branchIndex + 3].OpCode == OpCodes.Throw;
         }
 
-        private static bool SkipGeneratedBranchesForExceptionHandlers(MethodDefinition methodDefinition, Instruction instruction, List<Instruction> bodyInstructions)
+        private bool SkipGeneratedBranchesForExceptionHandlers(MethodDefinition methodDefinition, Instruction instruction, List<Instruction> bodyInstructions)
         {
             if (!_compilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
             {

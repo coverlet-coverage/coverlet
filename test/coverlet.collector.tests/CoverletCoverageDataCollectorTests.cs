@@ -12,7 +12,6 @@ using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.Utilities;
 using Xunit;
 using Coverlet.Collector.DataCollection;
-using coverlet.core.Abstractions;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;

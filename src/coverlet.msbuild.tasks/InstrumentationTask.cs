@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 
 using Coverlet.Core;
-using coverlet.core.Abstractions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Symbols;

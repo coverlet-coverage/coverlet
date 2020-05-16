@@ -8,7 +8,6 @@ using System.Text;
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
-using coverlet.core.Abstractions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;

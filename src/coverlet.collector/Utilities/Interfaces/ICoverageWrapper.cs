@@ -1,6 +1,5 @@
 ﻿using Coverlet.Collector.DataCollection;
 using Coverlet.Core;
-using coverlet.core.Abstractions;
 using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Collector.Utilities.Interfaces
