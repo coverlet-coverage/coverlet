@@ -385,7 +385,7 @@ namespace Coverlet.Core.Instrumentation
             foreach (MethodDefinition typeMethod in typeDefinition.DeclaringType.Methods)
             {
                 CustomAttribute attribute;
-                if ((attribute = typeMethod.CustomAttributes.SingleOrDefault(a => a.AttributeType.FullName == typeof(AsyncStateMachineAttribute).FullName)) is object)
+                if ((attribute = typeMethod.CustomAttributes.SingleOrDefault(a => a.AttributeType.FullName == typeof(AsyncStateMachineAttribute).FullName)) != null)
                 {
                     if (attribute.ConstructorArguments[0].Value == method.DeclaringType)
                     {
