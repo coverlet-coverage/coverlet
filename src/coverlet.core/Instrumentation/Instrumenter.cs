@@ -424,12 +424,13 @@ namespace Coverlet.Core.Instrumentation
                         customAttributes = customAttributes.Union(prop.CustomAttributes);
                 }
 
+                ordinal++;
+
                 if (IsMethodOfCompilerGeneratedClassOfAsyncStateMachineToBeExcluded(method))
                 {
                     continue;
                 }
 
-                ordinal++;
                 if (IsSynthesizedMemberToBeExcluded(method))
                 {
                     continue;
