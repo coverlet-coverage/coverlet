@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -Fix for code complexity not being generated for methods for cobertura reporter [#738](https://github.com/tonerdo/coverlet/pull/798) by https://github.com/dannyBies  
 -Fix coverage, skip branches in generated `MoveNext()` for singleton iterators [#813](https://github.com/coverlet-coverage/coverlet/pull/813) by https://github.com/bert2  
--Fix 'The process cannot access the file...because it is being used by another process' due to double flush for collectors driver [#https://github.com/coverlet-coverage/coverlet/pull/835](https://github.com/coverlet-coverage/coverlet/pull/835)
+-Fix 'The process cannot access the file...because it is being used by another process' due to double flush for collectors driver [#https://github.com/coverlet-coverage/coverlet/pull/835](https://github.com/coverlet-coverage/coverlet/pull/835)  
+-Fix skip [ExcludefromCoverage] for generated async state machine [#849](https://github.com/coverlet-coverage/coverlet/pull/849)
 
 ### Added
 
