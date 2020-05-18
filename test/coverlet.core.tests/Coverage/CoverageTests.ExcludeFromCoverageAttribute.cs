@@ -169,5 +169,41 @@ namespace Coverlet.Core.Tests
                 File.Delete(path);
             }
         }
+
+        [Fact]
+        public void ExcludeFromCodeCoverage_Issue809()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(instance =>
+                    {
+                        Assert.True(((Task<bool>)instance.EditTask(null, 10)).GetAwaiter().GetResult());
+                        return Task.CompletedTask;
+                    }, persistPrepareResultToFile: pathSerialize[0]);
+
+                    return 0;
+                }, new string[] { path });
+
+                TestInstrumentationHelper.GetCoverageResult(path)
+                .Document("Instrumentation.ExcludeFromCoverage.Issue809.cs")
+
+                // public async Task<bool> EditTask(Tasks_Issue809 tasks, int val)
+                .AssertNonInstrumentedLines(BuildConfiguration.Debug, 153, 162)
+                // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 170) -> Shoud be not covered, issue with lambda
+                .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 197)
+
+                // public List<Tasks_Issue809> GetAllTasks()
+                // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 266) -> Shoud be not covered, issue with lambda
+                .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 264);
+                // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 269, 275) -> Shoud be not covered, issue with lambda
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
     }
 }
