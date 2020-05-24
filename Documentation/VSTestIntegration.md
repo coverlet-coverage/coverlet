@@ -61,10 +61,10 @@ We're working to fill the gaps.
 *PS: if you don't have any other way to merge reports(for instance your report generator doesn't support multi coverage file) you can for the moment exploit a trick reported by one of our contributor Daniel Paz(@p4p3) https://github.com/tonerdo/coverlet/pull/225#issuecomment-573896446*
 
 
-#### Default
+#### Default option (if you don't specify a runsettings file)
 | Option | Summary |
 |-------------|------------------------------------|
-|Format              | Results format in which coverage output is generated. Default format is cobertura.| 
+|Format              | Results format in which coverage output is generated. Default format is cobertura. Supported format lcov, opencover, cobertura, teamcity, json (default coverlet proprietary format)| 
 
 #### Advanced Options (Supported via runsettings)
 These are a list of options that are supported by coverlet. These can be specified as datacollector configurations in the runsettings.
@@ -88,7 +88,7 @@ How to specify these options via runsettings?
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Format>json,cobertura</Format>          
+          <Format>json,cobertura,lcov,teamcity,opencover</Format>          
           <Exclude>[coverlet.*.tests?]*,[*]Coverlet.Core*</Exclude> <!-- [Assembly-Filter]Type-Filter -->
           <Include>[coverlet.*]*,[*]Coverlet.Core*</Include> <!-- [Assembly-Filter]Type-Filter -->
           <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
