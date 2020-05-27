@@ -36,7 +36,6 @@ namespace Coverlet.Console
 
             var logger = (ConsoleLogger) serviceProvider.GetService<ILogger>();
             var fileSystem = serviceProvider.GetService<IFileSystem>();
-            var sourceTranslator = serviceProvider.GetService<ISourceRootTranslator>();
 
             var app = new CommandLineApplication();
             app.Name = "coverlet";
@@ -88,10 +87,10 @@ namespace Coverlet.Console
                     mergeWith.Value(),
                     useSourceLink.HasValue(),
                     logger,
-                    serviceProvider.GetService<IInstrumentationHelper>(),
+                    serviceProvider.GetRequiredService<IInstrumentationHelper>(),
                     fileSystem,
                     sourceTranslator,
-                    serviceProvider.GetService<ICecilSymbolHelper>());
+                    serviceProvider.GetRequiredService<ICecilSymbolHelper>());
                 coverage.PrepareModules();
 
                 Process process = new Process();
