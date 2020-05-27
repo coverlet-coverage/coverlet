@@ -19,14 +19,9 @@ namespace Coverlet.Core.Symbols
     internal static class CecilSymbolHelper
     {
         private const int StepOverLineCode = 0xFEEFEE;
-        private static ConcurrentDictionary<string, int[]> CompilerGeneratedBranchesToExclude = null;
-
-        static CecilSymbolHelper()
-        {
-            // Create single instance, we cannot collide because we use full method name as key
-            CompilerGeneratedBranchesToExclude = new ConcurrentDictionary<string, int[]>();
-        }
-
+        // Create single instance, we cannot collide because we use full method name as key
+        private static ConcurrentDictionary<string, int[]> CompilerGeneratedBranchesToExclude = new ConcurrentDictionary<string, int[]>();
+        
         // In case of nested compiler generated classes, only the root one presents the CompilerGenerated attribute.
         // So let's search up to the outermost declaring type to find the attribute
         private static bool IsCompilerGenerated(MethodDefinition methodDefinition)
