@@ -89,7 +89,7 @@ namespace Coverlet.Console
                     logger,
                     serviceProvider.GetRequiredService<IInstrumentationHelper>(),
                     fileSystem,
-                    sourceTranslator,
+                    serviceProvider.GetRequiredService<ISourceRootTranslator>(),
                     serviceProvider.GetRequiredService<ICecilSymbolHelper>());
                 coverage.PrepareModules();
 
