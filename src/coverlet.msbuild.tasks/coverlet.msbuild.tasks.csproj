@@ -23,7 +23,7 @@
     <Title>coverlet.msbuild</Title>
     <Authors>tonerdo</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>http://github.com/tonerdo/coverlet</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/coverlet-coverage/coverlet</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
