@@ -34,7 +34,7 @@ At the moment collectors integration **does not support** .NET Framework applica
 ```bash
 dotnet add package coverlet.collector
 ```
-N.B. You **MUST** add package only to test projects and if you create xunit test projects (`dotnet new xunit`) you'll find the reference already present in `csproj` file because Coverlet is the default coverage tool for every .net core application, if have only to update to last version if needed.
+N.B. You **MUST** add package only to test projects and if you create xunit test projects (`dotnet new xunit`) you'll find the reference already present in `csproj` file because Coverlet is the default coverage tool for every .net core application, you've only to update to last version if needed.
 
 ### Usage
 Coverlet is integrated into the Visual Studio Test Platform as a [data collector](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md). To get coverage simply run the following command:
