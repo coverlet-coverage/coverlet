@@ -45,7 +45,7 @@ This happen also if there are other "piece of code" during testing that slow dow
 We found problem for instance with test that uses RabbitMQ.
 
 *Solution:* 
-The only way to solve this issue is to use collectors integration https://github.com/tonerdo/coverlet#vstest-integration-preferred-due-to-known-issue.  
+The only way to solve this issue is to use collectors integration https://github.com/coverlet-coverage/coverlet#vstest-integration-preferred-due-to-known-issue-supports-only-net-core-application.  
 With collector we're injected in test host through a in-proc collector that talk with vstest platform so we can signal when we end our work.  
 
 ## 2) Upgrade `coverlet.collector` to version > 1.0.0
