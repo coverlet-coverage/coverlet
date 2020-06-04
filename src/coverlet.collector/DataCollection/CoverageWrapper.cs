@@ -15,7 +15,7 @@ namespace Coverlet.Collector.DataCollection
         /// <param name="settings">Coverlet settings</param>
         /// <param name="coverletLogger">Coverlet logger</param>
         /// <returns>Coverage object</returns>
-        public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
+        public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
         {
             return new Coverage(
                 settings.TestModule,
@@ -31,7 +31,8 @@ namespace Coverlet.Collector.DataCollection
                 coverletLogger,
                 instrumentationHelper,
                 fileSystem,
-                sourceRootTranslator);
+                sourceRootTranslator,
+                cecilSymbolHelper);
         }
 
         /// <summary>

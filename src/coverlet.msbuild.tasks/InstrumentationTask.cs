@@ -5,6 +5,7 @@ using System.IO;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
+using Coverlet.Core.Symbols;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;
@@ -131,6 +132,7 @@ namespace Coverlet.MSbuild.Tasks
             serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(_path, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+            serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
 
             ServiceProvider = serviceCollection.BuildServiceProvider();
 
@@ -156,7 +158,8 @@ namespace Coverlet.MSbuild.Tasks
                     _logger,
                     ServiceProvider.GetService<IInstrumentationHelper>(),
                     fileSystem,
-                    ServiceProvider.GetService<ISourceRootTranslator>());
+                    ServiceProvider.GetService<ISourceRootTranslator>(),
+                    ServiceProvider.GetService<ICecilSymbolHelper>());
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());
