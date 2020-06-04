@@ -16,7 +16,7 @@
       <_mapping Include="@(_byProject->'%(Identity)|%(OriginalPath)=%(MappedPath)')" />
     </ItemGroup>
     <PropertyGroup>
-      <_sourceRootMappingFilePath>$([System.IO.Path]::Combine('$(OutputPath)', 'CoverletSourceRootsMapping'))</_sourceRootMappingFilePath>
+      <_sourceRootMappingFilePath>$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))CoverletSourceRootsMapping</_sourceRootMappingFilePath>
     </PropertyGroup>
     <WriteLinesToFile File="$(_sourceRootMappingFilePath)" Lines="@(_mapping)"
                       Overwrite="true" Encoding="Unicode"
