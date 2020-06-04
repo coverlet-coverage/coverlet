@@ -15,6 +15,7 @@ namespace Coverlet.Core.Helpers
 {
     internal class InstrumentationHelper : IInstrumentationHelper
     {
+        private const int RetryAttempts = 12;
         private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
         private readonly IRetryHelper _retryHelper;
         private readonly IFileSystem _fileSystem;
@@ -216,7 +217,7 @@ namespace Coverlet.Core.Helpers
                 _fileSystem.Copy(backupPath, module, true);
                 _fileSystem.Delete(backupPath);
                 _backupList.TryRemove(module, out string _);
-            }, retryStrategy, 10);
+            }, retryStrategy, RetryAttempts);
 
             _retryHelper.Retry(() =>
             {
@@ -227,7 +228,7 @@ namespace Coverlet.Core.Helpers
                     _fileSystem.Delete(backupSymbolPath);
                     _backupList.TryRemove(symbolFile, out string _);
                 }
-            }, retryStrategy, 10);
+            }, retryStrategy, RetryAttempts);
         }
 
         public virtual void RestoreOriginalModules()
@@ -244,7 +245,7 @@ namespace Coverlet.Core.Helpers
                     _fileSystem.Copy(backupPath, key, true);
                     _fileSystem.Delete(backupPath);
                     _backupList.TryRemove(key, out string _);
-                }, retryStrategy, 10);
+                }, retryStrategy, RetryAttempts);
             }
         }
 
@@ -253,7 +254,7 @@ namespace Coverlet.Core.Helpers
             // Retry hitting the hits file - retry up to 10 times, since the file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
             var retryStrategy = CreateRetryStrategy();
-            _retryHelper.Retry(() => _fileSystem.Delete(path), retryStrategy, 10);
+            _retryHelper.Retry(() => _fileSystem.Delete(path), retryStrategy, RetryAttempts);
         }
 
         public bool IsValidFilterExpression(string filter)
