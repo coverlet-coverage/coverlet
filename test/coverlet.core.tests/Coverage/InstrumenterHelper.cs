@@ -178,7 +178,6 @@ namespace Coverlet.Core.Tests
         public T Do<T>(Func<T> action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3)
         {
             var exceptions = new List<Exception>();
-
             for (int attempted = 0; attempted < maxAttemptCount; attempted++)
             {
                 try
@@ -191,7 +190,7 @@ namespace Coverlet.Core.Tests
                 }
                 catch (Exception ex)
                 {
-                    if (ex.ToString().Contains("RestoreOriginalModules"))
+                    if (ex.ToString().Contains("RestoreOriginalModules") || ex.ToString().Contains("RestoreOriginalModule"))
                     {
                         // If we're restoring modules mean that process are closing and we cannot override copied test file because is locked so we hide error
                         // to have a correct process exit value
