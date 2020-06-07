@@ -113,6 +113,16 @@ This runsettings file can easily be provided using command line option as given 
 
 Take a look at our [`HelloWorld`](Examples/VSTest/HelloWorld/HowTo.md) sample.
 
+#### Passing runsettings arguments through commandline
+
+You can avoid to pass `runsettings` file to `dotnet test` driver and use the xml flat syntax command line.  
+For instance if you want to set the `Format` element runsettings option you can use this syntax
+```
+dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
+```
+
+Take a look here for further informations https://github.com/microsoft/vstest-docs/blob/master/docs/RunSettingsArguments.md
+
 ## How it works
 
 Coverlet integration is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md).  
