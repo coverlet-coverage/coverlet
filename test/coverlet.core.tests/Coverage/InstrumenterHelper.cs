@@ -86,19 +86,30 @@ namespace Coverlet.Core.Tests
             SetTestContainer(newPath, disableRestoreModules);
 
             static string[] defaultFilters(string _) => Array.Empty<string>();
+
+            CoverageParameters parameters = new CoverageParameters
+            {
+                IncludeFilters = (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
+                new string[]
+                {
+                    $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*"
+                }).ToArray(),
+                IncludeDirectories = Array.Empty<string>(),
+                ExcludeFilters = (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)).Concat(new string[]
+                {
+                    "[xunit.*]*",
+                    "[coverlet.*]*"
+                }).ToArray(),
+                ExcludedSourceFiles = Array.Empty<string>(),
+                ExcludeAttributes = Array.Empty<string>(),
+                IncludeTestAssembly = true,
+                SingleHit = false,
+                MergeWith = string.Empty,
+                UseSourceLink = false
+            };
+
             // Instrument module
-            Coverage coverage = new Coverage(newPath,
-            includeFilters: (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
-            new string[]
-            {
-                $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*"
-            }).ToArray(),
-            Array.Empty<string>(),
-            excludeFilters: (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)).Concat(new string[]
-            {
-                "[xunit.*]*",
-                "[coverlet.*]*"
-            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile),
+            Coverage coverage = new Coverage(newPath, parameters, new Logger(logFile),
             _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>(), _processWideContainer.GetService<ICecilSymbolHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 

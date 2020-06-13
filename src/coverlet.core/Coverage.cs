@@ -10,6 +10,20 @@ using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core
 {
+    internal class CoverageParameters
+    {
+        public string Module { get; set; }
+        public string[] IncludeFilters { get; set; }
+        public string[] IncludeDirectories { get; set; }
+        public string[] ExcludeFilters { get; set; }
+        public string[] ExcludedSourceFiles { get; set; }
+        public string[] ExcludeAttributes { get; set; }
+        public bool IncludeTestAssembly { get; set; }
+        public bool SingleHit { get; set; }
+        public string MergeWith { get; set; }
+        public bool UseSourceLink { get; set; }
+    }
+
     internal class Coverage
     {
         private string _module;
@@ -36,15 +50,7 @@ namespace Coverlet.Core
         }
 
         public Coverage(string module,
-            string[] includeFilters,
-            string[] includeDirectories,
-            string[] excludeFilters,
-            string[] excludedSourceFiles,
-            string[] excludeAttributes,
-            bool includeTestAssembly,
-            bool singleHit,
-            string mergeWith,
-            bool useSourceLink,
+            CoverageParameters parameters,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
             IFileSystem fileSystem,
@@ -52,15 +58,15 @@ namespace Coverlet.Core
             ICecilSymbolHelper cecilSymbolHelper)
         {
             _module = module;
-            _includeFilters = includeFilters;
-            _includeDirectories = includeDirectories ?? Array.Empty<string>();
-            _excludeFilters = excludeFilters;
-            _excludedSourceFiles = excludedSourceFiles;
-            _excludeAttributes = excludeAttributes;
-            _includeTestAssembly = includeTestAssembly;
-            _singleHit = singleHit;
-            _mergeWith = mergeWith;
-            _useSourceLink = useSourceLink;
+            _includeFilters = parameters.IncludeFilters;
+            _includeDirectories = parameters.IncludeDirectories ?? Array.Empty<string>();
+            _excludeFilters = parameters.ExcludeFilters;
+            _excludedSourceFiles = parameters.ExcludedSourceFiles;
+            _excludeAttributes = parameters.ExcludeAttributes;
+            _includeTestAssembly = parameters.IncludeTestAssembly;
+            _singleHit = parameters.SingleHit;
+            _mergeWith = parameters.MergeWith;
+            _useSourceLink = parameters.UseSourceLink;
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;

@@ -145,21 +145,26 @@ namespace Coverlet.MSbuild.Tasks
                 var excludeAttributes = _excludeByAttribute?.Split(',');
                 var fileSystem = ServiceProvider.GetService<IFileSystem>();
 
+                CoverageParameters parameters = new CoverageParameters
+                {
+                    IncludeFilters = _include?.Split(','),
+                    IncludeDirectories = _includeDirectory?.Split(','),
+                    ExcludeFilters = _exclude?.Split(','),
+                    ExcludedSourceFiles = _excludeByFile?.Split(','),
+                    ExcludeAttributes = _excludeByAttribute?.Split(','),
+                    IncludeTestAssembly = _includeTestAssembly,
+                    SingleHit = _singleHit,
+                    MergeWith = _mergeWith,
+                    UseSourceLink = _useSourceLink
+                };
+
                 Coverage coverage = new Coverage(_path,
-                    includeFilters,
-                    includeDirectories,
-                    excludeFilters,
-                    excludedSourceFiles,
-                    excludeAttributes,
-                    _includeTestAssembly,
-                    _singleHit,
-                    _mergeWith,
-                    _useSourceLink,
-                    _logger,
-                    ServiceProvider.GetService<IInstrumentationHelper>(),
-                    fileSystem,
-                    ServiceProvider.GetService<ISourceRootTranslator>(),
-                    ServiceProvider.GetService<ICecilSymbolHelper>());
+                                                 parameters,
+                                                 _logger,
+                                                 ServiceProvider.GetService<IInstrumentationHelper>(),
+                                                 fileSystem,
+                                                 ServiceProvider.GetService<ISourceRootTranslator>(),
+                                                 ServiceProvider.GetService<ICecilSymbolHelper>());
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());
