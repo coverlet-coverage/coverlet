@@ -142,7 +142,26 @@ dotnet test --settings runsetting
 
  In this case the only workaround for the moment is to *manually copy* missing dll to output folder https://github.com/tonerdo/coverlet/issues/560#issue-496440052 "The only reliable way to work around this problem is to drop the DLL in the unit tests project's bin\Release\netcoreapp2.2 directory."
 
+ ## 4) Tests fail if assembly is strong named
 
+ *Affected drivers*: all drivers  
+
+ *Symptoms:* Running coverage on .NET Framework runtime(i.e. .NET 4.6.1) and get error like:
+ ```
+ Failed   Tests.MinMax.Min_AsyncSelector_Int32_4
+Error Message:
+ System.TypeInitializationException : The type initializer for 'Tests.AsyncEnumerableTests' threw an exception.
+---- System.IO.FileLoadException : Could not load file or assembly 'System.Linq.Async, Version=4.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263' or one of its dependencies. Strong name signature could not be verified.  The assembly may have been tampered with, or it was delay signed but not fully signed with the correct private key. (Exception from HRESULT: 0x80131045)
+Stack Trace:
+   at Tests.AsyncEnumerableTests..ctor()
+   at Tests.MinMax..ctor()
+----- Inner Stack Trace -----
+   at Tests.AsyncEnumerableTests..cctor()
+ ```
+
+  *Solution:* Looks like this is caused by xUnit's app domains. For `dotnet test`, it can be disabled with the following argument: `-- RunConfiguration.DisableAppDomain=true`
+
+  NB. Workaround doesn't work if test method itself explicitly creates an appdomain and uses shadow copying in order to test that the assembly behaves properly in those conditions.
 
 
 
