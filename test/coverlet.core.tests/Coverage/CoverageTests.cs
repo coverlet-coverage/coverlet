@@ -29,8 +29,20 @@ namespace Coverlet.Core.Tests
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                           new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem()));
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                        Array.Empty<string>(), false, false, string.Empty, false, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
+            CoverageParameters parameters = new CoverageParameters
+            {
+                IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
+                IncludeDirectories = Array.Empty<string>(),
+                ExcludeFilters = Array.Empty<string>(),
+                ExcludedSourceFiles = Array.Empty<string>(),
+                ExcludeAttributes = Array.Empty<string>(),
+                IncludeTestAssembly = false,
+                SingleHit = false,
+                MergeWith = string.Empty,
+                UseSourceLink = false
+            };
+
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
             coverage.PrepareModules();
 
             var result = coverage.GetCoverageResult();
@@ -55,8 +67,20 @@ namespace Coverlet.Core.Tests
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                           new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem()));
 
-            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                        Array.Empty<string>(), true, false, string.Empty, false, _mockLogger.Object, instrumentationHelper, new FileSystem(),
+            CoverageParameters parameters = new CoverageParameters
+            {
+                IncludeFilters = Array.Empty<string>(),
+                IncludeDirectories = Array.Empty<string>(),
+                ExcludeFilters = Array.Empty<string>(),
+                ExcludedSourceFiles = Array.Empty<string>(),
+                ExcludeAttributes = Array.Empty<string>(),
+                IncludeTestAssembly = true,
+                SingleHit = false,
+                MergeWith = string.Empty,
+                UseSourceLink = false
+            };
+
+            var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(),
                                         new SourceRootTranslator(module, _mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
             coverage.PrepareModules();
 

@@ -114,7 +114,19 @@ namespace Coverlet.Collector.Tests
                                           new Mock<ILogger>().Object,
                                           new Mock<ISourceRootTranslator>().Object);
 
-            Coverage coverage = new Coverage("abc.dll", null, null, null, null, null, true, true, "abc.json", true, It.IsAny<ILogger>(), instrumentationHelper, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new Mock<ICecilSymbolHelper>().Object);
+            CoverageParameters parameters = new CoverageParameters
+            {
+                IncludeFilters = null,
+                IncludeDirectories = null,
+                ExcludedSourceFiles = null,
+                ExcludeAttributes = null,
+                IncludeTestAssembly = true,
+                SingleHit = true,
+                MergeWith = "abc.json",
+                UseSourceLink = true
+            };
+
+            Coverage coverage = new Coverage("abc.dll", parameters, It.IsAny<ILogger>(), instrumentationHelper, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new Mock<ICecilSymbolHelper>().Object);
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
             _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>(), It.IsAny<ICecilSymbolHelper>())).Returns(coverage);

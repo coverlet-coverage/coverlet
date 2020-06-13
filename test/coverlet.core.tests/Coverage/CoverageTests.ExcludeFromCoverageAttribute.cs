@@ -33,9 +33,21 @@ namespace Coverlet.Core.Tests
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                           new SourceRootTranslator(excludedbyattributeDll, new Mock<ILogger>().Object, new FileSystem()));
 
+            CoverageParameters parameters = new CoverageParameters
+            {
+                IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
+                IncludeDirectories = Array.Empty<string>(),
+                ExcludeFilters = Array.Empty<string>(),
+                ExcludedSourceFiles = Array.Empty<string>(),
+                ExcludeAttributes = Array.Empty<string>(),
+                IncludeTestAssembly = true,
+                SingleHit = false,
+                MergeWith = string.Empty,
+                UseSourceLink = false
+            };
+
             // test skip module include test assembly feature
-            var coverage = new Coverage(excludedbyattributeDll, new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" }, Array.Empty<string>(), Array.Empty<string>(),
-                                        Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object,
+            var coverage = new Coverage(excludedbyattributeDll, parameters, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object,
                                         new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
             CoveragePrepareResult result = coverage.PrepareModules();
             Assert.Empty(result.Results);

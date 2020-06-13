@@ -34,7 +34,7 @@ namespace Coverlet.Console
 
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
-            var logger = (ConsoleLogger) serviceProvider.GetService<ILogger>();
+            var logger = (ConsoleLogger)serviceProvider.GetService<ILogger>();
             var fileSystem = serviceProvider.GetService<IFileSystem>();
 
             var app = new CommandLineApplication();
@@ -76,22 +76,28 @@ namespace Coverlet.Console
                     // Adjust log level based on user input.
                     logger.Level = verbosity.ParsedValue;
                 }
+
+                CoverageParameters parameters = new CoverageParameters
+                {
+                    IncludeFilters = includeFilters.Values.ToArray(),
+                    IncludeDirectories = includeDirectories.Values.ToArray(),
+                    ExcludeFilters = excludeFilters.Values.ToArray(),
+                    ExcludedSourceFiles = excludedSourceFiles.Values.ToArray(),
+                    ExcludeAttributes = excludeAttributes.Values.ToArray(),
+                    IncludeTestAssembly = includeTestAssembly.HasValue(),
+                    SingleHit = singleHit.HasValue(),
+                    MergeWith = mergeWith.Value(),
+                    UseSourceLink = useSourceLink.HasValue()
+                };
+
                 Coverage coverage = new Coverage(module.Value,
-                    includeFilters.Values.ToArray(),
-                    includeDirectories.Values.ToArray(),
-                    excludeFilters.Values.ToArray(),
-                    excludedSourceFiles.Values.ToArray(),
-                    excludeAttributes.Values.ToArray(),
-                    includeTestAssembly.HasValue(),
-                    singleHit.HasValue(),
-                    mergeWith.Value(),
-                    useSourceLink.HasValue(),
-                    logger,
-                    serviceProvider.GetRequiredService<IInstrumentationHelper>(),
-                    fileSystem,
-                    serviceProvider.GetRequiredService<ISourceRootTranslator>(),
-                    serviceProvider.GetRequiredService<ICecilSymbolHelper>());
-                coverage.PrepareModules();
+                                                 parameters,
+                                                 logger,
+                                                 serviceProvider.GetRequiredService<IInstrumentationHelper>(),
+                                                 fileSystem,
+                                                 serviceProvider.GetRequiredService<ISourceRootTranslator>(),
+                                                 serviceProvider.GetRequiredService<ICecilSymbolHelper>());
+                                                 coverage.PrepareModules();
 
                 Process process = new Process();
                 process.StartInfo.FileName = target.Value();
