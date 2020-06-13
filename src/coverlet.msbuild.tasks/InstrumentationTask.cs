@@ -138,11 +138,6 @@ namespace Coverlet.MSbuild.Tasks
 
             try
             {
-                var includeFilters = _include?.Split(',');
-                var includeDirectories = _includeDirectory?.Split(',');
-                var excludeFilters = _exclude?.Split(',');
-                var excludedSourceFiles = _excludeByFile?.Split(',');
-                var excludeAttributes = _excludeByAttribute?.Split(',');
                 var fileSystem = ServiceProvider.GetService<IFileSystem>();
 
                 CoverageParameters parameters = new CoverageParameters
@@ -162,7 +157,7 @@ namespace Coverlet.MSbuild.Tasks
                                                  parameters,
                                                  _logger,
                                                  ServiceProvider.GetService<IInstrumentationHelper>(),
-                                                 fileSystem,
+                                                 ServiceProvider.GetService<IFileSystem>(),
                                                  ServiceProvider.GetService<ISourceRootTranslator>(),
                                                  ServiceProvider.GetService<ICecilSymbolHelper>());
 
