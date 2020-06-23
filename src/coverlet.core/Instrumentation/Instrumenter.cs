@@ -66,7 +66,17 @@ namespace Coverlet.Core.Instrumentation
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
             _excludedFilesHelper = new ExcludedFilesHelper(excludedFiles, logger);
-            _excludedAttributes = excludedAttributes;
+            _excludedAttributes = (excludedAttributes ?? Array.Empty<string>())
+                // In case the attribute class ends in "Attribute", but it wasn't specified.
+                // Both names are included (if it wasn't specified) because the attribute class might not actually end in the prefix.
+                .SelectMany(a => a.EndsWith("Attribute") ? new[] { a } : new[] { a, $"{a}Attribute" })
+                // The default custom attributes used to exclude from coverage.
+                .Union(new List<string>()
+                {
+                    nameof(ExcludeFromCoverageAttribute),
+                    nameof(ExcludeFromCodeCoverageAttribute)
+                })
+                .ToArray();
             _singleHit = singleHit;
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
             _logger = logger;
@@ -680,22 +690,7 @@ namespace Coverlet.Core.Instrumentation
 
         private bool IsExcludeAttribute(CustomAttribute customAttribute)
         {
-            // The default custom attributes used to exclude from coverage.
-            IEnumerable<string> excludeAttributeNames = new List<string>()
-            {
-                nameof(ExcludeFromCoverageAttribute),
-                nameof(ExcludeFromCodeCoverageAttribute)
-            };
-
-            // Include the other attributes to exclude based on incoming parameters.
-            if (_excludedAttributes != null)
-            {
-                excludeAttributeNames = _excludedAttributes.Union(excludeAttributeNames);
-            }
-            return excludeAttributeNames.Any(a =>
-                a.EndsWith("Attribute")
-                    ? customAttribute.AttributeType.Name.Equals(a)
-                    : customAttribute.AttributeType.Name.Equals($"{a}Attribute"));
+            return Array.IndexOf(_excludedAttributes, customAttribute.AttributeType.Name) != -1;
         }
 
         private static MethodBody GetMethodBody(MethodDefinition method)
