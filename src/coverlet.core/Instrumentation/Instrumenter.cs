@@ -692,9 +692,10 @@ namespace Coverlet.Core.Instrumentation
             {
                 excludeAttributeNames = _excludedAttributes.Union(excludeAttributeNames);
             }
-
             return excludeAttributeNames.Any(a =>
-                customAttribute.AttributeType.Name.Equals(a.EndsWith("Attribute") ? a : $"{a}Attribute"));
+                a.EndsWith("Attribute")
+                    ? customAttribute.AttributeType.Name.Equals(a)
+                    : customAttribute.AttributeType.Name.Equals($"{a}Attribute"));
         }
 
         private static MethodBody GetMethodBody(MethodDefinition method)
