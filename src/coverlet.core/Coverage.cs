@@ -22,6 +22,7 @@ namespace Coverlet.Core
         public bool SingleHit { get; set; }
         public string MergeWith { get; set; }
         public bool UseSourceLink { get; set; }
+        public int InstrumentationRetries { get; set; }
     }
 
     internal class Coverage
@@ -72,6 +73,10 @@ namespace Coverlet.Core
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
             _cecilSymbolHelper = cecilSymbolHelper;
+            if(parameters.InstrumentationRetries != 0)
+            {
+                _instrumentationHelper.RetryAttempts = parameters.InstrumentationRetries;
+            }
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();

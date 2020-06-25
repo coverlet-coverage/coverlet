@@ -27,7 +27,8 @@ namespace Coverlet.Collector.DataCollection
                 IncludeTestAssembly = settings.IncludeTestAssembly,
                 SingleHit = settings.SingleHit,
                 MergeWith = settings.MergeWith,
-                UseSourceLink = settings.UseSourceLink
+                UseSourceLink = settings.UseSourceLink,
+                InstrumentationRetries = settings.InstrumentationRetries
             };
 
             return new Coverage(

@@ -42,6 +42,7 @@ namespace Coverlet.Collector.DataCollection
                 coverletSettings.UseSourceLink = this.ParseUseSourceLink(configurationElement);
                 coverletSettings.SingleHit = this.ParseSingleHit(configurationElement);
                 coverletSettings.IncludeTestAssembly = this.ParseIncludeTestAssembly(configurationElement);
+                coverletSettings.InstrumentationRetries = this.ParseInstrumentationRetries(configurationElement);
             }
 
             coverletSettings.ReportFormats = this.ParseReportFormats(configurationElement);
@@ -203,6 +204,18 @@ namespace Coverlet.Collector.DataCollection
             XmlElement includeTestAssemblyElement = configurationElement[CoverletConstants.IncludeTestAssemblyElementName];
             bool.TryParse(includeTestAssemblyElement?.InnerText, out bool includeTestAssembly);
             return includeTestAssembly;
+        }
+
+        /// <summary>
+        /// Parse instrumentation retries
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <returns>instrumentation retries</returns>
+        private int ParseInstrumentationRetries(XmlElement configurationElement)
+        {
+            XmlElement instrumentationRetriesElement = configurationElement[CoverletConstants.instrumentationRetriesElementName];
+            int.TryParse(instrumentationRetriesElement?.InnerText, out int instrumentationRetries);
+            return instrumentationRetries;
         }
 
         /// <summary>

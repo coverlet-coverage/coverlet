@@ -15,12 +15,13 @@ namespace Coverlet.Core.Helpers
 {
     internal class InstrumentationHelper : IInstrumentationHelper
     {
-        private const int RetryAttempts = 12;
         private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
         private readonly IRetryHelper _retryHelper;
         private readonly IFileSystem _fileSystem;
         private readonly ISourceRootTranslator _sourceRootTranslator;
         private ILogger _logger;
+
+        public int RetryAttempts { get; set; } = 12;
 
         public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger, ISourceRootTranslator sourceRootTranslator)
         {

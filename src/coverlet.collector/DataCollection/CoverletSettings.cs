@@ -63,6 +63,11 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         public bool IncludeTestAssembly { get; set; }
 
+        /// <summary>
+        /// Instrumentation retries
+        /// </summary>
+        public int InstrumentationRetries { get; set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -77,6 +82,7 @@ namespace Coverlet.Collector.DataCollection
             builder.AppendFormat("UseSourceLink: '{0}'", this.UseSourceLink);
             builder.AppendFormat("SingleHit: '{0}'", this.SingleHit);
             builder.AppendFormat("IncludeTestAssembly: '{0}'", this.IncludeTestAssembly);
+            builder.AppendFormat("InstrumentationRetries: '{0}'", this.InstrumentationRetries);
 
             return builder.ToString();
         }
