@@ -40,8 +40,8 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(0, points[0].Path);
             Assert.Equal(1, points[1].Path);
-            Assert.Equal(21, points[0].StartLine);
-            Assert.Equal(21, points[1].StartLine);
+            Assert.Equal(22, points[0].StartLine);
+            Assert.Equal(22, points[1].StartLine);
             Assert.NotNull(points[1].Document);
             Assert.Equal(points[0].Document, points[1].Document);
         }
@@ -87,8 +87,8 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(4, points.Count());
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(points[2].Offset, points[3].Offset);
-            Assert.Equal(27, points[0].StartLine);
-            Assert.Equal(28, points[2].StartLine);
+            Assert.Equal(28, points[0].StartLine);
+            Assert.Equal(29, points[2].StartLine);
         }
 
         [Fact]
@@ -105,8 +105,8 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.NotNull(points);
             Assert.Equal(2, points.Count());
             Assert.Equal(points[0].Offset, points[1].Offset);
-            Assert.Equal(34, points[0].StartLine);
-            Assert.Equal(34, points[1].StartLine);
+            Assert.Equal(35, points[0].StartLine);
+            Assert.Equal(35, points[1].StartLine);
         }
 
 #if !RELEASE // Issue https://github.com/tonerdo/coverlet/issues/389
@@ -127,10 +127,10 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
 
-            Assert.Equal(46, points[0].StartLine);
-            Assert.Equal(46, points[1].StartLine);
-            Assert.Equal(46, points[2].StartLine);
-            Assert.Equal(46, points[3].StartLine);
+            Assert.Equal(47, points[0].StartLine);
+            Assert.Equal(47, points[1].StartLine);
+            Assert.Equal(47, points[2].StartLine);
+            Assert.Equal(47, points[3].StartLine);
         }
 
         [Fact]
@@ -150,10 +150,10 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
 
-            Assert.Equal(60, points[0].StartLine);
-            Assert.Equal(60, points[1].StartLine);
-            Assert.Equal(60, points[2].StartLine);
-            Assert.Equal(60, points[3].StartLine);
+            Assert.Equal(61, points[0].StartLine);
+            Assert.Equal(61, points[1].StartLine);
+            Assert.Equal(61, points[2].StartLine);
+            Assert.Equal(61, points[3].StartLine);
         }
 
         [Fact]
@@ -173,10 +173,10 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
 
-            Assert.Equal(76, points[0].StartLine);
-            Assert.Equal(76, points[1].StartLine);
-            Assert.Equal(76, points[2].StartLine);
-            Assert.Equal(76, points[3].StartLine);
+            Assert.Equal(77, points[0].StartLine);
+            Assert.Equal(77, points[1].StartLine);
+            Assert.Equal(77, points[2].StartLine);
+            Assert.Equal(77, points[3].StartLine);
         }
 
         [Fact]
@@ -197,10 +197,10 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(points[0].Offset, points[3].Offset);
             Assert.Equal(3, points[3].Path);
 
-            Assert.Equal(94, points[0].StartLine);
-            Assert.Equal(94, points[1].StartLine);
-            Assert.Equal(94, points[2].StartLine);
-            Assert.Equal(94, points[3].StartLine);
+            Assert.Equal(95, points[0].StartLine);
+            Assert.Equal(95, points[1].StartLine);
+            Assert.Equal(95, points[2].StartLine);
+            Assert.Equal(95, points[3].StartLine);
         }
 #endif
 
