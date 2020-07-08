@@ -1,6 +1,10 @@
 # Coverlet
 
-[![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/coverlet-coverage.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=5&branchName=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/tonerdo/coverlet/blob/master/LICENSE)
+[![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/coverlet-coverage.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=5&branchName=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/tonerdo/coverlet/blob/master/LICENSE)   
+![NuGet](https://img.shields.io/nuget/dt/coverlet.collector.svg)![NuGet](https://img.shields.io/nuget/v/coverlet.collector.svg)  
+![NuGet](https://img.shields.io/nuget/dt/coverlet.msbuild.svg)![NuGet](https://img.shields.io/nuget/v/coverlet.msbuild.svg)  
+![NuGet](https://img.shields.io/nuget/dt/coverlet.console.svg)![NuGet](https://img.shields.io/nuget/v/coverlet.console.svg)    
+
 
 Coverlet is a cross platform code coverage framework for .NET, with support for line, branch and method coverage. It works with .NET Framework on Windows and .NET Core on all supported platforms.
 
