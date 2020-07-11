@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
--Attribute exclusion does not work if attribute name does not end with "Attribute" [883](https://github.com/coverlet-coverage/coverlet/issues/883) by https://github.com/bddckr
+-Attribute exclusion does not work if attribute name does not end with "Attribute" [884](https://github.com/coverlet-coverage/coverlet/pull/884) by https://github.com/bddckr  
+-Fix deterministic build+source link bug [895](https://github.com/coverlet-coverage/coverlet/pull/895)
 
 ## Release date 2020-05-30
 ### Packages  

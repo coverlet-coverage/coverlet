@@ -19,7 +19,7 @@ namespace Coverlet.Core.Helpers
         private readonly IFileSystem _fileSystem;
         private readonly Dictionary<string, List<SourceRootMapping>> _sourceRootMapping;
         private const string MappingFileName = "CoverletSourceRootsMapping";
-        private Dictionary<string, string> _resolutionCache;
+        private Dictionary<string, string> _resolutionCacheFiles;
 
         public SourceRootTranslator(ILogger logger, IFileSystem fileSystem)
         {
@@ -76,11 +76,16 @@ namespace Coverlet.Core.Helpers
             return mapping;
         }
 
+        public IReadOnlyList<SourceRootMapping> ResolvePathRoot(string pathRoot)
+        {
+            return _sourceRootMapping.TryGetValue(pathRoot, out List<SourceRootMapping> sourceRootMapping) ? sourceRootMapping.AsReadOnly() : null;
+        }
+
         public string ResolveFilePath(string originalFileName)
         {
-            if (_resolutionCache != null && _resolutionCache.ContainsKey(originalFileName))
+            if (_resolutionCacheFiles != null && _resolutionCacheFiles.ContainsKey(originalFileName))
             {
-                return _resolutionCache[originalFileName];
+                return _resolutionCacheFiles[originalFileName];
             }
 
             foreach (KeyValuePair<string, List<SourceRootMapping>> mapping in _sourceRootMapping)
@@ -92,7 +97,7 @@ namespace Coverlet.Core.Helpers
                         string pathToCheck;
                         if (_fileSystem.Exists(pathToCheck = Path.GetFullPath(originalFileName.Replace(mapping.Key, srm.OriginalPath))))
                         {
-                            (_resolutionCache ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
+                            (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
                             _logger.LogVerbose($"Mapping resolved: '{originalFileName}' -> '{pathToCheck}'");
                             return pathToCheck;
                         }

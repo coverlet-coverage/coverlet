@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 
 using Newtonsoft.Json;
@@ -77,7 +78,11 @@ namespace Coverlet.Core
             _results = new List<InstrumenterResult>();
         }
 
-        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
+        public Coverage(CoveragePrepareResult prepareResult,
+                        ILogger logger,
+                        IInstrumentationHelper instrumentationHelper,
+                        IFileSystem fileSystem,
+                        ISourceRootTranslator sourceRootTranslator)
         {
             _identifier = prepareResult.Identifier;
             _module = prepareResult.Module;
@@ -87,6 +92,7 @@ namespace Coverlet.Core
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
+            _sourceRootTranslator = sourceRootTranslator;
         }
 
         public CoveragePrepareResult PrepareModules()
@@ -429,29 +435,33 @@ namespace Coverlet.Core
                 string key = sourceLinkDocument.Key;
                 if (Path.GetFileName(key) != "*") continue;
 
-                string directoryDocument = Path.GetDirectoryName(document);
-                string sourceLinkRoot = Path.GetDirectoryName(key);
-                string relativePath = "";
-
-                // if document is on repo root we skip relative path calculation
-                if (directoryDocument != sourceLinkRoot)
+                IReadOnlyList<SourceRootMapping> rootMapping = _sourceRootTranslator.ResolvePathRoot(key.Substring(0, key.Length - 1));
+                foreach (string keyMapping in rootMapping is null ? new List<string>() { key } : new List<string>(rootMapping.Select(m => m.OriginalPath)))
                 {
-                    if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
-                        continue;
+                    string directoryDocument = Path.GetDirectoryName(document);
+                    string sourceLinkRoot = Path.GetDirectoryName(keyMapping);
+                    string relativePath = "";
 
-                    relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
-                }
+                    // if document is on repo root we skip relative path calculation
+                    if (directoryDocument != sourceLinkRoot)
+                    {
+                        if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
+                            continue;
 
-                if (relativePathOfBestMatch.Length == 0)
-                {
-                    keyWithBestMatch = sourceLinkDocument.Key;
-                    relativePathOfBestMatch = relativePath;
-                }
+                        relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
+                    }
 
-                if (relativePath.Length < relativePathOfBestMatch.Length)
-                {
-                    keyWithBestMatch = sourceLinkDocument.Key;
-                    relativePathOfBestMatch = relativePath;
+                    if (relativePathOfBestMatch.Length == 0)
+                    {
+                        keyWithBestMatch = sourceLinkDocument.Key;
+                        relativePathOfBestMatch = relativePath;
+                    }
+
+                    if (relativePath.Length < relativePathOfBestMatch.Length)
+                    {
+                        keyWithBestMatch = sourceLinkDocument.Key;
+                        relativePathOfBestMatch = relativePath;
+                    }
                 }
             }
 
