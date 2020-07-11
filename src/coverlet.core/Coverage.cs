@@ -249,6 +249,13 @@ namespace Coverlet.Core
                 {
                     foreach (var @class in document.Value)
                     {
+                        // We fix only lamda generated class
+                        // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L18
+                        if (!@class.Key.Contains("<>c"))
+                        {
+                            continue;
+                        }
+
                         foreach (var method in @class.Value)
                         {
                             foreach (var branch in method.Value.Branches)
