@@ -96,7 +96,7 @@ namespace Coverlet.MSbuild.Tasks
                     // Task.Log is teared down after a task and thus the new MSBuildLogger must be passed to the InstrumentationHelper
                     // https://github.com/microsoft/msbuild/issues/5153
                     instrumentationHelper.SetLogger(_logger);
-                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, ServiceProvider.GetService<IInstrumentationHelper>(), fileSystem);
+                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), this._logger, ServiceProvider.GetService<IInstrumentationHelper>(), fileSystem, ServiceProvider.GetService<ISourceRootTranslator>());
                 }
 
                 try

@@ -63,7 +63,7 @@ namespace Coverlet.Core.Tests
             });
             _processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
             CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem());
+            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
             return coverage.GetCoverageResult();
         }
 
