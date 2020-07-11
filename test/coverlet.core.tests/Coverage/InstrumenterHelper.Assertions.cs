@@ -20,7 +20,7 @@ namespace Coverlet.Core.Tests
 
     static class TestInstrumentationAssert
     {
-        public static CoverageResult GenerateReport(this CoverageResult coverageResult, [CallerMemberName]string directory = "", bool show = false)
+        public static CoverageResult GenerateReport(this CoverageResult coverageResult, [CallerMemberName] string directory = "", bool show = false)
         {
             if (coverageResult is null)
             {
@@ -241,6 +241,43 @@ namespace Coverlet.Core.Tests
                 {
                     throw new XunitException($"Hits expected for line: {line.Value.Number}");
                 }
+            }
+
+            return document;
+        }
+
+        public static Document AssertLinesCoveredFromTo(this Document document, BuildConfiguration configuration, int from, int to)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
+            }
+
+            if (to < from)
+            {
+                throw new ArgumentException("to cannot be lower than from");
+            }
+
+            List<int> lines = new List<int>();
+            foreach (KeyValuePair<int, Line> line in document.Lines)
+            {
+                if (line.Value.Number >= from && line.Value.Number <= to && line.Value.Hits > 0)
+                {
+                    lines.Add(line.Value.Number);
+                }
+            }
+
+            var expectedLinesToCover = Enumerable.Range(from, to - from + 1);
+            if (lines.Intersect(expectedLinesToCover).Count() != expectedLinesToCover.Count())
+            {
+                throw new XunitException($"Unexpected lines covered");
             }
 
             return document;
