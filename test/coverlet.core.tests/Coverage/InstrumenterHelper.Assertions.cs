@@ -274,8 +274,7 @@ namespace Coverlet.Core.Tests
                 }
             }
 
-            var expectedLinesToCover = Enumerable.Range(from, to - from + 1);
-            if (lines.Intersect(expectedLinesToCover).Count() != expectedLinesToCover.Count())
+            if (!lines.OrderBy(l => l).SequenceEqual(Enumerable.Range(from, to - from + 1)))
             {
                 throw new XunitException($"Unexpected lines covered");
             }
