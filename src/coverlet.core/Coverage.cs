@@ -435,10 +435,8 @@ namespace Coverlet.Core
                 string key = sourceLinkDocument.Key;
                 if (Path.GetFileName(key) != "*") continue;
 
-                List<SourceRootMapping> rootMapping = _sourceRootTranslator.ResolvePathRoot(key.Substring(0, key.Length - 1));
-                List<string> rootPaths = rootMapping is null ? new List<string>() { key } : new List<string>(rootMapping.Select(m => m.OriginalPath));
-
-                foreach (string keyMapping in rootPaths)
+                IReadOnlyList<SourceRootMapping> rootMapping = _sourceRootTranslator.ResolvePathRoot(key.Substring(0, key.Length - 1));
+                foreach (string keyMapping in rootMapping is null ? new List<string>() { key } : new List<string>(rootMapping.Select(m => m.OriginalPath)))
                 {
                     string directoryDocument = Path.GetDirectoryName(document);
                     string sourceLinkRoot = Path.GetDirectoryName(keyMapping);

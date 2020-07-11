@@ -76,9 +76,9 @@ namespace Coverlet.Core.Helpers
             return mapping;
         }
 
-        public List<SourceRootMapping> ResolvePathRoot(string pathRoot)
+        public IReadOnlyList<SourceRootMapping> ResolvePathRoot(string pathRoot)
         {
-            return _sourceRootMapping.TryGetValue(pathRoot, out List<SourceRootMapping> sourceRootMapping) ? sourceRootMapping : null;
+            return _sourceRootMapping.TryGetValue(pathRoot, out List<SourceRootMapping> sourceRootMapping) ? sourceRootMapping.AsReadOnly() : null;
         }
 
         public string ResolveFilePath(string originalFileName)
