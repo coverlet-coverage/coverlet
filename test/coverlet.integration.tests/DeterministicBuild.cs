@@ -95,6 +95,7 @@ namespace Coverlet.Integration.Tests
             Assert.Contains("Test Run Successful.", standardOutput);
             Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(_testProjectPath, "coverage.json")));
+            Assert.Contains("raw.githubusercontent.com", File.ReadAllText(Path.Combine(_testProjectPath, "coverage.json")));
             AssertCoverage(standardOutput);
 
             // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
@@ -146,6 +147,7 @@ namespace Coverlet.Integration.Tests
             Assert.True(DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out _), standardOutput);
             Assert.Contains("Test Run Successful.", standardOutput);
             AssertCoverage(standardOutput);
+            Assert.Contains("raw.githubusercontent.com", File.ReadAllText(Directory.GetFiles(_testProjectPath, "coverage.cobertura.xml", SearchOption.AllDirectories).Single()));
 
             // Check out/in process collectors injection
             string dataCollectorLogContent = File.ReadAllText(Directory.GetFiles(_testProjectPath, "log.datacollector.*.txt").Single());
