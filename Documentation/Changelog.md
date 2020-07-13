@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 -Attribute exclusion does not work if attribute name does not end with "Attribute" [884](https://github.com/coverlet-coverage/coverlet/pull/884) by https://github.com/bddckr  
--Fix deterministic build+source link bug [895](https://github.com/coverlet-coverage/coverlet/pull/895)
+-Fix deterministic build+source link bug [895](https://github.com/coverlet-coverage/coverlet/pull/895)  
+-Fix anonymous delegate compiler generate bug [896](https://github.com/coverlet-coverage/coverlet/pull/896)  
 
 ## Release date 2020-05-30
 ### Packages  
