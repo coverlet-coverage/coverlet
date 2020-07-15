@@ -23,6 +23,7 @@ namespace Coverlet.Core
         public bool SingleHit { get; set; }
         public string MergeWith { get; set; }
         public bool UseSourceLink { get; set; }
+        public string[] DoesNotReturnAttributes { get; set; }
     }
 
     internal class Coverage
@@ -38,6 +39,7 @@ namespace Coverlet.Core
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
+        private string[] _doesNotReturnAttributes;
         private ILogger _logger;
         private IInstrumentationHelper _instrumentationHelper;
         private IFileSystem _fileSystem;
@@ -68,6 +70,7 @@ namespace Coverlet.Core
             _singleHit = parameters.SingleHit;
             _mergeWith = parameters.MergeWith;
             _useSourceLink = parameters.UseSourceLink;
+            _doesNotReturnAttributes = parameters.DoesNotReturnAttributes;
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
@@ -115,7 +118,7 @@ namespace Coverlet.Core
                     continue;
                 }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator, _cecilSymbolHelper);
+                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _doesNotReturnAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator, _cecilSymbolHelper);
 
                 if (instrumenter.CanInstrument())
                 {

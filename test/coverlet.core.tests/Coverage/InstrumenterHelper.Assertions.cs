@@ -336,9 +336,54 @@ namespace Coverlet.Core.Tests
 
             int[] lineRange = Enumerable.Range(from, to - from + 1).ToArray();
 
-            if (document.Lines.Select(l => l.Value.Number).Intersect(lineRange).Count() > 0)
+            return AssertNonInstrumentedLines(document, configuration, lineRange);
+        }
+
+        public static Document AssertNonInstrumentedLines(this Document document, BuildConfiguration configuration, params int[] lines)
+        {
+            if (document is null)
             {
-                throw new XunitException($"Unexpected instrumented lines, '{string.Join(',', lineRange)}'");
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
+            }
+
+            var unexpectedlyInstrumented = document.Lines.Select(l => l.Value.Number).Intersect(lines);
+
+            if (unexpectedlyInstrumented.Any())
+            {
+                throw new XunitException($"Unexpected instrumented lines, '{string.Join(',', unexpectedlyInstrumented)}'");
+            }
+
+            return document;
+        }
+
+        public static Document AssertInstrumentLines(this Document document, BuildConfiguration configuration, params int[] lines)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
+            }
+
+            var instrumentedLines = document.Lines.Select(l => l.Value.Number).ToHashSet();
+
+            var missing = lines.Where(l => !instrumentedLines.Contains(l));
+
+            if (missing.Any())
+            {
+                throw new XunitException($"Expected lines to be instrumented, '{string.Join(',', missing)}'");
             }
 
             return document;
