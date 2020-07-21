@@ -646,8 +646,26 @@ namespace Coverlet.Core.Instrumentation.Tests
             var allInstrumentableLines =
                 new[]
                 {
-                    7, 8, 12, 13, 14, 15, 16, 19, 20, 22, 23, 24, 25, 26, 27, 29, 30, 33, 34, 36, 39, 40, 41, 42, 44, 45, 49, 50, 52, 53, 55, 56, 58, 59, 61, 62, 64, 65, 68, 69, 72, 73, 75, 78, 79, 80, 82, 83, 86, 87, 88, 91, 92, 95, 96, 98, 99, 101, 102, 103, 
-                    106, 107, 108, 110, 111, 112, 113, 114
+                    // Throws
+                    7, 8, 
+                    // NoBranches
+                    12, 13, 14, 15, 16, 
+                    // If
+                    19, 20, 22, 23, 24, 25, 26, 27, 29, 30, 
+                    // Switch
+                    33, 34, 36, 39, 40, 41, 42, 44, 45, 49, 50, 52, 53, 55, 56, 58, 59, 61, 62, 64, 65, 68, 69, 
+                    // Subtle
+                    72, 73, 75, 78, 79, 80, 82, 83, 86, 87, 88, 91, 92, 95, 96, 98, 99, 101, 102, 103, 
+                    // UnreachableBranch
+                    106, 107, 108, 110, 111, 112, 113, 114,
+                    // ThrowsGeneric
+                    118, 119,
+                    // CallsGenericMethodDoesNotReturn
+                    124, 125, 126, 127, 128,
+                    // AlsoThrows
+                    134, 135,
+                    // CallsGenericClassDoesNotReturn
+                    140, 141, 142, 143, 144
                 };
             var notReachableLines =
                 new[]
@@ -662,7 +680,11 @@ namespace Coverlet.Core.Instrumentation.Tests
                     // Subtle
                     79, 80, 88, 96, 98, 99, 
                     // UnreachableBranch
-                    110, 111, 112, 113, 114
+                    110, 111, 112, 113, 114,
+                    // CallsGenericMethodDoesNotReturn
+                    127, 128,
+                    // CallsGenericClassDoesNotReturn
+                    143, 144
                 };
 
             var expectedToBeInstrumented = allInstrumentableLines.Except(notReachableLines).ToArray();
@@ -675,8 +697,6 @@ namespace Coverlet.Core.Instrumentation.Tests
             // check for instrumented lines
             doc.AssertNonInstrumentedLines(BuildConfiguration.Debug, notReachableLines);
             doc.AssertInstrumentLines(BuildConfiguration.Debug, expectedToBeInstrumented);
-
-            // todo: check for instrumented branches
 
             instrumenterTest.Directory.Delete(true);
         }

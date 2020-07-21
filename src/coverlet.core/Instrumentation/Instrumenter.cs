@@ -47,6 +47,7 @@ namespace Coverlet.Core.Instrumentation
         private List<(MethodDefinition, int)> _excludedMethods;
         private List<string> _excludedCompilerGeneratedTypes;
         private readonly string[] _doesNotReturnAttributes;
+        private ReachabilityHelper _reachabilityHelper;
 
         public bool SkipModule { get; set; } = false;
 
@@ -187,8 +188,31 @@ namespace Coverlet.Core.Instrumentation
             return _isCoreLibrary && type.FullName == "System.Threading.Interlocked";
         }
 
+        // Have to do this before we start writing to a module, as we'll get into file
+        // locking issues if we do.
+        private void CreateReachabilityHelper()
+        {
+            using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read))
+            using (var resolver = new NetstandardAwareAssemblyResolver(_module, _logger))
+            {
+                resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
+                var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
+                if (_isCoreLibrary)
+                {
+                    parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
+                }
+
+                using (var module = ModuleDefinition.ReadModule(stream, parameters))
+                {
+                    _reachabilityHelper = ReachabilityHelper.CreateForModule(module, _doesNotReturnAttributes);
+                }
+            }
+        }
+
         private void InstrumentModule()
         {
+            CreateReachabilityHelper();
+
             using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
             using (var resolver = new NetstandardAwareAssemblyResolver(_module, _logger))
             {
@@ -508,7 +532,7 @@ namespace Coverlet.Core.Instrumentation
 
             var branchPoints = _cecilSymbolHelper.GetBranchPoints(method);
 
-            var unreachableRanges = ReachabilityHelper.FindUnreachableIL(processor.Body.Instructions, _doesNotReturnAttributes);
+            var unreachableRanges = _reachabilityHelper.FindUnreachableIL(processor.Body.Instructions);
             var currentUnreachableRangeIx = 0;
 
             for (int n = 0; n < count; n++)
@@ -910,7 +934,7 @@ namespace Coverlet.Core.Instrumentation
             => $"[{StartOffset}, {EndOffset}]";
         }
 
-        private class Block
+        private class BasicBlock
         {
             /// <summary>
             /// Offset of the instruction that starts the block
@@ -938,7 +962,7 @@ namespace Coverlet.Core.Instrumentation
             /// </summary>
             public bool HeadReachable { get; set; }
 
-            public Block(int startOffset, Instruction unreachableAfter, ImmutableArray<int> branchesTo)
+            public BasicBlock(int startOffset, Instruction unreachableAfter, ImmutableArray<int> branchesTo)
             {
                 StartOffset = startOffset;
                 UnreachableAfter = unreachableAfter;
@@ -1075,6 +1099,99 @@ namespace Coverlet.Core.Instrumentation
                 }
             );
 
+        private readonly ImmutableHashSet<MetadataToken> DoesNotReturnMethods;
+
+        private ReachabilityHelper(ImmutableHashSet<MetadataToken> doesNotReturnMethods)
+        {
+            DoesNotReturnMethods = doesNotReturnMethods;
+        }
+
+        /// <summary>
+        /// Build a ReachabilityHelper for the given module.
+        /// 
+        /// Predetermines methods that will not return, as 
+        /// indicated by the presense of the given attributes.
+        /// </summary>
+        public static ReachabilityHelper CreateForModule(ModuleDefinition module, string[] doesNotReturnAttributes)
+        {
+            if (doesNotReturnAttributes.Length == 0)
+            {
+                return new ReachabilityHelper(ImmutableHashSet<MetadataToken>.Empty);
+            }
+
+            var processedMethods = new HashSet<MetadataToken>();
+            var doNotReturn = ImmutableHashSet.CreateBuilder<MetadataToken>();
+            foreach (var type in module.Types)
+            {
+                foreach (var mtd in type.Methods)
+                {
+                    if (mtd.IsNative)
+                    {
+                        continue;
+                    }
+
+                    MethodBody body;
+                    try
+                    {
+                        if (!mtd.HasBody)
+                        {
+                            continue;
+                        }
+
+                        body = mtd.Body;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    foreach (var instr in body.Instructions)
+                    {
+                        if (!IsCall(instr, out var calledMtd))
+                        {
+                            continue;
+                        }
+
+                        var token = calledMtd.MetadataToken;
+                        if (!processedMethods.Add(token))
+                        {
+                            continue;
+                        }
+
+                        var mtdDef = calledMtd.Resolve();
+                        if (mtdDef == null)
+                        {
+                            continue;
+                        }
+
+                        if (!mtdDef.HasCustomAttributes)
+                        {
+                            continue;
+                        }
+
+                        var hasDoesNotReturnAttribute = false;
+                        foreach (var attr in mtdDef.CustomAttributes)
+                        {
+                            if (Array.IndexOf(doesNotReturnAttributes, attr.AttributeType.Name) != -1)
+                            {
+                                hasDoesNotReturnAttribute = true;
+                                break;
+                            }
+                        }
+
+                        if (hasDoesNotReturnAttribute)
+                        {
+                            doNotReturn.Add(token);
+                        }
+                    }
+                }
+            }
+
+            var doNoReturnTokens = doNotReturn.ToImmutable();
+
+            return new ReachabilityHelper(doNoReturnTokens);
+        }
+
         /// <summary>
         /// Calculates which IL instructions are reachable given an instruction stream and branch points extracted from a method.
         /// 
@@ -1097,9 +1214,16 @@ namespace Coverlet.Core.Instrumentation
         ///     * if it is not head reachable (regardless of tail reachability), no instructions in it are reachable
         ///     * if it is only head reachable, all instructions up to and including the first call to a method that does not return are reachable
         /// </summary>
-        public static ImmutableArray<UnreachableRange> FindUnreachableIL(Collection<Instruction> instrs, string[] doesNotReturnAttributes)
+        public ImmutableArray<UnreachableRange> FindUnreachableIL(Collection<Instruction> instrs)
         {
-            if (!instrs.Any() || !doesNotReturnAttributes.Any())
+            // no instructions, means nothing to... not reach
+            if (!instrs.Any())
+            {
+                return ImmutableArray<UnreachableRange>.Empty;
+            }
+
+            // no known methods that do not return, so everything is reachable by definition
+            if (DoesNotReturnMethods.IsEmpty)
             {
                 return ImmutableArray<UnreachableRange>.Empty;
             }
@@ -1108,7 +1232,7 @@ namespace Coverlet.Core.Instrumentation
 
             var lastInstr = instrs.Last();
 
-            var blocks = CreateBlocks(instrs, brs, doesNotReturnAttributes);
+            var blocks = CreateBasicBlocks(instrs, brs);
             DetermineHeadReachability(blocks);
             return DetermineUnreachableRanges(blocks, lastInstr.Offset);
         }
@@ -1116,7 +1240,7 @@ namespace Coverlet.Core.Instrumentation
         /// <summary>
         /// Discovers branches, including unconditional ones, in the given instruction stream.
         /// </summary>
-        private static ImmutableArray<BranchInstruction> FindBranches(Collection<Instruction> instrs)
+        private ImmutableArray<BranchInstruction> FindBranches(Collection<Instruction> instrs)
         {
             var ret = ImmutableArray.CreateBuilder<BranchInstruction>();
             foreach (var i in instrs)
@@ -1167,10 +1291,9 @@ namespace Coverlet.Core.Instrumentation
         }
 
         /// <summary>
-        /// Calculates which ranges of IL are unreachable, given blocks which have head and tail reachability calculated
-        /// and an insturction stream.
+        /// Calculates which ranges of IL are unreachable, given blocks which have head and tail reachability calculated.
         /// </summary>
-        private static ImmutableArray<UnreachableRange> DetermineUnreachableRanges(IReadOnlyList<Block> blocks, int lastInstructionOffset)
+        private ImmutableArray<UnreachableRange> DetermineUnreachableRanges(IReadOnlyList<BasicBlock> blocks, int lastInstructionOffset)
         {
             var ret = ImmutableArray.CreateBuilder<UnreachableRange>();
 
@@ -1223,13 +1346,13 @@ namespace Coverlet.Core.Instrumentation
         /// 
         /// "Tail reachability" will have already been determined in CreateBlocks.
         /// </summary>
-        private static void DetermineHeadReachability(IEnumerable<Block> blocks)
+        private void DetermineHeadReachability(IEnumerable<BasicBlock> blocks)
         {
             var blockLookup = blocks.ToImmutableDictionary(b => b.StartOffset);
 
             var headBlock = blockLookup[0];
 
-            var knownLive = new Stack<Block>();
+            var knownLive = new Stack<BasicBlock>();
             knownLive.Push(headBlock);
 
             while (knownLive.Count > 0)
@@ -1258,14 +1381,14 @@ namespace Coverlet.Core.Instrumentation
         }
 
         /// <summary>
-        /// Create blocks from an instruction stream and branches.
+        /// Create BasicBlocks from an instruction stream and branches.
         /// 
         /// Each block starts either at the start of the method, immediately after a branch or at a target for a branch,
         /// and ends with another branch, another branch target, or the end of the method.
         /// 
-        /// "Tail reachability" is also calculated, which is whether the block can ever actually get to its last instruction.
+        /// "Tail reachability" is also calculated, which is whether the block can ever actually get past its last instruction.
         /// </summary>
-        private static List<Block> CreateBlocks(Collection<Instruction> instrs, IReadOnlyList<BranchInstruction> branches, string[] doesNotReturnAttributes)
+        private List<BasicBlock> CreateBasicBlocks(Collection<Instruction> instrs, IReadOnlyList<BranchInstruction> branches)
         {
             // every branch-like instruction starts or stops a block
             var branchInstrLocs = branches.ToLookup(i => i.Offset);
@@ -1277,7 +1400,7 @@ namespace Coverlet.Core.Instrumentation
             // ending the method is also important
             var endOfMethodOffset = instrs.Last().Offset;
 
-            var blocks = new List<Block>();
+            var blocks = new List<BasicBlock>();
             int? blockStartedAt = null;
             Instruction unreachableAfter = null;
             foreach (var i in instrs)
@@ -1295,7 +1418,7 @@ namespace Coverlet.Core.Instrumentation
                 var isFollowedByBranchTarget = i.Next != null && branchTargetOffsets.Contains(i.Next.Offset);
                 var isEndOfMtd = endOfMethodOffset == offset;
 
-                if (unreachableAfter == null && DoesNotReturn(i, doesNotReturnAttributes))
+                if (unreachableAfter == null && DoesNotReturn(i))
                 {
                     unreachableAfter = i;
                 }
@@ -1311,7 +1434,7 @@ namespace Coverlet.Core.Instrumentation
                             ) :
                             nextInstr != null ? new[] { nextInstr.Offset } : Enumerable.Empty<int>();
 
-                    blocks.Add(new Block(blockStartedAt.Value, unreachableAfter, goesTo.ToImmutableArray()));
+                    blocks.Add(new BasicBlock(blockStartedAt.Value, unreachableAfter, goesTo.ToImmutableArray()));
 
                     blockStartedAt = null;
                     unreachableAfter = null;
@@ -1325,31 +1448,33 @@ namespace Coverlet.Core.Instrumentation
         /// Returns true if the given instruction will never return, 
         /// and thus subsequent instructions will never be run.
         /// </summary>
-        private static bool DoesNotReturn(Instruction instr, string[] doesNotReturnAttributeNames)
+        private bool DoesNotReturn(Instruction instr)
+        {
+            if (!IsCall(instr, out var mtd))
+            {
+                return false;
+            }
+
+            return DoesNotReturnMethods.Contains(mtd.MetadataToken);
+        }
+
+        /// <summary>
+        /// Returns true if the given instruction is a Call or Callvirt.
+        /// 
+        /// If it is a call, extracts the MethodReference that is being called.
+        /// </summary>
+        private static bool IsCall(Instruction instr, out MethodReference mtd)
         {
             var opcode = instr.OpCode;
             if (opcode != OpCodes.Call && opcode != OpCodes.Callvirt)
             {
+                mtd = null;
                 return false;
             }
 
-            var mtd = instr.Operand as MethodReference;
-            var def = mtd.Resolve();
+            mtd = (MethodReference)instr.Operand;
 
-            if (def == null || !def.HasCustomAttributes)
-            {
-                return false;
-            }
-
-            foreach (var attr in def.CustomAttributes)
-            {
-                if (Array.IndexOf(doesNotReturnAttributeNames, attr.AttributeType.Name) != -1)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return true;
         }
     }
 }

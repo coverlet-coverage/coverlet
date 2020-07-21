@@ -46,22 +46,22 @@
 
                 // need a number of additional, in order, branches to get a Switch generated
                 case 'C':
-                    System.Console.WriteLine("In-Constant-1");
+                    System.Console.WriteLine("In-Constant-2");
                     break;
                 case 'D':
-                    System.Console.WriteLine("In-Constant-1");
+                    System.Console.WriteLine("In-Constant-3");
                     break;
                 case 'E':
-                    System.Console.WriteLine("In-Constant-1");
+                    System.Console.WriteLine("In-Constant-4");
                     break;
                 case 'F':
-                    System.Console.WriteLine("In-Constant-1");
+                    System.Console.WriteLine("In-Constant-5");
                     break;
                 case 'G':
-                    System.Console.WriteLine("In-Constant-1");
+                    System.Console.WriteLine("In-Constant-6");
                     break;
                 case 'H':
-                    System.Console.WriteLine("In-Constant-1");
+                    System.Console.WriteLine("In-Constant-7");
                     break;
             }
 
@@ -112,5 +112,35 @@
                 System.Console.WriteLine("Constant-1");         // unreachable
             }                                                   // unreachable
         }                                                       // unreachable
+
+        [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+        public void ThrowsGeneric<T>()
+        {
+            throw new System.Exception(typeof(T).Name);
+        }
+
+
+        public void CallsGenericMethodDoesNotReturn()
+        {
+            System.Console.WriteLine("Constant-1");
+            ThrowsGeneric<string>();
+            System.Console.WriteLine("Constant-2");         // unreachable
+        }
+
+        private class GenericClass<T>
+        {
+            [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+            public static void AlsoThrows()
+            {
+                throw new System.Exception(typeof(T).Name);
+            }
+        }
+
+        public void CallsGenericClassDoesNotReturn()
+        {
+            System.Console.WriteLine("Constant-1");
+            GenericClass<int>.AlsoThrows();
+            System.Console.WriteLine("Constant-2");         // unreachable
+        }
     }
 }
