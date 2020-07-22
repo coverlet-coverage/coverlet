@@ -142,7 +142,7 @@ dotnet test --settings runsetting
 
  In this case the only workaround for the moment is to *manually copy* missing dll to output folder https://github.com/tonerdo/coverlet/issues/560#issue-496440052 "The only reliable way to work around this problem is to drop the DLL in the unit tests project's bin\Release\netcoreapp2.2 directory."
 
- ## 4) Tests fail if assembly is strong named
+ ## 5) Tests fail if assembly is strong named
 
  *Affected drivers*: all drivers  
 
