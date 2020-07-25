@@ -204,7 +204,7 @@ namespace Coverlet.Core.Instrumentation
 
                 using (var module = ModuleDefinition.ReadModule(stream, parameters))
                 {
-                    _reachabilityHelper = ReachabilityHelper.CreateForModule(module, _doesNotReturnAttributes);
+                    _reachabilityHelper = ReachabilityHelper.CreateForModule(module, _doesNotReturnAttributes, _logger);
                 }
             }
         }
@@ -1112,7 +1112,7 @@ namespace Coverlet.Core.Instrumentation
         /// Predetermines methods that will not return, as 
         /// indicated by the presense of the given attributes.
         /// </summary>
-        public static ReachabilityHelper CreateForModule(ModuleDefinition module, string[] doesNotReturnAttributes)
+        public static ReachabilityHelper CreateForModule(ModuleDefinition module, string[] doesNotReturnAttributes, ILogger logger)
         {
             if (doesNotReturnAttributes.Length == 0)
             {
@@ -1158,7 +1158,17 @@ namespace Coverlet.Core.Instrumentation
                             continue;
                         }
 
-                        var mtdDef = calledMtd.Resolve();
+                        MethodDefinition mtdDef;
+                        try
+                        {
+                            mtdDef = calledMtd.Resolve();
+                        }
+                        catch
+                        {
+                            logger.LogWarning($"Unable to resolve method reference \"{calledMtd.FullName}\", assuming calls to will return");
+                            mtdDef = null;
+                        }
+
                         if (mtdDef == null)
                         {
                             continue;
@@ -1181,6 +1191,7 @@ namespace Coverlet.Core.Instrumentation
 
                         if (hasDoesNotReturnAttribute)
                         {
+                            logger.LogVerbose($"Determined call to \"{calledMtd.FullName}\" will not return");
                             doNotReturn.Add(token);
                         }
                     }
