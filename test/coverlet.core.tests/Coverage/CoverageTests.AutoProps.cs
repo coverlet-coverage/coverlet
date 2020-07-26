@@ -15,7 +15,7 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                FunctionExecutor.Run(async (string[] parameters) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoProps>(instance =>
                     {
@@ -25,10 +25,10 @@ namespace Coverlet.Core.Tests
                         readVal = instance.AutoPropsInit;
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize[0], skipAutoProps: skipAutoProps);
+                    persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
                     return 0;
-                }, new string[] { path });
+                }, new string[] { path, skipAutoProps.ToString() });
 
                 if (skipAutoProps)
                 {
