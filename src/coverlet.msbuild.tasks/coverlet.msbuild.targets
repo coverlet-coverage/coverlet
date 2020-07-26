@@ -5,7 +5,7 @@
 
   <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" DependsOnTargets="ResolveProjectReferences" >
     <MSBuild Projects="@(AnnotatedProjects->'%(FullPath)')"
-             Targets="CoverletGetPathMap" 
+             Targets="CoverletGetPathMap"
              Properties="TargetFramework=%(AnnotatedProjects.NearestTargetFramework)"
              SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs"
@@ -38,7 +38,8 @@
       IncludeTestAssembly="$(IncludeTestAssembly)"
       SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
-      UseSourceLink="$(UseSourceLink)" >
+      UseSourceLink="$(UseSourceLink)"
+      SkipAutoProps="$(SkipAutoProps)" >
       <Output TaskParameter="InstrumenterState" PropertyName="InstrumenterState"/>
     </Coverlet.MSbuild.Tasks.InstrumentationTask>
   </Target>

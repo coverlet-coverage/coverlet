@@ -25,6 +25,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly ExcludedFilesHelper _excludedFilesHelper;
         private readonly string[] _excludedAttributes;
         private readonly bool _singleHit;
+        private readonly bool _skipAutoProps;
         private readonly bool _isCoreLibrary;
         private readonly ILogger _logger;
         private readonly IInstrumentationHelper _instrumentationHelper;
@@ -55,6 +56,7 @@ namespace Coverlet.Core.Instrumentation
             string[] excludedFiles,
             string[] excludedAttributes,
             bool singleHit,
+            bool skipAutoProps,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
             IFileSystem fileSystem,
@@ -84,6 +86,7 @@ namespace Coverlet.Core.Instrumentation
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
             _cecilSymbolHelper = cecilSymbolHelper;
+            _skipAutoProps = skipAutoProps;
         }
 
         public bool CanInstrument()
@@ -432,6 +435,11 @@ namespace Coverlet.Core.Instrumentation
 
                 if (actualMethod.IsGetter || actualMethod.IsSetter)
                 {
+                    if (_skipAutoProps && actualMethod.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
+                    {
+                        continue;
+                    }
+
                     PropertyDefinition prop = type.Properties.FirstOrDefault(p => (p.GetMethod ?? p.SetMethod).FullName.Equals(actualMethod.FullName));
                     if (prop?.HasCustomAttributes == true)
                         customAttributes = customAttributes.Union(prop.CustomAttributes);

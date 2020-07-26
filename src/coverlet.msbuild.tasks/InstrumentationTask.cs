@@ -15,86 +15,33 @@ namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : BaseTask
     {
-        private string _path;
-        private string _include;
-        private string _includeDirectory;
-        private string _exclude;
-        private string _excludeByFile;
-        private string _excludeByAttribute;
-        private bool _includeTestAssembly;
-        private bool _singleHit;
-        private string _mergeWith;
-        private bool _useSourceLink;
-        private ITaskItem _instrumenterState;
         private readonly MSBuildLogger _logger;
 
         [Required]
-        public string Path
-        {
-            get { return _path; }
-            set { _path = value; }
-        }
+        public string Path { get; set; }
 
-        public string Include
-        {
-            get { return _include; }
-            set { _include = value; }
-        }
+        public string Include { get; set; }
 
-        public string IncludeDirectory
-        {
-            get { return _includeDirectory; }
-            set { _includeDirectory = value; }
-        }
+        public string IncludeDirectory { get; set; }
 
-        public string Exclude
-        {
-            get { return _exclude; }
-            set { _exclude = value; }
-        }
+        public string Exclude { get; set; }
 
-        public string ExcludeByFile
-        {
-            get { return _excludeByFile; }
-            set { _excludeByFile = value; }
-        }
+        public string ExcludeByFile { get; set; }
 
-        public string ExcludeByAttribute
-        {
-            get { return _excludeByAttribute; }
-            set { _excludeByAttribute = value; }
-        }
+        public string ExcludeByAttribute { get; set; }
 
-        public bool IncludeTestAssembly
-        {
-            get { return _includeTestAssembly; }
-            set { _includeTestAssembly = value; }
-        }
+        public bool IncludeTestAssembly { get; set; }
 
-        public bool SingleHit
-        {
-            get { return _singleHit; }
-            set { _singleHit = value; }
-        }
+        public bool SingleHit { get; set; }
 
-        public string MergeWith
-        {
-            get { return _mergeWith; }
-            set { _mergeWith = value; }
-        }
+        public string MergeWith { get; set; }
 
-        public bool UseSourceLink
-        {
-            get { return _useSourceLink; }
-            set { _useSourceLink = value; }
-        }
+        public bool UseSourceLink { get; set; }
+
+        public bool SkipAutoProps { get; set; }
 
         [Output]
-        public ITaskItem InstrumenterState
-        {
-            get { return _instrumenterState; }
-            set { _instrumenterState = value; }
-        }
+        public ITaskItem InstrumenterState { get; set; }
 
         public InstrumentationTask()
         {
@@ -129,7 +76,7 @@ namespace Coverlet.MSbuild.Tasks
             serviceCollection.AddTransient<ILogger, MSBuildLogger>(_ => _logger);
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             // We cache resolutions
-            serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(_path, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+            serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(Path, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
@@ -142,18 +89,19 @@ namespace Coverlet.MSbuild.Tasks
 
                 CoverageParameters parameters = new CoverageParameters
                 {
-                    IncludeFilters = _include?.Split(','),
-                    IncludeDirectories = _includeDirectory?.Split(','),
-                    ExcludeFilters = _exclude?.Split(','),
-                    ExcludedSourceFiles = _excludeByFile?.Split(','),
-                    ExcludeAttributes = _excludeByAttribute?.Split(','),
-                    IncludeTestAssembly = _includeTestAssembly,
-                    SingleHit = _singleHit,
-                    MergeWith = _mergeWith,
-                    UseSourceLink = _useSourceLink
+                    IncludeFilters = Include?.Split(','),
+                    IncludeDirectories = IncludeDirectory?.Split(','),
+                    ExcludeFilters = Exclude?.Split(','),
+                    ExcludedSourceFiles = ExcludeByFile?.Split(','),
+                    ExcludeAttributes = ExcludeByAttribute?.Split(','),
+                    IncludeTestAssembly = IncludeTestAssembly,
+                    SingleHit = SingleHit,
+                    MergeWith = MergeWith,
+                    UseSourceLink = UseSourceLink,
+                    SkipAutoProps = SkipAutoProps
                 };
 
-                Coverage coverage = new Coverage(_path,
+                Coverage coverage = new Coverage(Path,
                                                  parameters,
                                                  _logger,
                                                  ServiceProvider.GetService<IInstrumentationHelper>(),

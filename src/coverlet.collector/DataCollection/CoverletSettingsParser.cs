@@ -29,23 +29,24 @@ namespace Coverlet.Collector.DataCollection
         {
             var coverletSettings = new CoverletSettings
             {
-                TestModule = this.ParseTestModule(testModules)
+                TestModule = ParseTestModule(testModules)
             };
 
             if (configurationElement != null)
             {
-                coverletSettings.IncludeFilters = this.ParseIncludeFilters(configurationElement);
-                coverletSettings.IncludeDirectories = this.ParseIncludeDirectories(configurationElement);
-                coverletSettings.ExcludeAttributes = this.ParseExcludeAttributes(configurationElement);
-                coverletSettings.ExcludeSourceFiles = this.ParseExcludeSourceFiles(configurationElement);
-                coverletSettings.MergeWith = this.ParseMergeWith(configurationElement);
-                coverletSettings.UseSourceLink = this.ParseUseSourceLink(configurationElement);
-                coverletSettings.SingleHit = this.ParseSingleHit(configurationElement);
-                coverletSettings.IncludeTestAssembly = this.ParseIncludeTestAssembly(configurationElement);
+                coverletSettings.IncludeFilters = ParseIncludeFilters(configurationElement);
+                coverletSettings.IncludeDirectories = ParseIncludeDirectories(configurationElement);
+                coverletSettings.ExcludeAttributes = ParseExcludeAttributes(configurationElement);
+                coverletSettings.ExcludeSourceFiles = ParseExcludeSourceFiles(configurationElement);
+                coverletSettings.MergeWith = ParseMergeWith(configurationElement);
+                coverletSettings.UseSourceLink = ParseUseSourceLink(configurationElement);
+                coverletSettings.SingleHit = ParseSingleHit(configurationElement);
+                coverletSettings.IncludeTestAssembly = ParseIncludeTestAssembly(configurationElement);
+                coverletSettings.SkipAutoProps = ParseSkipAutoProps(configurationElement);
             }
 
-            coverletSettings.ReportFormats = this.ParseReportFormats(configurationElement);
-            coverletSettings.ExcludeFilters = this.ParseExcludeFilters(configurationElement);
+            coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
+            coverletSettings.ExcludeFilters = ParseExcludeFilters(configurationElement);
 
             if (_eqtTrace.IsVerboseEnabled)
             {
@@ -203,6 +204,18 @@ namespace Coverlet.Collector.DataCollection
             XmlElement includeTestAssemblyElement = configurationElement[CoverletConstants.IncludeTestAssemblyElementName];
             bool.TryParse(includeTestAssemblyElement?.InnerText, out bool includeTestAssembly);
             return includeTestAssembly;
+        }
+
+        /// <summary>
+        /// Parse skipautoprops flag
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <returns>Include Test Assembly Flag</returns>
+        private bool ParseSkipAutoProps(XmlElement configurationElement)
+        {
+            XmlElement skipAutoPropsElement = configurationElement[CoverletConstants.SkipAutoProps];
+            bool.TryParse(skipAutoPropsElement?.InnerText, out bool skipAutoProps);
+            return skipAutoProps;
         }
 
         /// <summary>

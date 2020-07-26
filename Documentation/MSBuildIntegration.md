@@ -157,6 +157,11 @@ Both `Exclude` and `Include` properties can be used together but `Exclude` takes
 
 You can also include coverage of the test assembly itself by setting `/p:IncludeTestAssembly` to `true`.
 
+### Skip auto-implemented properties  
+
+Neither track nor record auto-implemented properties.  
+Syntax:  `/p:SkipAutoProps=true`
+
 ### Note for Powershell / VSTS users
 To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```.
 
