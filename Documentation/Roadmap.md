@@ -32,8 +32,6 @@ This is the list of features we should develop soon as possible:
 
 ### High priority
 
-- Option to ignore field/property initializers and auto-implemented properties https://github.com/tonerdo/coverlet/issues/328 
-
 - Allow merge reports solution wide on all flavours  https://github.com/tonerdo/coverlet/issues/662 https://github.com/tonerdo/coverlet/issues/357
 
 - Some perf improvements https://github.com/coverlet-coverage/coverlet/issues/836

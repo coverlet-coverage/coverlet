@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -Fix deterministic build+source link bug [895](https://github.com/coverlet-coverage/coverlet/pull/895)  
 -Fix anonymous delegate compiler generate bug [896](https://github.com/coverlet-coverage/coverlet/pull/896)  
 
+### Added
+-Skip autoprops feature [912](https://github.com/coverlet-coverage/coverlet/pull/912)
+
 ## Release date 2020-05-30
 ### Packages  
 coverlet.msbuild 2.9.0  
