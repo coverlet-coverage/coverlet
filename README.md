@@ -167,6 +167,10 @@ to clarify expected behavior in our community.
 
 For more information, see the [.NET Foundation Code of Conduct](https://dotnetfoundation.org/code-of-conduct).
 
+## Credits
+
+Part of the code is based on work done by OpenCover team https://github.com/OpenCover
+
 ## License
 
 This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.  

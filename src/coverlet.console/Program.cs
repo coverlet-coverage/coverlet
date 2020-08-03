@@ -60,6 +60,7 @@ namespace Coverlet.Console
             CommandOption excludeAttributes = app.Option("--exclude-by-attribute", "Attributes to exclude from code coverage.", CommandOptionType.MultipleValue);
             CommandOption includeTestAssembly = app.Option("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.", CommandOptionType.NoValue);
             CommandOption singleHit = app.Option("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location", CommandOptionType.NoValue);
+            CommandOption skipAutoProp = app.Option("--skipautoprops", "Neither track nor record auto-implemented properties.", CommandOptionType.NoValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
 
@@ -87,7 +88,8 @@ namespace Coverlet.Console
                     IncludeTestAssembly = includeTestAssembly.HasValue(),
                     SingleHit = singleHit.HasValue(),
                     MergeWith = mergeWith.Value(),
-                    UseSourceLink = useSourceLink.HasValue()
+                    UseSourceLink = useSourceLink.HasValue(),
+                    SkipAutoProps = skipAutoProp.HasValue()
                 };
 
                 Coverage coverage = new Coverage(module.Value,
@@ -97,7 +99,7 @@ namespace Coverlet.Console
                                                  fileSystem,
                                                  serviceProvider.GetRequiredService<ISourceRootTranslator>(),
                                                  serviceProvider.GetRequiredService<ICecilSymbolHelper>());
-                                                 coverage.PrepareModules();
+                coverage.PrepareModules();
 
                 Process process = new Process();
                 process.StartInfo.FileName = target.Value();

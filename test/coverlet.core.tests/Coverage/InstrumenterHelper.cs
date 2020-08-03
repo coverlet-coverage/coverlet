@@ -67,7 +67,12 @@ namespace Coverlet.Core.Tests
             return coverage.GetCoverageResult();
         }
 
-        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, Func<string, string[]> includeFilter = null, Func<string, string[]> excludeFilter = null, string persistPrepareResultToFile = null, bool disableRestoreModules = false)
+        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod,
+                                                               Func<string, string[]> includeFilter = null,
+                                                               Func<string, string[]> excludeFilter = null,
+                                                               string persistPrepareResultToFile = null,
+                                                               bool disableRestoreModules = false,
+                                                               bool skipAutoProps = false)
         {
             if (persistPrepareResultToFile is null)
             {
@@ -105,7 +110,8 @@ namespace Coverlet.Core.Tests
                 IncludeTestAssembly = true,
                 SingleHit = false,
                 MergeWith = string.Empty,
-                UseSourceLink = false
+                UseSourceLink = false,
+                SkipAutoProps = skipAutoProps
             };
 
             // Instrument module
