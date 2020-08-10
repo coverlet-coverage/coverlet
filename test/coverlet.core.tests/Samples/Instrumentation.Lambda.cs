@@ -1,5 +1,6 @@
 ﻿// Remember to use full name because adding new using directives change line numbers
 
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Coverlet.Core.Samples.Tests
@@ -73,6 +74,59 @@ namespace Coverlet.Core.Samples.Tests
             await Task.Delay(System.TimeSpan.FromMilliseconds(1));
             var selected = System.Linq.Enumerable.Select(objects, o => o);
             _ = System.Linq.Enumerable.ToArray(selected);
+        }
+    }
+
+    public class Issue_799_BodyStartsOneLineAfterSequencePoint
+    {
+        public int Run()
+        {
+            return new[] {2}.First(x =>
+            {
+                var foo = 2;
+
+                return foo == x;
+            });
+        }
+    }
+
+    public class Issue_799_BodyStartsOnSameLineAsSequencePoint
+    {
+        public int Run()
+        {
+            return new[] { 2 }.First(x => {
+                var foo = 2;
+
+                return foo == x;
+            });
+        }
+    }
+
+    public class Issue_799_BodyStartsTwoLinesAfterSequencePoint
+    {
+        public int Run()
+        {
+            return new[] { 2 }
+                .First(x =>
+            {
+                var foo = 2;
+
+                return foo == x;
+            });
+        }
+    }
+
+    public class Issue_799_SequencePointEndsOneLineAfterBody
+    {
+        public int Run()
+        {
+            return new[] { 2 }.Where(x =>
+            {
+                var foo = 2;
+
+                return foo == x;
+            })
+                .First(y => y == 2);
         }
     }
 }

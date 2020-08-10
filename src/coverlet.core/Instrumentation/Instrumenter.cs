@@ -43,6 +43,7 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _branchesInCompiledGeneratedClass;
         private List<(MethodDefinition, int)> _excludedMethods;
         private List<string> _excludedCompilerGeneratedTypes;
+        private IEnumerable<MethodDefinition> _compilerGeneratedMethods;
 
         public bool SkipModule { get; set; } = false;
 
@@ -375,6 +376,9 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentType(TypeDefinition type)
         {
             var methods = type.GetMethods();
+            _compilerGeneratedMethods = type.NestedTypes.Where(x =>
+                    x.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
+                .SelectMany(x => x.Methods.Where(y => y.DebugInformation.HasSequencePoints)).ToList();
 
             // We keep ordinal index because it's the way used by compiler for generated types/methods to 
             // avoid ambiguity
@@ -464,14 +468,17 @@ namespace Coverlet.Core.Instrumentation
 
                 if (sequencePoint != null && !sequencePoint.IsHidden)
                 {
-                    var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);
-                    foreach (var _instruction in processor.Body.Instructions)
-                        ReplaceInstructionTarget(_instruction, instruction, target);
+                    var targets = AddInstrumentationCode(method, processor, instruction, sequencePoint);
+                    foreach (var target in targets)
+                    {
+                        foreach (var _instruction in processor.Body.Instructions)
+                            ReplaceInstructionTarget(_instruction, instruction, target);
 
-                    foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
-                        ReplaceExceptionHandlerBoundary(handler, instruction, target);
+                        foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
+                            ReplaceExceptionHandlerBoundary(handler, instruction, target);
 
-                    index += 2;
+                        index += 2;
+                    }
                 }
 
                 foreach (var branchTarget in targetedBranchPoints)
@@ -501,7 +508,7 @@ namespace Coverlet.Core.Instrumentation
             method.Body.OptimizeMacros();
         }
 
-        private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
+        private IEnumerable<Instruction> AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
         {
             if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(sequencePoint.Document.Url), out var document))
             {
@@ -510,15 +517,46 @@ namespace Coverlet.Core.Instrumentation
                 _result.Documents.Add(document.Path, document);
             }
 
-            for (int i = sequencePoint.StartLine; i <= sequencePoint.EndLine; i++)
+            if (sequencePoint.StartLine != sequencePoint.EndLine)
+            {
+                var childSequencePoints = GetChildSequencePoints(sequencePoint).ToList();
+
+                if (childSequencePoints.Any())
+                {
+                    var firstLineGeneratedCode = childSequencePoints.Min(x => x.StartLine);
+                    var lastLineGeneratedCode = childSequencePoints.Max(x => x.EndLine);
+
+                    var before = AddHitCandidatesForMultipleLines(method, processor, instruction, document, sequencePoint.StartLine, firstLineGeneratedCode - 1);
+                    var after = AddHitCandidatesForMultipleLines(method, processor, instruction, document, lastLineGeneratedCode + 1, sequencePoint.EndLine);
+                    return new[] {before, after};
+
+                }
+                return new[] {AddHitCandidatesForMultipleLines(method, processor, instruction, document, sequencePoint.StartLine, sequencePoint.EndLine)};
+            }
+
+            if (!document.Lines.ContainsKey(sequencePoint.StartLine))
+                document.Lines.Add(sequencePoint.StartLine, new Line { Number = sequencePoint.StartLine, Class = method.DeclaringType.FullName, Method = method.FullName });
+
+            _result.HitCandidates.Add(new HitCandidate(false, document.Index, sequencePoint.StartLine, sequencePoint.EndLine));
+            return new[] {AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1)};
+        }
+
+        private Instruction AddHitCandidatesForMultipleLines(MethodDefinition method, ILProcessor processor, Instruction instruction, Document document, int startLine, int endLine)
+        {
+            for (int i = startLine; i <= endLine; i++)
             {
                 if (!document.Lines.ContainsKey(i))
                     document.Lines.Add(i, new Line { Number = i, Class = method.DeclaringType.FullName, Method = method.FullName });
             }
-
-            _result.HitCandidates.Add(new HitCandidate(false, document.Index, sequencePoint.StartLine, sequencePoint.EndLine));
-
+            _result.HitCandidates.Add(new HitCandidate(false, document.Index, startLine, endLine));
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
+        }
+
+        private IEnumerable<SequencePoint> GetChildSequencePoints(SequencePoint sequencePoint)
+        {
+            return _compilerGeneratedMethods.SelectMany(x =>
+                x.DebugInformation.SequencePoints.Where(y =>
+                    y.StartLine >= sequencePoint.StartLine && y.EndLine <= sequencePoint.EndLine));
         }
 
         private Instruction AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, BranchPoint branchPoint)
