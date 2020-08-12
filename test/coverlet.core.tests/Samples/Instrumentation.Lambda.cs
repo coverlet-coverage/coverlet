@@ -1,5 +1,6 @@
 ﻿// Remember to use full name because adding new using directives change line numbers
 
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Coverlet.Core.Samples.Tests
@@ -73,6 +74,33 @@ namespace Coverlet.Core.Samples.Tests
             await Task.Delay(System.TimeSpan.FromMilliseconds(1));
             var selected = System.Linq.Enumerable.Select(objects, o => o);
             _ = System.Linq.Enumerable.ToArray(selected);
+        }
+    }
+
+    public class Issue_760
+    {
+        public async Task<int> If()
+        {
+            var numbers = (System.Collections.Generic.IEnumerable<int>)new[] { 1, 2, 3, 4, 5 };
+            var result = 0;
+            if (numbers.Select(i => i * 2).Count() == 5)
+            {
+                result = 1;
+            }
+            await Task.Delay(100);
+            return result;
+        }
+
+        public async Task<int> Foreach()
+        {
+            var numbers = (System.Collections.Generic.IEnumerable<int>)new[] { 1, 2, 3, 4, 5 };
+            var sum = 0;
+            foreach (var i in numbers.Select(n => n * 2))
+            {
+                sum += i;
+            }
+            await Task.Delay(100);
+            return sum;
         }
     }
 }

@@ -61,10 +61,10 @@ We're working to fill the gaps.
 *PS: if you don't have any other way to merge reports(for instance your report generator doesn't support multi coverage file) you can for the moment exploit a trick reported by one of our contributor Daniel Paz(@p4p3) https://github.com/tonerdo/coverlet/pull/225#issuecomment-573896446*
 
 
-#### Default
+#### Default option (if you don't specify a runsettings file)
 | Option | Summary |
 |-------------|------------------------------------|
-|Format              | Results format in which coverage output is generated. Default format is cobertura.| 
+|Format              | Results format in which coverage output is generated. Default format is cobertura. Supported format lcov, opencover, cobertura, teamcity, json (default coverlet proprietary format)| 
 
 #### Advanced Options (Supported via runsettings)
 These are a list of options that are supported by coverlet. These can be specified as datacollector configurations in the runsettings.
@@ -79,6 +79,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 |SingleHit       | Specifies whether to limit code coverage hit reporting to a single hit for each location.| 
 |UseSourceLink   | Specifies whether to use SourceLink URIs in place of file system paths.                  |
 |IncludeTestAssembly    | Include coverage of the test assembly.                  |
+|SkipAutoProps    | Neither track nor record auto-implemented properties.                  |
 
 How to specify these options via runsettings?
 ```
@@ -88,7 +89,7 @@ How to specify these options via runsettings?
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Format>json,cobertura</Format>          
+          <Format>json,cobertura,lcov,teamcity,opencover</Format>          
           <Exclude>[coverlet.*.tests?]*,[*]Coverlet.Core*</Exclude> <!-- [Assembly-Filter]Type-Filter -->
           <Include>[coverlet.*]*,[*]Coverlet.Core*</Include> <!-- [Assembly-Filter]Type-Filter -->
           <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
@@ -97,6 +98,7 @@ How to specify these options via runsettings?
           <SingleHit>false</SingleHit>
           <UseSourceLink>true</UseSourceLink>
           <IncludeTestAssembly>true</IncludeTestAssembly>
+          <SkipAutoProps>true</SkipAutoProps>
         </Configuration>
       </DataCollector>
     </DataCollectors>
@@ -112,6 +114,16 @@ This runsettings file can easily be provided using command line option as given 
 2. `dotnet vstest C:\project\bin\Debug\netcoreapp3.0\publish\testdll.dll --collect:"XPlat Code Coverage" --settings coverlet.runsettings`
 
 Take a look at our [`HelloWorld`](Examples/VSTest/HelloWorld/HowTo.md) sample.
+
+#### Passing runsettings arguments through commandline
+
+You can avoid passing a `runsettings` file to `dotnet test` driver by using the xml flat syntax in the command line.  
+For instance if you want to set the `Format` element as a runsettings option you can use this syntax:
+```
+dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
+```
+
+Take a look here for further information: https://github.com/microsoft/vstest-docs/blob/master/docs/RunSettingsArguments.md
 
 ## How it works
 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Core.Symbols;
 using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
@@ -32,10 +33,22 @@ namespace Coverlet.Core.Tests
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                           new SourceRootTranslator(excludedbyattributeDll, new Mock<ILogger>().Object, new FileSystem()));
 
+            CoverageParameters parameters = new CoverageParameters
+            {
+                IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
+                IncludeDirectories = Array.Empty<string>(),
+                ExcludeFilters = Array.Empty<string>(),
+                ExcludedSourceFiles = Array.Empty<string>(),
+                ExcludeAttributes = Array.Empty<string>(),
+                IncludeTestAssembly = true,
+                SingleHit = false,
+                MergeWith = string.Empty,
+                UseSourceLink = false
+            };
+
             // test skip module include test assembly feature
-            var coverage = new Coverage(excludedbyattributeDll, new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" }, Array.Empty<string>(), Array.Empty<string>(),
-                                        Array.Empty<string>(), Array.Empty<string>(), true, false, string.Empty, false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object,
-                                        new SourceRootTranslator(loggerMock.Object, new FileSystem()));
+            var coverage = new Coverage(excludedbyattributeDll, parameters, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object,
+                                        new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
             CoveragePrepareResult result = coverage.PrepareModules();
             Assert.Empty(result.Results);
             loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
@@ -163,6 +176,42 @@ namespace Coverlet.Core.Tests
                 .Document("Instrumentation.ExcludeFromCoverage.cs")
                 .AssertLinesCovered(BuildConfiguration.Debug, (143, 1))
                 .AssertNonInstrumentedLines(BuildConfiguration.Debug, 146, 160);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void ExcludeFromCodeCoverage_Issue809()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(instance =>
+                    {
+                        Assert.True(((Task<bool>)instance.EditTask(null, 10)).GetAwaiter().GetResult());
+                        return Task.CompletedTask;
+                    }, persistPrepareResultToFile: pathSerialize[0]);
+
+                    return 0;
+                }, new string[] { path });
+
+                TestInstrumentationHelper.GetCoverageResult(path)
+                .Document("Instrumentation.ExcludeFromCoverage.Issue809.cs")
+
+                // public async Task<bool> EditTask(Tasks_Issue809 tasks, int val)
+                .AssertNonInstrumentedLines(BuildConfiguration.Debug, 153, 162)
+                // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 170) -> Shoud be not covered, issue with lambda
+                .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 197)
+
+                // public List<Tasks_Issue809> GetAllTasks()
+                // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 266) -> Shoud be not covered, issue with lambda
+                .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 264);
+                // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 269, 275) -> Shoud be not covered, issue with lambda
             }
             finally
             {

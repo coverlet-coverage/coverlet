@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 
 using Newtonsoft.Json;
@@ -10,6 +11,21 @@ using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core
 {
+    internal class CoverageParameters
+    {
+        public string Module { get; set; }
+        public string[] IncludeFilters { get; set; }
+        public string[] IncludeDirectories { get; set; }
+        public string[] ExcludeFilters { get; set; }
+        public string[] ExcludedSourceFiles { get; set; }
+        public string[] ExcludeAttributes { get; set; }
+        public bool IncludeTestAssembly { get; set; }
+        public bool SingleHit { get; set; }
+        public string MergeWith { get; set; }
+        public bool UseSourceLink { get; set; }
+        public bool SkipAutoProps { get; set; }
+    }
+
     internal class Coverage
     {
         private string _module;
@@ -23,10 +39,12 @@ namespace Coverlet.Core
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
+        private bool _skipAutoProps;
         private ILogger _logger;
         private IInstrumentationHelper _instrumentationHelper;
         private IFileSystem _fileSystem;
         private ISourceRootTranslator _sourceRootTranslator;
+        private ICecilSymbolHelper _cecilSymbolHelper;
         private List<InstrumenterResult> _results;
 
         public string Identifier
@@ -35,40 +53,39 @@ namespace Coverlet.Core
         }
 
         public Coverage(string module,
-            string[] includeFilters,
-            string[] includeDirectories,
-            string[] excludeFilters,
-            string[] excludedSourceFiles,
-            string[] excludeAttributes,
-            bool includeTestAssembly,
-            bool singleHit,
-            string mergeWith,
-            bool useSourceLink,
+            CoverageParameters parameters,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
             IFileSystem fileSystem,
-            ISourceRootTranslator sourceRootTranslator)
+            ISourceRootTranslator sourceRootTranslator,
+            ICecilSymbolHelper cecilSymbolHelper)
         {
             _module = module;
-            _includeFilters = includeFilters;
-            _includeDirectories = includeDirectories ?? Array.Empty<string>();
-            _excludeFilters = excludeFilters;
-            _excludedSourceFiles = excludedSourceFiles;
-            _excludeAttributes = excludeAttributes;
-            _includeTestAssembly = includeTestAssembly;
-            _singleHit = singleHit;
-            _mergeWith = mergeWith;
-            _useSourceLink = useSourceLink;
+            _includeFilters = parameters.IncludeFilters;
+            _includeDirectories = parameters.IncludeDirectories ?? Array.Empty<string>();
+            _excludeFilters = parameters.ExcludeFilters;
+            _excludedSourceFiles = parameters.ExcludedSourceFiles;
+            _excludeAttributes = parameters.ExcludeAttributes;
+            _includeTestAssembly = parameters.IncludeTestAssembly;
+            _singleHit = parameters.SingleHit;
+            _mergeWith = parameters.MergeWith;
+            _useSourceLink = parameters.UseSourceLink;
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
+            _cecilSymbolHelper = cecilSymbolHelper;
+            _skipAutoProps = parameters.SkipAutoProps;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
 
-        public Coverage(CoveragePrepareResult prepareResult, ILogger logger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem)
+        public Coverage(CoveragePrepareResult prepareResult,
+                        ILogger logger,
+                        IInstrumentationHelper instrumentationHelper,
+                        IFileSystem fileSystem,
+                        ISourceRootTranslator sourceRootTranslator)
         {
             _identifier = prepareResult.Identifier;
             _module = prepareResult.Module;
@@ -78,6 +95,7 @@ namespace Coverlet.Core
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
+            _sourceRootTranslator = sourceRootTranslator;
         }
 
         public CoveragePrepareResult PrepareModules()
@@ -100,7 +118,19 @@ namespace Coverlet.Core
                     continue;
                 }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator);
+                var instrumenter = new Instrumenter(module,
+                                                    _identifier,
+                                                    _excludeFilters,
+                                                    _includeFilters,
+                                                    _excludedSourceFiles,
+                                                    _excludeAttributes,
+                                                    _singleHit,
+                                                    _skipAutoProps,
+                                                    _logger,
+                                                    _instrumentationHelper,
+                                                    _fileSystem,
+                                                    _sourceRootTranslator,
+                                                    _cecilSymbolHelper);
 
                 if (instrumenter.CanInstrument())
                 {
@@ -234,6 +264,13 @@ namespace Coverlet.Core
                 {
                     foreach (var @class in document.Value)
                     {
+                        // We fix only lamda generated class
+                        // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L18
+                        if (!@class.Key.Contains("<>c"))
+                        {
+                            continue;
+                        }
+
                         foreach (var method in @class.Value)
                         {
                             foreach (var branch in method.Value.Branches)
@@ -420,29 +457,33 @@ namespace Coverlet.Core
                 string key = sourceLinkDocument.Key;
                 if (Path.GetFileName(key) != "*") continue;
 
-                string directoryDocument = Path.GetDirectoryName(document);
-                string sourceLinkRoot = Path.GetDirectoryName(key);
-                string relativePath = "";
-
-                // if document is on repo root we skip relative path calculation
-                if (directoryDocument != sourceLinkRoot)
+                IReadOnlyList<SourceRootMapping> rootMapping = _sourceRootTranslator.ResolvePathRoot(key.Substring(0, key.Length - 1));
+                foreach (string keyMapping in rootMapping is null ? new List<string>() { key } : new List<string>(rootMapping.Select(m => m.OriginalPath)))
                 {
-                    if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
-                        continue;
+                    string directoryDocument = Path.GetDirectoryName(document);
+                    string sourceLinkRoot = Path.GetDirectoryName(keyMapping);
+                    string relativePath = "";
 
-                    relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
-                }
+                    // if document is on repo root we skip relative path calculation
+                    if (directoryDocument != sourceLinkRoot)
+                    {
+                        if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
+                            continue;
 
-                if (relativePathOfBestMatch.Length == 0)
-                {
-                    keyWithBestMatch = sourceLinkDocument.Key;
-                    relativePathOfBestMatch = relativePath;
-                }
+                        relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
+                    }
 
-                if (relativePath.Length < relativePathOfBestMatch.Length)
-                {
-                    keyWithBestMatch = sourceLinkDocument.Key;
-                    relativePathOfBestMatch = relativePath;
+                    if (relativePathOfBestMatch.Length == 0)
+                    {
+                        keyWithBestMatch = sourceLinkDocument.Key;
+                        relativePathOfBestMatch = relativePath;
+                    }
+
+                    if (relativePath.Length < relativePathOfBestMatch.Length)
+                    {
+                        keyWithBestMatch = sourceLinkDocument.Key;
+                        relativePathOfBestMatch = relativePath;
+                    }
                 }
             }
 

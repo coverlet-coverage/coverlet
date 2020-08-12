@@ -5,7 +5,7 @@
 
   <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" DependsOnTargets="ResolveProjectReferences" >
     <MSBuild Projects="@(AnnotatedProjects->'%(FullPath)')"
-             Targets="CoverletGetPathMap" 
+             Targets="CoverletGetPathMap"
              Properties="TargetFramework=%(AnnotatedProjects.NearestTargetFramework)"
              SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs"
@@ -16,7 +16,7 @@
       <_mapping Include="@(_byProject->'%(Identity)|%(OriginalPath)=%(MappedPath)')" />
     </ItemGroup>
     <PropertyGroup>
-      <_sourceRootMappingFilePath>$(OutputPath)CoverletSourceRootsMapping</_sourceRootMappingFilePath>
+      <_sourceRootMappingFilePath>$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))CoverletSourceRootsMapping</_sourceRootMappingFilePath>
     </PropertyGroup>
     <WriteLinesToFile File="$(_sourceRootMappingFilePath)" Lines="@(_mapping)"
                       Overwrite="true" Encoding="Unicode"
@@ -38,7 +38,8 @@
       IncludeTestAssembly="$(IncludeTestAssembly)"
       SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
-      UseSourceLink="$(UseSourceLink)" >
+      UseSourceLink="$(UseSourceLink)"
+      SkipAutoProps="$(SkipAutoProps)" >
       <Output TaskParameter="InstrumenterState" PropertyName="InstrumenterState"/>
     </Coverlet.MSbuild.Tasks.InstrumentationTask>
   </Target>

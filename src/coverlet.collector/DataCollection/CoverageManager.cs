@@ -23,7 +23,7 @@ namespace Coverlet.Collector.DataCollection
         public IReporter[] Reporters { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper,
-                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
+                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
             : this(settings,
             settings.ReportFormats.Select(format =>
             {
@@ -39,19 +39,19 @@ namespace Coverlet.Collector.DataCollection
                 }
             }).Where(r => r != null).ToArray(),
             new CoverletLogger(eqtTrace, logger),
-            coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator)
+            coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator, cecilSymbolHelper)
         {
         }
 
         public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper,
-                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
+                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
         {
             // Store input vars
             Reporters = reporters;
             _coverageWrapper = coverageWrapper;
 
             // Coverage object
-            _coverage = _coverageWrapper.CreateCoverage(settings, logger, instrumentationHelper, fileSystem, sourceRootTranslator);
+            _coverage = _coverageWrapper.CreateCoverage(settings, logger, instrumentationHelper, fileSystem, sourceRootTranslator, cecilSymbolHelper);
         }
 
         /// <summary>

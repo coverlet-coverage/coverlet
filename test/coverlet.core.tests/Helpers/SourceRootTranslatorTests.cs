@@ -28,6 +28,23 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.Equal(@"C:\git\coverlet\src\coverlet.core\obj\Debug\netstandard2.0\coverlet.core.pdb", translator.ResolveFilePath(fileToTranslate));
         }
 
+        [ConditionalFact]
+        [SkipOnOS(OS.Linux, "Windows path format only")]
+        [SkipOnOS(OS.MacOS, "Windows path format only")]
+        public void TranslatePathRoot_Success()
+        {
+            Mock<ILogger> logger = new Mock<ILogger>();
+            Mock<IFileSystem> fileSystem = new Mock<IFileSystem>();
+            fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string p) =>
+            {
+                if (p == "testLib.dll" || p == @"C:\git\coverlet\src\coverlet.core\obj\Debug\netstandard2.0\coverlet.core.pdb" || p == "CoverletSourceRootsMapping") return true;
+                return false;
+            });
+            fileSystem.Setup(f => f.ReadAllLines(It.IsAny<string>())).Returns(File.ReadAllLines(@"TestAssets/CoverletSourceRootsMappingTest"));
+            SourceRootTranslator translator = new SourceRootTranslator("testLib.dll", logger.Object, fileSystem.Object);
+            Assert.Equal(@"C:\git\coverlet\", translator.ResolvePathRoot("/_/")[0].OriginalPath);
+        }
+
         [Fact]
         public void Translate_EmptyFile()
         {

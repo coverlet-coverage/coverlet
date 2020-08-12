@@ -111,7 +111,7 @@ dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line /p:Thr
 
 You can ignore a method an entire class or assembly from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
 
-You can also ignore additional attributes by using the `ExcludeByAttribute` property (short name or full name supported):
+You can also ignore additional attributes by using the `ExcludeByAttribute` property (short name, i.e. the type name without the namespace, supported only):
 
 ```bash
 dotnet test /p:CollectCoverage=true /p:ExcludeByAttribute="Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute"
@@ -157,6 +157,11 @@ Both `Exclude` and `Include` properties can be used together but `Exclude` takes
 
 You can also include coverage of the test assembly itself by setting `/p:IncludeTestAssembly` to `true`.
 
+### Skip auto-implemented properties  
+
+Neither track nor record auto-implemented properties.  
+Syntax:  `/p:SkipAutoProps=true`
+
 ### Note for Powershell / VSTS users
 To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```.
 
@@ -169,7 +174,7 @@ dotnet test --configuration $(buildConfiguration) --no-build /p:CollectCoverage=
 
 ## Note for Linux users
 
-[There is an issue with MSBuild on Linux](https://github.com/microsoft/msbuild/issues/3468) affects the ability to escape quotes while specifying multiple comma-separated values. Linux MSBuild automatically translates `\` to `/` in properties, tasks, etc. before using them, which means if you specified `/p:CoverletOutputFormat=\"json,opencover\"` in an MSBuild script, it will be converted to `/p:CoverletOutputFormat=/"json,opencover/"` before execution. This yields an error similar to the following:
+[There is an issue with MSBuild on Linux](https://github.com/microsoft/msbuild/issues/3468) that affects the ability to escape quotes while specifying multiple comma-separated values. Linux MSBuild automatically translates `\` to `/` in properties, tasks, etc. before using them, which means if you specified `/p:CoverletOutputFormat=\"json,opencover\"` in an MSBuild script, it will be converted to `/p:CoverletOutputFormat=/"json,opencover/"` before execution. This yields an error similar to the following:
 
 ```text
 MSBUILD : error MSB1006: Property is not valid. [/home/vsts/work/1/s/default.proj]
