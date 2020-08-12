@@ -29,13 +29,13 @@ namespace Coverlet.Core.Tests
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.Lambda.cs")
-                .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 23, 51)
+                .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 24, 52)
                 .AssertBranchesCovered(BuildConfiguration.Debug,
                 // Expected branches
-                (22, 0, 0),
-                (22, 1, 1),
-                (50, 0, 0),
-                (50, 1, 1)
+                (23, 0, 0),
+                (23, 1, 1),
+                (51, 0, 0),
+                (51, 1, 1)
                 );
             }
             finally
@@ -64,7 +64,7 @@ namespace Coverlet.Core.Tests
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.Lambda.cs")
-                .AssertLinesCovered(BuildConfiguration.Debug, (72, 1), (73, 1), (74, 101), (75, 1), (76, 1))
+                .AssertLinesCovered(BuildConfiguration.Debug, (73, 1), (74, 1), (75, 101), (76, 1), (77, 1))
                 .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
             }
             finally
@@ -74,7 +74,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
-        public void EmptyLine_Issue_799_01()
+        public void Issue_799_BodyStartsOneLineAfterSequencePoint()
         {
             string path = Path.GetTempFileName();
             try
@@ -103,7 +103,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
-        public void EmptyLine_Issue_799_02()
+        public void Issue_799_BodyStartsOnSameLineAsSequencePoint()
         {
             string path = Path.GetTempFileName();
             try
@@ -132,7 +132,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
-        public void EmptyLine_Issue_799_03()
+        public void Issue_799_BodyStartsTwoLinesAfterSequencePoint()
         {
             string path = Path.GetTempFileName();
             try
@@ -161,7 +161,7 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
-        public void EmptyLine_Issue_799_04()
+        public void Issue_799_SequencePointEndsOneLineAfterBody()
         {
             string path = Path.GetTempFileName();
             try

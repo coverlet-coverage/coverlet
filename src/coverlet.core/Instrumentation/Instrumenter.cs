@@ -519,29 +519,50 @@ namespace Coverlet.Core.Instrumentation
 
             if (sequencePoint.StartLine != sequencePoint.EndLine)
             {
-                var childSequencePoints = GetChildSequencePoints(sequencePoint).ToList();
-
-                if (childSequencePoints.Any())
-                {
-                    var firstLineGeneratedCode = childSequencePoints.Min(x => x.StartLine);
-                    var lastLineGeneratedCode = childSequencePoints.Max(x => x.EndLine);
-
-                    var before = AddHitCandidatesForMultipleLines(method, processor, instruction, document, sequencePoint.StartLine, firstLineGeneratedCode - 1);
-                    var after = AddHitCandidatesForMultipleLines(method, processor, instruction, document, lastLineGeneratedCode + 1, sequencePoint.EndLine);
-                    return new[] {before, after};
-
-                }
-                return new[] {AddHitCandidatesForMultipleLines(method, processor, instruction, document, sequencePoint.StartLine, sequencePoint.EndLine)};
+                return AddInstrumentationCodeForMultiLineSequencePoint(method, processor, instruction,sequencePoint, document);
             }
+            return new []{AddInstrumentationCodeForSingleLineSequencePoint(method, processor, instruction, sequencePoint, document)};
+        }
 
+        private IEnumerable<Instruction> AddInstrumentationCodeForMultiLineSequencePoint(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint, Document document)
+        {
+            List<Instruction> instructions = new List<Instruction>();
+            var childSequencePoints = GetChildSequencePoints(sequencePoint).ToList();
+            if (childSequencePoints.Any())
+            {
+                instructions.AddRange(AddInstrumentationInstructionsWhenChildSequencePointsExist(method, processor, instruction, sequencePoint, childSequencePoints, document));
+                return instructions;
+            }
+            instructions.Add(AddInstrumentationInstructionsForMultipleLines(method, processor, instruction, document, sequencePoint.StartLine, sequencePoint.EndLine));
+            return instructions;
+        }
+
+        private Instruction AddInstrumentationCodeForSingleLineSequencePoint(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint, Document document)
+        {
             if (!document.Lines.ContainsKey(sequencePoint.StartLine))
                 document.Lines.Add(sequencePoint.StartLine, new Line { Number = sequencePoint.StartLine, Class = method.DeclaringType.FullName, Method = method.FullName });
 
             _result.HitCandidates.Add(new HitCandidate(false, document.Index, sequencePoint.StartLine, sequencePoint.EndLine));
-            return new[] {AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1)};
+            return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
         }
 
-        private Instruction AddHitCandidatesForMultipleLines(MethodDefinition method, ILProcessor processor, Instruction instruction, Document document, int startLine, int endLine)
+        private IEnumerable<Instruction> AddInstrumentationInstructionsWhenChildSequencePointsExist(MethodDefinition method,
+            ILProcessor processor, Instruction instruction, SequencePoint sequencePoint, List<SequencePoint> childSequencePoints,
+            Document document)
+        {
+            var firstLineGeneratedCode = childSequencePoints.Min(x => x.StartLine);
+            var lastLineGeneratedCode = childSequencePoints.Max(x => x.EndLine);
+
+            return new[]
+            {
+                AddInstrumentationInstructionsForMultipleLines(method, processor, instruction, document,
+                    sequencePoint.StartLine, firstLineGeneratedCode - 1),
+                AddInstrumentationInstructionsForMultipleLines(method, processor, instruction, document,
+                    lastLineGeneratedCode + 1, sequencePoint.EndLine)
+            };
+        }
+
+        private Instruction AddInstrumentationInstructionsForMultipleLines(MethodDefinition method, ILProcessor processor, Instruction instruction, Document document, int startLine, int endLine)
         {
             for (int i = startLine; i <= endLine; i++)
             {
