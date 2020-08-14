@@ -15,23 +15,30 @@ namespace Coverlet.Collector.DataCollection
         /// <param name="settings">Coverlet settings</param>
         /// <param name="coverletLogger">Coverlet logger</param>
         /// <returns>Coverage object</returns>
-        public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator)
+        public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
         {
+            CoverageParameters parameters = new CoverageParameters
+            {
+                IncludeFilters = settings.IncludeFilters,
+                IncludeDirectories = settings.IncludeDirectories,
+                ExcludeFilters = settings.ExcludeFilters,
+                ExcludedSourceFiles = settings.ExcludeSourceFiles,
+                ExcludeAttributes = settings.ExcludeAttributes,
+                IncludeTestAssembly = settings.IncludeTestAssembly,
+                SingleHit = settings.SingleHit,
+                MergeWith = settings.MergeWith,
+                UseSourceLink = settings.UseSourceLink,
+                SkipAutoProps = settings.SkipAutoProps
+            };
+
             return new Coverage(
                 settings.TestModule,
-                settings.IncludeFilters,
-                settings.IncludeDirectories,
-                settings.ExcludeFilters,
-                settings.ExcludeSourceFiles,
-                settings.ExcludeAttributes,
-                settings.IncludeTestAssembly,
-                settings.SingleHit,
-                settings.MergeWith,
-                settings.UseSourceLink,
+                parameters,
                 coverletLogger,
                 instrumentationHelper,
                 fileSystem,
-                sourceRootTranslator);
+                sourceRootTranslator,
+                cecilSymbolHelper);
         }
 
         /// <summary>

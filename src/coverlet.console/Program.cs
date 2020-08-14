@@ -12,6 +12,7 @@ using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
+using Coverlet.Core.Symbols;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,10 +30,11 @@ namespace Coverlet.Console
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(provider => new SourceRootTranslator(provider.GetRequiredService<ILogger>(), provider.GetRequiredService<IFileSystem>()));
+            serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
 
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
-            var logger = (ConsoleLogger) serviceProvider.GetService<ILogger>();
+            var logger = (ConsoleLogger)serviceProvider.GetService<ILogger>();
             var fileSystem = serviceProvider.GetService<IFileSystem>();
 
             var app = new CommandLineApplication();
@@ -58,6 +60,7 @@ namespace Coverlet.Console
             CommandOption excludeAttributes = app.Option("--exclude-by-attribute", "Attributes to exclude from code coverage.", CommandOptionType.MultipleValue);
             CommandOption includeTestAssembly = app.Option("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.", CommandOptionType.NoValue);
             CommandOption singleHit = app.Option("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location", CommandOptionType.NoValue);
+            CommandOption skipAutoProp = app.Option("--skipautoprops", "Neither track nor record auto-implemented properties.", CommandOptionType.NoValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
 
@@ -74,20 +77,28 @@ namespace Coverlet.Console
                     // Adjust log level based on user input.
                     logger.Level = verbosity.ParsedValue;
                 }
+
+                CoverageParameters parameters = new CoverageParameters
+                {
+                    IncludeFilters = includeFilters.Values.ToArray(),
+                    IncludeDirectories = includeDirectories.Values.ToArray(),
+                    ExcludeFilters = excludeFilters.Values.ToArray(),
+                    ExcludedSourceFiles = excludedSourceFiles.Values.ToArray(),
+                    ExcludeAttributes = excludeAttributes.Values.ToArray(),
+                    IncludeTestAssembly = includeTestAssembly.HasValue(),
+                    SingleHit = singleHit.HasValue(),
+                    MergeWith = mergeWith.Value(),
+                    UseSourceLink = useSourceLink.HasValue(),
+                    SkipAutoProps = skipAutoProp.HasValue()
+                };
+
                 Coverage coverage = new Coverage(module.Value,
-                    includeFilters.Values.ToArray(),
-                    includeDirectories.Values.ToArray(),
-                    excludeFilters.Values.ToArray(),
-                    excludedSourceFiles.Values.ToArray(),
-                    excludeAttributes.Values.ToArray(),
-                    includeTestAssembly.HasValue(),
-                    singleHit.HasValue(),
-                    mergeWith.Value(),
-                    useSourceLink.HasValue(),
-                    logger,
-                    serviceProvider.GetRequiredService<IInstrumentationHelper>(),
-                    fileSystem,
-                    serviceProvider.GetRequiredService<ISourceRootTranslator>());
+                                                 parameters,
+                                                 logger,
+                                                 serviceProvider.GetRequiredService<IInstrumentationHelper>(),
+                                                 fileSystem,
+                                                 serviceProvider.GetRequiredService<ISourceRootTranslator>(),
+                                                 serviceProvider.GetRequiredService<ICecilSymbolHelper>());
                 coverage.PrepareModules();
 
                 Process process = new Process();

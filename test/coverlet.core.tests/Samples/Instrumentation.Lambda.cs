@@ -77,56 +77,30 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
-    public class Issue_799_BodyStartsOneLineAfterSequencePoint
+    public class Issue_760
     {
-        public int Run()
+        public async Task<int> If()
         {
-            return new[] {2}.First(x =>
+            var numbers = (System.Collections.Generic.IEnumerable<int>)new[] { 1, 2, 3, 4, 5 };
+            var result = 0;
+            if (numbers.Select(i => i * 2).Count() == 5)
             {
-                var foo = 2;
-
-                return foo == x;
-            });
+                result = 1;
+            }
+            await Task.Delay(100);
+            return result;
         }
-    }
 
-    public class Issue_799_BodyStartsOnSameLineAsSequencePoint
-    {
-        public int Run()
+        public async Task<int> Foreach()
         {
-            return new[] { 2 }.First(x => {
-                var foo = 2;
-
-                return foo == x;
-            });
-        }
-    }
-
-    public class Issue_799_BodyStartsTwoLinesAfterSequencePoint
-    {
-        public int Run()
-        {
-            return new[] { 2 }
-                .First(x =>
+            var numbers = (System.Collections.Generic.IEnumerable<int>)new[] { 1, 2, 3, 4, 5 };
+            var sum = 0;
+            foreach (var i in numbers.Select(n => n * 2))
             {
-                var foo = 2;
-
-                return foo == x;
-            });
-        }
-    }
-
-    public class Issue_799_SequencePointEndsOneLineAfterBody
-    {
-        public int Run()
-        {
-            return new[] { 2 }.Where(x =>
-            {
-                var foo = 2;
-
-                return foo == x;
-            })
-                .First(y => y == 2);
+                sum += i;
+            }
+            await Task.Delay(100);
+            return sum;
         }
     }
 }

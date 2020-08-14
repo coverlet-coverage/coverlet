@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-
+using Coverlet.Core.Abstractions;
 using Coverlet.Core.Extensions;
 
 using Mono.Cecil;
@@ -16,12 +16,12 @@ using Mono.Collections.Generic;
 
 namespace Coverlet.Core.Symbols
 {
-    internal static class CecilSymbolHelper
+    internal class CecilSymbolHelper : ICecilSymbolHelper
     {
         private const int StepOverLineCode = 0xFEEFEE;
         // Create single instance, we cannot collide because we use full method name as key
-        private static ConcurrentDictionary<string, int[]> CompilerGeneratedBranchesToExclude = new ConcurrentDictionary<string, int[]>();
-        
+        private readonly ConcurrentDictionary<string, int[]> _compilerGeneratedBranchesToExclude = new ConcurrentDictionary<string, int[]>();
+
         // In case of nested compiler generated classes, only the root one presents the CompilerGenerated attribute.
         // So let's search up to the outermost declaring type to find the attribute
         private static bool IsCompilerGenerated(MethodDefinition methodDefinition)
@@ -260,9 +260,9 @@ namespace Coverlet.Core.Symbols
                     instructions[branchIndex + 3].OpCode == OpCodes.Throw;
         }
 
-        private static bool SkipGeneratedBranchesForExceptionHandlers(MethodDefinition methodDefinition, Instruction instruction, List<Instruction> bodyInstructions)
+        private bool SkipGeneratedBranchesForExceptionHandlers(MethodDefinition methodDefinition, Instruction instruction, List<Instruction> bodyInstructions)
         {
-            if (!CompilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
+            if (!_compilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
             {
                 /*
                   This method is used to parse compiler generated code inside async state machine and find branches generated for exception catch blocks
@@ -388,13 +388,13 @@ namespace Coverlet.Core.Symbols
                     }
                 }
 
-                CompilerGeneratedBranchesToExclude.TryAdd(methodDefinition.FullName, detectedBranches.ToArray());
+                _compilerGeneratedBranchesToExclude.TryAdd(methodDefinition.FullName, detectedBranches.ToArray());
             }
 
-            return CompilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
+            return _compilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
         }
 
-        public static List<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
+        public IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
             if (methodDefinition is null)
@@ -659,7 +659,7 @@ namespace Coverlet.Core.Symbols
            IL_00eb: br.s IL_00ed
            ...
        */
-        internal static bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction)
+        public bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction)
         {
             if (!IsMoveNextInsideAsyncStateMachine(methodDefinition))
             {

@@ -74,114 +74,28 @@ namespace Coverlet.Core.Tests
         }
 
         [Fact]
-        public void Issue_799_BodyStartsOneLineAfterSequencePoint()
+        public void Lambda_Issue760()
         {
             string path = Path.GetTempFileName();
             try
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_799_BodyStartsOneLineAfterSequencePoint>(instance => 
-                        {
-                            instance.Run();
-                            return Task.CompletedTask;
-                        }, 
-                        persistPrepareResultToFile: pathSerialize[0]);
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_760>(instance =>
+                    {
+                        ((Task)instance.If()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task)instance.Foreach()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        return Task.CompletedTask;
+                    },
+                    persistPrepareResultToFile: pathSerialize[0]);
+
                     return 0;
                 }, new string[] { path });
 
                 TestInstrumentationHelper.GetCoverageResult(path)
                 .Document("Instrumentation.Lambda.cs")
-                .AssertLinesCovered(BuildConfiguration.Debug, (83, 1), (84, 1), (85, 1), (86, 1), (88, 1), (89, 1), (90, 1))
-                .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 87)
-                .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
-            }
-            finally
-            {
-                File.Delete(path);
-            }
-        }
-
-        [Fact]
-        public void Issue_799_BodyStartsOnSameLineAsSequencePoint()
-        {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_799_BodyStartsOnSameLineAsSequencePoint>(instance =>
-                        {
-                            instance.Run();
-                            return Task.CompletedTask;
-                        },
-                        persistPrepareResultToFile: pathSerialize[0]);
-                    return 0;
-                }, new string[] { path });
-
-                TestInstrumentationHelper.GetCoverageResult(path)
-                .Document("Instrumentation.Lambda.cs")
-                .AssertLinesCovered(BuildConfiguration.Debug, (96, 1), (97, 1), (98, 1), (100, 1), (101, 1), (102, 1))
-                .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 99)
-                .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
-            }
-            finally
-            {
-                File.Delete(path);
-            }
-        }
-
-        [Fact]
-        public void Issue_799_BodyStartsTwoLinesAfterSequencePoint()
-        {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_799_BodyStartsTwoLinesAfterSequencePoint>(instance =>
-                        {
-                            instance.Run();
-                            return Task.CompletedTask;
-                        },
-                        persistPrepareResultToFile: pathSerialize[0]);
-                    return 0;
-                }, new string[] { path });
-
-                TestInstrumentationHelper.GetCoverageResult(path)
-                    .Document("Instrumentation.Lambda.cs")
-                    .AssertLinesCovered(BuildConfiguration.Debug, (108, 1), (109, 1), (110, 1), (111, 1), (112, 1), (114, 1), (115, 1), (116, 1))
-                    .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 113)
-                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
-            }
-            finally
-            {
-                File.Delete(path);
-            }
-        }
-
-        [Fact]
-        public void Issue_799_SequencePointEndsOneLineAfterBody()
-        {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_799_SequencePointEndsOneLineAfterBody>(instance =>
-                        {
-                            instance.Run();
-                            return Task.CompletedTask;
-                        },
-                        persistPrepareResultToFile: pathSerialize[0]);
-                    return 0;
-                }, new string[] { path });
-
-                TestInstrumentationHelper.GetCoverageResult(path)
-                    .Document("Instrumentation.Lambda.cs")
-                    .AssertLinesCovered(BuildConfiguration.Debug, (122, 1), (123, 1), (124, 1), (125, 1), (127, 1), (128, 1), (129, 1), (130, 1))
-                    .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 126)
-                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
+                .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 83, 92)
+                .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 95, 104);
             }
             finally
             {

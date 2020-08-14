@@ -6,10 +6,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
+using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
@@ -63,11 +63,16 @@ namespace Coverlet.Core.Tests
             });
             _processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
             CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem());
+            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
             return coverage.GetCoverageResult();
         }
 
-        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod, Func<string, string[]> includeFilter = null, Func<string, string[]> excludeFilter = null, string persistPrepareResultToFile = null, bool disableRestoreModules = false)
+        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod,
+                                                               Func<string, string[]> includeFilter = null,
+                                                               Func<string, string[]> excludeFilter = null,
+                                                               string persistPrepareResultToFile = null,
+                                                               bool disableRestoreModules = false,
+                                                               bool skipAutoProps = false)
         {
             if (persistPrepareResultToFile is null)
             {
@@ -86,20 +91,32 @@ namespace Coverlet.Core.Tests
             SetTestContainer(newPath, disableRestoreModules);
 
             static string[] defaultFilters(string _) => Array.Empty<string>();
+
+            CoverageParameters parameters = new CoverageParameters
+            {
+                IncludeFilters = (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
+                new string[]
+                {
+                    $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*"
+                }).ToArray(),
+                IncludeDirectories = Array.Empty<string>(),
+                ExcludeFilters = (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)).Concat(new string[]
+                {
+                    "[xunit.*]*",
+                    "[coverlet.*]*"
+                }).ToArray(),
+                ExcludedSourceFiles = Array.Empty<string>(),
+                ExcludeAttributes = Array.Empty<string>(),
+                IncludeTestAssembly = true,
+                SingleHit = false,
+                MergeWith = string.Empty,
+                UseSourceLink = false,
+                SkipAutoProps = skipAutoProps
+            };
+
             // Instrument module
-            Coverage coverage = new Coverage(newPath,
-            includeFilters: (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
-            new string[]
-            {
-                $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*"
-            }).ToArray(),
-            Array.Empty<string>(),
-            excludeFilters: (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)).Concat(new string[]
-            {
-                "[xunit.*]*",
-                "[coverlet.*]*"
-            }).ToArray(), Array.Empty<string>(), Array.Empty<string>(), true, false, "", false, new Logger(logFile),
-            _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>());
+            Coverage coverage = new Coverage(newPath, parameters, new Logger(logFile),
+            _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>(), _processWideContainer.GetService<ICecilSymbolHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
@@ -153,6 +170,8 @@ namespace Coverlet.Core.Tests
                 new SourceRootTranslator(serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()) :
                 new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
 
+                serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
+
                 return serviceCollection.BuildServiceProvider();
             });
         }
@@ -176,7 +195,6 @@ namespace Coverlet.Core.Tests
         public T Do<T>(Func<T> action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3)
         {
             var exceptions = new List<Exception>();
-
             for (int attempted = 0; attempted < maxAttemptCount; attempted++)
             {
                 try
@@ -189,7 +207,7 @@ namespace Coverlet.Core.Tests
                 }
                 catch (Exception ex)
                 {
-                    if (ex.ToString().Contains("RestoreOriginalModules"))
+                    if (ex.ToString().Contains("RestoreOriginalModules") || ex.ToString().Contains("RestoreOriginalModule"))
                     {
                         // If we're restoring modules mean that process are closing and we cannot override copied test file because is locked so we hide error
                         // to have a correct process exit value

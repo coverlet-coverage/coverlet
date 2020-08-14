@@ -20,5 +20,6 @@
         public const string ReportFormatElementName = "Format";
         public const string DefaultExcludeFilter = "[coverlet.*]*";
         public const string InProcDataCollectorName = "CoverletInProcDataCollector";
+        public const string SkipAutoProps = "SkipAutoProps";
     }
 }

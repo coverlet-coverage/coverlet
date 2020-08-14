@@ -7,6 +7,7 @@ using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
+using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
@@ -133,7 +134,7 @@ namespace Coverlet.Collector.DataCollection
                 // Get coverage and attachment managers
                 _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _logger, _coverageWrapper,
                                                         _serviceProvider.GetRequiredService<IInstrumentationHelper>(), _serviceProvider.GetRequiredService<IFileSystem>(),
-                                                        _serviceProvider.GetRequiredService<ISourceRootTranslator>());
+                                                        _serviceProvider.GetRequiredService<ISourceRootTranslator>(), _serviceProvider.GetRequiredService<ICecilSymbolHelper>());
 
                 // Instrument modules
                 _coverageManager.InstrumentModules();
@@ -227,6 +228,7 @@ namespace Coverlet.Collector.DataCollection
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             // We cache resolutions
             serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+            serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
             return serviceCollection;
         }
     }
