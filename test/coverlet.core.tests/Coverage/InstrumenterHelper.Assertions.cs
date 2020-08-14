@@ -344,6 +344,31 @@ namespace Coverlet.Core.Tests
             return document;
         }
 
+        public static Document AssertHitsCountForEveryCoveredLine(this Document document, BuildConfiguration configuration, int hits)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
+            }
+
+            foreach (KeyValuePair<int, Line> line in document.Lines)
+            {
+                if (line.Value.Hits != hits)
+                {
+                    throw new XunitException($"Unexpected hits expected line: {line.Value.Number}. Expected hits: {hits} actual hits: {line.Value.Hits}");
+                }
+            }
+
+            return document;
+        }
+
         private static BuildConfiguration GetAssemblyBuildConfiguration()
         {
 #if DEBUG

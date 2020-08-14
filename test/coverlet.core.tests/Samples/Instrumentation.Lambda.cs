@@ -103,4 +103,48 @@ namespace Coverlet.Core.Samples.Tests
             return sum;
         }
     }
+
+    public class Issue_799_Empty_Line
+    {
+        public int BodyStartsOneLineAfterSequencePoint()
+        {
+            return new[] { 2 }.First(x =>
+            {
+                var foo = 2;
+
+                return foo == x;
+            });
+        }
+
+        public int BodyStartsOnSameLineAsSequencePoint()
+        {
+            return new[] { 2 }.First(x => {
+                var foo = 2;
+
+                return foo == x;
+            });
+        }
+
+        public int BodyStartsTwoLinesAfterSequencePoint()
+        {
+            return new[] { 2 }
+                .First(x =>
+                {
+                    var foo = 2;
+
+                    return foo == x;
+                });
+        }
+
+        public int SequencePointEndsOneLineAfterBody()
+        {
+            return new[] { 2 }.Where(x =>
+                {
+                    var foo = 2;
+
+                    return foo == x;
+                })
+                .First(y => y == 2);
+        }
+    }
 }
