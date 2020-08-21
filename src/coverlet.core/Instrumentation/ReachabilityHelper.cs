@@ -228,8 +228,7 @@ namespace coverlet.core.Instrumentation.Reachability
                     OpCodes.Br,
                     OpCodes.Br_S,
                     OpCodes.Leave,
-                    OpCodes.Leave_S,
-                    OpCodes.Endfinally
+                    OpCodes.Leave_S
                 }
             );
 
