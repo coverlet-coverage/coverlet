@@ -524,11 +524,6 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentIL(MethodDefinition method)
         {
-            if (method.Name == "FiltersAndFinallies")
-            {
-                Console.WriteLine();
-            }
-
             method.Body.SimplifyMacros();
             ILProcessor processor = method.Body.GetILProcessor();
 

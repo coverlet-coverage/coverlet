@@ -5,7 +5,6 @@ using Mono.Collections.Generic;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
 
 namespace coverlet.core.Instrumentation.Reachability
 {
@@ -381,101 +380,6 @@ namespace coverlet.core.Instrumentation.Reachability
             var lastInstr = instrs[instrs.Count - 1];
 
             var blocks = CreateBasicBlocks(instrs, exceptionHandlers, brs);
-
-            // debug
-
-            var sb = new StringBuilder();
-            sb.AppendLine("Exception Handlers");
-            sb.AppendLine("------------------");
-            for (var i = 0; i < exceptionHandlers.Count; i++)
-            {
-                var handler = exceptionHandlers[i];
-
-                sb.AppendLine($"{i:00}: Try: (IL_{handler.TryStart.Offset:x4} - IL_{handler.TryEnd.Offset:x4}){(handler.FilterStart != null ? $", Filter: IL_{handler.FilterStart.Offset:x4}" : "")}, Handler: (IL_{handler.HandlerStart.Offset:x4}{(handler.HandlerEnd != null ? $" - IL_{handler.HandlerEnd.Offset:x4})" : "")})");
-            }
-            sb.AppendLine();
-
-            sb.AppendLine("Branches");
-            sb.AppendLine("--------");
-            for (var i = 0; i < brs.Length; i++)
-            {
-                var br = brs[i];
-
-                sb.AppendLine($"{i:00}: {br}");
-            }
-            sb.AppendLine();
-
-            sb.AppendLine("Blocks");
-            sb.AppendLine("------");
-            for (var i = 0; i < blocks.Length; i++)
-            {
-                var block = blocks[i];
-
-                sb.AppendLine($"{i:00}: {block}");
-            }
-            sb.AppendLine();
-
-            sb.AppendLine("Instructions");
-            sb.AppendLine("------------");
-            for (var i = 0; i < instrs.Count; i++)
-            {
-                var instr = instrs[i];
-
-                var blockStarts = blocks.Select((t, ix) => (Value: t, Index: ix)).Where(b => b.Value.StartOffset == instr.Offset);
-                var tryStarts = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.TryStart.Offset == instr.Offset);
-                var tryEnd = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.TryEnd.Offset == instr.Offset);
-                var filterStart = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.FilterStart != null && s.Value.FilterStart.Offset == instr.Offset);
-                var handlerStart = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.HandlerStart.Offset == instr.Offset);
-                var handlerStop = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.HandlerEnd?.Offset == instr.Offset);
-                var branchesTo = brs.Select((t, ix) => (Value: t, Index: ix)).Where(b => b.Value.Offset == instr.Offset);
-                var branchesFrom = brs.Select((t, ix) => (Value: t, Index: ix)).Where(b => b.Value.HasMultiTargets ? b.Value.TargetOffsets.Contains(instr.Offset) : b.Value.TargetOffset == instr.Offset);
-
-                var hasSpecial = blockStarts.Any() || tryStarts.Any() || tryEnd.Any() || filterStart.Any() || handlerStart.Any() || handlerStop.Any() || branchesTo.Any() || branchesFrom.Any();
-
-                if (hasSpecial)
-                {
-                    sb.AppendLine();
-
-                    foreach (var x in blockStarts)
-                    {
-                        sb.AppendLine($"=== BLOCK {x.Index:00} ===");
-                    }
-                    foreach (var x in tryStarts)
-                    {
-                        sb.AppendLine($"--- try start {x.Index:00}");
-                    }
-                    foreach (var x in tryEnd)
-                    {
-                        sb.AppendLine($"--- try end {x.Index:00}");
-                    }
-                    foreach (var x in filterStart)
-                    {
-                        sb.AppendLine($"--- filter start {x.Index:00}");
-                    }
-                    foreach (var x in handlerStart)
-                    {
-                        sb.AppendLine($"--- handler start {x.Index:00}");
-                    }
-                    foreach (var x in handlerStop)
-                    {
-                        sb.AppendLine($"--- handler end {x.Index:00}");
-                    }
-                    foreach (var x in branchesTo)
-                    {
-                        sb.AppendLine($"--- branch {x.Index:00} -> {(x.Value.HasMultiTargets ? string.Join(", ", x.Value.TargetOffsets.Select(x => $"IL_{x:x4}")) : $"IL_{x.Value.TargetOffset:x4}")}");
-                    }
-                    foreach (var x in branchesFrom)
-                    {
-                        sb.AppendLine($"--- from branch {x.Index:00} at IL_{x.Value.Offset:x4}");
-                    }
-                }
-
-                sb.AppendLine(instr.ToString());
-            }
-
-            var debugStr = sb.ToString();
-
-            // end debug
 
             DetermineHeadReachability(blocks);
             return DetermineUnreachableRanges(blocks, lastInstr.Offset);
