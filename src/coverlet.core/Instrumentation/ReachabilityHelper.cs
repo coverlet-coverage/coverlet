@@ -374,24 +374,35 @@ namespace coverlet.core.Instrumentation.Reachability
                 return ImmutableArray<UnreachableRange>.Empty;
             }
 
-            var brs = FindBranches(instrs, exceptionHandlers);
+            var (mayContainUnreachableCode, branches) = AnalyzeInstructions(instrs, exceptionHandlers);
+
+            // no need to do any more work, nothing unreachable here
+            if (!mayContainUnreachableCode)
+            {
+                return ImmutableArray<UnreachableRange>.Empty;
+            }
 
             var lastInstr = instrs[instrs.Count - 1];
 
-            var blocks = CreateBasicBlocks(instrs, exceptionHandlers, brs);
+            var blocks = CreateBasicBlocks(instrs, exceptionHandlers, branches);
 
             DetermineHeadReachability(blocks);
             return DetermineUnreachableRanges(blocks, lastInstr.Offset);
         }
 
         /// <summary>
-        /// Discovers branches, including unconditional ones, in the given instruction stream.
+        /// Analyzes the instructiona and exception handlers provided to find branches and determine if
+        ///   it is possible for their to be unreachable code.
         /// </summary>
-        private ImmutableArray<BranchInstruction> FindBranches(Collection<Instruction> instrs, Collection<ExceptionHandler> exceptionHandlers)
+        private (bool MayContainUnreachableCode, ImmutableArray<BranchInstruction> Branches) AnalyzeInstructions(Collection<Instruction> instrs, Collection<ExceptionHandler> exceptionHandlers)
         {
+            var containsDoesNotReturnCall = false;
+
             var ret = ImmutableArray.CreateBuilder<BranchInstruction>();
             foreach (var i in instrs)
             {
+                containsDoesNotReturnCall = containsDoesNotReturnCall || DoesNotReturn(i);
+
                 if (BRANCH_OPCODES.Contains(i.OpCode))
                 {
                     var (singleTargetOffset, multiTargetOffsets) = GetInstructionTargets(i, exceptionHandlers);
@@ -407,7 +418,7 @@ namespace coverlet.core.Instrumentation.Reachability
                 }
             }
 
-            return ret.ToImmutable();
+            return (containsDoesNotReturnCall, ret.ToImmutable());
         }
 
         /// <summary>
@@ -599,7 +610,7 @@ namespace coverlet.core.Instrumentation.Reachability
 
                 // if the block is covered by an exception handler, then executing _any_ instruction in it
                 //   could conceivably cause those handlers to be visited
-                foreach(var exceptionHandlerOffset in block.ExceptionBranchesTo)
+                foreach (var exceptionHandlerOffset in block.ExceptionBranchesTo)
                 {
                     var reachableHandler = blockLookup[exceptionHandlerOffset];
                     knownLive = knownLive.Push(reachableHandler);
