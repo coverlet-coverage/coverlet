@@ -675,8 +675,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 new[]
                 {
                     // NoBranches
-                    15,
-                    16,
+                    15, 16,
                     // If
                     26, 27,
                     // Switch
