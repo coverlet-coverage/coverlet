@@ -3,7 +3,6 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -87,7 +86,7 @@ namespace coverlet.core.Instrumentation.Reachability
             /// </summary>
             public int Offset { get; }
 
-            public bool HasMultiTargets => _TargetOffsets.Any();
+            public bool HasMultiTargets => _TargetOffsets.Length > 0;
 
             private readonly int _TargetOffset;
 
@@ -109,14 +108,14 @@ namespace coverlet.core.Instrumentation.Reachability
                 }
             }
 
-            private readonly IEnumerable<int> _TargetOffsets;
+            private readonly ImmutableArray<int> _TargetOffsets;
 
             /// <summary>
             /// Targets of the branch, assuming it has multiple targets.
             /// 
             /// It is illegal to access this if there is a single target.
             /// </summary>
-            public IEnumerable<int> TargetOffsets
+            public ImmutableArray<int> TargetOffsets
             {
                 get
                 {
@@ -133,12 +132,12 @@ namespace coverlet.core.Instrumentation.Reachability
             {
                 Offset = offset;
                 _TargetOffset = targetOffset;
-                _TargetOffsets = Enumerable.Empty<int>();
+                _TargetOffsets = ImmutableArray<int>.Empty;
             }
 
-            public BranchInstruction(int offset, IEnumerable<int> targetOffset)
+            public BranchInstruction(int offset, ImmutableArray<int> targetOffset)
             {
-                if (targetOffset.Count() < 1)
+                if (targetOffset.Length < 1)
                 {
                     throw new ArgumentException("Must have at least 2 entries", nameof(targetOffset));
                 }
@@ -220,7 +219,7 @@ namespace coverlet.core.Instrumentation.Reachability
                 return new ReachabilityHelper(ImmutableHashSet<MetadataToken>.Empty);
             }
 
-            var processedMethods = new HashSet<MetadataToken>();
+            var processedMethods = ImmutableHashSet<MetadataToken>.Empty;
             var doNotReturn = ImmutableHashSet.CreateBuilder<MetadataToken>();
             foreach (var type in module.Types)
             {
@@ -254,10 +253,12 @@ namespace coverlet.core.Instrumentation.Reachability
                         }
 
                         var token = calledMtd.MetadataToken;
-                        if (!processedMethods.Add(token))
+                        if (processedMethods.Contains(token))
                         {
                             continue;
                         }
+
+                        processedMethods = processedMethods.Add(token);
 
                         MethodDefinition mtdDef;
                         try
@@ -329,7 +330,7 @@ namespace coverlet.core.Instrumentation.Reachability
         public ImmutableArray<UnreachableRange> FindUnreachableIL(Collection<Instruction> instrs)
         {
             // no instructions, means nothing to... not reach
-            if (!instrs.Any())
+            if (instrs.Count == 0)
             {
                 return ImmutableArray<UnreachableRange>.Empty;
             }
@@ -342,7 +343,7 @@ namespace coverlet.core.Instrumentation.Reachability
 
             var brs = FindBranches(instrs);
 
-            var lastInstr = instrs.Last();
+            var lastInstr = instrs[instrs.Count - 1];
 
             var blocks = CreateBasicBlocks(instrs, brs);
             DetermineHeadReachability(blocks);
@@ -360,13 +361,24 @@ namespace coverlet.core.Instrumentation.Reachability
                 if (BRANCH_OPCODES.Contains(i.OpCode))
                 {
                     int? singleTargetOffset;
-                    IEnumerable<int> multiTargetOffsets;
+                    ImmutableArray<int> multiTargetOffsets;
 
                     if (i.Operand is Instruction[] multiTarget)
                     {
                         // it's a switch
                         singleTargetOffset = null;
-                        multiTargetOffsets = multiTarget.Select(t => t.Offset).Concat(new[] { i.Next.Offset }).Distinct().ToList();
+
+                        multiTargetOffsets = ImmutableArray.Create(i.Next.Offset);
+                        foreach(var instr in multiTarget)
+                        {
+                            // in practice these are small arrays, so a scan should be fine
+                            if(multiTargetOffsets.Contains(instr.Offset))
+                            {
+                                continue;
+                            }
+
+                            multiTargetOffsets = multiTargetOffsets.Add(instr.Offset);
+                        }
                     }
                     else if (i.Operand is Instruction singleTarget)
                     {
@@ -374,13 +386,13 @@ namespace coverlet.core.Instrumentation.Reachability
 
                         if (UNCONDITIONAL_BRANCH_OPCODES.Contains(i.OpCode))
                         {
-                            multiTargetOffsets = null;
+                            multiTargetOffsets = ImmutableArray<int>.Empty;
                             singleTargetOffset = singleTarget.Offset;
                         }
                         else
                         {
                             singleTargetOffset = null;
-                            multiTargetOffsets = new[] { i.Next.Offset, singleTarget.Offset };
+                            multiTargetOffsets = ImmutableArray.Create(i.Next.Offset, singleTarget.Offset);
                         }
                     }
                     else
@@ -405,18 +417,18 @@ namespace coverlet.core.Instrumentation.Reachability
         /// <summary>
         /// Calculates which ranges of IL are unreachable, given blocks which have head and tail reachability calculated.
         /// </summary>
-        private ImmutableArray<UnreachableRange> DetermineUnreachableRanges(IReadOnlyList<BasicBlock> blocks, int lastInstructionOffset)
+        private ImmutableArray<UnreachableRange> DetermineUnreachableRanges(ImmutableArray<BasicBlock> blocks, int lastInstructionOffset)
         {
             var ret = ImmutableArray.CreateBuilder<UnreachableRange>();
 
             var endOfMethodOffset = lastInstructionOffset + 1; // add 1 so we point _past_ the end of the method
 
-            for (var curBlockIx = 0; curBlockIx < blocks.Count; curBlockIx++)
+            for (var curBlockIx = 0; curBlockIx < blocks.Length; curBlockIx++)
             {
                 var curBlock = blocks[curBlockIx];
 
                 int endOfCurBlockOffset;
-                if (curBlockIx == blocks.Count - 1)
+                if (curBlockIx == blocks.Length - 1)
                 {
                     endOfCurBlockOffset = endOfMethodOffset;
                 }
@@ -458,18 +470,17 @@ namespace coverlet.core.Instrumentation.Reachability
         /// 
         /// "Tail reachability" will have already been determined in CreateBlocks.
         /// </summary>
-        private void DetermineHeadReachability(IEnumerable<BasicBlock> blocks)
+        private void DetermineHeadReachability(ImmutableArray<BasicBlock> blocks)
         {
             var blockLookup = blocks.ToImmutableDictionary(b => b.StartOffset);
 
             var headBlock = blockLookup[0];
 
-            var knownLive = new Stack<BasicBlock>();
-            knownLive.Push(headBlock);
+            var knownLive = ImmutableStack.Create(headBlock);
 
-            while (knownLive.Count > 0)
+            while (!knownLive.IsEmpty)
             {
-                var block = knownLive.Pop();
+                knownLive = knownLive.Pop(out var block);
 
                 if (block.HeadReachable)
                 {
@@ -486,7 +497,7 @@ namespace coverlet.core.Instrumentation.Reachability
                     foreach (var reachableOffset in block.BranchesTo)
                     {
                         var reachableBlock = blockLookup[reachableOffset];
-                        knownLive.Push(reachableBlock);
+                        knownLive = knownLive.Push(reachableBlock);
                     }
                 }
             }
@@ -500,19 +511,33 @@ namespace coverlet.core.Instrumentation.Reachability
         /// 
         /// "Tail reachability" is also calculated, which is whether the block can ever actually get past its last instruction.
         /// </summary>
-        private List<BasicBlock> CreateBasicBlocks(Collection<Instruction> instrs, IReadOnlyList<BranchInstruction> branches)
+        private ImmutableArray<BasicBlock> CreateBasicBlocks(Collection<Instruction> instrs, ImmutableArray<BranchInstruction> branches)
         {
             // every branch-like instruction starts or stops a block
             var branchInstrLocs = branches.ToLookup(i => i.Offset);
             var branchInstrOffsets = branchInstrLocs.Select(k => k.Key).ToImmutableHashSet();
 
             // every target that might be branched to starts or stops a block
-            var branchTargetOffsets = branches.SelectMany(b => b.HasMultiTargets ? b.TargetOffsets : new[] { b.TargetOffset }).ToImmutableHashSet();
+            var branchTargetOffsets = ImmutableHashSet<int>.Empty;
+            foreach (var branch in branches)
+            {
+                if (branch.HasMultiTargets)
+                {
+                    foreach (var target in branch.TargetOffsets)
+                    {
+                        branchTargetOffsets = branchTargetOffsets.Add(target);
+                    }
+                }
+                else
+                {
+                    branchTargetOffsets = branchTargetOffsets.Add(branch.TargetOffset);
+                }
+            }
 
             // ending the method is also important
-            var endOfMethodOffset = instrs.Last().Offset;
+            var endOfMethodOffset = instrs[instrs.Count - 1].Offset;
 
-            var blocks = new List<BasicBlock>();
+            var blocks = ImmutableArray<BasicBlock>.Empty;
             int? blockStartedAt = null;
             Instruction unreachableAfter = null;
             foreach (var i in instrs)
@@ -539,14 +564,37 @@ namespace coverlet.core.Instrumentation.Reachability
                 if (blockEnds)
                 {
                     var nextInstr = i.Next;
-                    var goesTo =
-                        branchesAtLoc.Any() ?
-                            branchesAtLoc.SelectMany(
-                                b => b.HasMultiTargets ? b.TargetOffsets : new[] { b.TargetOffset }
-                            ) :
-                            nextInstr != null ? new[] { nextInstr.Offset } : Enumerable.Empty<int>();
 
-                    blocks.Add(new BasicBlock(blockStartedAt.Value, unreachableAfter, goesTo.ToImmutableArray()));
+                    // figure out all the different places the basic block could lead to
+                    ImmutableArray<int> goesTo;
+                    if(branchesAtLoc.Any())
+                    {
+                        // it ends in a branch, where all does it branch?
+                        goesTo = ImmutableArray<int>.Empty;
+                        foreach(var branch in branchesAtLoc)
+                        {
+                            if(branch.HasMultiTargets)
+                            {
+                                goesTo = goesTo.AddRange(branch.TargetOffsets);
+                            }
+                            else
+                            {
+                                goesTo = goesTo.Add(branch.TargetOffset);
+                            }
+                        }
+                    }
+                    else if (nextInstr != null)
+                    {
+                        // it falls throw to another instruction
+                        goesTo = ImmutableArray.Create(nextInstr.Offset);
+                    }
+                    else
+                    {
+                        // it ends the method
+                        goesTo = ImmutableArray<int>.Empty;
+                    }
+
+                    blocks = blocks.Add(new BasicBlock(blockStartedAt.Value, unreachableAfter, goesTo));
 
                     blockStartedAt = null;
                     unreachableAfter = null;
