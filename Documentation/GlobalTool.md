@@ -17,26 +17,27 @@ Arguments:
   <ASSEMBLY>  Path to the test assembly.
 
 Options:
-  -h|--help                Show help information
-  -v|--version             Show version information
-  -t|--target              Path to the test runner application.
-  -a|--targetargs          Arguments to be passed to the test runner.
-  -o|--output              Output of the generated coverage report
-  -v|--verbosity           Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
-  -f|--format              Format of the generated coverage report[multiple value].
-  --threshold              Exits with error if the coverage % is below value.
-  --threshold-type         Coverage type to apply the threshold to[multiple value].
-  --threshold-stat         Coverage statistic used to enforce the threshold value.
-  --exclude                Filter expressions to exclude specific modules and types[multiple value].
-  --include                Filter expressions to include specific modules and types[multiple value].
-  --include-directory      Include directories containing additional assemblies to be instrumented[multiple value].
-  --exclude-by-file        Glob patterns specifying source files to exclude[multiple value].
-  --exclude-by-attribute   Attributes to exclude from code coverage[multiple value].
-  --include-test-assembly  Specifies whether to report code coverage of the test assembly.
-  --single-hit             Specifies whether to limit code coverage hit reporting to a single hit for each location.
-  --merge-with             Path to existing coverage result to merge.
-  --use-source-link        Specifies whether to use SourceLink URIs in place of file system paths.
-  --skipautoprops          Neither track nor record auto-implemented properties.
+  -h|--help                    Show help information
+  -v|--version                 Show version information
+  -t|--target                  Path to the test runner application.
+  -a|--targetargs              Arguments to be passed to the test runner.
+  -o|--output                  Output of the generated coverage report
+  -v|--verbosity               Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
+  -f|--format                  Format of the generated coverage report[multiple value].
+  --threshold                  Exits with error if the coverage % is below value.
+  --threshold-type             Coverage type to apply the threshold to[multiple value].
+  --threshold-stat             Coverage statistic used to enforce the threshold value.
+  --exclude                    Filter expressions to exclude specific modules and types[multiple value].
+  --include                    Filter expressions to include specific modules and types[multiple value].
+  --include-directory          Include directories containing additional assemblies to be instrumented[multiple value].
+  --exclude-by-file            Glob patterns specifying source files to exclude[multiple value].
+  --exclude-by-attribute       Attributes to exclude from code coverage[multiple value].
+  --include-test-assembly      Specifies whether to report code coverage of the test assembly.
+  --single-hit                 Specifies whether to limit code coverage hit reporting to a single hit for each location.
+  --merge-with                 Path to existing coverage result to merge.
+  --use-source-link            Specifies whether to use SourceLink URIs in place of file system paths.
+  --skipautoprops              Neither track nor record auto-implemented properties.
+  --does-not-return-attribute  Attributes that mark methods that do not return[multiple value].
 ```
 
 NB. For a [multiple value] options you have to specify values multiple times i.e.

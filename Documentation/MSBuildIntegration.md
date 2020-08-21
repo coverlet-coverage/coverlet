@@ -162,6 +162,13 @@ You can also include coverage of the test assembly itself by setting `/p:Include
 Neither track nor record auto-implemented properties.  
 Syntax:  `/p:SkipAutoProps=true`
 
+### Methods that do not return
+
+Methods that do not return can be marked with attributes to cause statements after them to be excluded from coverage.  `DoesNotReturnAttribute` is included by default.
+
+Attributes can be specified with the following syntax.
+Syntax:  `/p:DoesNotReturnAttribute="DoesNotReturnAttribute,OtherAttribute"`
+
 ### Note for Powershell / VSTS users
 To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```.
 
