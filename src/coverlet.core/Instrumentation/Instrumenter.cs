@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -14,7 +13,6 @@ using Microsoft.Extensions.FileSystemGlobbing;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
-using Mono.Collections.Generic;
 
 namespace Coverlet.Core.Instrumentation
 {
@@ -192,7 +190,7 @@ namespace Coverlet.Core.Instrumentation
         }
 
         // Have to do this before we start writing to a module, as we'll get into file
-        // locking issues if we do.
+        //   locking issues if we do it while writing.
         private void CreateReachabilityHelper()
         {
             using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read))
