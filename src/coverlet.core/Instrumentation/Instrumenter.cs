@@ -524,6 +524,11 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentIL(MethodDefinition method)
         {
+            if (method.Name == "FiltersAndFinallies")
+            {
+                Console.WriteLine();
+            }
+
             method.Body.SimplifyMacros();
             ILProcessor processor = method.Body.GetILProcessor();
 
@@ -532,7 +537,7 @@ namespace Coverlet.Core.Instrumentation
 
             var branchPoints = _cecilSymbolHelper.GetBranchPoints(method);
 
-            var unreachableRanges = _reachabilityHelper.FindUnreachableIL(processor.Body.Instructions);
+            var unreachableRanges = _reachabilityHelper.FindUnreachableIL(processor.Body.Instructions, processor.Body.ExceptionHandlers);
             var currentUnreachableRangeIx = 0;
 
             for (int n = 0; n < count; n++)

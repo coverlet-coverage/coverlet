@@ -142,5 +142,58 @@
             GenericClass<int>.AlsoThrows();
             System.Console.WriteLine("Constant-2");         // unreachable
         }
+
+        public void WithLeave()
+        {
+            try
+            {
+                System.Console.WriteLine("Constant-1");
+            }
+            catch (System.Exception e)
+            {
+                if (e is System.InvalidOperationException)
+                {
+                    goto endOfMethod;
+                }
+
+                System.Console.WriteLine("InCatch-1");
+
+                Throws();
+
+                System.Console.WriteLine("InCatch-2");      // unreachable
+            }                                               // unreachable
+
+        endOfMethod:
+            System.Console.WriteLine("Constant-2");
+        }
+
+        public void FiltersAndFinallies()
+        {
+            try
+            {
+                System.Console.WriteLine("Constant-1");
+                Throws();
+                System.Console.WriteLine("Constant-2");     //unreachable
+            }                                               //unreachable
+            catch (System.InvalidOperationException e) 
+                when (e.Message != null)
+            {
+                System.Console.WriteLine("InCatch-1");
+                Throws();
+                System.Console.WriteLine("InCatch-2");      //unreachable
+            }                                               //unreachable
+            catch (System.InvalidOperationException)
+            {
+                System.Console.WriteLine("InCatch-3");
+                Throws();
+                System.Console.WriteLine("InCatch-4");      //unreachable
+            }                                               //unreachable
+            finally
+            {
+                System.Console.WriteLine("InFinally-1");
+                Throws();
+                System.Console.WriteLine("InFinally-2");    //unreachable
+            }                                               //unreachable
+        }                                                   //unreachable
     }
 }

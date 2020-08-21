@@ -5,6 +5,7 @@ using Mono.Collections.Generic;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 
 namespace coverlet.core.Instrumentation.Reachability
 {
@@ -31,7 +32,7 @@ namespace coverlet.core.Instrumentation.Reachability
             }
 
             public override string ToString()
-            => $"[{StartOffset}, {EndOffset}]";
+            => $"[IL_{StartOffset:x4}, IL_{EndOffset:x4}]";
         }
 
         private class BasicBlock
@@ -57,20 +58,28 @@ namespace coverlet.core.Instrumentation.Reachability
             public Instruction UnreachableAfter { get; }
 
             /// <summary>
+            /// If an exception is raised in this block, where control might branch to.
+            /// 
+            /// Note that this can happen even if the block's end is unreachable.
+            /// </summary>
+            public ImmutableArray<int> ExceptionBranchesTo { get; }
+
+            /// <summary>
             /// Mutable, records whether control can flow into the block,
             /// ie. whether it's head is reachable
             /// </summary>
             public bool HeadReachable { get; set; }
 
-            public BasicBlock(int startOffset, Instruction unreachableAfter, ImmutableArray<int> branchesTo)
+            public BasicBlock(int startOffset, Instruction unreachableAfter, ImmutableArray<int> branchesTo, ImmutableArray<int> exceptionBranchesTo)
             {
                 StartOffset = startOffset;
                 UnreachableAfter = unreachableAfter;
                 BranchesTo = branchesTo;
+                ExceptionBranchesTo = exceptionBranchesTo;
             }
 
             public override string ToString()
-            => $"{nameof(StartOffset)}={StartOffset}, {nameof(HeadReachable)}={HeadReachable}, {nameof(TailReachable)}={TailReachable}, {nameof(BranchesTo)}=({string.Join(", ", BranchesTo)}), {nameof(UnreachableAfter)}={UnreachableAfter}";
+            => $"{nameof(StartOffset)}=IL_{StartOffset:x4}, {nameof(HeadReachable)}={HeadReachable}, {nameof(TailReachable)}={TailReachable}, {nameof(BranchesTo)}=({string.Join(", ", BranchesTo.Select(b => $"IL_{b:x4}"))}), {nameof(ExceptionBranchesTo)}=({string.Join(", ", ExceptionBranchesTo.Select(b => $"IL_{b:x4}"))}), {nameof(UnreachableAfter)}={(UnreachableAfter != null ? $"IL_{UnreachableAfter:x4}" : "")}";
         }
 
         /// <summary>
@@ -86,7 +95,10 @@ namespace coverlet.core.Instrumentation.Reachability
             /// </summary>
             public int Offset { get; }
 
-            public bool HasMultiTargets => _TargetOffsets.Length > 0;
+            /// <summary>
+            /// Returns true if this branch has multiple targets.
+            /// </summary>
+            public bool HasMultiTargets => _TargetOffset == -1;
 
             private readonly int _TargetOffset;
 
@@ -137,15 +149,18 @@ namespace coverlet.core.Instrumentation.Reachability
 
             public BranchInstruction(int offset, ImmutableArray<int> targetOffset)
             {
-                if (targetOffset.Length < 1)
+                if (targetOffset.Length == 1)
                 {
-                    throw new ArgumentException("Must have at least 2 entries", nameof(targetOffset));
+                    throw new ArgumentException("Use single entry constructor for single targets", nameof(targetOffset));
                 }
 
                 Offset = offset;
                 _TargetOffset = -1;
                 _TargetOffsets = targetOffset;
             }
+
+            public override string ToString()
+            => $"IL_{Offset:x4}: {(HasMultiTargets ? string.Join(", ", TargetOffsets.Select(x => $"IL_{x:x4}")) : $"IL_{TargetOffset:x4}")}";
         }
 
         /// <summary>
@@ -182,7 +197,24 @@ namespace coverlet.core.Instrumentation.Reachability
                     OpCodes.Brfalse_S,
                     OpCodes.Brtrue,
                     OpCodes.Brtrue_S,
-                    OpCodes.Switch
+                    OpCodes.Switch,
+
+                    // These are forms of Br(_S) that are legal to use to exit
+                    //   an exception block
+                    //
+                    // So they're "weird" but not too weird for our purposes
+                    //
+                    // The somewhat nasty subtlety is that, within an exception block,
+                    //   it's perfectly legal to replace all normal branches with Leaves
+                    //   even if they don't actually exit the block.
+                    OpCodes.Leave,
+                    OpCodes.Leave_S,
+
+                    // these implicitly branch at the end of a filter or finally block
+                    //   their operands do not encode anything interesting, we have to
+                    //   look at exception handlers to figure out where they go to
+                    OpCodes.Endfilter,
+                    OpCodes.Endfinally
                 }
             );
 
@@ -195,7 +227,10 @@ namespace coverlet.core.Instrumentation.Reachability
                 new[]
                 {
                     OpCodes.Br,
-                    OpCodes.Br_S
+                    OpCodes.Br_S,
+                    OpCodes.Leave,
+                    OpCodes.Leave_S,
+                    OpCodes.Endfinally
                 }
             );
 
@@ -327,7 +362,7 @@ namespace coverlet.core.Instrumentation.Reachability
         ///     * if it is not head reachable (regardless of tail reachability), no instructions in it are reachable
         ///     * if it is only head reachable, all instructions up to and including the first call to a method that does not return are reachable
         /// </summary>
-        public ImmutableArray<UnreachableRange> FindUnreachableIL(Collection<Instruction> instrs)
+        public ImmutableArray<UnreachableRange> FindUnreachableIL(Collection<Instruction> instrs, Collection<ExceptionHandler> exceptionHandlers)
         {
             // no instructions, means nothing to... not reach
             if (instrs.Count == 0)
@@ -341,11 +376,107 @@ namespace coverlet.core.Instrumentation.Reachability
                 return ImmutableArray<UnreachableRange>.Empty;
             }
 
-            var brs = FindBranches(instrs);
+            var brs = FindBranches(instrs, exceptionHandlers);
 
             var lastInstr = instrs[instrs.Count - 1];
 
-            var blocks = CreateBasicBlocks(instrs, brs);
+            var blocks = CreateBasicBlocks(instrs, exceptionHandlers, brs);
+
+            // debug
+
+            var sb = new StringBuilder();
+            sb.AppendLine("Exception Handlers");
+            sb.AppendLine("------------------");
+            for (var i = 0; i < exceptionHandlers.Count; i++)
+            {
+                var handler = exceptionHandlers[i];
+
+                sb.AppendLine($"{i:00}: Try: (IL_{handler.TryStart.Offset:x4} - IL_{handler.TryEnd.Offset:x4}){(handler.FilterStart != null ? $", Filter: IL_{handler.FilterStart.Offset:x4}" : "")}, Handler: (IL_{handler.HandlerStart.Offset:x4}{(handler.HandlerEnd != null ? $" - IL_{handler.HandlerEnd.Offset:x4})" : "")})");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("Branches");
+            sb.AppendLine("--------");
+            for (var i = 0; i < brs.Length; i++)
+            {
+                var br = brs[i];
+
+                sb.AppendLine($"{i:00}: {br}");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("Blocks");
+            sb.AppendLine("------");
+            for (var i = 0; i < blocks.Length; i++)
+            {
+                var block = blocks[i];
+
+                sb.AppendLine($"{i:00}: {block}");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("Instructions");
+            sb.AppendLine("------------");
+            for (var i = 0; i < instrs.Count; i++)
+            {
+                var instr = instrs[i];
+
+                var blockStarts = blocks.Select((t, ix) => (Value: t, Index: ix)).Where(b => b.Value.StartOffset == instr.Offset);
+                var tryStarts = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.TryStart.Offset == instr.Offset);
+                var tryEnd = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.TryEnd.Offset == instr.Offset);
+                var filterStart = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.FilterStart != null && s.Value.FilterStart.Offset == instr.Offset);
+                var handlerStart = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.HandlerStart.Offset == instr.Offset);
+                var handlerStop = exceptionHandlers.Select((t, ix) => (Value: t, Index: ix)).Where(s => s.Value.HandlerEnd?.Offset == instr.Offset);
+                var branchesTo = brs.Select((t, ix) => (Value: t, Index: ix)).Where(b => b.Value.Offset == instr.Offset);
+                var branchesFrom = brs.Select((t, ix) => (Value: t, Index: ix)).Where(b => b.Value.HasMultiTargets ? b.Value.TargetOffsets.Contains(instr.Offset) : b.Value.TargetOffset == instr.Offset);
+
+                var hasSpecial = blockStarts.Any() || tryStarts.Any() || tryEnd.Any() || filterStart.Any() || handlerStart.Any() || handlerStop.Any() || branchesTo.Any() || branchesFrom.Any();
+
+                if (hasSpecial)
+                {
+                    sb.AppendLine();
+
+                    foreach (var x in blockStarts)
+                    {
+                        sb.AppendLine($"=== BLOCK {x.Index:00} ===");
+                    }
+                    foreach (var x in tryStarts)
+                    {
+                        sb.AppendLine($"--- try start {x.Index:00}");
+                    }
+                    foreach (var x in tryEnd)
+                    {
+                        sb.AppendLine($"--- try end {x.Index:00}");
+                    }
+                    foreach (var x in filterStart)
+                    {
+                        sb.AppendLine($"--- filter start {x.Index:00}");
+                    }
+                    foreach (var x in handlerStart)
+                    {
+                        sb.AppendLine($"--- handler start {x.Index:00}");
+                    }
+                    foreach (var x in handlerStop)
+                    {
+                        sb.AppendLine($"--- handler end {x.Index:00}");
+                    }
+                    foreach (var x in branchesTo)
+                    {
+                        sb.AppendLine($"--- branch {x.Index:00} -> {(x.Value.HasMultiTargets ? string.Join(", ", x.Value.TargetOffsets.Select(x => $"IL_{x:x4}")) : $"IL_{x.Value.TargetOffset:x4}")}");
+                    }
+                    foreach (var x in branchesFrom)
+                    {
+                        sb.AppendLine($"--- from branch {x.Index:00} at IL_{x.Value.Offset:x4}");
+                    }
+                }
+
+                sb.AppendLine(instr.ToString());
+            }
+
+            var debugStr = sb.ToString();
+
+            // end debug
+
             DetermineHeadReachability(blocks);
             return DetermineUnreachableRanges(blocks, lastInstr.Offset);
         }
@@ -353,52 +484,14 @@ namespace coverlet.core.Instrumentation.Reachability
         /// <summary>
         /// Discovers branches, including unconditional ones, in the given instruction stream.
         /// </summary>
-        private ImmutableArray<BranchInstruction> FindBranches(Collection<Instruction> instrs)
+        private ImmutableArray<BranchInstruction> FindBranches(Collection<Instruction> instrs, Collection<ExceptionHandler> exceptionHandlers)
         {
             var ret = ImmutableArray.CreateBuilder<BranchInstruction>();
             foreach (var i in instrs)
             {
                 if (BRANCH_OPCODES.Contains(i.OpCode))
                 {
-                    int? singleTargetOffset;
-                    ImmutableArray<int> multiTargetOffsets;
-
-                    if (i.Operand is Instruction[] multiTarget)
-                    {
-                        // it's a switch
-                        singleTargetOffset = null;
-
-                        multiTargetOffsets = ImmutableArray.Create(i.Next.Offset);
-                        foreach(var instr in multiTarget)
-                        {
-                            // in practice these are small arrays, so a scan should be fine
-                            if(multiTargetOffsets.Contains(instr.Offset))
-                            {
-                                continue;
-                            }
-
-                            multiTargetOffsets = multiTargetOffsets.Add(instr.Offset);
-                        }
-                    }
-                    else if (i.Operand is Instruction singleTarget)
-                    {
-                        // it's any of the B.*(_S)? instructions
-
-                        if (UNCONDITIONAL_BRANCH_OPCODES.Contains(i.OpCode))
-                        {
-                            multiTargetOffsets = ImmutableArray<int>.Empty;
-                            singleTargetOffset = singleTarget.Offset;
-                        }
-                        else
-                        {
-                            singleTargetOffset = null;
-                            multiTargetOffsets = ImmutableArray.Create(i.Next.Offset, singleTarget.Offset);
-                        }
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Unexpected operand when processing branch {i.Operand}: {i.Operand}");
-                    }
+                    var (singleTargetOffset, multiTargetOffsets) = GetInstructionTargets(i, exceptionHandlers);
 
                     if (singleTargetOffset != null)
                     {
@@ -412,6 +505,106 @@ namespace coverlet.core.Instrumentation.Reachability
             }
 
             return ret.ToImmutable();
+        }
+
+        /// <summary>
+        /// For a single instruction, determines all the places it might branch to.
+        /// </summary>
+        private static (int? SingleTargetOffset, ImmutableArray<int> MultiTargetOffsets) GetInstructionTargets(Instruction i, Collection<ExceptionHandler> exceptionHandlers)
+        {
+            int? singleTargetOffset;
+            ImmutableArray<int> multiTargetOffsets;
+
+            if (i.Operand is Instruction[] multiTarget)
+            {
+                // it's a switch
+                singleTargetOffset = null;
+
+                multiTargetOffsets = ImmutableArray.Create(i.Next.Offset);
+                foreach (var instr in multiTarget)
+                {
+                    // in practice these are small arrays, so a scan should be fine
+                    if (multiTargetOffsets.Contains(instr.Offset))
+                    {
+                        continue;
+                    }
+
+                    multiTargetOffsets = multiTargetOffsets.Add(instr.Offset);
+                }
+            }
+            else if (i.Operand is Instruction targetInstr)
+            {
+                // it's any of the B.*(_S)? or Leave(_S)? instructions
+
+                if (UNCONDITIONAL_BRANCH_OPCODES.Contains(i.OpCode))
+                {
+                    multiTargetOffsets = ImmutableArray<int>.Empty;
+                    singleTargetOffset = targetInstr.Offset;
+                }
+                else
+                {
+                    singleTargetOffset = null;
+                    multiTargetOffsets = ImmutableArray.Create(i.Next.Offset, targetInstr.Offset);
+                }
+            }
+            else if (i.OpCode == OpCodes.Endfilter)
+            {
+                // Endfilter is always the last instruction in a filter block, and no sort of control
+                //   flow is allowed so we can scan backwards to see find the block
+
+                ExceptionHandler filterForHandler = null;
+                foreach (var handler in exceptionHandlers)
+                {
+                    if (handler.FilterStart == null)
+                    {
+                        continue;
+                    }
+
+                    var startsAt = handler.FilterStart;
+                    var cur = startsAt;
+                    while (cur != null && cur.Offset < i.Offset)
+                    {
+                        cur = cur.Next;
+                    }
+
+                    if (cur != null && cur.Offset == i.Offset)
+                    {
+                        filterForHandler = handler;
+                        break;
+                    }
+                }
+
+                if (filterForHandler == null)
+                {
+                    throw new InvalidOperationException($"Could not find ExceptionHandler associated with {i}");
+                }
+
+                // filter can do one of two things:
+                //   - branch into handler
+                //   - percolate to another catch block, which might not be in this method
+                //
+                // so we chose to model this as an unconditional branch into the handler
+                singleTargetOffset = filterForHandler.HandlerStart.Offset;
+                multiTargetOffsets = ImmutableArray<int>.Empty;
+            }
+            else if (i.OpCode == OpCodes.Endfinally)
+            {
+                // Endfinally is very weird
+                //
+                // what it does, effectively is "take whatever branch would normally happen after the instruction
+                //   that left the paired try
+                //
+                // practically, this makes endfinally a branch with no target
+
+                singleTargetOffset = null;
+                multiTargetOffsets = ImmutableArray<int>.Empty;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unexpected operand when processing branch {i}");
+            }
+
+            return (singleTargetOffset, multiTargetOffsets);
         }
 
         /// <summary>
@@ -500,39 +693,63 @@ namespace coverlet.core.Instrumentation.Reachability
                         knownLive = knownLive.Push(reachableBlock);
                     }
                 }
+
+                // if the block is covered by an exception handler, then executing _any_ instruction in it
+                //   could conceivably cause those handlers to be visited
+                foreach(var exceptionHandlerOffset in block.ExceptionBranchesTo)
+                {
+                    var reachableHandler = blockLookup[exceptionHandlerOffset];
+                    knownLive = knownLive.Push(reachableHandler);
+                }
             }
         }
 
         /// <summary>
-        /// Create BasicBlocks from an instruction stream and branches.
+        /// Create BasicBlocks from an instruction stream, exception blocks, and branches.
         /// 
         /// Each block starts either at the start of the method, immediately after a branch or at a target for a branch,
         /// and ends with another branch, another branch target, or the end of the method.
         /// 
         /// "Tail reachability" is also calculated, which is whether the block can ever actually get past its last instruction.
         /// </summary>
-        private ImmutableArray<BasicBlock> CreateBasicBlocks(Collection<Instruction> instrs, ImmutableArray<BranchInstruction> branches)
+        private ImmutableArray<BasicBlock> CreateBasicBlocks(Collection<Instruction> instrs, Collection<ExceptionHandler> exceptionHandlers, ImmutableArray<BranchInstruction> branches)
         {
             // every branch-like instruction starts or stops a block
             var branchInstrLocs = branches.ToLookup(i => i.Offset);
             var branchInstrOffsets = branchInstrLocs.Select(k => k.Key).ToImmutableHashSet();
 
             // every target that might be branched to starts or stops a block
-            var branchTargetOffsets = ImmutableHashSet<int>.Empty;
+            var branchTargetOffsetsBuilder = ImmutableHashSet.CreateBuilder<int>();
             foreach (var branch in branches)
             {
                 if (branch.HasMultiTargets)
                 {
                     foreach (var target in branch.TargetOffsets)
                     {
-                        branchTargetOffsets = branchTargetOffsets.Add(target);
+                        branchTargetOffsetsBuilder.Add(target);
                     }
                 }
                 else
                 {
-                    branchTargetOffsets = branchTargetOffsets.Add(branch.TargetOffset);
+                    branchTargetOffsetsBuilder.Add(branch.TargetOffset);
                 }
             }
+
+            // every exception handler an entry point
+            //   either it's handler, or it's filter (if present)
+            foreach (var handler in exceptionHandlers)
+            {
+                if (handler.FilterStart != null)
+                {
+                    branchTargetOffsetsBuilder.Add(handler.FilterStart.Offset);
+                }
+                else
+                {
+                    branchTargetOffsetsBuilder.Add(handler.HandlerStart.Offset);
+                }
+            }
+
+            var branchTargetOffsets = branchTargetOffsetsBuilder.ToImmutable();
 
             // ending the method is also important
             var endOfMethodOffset = instrs[instrs.Count - 1].Offset;
@@ -567,13 +784,13 @@ namespace coverlet.core.Instrumentation.Reachability
 
                     // figure out all the different places the basic block could lead to
                     ImmutableArray<int> goesTo;
-                    if(branchesAtLoc.Any())
+                    if (branchesAtLoc.Any())
                     {
                         // it ends in a branch, where all does it branch?
                         goesTo = ImmutableArray<int>.Empty;
-                        foreach(var branch in branchesAtLoc)
+                        foreach (var branch in branchesAtLoc)
                         {
-                            if(branch.HasMultiTargets)
+                            if (branch.HasMultiTargets)
                             {
                                 goesTo = goesTo.AddRange(branch.TargetOffsets);
                             }
@@ -594,7 +811,49 @@ namespace coverlet.core.Instrumentation.Reachability
                         goesTo = ImmutableArray<int>.Empty;
                     }
 
-                    blocks = blocks.Add(new BasicBlock(blockStartedAt.Value, unreachableAfter, goesTo));
+                    var exceptionSwitchesTo = ImmutableArray<int>.Empty;
+
+                    // if the block is covered by any exception handlers then
+                    //   it is possible that it will branch to its handler block
+                    foreach (var handler in exceptionHandlers)
+                    {
+                        var tryStart = handler.TryStart.Offset;
+                        var tryEnd = handler.TryEnd.Offset;
+
+                        var containsStartOfTry =
+                            tryStart >= blockStartedAt.Value &&
+                            tryStart <= i.Offset;
+
+                        var containsEndOfTry =
+                            tryEnd >= blockStartedAt.Value &&
+                            tryEnd <= i.Offset;
+
+                        var blockInsideTry = blockStartedAt.Value >= tryStart && i.Offset <= tryEnd;
+
+                        // blocks do not necessarily align to the TRY part of exception handlers, so we need to handle three cases:
+                        //  - the try _starts_ in the block
+                        //  - the try _ends_ in the block
+                        //  - the try complete covers the block, but starts and ends before and after it (respectively)
+                        var tryOverlapsBlock = containsStartOfTry || containsEndOfTry || blockInsideTry;
+
+                        if (!tryOverlapsBlock)
+                        {
+                            continue;
+                        }
+
+                        // if there's a filter, that runs first
+                        if (handler.FilterStart != null)
+                        {
+                            exceptionSwitchesTo = exceptionSwitchesTo.Add(handler.FilterStart.Offset);
+                        }
+                        else
+                        {
+                            // otherwise, go straight to the handler
+                            exceptionSwitchesTo = exceptionSwitchesTo.Add(handler.HandlerStart.Offset);
+                        }
+                    }
+
+                    blocks = blocks.Add(new BasicBlock(blockStartedAt.Value, unreachableAfter, goesTo, exceptionSwitchesTo));
 
                     blockStartedAt = null;
                     unreachableAfter = null;

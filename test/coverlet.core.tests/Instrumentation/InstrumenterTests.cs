@@ -665,13 +665,17 @@ namespace Coverlet.Core.Instrumentation.Tests
                     // AlsoThrows
                     134, 135,
                     // CallsGenericClassDoesNotReturn
-                    140, 141, 142, 143, 144
+                    140, 141, 142, 143, 144,
+                    // WithLeave
+                    147, 149, 150, 151, 152, 153, 154, 155, 156, 159, 161, 163, 166, 167, 168,
+                    // FiltersAndFinallies
+                    171, 173, 174, 175, 176, 177, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 192, 193, 194, 195, 196, 197
                 };
             var notReachableLines =
                 new[]
                 {
                     // NoBranches
-                    15, 
+                    15,
                     16,
                     // If
                     26, 27,
@@ -684,7 +688,11 @@ namespace Coverlet.Core.Instrumentation.Tests
                     // CallsGenericMethodDoesNotReturn
                     127, 128,
                     // CallsGenericClassDoesNotReturn
-                    143, 144
+                    143, 144,
+                    // WithLeave
+                    163, 164,
+                    // FiltersAndFinallies
+                    176, 177, 183, 184, 189, 190, 195, 196, 197
                 };
 
             var expectedToBeInstrumented = allInstrumentableLines.Except(notReachableLines).ToArray();
