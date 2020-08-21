@@ -73,6 +73,7 @@ namespace Coverlet.Collector.Tests
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.UseSourceLinkElementName, "false");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.SingleHitElementName, "true");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeTestAssemblyElementName, "true");
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.SkipAutoProps, "true");
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
@@ -90,10 +91,11 @@ namespace Coverlet.Collector.Tests
             Assert.Equal("[coverlet.*]*", coverletSettings.ExcludeFilters[0]);
             Assert.Equal("[coverlet.*.tests?]*", coverletSettings.ExcludeFilters[1]);
             Assert.Equal("[coverlet.*.tests.*]*", coverletSettings.ExcludeFilters[2]);
-            
+
             Assert.False(coverletSettings.UseSourceLink);
             Assert.True(coverletSettings.SingleHit);
             Assert.True(coverletSettings.IncludeTestAssembly);
+            Assert.True(coverletSettings.SkipAutoProps);
         }
 
         [Fact]
@@ -104,7 +106,7 @@ namespace Coverlet.Collector.Tests
             var configElement = doc.CreateElement("Configuration");
             this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName);
             this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName);
-            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName);    
+            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName);
             this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName);
             this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName);
 

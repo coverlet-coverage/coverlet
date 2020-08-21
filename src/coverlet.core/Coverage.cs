@@ -24,6 +24,7 @@ namespace Coverlet.Core
         public string MergeWith { get; set; }
         public bool UseSourceLink { get; set; }
         public string[] DoesNotReturnAttributes { get; set; }
+        public bool SkipAutoProps { get; set; }
     }
 
     internal class Coverage
@@ -40,6 +41,7 @@ namespace Coverlet.Core
         private string _mergeWith;
         private bool _useSourceLink;
         private string[] _doesNotReturnAttributes;
+        private bool _skipAutoProps;
         private ILogger _logger;
         private IInstrumentationHelper _instrumentationHelper;
         private IFileSystem _fileSystem;
@@ -76,6 +78,7 @@ namespace Coverlet.Core
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
             _cecilSymbolHelper = cecilSymbolHelper;
+            _skipAutoProps = parameters.SkipAutoProps;
 
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
@@ -118,7 +121,20 @@ namespace Coverlet.Core
                     continue;
                 }
 
-                var instrumenter = new Instrumenter(module, _identifier, _excludeFilters, _includeFilters, _excludedSourceFiles, _excludeAttributes, _doesNotReturnAttributes, _singleHit, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator, _cecilSymbolHelper);
+                var instrumenter = new Instrumenter(module,
+                                                    _identifier,
+                                                    _excludeFilters,
+                                                    _includeFilters,
+                                                    _excludedSourceFiles,
+                                                    _excludeAttributes,
+                                                    _doesNotReturnAttributes,
+                                                    _singleHit,
+                                                    _skipAutoProps,
+                                                    _logger,
+                                                    _instrumentationHelper,
+                                                    _fileSystem,
+                                                    _sourceRootTranslator,
+                                                    _cecilSymbolHelper);
 
                 if (instrumenter.CanInstrument())
                 {

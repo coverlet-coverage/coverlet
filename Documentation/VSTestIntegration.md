@@ -79,6 +79,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 |SingleHit       | Specifies whether to limit code coverage hit reporting to a single hit for each location.| 
 |UseSourceLink   | Specifies whether to use SourceLink URIs in place of file system paths.                  |
 |IncludeTestAssembly    | Include coverage of the test assembly.                  |
+|SkipAutoProps    | Neither track nor record auto-implemented properties.                  |
 
 How to specify these options via runsettings?
 ```
@@ -97,6 +98,7 @@ How to specify these options via runsettings?
           <SingleHit>false</SingleHit>
           <UseSourceLink>true</UseSourceLink>
           <IncludeTestAssembly>true</IncludeTestAssembly>
+          <SkipAutoProps>true</SkipAutoProps>
         </Configuration>
       </DataCollector>
     </DataCollectors>
@@ -115,13 +117,13 @@ Take a look at our [`HelloWorld`](Examples/VSTest/HelloWorld/HowTo.md) sample.
 
 #### Passing runsettings arguments through commandline
 
-You can avoid to pass `runsettings` file to `dotnet test` driver and use the xml flat syntax command line.  
-For instance if you want to set the `Format` element runsettings option you can use this syntax
+You can avoid passing a `runsettings` file to `dotnet test` driver by using the xml flat syntax in the command line.  
+For instance if you want to set the `Format` element as a runsettings option you can use this syntax:
 ```
 dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
 ```
 
-Take a look here for further informations https://github.com/microsoft/vstest-docs/blob/master/docs/RunSettingsArguments.md
+Take a look here for further information: https://github.com/microsoft/vstest-docs/blob/master/docs/RunSettingsArguments.md
 
 ## How it works
 

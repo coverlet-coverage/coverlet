@@ -36,6 +36,7 @@ Options:
   --single-hit             Specifies whether to limit code coverage hit reporting to a single hit for each location.
   --merge-with             Path to existing coverage result to merge.
   --use-source-link        Specifies whether to use SourceLink URIs in place of file system paths.
+  --skipautoprops          Neither track nor record auto-implemented properties.
 ```
 
 NB. For a [multiple value] options you have to specify values multiple times i.e.
