@@ -39,7 +39,8 @@
       SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
       UseSourceLink="$(UseSourceLink)"
-      SkipAutoProps="$(SkipAutoProps)" >
+      SkipAutoProps="$(SkipAutoProps)" 
+      DoesNotReturnAttribute="$(DoesNotReturnAttribute)">
       <Output TaskParameter="InstrumenterState" PropertyName="InstrumenterState"/>
     </Coverlet.MSbuild.Tasks.InstrumentationTask>
   </Target>

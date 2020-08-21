@@ -6,7 +6,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace coverlet.core.Instrumentation.Reachability
+namespace Coverlet.Core.Instrumentation.Reachability
 {
     /// <summary>
     /// Helper for find unreachable IL instructions.

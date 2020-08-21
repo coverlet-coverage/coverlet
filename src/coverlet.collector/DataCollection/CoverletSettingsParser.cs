@@ -43,6 +43,7 @@ namespace Coverlet.Collector.DataCollection
                 coverletSettings.SingleHit = ParseSingleHit(configurationElement);
                 coverletSettings.IncludeTestAssembly = ParseIncludeTestAssembly(configurationElement);
                 coverletSettings.SkipAutoProps = ParseSkipAutoProps(configurationElement);
+                coverletSettings.DoesNotReturnAttributes = ParseDoesNotReturnAttributes(configurationElement);
             }
 
             coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
@@ -216,6 +217,17 @@ namespace Coverlet.Collector.DataCollection
             XmlElement skipAutoPropsElement = configurationElement[CoverletConstants.SkipAutoProps];
             bool.TryParse(skipAutoPropsElement?.InnerText, out bool skipAutoProps);
             return skipAutoProps;
+        }
+
+        /// <summary>
+        /// Parse attributes that mark methods that do not return.
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <returns>DoesNotReturn attributes</returns>
+        private string[] ParseDoesNotReturnAttributes(XmlElement configurationElement)
+        {
+            XmlElement doesNotReturnAttributesElement = configurationElement[CoverletConstants.DoesNotReturnAttributesElementName];
+            return this.SplitElement(doesNotReturnAttributesElement);
         }
 
         /// <summary>

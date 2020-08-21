@@ -40,6 +40,8 @@ namespace Coverlet.MSbuild.Tasks
 
         public bool SkipAutoProps { get; set; }
 
+        public string DoesNotReturnAttribute { get; set; }
+
         [Output]
         public ITaskItem InstrumenterState { get; set; }
 
@@ -98,7 +100,8 @@ namespace Coverlet.MSbuild.Tasks
                     SingleHit = SingleHit,
                     MergeWith = MergeWith,
                     UseSourceLink = UseSourceLink,
-                    SkipAutoProps = SkipAutoProps
+                    SkipAutoProps = SkipAutoProps,
+                    DoesNotReturnAttributes = DoesNotReturnAttribute?.Split(',')
                 };
 
                 Coverage coverage = new Coverage(Path,

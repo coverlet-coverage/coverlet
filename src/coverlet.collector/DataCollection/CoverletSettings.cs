@@ -68,6 +68,11 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         public bool SkipAutoProps { get; set; }
 
+        /// <summary>
+        /// Attributes that mark methods that never return.
+        /// </summary>
+        public string[] DoesNotReturnAttributes { get; set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -83,6 +88,7 @@ namespace Coverlet.Collector.DataCollection
             builder.AppendFormat("SingleHit: '{0}'", SingleHit);
             builder.AppendFormat("IncludeTestAssembly: '{0}'", IncludeTestAssembly);
             builder.AppendFormat("SkipAutoProps: '{0}'", SkipAutoProps);
+            builder.AppendFormat("DoesNotReturnAttributes: '{0}'", string.Join(",", DoesNotReturnAttributes ?? Enumerable.Empty<string>()));
 
             return builder.ToString();
         }
