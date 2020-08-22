@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+
 using Coverlet.Core.Instrumentation.Reachability;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Attributes;
