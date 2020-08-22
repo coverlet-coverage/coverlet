@@ -45,7 +45,6 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _branchesInCompiledGeneratedClass;
         private List<(MethodDefinition, int)> _excludedMethods;
         private List<string> _excludedCompilerGeneratedTypes;
-        private IEnumerable<MethodDefinition> _compilerGeneratedMethods;
 
         public bool SkipModule { get; set; } = false;
 
@@ -423,8 +422,8 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentType(TypeDefinition type)
         {
             var methods = type.GetMethods();
-            _compilerGeneratedMethods = type.NestedTypes.Where(x =>
-                    x.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
+            var compilerGeneratedMethods = type.NestedTypes
+                .Where(x => x.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
                 .SelectMany(x => x.Methods.Where(y => y.DebugInformation.HasSequencePoints)).ToList();
 
             // We keep ordinal index because it's the way used by compiler for generated types/methods to 
@@ -463,7 +462,7 @@ namespace Coverlet.Core.Instrumentation
 
                 if (!customAttributes.Any(IsExcludeAttribute))
                 {
-                    InstrumentMethod(method);
+                    InstrumentMethod(method, compilerGeneratedMethods);
                 }
                 else
                 {
@@ -476,12 +475,12 @@ namespace Coverlet.Core.Instrumentation
             {
                 if (!ctor.CustomAttributes.Any(IsExcludeAttribute))
                 {
-                    InstrumentMethod(ctor);
+                    InstrumentMethod(ctor, compilerGeneratedMethods);
                 }
             }
         }
 
-        private void InstrumentMethod(MethodDefinition method)
+        private void InstrumentMethod(MethodDefinition method, IEnumerable<MethodDefinition> compilerGeneratedMethods)
         {
             var sourceFile = method.DebugInformation.SequencePoints.Select(s => _sourceRootTranslator.ResolveFilePath(s.Document.Url)).FirstOrDefault();
             if (!string.IsNullOrEmpty(sourceFile) && _excludedFilesHelper.Exclude(sourceFile))
@@ -500,10 +499,10 @@ namespace Coverlet.Core.Instrumentation
             if (method.IsNative)
                 return;
 
-            InstrumentIL(method);
+            InstrumentIL(method, compilerGeneratedMethods);
         }
 
-        private void InstrumentIL(MethodDefinition method)
+        private void InstrumentIL(MethodDefinition method, IEnumerable<MethodDefinition> compilerGeneratedMethods)
         {
             method.Body.SimplifyMacros();
             ILProcessor processor = method.Body.GetILProcessor();
@@ -528,7 +527,7 @@ namespace Coverlet.Core.Instrumentation
 
                 if (sequencePoint != null && !sequencePoint.IsHidden)
                 {
-                    var targets = AddInstrumentationCode(method, processor, instruction, sequencePoint);
+                    var targets = AddInstrumentationCode(method, compilerGeneratedMethods, processor, instruction, sequencePoint);
                     foreach (var target in targets)
                     {
                         foreach (var _instruction in processor.Body.Instructions)
@@ -568,7 +567,7 @@ namespace Coverlet.Core.Instrumentation
             method.Body.OptimizeMacros();
         }
 
-        private IEnumerable<Instruction> AddInstrumentationCode(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
+        private IEnumerable<Instruction> AddInstrumentationCode(MethodDefinition method, IEnumerable<MethodDefinition> compilerGeneratedMethods, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint)
         {
             if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(sequencePoint.Document.Url), out var document))
             {
@@ -579,15 +578,15 @@ namespace Coverlet.Core.Instrumentation
 
             if (sequencePoint.StartLine != sequencePoint.EndLine)
             {
-                return AddInstrumentationCodeForMultiLineSequencePoint(method, processor, instruction,sequencePoint, document);
+                return AddInstrumentationCodeForMultiLineSequencePoint(method, compilerGeneratedMethods, processor, instruction, sequencePoint, document);
             }
             return new []{AddInstrumentationCodeForSingleLineSequencePoint(method, processor, instruction, sequencePoint, document)};
         }
 
-        private IEnumerable<Instruction> AddInstrumentationCodeForMultiLineSequencePoint(MethodDefinition method, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint, Document document)
+        private IEnumerable<Instruction> AddInstrumentationCodeForMultiLineSequencePoint(MethodDefinition method, IEnumerable<MethodDefinition> compilerGeneratedMethods, ILProcessor processor, Instruction instruction, SequencePoint sequencePoint, Document document)
         {
             List<Instruction> instructions = new List<Instruction>();
-            var childSequencePoints = GetChildSequencePoints(sequencePoint).ToList();
+            var childSequencePoints = GetChildSequencePoints(sequencePoint, compilerGeneratedMethods).ToList();
             if (childSequencePoints.Any())
             {
                 instructions.AddRange(AddInstrumentationInstructionsWhenChildSequencePointsExist(method, processor, instruction, sequencePoint, childSequencePoints, document));
@@ -633,9 +632,9 @@ namespace Coverlet.Core.Instrumentation
             return AddInstrumentationInstructions(method, processor, instruction, _result.HitCandidates.Count - 1);
         }
 
-        private IEnumerable<SequencePoint> GetChildSequencePoints(SequencePoint sequencePoint)
+        private IEnumerable<SequencePoint> GetChildSequencePoints(SequencePoint sequencePoint, IEnumerable<MethodDefinition> compilerGeneratedMethods)
         {
-            return _compilerGeneratedMethods.SelectMany(x =>
+            return compilerGeneratedMethods.SelectMany(x =>
                 x.DebugInformation.SequencePoints.Where(y =>
                     y.StartLine >= sequencePoint.StartLine && y.EndLine <= sequencePoint.EndLine));
         }
