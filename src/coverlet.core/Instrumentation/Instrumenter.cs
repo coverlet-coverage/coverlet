@@ -190,7 +190,7 @@ namespace Coverlet.Core.Instrumentation
         }
 
         // Have to do this before we start writing to a module, as we'll get into file
-        //   locking issues if we do it while writing.
+        // locking issues if we do it while writing.
         private void CreateReachabilityHelper()
         {
             using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read))
