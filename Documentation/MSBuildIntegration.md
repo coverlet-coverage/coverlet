@@ -44,6 +44,14 @@ To specify a directory where all results will be written to (especially if using
 dotnet test /p:CollectCoverage=true /p:CoverletOutput='./results/'
 ```
 
+The coverlet MSBuild task sets the `CoverletReport` MSBuild item so that you can easily use the produced coverlet reports. For example, using [ReportGenerator](https://github.com/danielpalme/ReportGenerator#usage--command-line-parameters) to generate an html coverage report.
+
+```xml
+<Target Name="GenerateHtmlCoverageReport" AfterTargets="GenerateCoverageResultAfterTest">
+  <ReportGenerator ReportFiles="@(CoverletReport)" TargetDirectory="../html-coverage-report" />
+</Target>
+```
+
 ### TeamCity Output
 
 Coverlet can output basic code coverage statistics using [TeamCity service messages](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages).

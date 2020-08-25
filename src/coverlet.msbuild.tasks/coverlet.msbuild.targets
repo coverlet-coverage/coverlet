@@ -66,7 +66,9 @@
       ThresholdType="$(ThresholdType)"
       ThresholdStat="$(ThresholdStat)"
       InstrumenterState="$(InstrumenterState)"
-      CoverletMultiTargetFrameworksCurrentTFM="$(_coverletMultiTargetFrameworksCurrentTFM)" />
+      CoverletMultiTargetFrameworksCurrentTFM="$(_coverletMultiTargetFrameworksCurrentTFM)">
+      <Output TaskParameter="ReportItems" ItemName="CoverletReport" />
+    </Coverlet.MSbuild.Tasks.CoverageResultTask>
   </Target>
 
   <Target Name="GenerateCoverageResultAfterTest"

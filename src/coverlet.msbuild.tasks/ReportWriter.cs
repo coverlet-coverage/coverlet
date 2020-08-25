@@ -20,7 +20,7 @@ namespace Coverlet.MSbuild.Tasks
             => (_coverletMultiTargetFrameworksCurrentTFM, _directory, _output, _reporter, _fileSystem, _console, _result) =
                 (coverletMultiTargetFrameworksCurrentTFM, directory, output, reporter, fileSystem, console, result);
 
-        public void WriteReport()
+        public string WriteReport()
         {
             string filename = Path.GetFileName(_output);
 
@@ -48,6 +48,7 @@ namespace Coverlet.MSbuild.Tasks
             string report = Path.Combine(_directory, filename);
             _console.WriteLine($"  Generating report '{report}'");
             _fileSystem.WriteAllText(report, _reporter.Report(_result));
+            return report;
         }
     }
 }
