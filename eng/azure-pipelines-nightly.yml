@@ -6,7 +6,7 @@ steps:
     version: 2.2.402
 - task: UseDotNet@2
   inputs:
-    version: 3.1.300
+    version: 3.1.401
 - powershell:
     .\eng\nightly.ps1 -apiKey $env:APIKEY -source $env:SOURCE
   ignoreLASTEXITCODE: true
