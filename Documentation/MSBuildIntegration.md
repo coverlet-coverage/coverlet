@@ -109,7 +109,7 @@ dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line /p:Thr
 
 ### Attributes
 
-You can ignore a method an entire class or assembly from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
+You can ignore a method, an entire class or assembly from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
 
 You can also ignore additional attributes by using the `ExcludeByAttribute` property (short name, i.e. the type name without the namespace, supported only):
 
