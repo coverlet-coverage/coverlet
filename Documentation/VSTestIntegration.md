@@ -80,6 +80,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 |UseSourceLink   | Specifies whether to use SourceLink URIs in place of file system paths.                  |
 |IncludeTestAssembly    | Include coverage of the test assembly.                  |
 |SkipAutoProps    | Neither track nor record auto-implemented properties.                  |
+|DoesNotReturnAttribute    | Methods marked with these attributes are known not to return, statements following them will be excluded from coverage |
 
 How to specify these options via runsettings?
 ```

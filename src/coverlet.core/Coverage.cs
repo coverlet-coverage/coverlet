@@ -23,6 +23,7 @@ namespace Coverlet.Core
         public bool SingleHit { get; set; }
         public string MergeWith { get; set; }
         public bool UseSourceLink { get; set; }
+        public string[] DoesNotReturnAttributes { get; set; }
         public bool SkipAutoProps { get; set; }
     }
 
@@ -39,6 +40,7 @@ namespace Coverlet.Core
         private bool _singleHit;
         private string _mergeWith;
         private bool _useSourceLink;
+        private string[] _doesNotReturnAttributes;
         private bool _skipAutoProps;
         private ILogger _logger;
         private IInstrumentationHelper _instrumentationHelper;
@@ -70,6 +72,7 @@ namespace Coverlet.Core
             _singleHit = parameters.SingleHit;
             _mergeWith = parameters.MergeWith;
             _useSourceLink = parameters.UseSourceLink;
+            _doesNotReturnAttributes = parameters.DoesNotReturnAttributes;
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
@@ -124,6 +127,7 @@ namespace Coverlet.Core
                                                     _includeFilters,
                                                     _excludedSourceFiles,
                                                     _excludeAttributes,
+                                                    _doesNotReturnAttributes,
                                                     _singleHit,
                                                     _skipAutoProps,
                                                     _logger,

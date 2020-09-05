@@ -63,6 +63,7 @@ namespace Coverlet.Console
             CommandOption skipAutoProp = app.Option("--skipautoprops", "Neither track nor record auto-implemented properties.", CommandOptionType.NoValue);
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
+            CommandOption doesNotReturnAttributes = app.Option("--does-not-return-attribute", "Attributes that mark methods that do not return.", CommandOptionType.MultipleValue);
 
             app.OnExecute(() =>
             {
@@ -89,7 +90,8 @@ namespace Coverlet.Console
                     SingleHit = singleHit.HasValue(),
                     MergeWith = mergeWith.Value(),
                     UseSourceLink = useSourceLink.HasValue(),
-                    SkipAutoProps = skipAutoProp.HasValue()
+                    SkipAutoProps = skipAutoProp.HasValue(),
+                    DoesNotReturnAttributes = doesNotReturnAttributes.Values.ToArray()
                 };
 
                 Coverage coverage = new Coverage(module.Value,

@@ -28,7 +28,8 @@ namespace Coverlet.Collector.DataCollection
                 SingleHit = settings.SingleHit,
                 MergeWith = settings.MergeWith,
                 UseSourceLink = settings.UseSourceLink,
-                SkipAutoProps = settings.SkipAutoProps
+                SkipAutoProps = settings.SkipAutoProps,
+                DoesNotReturnAttributes = settings.DoesNotReturnAttributes
             };
 
             return new Coverage(

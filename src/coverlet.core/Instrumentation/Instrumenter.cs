@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
+using Coverlet.Core.Instrumentation.Reachability;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Symbols;
@@ -45,6 +46,8 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _branchesInCompiledGeneratedClass;
         private List<(MethodDefinition, int)> _excludedMethods;
         private List<string> _excludedCompilerGeneratedTypes;
+        private readonly string[] _doesNotReturnAttributes;
+        private ReachabilityHelper _reachabilityHelper;
 
         public bool SkipModule { get; set; } = false;
 
@@ -55,6 +58,7 @@ namespace Coverlet.Core.Instrumentation
             string[] includeFilters,
             string[] excludedFiles,
             string[] excludedAttributes,
+            string[] doesNotReturnAttributes,
             bool singleHit,
             bool skipAutoProps,
             ILogger logger,
@@ -68,17 +72,7 @@ namespace Coverlet.Core.Instrumentation
             _excludeFilters = excludeFilters;
             _includeFilters = includeFilters;
             _excludedFilesHelper = new ExcludedFilesHelper(excludedFiles, logger);
-            _excludedAttributes = (excludedAttributes ?? Array.Empty<string>())
-                // In case the attribute class ends in "Attribute", but it wasn't specified.
-                // Both names are included (if it wasn't specified) because the attribute class might not actually end in the prefix.
-                .SelectMany(a => a.EndsWith("Attribute") ? new[] { a } : new[] { a, $"{a}Attribute" })
-                // The default custom attributes used to exclude from coverage.
-                .Union(new List<string>()
-                {
-                    nameof(ExcludeFromCoverageAttribute),
-                    nameof(ExcludeFromCodeCoverageAttribute)
-                })
-                .ToArray();
+            _excludedAttributes = PrepareAttributes(excludedAttributes, nameof(ExcludeFromCoverageAttribute), nameof(ExcludeFromCodeCoverageAttribute));
             _singleHit = singleHit;
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
             _logger = logger;
@@ -86,7 +80,20 @@ namespace Coverlet.Core.Instrumentation
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
             _cecilSymbolHelper = cecilSymbolHelper;
+            _doesNotReturnAttributes = PrepareAttributes(doesNotReturnAttributes, nameof(DoesNotReturnAttribute));
             _skipAutoProps = skipAutoProps;
+        }
+
+        private static string[] PrepareAttributes(IEnumerable<string> providedAttrs, params string[] defaultAttrs)
+        {
+            return
+                (providedAttrs ?? Array.Empty<string>())
+                // In case the attribute class ends in "Attribute", but it wasn't specified.
+                // Both names are included (if it wasn't specified) because the attribute class might not actually end in the prefix.
+                .SelectMany(a => a.EndsWith("Attribute") ? new[] { a } : new[] { a, $"{a}Attribute" })
+                // The default custom attributes used to exclude from coverage.
+                .Union(defaultAttrs)
+                .ToArray();
         }
 
         public bool CanInstrument()
@@ -183,8 +190,31 @@ namespace Coverlet.Core.Instrumentation
             return _isCoreLibrary && type.FullName == "System.Threading.Interlocked";
         }
 
+        // Have to do this before we start writing to a module, as we'll get into file
+        // locking issues if we do it while writing.
+        private void CreateReachabilityHelper()
+        {
+            using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read))
+            using (var resolver = new NetstandardAwareAssemblyResolver(_module, _logger))
+            {
+                resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
+                var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
+                if (_isCoreLibrary)
+                {
+                    parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
+                }
+
+                using (var module = ModuleDefinition.ReadModule(stream, parameters))
+                {
+                    _reachabilityHelper = ReachabilityHelper.CreateForModule(module, _doesNotReturnAttributes, _logger);
+                }
+            }
+        }
+
         private void InstrumentModule()
         {
+            CreateReachabilityHelper();
+
             using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
             using (var resolver = new NetstandardAwareAssemblyResolver(_module, _logger))
             {
@@ -509,14 +539,32 @@ namespace Coverlet.Core.Instrumentation
 
             var branchPoints = _cecilSymbolHelper.GetBranchPoints(method);
 
+            var unreachableRanges = _reachabilityHelper.FindUnreachableIL(processor.Body.Instructions, processor.Body.ExceptionHandlers);
+            var currentUnreachableRangeIx = 0;
+
             for (int n = 0; n < count; n++)
             {
                 var instruction = processor.Body.Instructions[index];
                 var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
                 var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
 
-                // Check if the instruction is coverable
-                if (_cecilSymbolHelper.SkipNotCoverableInstruction(method, instruction))
+                // make sure we're looking at the correct unreachable range (if any)
+                var instrOffset = instruction.Offset;
+                while (currentUnreachableRangeIx < unreachableRanges.Length && instrOffset > unreachableRanges[currentUnreachableRangeIx].EndOffset)
+                {
+                    currentUnreachableRangeIx++;
+                }
+
+                // determine if the unreachable
+                var isUnreachable = false;
+                if (currentUnreachableRangeIx < unreachableRanges.Length)
+                {
+                    var range = unreachableRanges[currentUnreachableRangeIx];
+                    isUnreachable = instrOffset >= range.StartOffset && instrOffset <= range.EndOffset;
+                }
+
+                // Check is both reachable, _and_ coverable
+                if (isUnreachable || _cecilSymbolHelper.SkipNotCoverableInstruction(method, instruction))
                 {
                     index++;
                     continue;

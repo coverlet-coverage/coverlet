@@ -21,5 +21,6 @@
         public const string DefaultExcludeFilter = "[coverlet.*]*";
         public const string InProcDataCollectorName = "CoverletInProcDataCollector";
         public const string SkipAutoProps = "SkipAutoProps";
+        public const string DoesNotReturnAttributesElementName = "DoesNotReturnAttribute";
     }
 }
