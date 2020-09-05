@@ -12,8 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -Fix anonymous delegate compiler generate bug [896](https://github.com/coverlet-coverage/coverlet/pull/896)  
 
 ### Added
--Skip autoprops feature [912](https://github.com/coverlet-coverage/coverlet/pull/912)
-
+-Skip autoprops feature [912](https://github.com/coverlet-coverage/coverlet/pull/912)  
+-Exclude code that follows [DoesNotReturn] from code coverage [904](https://github.com/coverlet-coverage/coverlet/pull/904) by https://github.com/kevin-montrose
 ## Release date 2020-05-30
 ### Packages  
 coverlet.msbuild 2.9.0  
