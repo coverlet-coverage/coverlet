@@ -181,6 +181,6 @@ Stack Trace:
 +---------+------+--------+--------+
 ```
 
-SUT assembly is also not listed in MSBuild logs - "Instrumented module" is missing for your dll.
+SUT(System Under Test) assembly is also not listed in MSBuild logs - "Instrumented module" is missing for your dll.
 
 *Solution*: Check whether deterministic build is turned on for your solution, if so, follow instructions how to handle [Deterministic build](DeterministicBuild.md).
