@@ -1,17 +1,17 @@
 # Known Issues
 
-## 1) VSTest stops process execution early(`dotnet test`)  
+## 1) VSTest stops process execution early(`dotnet test`)
 
-*Affected drivers*: msbuild(`dotnet test`) , dotnet tool(if you're using ` --targetargs "test ... --no-build"`)  
+*Affected drivers*: msbuild(`dotnet test`) , dotnet tool(if you're using ` --targetargs "test ... --no-build"`)
 
- *Symptoms:* 
+ *Symptoms:*
  * warning or error like
 
- `Unable to read beyond end of stream`  
+ `Unable to read beyond end of stream`
 
  `warning : [coverlet] Hits file:'C:\Users\REDACTED\AppData\Local\Temp\testApp_ac32258b-fd4a-4bb4-824c-a79061e97c31' not found for module: 'testApp'`
 
- *  zero coverage result (often only on CI but not on local)  
+ *  zero coverage result (often only on CI but not on local)
 ```
 Calculating coverage result...
 C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\2.6.0\build\netstandard2.0\coverlet.msbuild.targets(21,5): warning : [coverlet] Hits file:'C:\Users\REDACTED\AppData\Local\Temp\testApp_ac32258b-fd4a-4bb4-824c-a79061e97c31' not found for module: 'testApp' [C:\Users\REDACTED\Documents\repo\testapp\testapp.Tests\testapp.Tests.csproj]
@@ -35,7 +35,7 @@ C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\2.6.0\build\netstandard2.0\co
 +---------+------+--------+--------+
 ```
 
-The issue is related to vstest platform https://github.com/microsoft/vstest/issues/1900#issuecomment-457488472  
+The issue is related to vstest platform https://github.com/microsoft/vstest/issues/1900#issuecomment-457488472
 ```
 However if testhost doesn't shut down within 100ms(as the execution is completed, we expect it to shutdown fast). vstest.console forcefully kills the process.
 ```
@@ -44,21 +44,21 @@ Coverlet collect and write hits data on process exist, if for some reason proces
 This happen also if there are other "piece of code" during testing that slow down process exit.
 We found problem for instance with test that uses RabbitMQ.
 
-*Solution:* 
-The only way to solve this issue is to use collectors integration https://github.com/coverlet-coverage/coverlet#vstest-integration-preferred-due-to-known-issue-supports-only-net-core-application.  
-With collector we're injected in test host through a in-proc collector that talk with vstest platform so we can signal when we end our work.  
+*Solution:*
+The only way to solve this issue is to use collectors integration https://github.com/coverlet-coverage/coverlet#vstest-integration-preferred-due-to-known-issue-supports-only-net-core-application.
+With collector we're injected in test host through a in-proc collector that talk with vstest platform so we can signal when we end our work.
 
 ## 2) Upgrade `coverlet.collector` to version > 1.0.0
 
-*Affected drivers*: vstest integration `dotnet test --collect:"XPlat Code Coverage"`  
+*Affected drivers*: vstest integration `dotnet test --collect:"XPlat Code Coverage"`
 
- *Symptoms:* The same as known issue 1.  
+ *Symptoms:* The same as known issue 1.
 
-There is a bug inside vstest platform https://github.com/microsoft/vstest/issues/2205.  
+There is a bug inside vstest platform https://github.com/microsoft/vstest/issues/2205.
 If you upgrade collector package with version greater than 1.0.0 in-proc collector won't be loaded so you could incur known issue number 1 and get zero coverage result
 
-*Solutions:*   
-1) Reference `Mcrosoft.NET.Test.Sdk` with version *greater than* 16.4.0  
+*Solutions:*
+1) Reference `Mcrosoft.NET.Test.Sdk` with version *greater than* 16.4.0
 For instance
 ```xml
 <ItemGroup>
@@ -126,7 +126,7 @@ dotnet test --settings runsetting
  ```bash
  dotnet test /p:CollectCoverage=true /p:CopyLocalLockFileAssemblies=true
  ```
- or adding the attribute `<CopyLocalLockFileAssemblies>` to project 
+ or adding the attribute `<CopyLocalLockFileAssemblies>` to project
  file
  ```xml
  <PropertyGroup>
@@ -137,14 +137,14 @@ dotnet test --settings runsetting
  ```
  NB. This **DOESN'T ALWAYS WORK**, for instance in case of shared framework https://github.com/dotnet/cli/issues/12705#issuecomment-536686785
 
- We can do nothing at the moment this is a build behaviour out of our control.  
- This issue should not happen for .net runtime version >= 3.0 because the new default behavior is copy all assets to the build output https://github.com/dotnet/cli/issues/12705#issuecomment-535150372  
+ We can do nothing at the moment this is a build behaviour out of our control.
+ This issue should not happen for .net runtime version >= 3.0 because the new default behavior is copy all assets to the build output https://github.com/dotnet/cli/issues/12705#issuecomment-535150372
 
  In this case the only workaround for the moment is to *manually copy* missing dll to output folder https://github.com/tonerdo/coverlet/issues/560#issue-496440052 "The only reliable way to work around this problem is to drop the DLL in the unit tests project's bin\Release\netcoreapp2.2 directory."
 
  ## 5) Tests fail if assembly is strong named
 
- *Affected drivers*: all drivers  
+ *Affected drivers*: all drivers
 
  *Symptoms:* Running coverage on .NET Framework runtime(i.e. .NET 4.6.1) and get error like:
  ```
@@ -163,5 +163,24 @@ Stack Trace:
 
   NB. Workaround doesn't work if test method itself explicitly creates an appdomain and uses shadow copying in order to test that the assembly behaves properly in those conditions.
 
+## 6) Code coverage returns NaN%
 
+*Symptoms:* You are getting following result when running Coverlet within CI/CD pipeline:
 
+```
++--------+------+--------+--------+
+| Module | Line | Branch | Method |
++--------+------+--------+--------+
+
++---------+------+--------+--------+
+|         | Line | Branch | Method |
++---------+------+--------+--------+
+| Total   | 100% | 100%   | 100%   |
++---------+------+--------+--------+
+| Average | NaN% | NaN%   | NaN%   |
++---------+------+--------+--------+
+```
+
+SUT(System Under Test) assembly is also not listed in MSBuild logs - "Instrumented module" is missing for your dll.
+
+*Solution*: Check whether deterministic build is turned on for your solution, if so, follow instructions how to handle [Deterministic build](DeterministicBuild.md).
