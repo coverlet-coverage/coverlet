@@ -172,6 +172,7 @@ namespace Coverlet.Core.Symbols
                     operand.Name == "get_IsCompleted" &&
                     (
                         operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.TaskAwaiter") ||
+                        operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ValueTaskAwaiter") ||
                         operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredTaskAwaitable") ||
                         operand.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable")
                     )
