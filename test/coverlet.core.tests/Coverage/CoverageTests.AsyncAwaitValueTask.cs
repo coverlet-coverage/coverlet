@@ -17,18 +17,16 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwaitValueTask>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwaitValueTask>(async instance =>
                     {
                         instance.SyncExecution();
 
-                        int res = ((ValueTask<int>)instance.AsyncExecution(true)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        res = ((ValueTask<int>)instance.AsyncExecution(1)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        res = ((ValueTask<int>)instance.AsyncExecution(2)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        res = ((ValueTask<int>)instance.AsyncExecution(3)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        res = ((ValueTask<int>)instance.ConfigureAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        int res = await ((ValueTask<int>)instance.AsyncExecution(true)).ConfigureAwait(false);
+                        res = await ((ValueTask<int>)instance.AsyncExecution(1)).ConfigureAwait(false);
+                        res = await ((ValueTask<int>)instance.AsyncExecution(2)).ConfigureAwait(false);
+                        res = await ((ValueTask<int>)instance.AsyncExecution(3)).ConfigureAwait(false);
+                        res = await ((ValueTask<int>)instance.ConfigureAwait()).ConfigureAwait(false);
                         res = ((Task<int>)instance.WrappingValueTaskAsTask()).ConfigureAwait(false).GetAwaiter().GetResult();
-
-                        return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
                 }, new string[] { path });
