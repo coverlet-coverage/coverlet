@@ -728,7 +728,7 @@ namespace Coverlet.Core.Symbols
                 Instruction startFilter = exceptionHandler.FilterStart;
                 Instruction endFilter = startFilter;
 
-                while (endFilter.OpCode != OpCodes.Endfilter && endFilter != null)
+                while (endFilter != null && endFilter.OpCode != OpCodes.Endfilter)
                 {
                     endFilter = endFilter.Next;
                 }
