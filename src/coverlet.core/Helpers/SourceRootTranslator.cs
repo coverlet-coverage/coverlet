@@ -40,7 +40,7 @@ namespace Coverlet.Core.Helpers
             {
                 throw new FileNotFoundException("Module test path not found", moduleTestPath);
             }
-            _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath)) ?? new Dictionary<string, List<SourceRootMapping>>();
+            _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath));
         }
 
         private Dictionary<string, List<SourceRootMapping>> LoadSourceRootMapping(string directory)
