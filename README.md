@@ -18,6 +18,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 * [Consume nightly build](#Consume-nightly-build)
 * [Feature samples](Documentation/Examples.md)
 * [Cake Add-In](#Cake-Add-In)
+* [Visual Studio Add-In](#Visual-Studio-Add-In)
 * [Changelog](Documentation/Changelog.md)
 * [Roadmap](Documentation/Roadmap.md)
 
@@ -140,6 +141,11 @@ Unfortunately we have some known issues, check it [here](Documentation/KnownIssu
 ## Cake Add-In
 
 If you're using [Cake Build](https://cakebuild.net) for your build script you can use the [Cake.Coverlet](https://github.com/Romanx/Cake.Coverlet) add-in to provide you extensions to dotnet test for passing Coverlet arguments in a strongly typed manner.
+
+## Visual Studio Add-In
+
+If you're using Visual Studio, you can use the [Fine Code Coverage](https://marketplace.visualstudio.com/items?itemName=FortuneNgwenya.FineCodeCoverage) extension to visualize coverlet output inside Visual Studio while you code.
+Visualization is updated when you run unit tests in inside Visual Studio.
 
 ## Consume nightly build
 
