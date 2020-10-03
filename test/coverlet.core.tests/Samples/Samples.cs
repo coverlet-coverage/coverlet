@@ -189,6 +189,14 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
+    public class AsyncAwaitValueTaskStateMachine
+    {
+        async public ValueTask AsyncAwait()
+        {
+            await default(ValueTask);
+        }
+    }
+
     [ExcludeFromCoverage]
     public class ClassExcludedByCoverletCodeCoverageAttr
     {
