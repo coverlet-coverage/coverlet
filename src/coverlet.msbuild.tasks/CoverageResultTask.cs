@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Reporters;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Coverlet.MSbuild.Tasks
@@ -35,6 +37,9 @@ namespace Coverlet.MSbuild.Tasks
         public ITaskItem InstrumenterState { get; set; }
 
         public string CoverletMultiTargetFrameworksCurrentTFM { get; set; }
+
+        [Output]
+        public ITaskItem[] ReportItems { get; set; }
 
         public CoverageResultTask()
         {
@@ -87,6 +92,7 @@ namespace Coverlet.MSbuild.Tasks
                 }
 
                 var formats = OutputFormat.Split(',');
+                var coverageReportPaths = new List<ITaskItem>(formats.Length);
                 foreach (var format in formats)
                 {
                     var reporter = new ReporterFactory(format).CreateReporter();
@@ -110,9 +116,13 @@ namespace Coverlet.MSbuild.Tasks
                                                                 fileSystem,
                                                                 ServiceProvider.GetService<IConsole>(),
                                                                 result);
-                        writer.WriteReport();
+                        var path = writer.WriteReport();
+                        var metadata = new Dictionary<string, string> { ["Format"] = format };
+                        coverageReportPaths.Add(new TaskItem(path, metadata));
                     }
                 }
+
+                ReportItems = coverageReportPaths.ToArray();
 
                 var thresholdTypeFlags = ThresholdTypeFlags.None;
                 var thresholdStat = ThresholdStatistic.Minimum;

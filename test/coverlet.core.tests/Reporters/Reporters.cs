@@ -30,13 +30,6 @@ namespace Coverlet.Core.Reporters.Tests
         public void Msbuild_ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string coverletOutput, string reportFormat, string expectedFileName)
         {
             Mock<IFileSystem> fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(f => f.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
-            .Callback((string path, string contents) =>
-            {
-                // Path.Combine depends on OS so we can change only win side to avoid duplication
-                Assert.Equal(path.Replace('/', Path.DirectorySeparatorChar), expectedFileName.Replace('/', Path.DirectorySeparatorChar));
-            });
-
             Mock<IConsole> console = new Mock<IConsole>();
 
             ReportWriter reportWriter = new ReportWriter(
@@ -49,7 +42,9 @@ namespace Coverlet.Core.Reporters.Tests
                 console.Object,
                 new CoverageResult() { Modules = new Modules() });
 
-            reportWriter.WriteReport();
+            var path = reportWriter.WriteReport();
+            // Path.Combine depends on OS so we can change only win side to avoid duplication
+            Assert.Equal(path.Replace('/', Path.DirectorySeparatorChar), expectedFileName.Replace('/', Path.DirectorySeparatorChar));
         }
     }
 }
