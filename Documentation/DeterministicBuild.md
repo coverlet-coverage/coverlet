@@ -13,6 +13,10 @@ If for instance we build same project on different machine we'll have different 
 As explained above, to improve the level of security of generated artifacts (suppose for instance DLLs inside the nuget package), we need to apply some signature (signing with certificate) and validate before usage to avoid possible security issues like tampering.  
 Finally thanks to deterministic CI builds (with the `ContinuousIntegrationBuild` property set to `true`) plus signature we can validate artifacts and be sure that binary was build from a specific sources (because there is no hard-coded variables metadata like paths from different build machines).
 
+**Deterministic build is supported without any workaround since version 3.1.100 of .NET Core SDK**
+
+## Workaround only for .NET Core SDK < 3.1.100
+
 At the moment deterministic build works thanks to Roslyn compiler that emits deterministic metadata if `DeterministicSourcePaths` is enabled. Take a look here for more information https://github.com/dotnet/sourcelink/tree/master/docs#deterministicsourcepaths.  
 To allow coverlet to correctly do his work we need to provide information to translate deterministic path to real local path for every project referenced by tests project.  
 The current workaround is to add on top of your repo a `Directory.Build.targets` with inside a simple snippet with custom `target` that supports coverlet resolution algorithm.
