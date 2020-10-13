@@ -3,9 +3,17 @@
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.InstrumentationTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
   <UsingTask TaskName="Coverlet.MSbuild.Tasks.CoverageResultTask" AssemblyFile="$(CoverletToolsPath)coverlet.msbuild.tasks.dll"/>
 
+  <PropertyGroup>
+    <_CoverletSdkNETCoreSdkVersion>$(NETCoreSdkVersion)</_CoverletSdkNETCoreSdkVersion>
+    <_CoverletSdkNETCoreSdkVersion Condition="$(_CoverletSdkNETCoreSdkVersion.Contains('-'))">$(_CoverletSdkNETCoreSdkVersion.Split('-')[0])</_CoverletSdkNETCoreSdkVersion>
+    <_CoverletSdkMinVersionWithDependencyTarget>3.1.300</_CoverletSdkMinVersionWithDependencyTarget>
+    <_CoverletSourceRootTargetName>CoverletGetPathMap</_CoverletSourceRootTargetName>
+    <_CoverletSourceRootTargetName Condition="'$([System.Version]::Parse($(_CoverletSdkNETCoreSdkVersion)).CompareTo($([System.Version]::Parse($(_CoverletSdkMinVersionWithDependencyTarget)))))' &gt;= '0' ">InitializeSourceRootMappedPaths</_CoverletSourceRootTargetName>
+  </PropertyGroup>
+
   <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" DependsOnTargets="ResolveProjectReferences" >
     <MSBuild Projects="@(AnnotatedProjects->'%(FullPath)')"
-             Targets="CoverletGetPathMap"
+             Targets="$(_CoverletSourceRootTargetName)"
              Properties="TargetFramework=%(AnnotatedProjects.NearestTargetFramework)"
              SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs"
@@ -39,7 +47,7 @@
       SingleHit="$(SingleHit)"
       MergeWith="$(MergeWith)"
       UseSourceLink="$(UseSourceLink)"
-      SkipAutoProps="$(SkipAutoProps)" 
+      SkipAutoProps="$(SkipAutoProps)"
       DoesNotReturnAttribute="$(DoesNotReturnAttribute)">
       <Output TaskParameter="InstrumenterState" PropertyName="InstrumenterState"/>
     </Coverlet.MSbuild.Tasks.InstrumentationTask>
