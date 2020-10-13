@@ -7,16 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
--Attribute exclusion does not work if attribute name does not end with "Attribute" [884](https://github.com/coverlet-coverage/coverlet/pull/884) by https://github.com/bddckr  
--Fix deterministic build+source link bug [895](https://github.com/coverlet-coverage/coverlet/pull/895)  
--Fix anonymous delegate compiler generate bug [896](https://github.com/coverlet-coverage/coverlet/pull/896)  
--Fix incorrect branch coverage with await ValueTask [949](https://github.com/coverlet-coverage/coverlet/pull/949) by https://github.com/alexthornton1
+-Attribute exclusion does not work if attribute name does not end with "Attribute" [#884](https://github.com/coverlet-coverage/coverlet/pull/884) by https://github.com/bddckr  
+-Fix deterministic build+source link bug [#895](https://github.com/coverlet-coverage/coverlet/pull/895)  
+-Fix anonymous delegate compiler generate bug [#896](https://github.com/coverlet-coverage/coverlet/pull/896)  
+-Fix incorrect branch coverage with await ValueTask [#949](https://github.com/coverlet-coverage/coverlet/pull/949) by https://github.com/alexthornton1
 
 ### Added
--Skip autoprops feature [912](https://github.com/coverlet-coverage/coverlet/pull/912)  
--Exclude code that follows [DoesNotReturn] from code coverage [904](https://github.com/coverlet-coverage/coverlet/pull/904) by https://github.com/kevin-montrose  
--Add Visual Studio Add-In [954](https://github.com/coverlet-coverage/coverlet/pull/954) by https://github.com/FortuneN  
--Remove workaround for deterministic build for sdk >= 3.1.100 [965](https://github.com/coverlet-coverage/coverlet/pull/965)
+-Skip autoprops feature [#912](https://github.com/coverlet-coverage/coverlet/pull/912)  
+-Exclude code that follows [DoesNotReturn] from code coverage [#904](https://github.com/coverlet-coverage/coverlet/pull/904) by https://github.com/kevin-montrose  
+-Add Visual Studio Add-In [#954](https://github.com/coverlet-coverage/coverlet/pull/954) by https://github.com/FortuneN  
+-Remove workaround for deterministic build for sdk >= 3.1.100 [#965](https://github.com/coverlet-coverage/coverlet/pull/965)
 
 ## Release date 2020-05-30
 ### Packages  
