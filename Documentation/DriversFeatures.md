@@ -1,10 +1,10 @@
-# Drivers features differences
+# Driver feature differences
 
-Since the beginnig all coverlet drivers shared the same coverage engine.  
-Since version 3.0.0 we decided to consolidate versioning across drivers so for every new release drivers will have same version.  
-We think that keep version in sync express better the set of features every release will have.  
-By the way not all drivers support all functionality/feature or have the same behaviours and this is related to the context they're running.  
-In the table below we keep track of main differences
+Since the beginning all coverlet drivers shared the same coverage engine.  
+Since version 3.0.0 we decided to consolidate versioning across drivers so for every new release all drivers will have the same version number.  
+We think that keeping the versions in sync express better the set of features every release will have.  
+This does not mean that all drivers will support every functionality/feature or have the same behaviours, since they are limited by the context they're running in.  
+In the table below we keep track of main differences:
 
 | Feature  | MsBuild       | .NET Tool    |  DataCollectors |
 |----------|:-------------:|-------------:|----------------:|
@@ -16,4 +16,4 @@ In the table below we keep track of main differences
 | Coverage threshold validation |    Yes   |   Yes        |No            |
 
 
-If possible we advice to use collectors integration(vstest engine integration), because they're fully integrated inside test pipeline and does not suffer of [known issue](KnownIssues.md)
+If possible we advice you to use the collectors integration (vstest engine integration), since it is fully integrated inside the test pipeline and does not suffer of the [known issues](KnownIssues.md) of the other drivers.
