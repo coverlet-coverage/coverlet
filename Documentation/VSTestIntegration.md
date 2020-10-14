@@ -1,6 +1,6 @@
 # Coverlet integration with VSTest (a.k.a. Visual Studio Test Platform)
 
-**Fully supported runtime versions:**  
+**Supported runtime versions:**  
 Before version `3.0.0`  
 - .NET Core >= 2.0 
 - .NET Framework not fully supported(only out of process collector, could suffer of [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))  
