@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
@@ -14,6 +15,7 @@ namespace Coverlet.Collector.DataCollection
     public class CoverletInProcDataCollector : InProcDataCollection
     {
         private TestPlatformEqtTrace _eqtTrace;
+        private bool _enableExceptionLog = false;
 
         private void AttachDebugger()
         {
@@ -24,10 +26,18 @@ namespace Coverlet.Collector.DataCollection
             }
         }
 
+        private void EnableExceptionLog()
+        {
+            if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED"), out int result) && result == 1)
+            {
+                _enableExceptionLog = true;
+            }
+        }
+
         public void Initialize(IDataCollectionSink dataCollectionSink)
         {
-
             AttachDebugger();
+            EnableExceptionLog();
 
             _eqtTrace = new TestPlatformEqtTrace();
             _eqtTrace.Verbose("Initialize CoverletInProcDataCollector");
@@ -61,9 +71,12 @@ namespace Coverlet.Collector.DataCollection
                 }
                 catch (Exception ex)
                 {
-                    _eqtTrace.Error("{0}: Failed to unload module with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
-                    string errorMessage = string.Format(Resources.FailedToUnloadModule, CoverletConstants.InProcDataCollectorName);
-                    throw new CoverletDataCollectorException(errorMessage, ex);
+                    if (_enableExceptionLog)
+                    {
+                        _eqtTrace.Error("{0}: Failed to unload module with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
+                        string errorMessage = string.Format(Resources.FailedToUnloadModule, CoverletConstants.InProcDataCollectorName);
+                        throw new CoverletDataCollectorException(errorMessage, ex);
+                    }
                 }
             }
         }
@@ -89,7 +102,25 @@ namespace Coverlet.Collector.DataCollection
             }
             catch (Exception ex)
             {
-                _eqtTrace.Warning("{0}: Failed to get Instrumentation class with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
+                if (_enableExceptionLog)
+                {
+                    StringBuilder exceptionString = new StringBuilder();
+                    exceptionString.AppendFormat("{0}: Failed to get Instrumentation class for assembly '{1}' with error: {2}",
+                        CoverletConstants.InProcDataCollectorName, assembly, ex);
+                    exceptionString.AppendLine();
+
+                    if (ex is ReflectionTypeLoadException rtle)
+                    {
+                        exceptionString.AppendLine("ReflectionTypeLoadException list:");
+                        foreach (Exception loaderEx in rtle.LoaderExceptions)
+                        {
+                            exceptionString.AppendLine(loaderEx.ToString());
+                        }
+                    }
+
+                    _eqtTrace.Warning(exceptionString.ToString());
+                }
+
                 return null;
             }
         }

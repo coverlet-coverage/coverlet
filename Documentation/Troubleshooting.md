@@ -244,4 +244,9 @@ You can live attach and debug collectors with `COVERLET_DATACOLLECTOR_OUTOFPROC_
  set COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG=1
  set COVERLET_DATACOLLECTOR_INPROC_DEBUG=1
 ```
-You will be asked to attach a debugger through UI popup.
+You will be asked to attach a debugger through UI popup.  
+To enable exceptions log for in-process data collectors
+```
+ set COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED=1
+```
+
