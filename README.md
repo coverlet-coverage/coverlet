@@ -13,6 +13,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 # Main contents
 * [QuickStart](#Quick-Start)
 * [How It Works](#How-It-Works)
+* [Drivers features differences](Documentation/DriversFeatures.md)
 * [Deterministic build support](#Deterministic-build-support)
 * [Known Issues](#Known-Issues)
 * [Consume nightly build](#Consume-nightly-build)

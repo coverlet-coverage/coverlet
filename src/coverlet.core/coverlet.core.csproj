@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>5.4.0</AssemblyVersion>
+    <AssemblyVersion>5.5.0</AssemblyVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
