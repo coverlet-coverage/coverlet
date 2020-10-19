@@ -60,6 +60,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+                serviceCollection.AddTransient<IFilePathHelper, FilePathHelper>();
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
                 serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
@@ -94,6 +95,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+                serviceCollection.AddTransient<IFilePathHelper, FilePathHelper>();
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
                 serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
@@ -147,6 +149,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+                serviceCollection.AddTransient<IFilePathHelper, FilePathHelper>();
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
                 serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
@@ -195,6 +198,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+                serviceCollection.AddTransient<IFilePathHelper, FilePathHelper>();
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
                 serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
@@ -202,7 +206,7 @@ namespace Coverlet.Collector.Tests
             };
             _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, serviceCollectionFactory);
 
-            IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f).CreateReporter()).Where(x => x != null).ToList();
+            IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f, new FilePathHelper()).CreateReporter()).Where(x => x != null).ToList();
             Mock<DataCollectionSink> mockDataCollectionSink = new Mock<DataCollectionSink>();
             mockDataCollectionSink.Setup(m => m.SendFileAsync(It.IsAny<FileTransferInformation>())).Callback<FileTransferInformation>(fti =>
             {
@@ -248,6 +252,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+                serviceCollection.AddTransient<IFilePathHelper, FilePathHelper>();
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
                 serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();

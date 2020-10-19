@@ -77,6 +77,7 @@ namespace Coverlet.MSbuild.Tasks
             serviceCollection.AddTransient<IConsole, SystemConsole>();
             serviceCollection.AddTransient<ILogger, MSBuildLogger>(_ => _logger);
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+            serviceCollection.AddTransient<IFilePathHelper, FilePathHelper>();
             // We cache resolutions
             serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(Path, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
             // We need to keep singleton/static semantics

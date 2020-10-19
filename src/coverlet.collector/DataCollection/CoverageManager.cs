@@ -23,11 +23,12 @@ namespace Coverlet.Collector.DataCollection
         public IReporter[] Reporters { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper,
-                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
+                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper,
+                               IFilePathHelper filePathHelper)
             : this(settings,
             settings.ReportFormats.Select(format =>
             {
-                var reporterFactory = new ReporterFactory(format);
+                var reporterFactory = new ReporterFactory(format, filePathHelper);
                 if (!reporterFactory.IsValidFormat())
                 {
                     eqtTrace.Warning($"Invalid report format '{format}'");

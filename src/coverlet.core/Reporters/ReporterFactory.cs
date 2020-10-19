@@ -1,3 +1,4 @@
+using Coverlet.Core.Abstractions;
 using System;
 using System.Linq;
 
@@ -7,13 +8,15 @@ namespace Coverlet.Core.Reporters
     {
         private string _format;
         private IReporter[] _reporters;
-
-        public ReporterFactory(string format)
+        private IFilePathHelper _filePathHelper;
+       
+        public ReporterFactory(string format, IFilePathHelper filePathHelper)
         {
             _format = format;
+            _filePathHelper = filePathHelper;
             _reporters = new IReporter[] {
                 new JsonReporter(), new LcovReporter(),
-                new OpenCoverReporter(), new CoberturaReporter(),
+                new OpenCoverReporter(), new CoberturaReporter(_filePathHelper),
                 new TeamCityReporter()
             };
         }

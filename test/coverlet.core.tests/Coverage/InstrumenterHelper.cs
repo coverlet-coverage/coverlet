@@ -29,7 +29,7 @@ namespace Coverlet.Core.Tests
         public static void GenerateHtmlReport(CoverageResult coverageResult, IReporter reporter = null, string sourceFileFilter = "", [CallerMemberName] string directory = "")
         {
             JsonReporter defaultReporter = new JsonReporter();
-            reporter ??= new CoberturaReporter();
+            reporter ??= new CoberturaReporter(new FilePathHelper());
             DirectoryInfo dir = Directory.CreateDirectory(directory);
             dir.Delete(true);
             dir.Create();

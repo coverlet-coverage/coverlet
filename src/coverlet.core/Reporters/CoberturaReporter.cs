@@ -1,4 +1,4 @@
-using Coverlet.Core.Helpers;
+using Coverlet.Core.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,11 +12,18 @@ namespace Coverlet.Core.Reporters
 {
     internal class CoberturaReporter : IReporter
     {
+        private IFilePathHelper _filePathHelper;
+
         public ReporterOutputType OutputType => ReporterOutputType.File;
 
         public string Format => "cobertura";
 
         public string Extension => "cobertura.xml";
+
+        public CoberturaReporter(IFilePathHelper filePathHelper)
+        {
+            _filePathHelper = filePathHelper;
+        }
 
         public string Report(CoverageResult result)
         {
@@ -33,9 +40,8 @@ namespace Coverlet.Core.Reporters
             coverage.Add(new XAttribute("timestamp", (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds));
 
             XElement sources = new XElement("sources");
-            FilePathHelper pathHelper = new FilePathHelper();
-
-            var absolutePaths = pathHelper.GetBasePaths(result.Modules.Values.SelectMany(k => k.Keys), result.UseSourceLink).ToList();
+            
+            var absolutePaths = _filePathHelper.GetBasePaths(result.Modules.Values.SelectMany(k => k.Keys), result.UseSourceLink).ToList();
             absolutePaths.ForEach(x => sources.Add(new XElement("source", x)));
 
             XElement packages = new XElement("packages");
@@ -54,7 +60,7 @@ namespace Coverlet.Core.Reporters
                     {
                         XElement @class = new XElement("class");
                         @class.Add(new XAttribute("name", cls.Key));
-                        @class.Add(new XAttribute("filename", pathHelper.GetRelativePathFromBase(absolutePaths, document.Key, result.UseSourceLink)));
+                        @class.Add(new XAttribute("filename", _filePathHelper.GetRelativePathFromBase(absolutePaths, document.Key, result.UseSourceLink)));
                         @class.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(cls.Value)));

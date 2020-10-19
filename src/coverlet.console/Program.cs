@@ -27,6 +27,7 @@ namespace Coverlet.Console
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<ILogger, ConsoleLogger>();
+            serviceCollection.AddTransient<IFilePathHelper, FilePathHelper>();
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(provider => new SourceRootTranslator(provider.GetRequiredService<ILogger>(), provider.GetRequiredService<IFileSystem>()));
@@ -148,7 +149,7 @@ namespace Coverlet.Console
 
                 foreach (var format in (formats.HasValue() ? formats.Values : new List<string>(new string[] { "json" })))
                 {
-                    var reporter = new ReporterFactory(format).CreateReporter();
+                    var reporter = new ReporterFactory(format, serviceProvider.GetRequiredService<IFilePathHelper>()).CreateReporter();
                     if (reporter == null)
                     {
                         throw new Exception($"Specified output format '{format}' is not supported");

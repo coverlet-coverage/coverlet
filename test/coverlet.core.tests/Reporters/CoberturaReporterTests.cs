@@ -1,3 +1,4 @@
+using Coverlet.Core.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -58,7 +59,7 @@ namespace Coverlet.Core.Reporters.Tests
                 // where decimal char is comma.
                 Assert.Equal("1,5", (1.5).ToString());
 
-                CoberturaReporter reporter = new CoberturaReporter();
+                CoberturaReporter reporter = new CoberturaReporter(new FilePathHelper());
                 string report = reporter.Report(result);
 
                 Assert.NotEmpty(report);
@@ -139,7 +140,7 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
 
-            CoberturaReporter reporter = new CoberturaReporter();
+            CoberturaReporter reporter = new CoberturaReporter(new FilePathHelper());
             string report = reporter.Report(result);
 
             Assert.NotEmpty(report);
@@ -209,7 +210,7 @@ namespace Coverlet.Core.Reporters.Tests
 
             result.Modules = new Modules { { "Module", documents } };
 
-            CoberturaReporter reporter = new CoberturaReporter();
+            CoberturaReporter reporter = new CoberturaReporter(new FilePathHelper());
             string report = reporter.Report(result);
 
             var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
@@ -251,7 +252,7 @@ namespace Coverlet.Core.Reporters.Tests
 
             result.Modules = new Modules { { "Module", documents } };
 
-            CoberturaReporter reporter = new CoberturaReporter();
+            CoberturaReporter reporter = new CoberturaReporter(new FilePathHelper());
             string report = reporter.Report(result);
 
             var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));

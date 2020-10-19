@@ -134,7 +134,8 @@ namespace Coverlet.Collector.DataCollection
                 // Get coverage and attachment managers
                 _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _logger, _coverageWrapper,
                                                         _serviceProvider.GetRequiredService<IInstrumentationHelper>(), _serviceProvider.GetRequiredService<IFileSystem>(),
-                                                        _serviceProvider.GetRequiredService<ISourceRootTranslator>(), _serviceProvider.GetRequiredService<ICecilSymbolHelper>());
+                                                        _serviceProvider.GetRequiredService<ISourceRootTranslator>(), _serviceProvider.GetRequiredService<ICecilSymbolHelper>(),
+                                                        _serviceProvider.GetRequiredService<IFilePathHelper>());
 
                 // Instrument modules
                 _coverageManager.InstrumentModules();
@@ -223,6 +224,7 @@ namespace Coverlet.Collector.DataCollection
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<IFilePathHelper, FilePathHelper>();
             serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Helpers;
 using Coverlet.MSbuild.Tasks;
 using Moq;
 using Xunit;
@@ -37,7 +38,7 @@ namespace Coverlet.Core.Reporters.Tests
                 // mimic code inside CoverageResultTask.cs
                 Path.GetDirectoryName(coverletOutput),
                 coverletOutput,
-                new ReporterFactory(reportFormat).CreateReporter(),
+                new ReporterFactory(reportFormat, new FilePathHelper()).CreateReporter(),
                 fileSystem.Object,
                 console.Object,
                 new CoverageResult() { Modules = new Modules() });

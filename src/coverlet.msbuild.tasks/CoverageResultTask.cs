@@ -95,7 +95,7 @@ namespace Coverlet.MSbuild.Tasks
                 var coverageReportPaths = new List<ITaskItem>(formats.Length);
                 foreach (var format in formats)
                 {
-                    var reporter = new ReporterFactory(format).CreateReporter();
+                    var reporter = new ReporterFactory(format, ServiceProvider.GetRequiredService<IFilePathHelper>()).CreateReporter();
                     if (reporter == null)
                     {
                         throw new Exception($"Specified output format '{format}' is not supported");
