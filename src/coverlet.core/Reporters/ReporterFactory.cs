@@ -15,7 +15,7 @@ namespace Coverlet.Core.Reporters
             _format = format;
             _filePathHelper = filePathHelper;
             _reporters = new IReporter[] {
-                new JsonReporter(), new LcovReporter(),
+                new JsonReporter(), new LcovReporter(_filePathHelper),
                 new OpenCoverReporter(), new CoberturaReporter(_filePathHelper),
                 new TeamCityReporter()
             };

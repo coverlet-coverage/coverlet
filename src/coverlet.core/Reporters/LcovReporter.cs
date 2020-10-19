@@ -1,3 +1,4 @@
+using Coverlet.Core.Abstractions;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -6,16 +7,25 @@ namespace Coverlet.Core.Reporters
 {
     internal class LcovReporter : IReporter
     {
+        private IFilePathHelper _filePathHelper;
+
         public ReporterOutputType OutputType => ReporterOutputType.File;
 
         public string Format => "lcov";
 
         public string Extension => "info";
 
+        public LcovReporter(IFilePathHelper filePathHelper)
+        {
+            _filePathHelper = filePathHelper;
+        }
+
         public string Report(CoverageResult result)
         {
             CoverageSummary summary = new CoverageSummary();
             List<string> lcov = new List<string>();
+
+            var absolutePaths = _filePathHelper.GetBasePaths(result.Modules.Values.SelectMany(k => k.Keys), result.UseSourceLink).ToList();
 
             foreach (var module in result.Modules)
             {
@@ -25,7 +35,7 @@ namespace Coverlet.Core.Reporters
                     var docBranchCoverage = summary.CalculateBranchCoverage(doc.Value);
                     var docMethodCoverage = summary.CalculateMethodCoverage(doc.Value);
 
-                    lcov.Add("SF:" + doc.Key);
+                    lcov.Add("SF:" + _filePathHelper.GetRelativePathFromBase(absolutePaths, doc.Key, result.UseSourceLink));
                     foreach (var @class in doc.Value)
                     {
                         foreach (var method in @class.Value)
