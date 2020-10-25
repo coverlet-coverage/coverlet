@@ -16,12 +16,13 @@ namespace Coverlet.Core.Instrumentation
     /// regarding visibility of members, etc.
     /// </remarks>
     [ExcludeFromCodeCoverage]
-    internal static class ModuleTrackerTemplate
+    public static class ModuleTrackerTemplate
     {
         public static string HitsFilePath;
         public static int[] HitsArray;
         public static bool SingleHit;
         public static bool FlushHitFile;
+        
         private static readonly bool _enableLog = int.TryParse(Environment.GetEnvironmentVariable("COVERLET_ENABLETRACKERLOG"), out int result) ? result == 1 : false;
 
         static ModuleTrackerTemplate()
