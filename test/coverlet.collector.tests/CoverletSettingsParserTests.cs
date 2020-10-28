@@ -108,11 +108,11 @@ namespace Coverlet.Collector.Tests
             var testModules = new List<string> { "abc.dll" };
             var doc = new XmlDocument();
             var configElement = doc.CreateElement("Configuration");
-            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName);
-            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName);
-            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName);
-            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName);
-            this.CreateCoverleteNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName);
+            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName);
+            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName);
+            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName);
+            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName);
+            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName);
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
@@ -190,7 +190,7 @@ namespace Coverlet.Collector.Tests
             configElement.AppendChild(node);
         }
 
-        private void CreateCoverleteNullInnerTextNodes(XmlDocument doc, XmlElement configElement, string nodeSetting)
+        private void CreateCoverletNullInnerTextNodes(XmlDocument doc, XmlElement configElement, string nodeSetting)
         {
             var node = doc.CreateNode("element", nodeSetting, string.Empty);
             node.InnerText = null;
