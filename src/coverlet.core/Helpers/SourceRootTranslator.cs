@@ -38,7 +38,7 @@ namespace Coverlet.Core.Helpers
             }
             if (!_fileSystem.Exists(moduleTestPath))
             {
-                throw new FileNotFoundException("Module test path not found", moduleTestPath);
+                throw new FileNotFoundException($"Module test path '{moduleTestPath}' not found", moduleTestPath);
             }
             _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath)) ?? new Dictionary<string, List<SourceRootMapping>>();
         }
