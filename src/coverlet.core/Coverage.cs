@@ -29,7 +29,7 @@ namespace Coverlet.Core
 
     internal class Coverage
     {
-        private string _module;
+        private string _moduleOrAppDirectory;
         private string _identifier;
         private string[] _includeFilters;
         private string[] _includeDirectories;
@@ -54,7 +54,7 @@ namespace Coverlet.Core
             get { return _identifier; }
         }
 
-        public Coverage(string module,
+        public Coverage(string moduleOrDirectory,
             CoverageParameters parameters,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
@@ -62,7 +62,7 @@ namespace Coverlet.Core
             ISourceRootTranslator sourceRootTranslator,
             ICecilSymbolHelper cecilSymbolHelper)
         {
-            _module = module;
+            _moduleOrAppDirectory = moduleOrDirectory;
             _includeFilters = parameters.IncludeFilters;
             _includeDirectories = parameters.IncludeDirectories ?? Array.Empty<string>();
             _excludeFilters = parameters.ExcludeFilters;
@@ -91,7 +91,7 @@ namespace Coverlet.Core
                         ISourceRootTranslator sourceRootTranslator)
         {
             _identifier = prepareResult.Identifier;
-            _module = prepareResult.Module;
+            _moduleOrAppDirectory = prepareResult.ModuleOrDirectory;
             _mergeWith = prepareResult.MergeWith;
             _useSourceLink = prepareResult.UseSourceLink;
             _results = new List<InstrumenterResult>(prepareResult.Results);
@@ -103,7 +103,7 @@ namespace Coverlet.Core
 
         public CoveragePrepareResult PrepareModules()
         {
-            string[] modules = _instrumentationHelper.GetCoverableModules(_module, _includeDirectories, _includeTestAssembly);
+            string[] modules = _instrumentationHelper.GetCoverableModules(_moduleOrAppDirectory, _includeDirectories, _includeTestAssembly);
 
             Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded module filter '{filter}'"));
             Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Included module filter '{filter}'"));
@@ -161,7 +161,7 @@ namespace Coverlet.Core
             return new CoveragePrepareResult()
             {
                 Identifier = _identifier,
-                Module = _module,
+                ModuleOrDirectory = _moduleOrAppDirectory,
                 MergeWith = _mergeWith,
                 UseSourceLink = _useSourceLink,
                 Results = _results.ToArray()

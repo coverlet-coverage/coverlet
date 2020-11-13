@@ -31,11 +31,12 @@ namespace Coverlet.Core.Helpers
             _sourceRootTranslator = sourceRootTranslator;
         }
 
-        public string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly)
+        public string[] GetCoverableModules(string moduleOrAppDirectory, string[] directories, bool includeTestAssembly)
         {
             Debug.Assert(directories != null);
+            Debug.Assert(moduleOrAppDirectory != null);
 
-            string moduleDirectory = Path.GetDirectoryName(module);
+            string moduleDirectory = Path.GetDirectoryName(moduleOrAppDirectory);
             if (moduleDirectory == string.Empty)
             {
                 moduleDirectory = Directory.GetCurrentDirectory();
@@ -67,8 +68,8 @@ namespace Coverlet.Core.Helpers
             // The module's name must be unique.
             var uniqueModules = new HashSet<string>();
 
-            if (!includeTestAssembly)
-                uniqueModules.Add(Path.GetFileName(module));
+            if (!includeTestAssembly && File.Exists(moduleDirectory))
+                uniqueModules.Add(Path.GetFileName(moduleOrAppDirectory));
 
             return dirs.SelectMany(d => Directory.EnumerateFiles(d))
                 .Where(m => IsAssembly(m) && uniqueModules.Add(Path.GetFileName(m)))
