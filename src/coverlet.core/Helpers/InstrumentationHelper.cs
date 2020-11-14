@@ -36,7 +36,9 @@ namespace Coverlet.Core.Helpers
             Debug.Assert(directories != null);
             Debug.Assert(moduleOrAppDirectory != null);
 
-            string moduleDirectory = Path.GetDirectoryName(moduleOrAppDirectory);
+            bool isAppDirectory = !File.Exists(moduleOrAppDirectory) && Directory.Exists(moduleOrAppDirectory);
+
+            string moduleDirectory = isAppDirectory ? moduleOrAppDirectory : Path.GetDirectoryName(moduleOrAppDirectory);
             if (moduleDirectory == string.Empty)
             {
                 moduleDirectory = Directory.GetCurrentDirectory();
@@ -68,7 +70,7 @@ namespace Coverlet.Core.Helpers
             // The module's name must be unique.
             var uniqueModules = new HashSet<string>();
 
-            if (!includeTestAssembly && File.Exists(moduleDirectory))
+            if (!includeTestAssembly && !isAppDirectory)
                 uniqueModules.Add(Path.GetFileName(moduleOrAppDirectory));
 
             return dirs.SelectMany(d => Directory.EnumerateFiles(d))

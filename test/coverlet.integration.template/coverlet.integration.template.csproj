@@ -5,6 +5,8 @@
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsamplelib.integration.template</AssemblyName>
     <IsTestProject>false</IsTestProject>
+    <OutputType>Exe</OutputType>
+    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
   <ItemGroup>
