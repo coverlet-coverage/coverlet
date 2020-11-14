@@ -9,12 +9,12 @@ coverlet --help
 The current options are (output of `coverlet --help`):
 
 ```bash
-Cross platform .NET Core code coverage tool 1.0.0.0
+Cross platform .NET Core code coverage tool 3.0.0.0
 
-Usage: coverlet [arguments] [options]
+Usage: coverlet [options] <<ASSEMBLY> or <APP DIR>>
 
 Arguments:
-  <ASSEMBLY>  Path to the test assembly.
+  <ASSEMBLY> or <APP DIR>      Path to the test assembly or application directory.
 
 Options:
   -h|--help                    Show help information
@@ -23,21 +23,21 @@ Options:
   -a|--targetargs              Arguments to be passed to the test runner.
   -o|--output                  Output of the generated coverage report
   -v|--verbosity               Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
-  -f|--format                  Format of the generated coverage report[multiple value].
+  -f|--format                  Format of the generated coverage report.
   --threshold                  Exits with error if the coverage % is below value.
-  --threshold-type             Coverage type to apply the threshold to[multiple value].
+  --threshold-type             Coverage type to apply the threshold to.
   --threshold-stat             Coverage statistic used to enforce the threshold value.
-  --exclude                    Filter expressions to exclude specific modules and types[multiple value].
-  --include                    Filter expressions to include specific modules and types[multiple value].
-  --include-directory          Include directories containing additional assemblies to be instrumented[multiple value].
-  --exclude-by-file            Glob patterns specifying source files to exclude[multiple value].
-  --exclude-by-attribute       Attributes to exclude from code coverage[multiple value].
+  --exclude                    Filter expressions to exclude specific modules and types.
+  --include                    Filter expressions to include only specific modules and types.
+  --exclude-by-file            Glob patterns specifying source files to exclude.
+  --include-directory          Include directories containing additional assemblies to be instrumented.
+  --exclude-by-attribute       Attributes to exclude from code coverage.
   --include-test-assembly      Specifies whether to report code coverage of the test assembly.
-  --single-hit                 Specifies whether to limit code coverage hit reporting to a single hit for each location.
+  --single-hit                 Specifies whether to limit code coverage hit reporting to a single hit for each location
+  --skipautoprops              Neither track nor record auto-implemented properties.
   --merge-with                 Path to existing coverage result to merge.
   --use-source-link            Specifies whether to use SourceLink URIs in place of file system paths.
-  --skipautoprops              Neither track nor record auto-implemented properties.
-  --does-not-return-attribute  Attributes that mark methods that do not return[multiple value].
+  --does-not-return-attribute  Attributes that mark methods that do not return.
 ```
 
 NB. For a [multiple value] options you have to specify values multiple times i.e.
@@ -59,6 +59,22 @@ coverlet /path/to/test-assembly.dll --target "dotnet" --targetargs "test /path/t
 After the above command is run, a `coverage.json` file containing the results will be generated in the directory the `coverlet` command was run. A summary of the results will also be displayed in the terminal.
 
 _Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dll` isn't rebuilt_
+
+## Code Coverage for integration tests and end-to-end tests.
+
+Sometimes there are tests that doesn't use classic tests framework like XUnit/NUnit and so on.  
+For instance suppose to have some integration end-to-end tests where you do some calls to a backend web site with Selenium and at the end do assertions on database data. In this use case there is no test engine involved but simple script to startup tests and do evaluation at the end. 
+To gather the coverage for this kind of tests you can use Coverlet .NET tool and startup tests through our driver.  
+For instance suppose to have a folder `/application` where you've built your project and where there is the app entry point `myapp` file.
+You can use our tool to startup the app and gather live coverage:
+bash
+```
+coverlet "/application" --target "/application/myapp"
+```
+Coverlet will instrument all assemblies inside de `application` folder and after it will start the `myapp` application. Finally at shutdown of your app it will generate the coverage report. You can use all parameters available to customize the report generation.  
+
+**CAVEAT: today  Coverlet relies on `AppDomain.CurrentDomain.ProcessExit` and `AppDomain.CurrentDomain.DomainUnload` to register coverage hits on file system for the accounting, due to this you need to ensure a gracefully process shutdown. If you'll kill the process you won't get correct coverage report.**
+
 
 ## Coverage Output
 
