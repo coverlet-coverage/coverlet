@@ -22,9 +22,17 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     </PropertyGroup>
   </Target>
 
+  <PropertyGroup>
+    <_CoverletSdkNETCoreSdkVersion>$(NETCoreSdkVersion)</_CoverletSdkNETCoreSdkVersion>
+    <_CoverletSdkNETCoreSdkVersion Condition="$(_CoverletSdkNETCoreSdkVersion.Contains('-'))">$(_CoverletSdkNETCoreSdkVersion.Split('-')[0])</_CoverletSdkNETCoreSdkVersion>
+    <_CoverletSdkMinVersionWithDependencyTarget>3.1.300</_CoverletSdkMinVersionWithDependencyTarget>
+    <_CoverletSourceRootTargetName>CoverletGetPathMap</_CoverletSourceRootTargetName>
+    <_CoverletSourceRootTargetName Condition="'$([System.Version]::Parse($(_CoverletSdkNETCoreSdkVersion)).CompareTo($([System.Version]::Parse($(_CoverletSdkMinVersionWithDependencyTarget)))))' &gt;= '0' ">InitializeSourceRootMappedPaths</_CoverletSourceRootTargetName>
+  </PropertyGroup>
+
   <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" DependsOnTargets="ResolveProjectReferences" >
     <MSBuild Projects="@(AnnotatedProjects->'%(FullPath)')"
-             Targets="CoverletGetPathMap"             
+             Targets="$(_CoverletSourceRootTargetName)"
              Properties="TargetFramework=%(AnnotatedProjects.NearestTargetFramework)"
              SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs"

@@ -38,7 +38,7 @@ namespace Coverlet.Core.Helpers
             }
             if (!_fileSystem.Exists(moduleTestPath))
             {
-                throw new FileNotFoundException("Module test path not found", moduleTestPath);
+                throw new FileNotFoundException($"Module test path '{moduleTestPath}' not found", moduleTestPath);
             }
             _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath));
         }
@@ -55,15 +55,15 @@ namespace Coverlet.Core.Helpers
 
             foreach (string mappingRecord in _fileSystem.ReadAllLines(mappingFilePath))
             {
-                int projecFileSeparatorIndex = mappingRecord.IndexOf('|');
+                int projectFileSeparatorIndex = mappingRecord.IndexOf('|');
                 int pathMappingSeparatorIndex = mappingRecord.IndexOf('=');
-                if (projecFileSeparatorIndex == -1 || pathMappingSeparatorIndex == -1)
+                if (projectFileSeparatorIndex == -1 || pathMappingSeparatorIndex == -1)
                 {
                     _logger.LogWarning($"Malformed mapping '{mappingRecord}'");
                     continue;
                 }
-                string projectPath = mappingRecord.Substring(0, projecFileSeparatorIndex);
-                string originalPath = mappingRecord.Substring(projecFileSeparatorIndex + 1, pathMappingSeparatorIndex - projecFileSeparatorIndex - 1);
+                string projectPath = mappingRecord.Substring(0, projectFileSeparatorIndex);
+                string originalPath = mappingRecord.Substring(projectFileSeparatorIndex + 1, pathMappingSeparatorIndex - projectFileSeparatorIndex - 1);
                 string mappedPath = mappingRecord.Substring(pathMappingSeparatorIndex + 1);
 
                 if (!mapping.ContainsKey(mappedPath))

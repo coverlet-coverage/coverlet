@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,12 +63,19 @@ namespace Coverlet.Core.Tests.Instrumentation
         {
             FunctionExecutor.Run(() =>
             {
+                List<Thread> threads = new List<Thread>();
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 0, 0, 0, 0 };
                 for (int i = 0; i < ModuleTrackerTemplate.HitsArray.Length; ++i)
                 {
                     var t = new Thread(HitIndex);
+                    threads.Add(t);
                     t.Start(i);
+                }
+
+                foreach (Thread t in threads)
+                {
+                    t.Join();
                 }
 
                 ModuleTrackerTemplate.UnloadModule(null, null);

@@ -14,7 +14,7 @@ To consume nightly build create a `NuGet.Config` on your root solution directory
     <clear />
     <!-- Coverlet nightly build feed -->
     <add key="coverletNightly" value="https://www.myget.org/F/coverlet-dev/api/v3/index.json" /> 
-    <!-- Defaul nuget feed -->
+    <!-- Default nuget feed -->
     <add key="nuget" value="https://api.nuget.org/v3/index.json" /> 
     <!-- Add all other needed feed -->
   </packageSources>
