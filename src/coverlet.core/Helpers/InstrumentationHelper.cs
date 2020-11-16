@@ -37,8 +37,8 @@ namespace Coverlet.Core.Helpers
             Debug.Assert(moduleOrAppDirectory != null);
 
             bool isAppDirectory = !File.Exists(moduleOrAppDirectory) && Directory.Exists(moduleOrAppDirectory);
-
             string moduleDirectory = isAppDirectory ? moduleOrAppDirectory : Path.GetDirectoryName(moduleOrAppDirectory);
+
             if (moduleDirectory == string.Empty)
             {
                 moduleDirectory = Directory.GetCurrentDirectory();

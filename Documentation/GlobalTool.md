@@ -11,10 +11,10 @@ The current options are (output of `coverlet --help`):
 ```bash
 Cross platform .NET Core code coverage tool 3.0.0.0
 
-Usage: coverlet [options] <<ASSEMBLY> or <APP DIR>>
+Usage: coverlet [arguments] [options]
 
 Arguments:
-  <ASSEMBLY> or <APP DIR>      Path to the test assembly or application directory.
+  <ASSEMBLY|DIRECTORY>         Path to the test assembly or application directory.
 
 Options:
   -h|--help                    Show help information
@@ -62,19 +62,17 @@ _Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dl
 
 ## Code Coverage for integration tests and end-to-end tests.
 
-Sometimes there are tests that doesn't use classic tests framework like XUnit/NUnit and so on.  
-For instance suppose to have some integration end-to-end tests where you do some calls to a backend web site with Selenium and at the end do assertions on database data. In this use case there is no test engine involved but simple script to startup tests and do evaluation at the end. 
-To gather the coverage for this kind of tests you can use Coverlet .NET tool and startup tests through our driver.  
-For instance suppose to have a folder `/application` where you've built your project and where there is the app entry point `myapp` file.
-You can use our tool to startup the app and gather live coverage:
-bash
-```
-coverlet "/application" --target "/application/myapp"
-```
-Coverlet will instrument all assemblies inside de `application` folder and after it will start the `myapp` application. Finally at shutdown of your app it will generate the coverage report. You can use all parameters available to customize the report generation.  
+Sometimes, there are tests that doesn't use regular unit test frameworks like xunit. You may find yourself in a situation where your tests are driven by a custom executable/script, which when run, could do anything from making API calls to driving Selenium.
 
-**CAVEAT: today  Coverlet relies on `AppDomain.CurrentDomain.ProcessExit` and `AppDomain.CurrentDomain.DomainUnload` to register coverage hits on file system for the accounting, due to this you need to ensure a gracefully process shutdown. If you'll kill the process you won't get correct coverage report.**
+As an example, suppose you have a folder `/integrationtest` which contains said executable (lets call it `runner.exe`) and everything it needs to successfully execute. You can use our tool to startup the executable and gather live coverage:
 
+```bash
+coverlet "/integrationtest" --target "/application/runner.exe"
+```
+
+Coverlet will first instrument all .NET assemblies within the `integrationtests` folder, after which it will execute `runner.exe`. Finally, at shutdown of your `runner.exe`, it will generate the coverage report. You can use all parameters available to customize the report generation. Coverage results will be generated once `runner.exe` exits. You can use all parameters available to customize the report generation.
+
+_Note: Today, Coverlet relies on `AppDomain.CurrentDomain.ProcessExit` and `AppDomain.CurrentDomain.DomainUnload` to record hits to the filesystem, as a result, you need to ensure a graceful process shutdown. Forcefully, killing the process will result in an incomplete coverage report._
 
 ## Coverage Output
 

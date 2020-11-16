@@ -224,14 +224,16 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.Single(currentDirModules);
             Assert.Equal("coverlet.msbuild.tasks.dll", Path.GetFileName(currentDirModules[0]));
 
-            var moreThanOneDirectory = _instrumentationHelper.GetCoverableModules(module, new string[] { newDir2.FullName }, false)
+            var moreThanOneDirectory = _instrumentationHelper
+                                       .GetCoverableModules(module, new string[] { newDir2.FullName }, false)
                                        .OrderBy(f => f).ToArray();
 
             Assert.Equal(2, moreThanOneDirectory.Length);
             Assert.Equal("coverlet.msbuild.tasks.dll", Path.GetFileName(moreThanOneDirectory[0]));
             Assert.Equal("coverlet.core.dll", Path.GetFileName(moreThanOneDirectory[1]));
 
-            var moreThanOneDirectoryPlusTestAssembly = _instrumentationHelper.GetCoverableModules(module, new string[] { newDir2.FullName }, true)
+            var moreThanOneDirectoryPlusTestAssembly = _instrumentationHelper
+                                                       .GetCoverableModules(module, new string[] { newDir2.FullName }, true)
                                                        .OrderBy(f => f).ToArray();
 
             Assert.Equal(3, moreThanOneDirectoryPlusTestAssembly.Length);

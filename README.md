@@ -29,7 +29,7 @@ Coverlet can be used through three different *drivers*
 
 * VSTest engine integration
 * MSBuild task integration
-* As a .NET Global tool(used also for integration test, end-to-end tests)
+* As a .NET Global tool (supports standalone integration tests)
 
 Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk?view=vs-2019  
 
