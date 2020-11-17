@@ -16,7 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -Skip autoprops feature [#912](https://github.com/coverlet-coverage/coverlet/pull/912)  
 -Exclude code that follows [DoesNotReturn] from code coverage [#904](https://github.com/coverlet-coverage/coverlet/pull/904) by https://github.com/kevin-montrose  
 -Add Visual Studio Add-In [#954](https://github.com/coverlet-coverage/coverlet/pull/954) by https://github.com/FortuneN  
--Remove workaround for deterministic build for sdk >= 3.1.100 [#965](https://github.com/coverlet-coverage/coverlet/pull/965)
+-Remove workaround for deterministic build for sdk >= 3.1.100 [#965](https://github.com/coverlet-coverage/coverlet/pull/965)  
+-Allow standalone coverlet usage for integration/end-to-end tests using .NET tool driver [#991](https://github.com/coverlet-coverage/coverlet/pull/991)  
+-Support .NET Framework(>= net461) for in-process data collectors [#970](https://github.com/coverlet-coverage/coverlet/pull/970)
 
 ## Release date 2020-05-30
 ### Packages  
