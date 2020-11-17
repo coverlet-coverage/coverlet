@@ -13,7 +13,7 @@ namespace Coverlet.Core
         [DataMember]
         public string Identifier { get; set; }
         [DataMember]
-        public string Module { get; set; }
+        public string ModuleOrDirectory { get; set; }
         [DataMember]
         public string MergeWith { get; set; }
         [DataMember]

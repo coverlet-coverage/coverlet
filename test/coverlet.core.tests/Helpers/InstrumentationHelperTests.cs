@@ -208,9 +208,13 @@ namespace Coverlet.Core.Helpers.Tests
         public void TestIncludeDirectories()
         {
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
-
             DirectoryInfo newDir = Directory.CreateDirectory("TestIncludeDirectories");
+            newDir.Delete(true);
+            newDir.Create();
             DirectoryInfo newDir2 = Directory.CreateDirectory("TestIncludeDirectories2");
+            newDir2.Delete(true);
+            newDir2.Create();
+
             File.Copy(module, Path.Combine(newDir.FullName, Path.GetFileName(module)));
             module = Path.Combine(newDir.FullName, Path.GetFileName(module));
             File.Copy("coverlet.msbuild.tasks.dll", Path.Combine(newDir.FullName, "coverlet.msbuild.tasks.dll"));
@@ -220,10 +224,22 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.Single(currentDirModules);
             Assert.Equal("coverlet.msbuild.tasks.dll", Path.GetFileName(currentDirModules[0]));
 
-            var moreThanOneDirectory = _instrumentationHelper.GetCoverableModules(module, new string[] { newDir2.FullName }, false);
+            var moreThanOneDirectory = _instrumentationHelper
+                                       .GetCoverableModules(module, new string[] { newDir2.FullName }, false)
+                                       .OrderBy(f => f).ToArray();
+
             Assert.Equal(2, moreThanOneDirectory.Length);
             Assert.Equal("coverlet.msbuild.tasks.dll", Path.GetFileName(moreThanOneDirectory[0]));
             Assert.Equal("coverlet.core.dll", Path.GetFileName(moreThanOneDirectory[1]));
+
+            var moreThanOneDirectoryPlusTestAssembly = _instrumentationHelper
+                                                       .GetCoverableModules(module, new string[] { newDir2.FullName }, true)
+                                                       .OrderBy(f => f).ToArray();
+
+            Assert.Equal(3, moreThanOneDirectoryPlusTestAssembly.Length);
+            Assert.Equal("coverlet.core.tests.dll", Path.GetFileName(moreThanOneDirectoryPlusTestAssembly[0]));
+            Assert.Equal("coverlet.msbuild.tasks.dll", Path.GetFileName(moreThanOneDirectoryPlusTestAssembly[1]));
+            Assert.Equal("coverlet.core.dll", Path.GetFileName(moreThanOneDirectoryPlusTestAssembly[2]));
 
             newDir.Delete(true);
             newDir2.Delete(true);

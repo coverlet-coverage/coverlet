@@ -44,7 +44,7 @@ namespace Coverlet.Console
             app.VersionOption("-v|--version", GetAssemblyVersion());
             int exitCode = (int)CommandExitCodes.Success;
 
-            CommandArgument module = app.Argument("<ASSEMBLY>", "Path to the test assembly.");
+            CommandArgument moduleOrAppDirectory = app.Argument("<ASSEMBLY|DIRECTORY>", "Path to the test assembly or application directory.");
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
             CommandOption targs = app.Option("-a|--targetargs", "Arguments to be passed to the test runner.", CommandOptionType.SingleValue);
             CommandOption output = app.Option("-o|--output", "Output of the generated coverage report", CommandOptionType.SingleValue);
@@ -67,8 +67,8 @@ namespace Coverlet.Console
 
             app.OnExecute(() =>
             {
-                if (string.IsNullOrEmpty(module.Value) || string.IsNullOrWhiteSpace(module.Value))
-                    throw new CommandParsingException(app, "No test assembly specified.");
+                if (string.IsNullOrEmpty(moduleOrAppDirectory.Value) || string.IsNullOrWhiteSpace(moduleOrAppDirectory.Value))
+                    throw new CommandParsingException(app, "No test assembly or application directory specified.");
 
                 if (!target.HasValue())
                     throw new CommandParsingException(app, "Target must be specified.");
@@ -94,7 +94,7 @@ namespace Coverlet.Console
                     DoesNotReturnAttributes = doesNotReturnAttributes.Values.ToArray()
                 };
 
-                Coverage coverage = new Coverage(module.Value,
+                Coverage coverage = new Coverage(moduleOrAppDirectory.Value,
                                                  parameters,
                                                  logger,
                                                  serviceProvider.GetRequiredService<IInstrumentationHelper>(),

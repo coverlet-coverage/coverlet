@@ -29,7 +29,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             CoveragePrepareResult cpr = new CoveragePrepareResult();
             cpr.Identifier = "Identifier";
             cpr.MergeWith = "MergeWith";
-            cpr.Module = "Module";
+            cpr.ModuleOrDirectory = "Module";
             cpr.UseSourceLink = true;
 
             InstrumenterResult ir = new InstrumenterResult();
@@ -99,7 +99,7 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             Assert.Equal(cpr.Identifier, roundTrip.Identifier);
             Assert.Equal(cpr.MergeWith, roundTrip.MergeWith);
-            Assert.Equal(cpr.Module, roundTrip.Module);
+            Assert.Equal(cpr.ModuleOrDirectory, roundTrip.ModuleOrDirectory);
             Assert.Equal(cpr.UseSourceLink, roundTrip.UseSourceLink);
 
             for (int i = 0; i < cpr.Results.Length; i++)

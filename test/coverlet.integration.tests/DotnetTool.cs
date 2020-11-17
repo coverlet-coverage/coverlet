@@ -29,5 +29,20 @@ namespace Coverlet.Integration.Tests
             Assert.Contains("Test Run Successful.", standardOutput);
             AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
         }
+
+        [ConditionalFact]
+        [SkipOnOS(OS.Linux)]
+        [SkipOnOS(OS.MacOS)]
+        public void StandAlone()
+        {
+            using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
+            UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+            string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+            DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
+            string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj"));
+            RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError);
+            Assert.Contains("Hello World!", standardOutput);
+            AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
+        }
     }
 }
