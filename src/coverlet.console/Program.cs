@@ -44,7 +44,7 @@ namespace Coverlet.Console
             app.VersionOption("-v|--version", GetAssemblyVersion());
             int exitCode = (int)CommandExitCodes.Success;
 
-            CommandArgument moduleOrAppDirectory = app.Argument("<ASSEMBLY> or <APP DIR>", "Path to the test assembly or application directory.");
+            CommandArgument moduleOrAppDirectory = app.Argument("<ASSEMBLY|DIRECTORY>", "Path to the test assembly or application directory.");
             CommandOption target = app.Option("-t|--target", "Path to the test runner application.", CommandOptionType.SingleValue);
             CommandOption targs = app.Option("-a|--targetargs", "Arguments to be passed to the test runner.", CommandOptionType.SingleValue);
             CommandOption output = app.Option("-o|--output", "Output of the generated coverage report", CommandOptionType.SingleValue);
