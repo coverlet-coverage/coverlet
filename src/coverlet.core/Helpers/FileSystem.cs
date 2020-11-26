@@ -53,5 +53,11 @@ namespace Coverlet.Core.Helpers
         {
             return File.ReadAllLines(path);
         }
+
+        // Escape format characters in file names
+        internal static string EscapeFileName(string fileName)
+        {
+            return fileName?.Replace("{", "{{").Replace("}", "}}");
+        }
     }
 }

@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using Coverlet.Core.Instrumentation.Reachability;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Attributes;
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Mono.Cecil;
@@ -110,7 +111,7 @@ namespace Coverlet.Core.Instrumentation
                         }
                         else
                         {
-                            _logger.LogVerbose($"Unable to instrument module: {_module}, embedded pdb without local source files, [{firstNotFoundDocument}]");
+                            _logger.LogVerbose($"Unable to instrument module: {_module}, embedded pdb without local source files, [{FileSystem.EscapeFileName(firstNotFoundDocument)}]");
                             return false;
                         }
                     }
@@ -122,7 +123,7 @@ namespace Coverlet.Core.Instrumentation
                         }
                         else
                         {
-                            _logger.LogVerbose($"Unable to instrument module: {_module}, pdb without local source files, [{firstNotFoundDocument}]");
+                            _logger.LogVerbose($"Unable to instrument module: {_module}, pdb without local source files, [{FileSystem.EscapeFileName(firstNotFoundDocument)}]");
                             return false;
                         }
                     }
@@ -159,7 +160,7 @@ namespace Coverlet.Core.Instrumentation
             {
                 foreach (string sourceFile in _excludedSourceFiles)
                 {
-                    _logger.LogVerbose($"Excluded source file: '{sourceFile}'");
+                    _logger.LogVerbose($"Excluded source file: '{FileSystem.EscapeFileName(sourceFile)}'");
                 }
             }
 

@@ -98,7 +98,7 @@ namespace Coverlet.Core.Helpers
                         if (_fileSystem.Exists(pathToCheck = Path.GetFullPath(originalFileName.Replace(mapping.Key, srm.OriginalPath))))
                         {
                             (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
-                            _logger.LogVerbose($"Mapping resolved: '{originalFileName}' -> '{pathToCheck}'");
+                            _logger.LogVerbose($"Mapping resolved: '{FileSystem.EscapeFileName(originalFileName)}' -> '{FileSystem.EscapeFileName(pathToCheck)}'");
                             return pathToCheck;
                         }
                     }

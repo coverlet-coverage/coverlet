@@ -107,7 +107,7 @@ namespace Coverlet.Core
 
             Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded module filter '{filter}'"));
             Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Included module filter '{filter}'"));
-            Array.ForEach(_excludedSourceFiles ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded source files filter '{filter}'"));
+            Array.ForEach(_excludedSourceFiles ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded source files filter '{FileSystem.EscapeFileName(filter)}'"));
 
             _excludeFilters = _excludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
             _includeFilters = _includeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
