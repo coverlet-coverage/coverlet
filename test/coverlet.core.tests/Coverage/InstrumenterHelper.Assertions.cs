@@ -320,6 +320,57 @@ namespace Coverlet.Core.Tests
             return document;
         }
 
+        public static Document AssertLinesCovered(this Document document, BuildConfiguration configuration, params int[] lines)
+        {
+            return AssertLinesCoveredInternal(document, configuration, true, lines);
+        }
+
+        public static Document AssertLinesNotCovered(this Document document, BuildConfiguration configuration, params int[] lines)
+        {
+            return AssertLinesCoveredInternal(document, configuration, false, lines);
+        }
+
+        private static Document AssertLinesCoveredInternal(this Document document, BuildConfiguration configuration, bool covered, params int[] lines)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+
+            if ((buildConfiguration & configuration) != buildConfiguration)
+            {
+                return document;
+            }
+
+            List<int> linesToCover = new List<int>(lines);
+            foreach (KeyValuePair<int, Line> line in document.Lines)
+            {
+                foreach (int lineToCheck in lines)
+                {
+                    if (line.Value.Number == lineToCheck)
+                    {
+                        if (covered && line.Value.Hits > 0)
+                        {
+                            linesToCover.Remove(line.Value.Number);
+                        }
+                        if (!covered && line.Value.Hits == 0)
+                        {
+                            linesToCover.Remove(line.Value.Number);
+                        }
+                    }
+                }
+            }
+
+            if (linesToCover.Count != 0)
+            {
+                throw new XunitException($"Not all requested line found, {linesToCover.Select(l => l.ToString()).Aggregate((a, b) => $"{a}, {b}")}");
+            }
+
+            return document;
+        }
+
         public static Document AssertNonInstrumentedLines(this Document document, BuildConfiguration configuration, int from, int to)
         {
             if (document is null)
