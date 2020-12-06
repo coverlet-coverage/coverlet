@@ -396,24 +396,14 @@ namespace Coverlet.Core
                 // Nested ranges win on outermost one
                 foreach (HitCandidate hitCandidate in result.HitCandidates)
                 {
-                    if (hitCandidate.isBranch)
-                    {
-                        continue;
-                    }
-
-                    if (hitCandidate.end == hitCandidate.start)
+                    if (hitCandidate.isBranch || hitCandidate.end == hitCandidate.start)
                     {
                         continue;
                     }
 
                     foreach (HitCandidate hitCandidateToCompare in result.HitCandidates)
                     {
-                        if (hitCandidateToCompare.isBranch)
-                        {
-                            continue;
-                        }
-
-                        if (hitCandidate != hitCandidateToCompare)
+                        if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch)
                         {
                             if (hitCandidateToCompare.start >= hitCandidate.start &&
                                hitCandidateToCompare.end <= hitCandidate.end)
