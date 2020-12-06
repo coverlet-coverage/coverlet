@@ -103,7 +103,6 @@ namespace Coverlet.Core.Tests
                 }, new string[] { path });
 
                 TestInstrumentationHelper.GetCoverageResult(path)
-                .GenerateReport(show: true)
                 .Document("Instrumentation.SelectionStatements.cs")
                 .AssertLinesCovered(BuildConfiguration.Debug, 33, 34, 35, 36, 40)
                 .AssertLinesNotCovered(BuildConfiguration.Debug, 37, 38, 39)
@@ -140,7 +139,6 @@ namespace Coverlet.Core.Tests
                 }, new string[] { path });
 
                 TestInstrumentationHelper.GetCoverageResult(path)
-                .GenerateReport(show: true)
                 .Document("Instrumentation.SelectionStatements.cs")
                 .AssertLinesCovered(BuildConfiguration.Debug, 33, 34, 35, 36, 37, 38, 39, 40)
                 .AssertBranchesCovered(BuildConfiguration.Debug, (34, 0, 1), (34, 1, 3), (34, 2, 1), (34, 3, 2), (34, 4, 1), (34, 5, 1))
