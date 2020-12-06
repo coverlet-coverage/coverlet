@@ -422,7 +422,7 @@ namespace Coverlet.Core
                                      i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);
                                      i++)
                                 {
-                                    (hitCandidate.LinesToSkip ??= new List<int>()).Add(i);
+                                    (hitCandidate.AccountedByNestedInstrumentation ??= new HashSet<int>()).Add(i);
                                 }
                             }
                         }
@@ -452,7 +452,7 @@ namespace Coverlet.Core
                         {
                             for (int j = hitLocation.start; j <= hitLocation.end; j++)
                             {
-                                if (hitLocation.LinesToSkip?.Contains(j) == true)
+                                if (hitLocation.AccountedByNestedInstrumentation?.Contains(j) == true)
                                 {
                                     continue;
                                 }
