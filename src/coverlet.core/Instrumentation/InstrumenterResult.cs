@@ -88,6 +88,7 @@ namespace Coverlet.Core.Instrumentation
         public int start { get; set; }
         [DataMember]
         public int end { get; set; }
+        public HashSet<int> AccountedByNestedInstrumentation { get; set; }
     }
 
     [DataContract]

@@ -85,5 +85,69 @@ namespace Coverlet.Core.Tests
                 File.Delete(path);
             }
         }
+
+        [Fact]
+        public void SelectionStatements_Switch_CSharp8_OneBranch()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                    {
+                        instance.SwitchCsharp8(int.MaxValue);
+                        return Task.CompletedTask;
+                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    return 0;
+                }, new string[] { path });
+
+                TestInstrumentationHelper.GetCoverageResult(path)
+                .Document("Instrumentation.SelectionStatements.cs")
+                .AssertLinesCovered(BuildConfiguration.Debug, 33, 34, 35, 36, 40)
+                .AssertLinesNotCovered(BuildConfiguration.Debug, 37, 38, 39)
+                .AssertBranchesCovered(BuildConfiguration.Debug, (34, 0, 1), (34, 1, 0), (34, 2, 0), (34, 3, 0), (34, 4, 0), (34, 5, 0))
+                .ExpectedTotalNumberOfBranches(3);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void SelectionStatements_Switch_CSharp8_AllBranches()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                    {
+                        instance.SwitchCsharp8(int.MaxValue);
+                        instance.SwitchCsharp8(uint.MaxValue);
+                        instance.SwitchCsharp8(short.MaxValue);
+                        try
+                        {
+                            instance.SwitchCsharp8("");
+                        }
+                        catch { }
+                        return Task.CompletedTask;
+                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    return 0;
+                }, new string[] { path });
+
+                TestInstrumentationHelper.GetCoverageResult(path)
+                .Document("Instrumentation.SelectionStatements.cs")
+                .AssertLinesCovered(BuildConfiguration.Debug, 33, 34, 35, 36, 37, 38, 39, 40)
+                .AssertBranchesCovered(BuildConfiguration.Debug, (34, 0, 1), (34, 1, 3), (34, 2, 1), (34, 3, 2), (34, 4, 1), (34, 5, 1))
+                .ExpectedTotalNumberOfBranches(3);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
     }
 }

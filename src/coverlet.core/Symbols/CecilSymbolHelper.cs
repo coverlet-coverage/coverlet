@@ -21,6 +21,7 @@ namespace Coverlet.Core.Symbols
         private const int StepOverLineCode = 0xFEEFEE;
         // Create single instance, we cannot collide because we use full method name as key
         private readonly ConcurrentDictionary<string, int[]> _compilerGeneratedBranchesToExclude = new ConcurrentDictionary<string, int[]>();
+        private readonly ConcurrentDictionary<string, List<int>> _sequencePointOffsetToSkip = new ConcurrentDictionary<string, List<int>>();
 
         // In case of nested compiler generated classes, only the root one presents the CompilerGenerated attribute.
         // So let's search up to the outermost declaring type to find the attribute
@@ -395,6 +396,12 @@ namespace Coverlet.Core.Symbols
             return _compilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
         }
 
+        // https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/Expression%20Breakpoints.md
+        private bool SkipExpressionBreakpointsBranches(Instruction instruction) => instruction.Previous is not null && instruction.Previous.OpCode == OpCodes.Ldc_I4 &&
+                                                                                    instruction.Previous.Operand is int operandValue && operandValue == 1 &&
+                                                                                    instruction.Next is not null && instruction.Next.OpCode == OpCodes.Nop &&
+                                                                                    instruction.Operand == instruction.Next?.Next;
+
         public IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
             var list = new List<BranchPoint>();
@@ -439,6 +446,11 @@ namespace Coverlet.Core.Symbols
                         {
                             continue;
                         }
+                    }
+
+                    if (SkipExpressionBreakpointsBranches(instruction))
+                    {
+                        continue;
                     }
 
                     if (SkipLambdaCachedField(instruction))
@@ -620,6 +632,10 @@ namespace Coverlet.Core.Symbols
             return ordinal;
         }
 
+        public bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction) =>
+            SkipNotCoverableInstructionAfterExceptionRethrowInsiceCatchBlock(methodDefinition, instruction) ||
+            SkipExpressionBreakpointsSequences(methodDefinition, instruction);
+
         /*
            Need to skip instrumentation after exception re-throw inside catch block (only for async state machine MoveNext())
            es:
@@ -660,7 +676,7 @@ namespace Coverlet.Core.Symbols
            IL_00eb: br.s IL_00ed
            ...
        */
-        public bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction)
+        public bool SkipNotCoverableInstructionAfterExceptionRethrowInsiceCatchBlock(MethodDefinition methodDefinition, Instruction instruction)
         {
             if (!IsMoveNextInsideAsyncStateMachine(methodDefinition))
             {
@@ -712,6 +728,44 @@ namespace Coverlet.Core.Symbols
 
                 return null;
             }
+        }
+
+        private bool SkipExpressionBreakpointsSequences(MethodDefinition methodDefinition, Instruction instruction)
+        {
+            if (_sequencePointOffsetToSkip.ContainsKey(methodDefinition.FullName) && _sequencePointOffsetToSkip[methodDefinition.FullName].Contains(instruction.Offset) && instruction.OpCode == OpCodes.Nop)
+            {
+                return true;
+            }
+            /* 
+               Sequence to skip https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/Expression%20Breakpoints.md
+               // if (1 == 0)
+               // sequence point: (line 33, col 9) to (line 40, col 10) in C:\git\coverletfork\test\coverlet.core.tests\Samples\Instrumentation.SelectionStatements.cs
+               IL_0000: ldc.i4.1
+               IL_0001: brtrue.s IL_0004
+               // if (value is int)
+               // sequence point: (line 34, col 9) to (line 40, col 10) in C:\git\coverletfork\test\coverlet.core.tests\Samples\Instrumentation.SelectionStatements.cs
+               IL_0003: nop
+                // sequence point: hidden
+                ...
+             */
+            if (
+                    instruction.OpCode == OpCodes.Ldc_I4 && instruction.Operand is int operandValue && operandValue == 1 &&
+                    instruction.Next?.OpCode == OpCodes.Brtrue &&
+                    instruction.Next?.Next?.OpCode == OpCodes.Nop &&
+                    instruction.Next?.Operand == instruction.Next?.Next?.Next &&
+                    methodDefinition.DebugInformation.GetSequencePoint(instruction.Next?.Next) is not null
+                )
+            {
+                if (!_sequencePointOffsetToSkip.ContainsKey(methodDefinition.FullName))
+                {
+                    _sequencePointOffsetToSkip.TryAdd(methodDefinition.FullName, new List<int>());
+                }
+                _sequencePointOffsetToSkip[methodDefinition.FullName].Add(instruction.Offset);
+                _sequencePointOffsetToSkip[methodDefinition.FullName].Add(instruction.Next.Offset);
+                _sequencePointOffsetToSkip[methodDefinition.FullName].Add(instruction.Next.Next.Offset);
+            }
+
+            return false;
         }
 
         private static bool SkipBranchGeneratedExceptionFilter(Instruction branchInstruction, MethodDefinition methodDefinition)

@@ -392,7 +392,33 @@ namespace Coverlet.Core
                     }
                 }
 
-                List<(int docIndex, int line)> zeroHitsLines = new List<(int docIndex, int line)>();
+                // Calculate lines to skip for every hits start/end candidate
+                // Nested ranges win on outermost one
+                foreach (HitCandidate hitCandidate in result.HitCandidates)
+                {
+                    if (hitCandidate.isBranch || hitCandidate.end == hitCandidate.start)
+                    {
+                        continue;
+                    }
+
+                    foreach (HitCandidate hitCandidateToCompare in result.HitCandidates)
+                    {
+                        if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch)
+                        {
+                            if (hitCandidateToCompare.start >= hitCandidate.start &&
+                               hitCandidateToCompare.end <= hitCandidate.end)
+                            {
+                                for (int i = hitCandidateToCompare.start;
+                                     i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);
+                                     i++)
+                                {
+                                    (hitCandidate.AccountedByNestedInstrumentation ??= new HashSet<int>()).Add(i);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 var documentsList = result.Documents.Values.ToList();
                 using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
                 using (var br = new BinaryReader(fs))
@@ -416,27 +442,14 @@ namespace Coverlet.Core
                         {
                             for (int j = hitLocation.start; j <= hitLocation.end; j++)
                             {
+                                if (hitLocation.AccountedByNestedInstrumentation?.Contains(j) == true)
+                                {
+                                    continue;
+                                }
+
                                 var line = document.Lines[j];
                                 line.Hits += hits;
-
-                                // We register 0 hit lines for later cleanup false positive of nested lambda closures
-                                if (hits == 0)
-                                {
-                                    zeroHitsLines.Add((hitLocation.docIndex, line.Number));
-                                }
                             }
-                        }
-                    }
-                }
-
-                // Cleanup nested state machine false positive hits
-                foreach (var (docIndex, line) in zeroHitsLines)
-                {
-                    foreach (var lineToCheck in documentsList[docIndex].Lines)
-                    {
-                        if (lineToCheck.Key == line)
-                        {
-                            lineToCheck.Value.Hits = 0;
                         }
                     }
                 }
