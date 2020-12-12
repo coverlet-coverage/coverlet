@@ -36,7 +36,7 @@ namespace Coverlet.Core.Samples.Tests
             int i => i.ToString(System.Globalization.CultureInfo.InvariantCulture),
             uint ui => ui.ToString(System.Globalization.CultureInfo.InvariantCulture),
             short s => s.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            _ => throw new System.NotSupportedException(),
+            _ => throw new System.NotSupportedException()
         };
     }
 }
