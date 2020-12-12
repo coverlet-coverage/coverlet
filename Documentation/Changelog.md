@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -Attribute exclusion does not work if attribute name does not end with "Attribute" [#884](https://github.com/coverlet-coverage/coverlet/pull/884) by https://github.com/bddckr  
 -Fix deterministic build+source link bug [#895](https://github.com/coverlet-coverage/coverlet/pull/895)  
 -Fix anonymous delegate compiler generate bug [#896](https://github.com/coverlet-coverage/coverlet/pull/896)  
--Fix incorrect branch coverage with await ValueTask [#949](https://github.com/coverlet-coverage/coverlet/pull/949) by https://github.com/alexthornton1
+-Fix incorrect branch coverage with await ValueTask [#949](https://github.com/coverlet-coverage/coverlet/pull/949) by https://github.com/alexthornton1  
+-Fix switch pattern coverage [#1006](https://github.com/coverlet-coverage/coverlet/pull/1006)
 
 ### Added
 -Skip autoprops feature [#912](https://github.com/coverlet-coverage/coverlet/pull/912)  
