@@ -60,16 +60,9 @@ To get the list of commits between two version use git command
 
 This is the steps to do to release new packages to Nuget.org
 
-1) Update project versions in file(remove `-preview.{height}` and adjust versions):
+1) Update project version in file `version.json` in root of repo (remove `-preview.{height}` and adjust version)
 
-Collector 
-https://github.com/tonerdo/coverlet/blob/master/src/coverlet.collector/version.json  
-.NET tool
-https://github.com/tonerdo/coverlet/blob/master/src/coverlet.console/version.json  
-Msbuild tasks
-https://github.com/tonerdo/coverlet/blob/master/src/coverlet.msbuild.tasks/version.json  
-
-Core lib project file https://github.com/tonerdo/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj.
+Update core lib project file version https://github.com/tonerdo/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj.  
 The version of core lib project file is the version we'll report on github repo releases https://github.com/tonerdo/coverlet/releases
 
 Do a PR and merge to master.
