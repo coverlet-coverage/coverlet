@@ -399,7 +399,8 @@ namespace Coverlet.Core.Symbols
         // https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/Expression%20Breakpoints.md
         private bool SkipExpressionBreakpointsBranches(Instruction instruction) => instruction.Previous is not null && instruction.Previous.OpCode == OpCodes.Ldc_I4 &&
                                                                                     instruction.Previous.Operand is int operandValue && operandValue == 1 &&
-                                                                                    instruction.Next is not null && instruction.Next.OpCode == OpCodes.Nop;
+                                                                                    instruction.Next is not null && instruction.Next.OpCode == OpCodes.Nop &&
+                                                                                    instruction.Operand == instruction.Next?.Next;
 
         public IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
         {
@@ -751,6 +752,7 @@ namespace Coverlet.Core.Symbols
                     instruction.OpCode == OpCodes.Ldc_I4 && instruction.Operand is int operandValue && operandValue == 1 &&
                     instruction.Next?.OpCode == OpCodes.Brtrue &&
                     instruction.Next?.Next?.OpCode == OpCodes.Nop &&
+                    instruction.Next?.Operand == instruction.Next?.Next?.Next &&
                     methodDefinition.DebugInformation.GetSequencePoint(instruction.Next?.Next) is not null
                 )
             {
