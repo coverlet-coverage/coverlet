@@ -19,6 +19,7 @@ using Xunit;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.VisualStudio.TestPlatform;
 using Coverlet.Core.Tests;
+using coverlet.core.tests;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
@@ -522,50 +523,51 @@ namespace Coverlet.Core.Instrumentation.Tests
         [InlineData("CustomExcludeAttribute", new string[] { "CustomExcludeAttribute" }, true)]
         public void TestInstrument_AssemblyMarkedAsExcludeFromCodeCoverage(string attributeName, string[] excludedAttributes, bool expectedExcludes)
         {
-            (string dllPath,string pdbPath) EmitAssemblyToInstrument(string outputFolder)
-            {
-                var attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
-                var instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
-[assembly:{attributeName}]
-namespace coverlet.tests.projectsample.excludedbyattribute{{
-public class SampleClass
-{{
-	public int SampleMethod()
-	{{
-		return new System.Random().Next();
-	}}
-}}
+//            (string dllPath,string pdbPath) EmitAssemblyToInstrument(string outputFolder)
+//            {
+//                var attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
+//                var instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
+//[assembly:{attributeName}]
+//namespace coverlet.tests.projectsample.excludedbyattribute{{
+//public class SampleClass
+//{{
+//	public int SampleMethod()
+//	{{
+//		return new System.Random().Next();
+//	}}
+//}}
 
-}}
-");
-                var compilation = CSharpCompilation.Create(attributeName, new List<SyntaxTree>
-                {
-                    attributeClassSyntaxTree,instrumentableClassSyntaxTree
-                }).AddReferences(
-                    MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location)).
-                WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, false));
+//}}
+//");
+//                var compilation = CSharpCompilation.Create(attributeName, new List<SyntaxTree>
+//                {
+//                    attributeClassSyntaxTree,instrumentableClassSyntaxTree
+//                }).AddReferences(
+//                    MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location)).
+//                WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, false));
 
-                var dllPath = Path.Combine(outputFolder, $"{attributeName}.dll");
-                var pdbPath = Path.Combine(outputFolder, $"{attributeName}.pdb");
-                var emitResult = compilation.Emit(Path.Combine(outputFolder, dllPath), pdbPath);
-                if (!emitResult.Success)
-                {
-                    var message = "Failure to dynamically create dll";
-                    foreach(var diagnostic in emitResult.Diagnostics)
-                    {
-                        message += Environment.NewLine;
-                        message += diagnostic.GetMessage();
-                    }
-                    throw new Xunit.Sdk.XunitException(message);
-                }
-                return (dllPath,pdbPath);
-            }
+//                var dllPath = Path.Combine(outputFolder, $"{attributeName}.dll");
+//                var pdbPath = Path.Combine(outputFolder, $"{attributeName}.pdb");
+//                var emitResult = compilation.Emit(Path.Combine(outputFolder, dllPath), pdbPath);
+//                if (!emitResult.Success)
+//                {
+//                    var message = "Failure to dynamically create dll";
+//                    foreach(var diagnostic in emitResult.Diagnostics)
+//                    {
+//                        message += Environment.NewLine;
+//                        message += diagnostic.GetMessage();
+//                    }
+//                    throw new Xunit.Sdk.XunitException(message);
+//                }
+//                return (dllPath,pdbPath);
+//            }
             
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
             disposeAction = () => Directory.Delete(tempDirectory,true);
-            
-            var (excludedbyattributeDll,_) = EmitAssemblyToInstrument(tempDirectory);
+
+            //var (excludedbyattributeDll,_) = EmitAssemblyToInstrument(tempDirectory);
+            var (excludedbyattributeDll, _) = AssemblyMarkedAsExcludeFromCodeCoverageEmitter.EmitAssemblyToInstrument(tempDirectory, attributeName);
 
             Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
