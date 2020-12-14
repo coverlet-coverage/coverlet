@@ -566,10 +566,7 @@ public class SampleClass
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
             {
-                //using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
                 return new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-
-                //return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             });
             var loggerMock = new Mock<ILogger>();
 
