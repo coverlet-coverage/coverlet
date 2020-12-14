@@ -1,14 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using coverlet.core.tests;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Moq;
 using Xunit;
 
@@ -33,50 +31,28 @@ namespace Coverlet.Core.Tests
         [InlineData("CustomExcludeAttribute", new string[] { "CustomExcludeAttribute" }, true)]
         public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage(string attributeName, string[] excludedAttributes, bool expectedExcludes)
         {
-//            (string dllPath, string pdbPath) EmitAssemblyToInstrument(string outputFolder)
-//            {
-//                var attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
-//                var instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
-//[assembly:{attributeName}]
-//namespace coverlet.tests.projectsample.excludedbyattribute{{
-//public class SampleClass
-//{{
-//	public int SampleMethod()
-//	{{
-//		return new System.Random().Next();
-//	}}
-//}}
+            /*
+             * todo create via attributes similarly to
+             [ConditionalFact]
+             [SkipOnOS(OS.Linux)]
+             [SkipOnOS(OS.MacOS)]
 
-//}}
-//");
-//                var compilation = CSharpCompilation.Create(attributeName, new List<SyntaxTree>
-//                {
-//                    attributeClassSyntaxTree,instrumentableClassSyntaxTree
-//                }).AddReferences(
-//                    MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location)).
-//                WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, false));
+            https://www.nuget.org/packages/Xunit.SkippableFact/
+            */
 
-//                var dllPath = Path.Combine(outputFolder, $"{attributeName}.dll");
-//                var pdbPath = Path.Combine(outputFolder, $"{attributeName}.pdb");
-//                var emitResult = compilation.Emit(Path.Combine(outputFolder, dllPath), pdbPath);
-//                if (!emitResult.Success)
-//                {
-//                    var message = "Failure to dynamically create dll";
-//                    foreach (var diagnostic in emitResult.Diagnostics)
-//                    {
-//                        message += Environment.NewLine;
-//                        message += diagnostic.GetMessage();
-//                    }
-//                    throw new Xunit.Sdk.XunitException(message);
-//                }
-//                return (dllPath, pdbPath);
-//            }
+            //excluding portable pdb due to the requirement of local source - 
+            //the actual exclusion is covered in InstrumenterTests.cs TestInstrument_AssemblyMarkedAsExcludeFromCodeCoverage
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
             disposeAction = () => Directory.Delete(tempDirectory, true);
 
             var (excludedbyattributeDll, _) = AssemblyMarkedAsExcludeFromCodeCoverageEmitter.EmitAssemblyToInstrument(tempDirectory, attributeName);
+
             Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
