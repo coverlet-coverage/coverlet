@@ -61,8 +61,13 @@ public class SampleClass
                 var emitResult = compilation.Emit(Path.Combine(outputFolder, dllPath), pdbPath);
                 if (!emitResult.Success)
                 {
-                    //write out
-                    throw new Xunit.Sdk.XunitException("Failure to dynamically create dll");
+                    var message = "Failure to dynamically create dll";
+                    foreach (var diagnostic in emitResult.Diagnostics)
+                    {
+                        message += Environment.NewLine;
+                        message += diagnostic.GetMessage();
+                    }
+                    throw new Xunit.Sdk.XunitException(message);
                 }
                 return (dllPath, pdbPath);
             }
