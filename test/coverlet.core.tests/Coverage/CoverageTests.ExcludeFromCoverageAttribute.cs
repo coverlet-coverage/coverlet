@@ -76,7 +76,7 @@ public class SampleClass
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
             {
-                return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
             });
             var loggerMock = new Mock<ILogger>();
 
@@ -86,7 +86,7 @@ public class SampleClass
 
             CoverageParameters parameters = new CoverageParameters
             {
-                IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
+                IncludeFilters = Array.Empty<string>(),
                 IncludeDirectories = Array.Empty<string>(),
                 ExcludeFilters = Array.Empty<string>(),
                 ExcludedSourceFiles = Array.Empty<string>(),
