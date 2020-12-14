@@ -1,24 +1,77 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
-using Coverlet.Tests.Xunit.Extensions;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Moq;
 using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    public partial class CoverageTests
+    public partial class CoverageTests:IDisposable
     {
-        [Fact]
-        public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
+        private Action disposeAction;
+        public void Dispose()
         {
+            if (disposeAction != null)
+            {
+                disposeAction();
+            }
+        }
+        [Theory]
+        [InlineData("NotAMatch", new string[] { }, false)]
+        [InlineData("ExcludeFromCoverageAttribute", new string[] { }, true)]
+        [InlineData("ExcludeFromCodeCoverageAttribute", new string[] { }, true)]
+        [InlineData("CustomExclude", new string[] { "CustomExclude" }, true)]
+        [InlineData("CustomExcludeAttribute", new string[] { "CustomExclude" }, true)]
+        [InlineData("CustomExcludeAttribute", new string[] { "CustomExcludeAttribute" }, true)]
+        public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage(string attributeName, string[] excludedAttributes, bool expectedExcludes)
+        {
+            (string dllPath, string pdbPath) EmitAssemblyToInstrument(string outputFolder)
+            {
+                var attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
+                var instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
+[assembly:{attributeName}]
+namespace coverlet.tests.projectsample.excludedbyattribute{{
+public class SampleClass
+{{
+	public int SampleMethod()
+	{{
+		return new System.Random().Next();
+	}}
+}}
+
+}}
+");
+                var compilation = CSharpCompilation.Create(attributeName, new List<SyntaxTree>
+                {
+                    attributeClassSyntaxTree,instrumentableClassSyntaxTree
+                }).AddReferences(
+                    MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location)).
+                WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, false));
+
+                var dllPath = Path.Combine(outputFolder, $"{attributeName}.dll");
+                var pdbPath = Path.Combine(outputFolder, $"{attributeName}.pdb");
+                var emitResult = compilation.Emit(Path.Combine(outputFolder, dllPath), pdbPath);
+                if (!emitResult.Success)
+                {
+                    //write out
+                    throw new Xunit.Sdk.XunitException("Failure to dynamically create dll");
+                }
+                return (dllPath, pdbPath);
+            }
+
+            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempDirectory);
+            disposeAction = () => Directory.Delete(tempDirectory, true);
+
+            var (excludedbyattributeDll, _) = EmitAssemblyToInstrument(tempDirectory);
             Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
@@ -26,8 +79,6 @@ namespace Coverlet.Core.Tests
                 return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             });
             var loggerMock = new Mock<ILogger>();
-
-            string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
 
             InstrumentationHelper instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
@@ -39,7 +90,7 @@ namespace Coverlet.Core.Tests
                 IncludeDirectories = Array.Empty<string>(),
                 ExcludeFilters = Array.Empty<string>(),
                 ExcludedSourceFiles = Array.Empty<string>(),
-                ExcludeAttributes = Array.Empty<string>(),
+                ExcludeAttributes = excludedAttributes,
                 IncludeTestAssembly = true,
                 SingleHit = false,
                 MergeWith = string.Empty,
@@ -50,8 +101,17 @@ namespace Coverlet.Core.Tests
             var coverage = new Coverage(excludedbyattributeDll, parameters, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object,
                                         new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
             CoveragePrepareResult result = coverage.PrepareModules();
-            Assert.Empty(result.Results);
-            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+
+            if (expectedExcludes)
+            {
+                Assert.Empty(result.Results);
+                loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+            }
+            else
+            {
+                Assert.NotEmpty(result.Results);
+            }
+            
         }
 
         [Fact]

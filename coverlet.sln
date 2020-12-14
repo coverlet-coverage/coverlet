@@ -38,8 +38,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		eng\nightly.ps1 = eng\nightly.ps1
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.excludedbyattribute", "test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj", "{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.integration.tests", "test\coverlet.integration.tests\coverlet.integration.tests.csproj", "{99B4059C-B25C-4B82-8117-A0E9DC9B0949}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.integration.template", "test\coverlet.integration.template\coverlet.integration.template.csproj", "{F6FE7678-C662-43D3-AC6A-64F6AC5A5935}"
@@ -96,10 +94,6 @@ Global
 		{085A3AFB-C086-4E98-86F1-1B481446EC5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{085A3AFB-C086-4E98-86F1-1B481446EC5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{085A3AFB-C086-4E98-86F1-1B481446EC5E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{99B4059C-B25C-4B82-8117-A0E9DC9B0949}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{99B4059C-B25C-4B82-8117-A0E9DC9B0949}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99B4059C-B25C-4B82-8117-A0E9DC9B0949}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -130,7 +124,6 @@ Global
 		{F5B2C45B-274B-43D6-9565-8B50659CFE56} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
 		{5ED4FA81-8F8C-4211-BA88-7573BD63262E} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{085A3AFB-C086-4E98-86F1-1B481446EC5E} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
-		{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{99B4059C-B25C-4B82-8117-A0E9DC9B0949} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F6FE7678-C662-43D3-AC6A-64F6AC5A5935} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{5FF404AD-7C0B-465A-A1E9-558CDC642B0C} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
