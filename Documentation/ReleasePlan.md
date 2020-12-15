@@ -15,32 +15,33 @@ Additional labels for pre-release and build metadata are available as extensions
 
 ## Release Calendar
 
-We release 3 components as nuget packages:  
+We release 3 components as NuGet packages:  
 
-**coverlet.msbuild.nupkg**  
-**coverlet.console.nupkg**  
-**coverlet.collector.nupkg**  
+**coverlet.msbuild.nupkg**
+**coverlet.console.nupkg**
+**coverlet.collector.nupkg**
 
 We plan 1 release [once per quarter](https://en.wikipedia.org/wiki/Calendar_year) if there is *at least* 1 new commit of source code on master. This release may be a major, minor, or patch version upgrade from the previous release depending on impact to consumers. 
 **We release intermediate packages in case of severe bug or to unblock users.**
 
 ### Current versions
 
-| Package        | **coverlet.msbuild** |
-| :-------------: |:-------------:|
-|**coverlet.msbuild**      | 2.9.0  |  
-|**coverlet.console**      | 1.7.2  |
-|**coverlet.collector**      | 1.3.0 |  
+| Package               | Version |
+|:----------------------|:--------|
+|**coverlet.msbuild**   | 2.9.0   |  
+|**coverlet.console**   | 1.7.2   |
+|**coverlet.collector** | 1.3.0   |  
 
 ### Proposed next versions  
 
-We bump version based on Semantic Versioning 2.0.0 spec.  
-If we add features to **coverlet.core.dll** we bump MINOR version of all packages.  
-If we do breaking changes on **coverlet.core.dll** we bump MAJOR version of all packages.  
-We MANUALLY bump versions on production release, so we have different release plan between prod and nigntly packages.
+We bump version based on Semantic Versioning 2.0.0 spec:
 
-| Release Date        | **coverlet.msbuild**           | **coverlet.console**  | **coverlet.collector** | **commit hash**| **notes** |
-| :-------------: |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+1. If we add features to **coverlet.core.dll** we bump MINOR version of all packages.  
+1. If we do breaking changes on **coverlet.core.dll** we bump MAJOR version of all packages.  
+1. We MANUALLY bump versions on production release, so we have different release plan between prod and nigntly packages.
+
+| Release Date        | coverlet.msbuild           | coverlet.console  | coverlet.collector | commit hash| notes |
+| :-------------- |:--------------|:--------------|:--------------|:--------------|:--------------|
 | <1 Jul 2020>      | 3.0.0 | 3.0.0 |   3.0.0 | | Align versions
 | 30 May 2020      | 2.9.0 | 1.7.2 |   1.3.0 | 83a38d45b3f9c231d705bfed849efbf41b3aaa86 | deterministic build support
 | 04 April 2020      | 2.8.1 | 1.7.1 |   1.2.1 | 3f81828821d07d756e02a4105b2533cedf0b543c
@@ -53,29 +54,28 @@ We MANUALLY bump versions on production release, so we have different release pl
 
 To get the list of commits between two version use git command
 ```bash
- git log --oneline hashbefore currenthash
+git log --oneline hashbefore currenthash
 ```
 
-# How to manually release packages to Nuget.org
+# How to manually release packages to nuget.org
 
-This is the steps to do to release new packages to Nuget.org
+This is the steps to release new packages to nuget.org
 
-1) Update projects version in file `version.json` in root of repo (remove `-preview.{height}` and adjust version)
+1. Update projects version in file `version.json` in root of repo (remove `-preview.{height}` and adjust version)
 
-Update core lib project file version https://github.com/tonerdo/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj.  
-The version of core lib project file is the version we'll report on github repo releases https://github.com/tonerdo/coverlet/releases
+Update core lib project file version https://github.com/coverlet-coverage/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj.  
+The version of core lib project file is the version we'll report on github repo releases https://github.com/coverlet-coverage/coverlet/releases
 
 Do a PR and merge to master.
 
-2) Clone repo, **remember to build packages from master and not from your fork or metadata links will point to your forked repo.**  
-Run `git log -5` from repo root to verify last commit.
+2. Clone repo, **remember to build packages from master and not from your fork or metadata links will point to your forked repo.** . Run `git log -5` from repo root to verify last commit.
 
+3. From new cloned, aligned and versions updated repo root run pack command
 
-3) From new cloned, aligned and versions updated repo root run pack command
-```
-dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
-...
- coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\netcoreapp2.2\coverlet.console.dll
+  ```
+  dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
+  ...
+  coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\netcoreapp2.2\coverlet.console.dll
   coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\netcoreapp2.2\publish\
   Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.2.8.1.nupkg'.
   Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.2.8.1.snupkg'.
@@ -83,25 +83,26 @@ dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
   Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.1.7.1.snupkg'.
   Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.1.2.1.nupkg'.
   Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.1.2.1.snupkg'.
-```
-4) Sign the packages using SignClient tool https://www.nuget.org/packages/SignClient
+  ```
 
-```powershell
-❯ SignClient "Sign" `
->> --baseDirectory "REPO ROOT DIRECTORY\bin" `
->> --input "**/*.nupkg" `
->> --config "ROOT REPO DIRECTORY\eng\signclient.json" `
->> --user "USER" `
->> --secret "SECRET" `
->> --name "Coverlet" `
->> --description "Coverlet" `
->> --descriptionUrl "https://github.com/coverlet-coverage/coverlet"
-```
+4. Sign the packages using SignClient tool https://www.nuget.org/packages/SignClient
 
-5) Upload *.nupkg files to Nuget.org site. **Check all metadata(url links, deterministic build etc...) before "Submit"**
+  ```powershell
+  ❯ SignClient "Sign" `
+  >> --baseDirectory "REPO ROOT DIRECTORY\bin" `
+  >> --input "**/*.nupkg" `
+  >> --config "ROOT REPO DIRECTORY\eng\signclient.json" `
+  >> --user "USER" `
+  >> --secret "SECRET" `
+  >> --name "Coverlet" `
+  >> --description "Coverlet" `
+  >> --descriptionUrl "https://github.com/coverlet-coverage/coverlet"
+  ```
 
-6) **On your fork**:
-*   Align to master
-*   Bump version by one(fix part) and re-add `-preview.{height}`
-*   Create release on repo https://github.com/tonerdo/coverlet/releases using https://github.com/tonerdo/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj assembly version
-*   Update the [Release Plan](https://github.com/tonerdo/coverlet/blob/master/Documentation/ReleasePlan.md)(this document) and [ChangeLog](https://github.com/tonerdo/coverlet/blob/master/Documentation/Changelog.md)
+5. Upload *.nupkg files to Nuget.org site. **Check all metadata(url links, deterministic build etc...) before "Submit"**
+
+6. **On your fork**:
+  * Align to master
+  * Bump version by one (fix part) and re-add `-preview.{height}`
+  * Create release on repo https://github.com/coverlet-coverage/coverlet/releases using https://github.com/coverlet-coverage/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj assembly version
+  * Update the [Release Plan](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/ReleasePlan.md)(this document) and [ChangeLog](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md)

@@ -11,7 +11,7 @@ Contributions are highly welcome, however, except for very small changes, kindly
 
 Clone this repo:
 
-    git clone https://github.com/tonerdo/coverlet.git
+    git clone https://github.com/coverlet-coverage/coverlet.git
     cd coverlet
 
 Building, testing, and packing use all the standard dotnet commands:
