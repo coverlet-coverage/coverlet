@@ -22,7 +22,7 @@ using Coverlet.Core.Tests;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
-    public class InstrumenterTests:IDisposable
+    public class InstrumenterTests : IDisposable
     {
         private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
         private Action disposeAction;
