@@ -230,9 +230,9 @@ namespace Coverlet.Core.Instrumentation
                 {
                     foreach (CustomAttribute customAttribute in module.Assembly.CustomAttributes)
                     {
-                        if (customAttribute.AttributeType.FullName == "System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute")
+                        if (IsExcludeAttribute(customAttribute))
                         {
-                            _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute 'System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute'");
+                            _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute {customAttribute.AttributeType.FullName}");
                             SkipModule = true;
                             return;
                         }
