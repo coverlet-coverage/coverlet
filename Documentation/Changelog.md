@@ -113,4 +113,3 @@ coverlet.collector 1.1.0
 -Fix property attribute detection [#477](https://github.com/tonerdo/coverlet/pull/477) by https://github.com/amweiss  
 -Fix instrumentation serialization bug [#458](https://github.com/tonerdo/coverlet/pull/458)  
 -Fix culture for cobertura xml report [#464](https://github.com/tonerdo/coverlet/pull/464)
-

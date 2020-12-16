@@ -119,7 +119,7 @@ coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output teamcit
 The currently supported [TeamCity statistics](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages) are:
 
 | TeamCity Statistic Key  | Description                    |
-| :---                    | :---                           |
+|:------------------------|:-------------------------------|
 | CodeCoverageL           | Line-level code coverage       |
 | CodeCoverageB           | Branch-level code coverage     |
 | CodeCoverageM           | Method-level code coverage     |
@@ -226,9 +226,14 @@ Both `--exclude` and `--include` options can be used together but `--exclude` ta
 
 You can also include coverage of the test assembly itself by specifying the `--include-test-assembly` flag.
 
+## SourceLink
+
+Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `--use-source-link` flag, Coverlet will generate results that contain the URL to the source files in your source control instead of local file paths.
+
 ## Exit Codes
 
-Coverlet outputs specific exit codes to better support build automation systems for determining failures and take action on it.
+Coverlet outputs specific exit codes to better support build automation systems for determining the kind of failure so the appropriate action can be taken.
+
 ```bash
 0 - Success.
 1 - If any test fails.

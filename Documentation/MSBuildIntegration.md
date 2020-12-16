@@ -1,4 +1,4 @@
-# Coverlet Integration with MSBuild
+# Coverlet integration with MSBuild
 
 In this mode, Coverlet doesn't require any additional setup other than including the NuGet package in the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
 
@@ -44,7 +44,7 @@ To specify a directory where all results will be written to (especially if using
 dotnet test /p:CollectCoverage=true /p:CoverletOutput='./results/'
 ```
 
-The coverlet MSBuild task sets the `CoverletReport` MSBuild item so that you can easily use the produced coverlet reports. For example, using [ReportGenerator](https://github.com/danielpalme/ReportGenerator#usage--command-line-parameters) to generate an html coverage report.
+The Coverlet MSBuild task sets the `CoverletReport` MSBuild item so that you can easily use the produced coverage reports. For example, using [ReportGenerator](https://github.com/danielpalme/ReportGenerator#usage--command-line-parameters) to generate an html coverage report.
 
 ```xml
 <Target Name="GenerateHtmlCoverageReport" AfterTargets="GenerateCoverageResultAfterTest">
@@ -63,7 +63,7 @@ dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=teamcity
 The currently supported [TeamCity statistics](https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ServiceMessages) are:
 
 | TeamCity Statistic Key  | Description                    |
-| :---                    | :---                           |
+|:------------------------|:-------------------------------|
 | CodeCoverageL           | Line-level code coverage       |
 | CodeCoverageB           | Branch-level code coverage     |
 | CodeCoverageM           | Method-level code coverage     |
@@ -76,14 +76,13 @@ The currently supported [TeamCity statistics](https://confluence.jetbrains.com/d
 
 ## Merging Results
 
-With Coverlet you can combine the output of multiple coverage runs into a single result.
+With Coverlet, you can combine the output of multiple coverage runs into a single result.
 
 ```bash
 dotnet test /p:CollectCoverage=true /p:MergeWith='/path/to/result.json'
 ```
 
-The value given to `/p:MergeWith` **must** be a path to Coverlet's own json result format. The results in `result.json` will be read, and added to the new results written to by Coverlet.
-[Check the sample](Examples.md).
+The value given to `/p:MergeWith` **must** be a path to Coverlet's own json result format. The results in `result.json` will be read, and added to the new results written to by Coverlet. [Check the sample](Examples.md).
 
 ## Threshold
 
@@ -117,7 +116,7 @@ dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line /p:Thr
 
 ### Attributes
 
-You can ignore a method an entire class or assembly from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
+You can ignore a method, an entire class or assembly from code coverage by creating and applying the `ExcludeFromCodeCoverage` attribute present in the `System.Diagnostics.CodeAnalysis` namespace.
 
 You can also ignore additional attributes by using the `ExcludeByAttribute` property (short name, i.e. the type name without the namespace, supported only):
 
@@ -126,6 +125,7 @@ dotnet test /p:CollectCoverage=true /p:ExcludeByAttribute="Obsolete,GeneratedCod
 ```
 
 ### Source Files
+
 You can also ignore specific source files from code coverage using the `ExcludeByFile` property
  - Use single or multiple paths (separate by comma)
  - Use file path or directory path with globbing (e.g `dir1/*.cs`)
@@ -135,6 +135,7 @@ dotnet test /p:CollectCoverage=true /p:ExcludeByFile=\"**/dir1/class1.cs,**/dir2
 ```
 
 ### Filters
+
 Coverlet gives the ability to have fine grained control over what gets excluded using "filter expressions".
 
 Syntax: `/p:Exclude=[Assembly-Filter]Type-Filter`
@@ -177,17 +178,19 @@ Methods that do not return can be marked with attributes to cause statements aft
 Attributes can be specified with the following syntax.
 Syntax:  `/p:DoesNotReturnAttribute="DoesNotReturnAttribute,OtherAttribute"`
 
-### Note for Powershell / VSTS users
-To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for a VSTS build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```.
+### Note for Powershell / Azure DevOps users
+
+To exclude or include multiple assemblies when using Powershell scripts or creating a .yaml file for an Azure DevOps build ```%2c``` should be used as a separator. Msbuild will translate this symbol to ```,```.
 
 ```/p:Exclude="[*]*Examples?%2c[*]*Startup"```
 
-VSTS builds do not require double quotes to be unescaped:
+Azure DevOps builds do not require double quotes to be unescaped:
+
 ```
 dotnet test --configuration $(buildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/ /p:Exclude="[MyAppName.DebugHost]*%2c[MyAppNamet.WebHost]*%2c[MyAppName.App]*"
 ```
 
-## Note for Linux users
+### Note for Linux users
 
 [There is an issue with MSBuild on Linux](https://github.com/microsoft/msbuild/issues/3468) that affects the ability to escape quotes while specifying multiple comma-separated values. Linux MSBuild automatically translates `\` to `/` in properties, tasks, etc. before using them, which means if you specified `/p:CoverletOutputFormat=\"json,opencover\"` in an MSBuild script, it will be converted to `/p:CoverletOutputFormat=/"json,opencover/"` before execution. This yields an error similar to the following:
 
@@ -202,4 +205,4 @@ The workaround is to use the .NET Core `dotnet msbuild` command instead of using
 
 ## SourceLink
 
-Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `--use-source-link` flag in the global tool or `/p:UseSourceLink=true` property in the MSBuild command, Coverlet will generate results that contain the URL to the source files in your source control instead of absolute file paths.
+Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `/p:UseSourceLink=true` property, Coverlet will generate results that contain the URL to the source files in your source control instead of local file paths.

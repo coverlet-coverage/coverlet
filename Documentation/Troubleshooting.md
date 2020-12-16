@@ -1,8 +1,9 @@
 # Troubleshooting
 
-## Msbuild integration
+## MSBuild integration
 
 1) Generate verbose log
+
 ```
 dotnet test test\coverlet.core.tests\coverlet.core.tests.csproj -c debug /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include=[coverlet.*]* -verbosity:diagnostic -bl:msbuild.binlog -noconsolelogger
 ```
@@ -17,19 +18,24 @@ dotnet test test\coverlet.core.tests\coverlet.core.tests.csproj -c debug /p:Coll
 ```
 dotnet test --collect:"XPlat Code Coverage" --settings runsettings --diag:log.txt
 ```
+
 You'll get logs file in same folder similar to
+
 ```
 log.datacollector.19-09-12_14-55-17_64755_5.txt
 log.host.19-09-12_14-55-18_82700_6.txt
 log.txt
 ```
 Search inside with filter '[coverlet]'
+
 ## Coverlet Global Tool
 
 ```
 coverlet "C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\coverlet.core.tests.dll" --target "dotnet" --targetargs "test C:\git\coverlet\test\coverlet.core.tests --no-build" --verbosity detailed
 ```
+
 Sample output
+
 ```
 ...
 Instrumented module: 'C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\coverlet.core.dll'
@@ -72,7 +78,7 @@ Hits file:'C:\Users\Marco\AppData\Local\Temp\coverlet.core_703263e9-21f0-4d1c-9c
 +---------+--------+--------+--------+
 ```
 
-## Use local build(no collectors)
+## Use local build (no collectors)
 
 Sometimes is useful test local updated source to fix issue.  
 You can "load" your local build using simple switch:
@@ -110,11 +116,10 @@ Build succeeded.
 Time Elapsed 00:00:07.42
 
 D:\git\coverlet (fixjsonserializerbug -> origin)
-λ
-
 ```
 
 * Go to repro project and run
+
 ```
 D:\git\Cake.Codecov\Source\Cake.Codecov.Tests (develop -> origin)
 λ dotnet test /p:CollectCoverage=true /p:Exclude="[xunit.*]*" /p:CoverletToolsPath=D:\git\coverlet\src\coverlet.msbuild.tasks\bin\Debug\netstandard2.0\  
@@ -129,6 +134,7 @@ In this way you can add `Debug.Launch()` inside coverlet source and debug.
 To use/debug local collectors build we need to tell to our project to restore and use our local build nuget package.
 
 1) Build local package
+
 ```
 C:\git\coverlet\src\coverlet.collector (master -> origin)
 λ dotnet pack
@@ -177,9 +183,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </ItemGroup>
 
 </Project>
-
 ```
+
 4) Run test command
+
 ```
  dotnet test XUnitTestProject1\ --collect:"XPlat Code Coverage"
 ```
@@ -187,7 +194,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 You can also attach/debug your code adding some line of code on collectors i.e.
 
 Attach using vs "Attach to Process"
-```cs
+
+```csharp
 while(!System.Diagnostics.Debugger.IsAttached)
 {
     System.Threading.Thread.Sleep(1000);
@@ -195,15 +203,19 @@ while(!System.Diagnostics.Debugger.IsAttached)
 ```
 
 Fire attach
-```cs
+
+```csharp
 System.Diagnostics.Debugger.Launch();
 ```
 
-If you want debug in-process collector you need to set VSTEST_HOST_DEBUG(https://github.com/microsoft/vstest/issues/2158) environment variable
+If you want debug in-process collector, you need to set VSTEST_HOST_DEBUG(https://github.com/microsoft/vstest/issues/2158) environment variable
+
 ```
 set VSTEST_HOST_DEBUG=1
 ```
+
 Test host will wait for debugger
+
 ```
 Starting test execution, please wait...
 Logging Vstest Diagnostics in file: C:\git\coverletissue\collectorlog\XUnitTestProject1\log.txt
@@ -211,26 +223,30 @@ Host debugging is enabled. Please attach debugger to testhost process to continu
 Process Id: 800, Name: dotnet
 ```
 
-**Every time you update code and rebuild new package remember to remove local nuget cache(`RMDIR "C:\Users\[winUser]\.nuget\packages\coverlet.collector" /S /Q`) otherwise you'll load old collector code because the package version wasn't changed**
+**Every time you update code and rebuild new package, remember to remove local nuget cache (`RMDIR "C:\Users\[winUser]\.nuget\packages\coverlet.collector" /S /Q`) otherwise you'll load old collector code because the package version wasn't changed**
 
 ## Enable injected tracker log
 
-Coverlet works thanks to ModuleTracker that is injected during instrumentation for every covered module.
-This piece of code is run as a part of tests and doesn't have any connection with coverlet.
+Coverlet works thanks to ModuleTracker that is injected during instrumentation for every covered module. This piece of code is run as a part of tests and doesn't have any connection with Coverlet.
+
 We can collect logs from trackers through an enviroment variable
+
 ```
  set COVERLET_ENABLETRACKERLOG=1
 ```
-When enabled, tracking event will be collected in log file near to module location.  
-File name will be something like `moduleName.dll_tracker.txt` and files with detailed hits will be in a folder named `TrackersHitsLog`.
+
+When enabled, tracking event will be collected in a log file near to module location. File name will be something like `moduleName.dll_tracker.txt` and files with detailed hits will be in a folder named `TrackersHitsLog`.
 
 ## Enable msbuild task instrumentation debugging
 
 You can live attach and debug msbuild tasks with `COVERLET_MSBUILD_INSTRUMENTATIONTASK_DEBUG` env variable
+
 ```
  set COVERLET_MSBUILD_INSTRUMENTATIONTASK_DEBUG=1
 ```
+
 You'll get this message during test run
+
 ```
 dotnet test  -p:Include="[test_coverage.]"   -p:Exclude="[*.Test.*]*"   -p:CollectCoverage=true   -p:CoverletOutputFormat=cobertura   -p:CoverletOutput=coverage.cobertura.xml
 Coverlet msbuild instrumentation task debugging is enabled. Please attach debugger to process to continue
@@ -240,13 +256,15 @@ Process Id: 29228 Name: dotnet
 ## Enable collector instrumentation debugging
 
 You can live attach and debug collectors with `COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG` and `COVERLET_DATACOLLECTOR_INPROC_DEBUG` env variable
+
 ```
  set COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG=1
  set COVERLET_DATACOLLECTOR_INPROC_DEBUG=1
 ```
+
 You will be asked to attach a debugger through UI popup.  
 To enable exceptions log for in-process data collectors
+
 ```
  set COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED=1
 ```
-

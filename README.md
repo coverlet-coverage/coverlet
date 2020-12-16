@@ -1,6 +1,6 @@
 # Coverlet
 
-[![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/coverlet-coverage.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=5&branchName=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/tonerdo/coverlet/blob/master/LICENSE)   
+[![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/coverlet-coverage.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=5&branchName=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/coverlet-coverage/coverlet/blob/master/LICENSE)   
 
 | Driver  |  Current version  | Downloads  |
 |---|---|---|
@@ -34,7 +34,7 @@ Coverlet can be used through three different *drivers*
 Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk?view=vs-2019  
 
 
-### VSTest Integration (preferred due to [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test) supports only .NET Core application)
+### VSTest Integration (preferred due to [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test) supports only .NET Core application)
 
 At the moment collectors integration **does not support** .NET Framework application.
 
@@ -62,7 +62,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
 ```
 
-### MSBuild Integration (suffers of possible [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
+### MSBuild Integration (suffers of possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation
 ```bash
@@ -85,7 +85,7 @@ See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 #### Requirements
 Requires a runtime that support _.NET Standard 2.0 and above_
 
-### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), suffers of possible [known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
+### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), suffers from possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation
 
