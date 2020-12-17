@@ -16,14 +16,15 @@ steps:
   displayName: Authenticate with NuGet feeds
 
 - script: dotnet pack -c Release /p:PublicRelease=false
-  displayName: Pack
+  displayName: Create NuGet packages
 
 - task: NuGetCommand@2
   inputs:
     command: push
     packagesToPush: $(Build.SourcesDirectory)/bin/Release/Packages/*.nupkg
     nuGetFeedType: internal
-    publishVstsFeed: coverlet-nightly@Local
+    vstsFeed: coverlet/coverlet-scoped-feed
+    publishVstsFeed: coverlet-nightly
   displayName: Publish NuGet packages
 
 - task: NuGetCommand@2
@@ -31,7 +32,8 @@ steps:
     command: push
     packagesToPush: $(Build.SourcesDirectory)/bin/Release/Packages/*.snupkg
     nuGetFeedType: internal
-    publishVstsFeed: coverlet-nightly@Local
+    vstsFeed: coverlet/coverlet-scoped-feed
+    publishVstsFeed: coverlet-nightly
   displayName: Publish NuGet symbol packages
 
 # - powershell:
