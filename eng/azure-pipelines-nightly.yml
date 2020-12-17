@@ -33,10 +33,3 @@ steps:
     nuGetFeedType: internal
     publishVstsFeed: coverlet/coverlet-nightly
   displayName: Publish NuGet symbol packages
-
-# - powershell:
-#     .\eng\nightly.ps1 -apiKey $env:APIKEY -source $env:SOURCE
-#   ignoreLASTEXITCODE: true
-#   env:
-#     APIKEY: $(apikey)
-#     SOURCE: $(source)
