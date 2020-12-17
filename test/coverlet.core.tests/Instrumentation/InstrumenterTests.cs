@@ -22,9 +22,18 @@ using Coverlet.Core.Tests;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
-    public class InstrumenterTests
+    public class InstrumenterTests : IDisposable
     {
         private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
+        private Action disposeAction;
+
+        public void Dispose()
+        {
+            if (disposeAction != null)
+            {
+                disposeAction();
+            }
+        }
 
         [ConditionalFact]
         [SkipOnOS(OS.Linux)]
@@ -504,29 +513,92 @@ namespace Coverlet.Core.Instrumentation.Tests
             loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
         }
 
-        [Fact]
-        public void TestInstrument_AssemblyMarkedAsExcludeFromCodeCoverage()
+        [Theory]
+        [InlineData("NotAMatch", new string[] { }, false)]
+        [InlineData("ExcludeFromCoverageAttribute", new string[] { }, true)]
+        [InlineData("ExcludeFromCodeCoverageAttribute", new string[] { }, true)]
+        [InlineData("CustomExclude", new string[] { "CustomExclude" }, true)]
+        [InlineData("CustomExcludeAttribute", new string[] { "CustomExclude" }, true)]
+        [InlineData("CustomExcludeAttribute", new string[] { "CustomExcludeAttribute" }, true)]
+        public void TestInstrument_AssemblyMarkedAsExcludeFromCodeCoverage(string attributeName, string[] excludedAttributes, bool expectedExcludes)
         {
+            string EmitAssemblyToInstrument(string outputFolder)
+            {
+                var attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
+                var instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
+[assembly:{attributeName}]
+namespace coverlet.tests.projectsample.excludedbyattribute{{
+public class SampleClass
+{{
+	public int SampleMethod()
+	{{
+		return new System.Random().Next();
+	}}
+}}
+
+}}
+");
+                var compilation = CSharpCompilation.Create(attributeName, new List<SyntaxTree>
+                {
+                    attributeClassSyntaxTree,instrumentableClassSyntaxTree
+                }).AddReferences(
+                    MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location)).
+                WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, false));
+
+                var dllPath = Path.Combine(outputFolder, $"{attributeName}.dll");
+                var pdbPath = Path.Combine(outputFolder, $"{attributeName}.pdb");
+
+                using (var outputStream = File.Create(dllPath))
+                using (var pdbStream = File.Create(pdbPath))
+                {
+                    var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+                    var emitOptions = new EmitOptions(pdbFilePath: pdbPath);
+                    var emitResult = compilation.Emit(outputStream, pdbStream, options: isWindows ? emitOptions : emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb));
+                    if (!emitResult.Success)
+                    {
+                        var message = "Failure to dynamically create dll";
+                        foreach (var diagnostic in emitResult.Diagnostics)
+                        {
+                            message += Environment.NewLine;
+                            message += diagnostic.GetMessage();
+                        }
+                        throw new Xunit.Sdk.XunitException(message);
+                    }
+                }
+                return dllPath;
+            }
+
+            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempDirectory);
+            disposeAction = () => Directory.Delete(tempDirectory, true);
+
             Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
             {
-                return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
             });
             var loggerMock = new Mock<ILogger>();
 
-            string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
+            string excludedbyattributeDll = EmitAssemblyToInstrument(tempDirectory);
 
             InstrumentationHelper instrumentationHelper =
                     new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                               new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
 
             Instrumenter instrumenter = new Instrumenter(excludedbyattributeDll, "_xunit_excludedbyattribute", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                                         Array.Empty<string>(), Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+                                                         excludedAttributes, Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
 
             InstrumenterResult result = instrumenter.Instrument();
-            Assert.Empty(result.Documents);
-            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+            if(expectedExcludes)
+            {
+                Assert.Empty(result.Documents);
+                loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+            }
+            else
+            {
+                Assert.NotEmpty(result.Documents);
+            }
         }
 
         [Fact]
@@ -710,5 +782,7 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             instrumenterTest.Directory.Delete(true);
         }
+
+        
     }
 }
