@@ -23,8 +23,7 @@ steps:
     command: push
     packagesToPush: $(Build.SourcesDirectory)/bin/Release/Packages/*.nupkg
     nuGetFeedType: internal
-    vstsFeed: coverlet/coverlet-scoped-feed
-    publishVstsFeed: coverlet-nightly
+    publishVstsFeed: coverlet/coverlet-nightly
   displayName: Publish NuGet packages
 
 - task: NuGetCommand@2
@@ -32,8 +31,7 @@ steps:
     command: push
     packagesToPush: $(Build.SourcesDirectory)/bin/Release/Packages/*.snupkg
     nuGetFeedType: internal
-    vstsFeed: coverlet/coverlet-scoped-feed
-    publishVstsFeed: coverlet-nightly
+    publishVstsFeed: coverlet/coverlet-nightly
   displayName: Publish NuGet symbol packages
 
 # - powershell:
