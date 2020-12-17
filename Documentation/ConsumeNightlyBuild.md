@@ -1,11 +1,5 @@
 # Consume nightly build
 
-You can check the metadata of nightly build packages here:
-
-MSBuild https://www.myget.org/feed/coverlet-dev/package/nuget/coverlet.msbuild  
-VSTest collector https://www.myget.org/feed/coverlet-dev/package/nuget/coverlet.collector  
-.NET tools https://www.myget.org/feed/coverlet-dev/package/nuget/coverlet.console  
-
 To consume nightly builds, create a `NuGet.Config` in your root solution directory and add the following content:
 
 ```xml
