@@ -1,15 +1,35 @@
 pool:
   vmImage: 'windows-2019'
+
 steps:
 - task: UseDotNet@2
   inputs:
     version: 2.2.402
+  displayName: Install .NET Core SDK 2.2.402
+
 - task: UseDotNet@2
   inputs:
     version: 3.1.401
-- powershell:
-    .\eng\nightly.ps1 -apiKey $env:APIKEY -source $env:SOURCE
-  ignoreLASTEXITCODE: true
-  env:
-    APIKEY: $(apikey)
-    SOURCE: $(source)
+  displayName: Install .NET Core SDK 3.1.401
+
+- task: NuGetAuthenticate@0
+  displayName: Authenticate with NuGet feeds
+
+- script: dotnet pack -c Release /p:PublicRelease=false
+  displayName: Create NuGet packages
+
+- task: NuGetCommand@2
+  inputs:
+    command: push
+    packagesToPush: $(Build.SourcesDirectory)/bin/Release/Packages/*.nupkg
+    nuGetFeedType: internal
+    publishVstsFeed: coverlet/coverlet-nightly
+  displayName: Publish NuGet packages
+
+- task: NuGetCommand@2
+  inputs:
+    command: push
+    packagesToPush: $(Build.SourcesDirectory)/bin/Release/Packages/*.snupkg
+    nuGetFeedType: internal
+    publishVstsFeed: coverlet/coverlet-nightly
+  displayName: Publish NuGet symbol packages
