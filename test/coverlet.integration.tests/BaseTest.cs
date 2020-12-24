@@ -85,7 +85,7 @@ namespace Coverlet.Integration.Tests
             psi.WorkingDirectory = workingDirectory;
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
-            Process commandProcess = Process.Start(psi);
+            Process commandProcess = Process.Start(psi)!;
             if (!commandProcess.WaitForExit((int)TimeSpan.FromMinutes(5).TotalMilliseconds))
             {
                 throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
@@ -114,8 +114,8 @@ namespace Coverlet.Integration.Tests
             }
 
             string localPackageFolder = Path.GetFullPath($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages");
-            xml.Element("configuration")
-               .Element("packageSources")
+            xml.Element("configuration")!
+               .Element("packageSources")!
                .Elements()
                .ElementAt(0)
                .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
@@ -135,9 +135,9 @@ namespace Coverlet.Integration.Tests
                 xml = XDocument.Load(csprojStream);
             }
 
-            xml.Element("Project")
-               .Element("PropertyGroup")
-               .Element("IsTestProject").Value = "true";
+            xml.Element("Project")!
+               .Element("PropertyGroup")!
+               .Element("IsTestProject")!.Value = "true";
 
             xml.Save(csproj);
         }
@@ -155,8 +155,8 @@ namespace Coverlet.Integration.Tests
                 xml = XDocument.Load(csprojStream);
             }
 
-            xml.Element("Project")
-               .Element("ItemGroup")
+            xml.Element("Project")!
+               .Element("ItemGroup")!
                .Add(new XElement("PackageReference", new XAttribute("Include", "Microsoft.NET.Test.Sdk"),
                new XAttribute("Version", version)));
             xml.Save(csproj);
@@ -175,8 +175,8 @@ namespace Coverlet.Integration.Tests
                 xml = XDocument.Load(csprojStream);
             }
             string msbuildPkgVersion = GetPackageVersion("*msbuild*.nupkg");
-            xml.Element("Project")
-               .Element("ItemGroup")
+            xml.Element("Project")!
+               .Element("ItemGroup")!
                .Add(new XElement("PackageReference", new XAttribute("Include", "coverlet.msbuild"), new XAttribute("Version", msbuildPkgVersion)));
             xml.Save(csproj);
         }
@@ -194,8 +194,8 @@ namespace Coverlet.Integration.Tests
                 xml = XDocument.Load(csprojStream);
             }
             string msbuildPkgVersion = GetPackageVersion("*collector*.nupkg");
-            xml.Element("Project")
-               .Element("ItemGroup")
+            xml.Element("Project")!
+               .Element("ItemGroup")!
                .Add(new XElement("PackageReference", new XAttribute("Include", "coverlet.collector"), new XAttribute("Version", msbuildPkgVersion)));
             xml.Save(csproj);
         }
@@ -261,9 +261,9 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
                 xml = XDocument.Load(csprojStream);
             }
 
-            xml.Element("Project")
-              .Element("PropertyGroup")
-              .Element("TargetFramework")
+            xml.Element("Project")!
+              .Element("PropertyGroup")!
+              .Element("TargetFramework")!
               .Remove();
 
             XElement targetFrameworkElement;
@@ -277,7 +277,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
                 targetFrameworkElement = new XElement("TargetFrameworks", string.Join(';', targetFrameworks));
             }
 
-            xml.Element("Project").Element("PropertyGroup").Add(targetFrameworkElement);
+            xml.Element("Project")!.Element("PropertyGroup")!.Add(targetFrameworkElement);
             xml.Save(project.ProjectFileNamePath);
         }
 
@@ -328,14 +328,14 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
         {
             using var csprojStream = File.OpenRead(ProjectFileNamePath);
             XDocument xml = XDocument.Load(csprojStream);
-            return xml.Element("Project").Element("PropertyGroup").Element("TargetFramework") == null;
+            return xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFramework") == null;
         }
 
         public string[] GetTargetFrameworks()
         {
             using var csprojStream = File.OpenRead(ProjectFileNamePath);
             XDocument xml = XDocument.Load(csprojStream);
-            XElement element = xml.Element("Project").Element("PropertyGroup").Element("TargetFramework") ?? xml.Element("Project").Element("PropertyGroup").Element("TargetFrameworks");
+            XElement element = xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFramework") ?? xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFrameworks")!;
             if (element is null)
             {
                 throw new ArgumentNullException("No 'TargetFramework' neither 'TargetFrameworks' found in csproj file");
@@ -354,7 +354,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
             {
                 try
                 {
-                    Directory.Delete(ProjectRootPath, true);
+                    // Directory.Delete(ProjectRootPath, true);
                 }
                 catch (UnauthorizedAccessException)
                 {
