@@ -102,5 +102,34 @@ namespace Coverlet.Core.Tests
                 File.Delete(path);
             }
         }
+
+        [Fact]
+        public void Issue_799_Empty_Line()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_799_Empty_Line>(instance =>
+                        {
+                            instance.EmptyLineInCompilerGeneratedMethod();
+                            return Task.CompletedTask;
+                        },
+                        persistPrepareResultToFile: pathSerialize[0]);
+                    return 0;
+                }, new string[] { path });
+
+                TestInstrumentationHelper.GetCoverageResult(path)
+                    .Document("Instrumentation.Lambda.cs")
+                    .AssertLinesCovered(BuildConfiguration.Debug, (110, 1), (111, 1), (112, 1), (113, 1), (115, 1), (116, 1), (117, 1))
+                    .AssertNonInstrumentedLines(BuildConfiguration.Debug, 114)
+                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
     }
 }

@@ -103,4 +103,17 @@ namespace Coverlet.Core.Samples.Tests
             return sum;
         }
     }
+
+    public class Issue_799_Empty_Line
+    {
+        public int EmptyLineInCompilerGeneratedMethod()
+        {
+            return new[] { 2 }.First(x =>
+            {
+                var number = 2;
+
+                return number == x;
+            });
+        }
+    }
 }

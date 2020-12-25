@@ -420,6 +420,35 @@ namespace Coverlet.Core
                 }
 
                 var documentsList = result.Documents.Values.ToList();
+
+                // Calculate lines to skip for every hits start/end candidate
+                // Nested ranges win on outermost one
+                foreach (HitCandidate hitCandidate in result.HitCandidates)
+                {
+                    if (hitCandidate.isBranch || hitCandidate.end == hitCandidate.start)
+                    {
+                        continue;
+                    }
+
+                    foreach (HitCandidate hitCandidateToCompare in result.HitCandidates)
+                    {
+                        if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch)
+                        {
+                            if (hitCandidateToCompare.start >= hitCandidate.start &&
+                               hitCandidateToCompare.end <= hitCandidate.end)
+                            {
+                                for (int i = hitCandidateToCompare.start;
+                                     i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);
+                                     i++)
+                                {
+                                    (hitCandidate.AccountedByNestedInstrumentation ??= new HashSet<int>()).Add(i);
+                                }
+                            }
+                        }
+                    }
+                    RemoveNotCoverableLinesWithinGeneratedMethods(documentsList, hitCandidate);
+                }
+
                 using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
                 using (var br = new BinaryReader(fs))
                 {
@@ -442,7 +471,7 @@ namespace Coverlet.Core
                         {
                             for (int j = hitLocation.start; j <= hitLocation.end; j++)
                             {
-                                if (hitLocation.AccountedByNestedInstrumentation?.Contains(j) == true)
+                                if (j >= hitLocation.AccountedByNestedInstrumentation?.FirstOrDefault() && j <= hitLocation.AccountedByNestedInstrumentation?.LastOrDefault())
                                 {
                                     continue;
                                 }
@@ -457,6 +486,19 @@ namespace Coverlet.Core
                 _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
                 _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
             }
+        }
+
+        private static void RemoveNotCoverableLinesWithinGeneratedMethods(List<Document> documentsList, HitCandidate hitCandidate)
+        {
+            if(hitCandidate.AccountedByNestedInstrumentation == null || !hitCandidate.AccountedByNestedInstrumentation.Any()) return;
+
+            var document = documentsList[hitCandidate.docIndex];
+            var first = hitCandidate.AccountedByNestedInstrumentation.First();
+            var last = hitCandidate.AccountedByNestedInstrumentation.Last();
+
+            var notCoverableLinesWithinGeneratedMethods = Enumerable.Range(first, last - first + 1)
+                .Except(hitCandidate.AccountedByNestedInstrumentation).ToList();
+            notCoverableLinesWithinGeneratedMethods.ForEach(line => document.Lines.Remove(line));
         }
 
         private string GetSourceLinkUrl(Dictionary<string, string> sourceLinkDocuments, string document)
