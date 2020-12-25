@@ -392,33 +392,6 @@ namespace Coverlet.Core
                     }
                 }
 
-                // Calculate lines to skip for every hits start/end candidate
-                // Nested ranges win on outermost one
-                foreach (HitCandidate hitCandidate in result.HitCandidates)
-                {
-                    if (hitCandidate.isBranch || hitCandidate.end == hitCandidate.start)
-                    {
-                        continue;
-                    }
-
-                    foreach (HitCandidate hitCandidateToCompare in result.HitCandidates)
-                    {
-                        if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch)
-                        {
-                            if (hitCandidateToCompare.start >= hitCandidate.start &&
-                               hitCandidateToCompare.end <= hitCandidate.end)
-                            {
-                                for (int i = hitCandidateToCompare.start;
-                                     i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);
-                                     i++)
-                                {
-                                    (hitCandidate.AccountedByNestedInstrumentation ??= new HashSet<int>()).Add(i);
-                                }
-                            }
-                        }
-                    }
-                }
-
                 var documentsList = result.Documents.Values.ToList();
 
                 // Calculate lines to skip for every hits start/end candidate
