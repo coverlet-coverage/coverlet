@@ -444,7 +444,7 @@ namespace Coverlet.Core
                         {
                             for (int j = hitLocation.start; j <= hitLocation.end; j++)
                             {
-                                if (j >= hitLocation.AccountedByNestedInstrumentation?.FirstOrDefault() && j <= hitLocation.AccountedByNestedInstrumentation?.LastOrDefault())
+                                if (j >= hitLocation.AccountedByNestedInstrumentation?.Min() && j <= hitLocation.AccountedByNestedInstrumentation?.Max())
                                 {
                                     continue;
                                 }
@@ -466,8 +466,8 @@ namespace Coverlet.Core
             if(hitCandidate.AccountedByNestedInstrumentation == null || !hitCandidate.AccountedByNestedInstrumentation.Any()) return;
 
             var document = documentsList[hitCandidate.docIndex];
-            var first = hitCandidate.AccountedByNestedInstrumentation.First();
-            var last = hitCandidate.AccountedByNestedInstrumentation.Last();
+            var first = hitCandidate.AccountedByNestedInstrumentation.Min();
+            var last = hitCandidate.AccountedByNestedInstrumentation.Max();
 
             var notCoverableLinesWithinGeneratedMethods = Enumerable.Range(first, last - first + 1)
                 .Except(hitCandidate.AccountedByNestedInstrumentation).ToList();
