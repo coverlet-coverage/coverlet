@@ -106,3 +106,4 @@ Do a PR and merge to master.
   * Bump version by one (fix part) and re-add `-preview.{height}`
   * Create release on repo https://github.com/coverlet-coverage/coverlet/releases using https://github.com/coverlet-coverage/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj assembly version
   * Update the [Release Plan](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/ReleasePlan.md)(this document) and [ChangeLog](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md)
+  * Do PR and merge
