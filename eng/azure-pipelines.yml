@@ -7,7 +7,7 @@ trigger:
 jobs:
 - job: Windows
   displayName: Windows
-  continueOnError: true
+  continueOnError: 'true'
   strategy:
     matrix:
       Debug:
@@ -37,7 +37,7 @@ jobs:
 
 - job: macOS
   displayName: macOS
-  continueOnError: true
+  continueOnError: 'true'
   strategy:
     matrix:
       Debug:
@@ -51,7 +51,7 @@ jobs:
 
 - job: Linux
   displayName: Linux
-  continueOnError: true
+  continueOnError: 'true'
   strategy:
     matrix:
       Debug:

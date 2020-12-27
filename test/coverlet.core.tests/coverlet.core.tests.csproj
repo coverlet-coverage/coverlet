@@ -2,7 +2,7 @@
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
@@ -54,8 +54,8 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="copy $(ProjectDir)..\coverlet.tests.projectsample.excludedbyattribute\$(OutDir) $(TargetDir)TestAssets /Y" />
-    <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) OR $([MSBuild]::IsOSPlatform('Linux'))" Command="cp -r $(ProjectDir)..\coverlet.tests.projectsample.excludedbyattribute\$(OutDir). $(TargetDir)TestAssets" />
+    <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="copy $(RepoRoot)test\coverlet.tests.projectsample.excludedbyattribute\$(OutDir) $(TargetDir)TestAssets /Y" />
+    <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) OR $([MSBuild]::IsOSPlatform('Linux'))" Command="cp -r $(RepoRoot)test/coverlet.tests.projectsample.excludedbyattribute/$(OutDir). $(TargetDir)TestAssets" />
   </Target>
 
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />

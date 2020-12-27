@@ -26,7 +26,7 @@ namespace Coverlet.Integration.Tests
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "coverage.json")));
             AssertCoverage(clonedTemplateProject);
@@ -37,7 +37,7 @@ namespace Coverlet.Integration.Tests
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "coverage.json")));
             AssertCoverage(clonedTemplateProject);
@@ -48,7 +48,7 @@ namespace Coverlet.Integration.Tests
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.json")));
             AssertCoverage(clonedTemplateProject, "file.json");
@@ -59,7 +59,7 @@ namespace Coverlet.Integration.Tests
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext")));
             AssertCoverage(clonedTemplateProject, "file.ext");
@@ -72,7 +72,7 @@ namespace Coverlet.Integration.Tests
             Assert.False(clonedTemplateProject.IsMultipleTargetFramework());
             string framework = clonedTemplateProject.GetTargetFrameworks().Single();
             Assert.True(DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext")));
             AssertCoverage(clonedTemplateProject, "file.ext");
@@ -83,7 +83,7 @@ namespace Coverlet.Integration.Tests
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext1.ext2")));
             AssertCoverage(clonedTemplateProject, "file.ext1.ext2");
@@ -93,10 +93,10 @@ namespace Coverlet.Integration.Tests
         public void Test_MultipleTargetFrameworkReport_NoCoverletOutput()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-            string[] targetFrameworks = new string[] { "netcoreapp2.2", "netcoreapp2.1" };
+            string[] targetFrameworks = new string[] { "net5.0", "netcoreapp3.1" };
             UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
 
             foreach (string targetFramework in targetFrameworks)
@@ -111,10 +111,10 @@ namespace Coverlet.Integration.Tests
         public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-            string[] targetFrameworks = new string[] { "netcoreapp2.2", "netcoreapp2.1" };
+            string[] targetFrameworks = new string[] { "netcoreapp3.1", "net5.0" };
             UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
 
             foreach (string targetFramework in targetFrameworks)
@@ -130,10 +130,10 @@ namespace Coverlet.Integration.Tests
         public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithoutExtension()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-            string[] targetFrameworks = new string[] { "netcoreapp2.2", "netcoreapp2.1" };
+            string[] targetFrameworks = new string[] { "net5.0", "netcoreapp3.1" };
             UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
 
             foreach (string targetFramework in targetFrameworks)
@@ -148,14 +148,14 @@ namespace Coverlet.Integration.Tests
         public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension_SpecifyFramework()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-            string[] targetFrameworks = new string[] { "netcoreapp2.2", "netcoreapp2.1" };
+            string[] targetFrameworks = new string[] { "net5.0", "netcoreapp3.1" };
             UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
             Assert.True(clonedTemplateProject.IsMultipleTargetFramework());
             string[] frameworks = clonedTemplateProject.GetTargetFrameworks();
             Assert.Equal(2, frameworks.Length);
-            string framework = frameworks.FirstOrDefault();
+            string framework = frameworks.FirstOrDefault()!;
             Assert.True(DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
 
             foreach (string targetFramework in targetFrameworks)
@@ -177,10 +177,10 @@ namespace Coverlet.Integration.Tests
         public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-            string[] targetFrameworks = new string[] { "netcoreapp2.2", "netcoreapp2.1" };
+            string[] targetFrameworks = new string[] {"net5.0", "netcoreapp3.1" };
             UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
 
             foreach (string targetFramework in targetFrameworks)
@@ -195,10 +195,10 @@ namespace Coverlet.Integration.Tests
         public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithDoubleExtension()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-            string[] targetFrameworks = new string[] { "netcoreapp2.2", "netcoreapp2.1" };
+            string[] targetFrameworks = new string[] { "net5.0", "netcoreapp3.1" };
             UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
-            Assert.Contains("Test Run Successful.", standardOutput);
+            Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput);
 
             foreach (string targetFramework in targetFrameworks)
