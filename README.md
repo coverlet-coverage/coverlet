@@ -148,8 +148,14 @@ If you're using [Cake Build](https://cakebuild.net) for your build script you ca
 
 ## Visual Studio Add-In
 
-If you're using Visual Studio, you can use the [Fine Code Coverage](https://marketplace.visualstudio.com/items?itemName=FortuneNgwenya.FineCodeCoverage) extension to visualize coverlet output inside Visual Studio while you code.
-Visualization is updated when you run unit tests in inside Visual Studio.
+If you want to visualize coverlet output inside Visual Studio while you code, you can use the following addins depending on your platform.
+
+### Windows
+If you're using Visual Studio on Windows, you can use the [Fine Code Coverage](https://marketplace.visualstudio.com/items?itemName=FortuneNgwenya.FineCodeCoverage) extension.
+Visualization is updated when you run unit tests inside Visual Studio.
+
+### Mac OS
+If you're using Visual Studio for Mac, you can use the [VSMac-CodeCoverage](https://github.com/ademanuele/VSMac-CodeCoverage) extension.
 
 ## Consume nightly build
 
