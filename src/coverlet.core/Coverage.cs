@@ -401,7 +401,7 @@ namespace Coverlet.Core
                         continue;
                     }
 
-                    foreach (HitCandidate hitCandidateToCompare in result.HitCandidates)
+                    foreach (HitCandidate hitCandidateToCompare in result.HitCandidates.Where(x => x.docIndex.Equals(hitCandidate.docIndex)))
                     {
                         if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch)
                         {
