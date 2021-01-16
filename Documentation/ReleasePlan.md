@@ -28,9 +28,9 @@ We plan 1 release [once per quarter](https://en.wikipedia.org/wiki/Calendar_year
 
 | Package               | Version |
 |:----------------------|:--------|
-|**coverlet.msbuild**   | 3.0.0   |  
-|**coverlet.console**   | 3.0.0   |
-|**coverlet.collector** | 3.0.0   |  
+|**coverlet.msbuild**   | 3.0.1   |  
+|**coverlet.console**   | 3.0.1   |
+|**coverlet.collector** | 3.0.1   |  
 
 ### Proposed next versions  
 
@@ -40,15 +40,16 @@ We bump version based on Semantic Versioning 2.0.0 spec:
 1. If we do breaking changes on **coverlet.core.dll** we bump MAJOR version of all packages.  
 1. We MANUALLY bump versions on production release, so we have different release plan between prod and nigntly packages.
 
-| Release Date      | coverlet.msbuild | coverlet.console  | coverlet.collector| commit hash                              | notes                       |
-| :-----------------|:-----------------|:------------------|:------------------|:-----------------------------------------|:----------------------------|
-| 09 January 2021   | 3.0.0            | 3.0.0             |   3.0.0           | 1e77f9d2183a320e8991bfc296460e793301931f | Align versions numbers      | 
-| 30 May 2020       | 2.9.0            | 1.7.2             |   1.3.0           | 83a38d45b3f9c231d705bfed849efbf41b3aaa86 | deterministic build support |
-| 04 April 2020     | 2.8.1            | 1.7.1             |   1.2.1           | 3f81828821d07d756e02a4105b2533cedf0b543c |                             |
-| 03 January 2019   | 2.8.0            | 1.7.0             |   1.2.0           | 72a688f1c47fa92059540d5fbb1c4b0b4bf0dc8c |                             |
-| 23 September 2019 | 2.7.0            | 1.6.0             |   1.1.0           | 4ca01eb239038808739699470a61fad675af6c79 |                             |
-| 01 July 2019      | 2.6.3            | 1.5.3             |   1.0.1           | e1593359497fdfe6befbb86304b8f4e09a656d14 |                             |
-| 06 June 2019      | 2.6.2            | 1.5.2             |   1.0.0           | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release     |
+| Release Date      | coverlet.msbuild | coverlet.console  | coverlet.collector| commit hash                              | notes                          |
+| :-----------------|:-----------------|:------------------|:------------------|:-----------------------------------------|:-------------------------------|
+| 16 January 2021   | 3.0.1            | 3.0.1             |   3.0.1           | 1b45fd89245369ae94407e7a77bdfee112042486 | Fix severe coverage regression | 
+| 09 January 2021   | 3.0.0            | 3.0.0             |   3.0.0           | 1e77f9d2183a320e8991bfc296460e793301931f | Align versions numbers         | 
+| 30 May 2020       | 2.9.0            | 1.7.2             |   1.3.0           | 83a38d45b3f9c231d705bfed849efbf41b3aaa86 | deterministic build support    |
+| 04 April 2020     | 2.8.1            | 1.7.1             |   1.2.1           | 3f81828821d07d756e02a4105b2533cedf0b543c |                                |
+| 03 January 2019   | 2.8.0            | 1.7.0             |   1.2.0           | 72a688f1c47fa92059540d5fbb1c4b0b4bf0dc8c |                                |
+| 23 September 2019 | 2.7.0            | 1.6.0             |   1.1.0           | 4ca01eb239038808739699470a61fad675af6c79 |                                |
+| 01 July 2019      | 2.6.3            | 1.5.3             |   1.0.1           | e1593359497fdfe6befbb86304b8f4e09a656d14 |                                |
+| 06 June 2019      | 2.6.2            | 1.5.2             |   1.0.0           | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release        |
 
 *< date >  Expected next release date
 
@@ -64,7 +65,6 @@ This is the steps to release new packages to nuget.org
 1. Update projects version in file `version.json` in root of repo (remove `-preview.{height}` and adjust version)
 
 Update core lib project file version https://github.com/coverlet-coverage/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj.  
-The version of core lib project file is the version we'll report on github repo releases https://github.com/coverlet-coverage/coverlet/releases
 
 Do a PR and merge to master.
 
@@ -104,6 +104,6 @@ Do a PR and merge to master.
 6. **On your fork**:
   * Align to master
   * Bump version by one (fix part) and re-add `-preview.{height}`
-  * Create release on repo https://github.com/coverlet-coverage/coverlet/releases using https://github.com/coverlet-coverage/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj assembly version
+  * Create release on repo https://github.com/coverlet-coverage/coverlet/releases
   * Update the [Release Plan](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/ReleasePlan.md)(this document) and [ChangeLog](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md)
   * Do PR and merge
