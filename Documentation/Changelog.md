@@ -12,7 +12,7 @@ coverlet.collector 3.0.1
 
 ### Fixed
 
-
+-Fix severe loss in coverage [#1043](https://github.com/coverlet-coverage/coverlet/pull/1043) by https://github.com/daveMueller
 
 ## Release date 2021-01-09
 ### Packages  
