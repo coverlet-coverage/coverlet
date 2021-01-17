@@ -122,7 +122,6 @@ namespace Coverlet.Core.Tests
                 }, new string[] { path });
 
                 TestInstrumentationHelper.GetCoverageResult(path)
-                .GenerateReport(show: true)
                 .Document("Instrumentation.Lambda.cs")
                 .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 110, 119)
                 .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 122, 124)
