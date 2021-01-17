@@ -246,6 +246,11 @@ namespace Coverlet.Core.Tests
             return document;
         }
 
+        public static Document AssertLinesCoveredFromTo(this Document document, int from, int to)
+        {
+            return AssertLinesCoveredFromTo(document, BuildConfiguration.Debug | BuildConfiguration.Release, from, to);
+        }
+
         public static Document AssertLinesCoveredFromTo(this Document document, BuildConfiguration configuration, int from, int to)
         {
             if (document is null)

@@ -405,8 +405,8 @@ namespace Coverlet.Core
                     {
                         if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch)
                         {
-                            if (hitCandidateToCompare.start >= hitCandidate.start &&
-                               hitCandidateToCompare.end <= hitCandidate.end)
+                            if (hitCandidateToCompare.start > hitCandidate.start &&
+                               hitCandidateToCompare.end < hitCandidate.end)
                             {
                                 for (int i = hitCandidateToCompare.start;
                                      i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);

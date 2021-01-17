@@ -103,4 +103,31 @@ namespace Coverlet.Core.Samples.Tests
             return sum;
         }
     }
+
+    public class Issue_1056
+    {
+        public void T1()
+        {
+            Do(x => WriteLine(x.GetType().Name));
+            Do(x => WriteLine(x
+                .GetType()
+                .Name));
+            Do2(x => x.GetType().Name.Length);
+            Do2(x => x.GetType()
+                .Name
+                .Length);
+        }
+
+        private static void Do(System.Action<object> action)
+        {
+            action(new object());
+        }
+
+        private static object Do2(System.Func<object, object> func)
+        {
+            return func(new object());
+        }
+
+        public void WriteLine(string str) { }
+    }
 }
