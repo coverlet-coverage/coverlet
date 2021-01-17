@@ -198,7 +198,6 @@ namespace Coverlet.Core.Instrumentation
             using (var stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read))
             using (var resolver = new NetstandardAwareAssemblyResolver(_module, _logger))
             {
-                resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
                 var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
                 if (_isCoreLibrary)
                 {
