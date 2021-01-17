@@ -127,7 +127,7 @@ namespace Coverlet.Core.Tests
                 .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 122, 124)
                 .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 127, 129)
                 .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 131, 131)
-                .AssertLinesCovered((110, 1), (111, 2), (112, 2), (113, 2), (114, 2), (115, 2), (116, 2), (117, 2), (118, 2), (119, 1),
+                .AssertLinesCovered(BuildConfiguration.Debug, (110, 1), (111, 2), (112, 2), (113, 2), (114, 2), (115, 2), (116, 2), (117, 2), (118, 2), (119, 1),
                                     (122, 2), (123, 2), (124, 2),
                                     (127, 2), (128, 2), (129, 2),
                                     (131, 4));
