@@ -70,6 +70,7 @@ namespace Coverlet.Core.Tests
         async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod,
                                                                Func<string, string[]> includeFilter = null,
                                                                Func<string, string[]> excludeFilter = null,
+                                                               Func<string, string[]> doesNotReturnAttributes = null,
                                                                string persistPrepareResultToFile = null,
                                                                bool disableRestoreModules = false,
                                                                bool skipAutoProps = false)
@@ -111,7 +112,8 @@ namespace Coverlet.Core.Tests
                 SingleHit = false,
                 MergeWith = string.Empty,
                 UseSourceLink = false,
-                SkipAutoProps = skipAutoProps
+                SkipAutoProps = skipAutoProps,
+                DoesNotReturnAttributes = doesNotReturnAttributes?.Invoke(fileName)
             };
 
             // Instrument module

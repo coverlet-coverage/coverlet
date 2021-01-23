@@ -252,7 +252,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object, new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
 
             module = Path.Combine(directory.FullName, destModule);
-            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, Array.Empty<string>(), false, false,
+            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, new string[] { "DoesNotReturnAttribute" }, false, false,
                                                          _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
             return new InstrumenterTest
             {
@@ -590,7 +590,7 @@ public class SampleClass
                                                          excludedAttributes, Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
 
             InstrumenterResult result = instrumenter.Instrument();
-            if(expectedExcludes)
+            if (expectedExcludes)
             {
                 Assert.Empty(result.Documents);
                 loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
@@ -783,6 +783,6 @@ public class SampleClass
             instrumenterTest.Directory.Delete(true);
         }
 
-        
+
     }
 }

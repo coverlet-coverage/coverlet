@@ -81,7 +81,7 @@ namespace Coverlet.Core.Instrumentation
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
             _cecilSymbolHelper = cecilSymbolHelper;
-            _doesNotReturnAttributes = PrepareAttributes(doesNotReturnAttributes, nameof(DoesNotReturnAttribute));
+            _doesNotReturnAttributes = PrepareAttributes(doesNotReturnAttributes);
             _skipAutoProps = skipAutoProps;
         }
 
