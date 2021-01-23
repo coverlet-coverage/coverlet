@@ -173,7 +173,7 @@ Syntax:  `/p:SkipAutoProps=true`
 
 ### Methods that do not return
 
-Methods that do not return can be marked with attributes to cause statements after them to be excluded from coverage.  `DoesNotReturnAttribute` is included by default.
+Methods that do not return can be marked with attributes to cause statements after them to be excluded from coverage.
 
 Attributes can be specified with the following syntax.
 Syntax:  `/p:DoesNotReturnAttribute="DoesNotReturnAttribute,OtherAttribute"`
