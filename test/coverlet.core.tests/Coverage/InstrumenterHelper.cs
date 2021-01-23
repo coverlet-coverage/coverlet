@@ -113,7 +113,7 @@ namespace Coverlet.Core.Tests
                 MergeWith = string.Empty,
                 UseSourceLink = false,
                 SkipAutoProps = skipAutoProps,
-                DoesNotReturnAttributes = doesNotReturnAttributes is null ? null : doesNotReturnAttributes(fileName)
+                DoesNotReturnAttributes = doesNotReturnAttributes?.Invoke(fileName)
             };
 
             // Instrument module
