@@ -23,7 +23,7 @@ namespace Coverlet.Core.Tests
                         catch (Exception) { }
                         return Task.CompletedTask;
 
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
                     return 0;
 
@@ -183,7 +183,7 @@ namespace Coverlet.Core.Tests
                             catch (Exception) { }
                             return Task.CompletedTask;
 
-                        }, persistPrepareResultToFile: pathSerialize[0]);
+                        }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
                     return 0;
 
@@ -215,7 +215,7 @@ namespace Coverlet.Core.Tests
                             catch (Exception) { }
                             return Task.CompletedTask;
 
-                        }, persistPrepareResultToFile: pathSerialize[0]);
+                        }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
                     return 0;
 
@@ -247,7 +247,7 @@ namespace Coverlet.Core.Tests
                             catch (Exception) { }
                             return Task.CompletedTask;
 
-                        }, persistPrepareResultToFile: pathSerialize[0]);
+                        }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
                     return 0;
 
@@ -279,7 +279,7 @@ namespace Coverlet.Core.Tests
                             catch (Exception) { }
                             return Task.CompletedTask;
 
-                        }, persistPrepareResultToFile: pathSerialize[0]);
+                        }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
                     return 0;
 
