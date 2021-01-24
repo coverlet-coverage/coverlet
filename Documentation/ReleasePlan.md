@@ -13,35 +13,24 @@ PATCH version when you make backwards-compatible bug fixes.
 Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
 ```
 
-## Release Calendar
-
 We release 3 components as NuGet packages:  
 
-**coverlet.msbuild.nupkg**
-**coverlet.console.nupkg**
-**coverlet.collector.nupkg**
-
-We plan 1 release [once per quarter](https://en.wikipedia.org/wiki/Calendar_year) if there is *at least* 1 new commit of source code on master. This release may be a major, minor, or patch version upgrade from the previous release depending on impact to consumers. 
-**We release intermediate packages in case of severe bug or to unblock users.**
+**coverlet.msbuild.nupkg**  
+**coverlet.console.nupkg**  
+**coverlet.collector.nupkg**  
 
 ### Current versions
 
 | Package               | Version |
 |:----------------------|:--------|
-|**coverlet.msbuild**   | 3.0.1   |  
-|**coverlet.console**   | 3.0.1   |
-|**coverlet.collector** | 3.0.1   |  
+|**coverlet.msbuild**   | 3.0.2   |  
+|**coverlet.console**   | 3.0.2   |
+|**coverlet.collector** | 3.0.2   |  
 
-### Proposed next versions  
-
-We bump version based on Semantic Versioning 2.0.0 spec:
-
-1. If we add features to **coverlet.core.dll** we bump MINOR version of all packages.  
-1. If we do breaking changes on **coverlet.core.dll** we bump MAJOR version of all packages.  
-1. We MANUALLY bump versions on production release, so we have different release plan between prod and nigntly packages.
 
 | Release Date      | coverlet.msbuild | coverlet.console  | coverlet.collector| commit hash                              | notes                          |
 | :-----------------|:-----------------|:------------------|:------------------|:-----------------------------------------|:-------------------------------|
+| 24 January 2021   | 3.0.2            | 3.0.2             |   3.0.2           | ed918515492193fd154b60270d440c40fa30fee9 | Fix regressions                | 
 | 16 January 2021   | 3.0.1            | 3.0.1             |   3.0.1           | 1b45fd89245369ae94407e7a77bdfee112042486 | Fix severe coverage regression | 
 | 09 January 2021   | 3.0.0            | 3.0.0             |   3.0.0           | 1e77f9d2183a320e8991bfc296460e793301931f | Align versions numbers         | 
 | 30 May 2020       | 2.9.0            | 1.7.2             |   1.3.0           | 83a38d45b3f9c231d705bfed849efbf41b3aaa86 | deterministic build support    |
@@ -50,8 +39,6 @@ We bump version based on Semantic Versioning 2.0.0 spec:
 | 23 September 2019 | 2.7.0            | 1.6.0             |   1.1.0           | 4ca01eb239038808739699470a61fad675af6c79 |                                |
 | 01 July 2019      | 2.6.3            | 1.5.3             |   1.0.1           | e1593359497fdfe6befbb86304b8f4e09a656d14 |                                |
 | 06 June 2019      | 2.6.2            | 1.5.2             |   1.0.0           | 3e7eac9df094c22335711a298d359890aed582e8 | first collector release        |
-
-*< date >  Expected next release date
 
 To get the list of commits between two version use git command
 ```bash
