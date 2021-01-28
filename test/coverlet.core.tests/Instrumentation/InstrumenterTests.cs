@@ -597,7 +597,7 @@ public class SampleClass
             }
             else
             {
-                Assert.NotEmpty(result.Documents);
+                Assert.Empty(result.Documents);
             }
         }
 
