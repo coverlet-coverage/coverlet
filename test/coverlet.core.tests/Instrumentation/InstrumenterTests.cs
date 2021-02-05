@@ -783,6 +783,22 @@ public class SampleClass
             instrumenterTest.Directory.Delete(true);
         }
 
+        [Fact]
+        public void Instrumenter_MethodsWithoutReferenceToSource_AreSkipped()
+        {
+            var loggerMock = new Mock<ILogger>();
 
+            string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.vbmynamespace.dll").First();
+            InstrumentationHelper instrumentationHelper = 
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                                          new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem()));
+
+            var instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_vbmynamespace", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
+                                            Array.Empty<string>(), Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+
+            var result = instrumenter.Instrument();
+            
+            Assert.False(result.Documents.ContainsKey(string.Empty));
+        }
     }
 }

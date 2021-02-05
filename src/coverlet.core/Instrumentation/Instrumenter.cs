@@ -510,6 +510,8 @@ namespace Coverlet.Core.Instrumentation
 
         private void InstrumentMethod(MethodDefinition method)
         {
+            _logger.LogInformation($"Instrumenting method '{method.FullName}' in module '{_module}'.");
+
             var sourceFile = method.DebugInformation.SequencePoints.Select(s => _sourceRootTranslator.ResolveFilePath(s.Document.Url)).FirstOrDefault();
 
             if (string.IsNullOrEmpty(sourceFile)) return;
