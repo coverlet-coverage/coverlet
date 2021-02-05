@@ -788,17 +788,30 @@ public class SampleClass
         {
             var loggerMock = new Mock<ILogger>();
 
-            string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.vbmynamespace.dll").First();
-            InstrumentationHelper instrumentationHelper = 
-                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
-                                          new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem()));
+            // Default case
+            string module = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.vbmynamespace.dll").First();
+            string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
 
-            var instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_vbmynamespace", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                            Array.Empty<string>(), Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+
+            File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
+            File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
+
+            InstrumentationHelper instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                    new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem()));
+
+
+            Instrumenter instrumenter = new Instrumenter(Path.Combine(directory.FullName, Path.GetFileName(module)), "_coverlet_tests_projectsample_vbmynamespace", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
+                Array.Empty<string>(), Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(Path.Combine(directory.FullName, Path.GetFileName(module)), loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            
+            instrumentationHelper.BackupOriginalModule(Path.Combine(directory.FullName, Path.GetFileName(module)), "_coverlet_tests_projectsample_vbmynamespace");
 
             var result = instrumenter.Instrument();
-            
+
             Assert.False(result.Documents.ContainsKey(string.Empty));
+
+            directory.Delete(true);
         }
     }
 }
