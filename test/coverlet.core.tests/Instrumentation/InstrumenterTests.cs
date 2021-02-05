@@ -788,7 +788,6 @@ public class SampleClass
         {
             var loggerMock = new Mock<ILogger>();
 
-            // Default case
             string module = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.vbmynamespace.dll").First();
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
 
