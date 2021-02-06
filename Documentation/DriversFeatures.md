@@ -14,5 +14,6 @@ In the table below we keep track of main differences:
 | Configurable reports output folder | Yes           | Yes          | No               |
 | Merge reports                      | Yes           | Yes          | No               |
 | Coverage threshold validation      | Yes           | Yes          | No               |
+| Deterministic build support        | Yes           | No           | Yes              |
 
 When possible, we advice you to use the collectors integration (VSTest engine integration), since it is fully integrated inside the test pipeline and does not suffer from the [known issues](KnownIssues.md) of the other drivers.
