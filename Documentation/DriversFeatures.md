@@ -11,7 +11,7 @@ In the table below we keep track of main differences:
 | .NET Core support(>= 2.0)          | Yes           | Yes          | Yes              |
 | .NET Framework support(>= 4.6.1)   | Yes           | Yes          | Yes(since 3.0.0) |
 | Show result on console             | Yes           | Yes          | No               |
-| Configurable reports output folder | Yes           | Yes          | No               |
+| Deterministic reports output folder| Yes           | Yes          | No               |
 | Merge reports                      | Yes           | Yes          | No               |
 | Coverage threshold validation      | Yes           | Yes          | No               |
 | Deterministic build support        | Yes           | No           | Yes              |
