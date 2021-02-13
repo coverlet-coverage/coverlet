@@ -125,7 +125,7 @@ namespace Coverlet.Core.Helpers
                                 // We verify all docs and return false if not all are present in local
                                 // We could have false negative if doc is not a source
                                 // Btw check for all possible extension could be weak approach
-                                if (!_fileSystem.Exists(docName))
+                                if (!_fileSystem.Exists(docName) && !docName.EndsWith(".g.cs"))
                                 {
                                     firstNotFoundDocument = docName;
                                     return false;
@@ -172,7 +172,7 @@ namespace Coverlet.Core.Helpers
                             // We verify all docs and return false if not all are present in local
                             // We could have false negative if doc is not a source
                             // Btw check for all possible extension could be weak approach
-                            if (!_fileSystem.Exists(docName))
+                            if (!_fileSystem.Exists(docName) && !docName.EndsWith(".g.cs"))
                             {
                                 firstNotFoundDocument = docName;
                                 return false;
