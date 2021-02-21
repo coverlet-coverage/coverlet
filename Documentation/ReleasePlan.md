@@ -23,13 +23,14 @@ We release 3 components as NuGet packages:
 
 | Package               | Version |
 |:----------------------|:--------|
-|**coverlet.msbuild**   | 3.0.2   |  
-|**coverlet.console**   | 3.0.2   |
-|**coverlet.collector** | 3.0.2   |  
+|**coverlet.msbuild**   | 3.0.3   |  
+|**coverlet.console**   | 3.0.3   |
+|**coverlet.collector** | 3.0.3   |  
 
 
 | Release Date      | coverlet.msbuild | coverlet.console  | coverlet.collector| commit hash                              | notes                          |
 | :-----------------|:-----------------|:------------------|:------------------|:-----------------------------------------|:-------------------------------|
+| 21 February 2021  | 3.0.3            | 3.0.3             |   3.0.3           | adfabfd58de0aabe263e7d2080324e0b8541071e | Fix regressions                | 
 | 24 January 2021   | 3.0.2            | 3.0.2             |   3.0.2           | ed918515492193fd154b60270d440c40fa30fee9 | Fix regressions                | 
 | 16 January 2021   | 3.0.1            | 3.0.1             |   3.0.1           | 1b45fd89245369ae94407e7a77bdfee112042486 | Fix severe coverage regression | 
 | 09 January 2021   | 3.0.0            | 3.0.0             |   3.0.0           | 1e77f9d2183a320e8991bfc296460e793301931f | Align versions numbers         | 
