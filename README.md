@@ -174,7 +174,7 @@ Author and owner
 Co-maintainers
 
 * [Peter Liljenberg](https://github.com/petli)  
-* [Dave Muller](https://github.com/daveMueller)
+* [David Müller](https://github.com/daveMueller)
 * [Marco Rossignoli](https://github.com/MarcoRossignoli)
 
 ## Code of Conduct
