@@ -8,7 +8,8 @@
     <PackageReference Update="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
     <PackageReference Update="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Update="Microsoft.TestPlatform.ObjectModel" Version="16.5.0" />
+    <!-- https://github.com/coverlet-coverage/coverlet/issues/1042 -->
+    <PackageReference Update="Microsoft.TestPlatform.ObjectModel" Version="16.9.1" />
     <PackageReference Update="Mono.Cecil" Version="0.11.1" />
     <PackageReference Update="Moq" Version="4.10.1" />
     <!-- Do not upgrade this version or we won't support old SDK -->
