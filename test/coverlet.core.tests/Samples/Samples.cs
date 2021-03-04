@@ -197,6 +197,39 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
+    public class AwaitForeachStateMachine
+    {
+        async public ValueTask AsyncAwait(IAsyncEnumerable<int> ints)
+        {
+            await foreach (int i in ints)
+            {
+                await default(ValueTask);
+            }
+        }
+    }
+
+    public class AwaitForeachStateMachine_WithBranches
+    {
+        async public ValueTask<int> SumWithATwist(IAsyncEnumerable<int> ints)
+        {
+            int sum = 0;
+
+            await foreach (int i in ints)
+            {
+                if (i > 0)
+                {
+                    sum += i;
+                }
+                else
+                {
+                    sum = 0;
+                }
+            }
+
+            return sum;
+        }
+    }
+
     [ExcludeFromCoverage]
     public class ClassExcludedByCoverletCodeCoverageAttr
     {

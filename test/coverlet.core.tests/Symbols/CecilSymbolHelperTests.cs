@@ -311,6 +311,55 @@ namespace Coverlet.Core.Symbols.Tests
         }
 
         [Fact]
+        public void GetBranchPoints_IgnoresMostBranchesIn_AwaitForeachStateMachine()
+        {
+            // arrange
+            var nestedName = typeof(AwaitForeachStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitForeachStateMachine).FullName);
+            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+
+            // act
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
+
+            // assert
+            // We do expect there to be a two-way branch (stay in the loop or not?) on
+            // the line containing "await foreach".
+            Assert.NotNull(points);
+            Assert.Equal(2, points.Count());
+            Assert.Equal(points[0].Offset, points[1].Offset);
+            Assert.Equal(204, points[0].StartLine);
+            Assert.Equal(204, points[1].StartLine);
+        }
+
+        [Fact]
+        public void GetBranchPoints_IgnoresMostBranchesIn_AwaitForeachStateMachine_WithBranchesWithinIt()
+        {
+            // arrange
+            var nestedName = typeof(AwaitForeachStateMachine_WithBranches).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitForeachStateMachine_WithBranches).FullName);
+            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+
+            // act
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
+
+            // assert
+            // We do expect there to be four branch points (two places where we can branch
+            // two ways), one being the "stay in the loop or not?" branch on the line
+            // containing "await foreach" and the other being the "if" statement inside
+            // the loop.
+            Assert.NotNull(points);
+            Assert.Equal(4, points.Count());
+            Assert.Equal(points[0].Offset, points[1].Offset);
+            Assert.Equal(points[2].Offset, points[3].Offset);
+            Assert.Equal(219, points[0].StartLine);
+            Assert.Equal(219, points[1].StartLine);
+            Assert.Equal(217, points[2].StartLine);
+            Assert.Equal(217, points[3].StartLine);
+        }
+
+        [Fact]
         public void GetBranchPoints_ExceptionFilter()
         {
             // arrange
