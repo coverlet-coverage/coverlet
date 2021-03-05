@@ -111,7 +111,7 @@ namespace Coverlet.Core
             }
         }
 
-        public ThresholdTypeFlags GetThresholdTypesBelowThreshold(CoverageSummary summary, double threshold, ThresholdTypeFlags thresholdTypes, ThresholdStatistic thresholdStat)
+        public ThresholdTypeFlags GetThresholdTypesBelowThreshold(CoverageSummary summary, Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues, ThresholdTypeFlags thresholdTypes, ThresholdStatistic thresholdStat)
         {
             var thresholdTypeFlags = ThresholdTypeFlags.None;
             switch (thresholdStat)
@@ -126,19 +126,19 @@ namespace Coverlet.Core
 
                             if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                             {
-                                if (line < threshold)
+                                if (line < thresholdTypeFlagValues[ThresholdTypeFlags.Line])
                                     thresholdTypeFlags |= ThresholdTypeFlags.Line;
                             }
 
                             if ((thresholdTypes & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
                             {
-                                if (branch < threshold)
+                                if (branch < thresholdTypeFlagValues[ThresholdTypeFlags.Branch])
                                     thresholdTypeFlags |= ThresholdTypeFlags.Branch;
                             }
 
                             if ((thresholdTypes & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
                             {
-                                if (method < threshold)
+                                if (method < thresholdTypeFlagValues[ThresholdTypeFlags.Method])
                                     thresholdTypeFlags |= ThresholdTypeFlags.Method;
                             }
                         }
@@ -149,22 +149,23 @@ namespace Coverlet.Core
                         double line = summary.CalculateLineCoverage(Modules).AverageModulePercent;
                         double branch = summary.CalculateBranchCoverage(Modules).AverageModulePercent;
                         double method = summary.CalculateMethodCoverage(Modules).AverageModulePercent;
+                        var numModules = Modules.Count;
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                         {
-                            if (line < threshold)
+                            if ((line / numModules) < thresholdTypeFlagValues[ThresholdTypeFlags.Line])
                                 thresholdTypeFlags |= ThresholdTypeFlags.Line;
                         }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
                         {
-                            if (branch < threshold)
+                            if ((branch / numModules) < thresholdTypeFlagValues[ThresholdTypeFlags.Branch])
                                 thresholdTypeFlags |= ThresholdTypeFlags.Branch;
                         }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
                         {
-                            if (method < threshold)
+                            if ((method / numModules) < thresholdTypeFlagValues[ThresholdTypeFlags.Method])
                                 thresholdTypeFlags |= ThresholdTypeFlags.Method;
                         }
                     }
@@ -177,19 +178,19 @@ namespace Coverlet.Core
 
                         if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                         {
-                            if (line < threshold)
+                            if (line < thresholdTypeFlagValues[ThresholdTypeFlags.Line])
                                 thresholdTypeFlags |= ThresholdTypeFlags.Line;
                         }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
                         {
-                            if (branch < threshold)
+                            if (branch < thresholdTypeFlagValues[ThresholdTypeFlags.Branch])
                                 thresholdTypeFlags |= ThresholdTypeFlags.Branch;
                         }
 
                         if ((thresholdTypes & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
                         {
-                            if (method < threshold)
+                            if (method < thresholdTypeFlagValues[ThresholdTypeFlags.Method])
                                 thresholdTypeFlags |= ThresholdTypeFlags.Method;
                         }
                     }
