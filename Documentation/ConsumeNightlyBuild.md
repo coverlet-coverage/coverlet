@@ -20,8 +20,8 @@ To consume nightly builds, create a `NuGet.Config` in your root solution directo
 
 ### Visual Studio:
 
-![File](images/nightly.PNG)
-Example:
+![File](images/nightly.PNG)\
+Example:\
 ![File](images/nightlyExample.PNG)
 
 ### NuGet (Package Manager console):
