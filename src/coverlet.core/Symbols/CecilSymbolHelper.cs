@@ -61,6 +61,22 @@ namespace Coverlet.Core.Symbols
             return false;
         }
 
+        private static bool IsMoveNextInsideAsyncIterator(MethodDefinition methodDefinition)
+        {
+            if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
+            {
+                foreach (InterfaceImplementation implementedInterface in methodDefinition.DeclaringType.Interfaces)
+                {
+                    if (implementedInterface.InterfaceType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator`1<"))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private static bool IsMoveNextInsideEnumerator(MethodDefinition methodDefinition)
         {
             if (!methodDefinition.FullName.EndsWith("::MoveNext()"))
@@ -408,13 +424,13 @@ namespace Coverlet.Core.Symbols
             //     which is germane to code coverage testing.
             // (2) A check near the end for whether the IAsyncEnumerator was ever
             //     obtained, so it can be disposed.
-            // (3) A check for whether an exception was thrown in a most recent
+            // (3) A check for whether an exception was thrown in the most recent
             //     loop iteration.
             // (4) A check for whether the exception thrown in the most recent
             //     loop iteration has (at least) the type System.Exception.
             //
-            // If we're looking at any of three the last three of those four
-            // branches, we should be skipping it.
+            // If we're looking at any of the last three of those four branches,
+            // we should be skipping it.
 
             int currentIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
 
@@ -556,6 +572,96 @@ namespace Coverlet.Core.Symbols
             return false;
         }
 
+        // https://docs.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8
+        private bool SkipGeneratedBranchesForAsyncIterator(List<Instruction> instructions, Instruction instruction)
+        {
+            // There are two branch patterns that we want to eliminate in the
+            // MoveNext() method in compiler-generated async iterators.
+            //
+            // (1) A "switch" instruction near the beginning of MoveNext() that checks
+            //     the state machine's current state and jumps to the right place.
+            // (2) A check that the compiler-generated field "<>w__disposeMode" is false,
+            //     which is used to know whether the enumerator has been disposed (so it's
+            //     necessary not to iterate any further).  This is done in more than once
+            //     place, but we always want to skip it.
+
+            int currentIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
+
+            return SkipGeneratedBranchesForAsyncIterator_CheckForStateSwitch(instructions, instruction, currentIndex) ||
+                   SkipGeneratedBranchesForAsyncIterator_DisposeCheck(instructions, instruction, currentIndex);
+        }
+
+        private bool SkipGeneratedBranchesForAsyncIterator_CheckForStateSwitch(List<Instruction> instructions, Instruction instruction, int currentIndex)
+        {
+            // The pattern we're looking for here is this one:
+            //
+            // IL_0000: ldarg.0
+            // IL_0001: ldfld int32 Test.AsyncEnumerableStateMachine/'<CreateSequenceAsync>d__0'::'<>1__state'
+            // IL_0006: stloc.0
+            // .try
+            // {
+            //     IL_0007: ldloc.0
+            //     IL_0008: ldc.i4.s -4
+            //     IL_000a: sub
+            //     IL_000b: switch (IL_0026, IL_002b, IL_002f, IL_002f, IL_002d)
+            //
+            // The "switch" instruction is the branch we want to skip.  To eliminate
+            // false positives, we'll search back for the "ldfld" of the compiler-
+            // generated "<>1__state" field, making sure it precedes it within five
+            // instructions.
+
+            if (instruction.OpCode != OpCodes.Switch)
+            {
+                return false;
+            }
+
+            int minLoadStateFieldIndex = Math.Max(0, currentIndex - 5);
+
+            for (int i = currentIndex - 1; i >= minLoadStateFieldIndex; --i)
+            {
+                if (instructions[i].OpCode == OpCodes.Ldfld &&
+                    instructions[i].Operand is FieldDefinition field &&
+                    IsCompilerGenerated(field) && field.FullName.EndsWith("__state"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool SkipGeneratedBranchesForAsyncIterator_DisposeCheck(List<Instruction> instructions, Instruction instruction, int currentIndex)
+        {
+            // Within the compiler-generated async iterator, there are at least a
+            // couple of places where we find this pattern, in which the async
+            // iterator is checking whether it's been disposed, so it'll know to
+            // stop iterating.
+            //
+            // IL_0024: ldarg.0
+            // IL_0025: ldfld bool Test.AsyncEnumerableStateMachine/'<CreateSequenceAsync>d__0'::'<>w__disposeMode'
+            // IL_002a: brfalse.s IL_0031
+            //
+            // We'll eliminate these wherever they appear.  It's reasonable to just
+            // look for a "brfalse" or "brfalse.s" instruction, preceded immediately
+            // by "ldfld" of the compiler-generated "<>w__disposeMode" field.
+
+            if (instruction.OpCode != OpCodes.Brfalse &&
+                instruction.OpCode != OpCodes.Brfalse_S)
+            {
+                return false;
+            }
+
+            if (currentIndex >= 1 &&
+                instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
+                instructions[currentIndex - 1].Operand is FieldDefinition field &&
+                IsCompilerGenerated(field) && field.FullName.EndsWith("__disposeMode"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         // https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/Expression%20Breakpoints.md
         private bool SkipExpressionBreakpointsBranches(Instruction instruction) => instruction.Previous is not null && instruction.Previous.OpCode == OpCodes.Ldc_I4 &&
                                                                                     instruction.Previous.Operand is int operandValue && operandValue == 1 &&
@@ -575,6 +681,7 @@ namespace Coverlet.Core.Symbols
 
             bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
             bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
+            bool isMoveNextInsideAsyncIterator = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncIterator(methodDefinition);
 
             // State machine for enumerator uses `brfalse.s`/`beq` or `switch` opcode depending on how many `yield` we have in the method body.
             // For more than one `yield` a `switch` is emitted so we should only skip the first branch. In case of a single `yield` we need to
@@ -627,6 +734,15 @@ namespace Coverlet.Core.Symbols
                             continue;
                         }
                     }
+
+                    if (isMoveNextInsideAsyncIterator)
+                    {
+                        if (SkipGeneratedBranchesForAsyncIterator(instructions, instruction))
+                        {
+                            continue;
+                        }
+                    }
+
                     if (SkipBranchGeneratedExceptionFilter(instruction, methodDefinition))
                     {
                         continue;

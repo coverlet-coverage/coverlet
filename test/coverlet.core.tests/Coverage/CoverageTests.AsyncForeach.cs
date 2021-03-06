@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
@@ -10,14 +11,6 @@ namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests
     {
-        async private static IAsyncEnumerable<T> ToAsync<T>(IEnumerable<T> values)
-        {
-            foreach (T value in values)
-            {
-                yield return await Task.FromResult(value);
-            }
-        }
-
         [Fact]
         public void AsyncForeach()
         {
@@ -28,8 +21,8 @@ namespace Coverlet.Core.Tests
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(instance =>
                     {
-                        int res = ((ValueTask<int>)instance.SumWithATwist(ToAsync(new int[] { 1, 2, 3, 4, 5 }))).GetAwaiter().GetResult();
-                        res += ((ValueTask<int>)instance.Sum(ToAsync(new int[] { 1, 2, 3 }))).GetAwaiter().GetResult();
+                        int res = ((ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5))).GetAwaiter().GetResult();
+                        res += ((ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3))).GetAwaiter().GetResult();
                         res += ((ValueTask<int>)instance.SumEmpty()).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;

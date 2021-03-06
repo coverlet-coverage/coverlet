@@ -230,6 +230,18 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
+    public class AsyncIteratorStateMachine
+    {
+        async public IAsyncEnumerable<int> CreateSequenceAsync()
+        {
+            for (int i = 0; i < 100; ++i)
+            {
+                await Task.CompletedTask;
+                yield return i;
+            }
+        }
+    }
+
     [ExcludeFromCoverage]
     public class ClassExcludedByCoverletCodeCoverageAttr
     {

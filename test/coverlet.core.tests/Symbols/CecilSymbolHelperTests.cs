@@ -360,6 +360,26 @@ namespace Coverlet.Core.Symbols.Tests
         }
 
         [Fact]
+        public void GetBranchesPoints_IgnoresExtraBranchesIn_AsyncIteratorStateMachine()
+        {
+            // arrange
+            var nestedName = typeof(AsyncIteratorStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncIteratorStateMachine).FullName);
+            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+
+            // act
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            
+            // assert
+            // We do expect the "for" loop to be a branch with two branch points, but that's it.
+            Assert.NotNull(points);
+            Assert.Equal(2, points.Count());
+            Assert.Equal(237, points[0].StartLine);
+            Assert.Equal(237, points[1].StartLine);
+        }
+
+        [Fact]
         public void GetBranchPoints_ExceptionFilter()
         {
             // arrange
