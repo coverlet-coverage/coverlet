@@ -30,9 +30,11 @@
 
   <ItemGroup>
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="2.0.0" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="5.0.23" />
+    <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
+    <PackageReference Include="System.Linq.Async" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
