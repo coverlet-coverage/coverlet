@@ -688,6 +688,30 @@ namespace Coverlet.Core.Symbols
 
             bool CheckForCleanup(List<Instruction> instructions, Instruction instruction, int currentIndex)
             {
+                // The pattern we're looking for here is this:
+                //
+                // IL_00c6: ldloc.s 5
+                // IL_00c8: call class [System.Private.CoreLib]System.Runtime.ExceptionServices.ExceptionDispatchInfo [System.Private.CoreLib]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Capture(class [System.Private.CoreLib]System.Exception)
+                // IL_00cd: callvirt instance void [System.Private.CoreLib]System.Runtime.ExceptionServices.ExceptionDispatchInfo::Throw()
+                // IL_00d2: nop
+                // IL_00d3: ldarg.0
+                // IL_00d4: ldfld int32 Coverlet.Core.Samples.Tests.AwaitUsing/'<Issue914_Repro_Example1>d__2'::'<>s__3'
+                // IL_00d9: stloc.s 6
+                // IL_00db: ldloc.s 6
+                // IL_00dd: ldc.i4.1
+                // IL_00de: beq.s IL_00e2
+                // IL_00e0: br.s IL_00e4
+                // IL_00e2: leave.s IL_0115
+                //
+                // It appears that this pattern is not generated in every "await using",
+                // but only in an "await using" without curly braces (i.e., that is
+                // scoped to the end of the method).  It's also a slightly different
+                // pattern in Release vs. Debug (bne.un.s instead of beq.s followed by
+                // br.s).  To be as safe as we can, we'll expect an ldc.i4 to precede
+                // the branch, then we want a load from a compiler-generated field within
+                // a few instructions before that, then we want an exception to be
+                // rethrown before that.
+
                 if (instruction.OpCode != OpCodes.Beq &&
                     instruction.OpCode != OpCodes.Beq_S &&
                     instruction.OpCode != OpCodes.Bne_Un &&
