@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
+using Coverlet.Core.Abstractions;
+
 namespace Coverlet.Core.Reporters
 {
     internal class CoberturaReporter : IReporter
@@ -17,7 +19,7 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => "cobertura.xml";
 
-        public string Report(CoverageResult result)
+        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
             CoverageSummary summary = new CoverageSummary();
 
@@ -32,8 +34,13 @@ namespace Coverlet.Core.Reporters
             coverage.Add(new XAttribute("timestamp", (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds));
 
             XElement sources = new XElement("sources");
-            var absolutePaths = GetBasePaths(result.Modules, result.UseSourceLink).ToList();
-            absolutePaths.ForEach(x => sources.Add(new XElement("source", x)));
+
+            List<string> absolutePaths = new List<string>();
+            if (!result.Parameters.DeterministicReport)
+            {
+                absolutePaths = GetBasePaths(result.Modules, result.Parameters.UseSourceLink).ToList();
+                absolutePaths.ForEach(x => sources.Add(new XElement("source", x)));
+            }
 
             XElement packages = new XElement("packages");
             foreach (var module in result.Modules)
@@ -51,7 +58,16 @@ namespace Coverlet.Core.Reporters
                     {
                         XElement @class = new XElement("class");
                         @class.Add(new XAttribute("name", cls.Key));
-                        @class.Add(new XAttribute("filename", GetRelativePathFromBase(absolutePaths, document.Key, result.UseSourceLink)));
+                        string fileName;
+                        if (!result.Parameters.DeterministicReport)
+                        {
+                            fileName = GetRelativePathFromBase(absolutePaths, document.Key, result.Parameters.UseSourceLink);
+                        }
+                        else
+                        {
+                            fileName = sourceRootTranslator.ResolveDeterministicPath(document.Key);
+                        }
+                        @class.Add(new XAttribute("filename", fileName));
                         @class.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(cls.Value)));

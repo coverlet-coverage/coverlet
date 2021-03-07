@@ -206,3 +206,11 @@ The workaround is to use the .NET Core `dotnet msbuild` command instead of using
 ## SourceLink
 
 Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `/p:UseSourceLink=true` property, Coverlet will generate results that contain the URL to the source files in your source control instead of local file paths.
+
+## Deterministic build
+
+Take a look at [documentation](Documentation/DeterministicBuild.md) for further informations.  
+To generate deterministc report the parameter is:
+```
+/p:DeterministicReport=true
+```

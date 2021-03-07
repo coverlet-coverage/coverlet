@@ -40,7 +40,7 @@ namespace Coverlet.Core.Reporters.Tests
                 new ReporterFactory(reportFormat).CreateReporter(),
                 fileSystem.Object,
                 console.Object,
-                new CoverageResult() { Modules = new Modules() });
+                new CoverageResult() { Modules = new Modules(), Parameters = new CoverageParameters() }, null);
 
             var path = reportWriter.WriteReport();
             // Path.Combine depends on OS so we can change only win side to avoid duplication

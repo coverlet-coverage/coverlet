@@ -7,6 +7,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Xml.Linq;
+
+using Coverlet.Core.Abstractions;
+using Moq;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -49,6 +52,7 @@ namespace Coverlet.Core.Reporters.Tests
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
+            result.Parameters = new CoverageParameters();
 
             CultureInfo currentCulture = Thread.CurrentThread.CurrentCulture;
             Thread.CurrentThread.CurrentCulture = new CultureInfo("it-IT");
@@ -59,7 +63,7 @@ namespace Coverlet.Core.Reporters.Tests
                 Assert.Equal("1,5", (1.5).ToString());
 
                 CoberturaReporter reporter = new CoberturaReporter();
-                string report = reporter.Report(result);
+                string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
                 Assert.NotEmpty(report);
 
@@ -110,6 +114,7 @@ namespace Coverlet.Core.Reporters.Tests
             string expectedSignature)
         {
             CoverageResult result = new CoverageResult();
+            result.Parameters = new CoverageParameters();
             result.Identifier = Guid.NewGuid().ToString();
 
             Lines lines = new Lines();
@@ -140,7 +145,7 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("module", documents);
 
             CoberturaReporter reporter = new CoberturaReporter();
-            string report = reporter.Report(result);
+            string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
             Assert.NotEmpty(report);
 
@@ -157,6 +162,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void TestReportWithDifferentDirectories()
         {
             CoverageResult result = new CoverageResult();
+            result.Parameters = new CoverageParameters();
             result.Identifier = Guid.NewGuid().ToString();
 
             string absolutePath1;
@@ -210,7 +216,7 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules = new Modules { { "Module", documents } };
 
             CoberturaReporter reporter = new CoberturaReporter();
-            string report = reporter.Report(result);
+            string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
             var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
 
@@ -241,7 +247,7 @@ namespace Coverlet.Core.Reporters.Tests
         [Fact]
         public void TestReportWithSourcelinkPaths()
         {
-            CoverageResult result = new CoverageResult { UseSourceLink = true, Identifier = Guid.NewGuid().ToString() };
+            CoverageResult result = new CoverageResult { Parameters = new CoverageParameters() { UseSourceLink = true }, Identifier = Guid.NewGuid().ToString() };
 
             var absolutePath =
                 @"https://raw.githubusercontent.com/johndoe/Coverlet/02c09baa8bfdee3b6cdf4be89bd98c8157b0bc08/Demo.cs";
@@ -252,7 +258,7 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules = new Modules { { "Module", documents } };
 
             CoberturaReporter reporter = new CoberturaReporter();
-            string report = reporter.Report(result);
+            string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
             var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
             var fileName = doc.Element("coverage").Element("packages").Element("package").Element("classes").Elements()

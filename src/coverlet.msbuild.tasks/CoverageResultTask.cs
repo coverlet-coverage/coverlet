@@ -93,6 +93,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 var formats = OutputFormat.Split(',');
                 var coverageReportPaths = new List<ITaskItem>(formats.Length);
+                ISourceRootTranslator sourceRootTranslator = ServiceProvider.GetService<ISourceRootTranslator>();
                 foreach (var format in formats)
                 {
                     var reporter = new ReporterFactory(format).CreateReporter();
@@ -105,17 +106,18 @@ namespace Coverlet.MSbuild.Tasks
                     {
                         // Output to console
                         Console.WriteLine("  Outputting results to console");
-                        Console.WriteLine(reporter.Report(result));
+                        Console.WriteLine(reporter.Report(result, sourceRootTranslator));
                     }
                     else
                     {
-                        ReportWriter writer = new ReportWriter(CoverletMultiTargetFrameworksCurrentTFM,
+                        ReportWriter writer = new(CoverletMultiTargetFrameworksCurrentTFM,
                                                                 directory,
                                                                 Output,
                                                                 reporter,
                                                                 fileSystem,
                                                                 ServiceProvider.GetService<IConsole>(),
-                                                                result);
+                                                                result,
+                                                                sourceRootTranslator);
                         var path = writer.WriteReport();
                         var metadata = new Dictionary<string, string> { ["Format"] = format };
                         coverageReportPaths.Add(new TaskItem(path, metadata));

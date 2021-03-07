@@ -22,5 +22,6 @@
         public const string InProcDataCollectorName = "CoverletInProcDataCollector";
         public const string SkipAutoProps = "SkipAutoProps";
         public const string DoesNotReturnAttributesElementName = "DoesNotReturnAttribute";
+        public const string DeterministicReport = "DeterministicReport";
     }
 }

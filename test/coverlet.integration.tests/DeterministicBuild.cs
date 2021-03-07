@@ -35,7 +35,7 @@ namespace Coverlet.Integration.Tests
             deterministicTestProps.Save(Path.Combine(_testProjectPath, PropsFileName));
         }
 
-        private protected void AssertCoverage(string standardOutput = "")
+        private protected void AssertCoverage(string standardOutput = "", bool checkDeterministicReport = true)
         {
             if (_buildConfiguration == "Debug")
             {
@@ -54,6 +54,16 @@ namespace Coverlet.Integration.Tests
                 Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
                 File.Delete(reportFilePath);
                 Assert.False(File.Exists(reportFilePath));
+
+                if (checkDeterministicReport)
+                {
+                    // Verify deterministic report
+                    foreach (string coverageFile in Directory.GetFiles(_testProjectPath, "coverage.cobertura.xml", SearchOption.AllDirectories))
+                    {
+                        Assert.Contains("/_/test/coverlet.integration.determisticbuild/DeepThought.cs", File.ReadAllText(coverageFile));
+                        File.Delete(coverageFile);
+                    }
+                }
             }
         }
 
@@ -68,7 +78,7 @@ namespace Coverlet.Integration.Tests
             Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-            DotnetCli($"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out _, _testProjectPath);
+            DotnetCli($"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:DeterministicReport=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out _, _testProjectPath);
             Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(_testProjectPath, "coverage.json")));
@@ -91,12 +101,12 @@ namespace Coverlet.Integration.Tests
             Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-            DotnetCli($"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out _, _testProjectPath);
+            DotnetCli($"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out _, _testProjectPath);
             Assert.Contains("Passed!", standardOutput);
             Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(_testProjectPath, "coverage.json")));
             Assert.Contains("raw.githubusercontent.com", File.ReadAllText(Path.Combine(_testProjectPath, "coverage.json")));
-            AssertCoverage(standardOutput);
+            AssertCoverage(standardOutput, checkDeterministicReport: false);
 
             // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
             // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
@@ -115,7 +125,7 @@ namespace Coverlet.Integration.Tests
             Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-            string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought");
+            string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", deterministicReport: true);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out _), standardOutput);
             Assert.Contains("Passed!", standardOutput);
             AssertCoverage(standardOutput);
@@ -146,7 +156,7 @@ namespace Coverlet.Integration.Tests
             string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", sourceLink: true);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out _), standardOutput);
             Assert.Contains("Passed!", standardOutput);
-            AssertCoverage(standardOutput);
+            AssertCoverage(standardOutput, checkDeterministicReport: false);
             Assert.Contains("raw.githubusercontent.com", File.ReadAllText(Directory.GetFiles(_testProjectPath, "coverage.cobertura.xml", SearchOption.AllDirectories).Single()));
 
             // Check out/in process collectors injection

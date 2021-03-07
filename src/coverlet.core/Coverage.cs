@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
@@ -11,43 +12,48 @@ using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core
 {
+    [DataContract]
     internal class CoverageParameters
     {
+        [DataMember]
         public string Module { get; set; }
+        [DataMember]
         public string[] IncludeFilters { get; set; }
+        [DataMember]
         public string[] IncludeDirectories { get; set; }
+        [DataMember]
         public string[] ExcludeFilters { get; set; }
+        [DataMember]
         public string[] ExcludedSourceFiles { get; set; }
+        [DataMember]
         public string[] ExcludeAttributes { get; set; }
+        [DataMember]
         public bool IncludeTestAssembly { get; set; }
+        [DataMember]
         public bool SingleHit { get; set; }
+        [DataMember]
         public string MergeWith { get; set; }
+        [DataMember]
         public bool UseSourceLink { get; set; }
+        [DataMember]
         public string[] DoesNotReturnAttributes { get; set; }
+        [DataMember]
         public bool SkipAutoProps { get; set; }
+        [DataMember]
+        public bool DeterministicReport { get; set; }
     }
 
     internal class Coverage
     {
         private string _moduleOrAppDirectory;
         private string _identifier;
-        private string[] _includeFilters;
-        private string[] _includeDirectories;
-        private string[] _excludeFilters;
-        private string[] _excludedSourceFiles;
-        private string[] _excludeAttributes;
-        private bool _includeTestAssembly;
-        private bool _singleHit;
-        private string _mergeWith;
-        private bool _useSourceLink;
-        private string[] _doesNotReturnAttributes;
-        private bool _skipAutoProps;
         private ILogger _logger;
         private IInstrumentationHelper _instrumentationHelper;
         private IFileSystem _fileSystem;
         private ISourceRootTranslator _sourceRootTranslator;
         private ICecilSymbolHelper _cecilSymbolHelper;
         private List<InstrumenterResult> _results;
+        private CoverageParameters _parameters;
 
         public string Identifier
         {
@@ -63,23 +69,13 @@ namespace Coverlet.Core
             ICecilSymbolHelper cecilSymbolHelper)
         {
             _moduleOrAppDirectory = moduleOrDirectory;
-            _includeFilters = parameters.IncludeFilters;
-            _includeDirectories = parameters.IncludeDirectories ?? Array.Empty<string>();
-            _excludeFilters = parameters.ExcludeFilters;
-            _excludedSourceFiles = parameters.ExcludedSourceFiles;
-            _excludeAttributes = parameters.ExcludeAttributes;
-            _includeTestAssembly = parameters.IncludeTestAssembly;
-            _singleHit = parameters.SingleHit;
-            _mergeWith = parameters.MergeWith;
-            _useSourceLink = parameters.UseSourceLink;
-            _doesNotReturnAttributes = parameters.DoesNotReturnAttributes;
+            parameters.IncludeDirectories ??= Array.Empty<string>();
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
+            _parameters = parameters;
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
             _cecilSymbolHelper = cecilSymbolHelper;
-            _skipAutoProps = parameters.SkipAutoProps;
-
             _identifier = Guid.NewGuid().ToString();
             _results = new List<InstrumenterResult>();
         }
@@ -92,8 +88,7 @@ namespace Coverlet.Core
         {
             _identifier = prepareResult.Identifier;
             _moduleOrAppDirectory = prepareResult.ModuleOrDirectory;
-            _mergeWith = prepareResult.MergeWith;
-            _useSourceLink = prepareResult.UseSourceLink;
+            _parameters = prepareResult.Parameters;
             _results = new List<InstrumenterResult>(prepareResult.Results);
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
@@ -103,19 +98,19 @@ namespace Coverlet.Core
 
         public CoveragePrepareResult PrepareModules()
         {
-            string[] modules = _instrumentationHelper.GetCoverableModules(_moduleOrAppDirectory, _includeDirectories, _includeTestAssembly);
+            string[] modules = _instrumentationHelper.GetCoverableModules(_moduleOrAppDirectory, _parameters.IncludeDirectories, _parameters.IncludeTestAssembly);
 
-            Array.ForEach(_excludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded module filter '{filter}'"));
-            Array.ForEach(_includeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Included module filter '{filter}'"));
-            Array.ForEach(_excludedSourceFiles ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded source files filter '{FileSystem.EscapeFileName(filter)}'"));
+            Array.ForEach(_parameters.ExcludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded module filter '{filter}'"));
+            Array.ForEach(_parameters.IncludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Included module filter '{filter}'"));
+            Array.ForEach(_parameters.ExcludedSourceFiles ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded source files filter '{FileSystem.EscapeFileName(filter)}'"));
 
-            _excludeFilters = _excludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
-            _includeFilters = _includeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            _parameters.ExcludeFilters = _parameters.ExcludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
+            _parameters.IncludeFilters = _parameters.IncludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
             foreach (var module in modules)
             {
-                if (_instrumentationHelper.IsModuleExcluded(module, _excludeFilters) ||
-                    !_instrumentationHelper.IsModuleIncluded(module, _includeFilters))
+                if (_instrumentationHelper.IsModuleExcluded(module, _parameters.ExcludeFilters) ||
+                    !_instrumentationHelper.IsModuleIncluded(module, _parameters.IncludeFilters))
                 {
                     _logger.LogVerbose($"Excluded module: '{module}'");
                     continue;
@@ -123,13 +118,7 @@ namespace Coverlet.Core
 
                 var instrumenter = new Instrumenter(module,
                                                     _identifier,
-                                                    _excludeFilters,
-                                                    _includeFilters,
-                                                    _excludedSourceFiles,
-                                                    _excludeAttributes,
-                                                    _doesNotReturnAttributes,
-                                                    _singleHit,
-                                                    _skipAutoProps,
+                                                    _parameters,
                                                     _logger,
                                                     _instrumentationHelper,
                                                     _fileSystem,
@@ -162,8 +151,7 @@ namespace Coverlet.Core
             {
                 Identifier = _identifier,
                 ModuleOrDirectory = _moduleOrAppDirectory,
-                MergeWith = _mergeWith,
-                UseSourceLink = _useSourceLink,
+                Parameters = _parameters,
                 Results = _results.ToArray()
             };
         }
@@ -321,11 +309,11 @@ namespace Coverlet.Core
                 }
             }
 
-            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results, UseSourceLink = _useSourceLink };
+            var coverageResult = new CoverageResult { Identifier = _identifier, Modules = modules, InstrumentedResults = _results, Parameters = _parameters };
 
-            if (!string.IsNullOrEmpty(_mergeWith) && !string.IsNullOrWhiteSpace(_mergeWith) && _fileSystem.Exists(_mergeWith))
+            if (!string.IsNullOrEmpty(_parameters.MergeWith) && !string.IsNullOrWhiteSpace(_parameters.MergeWith) && _fileSystem.Exists(_parameters.MergeWith))
             {
-                string json = _fileSystem.ReadAllText(_mergeWith);
+                string json = _fileSystem.ReadAllText(_parameters.MergeWith);
                 coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
             }
 
@@ -382,7 +370,7 @@ namespace Coverlet.Core
                 }
 
                 List<Document> documents = result.Documents.Values.ToList();
-                if (_useSourceLink && result.SourceLink != null)
+                if (_parameters.UseSourceLink && result.SourceLink != null)
                 {
                     var jObject = JObject.Parse(result.SourceLink)["documents"];
                     var sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());

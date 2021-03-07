@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
+using Coverlet.Core.Abstractions;
+
 namespace Coverlet.Core.Reporters
 {
     internal class OpenCoverReporter : IReporter
@@ -15,8 +17,13 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => "opencover.xml";
 
-        public string Report(CoverageResult result)
+        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
+            if (result.Parameters.DeterministicReport)
+            {
+                throw new NotSupportedException("Deterministic report not supported by openCover reporter");
+            }
+
             CoverageSummary summary = new CoverageSummary();
             XDocument xml = new XDocument();
             XElement coverage = new XElement("CoverageSession");

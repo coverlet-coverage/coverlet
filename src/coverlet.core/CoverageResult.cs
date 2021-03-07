@@ -39,14 +39,14 @@ namespace Coverlet.Core
 
     internal class CoverageResult
     {
-        public string Identifier;
-        public Modules Modules;
-        public bool UseSourceLink;
-        internal List<InstrumenterResult> InstrumentedResults;
+        public string Identifier { get; set; }
+        public Modules Modules { get; set; }
+        public List<InstrumenterResult> InstrumentedResults { get; set; }
+        public CoverageParameters Parameters { get; set; }
 
-        internal CoverageResult() { }
+        public CoverageResult() { }
 
-        internal void Merge(Modules modules)
+        public void Merge(Modules modules)
         {
             foreach (var module in modules)
             {
