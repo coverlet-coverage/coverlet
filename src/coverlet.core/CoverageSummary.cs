@@ -61,7 +61,7 @@ namespace Coverlet.Core
                 details.Total += moduleCoverage.Total;
                 accumPercent += moduleCoverage.Percent;
             }
-            details.AverageModulePercent = accumPercent / modules.Count;
+            details.AverageModulePercent = modules.Count == 0 ? 0 : accumPercent / modules.Count;
             return details;
         }
 
@@ -194,7 +194,7 @@ namespace Coverlet.Core
                 details.Total += moduleCoverage.Total;
                 accumPercent += moduleCoverage.Percent;
             }
-            details.AverageModulePercent = accumPercent / modules.Count;
+            details.AverageModulePercent = modules.Count == 0 ? 0 : accumPercent / modules.Count;
             return details;
         }
 
@@ -254,7 +254,7 @@ namespace Coverlet.Core
                 details.Total += moduleCoverage.Total;
                 accumPercent += moduleCoverage.Percent;
             }
-            details.AverageModulePercent = accumPercent / modules.Count;
+            details.AverageModulePercent = modules.Count == 0 ? 0 : accumPercent / modules.Count;
             return details;
         }
     }

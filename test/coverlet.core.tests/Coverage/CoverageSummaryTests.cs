@@ -13,14 +13,12 @@ namespace Coverlet.Core.Tests
         private Modules _averageCalculationSingleModule;
         private Modules _averageCalculationMultiModule;
         private Modules _moduleArithmeticPrecision;
-        private Modules _moduleNoCoverage;
 
         public CoverageSummaryTests()
         {
             SetupDataSingleModule();
             SetupDataMultipleModule();
             SetupDataForArithmeticPrecision();
-            SetupDataSingleModuleNoCoverage();
         }
 
         private void SetupDataForArithmeticPrecision()
@@ -126,45 +124,19 @@ namespace Coverlet.Core.Tests
                 { "aditionalModule", documents }
             };
         }
-
-        private void SetupDataSingleModuleNoCoverage()
-        {
-            Lines lines = new Lines();
-            //lines.Add(1, 0);
-            Branches branches = new Branches();
-            //branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 0, Ordinal = 1 });
-
-            Methods methods = new Methods();
-            var methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
-            methods.Add(methodString, new Method());
-            methods[methodString].Lines = lines;
-            methods[methodString].Branches = branches;
-
-            Classes classes = new Classes();
-            classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
-
-            Documents documents = new Documents();
-            documents.Add("doc.cs", classes);
-
-            _moduleNoCoverage = new Modules();
-            _moduleNoCoverage.Add("module", documents);
-        }
-
+        
         [Fact]
-        public void TestCalculateLineCoverage_NoCoverage()
+        public void TestCalculateLineCoverage_NoModules()
         {
             CoverageSummary summary = new CoverageSummary();
+            var modules = new Modules();
 
-            var module = _moduleNoCoverage.First();
-            var document = module.Value.First();
-            var @class = document.Value.First();
-            var method = @class.Value.First();
-
-            Assert.Equal(0, summary.CalculateLineCoverage(_moduleNoCoverage).AverageModulePercent);
-            Assert.Equal(0, summary.CalculateLineCoverage(module.Value).Percent);
-            Assert.Equal(0, summary.CalculateLineCoverage(document.Value).Percent);
-            Assert.Equal(0, summary.CalculateLineCoverage(@class.Value).Percent);
-            Assert.Equal(0, summary.CalculateLineCoverage(method.Value.Lines).Percent);
+            Assert.Equal(0, summary.CalculateLineCoverage(modules).Percent);
+            Assert.Equal(0, summary.CalculateLineCoverage(modules).AverageModulePercent);
+            Assert.Equal(0, summary.CalculateBranchCoverage(modules).Percent);
+            Assert.Equal(0, summary.CalculateBranchCoverage(modules).AverageModulePercent);
+            Assert.Equal(0, summary.CalculateMethodCoverage(modules).Percent);
+            Assert.Equal(0, summary.CalculateMethodCoverage(modules).AverageModulePercent);
         }
 
         [Fact]

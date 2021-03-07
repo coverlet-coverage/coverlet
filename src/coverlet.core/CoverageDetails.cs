@@ -13,6 +13,6 @@ namespace Coverlet.Core
             internal set { _averageModulePercent = value; }
         }
 
-        public double Percent => Total == 0 ? 100D : Math.Floor((Covered / Total) * 10000) / 100;
+        public double Percent => Total == 0 ? 0 : Math.Floor((Covered / Total) * 10000) / 100;
     }
 }
