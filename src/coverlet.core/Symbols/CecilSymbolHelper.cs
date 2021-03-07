@@ -434,145 +434,297 @@ namespace Coverlet.Core.Symbols
 
             int currentIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
 
-            return SkipGeneratedBranchForAwaitForeach_CheckForAsyncEnumerator(instructions, instruction, currentIndex) ||
-                   SkipGeneratedBranchForAwaitForeach_CheckIfExceptionThrown(instructions, instruction, currentIndex) ||
-                   SkipGeneratedBranchForAwaitForeach_CheckThrownExceptionType(instructions, instruction, currentIndex);
-        }
+            return CheckForAsyncEnumerator(instructions, instruction, currentIndex) ||
+                   CheckIfExceptionThrown(instructions, instruction, currentIndex) ||
+                   CheckThrownExceptionType(instructions, instruction, currentIndex);
 
-        // The pattern for the "should we stay in the loop or not?", which we don't
-        // want to skip (so we have no method to try to find it), looks like this:
-        //
-        // IL_0111: ldloca.s 4
-        // IL_0113: call instance !0 valuetype [System.Private.CoreLib]System.Runtime.CompilerServices.ValueTaskAwaiter`1<bool>::GetResult()
-        // IL_0118: brtrue IL_0047
-        //
-        // In Debug mode, there are additional things that happen in between
-        // the "call" and branch, but it's the same idea either way: branch
-        // if GetResult() returned true.
 
-        private static bool SkipGeneratedBranchForAwaitForeach_CheckForAsyncEnumerator(List<Instruction> instructions, Instruction instruction, int currentIndex)
-        {
-            // We're looking for the following pattern, which checks whether a
-            // compiler-generated field of type IAsyncEnumerator<> is null.
+            // The pattern for the "should we stay in the loop or not?", which we don't
+            // want to skip (so we have no method to try to find it), looks like this:
             //
-            // IL_012b: ldarg.0
-            // IL_012c: ldfld class [System.Private.CoreLib]System.Collections.Generic.IAsyncEnumerator`1<int32> AwaitForeachStateMachine/'<AsyncAwait>d__0'::'<>7__wrap1'
-            // IL_0131: brfalse.s IL_0196
-
-            if (instruction.OpCode != OpCodes.Brfalse &&
-                instruction.OpCode != OpCodes.Brfalse_S)
-            {
-                return false;
-            }
-
-            if (currentIndex >= 2 &&
-                (instructions[currentIndex - 2].OpCode == OpCodes.Ldarg ||
-                 instructions[currentIndex - 2].OpCode == OpCodes.Ldarg_0) &&
-                instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
-                instructions[currentIndex - 1].Operand is FieldDefinition field &&
-                IsCompilerGenerated(field) && field.FieldType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator"))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private static bool SkipGeneratedBranchForAwaitForeach_CheckIfExceptionThrown(List<Instruction> instructions, Instruction instruction, int currentIndex)
-        {
-            // Here, we want to find a pattern where we're checking whether a
-            // compiler-generated field of type Object is null.  To narrow our
-            // search down and reduce the odds of false positives, we'll also
-            // expect a call to GetResult() to precede the loading of the field's
-            // value.  The basic pattern looks like this:
+            // IL_0111: ldloca.s 4
+            // IL_0113: call instance !0 valuetype [System.Private.CoreLib]System.Runtime.CompilerServices.ValueTaskAwaiter`1<bool>::GetResult()
+            // IL_0118: brtrue IL_0047
             //
-            // IL_018f: ldloca.s 2
-            // IL_0191: call instance void [System.Private.CoreLib]System.Runtime.CompilerServices.ValueTaskAwaiter::GetResult()
-            // IL_0196: ldarg.0
-            // IL_0197: ldfld object AwaitForeachStateMachine/'<AsyncAwait>d__0'::'<>7__wrap2'
-            // IL_019c: stloc.s 6
-            // IL_019e: ldloc.s 6
-            // IL_01a0: brfalse.s IL_01b9
-            //
-            // Variants are possible (e.g., a "dup" instruction instead of a
-            // "stloc.s" and "ldloc.s" pair), so we'll just look for the
-            // highlights.
+            // In Debug mode, there are additional things that happen in between
+            // the "call" and branch, but it's the same idea either way: branch
+            // if GetResult() returned true.
 
-            if (instruction.OpCode != OpCodes.Brfalse &&
-                instruction.OpCode != OpCodes.Brfalse_S)
+
+            bool CheckForAsyncEnumerator(List<Instruction> instructions, Instruction instruction, int currentIndex)
             {
-                return false;
-            }
+                // We're looking for the following pattern, which checks whether a
+                // compiler-generated field of type IAsyncEnumerator<> is null.
+                //
+                // IL_012b: ldarg.0
+                // IL_012c: ldfld class [System.Private.CoreLib]System.Collections.Generic.IAsyncEnumerator`1<int32> AwaitForeachStateMachine/'<AsyncAwait>d__0'::'<>7__wrap1'
+                // IL_0131: brfalse.s IL_0196
 
-            // We expect the field to be loaded no more than thre instructions before
-            // the branch, so that's how far we're willing to search for it.
-            int minFieldIndex = Math.Max(0, currentIndex - 3);
-
-            for (int i = currentIndex - 1; i >= minFieldIndex; --i)
-            {
-                if (instructions[i].OpCode == OpCodes.Ldfld &&
-                    instructions[i].Operand is FieldDefinition field &&
-                    IsCompilerGenerated(field) && field.FieldType.FullName == "System.Object")
+                if (instruction.OpCode != OpCodes.Brfalse &&
+                    instruction.OpCode != OpCodes.Brfalse_S)
                 {
-                    // We expect the call to GetResult() to be no more than three
-                    // instructions before the loading of the field's value.
-                    int minCallIndex = Math.Max(0, i - 3);
+                    return false;
+                }
 
-                    for (int j = i - 1; j >= minCallIndex; --j)
+                if (currentIndex >= 2 &&
+                    instructions[currentIndex - 2].IsLdarg(0) &&
+                    instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
+                    instructions[currentIndex - 1].Operand is FieldDefinition field &&
+                    IsCompilerGenerated(field) && field.FieldType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator"))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+
+            bool CheckIfExceptionThrown(List<Instruction> instructions, Instruction instruction, int currentIndex)
+            {
+                // Here, we want to find a pattern where we're checking whether a
+                // compiler-generated field of type Object is null.  To narrow our
+                // search down and reduce the odds of false positives, we'll also
+                // expect a call to GetResult() to precede the loading of the field's
+                // value.  The basic pattern looks like this:
+                //
+                // IL_018f: ldloca.s 2
+                // IL_0191: call instance void [System.Private.CoreLib]System.Runtime.CompilerServices.ValueTaskAwaiter::GetResult()
+                // IL_0196: ldarg.0
+                // IL_0197: ldfld object AwaitForeachStateMachine/'<AsyncAwait>d__0'::'<>7__wrap2'
+                // IL_019c: stloc.s 6
+                // IL_019e: ldloc.s 6
+                // IL_01a0: brfalse.s IL_01b9
+                //
+                // Variants are possible (e.g., a "dup" instruction instead of a
+                // "stloc.s" and "ldloc.s" pair), so we'll just look for the
+                // highlights.
+
+                if (instruction.OpCode != OpCodes.Brfalse &&
+                    instruction.OpCode != OpCodes.Brfalse_S)
+                {
+                    return false;
+                }
+
+                // We expect the field to be loaded no more than thre instructions before
+                // the branch, so that's how far we're willing to search for it.
+                int minFieldIndex = Math.Max(0, currentIndex - 3);
+
+                for (int i = currentIndex - 1; i >= minFieldIndex; --i)
+                {
+                    if (instructions[i].OpCode == OpCodes.Ldfld &&
+                        instructions[i].Operand is FieldDefinition field &&
+                        IsCompilerGenerated(field) && field.FieldType.FullName == "System.Object")
                     {
-                        if (instructions[j].OpCode == OpCodes.Call &&
-                            instructions[j].Operand is MethodReference callRef &&
-                            callRef.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices") &&
-                            callRef.DeclaringType.FullName.Contains("TaskAwait") &&
-                            callRef.Name == "GetResult")
+                        // We expect the call to GetResult() to be no more than three
+                        // instructions before the loading of the field's value.
+                        int minCallIndex = Math.Max(0, i - 3);
+
+                        for (int j = i - 1; j >= minCallIndex; --j)
+                        {
+                            if (instructions[j].OpCode == OpCodes.Call &&
+                                instructions[j].Operand is MethodReference callRef &&
+                                callRef.DeclaringType.FullName.StartsWith("System.Runtime.CompilerServices") &&
+                                callRef.DeclaringType.FullName.Contains("TaskAwait") &&
+                                callRef.Name == "GetResult")
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+
+            bool CheckThrownExceptionType(List<Instruction> instructions, Instruction instruction, int currentIndex)
+            {
+                // In this case, we're looking for a branch generated by the compiler to
+                // check whether a previously-thrown exception has (at least) the type
+                // System.Exception, the pattern for which looks like this:
+                //
+                // IL_01db: ldloc.s 7
+                // IL_01dd: isinst [System.Private.CoreLib]System.Exception
+                // IL_01e2: stloc.s 9
+                // IL_01e4: ldloc.s 9
+                // IL_01e6: brtrue.s IL_01eb
+                //
+                // Once again, variants are possible here, such as a "dup" instruction in
+                // place of the "stloc.s" and "ldloc.s" pair, and we'll reduce the odds of
+                // a false positive by requiring a "ldloc.s" instruction to precede the
+                // "isinst" instruction.
+
+                if (instruction.OpCode != OpCodes.Brtrue &&
+                    instruction.OpCode != OpCodes.Brtrue_S)
+                {
+                    return false;
+                }
+
+                int minTypeCheckIndex = Math.Max(1, currentIndex - 3);
+
+                for (int i = currentIndex - 1; i >= minTypeCheckIndex; --i)
+                {
+                    if (instructions[i].OpCode == OpCodes.Isinst &&
+                        instructions[i].Operand is TypeReference typeRef &&
+                        typeRef.FullName == "System.Exception" &&
+                        instructions[i - 1].IsLdloc())
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        private static bool SkipGeneratedBranchesForAwaitUsing(List<Instruction> instructions, Instruction instruction)
+        {
+            int currentIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
+
+            return CheckForSkipDisposal(instructions, instruction, currentIndex) ||
+                   CheckForCleanup(instructions, instruction, currentIndex);
+
+
+            bool CheckForSkipDisposal(List<Instruction> instructions, Instruction instruction, int currentIndex)
+            {
+                // The async state machine generated for an "await using" contains a branch
+                // that checks whether the call to DisposeAsync() needs to be skipped.
+                // As it turns out, the pattern is a little different in Debug and Release
+                // configurations, but the idea is the same in either case:
+                //
+                // * Check whether the IAsyncDisposable that's being managed by the "await
+                //   using" is null.  If so, skip the call to DisposeAsync().  If not,
+                //   make the call.
+                //
+                // To avoid other places where this pattern is used, we'll require it to be
+                // preceded by the tail end of a try/catch generated by the compiler.
+                //
+                // The primary difference between the Debug and Release versions of this
+                // pattern are where that IAsyncDisposable is stored.  In Debug mode, it's
+                // in a field; in Release mode, it's in a local variable.  So what we'll
+                // look for, generally, is a brfalse instruction that checks a value,
+                // followed shortly by reloading that same value and calling DisposeAsync()
+                // on it, preceded shortly by a store into a compiler-generated field and
+                // a "leave" instruction.
+                //
+                // Debug version:
+                // IL_0041: stfld object Coverlet.Core.Samples.Tests.AwaitUsing/'<HasAwaitUsing>d__0'::'<>s__2'
+                // IL_0046: leave.s IL_0048
+                // IL_0048: ldarg.0
+                // IL_0049: ldfld class [System.Private.CoreLib]System.IO.MemoryStream Coverlet.Core.Samples.Tests.AwaitUsing/'<HasAwaitUsing>d__0'::'<ms>5__1'
+                // IL_004e: brfalse.s IL_00b9
+                // IL_0050: ldarg.0
+                // IL_0051: ldfld class [System.Private.CoreLib]System.IO.MemoryStream Coverlet.Core.Samples.Tests.AwaitUsing/'<HasAwaitUsing>d__0'::'<ms>5__1'
+                // IL_0056: callvirt instance valuetype [System.Private.CoreLib]System.Threading.Tasks.ValueTask [System.Private.CoreLib]System.IAsyncDisposable::DisposeAsync()
+                //
+                // Release version:
+                // IL_0032: stfld object Coverlet.Core.Samples.Tests.AwaitUsing/'<HasAwaitUsing>d__0'::'<>7__wrap1'
+                // IL_0037: leave.s IL_0039
+                // IL_0039: ldloc.1
+                // IL_003a: brfalse.s IL_0098
+                // IL_003c: ldloc.1
+                // IL_003d: callvirt instance valuetype [System.Private.CoreLib]System.Threading.Tasks.ValueTask [System.Private.CoreLib]System.IAsyncDisposable::DisposeAsync()
+
+                if (instruction.OpCode != OpCodes.Brfalse &&
+                    instruction.OpCode != OpCodes.Brfalse_S)
+                {
+                    return false;
+                }
+                
+                bool isFollowedByDisposeAsync = false;
+
+                if (instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
+                    instructions[currentIndex - 1].Operand is FieldDefinition field &&
+                    IsCompilerGenerated(field))
+                {
+                    int maxReloadFieldIndex = Math.Min(currentIndex + 2, instructions.Count - 2);
+
+                    for (int i = currentIndex + 1; i <= maxReloadFieldIndex; ++i)
+                    {
+                        if (instructions[i].OpCode == OpCodes.Ldfld &&
+                            instructions[i].Operand is FieldDefinition reloadedField &&
+                            field.Equals(reloadedField) &&
+                            instructions[i + 1].OpCode == OpCodes.Callvirt &&
+                            instructions[i + 1].Operand is MethodReference method &&
+                            method.DeclaringType.FullName == "System.IAsyncDisposable" &&
+                            method.Name == "DisposeAsync")
+                        {
+                            isFollowedByDisposeAsync = true;
+                            break;
+                        }
+                    }
+                }
+                else if (instructions[currentIndex - 1].IsLdloc(out int localVariableIndex) &&
+                         instructions[currentIndex + 1].IsLdloc(out int reloadedLocalVariableIndex) &&
+                         localVariableIndex == reloadedLocalVariableIndex &&
+                         instructions[currentIndex + 2].OpCode == OpCodes.Callvirt &&
+                         instructions[currentIndex + 2].Operand is MethodReference method &&
+                         method.DeclaringType.FullName == "System.IAsyncDisposable" &&
+                         method.Name == "DisposeAsync")
+                {
+                    isFollowedByDisposeAsync = true;
+                }
+
+                if (isFollowedByDisposeAsync)
+                {
+                    int minLeaveIndex = Math.Max(1, currentIndex - 4);
+
+                    for (int i = currentIndex - 1; i >= minLeaveIndex; --i)
+                    {
+                        if ((instructions[i].OpCode == OpCodes.Leave ||
+                             instructions[i].OpCode == OpCodes.Leave_S) &&
+                            instructions[i - 1].OpCode == OpCodes.Stfld &&
+                            instructions[i - 1].Operand is FieldDefinition storeField &&
+                            IsCompilerGenerated(storeField))
                         {
                             return true;
                         }
                     }
                 }
-            }
 
-            return false;
-        }
-
-        private static bool SkipGeneratedBranchForAwaitForeach_CheckThrownExceptionType(List<Instruction> instructions, Instruction instruction, int currentIndex)
-        {
-            // In this case, we're looking for a branch generated by the compiler to
-            // check whether a previously-thrown exception has (at least) the type
-            // System.Exception, the pattern for which looks like this:
-            //
-            // IL_01db: ldloc.s 7
-            // IL_01dd: isinst [System.Private.CoreLib]System.Exception
-            // IL_01e2: stloc.s 9
-            // IL_01e4: ldloc.s 9
-            // IL_01e6: brtrue.s IL_01eb
-            //
-            // Once again, variants are possible here, such as a "dup" instruction in
-            // place of the "stloc.s" and "ldloc.s" pair, and we'll reduce the odds of
-            // a false positive by requiring a "ldloc.s" instruction to precede the
-            // "isinst" instruction.
-
-            if (instruction.OpCode != OpCodes.Brtrue &&
-                instruction.OpCode != OpCodes.Brtrue_S)
-            {
                 return false;
             }
 
-            int minTypeCheckIndex = Math.Max(1, currentIndex - 3);
 
-            for (int i = currentIndex - 1; i >= minTypeCheckIndex; --i)
+            bool CheckForCleanup(List<Instruction> instructions, Instruction instruction, int currentIndex)
             {
-                if (instructions[i].OpCode == OpCodes.Isinst &&
-                    instructions[i].Operand is TypeReference typeRef &&
-                    typeRef.FullName == "System.Exception" &&
-                    (instructions[i - 1].OpCode == OpCodes.Ldloc ||
-                     instructions[i - 1].OpCode == OpCodes.Ldloc_S))
+                if (instruction.OpCode != OpCodes.Beq &&
+                    instruction.OpCode != OpCodes.Beq_S &&
+                    instruction.OpCode != OpCodes.Bne_Un &&
+                    instruction.OpCode != OpCodes.Bne_Un_S)
                 {
-                    return true;
+                    return false;
                 }
-            }
 
-            return false;
+                if (currentIndex >= 1 &&
+                    instructions[currentIndex - 1].IsLdc_I4(1))
+                {
+                    int minLoadFieldIndex = Math.Max(1, currentIndex - 5);
+
+                    for (int i = currentIndex - 2; i >= minLoadFieldIndex; --i)
+                    {
+                        if (instructions[i].OpCode == OpCodes.Ldfld &&
+                            instructions[i].Operand is FieldDefinition loadedField &&
+                            IsCompilerGenerated(loadedField))
+                        {
+                            int minRethrowIndex = Math.Max(0, i - 4);
+
+                            for (int j = i - 1; j >= minRethrowIndex; --j)
+                            {
+                                if (instructions[j].OpCode == OpCodes.Callvirt &&
+                                    instructions[j].Operand is MethodReference method &&
+                                    method.DeclaringType.FullName == "System.Runtime.ExceptionServices.ExceptionDispatchInfo" &&
+                                    method.Name == "Throw")
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
         }
 
         // https://docs.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8
@@ -590,82 +742,86 @@ namespace Coverlet.Core.Symbols
 
             int currentIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
 
-            return SkipGeneratedBranchesForAsyncIterator_CheckForStateSwitch(instructions, instruction, currentIndex) ||
-                   SkipGeneratedBranchesForAsyncIterator_DisposeCheck(instructions, instruction, currentIndex);
-        }
+            return CheckForStateSwitch(instructions, instruction, currentIndex) ||
+                   DisposeCheck(instructions, instruction, currentIndex);
 
-        private static bool SkipGeneratedBranchesForAsyncIterator_CheckForStateSwitch(List<Instruction> instructions, Instruction instruction, int currentIndex)
-        {
-            // The pattern we're looking for here is this one:
-            //
-            // IL_0000: ldarg.0
-            // IL_0001: ldfld int32 Test.AsyncEnumerableStateMachine/'<CreateSequenceAsync>d__0'::'<>1__state'
-            // IL_0006: stloc.0
-            // .try
-            // {
-            //     IL_0007: ldloc.0
-            //     IL_0008: ldc.i4.s -4
-            //     IL_000a: sub
-            //     IL_000b: switch (IL_0026, IL_002b, IL_002f, IL_002f, IL_002d)
-            //
-            // The "switch" instruction is the branch we want to skip.  To eliminate
-            // false positives, we'll search back for the "ldfld" of the compiler-
-            // generated "<>1__state" field, making sure it precedes it within five
-            // instructions.  To be safe, we'll also require a "ldarg.0" instruction
-            // before the "ldfld".
 
-            if (instruction.OpCode != OpCodes.Switch)
+            bool CheckForStateSwitch(List<Instruction> instructions, Instruction instruction, int currentIndex)
             {
+                // The pattern we're looking for here is this one:
+                //
+                // IL_0000: ldarg.0
+                // IL_0001: ldfld int32 Test.AsyncEnumerableStateMachine/'<CreateSequenceAsync>d__0'::'<>1__state'
+                // IL_0006: stloc.0
+                // .try
+                // {
+                //     IL_0007: ldloc.0
+                //     IL_0008: ldc.i4.s -4
+                //     IL_000a: sub
+                //     IL_000b: switch (IL_0026, IL_002b, IL_002f, IL_002f, IL_002d)
+                //
+                // The "switch" instruction is the branch we want to skip.  To eliminate
+                // false positives, we'll search back for the "ldfld" of the compiler-
+                // generated "<>1__state" field, making sure it precedes it within five
+                // instructions.  To be safe, we'll also require a "ldarg.0" instruction
+                // before the "ldfld".
+
+                if (instruction.OpCode != OpCodes.Switch)
+                {
+                    return false;
+                }
+
+                int minLoadStateFieldIndex = Math.Max(1, currentIndex - 5);
+
+                for (int i = currentIndex - 1; i >= minLoadStateFieldIndex; --i)
+                {
+                    if (instructions[i].OpCode == OpCodes.Ldfld &&
+                        instructions[i].Operand is FieldDefinition field &&
+                        IsCompilerGenerated(field) && field.FullName.EndsWith("__state") &&
+                        (instructions[i - 1].OpCode == OpCodes.Ldarg ||
+                         instructions[i - 1].OpCode == OpCodes.Ldarg_0))
+                    {
+                        return true;
+                    }
+                }
+
                 return false;
             }
 
-            int minLoadStateFieldIndex = Math.Max(1, currentIndex - 5);
 
-            for (int i = currentIndex - 1; i >= minLoadStateFieldIndex; --i)
+            bool DisposeCheck(List<Instruction> instructions, Instruction instruction, int currentIndex)
             {
-                if (instructions[i].OpCode == OpCodes.Ldfld &&
-                    instructions[i].Operand is FieldDefinition field &&
-                    IsCompilerGenerated(field) && field.FullName.EndsWith("__state") &&
-                    (instructions[i - 1].OpCode == OpCodes.Ldarg ||
-                     instructions[i - 1].OpCode == OpCodes.Ldarg_0))
+                // Within the compiler-generated async iterator, there are at least a
+                // couple of places where we find this pattern, in which the async
+                // iterator is checking whether it's been disposed, so it'll know to
+                // stop iterating.
+                //
+                // IL_0024: ldarg.0
+                // IL_0025: ldfld bool Test.AsyncEnumerableStateMachine/'<CreateSequenceAsync>d__0'::'<>w__disposeMode'
+                // IL_002a: brfalse.s IL_0031
+                //
+                // We'll eliminate these wherever they appear.  It's reasonable to just
+                // look for a "brfalse" or "brfalse.s" instruction, preceded immediately
+                // by "ldfld" of the compiler-generated "<>w__disposeMode" field.
+
+                if (instruction.OpCode != OpCodes.Brfalse &&
+                    instruction.OpCode != OpCodes.Brfalse_S)
+                {
+                    return false;
+                }
+
+                if (currentIndex >= 2 &&
+                    instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
+                    instructions[currentIndex - 1].Operand is FieldDefinition field &&
+                    IsCompilerGenerated(field) && field.FullName.EndsWith("__disposeMode") &&
+                    (instructions[currentIndex - 2].OpCode == OpCodes.Ldarg ||
+                     instructions[currentIndex - 2].OpCode == OpCodes.Ldarg_0))
                 {
                     return true;
                 }
-            }
 
-            return false;
-        }
-
-        private static bool SkipGeneratedBranchesForAsyncIterator_DisposeCheck(List<Instruction> instructions, Instruction instruction, int currentIndex)
-        {
-            // Within the compiler-generated async iterator, there are at least a
-            // couple of places where we find this pattern, in which the async
-            // iterator is checking whether it's been disposed, so it'll know to
-            // stop iterating.
-            //
-            // IL_0024: ldarg.0
-            // IL_0025: ldfld bool Test.AsyncEnumerableStateMachine/'<CreateSequenceAsync>d__0'::'<>w__disposeMode'
-            // IL_002a: brfalse.s IL_0031
-            //
-            // We'll eliminate these wherever they appear.  It's reasonable to just
-            // look for a "brfalse" or "brfalse.s" instruction, preceded immediately
-            // by "ldfld" of the compiler-generated "<>w__disposeMode" field.
-
-            if (instruction.OpCode != OpCodes.Brfalse &&
-                instruction.OpCode != OpCodes.Brfalse_S)
-            {
                 return false;
             }
-
-            if (currentIndex >= 1 &&
-                instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
-                instructions[currentIndex - 1].Operand is FieldDefinition field &&
-                IsCompilerGenerated(field) && field.FullName.EndsWith("__disposeMode"))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         // https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/Expression%20Breakpoints.md
@@ -735,7 +891,8 @@ namespace Coverlet.Core.Symbols
                     {
                         if (SkipGeneratedBranchesForExceptionHandlers(methodDefinition, instruction, instructions) ||
                             SkipGeneratedBranchForExceptionRethrown(instructions, instruction) ||
-                            SkipGeneratedBranchesForAwaitForeach(instructions, instruction))
+                            SkipGeneratedBranchesForAwaitForeach(instructions, instruction) ||
+                            SkipGeneratedBranchesForAwaitUsing(instructions, instruction))
                         {
                             continue;
                         }

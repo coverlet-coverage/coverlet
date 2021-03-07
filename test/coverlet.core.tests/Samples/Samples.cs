@@ -242,6 +242,24 @@ namespace Coverlet.Core.Samples.Tests
         }
     }
 
+    public class AwaitUsingStateMachine
+    {
+        async public ValueTask HasAwaitUsing()
+        {
+            await using (var ms = new MemoryStream(System.Text.Encoding.ASCII.GetBytes("Boo")))
+            {
+            }
+        }
+    }
+
+    public class ScopedAwaitUsingStateMachine
+    {
+        async public ValueTask HasScopedAwaitUsing()
+        {
+            await using var ms = new MemoryStream(System.Text.Encoding.ASCII.GetBytes("Boo"));
+        }
+    }
+
     [ExcludeFromCoverage]
     public class ClassExcludedByCoverletCodeCoverageAttr
     {
