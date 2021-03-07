@@ -15,7 +15,7 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                FunctionExecutor.RunInProcess(async (string[] pathSerialize) =>
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AwaitUsing>(instance =>
                     {
