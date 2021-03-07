@@ -471,7 +471,8 @@ namespace Coverlet.Core.Instrumentation
                         continue;
                     }
 
-                    PropertyDefinition prop = type.Properties.FirstOrDefault(p => (p.GetMethod ?? p.SetMethod).FullName.Equals(actualMethod.FullName));
+                    PropertyDefinition prop = type.Properties.FirstOrDefault(p => p.GetMethod?.FullName.Equals(actualMethod.FullName) == true ||
+                                                                                    p.SetMethod?.FullName.Equals(actualMethod.FullName) == true);
                     if (prop?.HasCustomAttributes == true)
                         customAttributes = customAttributes.Union(prop.CustomAttributes);
                 }
