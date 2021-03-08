@@ -54,6 +54,10 @@ namespace Coverlet.Core
         {
             var details = new CoverageDetails();
             var accumPercent = 0.0D;
+
+            if (modules.Count == 0)
+                return details;
+
             foreach (var module in modules)
             {
                 var moduleCoverage = CalculateLineCoverage(module.Value);
@@ -61,7 +65,7 @@ namespace Coverlet.Core
                 details.Total += moduleCoverage.Total;
                 accumPercent += moduleCoverage.Percent;
             }
-            details.AverageModulePercent = modules.Count == 0 ? 0 : accumPercent / modules.Count;
+            details.AverageModulePercent = accumPercent / modules.Count;
             return details;
         }
 
@@ -187,6 +191,10 @@ namespace Coverlet.Core
         {
             var details = new CoverageDetails();
             var accumPercent = 0.0D;
+
+            if (modules.Count == 0)
+                return details;
+
             foreach (var module in modules)
             {
                 var moduleCoverage = CalculateBranchCoverage(module.Value);
@@ -247,6 +255,10 @@ namespace Coverlet.Core
         {
             var details = new CoverageDetails();
             var accumPercent = 0.0D;
+
+            if (modules.Count == 0)
+                return details;
+
             foreach (var module in modules)
             {
                 var moduleCoverage = CalculateMethodCoverage(module.Value);

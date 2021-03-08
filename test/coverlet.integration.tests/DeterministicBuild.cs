@@ -80,7 +80,7 @@ namespace Coverlet.Integration.Tests
 
             DotnetCli($"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:DeterministicReport=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out _, _testProjectPath);
             Assert.Contains("Passed!", standardOutput);
-            Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 0%     | 100%   |", standardOutput);
+            Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(_testProjectPath, "coverage.json")));
             AssertCoverage(standardOutput);
 
@@ -103,7 +103,7 @@ namespace Coverlet.Integration.Tests
 
             DotnetCli($"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out _, _testProjectPath);
             Assert.Contains("Passed!", standardOutput);
-            Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 0%     | 100%   |", standardOutput);
+            Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
             Assert.True(File.Exists(Path.Combine(_testProjectPath, "coverage.json")));
             Assert.Contains("raw.githubusercontent.com", File.ReadAllText(Path.Combine(_testProjectPath, "coverage.json")));
             AssertCoverage(standardOutput, checkDeterministicReport: false);
