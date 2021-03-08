@@ -360,7 +360,7 @@ namespace Coverlet.Core.Symbols.Tests
         }
 
         [Fact]
-        public void GetBranchesPoints_IgnoresExtraBranchesIn_AsyncIteratorStateMachine()
+        public void GetBranchPoints_IgnoresExtraBranchesIn_AsyncIteratorStateMachine()
         {
             // arrange
             var nestedName = typeof(AsyncIteratorStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
@@ -377,6 +377,38 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.Equal(2, points.Count());
             Assert.Equal(237, points[0].StartLine);
             Assert.Equal(237, points[1].StartLine);
+        }
+
+        [Fact]
+        public void GetBranchPoints_IgnoreBranchesIn_AwaitUsingStateMachine()
+        {
+            // arrange
+            var nestedName = typeof(AwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitUsingStateMachine).FullName);
+            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+
+            // act
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
+
+            // assert
+            Assert.Empty(points);
+        }
+
+        [Fact]
+        public void GetBranchPoints_IgnoreBranchesIn_ScopedAwaitUsingStateMachine()
+        {
+            // arrange
+            var nestedName = typeof(ScopedAwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(ScopedAwaitUsingStateMachine).FullName);
+            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+
+            // act
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
+
+            // assert
+            Assert.Empty(points);
         }
 
         [Fact]
