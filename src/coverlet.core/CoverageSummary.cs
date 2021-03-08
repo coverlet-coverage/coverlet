@@ -52,7 +52,7 @@ namespace Coverlet.Core
 
         public CoverageDetails CalculateLineCoverage(Modules modules)
         {
-            var details = new CoverageDetails();
+            var details = new CoverageDetails{Modules = modules};
             var accumPercent = 0.0D;
 
             if (modules.Count == 0)
@@ -189,7 +189,7 @@ namespace Coverlet.Core
 
         public CoverageDetails CalculateBranchCoverage(Modules modules)
         {
-            var details = new CoverageDetails();
+            var details = new CoverageDetails{ Modules = modules };
             var accumPercent = 0.0D;
 
             if (modules.Count == 0)
@@ -253,7 +253,7 @@ namespace Coverlet.Core
 
         public CoverageDetails CalculateMethodCoverage(Modules modules)
         {
-            var details = new CoverageDetails();
+            var details = new CoverageDetails{ Modules = modules };
             var accumPercent = 0.0D;
 
             if (modules.Count == 0)
