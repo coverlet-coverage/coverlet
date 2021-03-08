@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -30,7 +31,14 @@ namespace Coverlet.Core.Reporters.Tests
             classes.Add("Coverlet.Core.Reporters.Tests.LcovReporterTests", methods);
 
             Documents documents = new Documents();
-            documents.Add("doc.cs", classes);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                documents.Add(@"C:\doc.cs", classes);
+            }
+            else
+            {
+                documents.Add(@"/doc.cs", classes);
+            }
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
 

@@ -2,15 +2,15 @@ using Newtonsoft.Json;
 
 namespace Coverlet.Core.Reporters
 {
-    internal class JsonReporter : IReporter
+    internal class JsonReporter : ReporterBase
     {
-        public ReporterOutputType OutputType => ReporterOutputType.File;
+        public override ReporterOutputType OutputType => ReporterOutputType.File;
 
-        public string Format => "json";
+        public override string Format => "json";
 
-        public string Extension => "json";
+        public override string Extension => "json";
 
-        public string Report(CoverageResult result)
+        public override string Report(CoverageResult result)
         {
             return JsonConvert.SerializeObject(result.Modules, Formatting.Indented);
         }
