@@ -8,8 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed  
 
--Fixed partially covered `await foreach` statement [#1107](https://github.com/coverlet-coverage/coverlet/pull/1107) by https://github.com/alexthornton1  
--Fixed `System.MissingMethodException`(TryGetIntArgFromDict) [#1101](https://github.com/coverlet-coverage/coverlet/pull/1101)
+-Fix partially covered `await foreach` statement [#1107](https://github.com/coverlet-coverage/coverlet/pull/1107) by https://github.com/alexthornton1  
+-Fix `System.MissingMethodException`(TryGetIntArgFromDict) [#1101](https://github.com/coverlet-coverage/coverlet/pull/1101)  
+-Fix ExcludeFromCodeCoverage on props [#1114](https://github.com/coverlet-coverage/coverlet/pull/1114)
 
 ## Release date 2021-02-21
 ### Packages  
