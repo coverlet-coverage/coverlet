@@ -1,7 +1,8 @@
-﻿using System.Globalization;
-using Coverlet.Core;
-using Coverlet.Core.Reporters;
+﻿using System;
+using System.Globalization;
 using System.Text;
+
+using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
 {
@@ -13,8 +14,13 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => null;
 
-        public string Report(CoverageResult result)
+        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
+            if (result.Parameters.DeterministicReport)
+            {
+                throw new NotSupportedException("Deterministic report not supported by teamcity reporter");
+            }
+
             // Calculate coverage
             var summary = new CoverageSummary();
             var overallLineCoverage = summary.CalculateLineCoverage(result.Modules);

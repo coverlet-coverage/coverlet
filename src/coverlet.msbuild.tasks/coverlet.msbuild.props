@@ -10,6 +10,7 @@
     <SingleHit Condition="'$(SingleHit)' == ''">false</SingleHit>
     <MergeWith Condition="$(MergeWith) == ''"></MergeWith>
     <UseSourceLink Condition="$(UseSourceLink) == ''">false</UseSourceLink>
+    <DeterministicReport Condition="$(DeterministicReport) == ''">false</DeterministicReport>
     <CoverletOutputFormat Condition="$(CoverletOutputFormat) == ''">json</CoverletOutputFormat>
     <CoverletOutput Condition="$(CoverletOutput) == ''">$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))</CoverletOutput>
     <Threshold Condition="$(Threshold) == ''">0</Threshold>

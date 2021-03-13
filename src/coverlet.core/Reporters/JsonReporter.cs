@@ -1,5 +1,8 @@
 using Newtonsoft.Json;
 
+using Coverlet.Core.Abstractions;
+using System;
+
 namespace Coverlet.Core.Reporters
 {
     internal class JsonReporter : IReporter
@@ -10,7 +13,7 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => "json";
 
-        public string Report(CoverageResult result)
+        public string Report(CoverageResult result, ISourceRootTranslator _)
         {
             return JsonConvert.SerializeObject(result.Modules, Formatting.Indented);
         }

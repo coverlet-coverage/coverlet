@@ -73,6 +73,11 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         public string[] DoesNotReturnAttributes { get; set; }
 
+        /// <summary>
+        /// DeterministicReport flag
+        /// </summary>
+        public bool DeterministicReport { get; set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -89,6 +94,7 @@ namespace Coverlet.Collector.DataCollection
             builder.AppendFormat("IncludeTestAssembly: '{0}'", IncludeTestAssembly);
             builder.AppendFormat("SkipAutoProps: '{0}'", SkipAutoProps);
             builder.AppendFormat("DoesNotReturnAttributes: '{0}'", string.Join(",", DoesNotReturnAttributes ?? Enumerable.Empty<string>()));
+            builder.AppendFormat("DeterministicReport: '{0}'", DeterministicReport);
 
             return builder.ToString();
         }

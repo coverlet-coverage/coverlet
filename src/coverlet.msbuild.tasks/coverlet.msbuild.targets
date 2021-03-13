@@ -48,6 +48,7 @@
       MergeWith="$(MergeWith)"
       UseSourceLink="$(UseSourceLink)"
       SkipAutoProps="$(SkipAutoProps)"
+      DeterministicReport="$(DeterministicReport)"
       DoesNotReturnAttribute="$(DoesNotReturnAttribute)">
       <Output TaskParameter="InstrumenterState" PropertyName="InstrumenterState"/>
     </Coverlet.MSbuild.Tasks.InstrumentationTask>

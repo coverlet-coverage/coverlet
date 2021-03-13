@@ -37,9 +37,11 @@ namespace Coverlet.Console
             var logger = (ConsoleLogger)serviceProvider.GetService<ILogger>();
             var fileSystem = serviceProvider.GetService<IFileSystem>();
 
-            var app = new CommandLineApplication();
-            app.Name = "coverlet";
-            app.FullName = "Cross platform .NET Core code coverage tool";
+            var app = new CommandLineApplication
+            {
+                Name = "coverlet",
+                FullName = "Cross platform .NET Core code coverage tool"
+            };
             app.HelpOption("-h|--help");
             app.VersionOption("-v|--version", GetAssemblyVersion());
             int exitCode = (int)CommandExitCodes.Success;
@@ -79,7 +81,7 @@ namespace Coverlet.Console
                     logger.Level = verbosity.ParsedValue;
                 }
 
-                CoverageParameters parameters = new CoverageParameters
+                CoverageParameters parameters = new()
                 {
                     IncludeFilters = includeFilters.Values.ToArray(),
                     IncludeDirectories = includeDirectories.Values.ToArray(),
@@ -94,16 +96,18 @@ namespace Coverlet.Console
                     DoesNotReturnAttributes = doesNotReturnAttributes.Values.ToArray()
                 };
 
-                Coverage coverage = new Coverage(moduleOrAppDirectory.Value,
+                ISourceRootTranslator sourceRootTranslator = serviceProvider.GetRequiredService<ISourceRootTranslator>();
+
+                Coverage coverage = new(moduleOrAppDirectory.Value,
                                                  parameters,
                                                  logger,
                                                  serviceProvider.GetRequiredService<IInstrumentationHelper>(),
                                                  fileSystem,
-                                                 serviceProvider.GetRequiredService<ISourceRootTranslator>(),
+                                                 sourceRootTranslator,
                                                  serviceProvider.GetRequiredService<ICecilSymbolHelper>());
                 coverage.PrepareModules();
 
-                Process process = new Process();
+                Process process = new();
                 process.StartInfo.FileName = target.Value();
                 process.StartInfo.Arguments = targs.HasValue() ? targs.Value() : string.Empty;
                 process.StartInfo.CreateNoWindow = true;
@@ -146,7 +150,7 @@ namespace Coverlet.Console
                     Directory.CreateDirectory(directory);
                 }
 
-                foreach (var format in (formats.HasValue() ? formats.Values : new List<string>(new string[] { "json" })))
+                foreach (var format in formats.HasValue() ? formats.Values : new List<string>(new string[] { "json" }))
                 {
                     var reporter = new ReporterFactory(format).CreateReporter();
                     if (reporter == null)
@@ -158,7 +162,7 @@ namespace Coverlet.Console
                     {
                         // Output to console
                         logger.LogInformation("  Outputting results to console", important: true);
-                        logger.LogInformation(reporter.Report(result), important: true);
+                        logger.LogInformation(reporter.Report(result, sourceRootTranslator), important: true);
                     }
                     else
                     {
@@ -169,7 +173,7 @@ namespace Coverlet.Console
 
                         var report = Path.Combine(directory, filename);
                         logger.LogInformation($"  Generating report '{report}'", important: true);
-                        fileSystem.WriteAllText(report, reporter.Report(result));
+                        fileSystem.WriteAllText(report, reporter.Report(result, sourceRootTranslator));
                     }
                 }
 

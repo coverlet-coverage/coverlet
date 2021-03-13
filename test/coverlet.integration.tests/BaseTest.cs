@@ -80,7 +80,7 @@ namespace Coverlet.Integration.Tests
 
         private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
         {
-            Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}");
+            Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}\nWorkingDirectory: {workingDirectory}");
             ProcessStartInfo psi = new ProcessStartInfo(command, arguments);
             psi.WorkingDirectory = workingDirectory;
             psi.RedirectStandardError = true;
@@ -200,7 +200,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought", bool sourceLink = false)
+        private protected string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought", bool sourceLink = false, bool deterministicReport = false)
         {
             string runSettings =
 $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
@@ -210,6 +210,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
         <DataCollector friendlyName=""XPlat code coverage"" >
            <Configuration>
             <Format>json,cobertura</Format>
+            <DeterministicReport>{deterministicReport}</DeterministicReport>
             <Include>{includeFilter}</Include>
             <UseSourceLink>{(sourceLink ? "true" : "false")}</UseSourceLink>
             <!-- We need to include test assembly because test and code to cover are in same template project -->

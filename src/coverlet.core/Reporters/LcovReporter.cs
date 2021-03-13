@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
+using Coverlet.Core.Abstractions;
+
 namespace Coverlet.Core.Reporters
 {
     internal class LcovReporter : IReporter
@@ -12,8 +14,13 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => "info";
 
-        public string Report(CoverageResult result)
+        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
+            if (result.Parameters.DeterministicReport)
+            {
+                throw new NotSupportedException("Deterministic report not supported by lcov reporter");
+            }
+
             CoverageSummary summary = new CoverageSummary();
             List<string> lcov = new List<string>();
 

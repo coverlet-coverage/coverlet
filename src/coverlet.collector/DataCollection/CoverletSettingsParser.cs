@@ -44,6 +44,7 @@ namespace Coverlet.Collector.DataCollection
                 coverletSettings.IncludeTestAssembly = ParseIncludeTestAssembly(configurationElement);
                 coverletSettings.SkipAutoProps = ParseSkipAutoProps(configurationElement);
                 coverletSettings.DoesNotReturnAttributes = ParseDoesNotReturnAttributes(configurationElement);
+                coverletSettings.DeterministicReport = ParseDeterministicReport(configurationElement);
             }
 
             coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
@@ -193,6 +194,18 @@ namespace Coverlet.Collector.DataCollection
             XmlElement singleHitElement = configurationElement[CoverletConstants.SingleHitElementName];
             bool.TryParse(singleHitElement?.InnerText, out bool singleHit);
             return singleHit;
+        }
+
+        /// <summary>
+        /// Parse ParseDeterministicReport flag
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <returns>ParseDeterministicReport flag</returns>
+        private bool ParseDeterministicReport(XmlElement configurationElement)
+        {
+            XmlElement deterministicReportElement = configurationElement[CoverletConstants.DeterministicReport];
+            bool.TryParse(deterministicReportElement?.InnerText, out bool deterministicReport);
+            return deterministicReport;
         }
 
         /// <summary>

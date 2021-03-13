@@ -1,5 +1,7 @@
 ﻿using System;
-using Coverlet.Core.Reporters;
+
+using Coverlet.Core.Abstractions;
+using Moq;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -13,6 +15,7 @@ namespace Coverlet.Core.Reporters.Tests
         {
             _reporter = new TeamCityReporter();
             _result = new CoverageResult();
+            _result.Parameters = new CoverageParameters();
             _result.Identifier = Guid.NewGuid().ToString();
 
             var lines = new Lines { { 1, 1 }, { 2, 0 } };
@@ -86,7 +89,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void Report_ReturnsNonNullString()
         {
             // Act
-            var output = _reporter.Report(_result);
+            var output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
             Assert.False(string.IsNullOrWhiteSpace(output), "Output is not null or whitespace");
@@ -96,7 +99,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void Report_ReportsLineCoverage()
         {
             // Act
-            var output = _reporter.Report(_result);
+            var output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLCovered' value='1']", output);
@@ -107,7 +110,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void Report_ReportsBranchCoverage()
         {
             // Act
-            var output = _reporter.Report(_result);
+            var output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBCovered' value='1']", output);
@@ -118,7 +121,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void Report_ReportsMethodCoverage()
         {
             // Act
-            var output = _reporter.Report(_result);
+            var output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMCovered' value='1']", output);
