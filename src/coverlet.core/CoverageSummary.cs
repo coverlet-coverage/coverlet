@@ -88,7 +88,7 @@ namespace Coverlet.Core
                 {
                     count = 0;
                 }
-                paths[branch.Offset] = count++;
+                paths[branch.Offset] = ++count;
             }
 
             int npath = 1;
@@ -101,6 +101,7 @@ namespace Coverlet.Core
                 catch (OverflowException)
                 {
                     npath = int.MaxValue;
+                    break;
                 }
             }
             return npath;

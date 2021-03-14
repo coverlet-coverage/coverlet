@@ -24,6 +24,7 @@ namespace Coverlet.Core.Reporters.Tests
             XDocument doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
             Assert.Empty(doc.Descendants().Attributes("sequenceCoverage").Where(v => v.Value != "33.33"));
             Assert.Empty(doc.Descendants().Attributes("branchCoverage").Where(v => v.Value != "25"));
+            Assert.Empty(doc.Descendants().Attributes("nPathComplexity").Where(v => v.Value != "4"));
         }
 
         [Fact]
