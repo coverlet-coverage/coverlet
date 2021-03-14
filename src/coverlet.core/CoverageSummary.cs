@@ -73,6 +73,40 @@ namespace Coverlet.Core
             return details;
         }
 
+        public int CalculateNpathComplexity(IList<BranchInfo> branches)
+        {
+            // Adapted from OpenCover see https://github.com/OpenCover/opencover/blob/master/main/OpenCover.Framework/Persistance/BasePersistance.cs#L419
+            if (!branches.Any())
+            {
+                return 0;
+            }
+
+            var paths = new Dictionary<int, int>();
+            foreach (var branch in branches)
+            {
+                if (!paths.TryGetValue(branch.Offset, out int count))
+                {
+                    count = 0;
+                }
+                paths[branch.Offset] = ++count;
+            }
+
+            int npath = 1;
+            foreach (var branchPoints in paths.Values)
+            {
+                try
+                {
+                    npath = checked(npath * branchPoints);
+                }
+                catch (OverflowException)
+                {
+                    npath = int.MaxValue;
+                    break;
+                }
+            }
+            return npath;
+        }
+
         public int CalculateCyclomaticComplexity(IList<BranchInfo> branches)
         {
             return Math.Max(1, branches.Count);

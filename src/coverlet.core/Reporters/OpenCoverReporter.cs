@@ -78,11 +78,12 @@ namespace Coverlet.Core.Reporters
                             var methLineCoverage = summary.CalculateLineCoverage(meth.Value.Lines);
                             var methBranchCoverage = summary.CalculateBranchCoverage(meth.Value.Branches);
                             var methCyclomaticComplexity = summary.CalculateCyclomaticComplexity(meth.Value.Branches);
+                            var methNpathComplexity = summary.CalculateNpathComplexity(meth.Value.Branches);
 
                             XElement method = new XElement("Method");
 
                             method.Add(new XAttribute("cyclomaticComplexity", methCyclomaticComplexity.ToString()));
-                            method.Add(new XAttribute("nPathComplexity", "0"));
+                            method.Add(new XAttribute("nPathComplexity", methCyclomaticComplexity.ToString()));
                             method.Add(new XAttribute("sequenceCoverage", methLineCoverage.Percent.ToString("G", CultureInfo.InvariantCulture)));
                             method.Add(new XAttribute("branchCoverage", methBranchCoverage.Percent.ToString("G", CultureInfo.InvariantCulture)));
                             method.Add(new XAttribute("isConstructor", meth.Key.Contains("ctor").ToString()));
