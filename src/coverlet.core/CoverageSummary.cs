@@ -52,8 +52,12 @@ namespace Coverlet.Core
 
         public CoverageDetails CalculateLineCoverage(Modules modules)
         {
-            var details = new CoverageDetails();
+            var details = new CoverageDetails{Modules = modules};
             var accumPercent = 0.0D;
+
+            if (modules.Count == 0)
+                return details;
+
             foreach (var module in modules)
             {
                 var moduleCoverage = CalculateLineCoverage(module.Value);
@@ -185,8 +189,12 @@ namespace Coverlet.Core
 
         public CoverageDetails CalculateBranchCoverage(Modules modules)
         {
-            var details = new CoverageDetails();
+            var details = new CoverageDetails{ Modules = modules };
             var accumPercent = 0.0D;
+
+            if (modules.Count == 0)
+                return details;
+
             foreach (var module in modules)
             {
                 var moduleCoverage = CalculateBranchCoverage(module.Value);
@@ -194,7 +202,7 @@ namespace Coverlet.Core
                 details.Total += moduleCoverage.Total;
                 accumPercent += moduleCoverage.Percent;
             }
-            details.AverageModulePercent = accumPercent / modules.Count;
+            details.AverageModulePercent = modules.Count == 0 ? 0 : accumPercent / modules.Count;
             return details;
         }
 
@@ -245,8 +253,12 @@ namespace Coverlet.Core
 
         public CoverageDetails CalculateMethodCoverage(Modules modules)
         {
-            var details = new CoverageDetails();
+            var details = new CoverageDetails{ Modules = modules };
             var accumPercent = 0.0D;
+
+            if (modules.Count == 0)
+                return details;
+
             foreach (var module in modules)
             {
                 var moduleCoverage = CalculateMethodCoverage(module.Value);
@@ -254,7 +266,7 @@ namespace Coverlet.Core
                 details.Total += moduleCoverage.Total;
                 accumPercent += moduleCoverage.Percent;
             }
-            details.AverageModulePercent = accumPercent / modules.Count;
+            details.AverageModulePercent = modules.Count == 0 ? 0 : accumPercent / modules.Count;
             return details;
         }
     }
