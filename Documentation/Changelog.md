@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed  
 
--Fix coverage threshold not failing when no coverage (https://github.com/coverlet-coverage/coverlet/pull/1115)
+-Fix coverage threshold not failing when no coverage (https://github.com/coverlet-coverage/coverlet/pull/1115)  
 -Fix partially covered `await foreach` statement [#1107](https://github.com/coverlet-coverage/coverlet/pull/1107) by https://github.com/alexthornton1  
 -Fix `System.MissingMethodException`(TryGetIntArgFromDict) [#1101](https://github.com/coverlet-coverage/coverlet/pull/1101)  
 -Fix ExcludeFromCodeCoverage on props [#1114](https://github.com/coverlet-coverage/coverlet/pull/1114)  
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 -Support deterministic reports [#1113](https://github.com/coverlet-coverage/coverlet/pull/1113)  
+-Specifying threshold level for each threshold type  [#1123](https://github.com/coverlet-coverage/coverlet/pull/1123)  
 
 ### Improvements
 -Implementation of Npath complexity for the OpenCover reports [#1058](https://github.com/coverlet-coverage/coverlet/pull/1058) by https://github.com/benjaminZale
