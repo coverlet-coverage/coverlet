@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 -Support deterministic reports [#1113](https://github.com/coverlet-coverage/coverlet/pull/1113)  
--Specifying threshold level for each threshold type  [#1123](https://github.com/coverlet-coverage/coverlet/pull/1123)  
+-Specifying threshold level for each threshold type  [#1123](https://github.com/coverlet-coverage/coverlet/pull/1123) by https://github.com/pbmiguel  
 
 ### Improvements
 -Implementation of Npath complexity for the OpenCover reports [#1058](https://github.com/coverlet-coverage/coverlet/pull/1058) by https://github.com/benjaminZale
