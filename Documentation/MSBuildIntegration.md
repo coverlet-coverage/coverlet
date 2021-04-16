@@ -102,7 +102,7 @@ You can specify multiple values for `ThresholdType` by separating them with comm
 You can do the same for `Threshold` as well.
 
 ```bash
-dotnet test /p:CollectCoverage=true /p:Threshold="80,100,70", /p:ThresholdType="line,branch,method"
+dotnet test /p:CollectCoverage=true /p:Threshold=\"80,100,70\" /p:ThresholdType=\"line,branch,method\"
 ```
 
 By default, Coverlet will validate the threshold value against the coverage result of each module. The `/p:ThresholdStat` option allows you to change this behaviour and can have any of the following values:
