@@ -34,9 +34,9 @@ namespace Coverlet.Core.Tests
             dir.Delete(true);
             dir.Create();
             string reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", defaultReporter.Extension));
-            File.WriteAllText(reportFile, defaultReporter.Report(coverageResult));
+            File.WriteAllText(reportFile, defaultReporter.Report(coverageResult, new Mock<ISourceRootTranslator>().Object));
             reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", reporter.Extension));
-            File.WriteAllText(reportFile, reporter.Report(coverageResult));
+            File.WriteAllText(reportFile, reporter.Report(coverageResult, new Mock<ISourceRootTranslator>().Object));
             // i.e. reportgenerator -reports:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If\report.cobertura.xml" -targetdir:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If" -filefilters:+**\Samples\Instrumentation.cs
             Assert.True(new Generator().GenerateReport(new ReportConfiguration(
             new[] { reportFile },

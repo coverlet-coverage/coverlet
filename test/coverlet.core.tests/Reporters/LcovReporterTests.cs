@@ -1,3 +1,5 @@
+using Coverlet.Core.Abstractions;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -11,6 +13,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void TestReport()
         {
             CoverageResult result = new CoverageResult();
+            result.Parameters = new CoverageParameters();
             result.Identifier = Guid.NewGuid().ToString();
 
             Lines lines = new Lines();
@@ -43,7 +46,7 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("module", documents);
 
             LcovReporter reporter = new LcovReporter();
-            string report = reporter.Report(result);
+            string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
             Assert.NotEmpty(report);
             Assert.Equal("SF:doc.cs", report.Split(Environment.NewLine)[0]);

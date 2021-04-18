@@ -85,18 +85,19 @@ We're working to fill the gaps.
 
 These are a list of options that are supported by coverlet. These can be specified as datacollector configurations in the runsettings.
 
-| Option                   | Summary                                                                                                                           |
-|:-------------------------|:----------------------------------------------------------------------------------------------------------------------------------|
-| Format                   | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.   | 
-| Exclude                  | Exclude from code coverage analysing using filter expressions.                                                                    | 
-| ExcludeByFile            | Ignore specific source files from code coverage.                                                                                  | 
-| Include                  | Explicitly set what to include in code coverage analysis using filter expressions.                                                | 
-| IncludeDirectory         | Explicitly set which directories to include in code coverage analysis.                                                            |
-| SingleHit                | Specifies whether to limit code coverage hit reporting to a single hit for each location.                                         | 
-| UseSourceLink            | Specifies whether to use SourceLink URIs in place of file system paths.                                                           |
-| IncludeTestAssembly      | Include coverage of the test assembly.                                                                                            |
-| SkipAutoProps            | Neither track nor record auto-implemented properties.                                                                             |
-| DoesNotReturnAttribute   | Methods marked with these attributes are known not to return, statements following them will be excluded from coverage            |
+| Option                   | Summary                                                                                                                                                         |
+|:-------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Format                   | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.                                 | 
+| Exclude                  | Exclude from code coverage analysing using filter expressions.                                                                                                  | 
+| ExcludeByFile            | Ignore specific source files from code coverage.                                                                                                                | 
+| Include                  | Explicitly set what to include in code coverage analysis using filter expressions.                                                                              | 
+| IncludeDirectory         | Explicitly set which directories to include in code coverage analysis.                                                                                          |
+| SingleHit                | Specifies whether to limit code coverage hit reporting to a single hit for each location.                                                                       | 
+| UseSourceLink            | Specifies whether to use SourceLink URIs in place of file system paths.                                                                                         |
+| IncludeTestAssembly      | Include coverage of the test assembly.                                                                                                                          |
+| SkipAutoProps            | Neither track nor record auto-implemented properties.                                                                                                           |
+| DoesNotReturnAttribute   | Methods marked with these attributes are known not to return, statements following them will be excluded from coverage                                          |
+| DeterministicReport      | Generates deterministic report in context of deterministic build. Take a look at [documentation](Documentation/DeterministicBuild.md) for further informations. | 
 
 How to specify these options via runsettings?
 
@@ -117,6 +118,7 @@ How to specify these options via runsettings?
           <UseSourceLink>true</UseSourceLink>
           <IncludeTestAssembly>true</IncludeTestAssembly>
           <SkipAutoProps>true</SkipAutoProps>
+          <DeterministicReport>false</DeterministicReport>
         </Configuration>
       </DataCollector>
     </DataCollectors>

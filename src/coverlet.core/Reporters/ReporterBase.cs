@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Coverlet.Core.Abstractions;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Coverlet.Core.Reporters
 {
@@ -15,7 +14,7 @@ namespace Coverlet.Core.Reporters
 
         public abstract string Extension { get; }
 
-        public abstract string Report(CoverageResult result);
+        public abstract string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator);
         
         protected static IEnumerable<string> GetBasePaths(Modules modules, bool useSourceLink)
         {

@@ -10,6 +10,23 @@ As explained above, to improve the level of security of generated artifacts (for
 
 Finally, thanks to deterministic CI builds (with the `ContinuousIntegrationBuild` property set to `true`) plus signature we can validate artifacts and be sure that the binary was built from specific sources (because there is no hard-coded variable metadata, like paths from different build machines).
 
+# Deterministic report
+
+Coverlet supports also deterministic reports(for now only for cobertura coverage format).  
+If you include `DeterministicReport` parameters for `msbuild` and `collectors` integrations resulting report will be like:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<coverage line-rate="0.8571" branch-rate="0.5" version="1.9" timestamp="1612702997" lines-covered="6" lines-valid="7" branches-covered="1" branches-valid="2">
+  <sources />
+  <packages>
+    <package name="MyLibrary" line-rate="0.8571" branch-rate="0.5" complexity="3">
+      <classes>
+        <class name="MyLibrary.Hello" filename="/_/MyLibrary/Hello.cs" line-rate="0.8571" branch-rate="0.5" complexity="3">
+          <methods>
+...
+```
+As you can see we have empty `<sources />` element and the `filename` start with well known deterministic fragment `/_/...`
+
 **Deterministic build is supported without any workaround since version 3.1.100 of .NET Core SDK**
 
 ## Workaround only for .NET Core SDK < 3.1.100

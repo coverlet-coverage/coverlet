@@ -75,6 +75,7 @@ namespace Coverlet.Collector.Tests
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.SingleHitElementName, "true");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeTestAssemblyElementName, "true");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.SkipAutoProps, "true");
+            this.CreateCoverletNodes(doc, configElement, CoverletConstants.DeterministicReport, "true");
             this.CreateCoverletNodes(doc, configElement, CoverletConstants.DoesNotReturnAttributesElementName, doesNotReturnAttributes);
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
@@ -100,6 +101,7 @@ namespace Coverlet.Collector.Tests
             Assert.True(coverletSettings.SingleHit);
             Assert.True(coverletSettings.IncludeTestAssembly);
             Assert.True(coverletSettings.SkipAutoProps);
+            Assert.True(coverletSettings.DeterministicReport);
         }
 
         [Fact]

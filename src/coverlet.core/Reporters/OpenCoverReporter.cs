@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
+using Coverlet.Core.Abstractions;
+
 namespace Coverlet.Core.Reporters
 {
     internal class OpenCoverReporter : ReporterBase
@@ -15,8 +17,13 @@ namespace Coverlet.Core.Reporters
 
         public override string Extension => "opencover.xml";
 
-        public override string Report(CoverageResult result)
+        public override string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
+            if (result.Parameters.DeterministicReport)
+            {
+                throw new NotSupportedException("Deterministic report not supported by openCover reporter");
+            }
+
             CoverageSummary summary = new CoverageSummary();
             XDocument xml = new XDocument();
             XElement coverage = new XElement("CoverageSession");
@@ -71,11 +78,12 @@ namespace Coverlet.Core.Reporters
                             var methLineCoverage = summary.CalculateLineCoverage(meth.Value.Lines);
                             var methBranchCoverage = summary.CalculateBranchCoverage(meth.Value.Branches);
                             var methCyclomaticComplexity = summary.CalculateCyclomaticComplexity(meth.Value.Branches);
+                            var methNpathComplexity = summary.CalculateNpathComplexity(meth.Value.Branches);
 
                             XElement method = new XElement("Method");
 
                             method.Add(new XAttribute("cyclomaticComplexity", methCyclomaticComplexity.ToString()));
-                            method.Add(new XAttribute("nPathComplexity", "0"));
+                            method.Add(new XAttribute("nPathComplexity", methCyclomaticComplexity.ToString()));
                             method.Add(new XAttribute("sequenceCoverage", methLineCoverage.Percent.ToString("G", CultureInfo.InvariantCulture)));
                             method.Add(new XAttribute("branchCoverage", methBranchCoverage.Percent.ToString("G", CultureInfo.InvariantCulture)));
                             method.Add(new XAttribute("isConstructor", meth.Key.Contains("ctor").ToString()));

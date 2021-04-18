@@ -42,6 +42,8 @@ namespace Coverlet.MSbuild.Tasks
 
         public string DoesNotReturnAttribute { get; set; }
 
+        public bool DeterministicReport { get; set; }
+
         [Output]
         public ITaskItem InstrumenterState { get; set; }
 
@@ -50,26 +52,18 @@ namespace Coverlet.MSbuild.Tasks
             _logger = new MSBuildLogger(Log);
         }
 
-        private void WaitForDebuggerIfEnabled()
+        private void AttachDebugger()
         {
             if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_MSBUILD_INSTRUMENTATIONTASK_DEBUG"), out int result) && result == 1)
             {
-                Console.WriteLine("Coverlet msbuild instrumentation task debugging is enabled. Please attach debugger to process to continue");
-                Process currentProcess = Process.GetCurrentProcess();
-                Console.WriteLine($"Process Id: {currentProcess.Id} Name: {currentProcess.ProcessName}");
-
-                while (!Debugger.IsAttached)
-                {
-                    System.Threading.Tasks.Task.Delay(1000).Wait();
-                }
-
+                Debugger.Launch();
                 Debugger.Break();
             }
         }
 
         public override bool Execute()
         {
-            WaitForDebuggerIfEnabled();
+            AttachDebugger();
 
             IServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
@@ -101,6 +95,7 @@ namespace Coverlet.MSbuild.Tasks
                     MergeWith = MergeWith,
                     UseSourceLink = UseSourceLink,
                     SkipAutoProps = SkipAutoProps,
+                    DeterministicReport = DeterministicReport,
                     DoesNotReturnAttributes = DoesNotReturnAttribute?.Split(',')
                 };
 

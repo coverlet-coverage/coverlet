@@ -1,5 +1,7 @@
 ﻿// Remember to use full name because adding new using directives change line numbers
 
+using System.Data;
+
 namespace Coverlet.Core.Samples.Tests
 {
     public class MethodsWithExcludeFromCodeCoverageAttr
@@ -157,5 +159,25 @@ namespace Coverlet.Core.Samples.Tests
                 }
             }
         }
+    }
+
+    public class AutoGeneneratedGetSet
+    {
+        [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+        public int Id { get; set; }
+
+        public void SetId(int value) => Id = value;
+    }
+
+    public class AutoGeneneratedGetOnly
+    {
+        public int Id
+        {
+            [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+            get;
+            set;
+        }
+
+        public void SetId(int value) => Id = value;
     }
 }

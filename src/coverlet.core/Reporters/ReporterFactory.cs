@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 
+using Coverlet.Core.Abstractions;
+
 namespace Coverlet.Core.Reporters
 {
     internal class ReporterFactory

@@ -98,7 +98,12 @@ The above command will automatically fail the build if the line, branch or metho
 dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
 ```
 
-You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`.
+You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`. 
+You can do the same for `Threshold` as well.
+
+```bash
+dotnet test /p:CollectCoverage=true /p:Threshold=\"80,100,70\" /p:ThresholdType=\"line,branch,method\"
+```
 
 By default, Coverlet will validate the threshold value against the coverage result of each module. The `/p:ThresholdStat` option allows you to change this behaviour and can have any of the following values:
 
@@ -206,3 +211,11 @@ The workaround is to use the .NET Core `dotnet msbuild` command instead of using
 ## SourceLink
 
 Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `/p:UseSourceLink=true` property, Coverlet will generate results that contain the URL to the source files in your source control instead of local file paths.
+
+## Deterministic build
+
+Take a look at [documentation](Documentation/DeterministicBuild.md) for further informations.  
+To generate deterministc report the parameter is:
+```
+/p:DeterministicReport=true
+```

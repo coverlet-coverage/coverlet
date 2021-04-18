@@ -124,6 +124,20 @@ namespace Coverlet.Core.Tests
                 { "aditionalModule", documents }
             };
         }
+        
+        [Fact]
+        public void TestCalculateLineCoverage_NoModules()
+        {
+            CoverageSummary summary = new CoverageSummary();
+            var modules = new Modules();
+
+            Assert.Equal(0, summary.CalculateLineCoverage(modules).Percent);
+            Assert.Equal(0, summary.CalculateLineCoverage(modules).AverageModulePercent);
+            Assert.Equal(0, summary.CalculateBranchCoverage(modules).Percent);
+            Assert.Equal(0, summary.CalculateBranchCoverage(modules).AverageModulePercent);
+            Assert.Equal(0, summary.CalculateMethodCoverage(modules).Percent);
+            Assert.Equal(0, summary.CalculateMethodCoverage(modules).AverageModulePercent);
+        }
 
         [Fact]
         public void TestCalculateLineCoverage_SingleModule()

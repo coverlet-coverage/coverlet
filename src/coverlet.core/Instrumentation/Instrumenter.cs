@@ -22,12 +22,9 @@ namespace Coverlet.Core.Instrumentation
     {
         private readonly string _module;
         private readonly string _identifier;
-        private readonly string[] _excludeFilters;
-        private readonly string[] _includeFilters;
         private readonly ExcludedFilesHelper _excludedFilesHelper;
+        private readonly CoverageParameters _parameters;
         private readonly string[] _excludedAttributes;
-        private readonly bool _singleHit;
-        private readonly bool _skipAutoProps;
         private readonly bool _isCoreLibrary;
         private readonly ILogger _logger;
         private readonly IInstrumentationHelper _instrumentationHelper;
@@ -55,13 +52,7 @@ namespace Coverlet.Core.Instrumentation
         public Instrumenter(
             string module,
             string identifier,
-            string[] excludeFilters,
-            string[] includeFilters,
-            string[] excludedFiles,
-            string[] excludedAttributes,
-            string[] doesNotReturnAttributes,
-            bool singleHit,
-            bool skipAutoProps,
+            CoverageParameters parameters,
             ILogger logger,
             IInstrumentationHelper instrumentationHelper,
             IFileSystem fileSystem,
@@ -70,19 +61,16 @@ namespace Coverlet.Core.Instrumentation
         {
             _module = module;
             _identifier = identifier;
-            _excludeFilters = excludeFilters;
-            _includeFilters = includeFilters;
-            _excludedFilesHelper = new ExcludedFilesHelper(excludedFiles, logger);
-            _excludedAttributes = PrepareAttributes(excludedAttributes, nameof(ExcludeFromCoverageAttribute), nameof(ExcludeFromCodeCoverageAttribute));
-            _singleHit = singleHit;
+            _parameters = parameters;
+            _excludedFilesHelper = new ExcludedFilesHelper(parameters.ExcludedSourceFiles, logger);
+            _excludedAttributes = PrepareAttributes(parameters.ExcludeAttributes, nameof(ExcludeFromCoverageAttribute), nameof(ExcludeFromCodeCoverageAttribute));
             _isCoreLibrary = Path.GetFileNameWithoutExtension(_module) == "System.Private.CoreLib";
             _logger = logger;
             _instrumentationHelper = instrumentationHelper;
             _fileSystem = fileSystem;
             _sourceRootTranslator = sourceRootTranslator;
             _cecilSymbolHelper = cecilSymbolHelper;
-            _doesNotReturnAttributes = PrepareAttributes(doesNotReturnAttributes);
-            _skipAutoProps = skipAutoProps;
+            _doesNotReturnAttributes = PrepareAttributes(parameters.DoesNotReturnAttributes);
         }
 
         private static string[] PrepareAttributes(IEnumerable<string> providedAttrs, params string[] defaultAttrs)
@@ -176,7 +164,7 @@ namespace Coverlet.Core.Instrumentation
             for (TypeDefinition current = type; current != null; current = current.DeclaringType)
             {
                 // Check exclude attribute and filters
-                if (current.CustomAttributes.Any(IsExcludeAttribute) || _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _excludeFilters))
+                if (current.CustomAttributes.Any(IsExcludeAttribute) || _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _parameters.ExcludeFilters))
                 {
                     return true;
                 }
@@ -253,7 +241,7 @@ namespace Coverlet.Core.Instrumentation
                         if (
                             !Is_System_Threading_Interlocked_CoreLib_Type(type) &&
                             !IsTypeExcluded(type) &&
-                            _instrumentationHelper.IsTypeIncluded(_module, type.FullName, _includeFilters)
+                            _instrumentationHelper.IsTypeIncluded(_module, type.FullName, _parameters.IncludeFilters)
                             )
                         {
                             if (IsSynthesizedMemberToBeExcluded(type))
@@ -289,7 +277,7 @@ namespace Coverlet.Core.Instrumentation
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(_singleHit ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(_parameters.SingleHit ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerSingleHit));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4_1));
                     _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerFlushHitFile));
@@ -466,12 +454,13 @@ namespace Coverlet.Core.Instrumentation
 
                 if (actualMethod.IsGetter || actualMethod.IsSetter)
                 {
-                    if (_skipAutoProps && actualMethod.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
+                    if (_parameters.SkipAutoProps && actualMethod.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
                     {
                         continue;
                     }
 
-                    PropertyDefinition prop = type.Properties.FirstOrDefault(p => (p.GetMethod ?? p.SetMethod).FullName.Equals(actualMethod.FullName));
+                    PropertyDefinition prop = type.Properties.FirstOrDefault(p => p.GetMethod?.FullName.Equals(actualMethod.FullName) == true ||
+                                                                                    p.SetMethod?.FullName.Equals(actualMethod.FullName) == true);
                     if (prop?.HasCustomAttributes == true)
                         customAttributes = customAttributes.Union(prop.CustomAttributes);
                 }
@@ -680,7 +669,7 @@ namespace Coverlet.Core.Instrumentation
             if (_customTrackerRecordHitMethod == null)
             {
                 string recordHitMethodName;
-                if (_singleHit)
+                if (_parameters.SingleHit)
                 {
                     recordHitMethodName = _isCoreLibrary
                         ? nameof(ModuleTrackerTemplate.RecordSingleHitInCoreLibrary)

@@ -25,7 +25,7 @@ namespace Coverlet.MSbuild.Tasks
         public string OutputFormat { get; set; }
 
         [Required]
-        public double Threshold { get; set; }
+        public string Threshold { get; set; }
 
         [Required]
         public string ThresholdType { get; set; }
@@ -93,6 +93,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 var formats = OutputFormat.Split(',');
                 var coverageReportPaths = new List<ITaskItem>(formats.Length);
+                ISourceRootTranslator sourceRootTranslator = ServiceProvider.GetService<ISourceRootTranslator>();
                 foreach (var format in formats)
                 {
                     var reporter = new ReporterFactory(format).CreateReporter();
@@ -105,17 +106,18 @@ namespace Coverlet.MSbuild.Tasks
                     {
                         // Output to console
                         Console.WriteLine("  Outputting results to console");
-                        Console.WriteLine(reporter.Report(result));
+                        Console.WriteLine(reporter.Report(result, sourceRootTranslator));
                     }
                     else
                     {
-                        ReportWriter writer = new ReportWriter(CoverletMultiTargetFrameworksCurrentTFM,
+                        ReportWriter writer = new(CoverletMultiTargetFrameworksCurrentTFM,
                                                                 directory,
                                                                 Output,
                                                                 reporter,
                                                                 fileSystem,
                                                                 ServiceProvider.GetService<IConsole>(),
-                                                                result);
+                                                                result,
+                                                                sourceRootTranslator);
                         var path = writer.WriteReport();
                         var metadata = new Dictionary<string, string> { ["Format"] = format };
                         coverageReportPaths.Add(new TaskItem(path, metadata));
@@ -124,25 +126,56 @@ namespace Coverlet.MSbuild.Tasks
 
                 ReportItems = coverageReportPaths.ToArray();
 
-                var thresholdTypeFlags = ThresholdTypeFlags.None;
-                var thresholdStat = ThresholdStatistic.Minimum;
+                var thresholdTypeFlagQueue = new Queue<ThresholdTypeFlags>();
 
                 foreach (var thresholdType in ThresholdType.Split(',').Select(t => t.Trim()))
                 {
                     if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
                     {
-                        thresholdTypeFlags |= ThresholdTypeFlags.Line;
+                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Line);
                     }
                     else if (thresholdType.Equals("branch", StringComparison.OrdinalIgnoreCase))
                     {
-                        thresholdTypeFlags |= ThresholdTypeFlags.Branch;
+                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Branch);
                     }
                     else if (thresholdType.Equals("method", StringComparison.OrdinalIgnoreCase))
                     {
-                        thresholdTypeFlags |= ThresholdTypeFlags.Method;
+                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Method);
                     }
                 }
+                
+                Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>();
+                if (Threshold.Contains(','))
+                {
+                    var thresholdValues = Threshold.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
+                    if(thresholdValues.Count() != thresholdTypeFlagQueue.Count())
+                    {
+                        throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count()}) and values count ({thresholdValues.Count()}) doesn't match");
+                    }
 
+                    foreach (var threshold in thresholdValues)
+                    {
+                        if (double.TryParse(threshold, out var value))
+                        {
+                            thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = value;
+                        }
+                        else
+                        {
+                            throw new Exception($"Invalid threshold value must be numeric");
+                        }
+                    }
+                }
+                else
+                {
+                    double thresholdValue = double.Parse(Threshold);
+
+                    while (thresholdTypeFlagQueue.Any())
+                    {
+                        thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = thresholdValue;
+                    }
+                }
+                
+                var thresholdStat = ThresholdStatistic.Minimum;
                 if (ThresholdStat.Equals("average", StringComparison.OrdinalIgnoreCase))
                 {
                     thresholdStat = ThresholdStatistic.Average;
@@ -154,7 +187,6 @@ namespace Coverlet.MSbuild.Tasks
 
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
                 var summary = new CoverageSummary();
-                int numModules = result.Modules.Count;
 
                 var linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
                 var branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
@@ -189,23 +221,26 @@ namespace Coverlet.MSbuild.Tasks
 
                 Console.WriteLine(coverageTable.ToStringAlternative());
 
-                thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, Threshold, thresholdTypeFlags, thresholdStat);
+                var thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
                     var exceptionMessageBuilder = new StringBuilder();
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {Threshold}");
+                        exceptionMessageBuilder.AppendLine(
+                            $"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line]}");
                     }
 
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {Threshold}");
+                        exceptionMessageBuilder.AppendLine(
+                            $"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Branch]}");
                     }
 
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {Threshold}");
+                        exceptionMessageBuilder.AppendLine(
+                            $"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
                     }
 
                     throw new Exception(exceptionMessageBuilder.ToString());

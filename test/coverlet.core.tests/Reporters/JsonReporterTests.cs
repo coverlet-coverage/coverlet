@@ -1,3 +1,5 @@
+using Coverlet.Core.Abstractions;
+using Moq;
 using System;
 using Xunit;
 
@@ -30,8 +32,8 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("module", documents);
 
             JsonReporter reporter = new JsonReporter();
-            Assert.NotEqual("{\n}", reporter.Report(result));
-            Assert.NotEqual(string.Empty, reporter.Report(result));
+            Assert.NotEqual("{\n}", reporter.Report(result, new Mock<ISourceRootTranslator>().Object));
+            Assert.NotEqual(string.Empty, reporter.Report(result, new Mock<ISourceRootTranslator>().Object));
         }
     }
 }
