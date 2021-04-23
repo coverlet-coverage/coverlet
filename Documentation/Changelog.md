@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed  
 
+-Fix partially covered throw statement [#1144](https://github.com/coverlet-coverage/coverlet/pull/1144)
 -Fix coverage threshold not failing when no coverage [#1115](https://github.com/coverlet-coverage/coverlet/pull/1115)  
 -Fix partially covered `await foreach` statement [#1107](https://github.com/coverlet-coverage/coverlet/pull/1107) by https://github.com/alexthornton1  
 -Fix `System.MissingMethodException`(TryGetIntArgFromDict) [#1101](https://github.com/coverlet-coverage/coverlet/pull/1101)  
