@@ -4,7 +4,7 @@
 
 Before version `3.0.0`  
 - .NET Core >= 2.0 
-- .NET Framework not fully supported(only out of process collector, could suffer of [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))  
+- .NET Framework not fully supported(only out of process collector, could suffer of [known issue](KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))  
 
 Since version `3.0.0` 
 - .NET Core >= 2.0 
@@ -97,7 +97,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 | IncludeTestAssembly      | Include coverage of the test assembly.                                                                                                                          |
 | SkipAutoProps            | Neither track nor record auto-implemented properties.                                                                                                           |
 | DoesNotReturnAttribute   | Methods marked with these attributes are known not to return, statements following them will be excluded from coverage                                          |
-| DeterministicReport      | Generates deterministic report in context of deterministic build. Take a look at [documentation](Documentation/DeterministicBuild.md) for further informations. | 
+| DeterministicReport      | Generates deterministic report in context of deterministic build. Take a look at [documentation](DeterministicBuild.md) for further informations. | 
 
 How to specify these options via runsettings?
 
@@ -125,7 +125,7 @@ How to specify these options via runsettings?
   </DataCollectionRunSettings>
 </RunSettings>
 ```
-Filtering details are present on [msbuild guide](https://github.com/tonerdo/coverlet/blob/master/Documentation/MSBuildIntegration.md#excluding-from-coverage).
+Filtering details are present on [msbuild guide](MSBuildIntegration.md#excluding-from-coverage).
 
 This runsettings file can easily be provided using command line option as given :
 
@@ -154,8 +154,8 @@ When we specify `--collect:"XPlat Code Coverage"` VSTest platform tries to load 
 
 1. Out-of-proc Datacollector: The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector is responsible for calling into Coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
 
-2. In-proc Datacollector: The in-proc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [serious known issue](https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
+2. In-proc Datacollector: The in-proc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [serious known issue](KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
 
 ## Known Issues
 
-For a comprehensive list of known issues check the detailed documentation https://github.com/tonerdo/coverlet/blob/master/Documentation/KnownIssues.md
+For a comprehensive list of known issues check the detailed documentation [KnownIssues.md](KnownIssues.md)
