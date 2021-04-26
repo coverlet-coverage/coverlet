@@ -4,15 +4,12 @@
     <AssemblyTitle>coverlet.collector</AssemblyTitle>
     <DevelopmentDependency>true</DevelopmentDependency>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- 
           suppress warning https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128 
           If your package does not contain any lib/ or ref/ files and is not a meta-package, 
           it likely does not have any dependencies that the package consumer needs. 
           If you are packing with NuGet's MSBuild Pack target, you can set <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking> in any PropertyGroup in your project file.
     -->
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
     <!-- Open issue https://github.com/NuGet/Home/issues/8941 -->
     <NoWarn>$(NoWarn);NU5127</NoWarn>
   </PropertyGroup>
@@ -74,14 +71,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="All" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
-
-  <Target Name="PackBuildOutputs">
-    <ItemGroup>
-      <TfmSpecificPackageFile Include="$(TargetDir)\*.dll" PackagePath="build\netstandard1.0\" />
-      <TfmSpecificPackageFile Include="$(TargetDir)\*.pdb" PackagePath="build\netstandard1.0\" />
-      <TfmSpecificPackageFile Include="$(TargetDir)\*.deps.json" PackagePath="build\netstandard1.0\" />
-    </ItemGroup>
-  </Target>
 </Project>

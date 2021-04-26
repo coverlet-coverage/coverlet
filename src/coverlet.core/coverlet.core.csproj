@@ -4,7 +4,6 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyVersion>5.6.3</AssemblyVersion>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +14,26 @@
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
+  <PropertyGroup>
+    <Title>coverlet.core</Title>
+    <PackageId>coverlet.core</PackageId>
+    <Authors>tonerdo</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/coverlet-coverage/coverlet</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
+    <PackageIcon>coverlet-icon.png</PackageIcon>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Description>Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.</Description>
+    <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="build\**" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
