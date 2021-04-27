@@ -214,7 +214,7 @@ Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debu
 
 ## Deterministic build
 
-Take a look at [documentation](Documentation/DeterministicBuild.md) for further informations.  
+Take a look at [documentation](DeterministicBuild.md) for further informations.  
 To generate deterministc report the parameter is:
 ```
 /p:DeterministicReport=true
