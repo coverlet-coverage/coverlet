@@ -15,7 +15,7 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                FunctionExecutor.RunInProcess(async (string[] parameters) =>
+                FunctionExecutor.Run(async (string[] parameters) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoProps>(instance =>
                     {
@@ -63,7 +63,7 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                FunctionExecutor.RunInProcess(async (string[] parameters) =>
+                FunctionExecutor.Run(async (string[] parameters) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordWithPropertyInit>(instance =>
                         {
@@ -110,7 +110,7 @@ namespace Coverlet.Core.Tests
             string path = Path.GetTempFileName();
             try
             {
-                FunctionExecutor.RunInProcess(async (string[] parameters) =>
+                FunctionExecutor.Run(async (string[] parameters) =>
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithAutoRecordProperties>(instance =>
                         {
