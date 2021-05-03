@@ -12,4 +12,25 @@ namespace Coverlet.Core.Samples.Tests
         public int AutoPropsNonInit { get; set; }
         public int AutoPropsInit { get; set; } = 10;
     }
+
+    public record RecordWithPropertyInit
+    {
+        private int _myRecordVal = 0;
+        public RecordWithPropertyInit()
+        {
+            _myRecordVal = new Random().Next();
+        }
+        public string RecordAutoPropsNonInit { get; set; }
+        public string RecordAutoPropsInit { get; set; } = string.Empty;
+    }
+
+    public class ClassWithAutoRecordProperties
+    {
+        record AutoRecordWithProperties(string Prop1, string Prop2);
+
+        public ClassWithAutoRecordProperties()
+        {
+            var record = new AutoRecordWithProperties(string.Empty, string.Empty);
+        }
+    }
 }

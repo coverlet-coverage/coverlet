@@ -9,5 +9,6 @@ namespace Coverlet.Core.Abstractions
     {
         IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition);
         bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction);
+        bool SkipInlineAssignedAutoProperty(bool skipAutoProps, MethodDefinition methodDefinition, Instruction instruction);
     }
 }
