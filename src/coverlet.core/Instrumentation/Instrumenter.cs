@@ -562,6 +562,12 @@ namespace Coverlet.Core.Instrumentation
 
                 if (sequencePoint != null && !sequencePoint.IsHidden)
                 {
+                    if (_cecilSymbolHelper.SkipInlineAssignedAutoProperty(_parameters.SkipAutoProps, method, instruction))
+                    {
+                        index++;
+                        continue;
+                    }
+
                     var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);
                     foreach (var _instruction in processor.Body.Instructions)
                         ReplaceInstructionTarget(_instruction, instruction, target);
