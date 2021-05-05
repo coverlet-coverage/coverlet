@@ -39,8 +39,6 @@ Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visua
 
 ### VSTest Integration (preferred due to [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test) supports only .NET Core application)
 
-At the moment collectors integration **does not support** .NET Framework application.
-
 ### Installation
 ```bash
 dotnet add package coverlet.collector
