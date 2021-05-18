@@ -9,8 +9,4 @@
     <Compile Include="Library.fs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
-  </ItemGroup>
-
 </Project>
