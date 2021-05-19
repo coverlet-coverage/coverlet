@@ -3,6 +3,7 @@ using System.IO;
 using Xunit;
 using System.Collections.Generic;
 using System.Linq;
+using Castle.Core.Internal;
 using Moq;
 using Coverlet.Core.Abstractions;
 
@@ -10,7 +11,7 @@ namespace Coverlet.Core.Helpers.Tests
 {
     public class InstrumentationHelperTests
     {
-        private readonly InstrumentationHelper _instrumentationHelper =
+        private InstrumentationHelper _instrumentationHelper =
             new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
 
         [Fact]
@@ -27,6 +28,26 @@ namespace Coverlet.Core.Helpers.Tests
             string module = typeof(InstrumentationHelperTests).Assembly.Location;
             var modules = _instrumentationHelper.GetCoverableModules(module, Array.Empty<string>(), true);
             Assert.True(Array.Exists(modules, m => m == module));
+        }
+
+        [Fact]
+        public void EmbeddedPortablePDPHasLocalSource_DocumentDoesNotExist_ReturnsFalse()
+        {
+            var fileSystem = new Mock<FileSystem> {CallBase = true};
+            fileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+
+            _instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object, new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
+
+            Assert.False(_instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, out string notFoundDocument));
+            Assert.False(notFoundDocument.IsNullOrEmpty());
+        }
+
+        [Fact]
+        public void EmbeddedPortablePDPHasLocalSource_AllDocumentsExist_ReturnsTrue()
+        {
+            Assert.True(_instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, out string notFoundDocument));
+            Assert.True(notFoundDocument.IsNullOrEmpty());
         }
 
         [Fact]
