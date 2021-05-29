@@ -513,6 +513,24 @@ namespace Coverlet.Core.Instrumentation.Tests
             loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
         }
 
+        [Fact]
+        public void CanInstrumentFSharpAssemblyWithAnonymousRecord()
+        {
+            var loggerMock = new Mock<ILogger>();
+
+            string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.fsharp.dll").First();
+            InstrumentationHelper instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                    new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem()));
+
+            var instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_fsharp", new CoverageParameters(), loggerMock.Object, instrumentationHelper,
+                new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+
+            Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
+            Assert.False(embedded);
+            Assert.True(instrumenter.CanInstrument());
+        }
+
         [Theory]
         [InlineData("NotAMatch", new string[] { }, false)]
         [InlineData("ExcludeFromCoverageAttribute", new string[] { }, true)]
