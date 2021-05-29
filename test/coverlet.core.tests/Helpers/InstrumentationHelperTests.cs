@@ -11,7 +11,7 @@ namespace Coverlet.Core.Helpers.Tests
 {
     public class InstrumentationHelperTests
     {
-        private InstrumentationHelper _instrumentationHelper =
+        private readonly InstrumentationHelper _instrumentationHelper =
             new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
 
         [Fact]
@@ -36,10 +36,10 @@ namespace Coverlet.Core.Helpers.Tests
             var fileSystem = new Mock<FileSystem> {CallBase = true};
             fileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
 
-            _instrumentationHelper =
+            InstrumentationHelper instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object, new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
 
-            Assert.False(_instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, out string notFoundDocument));
+            Assert.False(instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, out string notFoundDocument));
             Assert.False(notFoundDocument.IsNullOrEmpty());
         }
 

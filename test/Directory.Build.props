@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
-  <Choose>
-    <When Condition="$(MSBuildProjectName)!='coverlet.tests.projectsample.fsharp'">
-      <PropertyGroup>
-        <IsTestProject>true</IsTestProject>
-        </PropertyGroup>
-    </When>
-  </Choose>
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
 </Project>
