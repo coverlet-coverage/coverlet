@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed  
-
+-Fix branch coverage for targetframework net472 [#1167](https://github.com/coverlet-coverage/coverlet/issues/1167)
 -Fix F# projects with `unkown` source [#1145](https://github.com/coverlet-coverage/coverlet/issues/1145)
 -Fix SkipAutoProps for inline assigned properties [#1139](https://github.com/coverlet-coverage/coverlet/issues/1139)
 -Fix partially covered throw statement [#1144](https://github.com/coverlet-coverage/coverlet/pull/1144)

@@ -5,6 +5,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
+    <MSBuildWarningsAsMessages>NU1702</MSBuildWarningsAsMessages>
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
     <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
@@ -27,6 +28,7 @@
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.fsharp\coverlet.tests.projectsample.fsharp.fsproj" />    
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj" />
+    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.netframework\coverlet.tests.projectsample.netframework.csproj" />
   </ItemGroup>
 
   <ItemGroup>

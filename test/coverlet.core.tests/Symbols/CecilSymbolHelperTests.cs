@@ -4,6 +4,7 @@ using System.Reflection;
 
 using Xunit;
 using Coverlet.Core.Samples.Tests;
+using coverlet.tests.projectsample.netframework;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -11,16 +12,18 @@ namespace Coverlet.Core.Symbols.Tests
 {
     public class CecilSymbolHelperTests
     {
-        private readonly ModuleDefinition _module;
+        private ModuleDefinition _module;
         private readonly CecilSymbolHelper _cecilSymbolHelper;
+        private readonly DefaultAssemblyResolver _resolver;
+        private readonly ReaderParameters _parameters;
 
         public CecilSymbolHelperTests()
         {
             var location = GetType().Assembly.Location;
-            var resolver = new DefaultAssemblyResolver();
-            resolver.AddSearchDirectory(Path.GetDirectoryName(location));
-            var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
-            _module = ModuleDefinition.ReadModule(location, parameters);
+            _resolver = new DefaultAssemblyResolver();
+            _resolver.AddSearchDirectory(Path.GetDirectoryName(location));
+            _parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = _resolver };
+            _module = ModuleDefinition.ReadModule(location, _parameters);
             _cecilSymbolHelper = new CecilSymbolHelper();
         }
 
@@ -284,6 +287,26 @@ namespace Coverlet.Core.Symbols.Tests
             // arrange
             var nestedName = typeof(AsyncAwaitStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
             var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachine).FullName);
+            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+
+            // act
+            var points = _cecilSymbolHelper.GetBranchPoints(method);
+
+            // assert
+            Assert.Empty(points);
+        }
+
+        [Fact]
+        public void GetBranchPoints_IgnoresBranchesIn_AsyncAwaitStateMachineNetFramework()
+        {
+            // arrange
+            string location = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.netframework.dll").First();
+            _resolver.AddSearchDirectory(Path.GetDirectoryName(location));
+            _module = ModuleDefinition.ReadModule(location, _parameters);
+
+            var nestedName = typeof(AsyncAwaitStateMachineNetFramework).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachineNetFramework).FullName);
             var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
             var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
