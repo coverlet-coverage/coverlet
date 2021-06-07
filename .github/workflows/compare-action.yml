@@ -1,0 +1,80 @@
+name: Benchmark Test
+on: [workflow_dispatch]
+jobs:
+  Benchmark-Test:
+    runs-on: windows-latest
+    steps:     
+      - name: Checkout coverlet
+        uses: actions/checkout@v2
+        with:
+          path: coverlet
+      - name: Checkout refit
+        uses: actions/checkout@v2
+        with:
+          repository: reactiveui/refit
+          path: refit
+      - name: Setup .NET Core SDK 2.1.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '2.1.x'
+      - name: Setup .NET Core SDK 3.1.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+      - name: Setup .NET Core SDK 5.0.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+          include-prerelease: true
+ 
+      - name: Generate first refit report
+        working-directory: refit
+        run: | 
+          git fetch --prune --unshallow
+          dotnet build
+          dotnet test --framework net5.0 --no-build --collect:"XPlat Code Coverage"
+          $coverletVersion = (Get-Childitem -Include *coverlet* -Recurse)
+          echo "FirstVersion=$coverletVersion" >> $GITHUB_ENV
+      - name: ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@4.8.9
+        with:
+          reports: 'refit\Refit.Tests\TestResults\*\coverage.cobertura.xml'
+          targetdir: 'coveragereport'
+          reporttypes: 'TextSummary'
+          toolpath: 'reportgeneratortool'
+      - name: Rename first summary
+        run: |
+          $version = (([xml](Get-Content refit\Refit.Tests\*csproj)).project.ItemGroup.PackageReference | Where-Object {$_.Include -like "coverlet.collector"}).Version
+          echo $version
+          Rename-Item coveragereport\Summary.txt "$version.txt"
+
+      - name: Pack coverlet master
+        working-directory: coverlet
+        run: |
+          git fetch --prune --unshallow
+          dotnet pack -c Release
+          dotnet nuget add source $PSScriptRoot\..\coverlet\coverlet\coverlet\bin\Release\Packages
+      - name: Generate second refit report
+        working-directory: refit
+        run: | 
+          Remove-Item 'Refit.Tests\TestResults' -Recurse
+          dotnet remove Refit.Tests package coverlet.collector
+          dotnet add Refit.Tests package coverlet.collector --prerelease
+          dotnet build
+          dotnet test --framework net5.0 --no-build --collect:"XPlat Code Coverage"
+      - name: ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@4.8.9
+        with:
+          reports: 'refit\Refit.Tests\TestResults\*\coverage.cobertura.xml'
+          targetdir: 'coveragereport'
+          reporttypes: 'TextSummary'
+          toolpath: 'reportgeneratortool'
+      - name: Rename second summary
+        run: |
+          $version = (([xml](Get-Content refit\Refit.Tests\*csproj)).project.ItemGroup.PackageReference | Where-Object {$_.Include -like "coverlet.collector"}).Version
+          echo $version
+          Rename-Item coveragereport\Summary.txt "$version.txt"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: coveragereport/*.txt
