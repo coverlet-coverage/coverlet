@@ -1,7 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 
 namespace Coverlet.MSbuild.Tasks
@@ -16,6 +18,7 @@ namespace Coverlet.MSbuild.Tasks
         private readonly IConsole _console;
         private readonly ISourceRootTranslator _sourceRootTranslator;
         private readonly CoverageResult _result;
+        private int _delayCounter;
 
         public ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string directory, string output,
                             IReporter reporter, IFileSystem fileSystem, IConsole console, CoverageResult result, ISourceRootTranslator sourceRootTranslator)
@@ -48,9 +51,22 @@ namespace Coverlet.MSbuild.Tasks
             }
 
             string report = Path.Combine(_directory, filename);
+
+            IRetryHelper retryer = new RetryHelper();
             _console.WriteLine($"  Generating report '{report}'");
-            _fileSystem.WriteAllText(report, _reporter.Report(_result, _sourceRootTranslator));
+            retryer.Retry(() => _fileSystem.WriteAllText(report, _reporter.Report(_result, _sourceRootTranslator)), GetDelay, maxAttemptCount: 5);
             return report;
         }
+
+        private TimeSpan GetDelay() => _delayCounter++ switch
+        {
+            0 => TimeSpan.FromSeconds(1),
+            1 => TimeSpan.FromSeconds(1),
+            2 => TimeSpan.FromSeconds(2),
+            3 => TimeSpan.FromSeconds(3),
+            4 => TimeSpan.FromSeconds(5),
+            5 => TimeSpan.FromSeconds(8),
+            _ => TimeSpan.FromSeconds(13)
+        };
     }
 }
