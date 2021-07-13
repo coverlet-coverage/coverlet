@@ -45,6 +45,32 @@ To get the list of commits between two version use git command
 ```bash
 git log --oneline hashbefore currenthash
 ```
+# How to manually compare latest release with nightly build
+
+Before creating a new release it makes sense to test the new release against a benchmark repository. This can help to determine bugs that haven't been found 
+by the unit/integration tests. Therefore, coverage of the latest release is compared with our nightly build. 
+
+In the following example the benchmark repository refit (https://github.com/reactiveui/refit) is used which already uses coverlet for coverage.
+
+1. Clone the benchmark repository (https://github.com/reactiveui/refit)
+
+2. Check if latest coverlet version is used by the project, otherwise add coverlet to the project (https://github.com/coverlet-coverage/coverlet#installation).
+
+3. Create coverage report for latest coverlet version:
+```
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+4. Update the test projects with the latest nightly build version of coverlet
+(https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/ConsumeNightlyBuild.md).
+
+5. Create coverage report for nightly build version by rerunning the tests:
+```
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+6. Check for differences in the coverage reports.
+
 
 # How to manually release packages to nuget.org
 
