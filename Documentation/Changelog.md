@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed  
+-Fix branch coverage issue for il switch [#1177](https://github.com/coverlet-coverage/coverlet/issues/1177)
+-Fix branch coverage with using statement and several awaits[#1176](https://github.com/coverlet-coverage/coverlet/issues/1176)
+
 ## Release date 2021-07-19
 ### Packages  
 coverlet.msbuild 3.1.0  
