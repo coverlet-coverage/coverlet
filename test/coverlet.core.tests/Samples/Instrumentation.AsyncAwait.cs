@@ -1,5 +1,6 @@
 ﻿// Remember to use full name because adding new using directives change line numbers
 
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Coverlet.Core.Samples.Tests
@@ -123,6 +124,18 @@ namespace Coverlet.Core.Samples.Tests
         {
             Task<string> GetCat();
             Task Process(string cat);
+        }
+    }
+
+    public class Issue_1177
+    {
+        async public Task Test()
+        {
+            await Task.CompletedTask;
+            using var _ = new MemoryStream();
+            await Task.CompletedTask;
+            await Task.CompletedTask;
+            await Task.CompletedTask;
         }
     }
 }
