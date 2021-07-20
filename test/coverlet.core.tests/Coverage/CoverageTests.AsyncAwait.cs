@@ -146,8 +146,8 @@ namespace Coverlet.Core.Tests
                 }, new string[] { path });
 
                 var document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
-                document.AssertLinesCovered(BuildConfiguration.Debug, (134, 1), (135, 1), (136, 1), (137, 1), (138, 1));
-                Assert.DoesNotContain(document.Branches, x => x.Key.Line == 135);
+                document.AssertLinesCovered(BuildConfiguration.Debug, (133, 1), (134, 1), (135, 1), (136, 1), (137, 1));
+                Assert.DoesNotContain(document.Branches, x => x.Key.Line == 134);
             }
             finally
             {
