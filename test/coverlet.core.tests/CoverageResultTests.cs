@@ -148,5 +148,26 @@ namespace Coverlet.Core.Tests
             ThresholdTypeFlags resThresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStatic);
             Assert.Equal(thresholdTypeFlags, resThresholdTypeFlags);
         }
+
+        [Fact]
+        public void TestGetThresholdTypesBelowThresholdWhenNoModuleInstrumented()
+        {
+            CoverageResult result = new CoverageResult();
+            result.Modules = new Modules();
+
+            CoverageSummary summary = new CoverageSummary();
+            Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
+            {
+                {  ThresholdTypeFlags.Line, 80 },
+                {  ThresholdTypeFlags.Method, 80 },
+                {  ThresholdTypeFlags.Branch, 80 },
+            };
+
+            ThresholdTypeFlags thresholdTypeFlags = ThresholdTypeFlags.Line | ThresholdTypeFlags.Branch | ThresholdTypeFlags.Method;
+            ThresholdStatistic thresholdStatic = ThresholdStatistic.Minimum;
+
+            ThresholdTypeFlags resThresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStatic);
+            Assert.Equal(thresholdTypeFlags, resThresholdTypeFlags);
+        }
     }
 }

@@ -118,6 +118,9 @@ namespace Coverlet.Core
             {
                 case ThresholdStatistic.Minimum:
                     {
+                        if (!Modules.Any())
+                            return ThresholdTypeFlags.Line | ThresholdTypeFlags.Branch | ThresholdTypeFlags.Method;
+
                         foreach (var module in Modules)
                         {
                             double line = summary.CalculateLineCoverage(module.Value).Percent;
