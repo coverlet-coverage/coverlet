@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
@@ -119,6 +120,34 @@ namespace Coverlet.Core.Tests
                 .Document("Instrumentation.AsyncAwait.cs")
                 .AssertLinesCovered(BuildConfiguration.Debug, (7, 1), (10, 1), (11, 1), (12, 1), (13, 1), (15, 1))
                 .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void AsyncAwait_Issue_1177()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1177>(instance =>
+                        {
+                            ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
+                            return Task.CompletedTask;
+                        },
+                        persistPrepareResultToFile: pathSerialize[0]);
+
+                    return 0;
+                }, new string[] { path });
+
+                var document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+                document.AssertLinesCovered(BuildConfiguration.Debug, (133, 1), (134, 1), (135, 1), (136, 1), (137, 1));
+                Assert.DoesNotContain(document.Branches, x => x.Key.Line == 134);
             }
             finally
             {

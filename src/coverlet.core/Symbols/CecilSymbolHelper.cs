@@ -124,8 +124,8 @@ namespace Coverlet.Core.Symbols
                    If method is a generated MoveNext we'll skip first branches (could be a switch or a series of branches) 
                    that check state machine value to jump to correct state (for instance after a true async call)
                    Check if it's a Cond_Branch on state machine current value int num = <>1__state;
-                   We are on branch OpCode so we need to go back by max 2 operation to reach ldloc.0 the load of "num"
-                   Max 2 because we handle following patterns
+                   We are on branch OpCode so we need to go back by max 3 operation to reach ldloc.0 the load of "num"
+                   Max 3 because we handle following patterns
 
                     Swich
 
@@ -168,7 +168,7 @@ namespace Coverlet.Core.Symbols
             */
 
             Instruction current = instruction.Previous;
-            for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
+            for (int instructionBefore = 3; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
             {
                 if (
                         (current.OpCode == OpCodes.Ldloc && current.Operand is VariableDefinition vo && vo.Index == 0) ||
