@@ -118,26 +118,16 @@ namespace Coverlet.Core
             {
                 case ThresholdStatistic.Minimum:
                     {
+                        if (!Modules.Any())
+                            thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, 0, 0, 0);
+
                         foreach (var module in Modules)
                         {
                             double line = summary.CalculateLineCoverage(module.Value).Percent;
                             double branch = summary.CalculateBranchCoverage(module.Value).Percent;
                             double method = summary.CalculateMethodCoverage(module.Value).Percent;
-                            
-                            if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Line, out var lineThresholdValue) && lineThresholdValue > line)
-                            {
-                                thresholdTypeFlags |= ThresholdTypeFlags.Line;
-                            }
 
-                            if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Branch, out var branchThresholdValue) && branchThresholdValue > branch)
-                            {
-                                thresholdTypeFlags |= ThresholdTypeFlags.Branch;
-                            }
-
-                            if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Method, out var methodThresholdValue) && methodThresholdValue > method)
-                            {
-                                thresholdTypeFlags |= ThresholdTypeFlags.Method;
-                            }
+                            thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, line, branch, method);
                         }
                     }
                     break;
@@ -146,21 +136,8 @@ namespace Coverlet.Core
                         double line = summary.CalculateLineCoverage(Modules).AverageModulePercent;
                         double branch = summary.CalculateBranchCoverage(Modules).AverageModulePercent;
                         double method = summary.CalculateMethodCoverage(Modules).AverageModulePercent;
-                        
-                        if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Line, out var lineThresholdValue) && lineThresholdValue > line)
-                        {
-                            thresholdTypeFlags |= ThresholdTypeFlags.Line;
-                        }
 
-                        if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Branch, out var branchThresholdValue) && branchThresholdValue > branch)
-                        {
-                            thresholdTypeFlags |= ThresholdTypeFlags.Branch;
-                        }
-
-                        if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Method, out var methodThresholdValue) && methodThresholdValue > method)
-                        {
-                            thresholdTypeFlags |= ThresholdTypeFlags.Method;
-                        }
+                        thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, line, branch, method);
                     }
                     break;
                 case ThresholdStatistic.Total:
@@ -169,22 +146,34 @@ namespace Coverlet.Core
                         double branch = summary.CalculateBranchCoverage(Modules).Percent;
                         double method = summary.CalculateMethodCoverage(Modules).Percent;
 
-                        if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Line, out var lineThresholdValue) && lineThresholdValue > line)
-                        {
-                            thresholdTypeFlags |= ThresholdTypeFlags.Line;
-                        }
-
-                        if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Branch, out var branchThresholdValue) && branchThresholdValue > branch)
-                        {
-                            thresholdTypeFlags |= ThresholdTypeFlags.Branch;
-                        }
-
-                        if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Method, out var methodThresholdValue) && methodThresholdValue > method)
-                        {
-                            thresholdTypeFlags |= ThresholdTypeFlags.Method;
-                        }
+                        thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, line, branch, method);
                     }
                     break;
+            }
+
+            return thresholdTypeFlags;
+        }
+
+        private static ThresholdTypeFlags CompareThresholdValues(
+            Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues, ThresholdTypeFlags thresholdTypeFlags,
+            double line, double branch, double method)
+        {
+            if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Line, out var lineThresholdValue) &&
+                lineThresholdValue > line)
+            {
+                thresholdTypeFlags |= ThresholdTypeFlags.Line;
+            }
+
+            if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Branch, out var branchThresholdValue) &&
+                branchThresholdValue > branch)
+            {
+                thresholdTypeFlags |= ThresholdTypeFlags.Branch;
+            }
+
+            if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Method, out var methodThresholdValue) &&
+                methodThresholdValue > method)
+            {
+                thresholdTypeFlags |= ThresholdTypeFlags.Method;
             }
 
             return thresholdTypeFlags;
