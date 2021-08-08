@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Fixed  
+### Fixed 
+-Fix threshold doesn't work when coverage empty [#1205](https://github.com/coverlet-coverage/coverlet/issues/1205)
 -Fix branch coverage issue for il switch [#1177](https://github.com/coverlet-coverage/coverlet/issues/1177)
 -Fix branch coverage with using statement and several awaits[#1176](https://github.com/coverlet-coverage/coverlet/issues/1176)
 
