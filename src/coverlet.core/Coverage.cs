@@ -408,7 +408,7 @@ namespace Coverlet.Core
                 }
 
                 var documentsList = result.Documents.Values.ToList();
-                using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open))
+                using (var fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open, FileAccess.Read))
                 using (var br = new BinaryReader(fs))
                 {
                     int hitCandidatesCount = br.ReadInt32();
@@ -442,8 +442,15 @@ namespace Coverlet.Core
                     }
                 }
 
-                _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
-                _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
+                try
+                {
+                    _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
+                    _logger.LogVerbose($"Hit file '{result.HitsFilePath}' deleted");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Unable to remove hit file: {result.HitsFilePath} because : {ex.Message}");
+                }
             }
         }
 
