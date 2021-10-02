@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Coverlet.Core.Instrumentation
@@ -16,6 +17,7 @@ namespace Coverlet.Core.Instrumentation
     /// regarding visibility of members, etc.
     /// </remarks>
     [ExcludeFromCodeCoverage]
+    [CompilerGenerated]
     internal static class ModuleTrackerTemplate
     {
         public static string HitsFilePath;
