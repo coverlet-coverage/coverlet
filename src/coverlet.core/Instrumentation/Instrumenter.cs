@@ -519,27 +519,34 @@ namespace Coverlet.Core.Instrumentation
             InstrumentIL(method);
         }
 
+        /// <summary>
+        /// The base idea is to inject an int placeholder for every sequence point. We register source+placeholder+lines(from sequence point) for final accounting.
+        /// Instrumentation alg(current instruction: instruction we're analyzing):
+        /// 1) We get all branches for the method
+        /// 2) We get the sequence point of every instruction of method(start line/end line)
+        /// 3) We check if current instruction is reachable and coverable
+        /// 4) For every sequence point of an instruction we put load(int hint placeholder)+call opcode above current instruction
+        /// 5) We patch all jump to current instruction with first injected instruction(load)
+        /// 6) If current instruction is a target for a branch we inject again load(int hint placeholder)+call opcode above current instruction
+        /// 7) We patch all jump to current instruction with first injected instruction(load)
+        /// </summary>
         private void InstrumentIL(MethodDefinition method)
         {
             method.Body.SimplifyMacros();
             ILProcessor processor = method.Body.GetILProcessor();
-
             var index = 0;
             var count = processor.Body.Instructions.Count;
-
             var branchPoints = _cecilSymbolHelper.GetBranchPoints(method);
-
             var unreachableRanges = _reachabilityHelper.FindUnreachableIL(processor.Body.Instructions, processor.Body.ExceptionHandlers);
             var currentUnreachableRangeIx = 0;
-
             for (int n = 0; n < count; n++)
             {
-                var instruction = processor.Body.Instructions[index];
-                var sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
-                var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == instruction.Offset);
+                var currentInstruction = processor.Body.Instructions[index];
+                var sequencePoint = method.DebugInformation.GetSequencePoint(currentInstruction);
+                var targetedBranchPoints = branchPoints.Where(p => p.EndOffset == currentInstruction.Offset);
 
                 // make sure we're looking at the correct unreachable range (if any)
-                var instrOffset = instruction.Offset;
+                var instrOffset = currentInstruction.Offset;
                 while (currentUnreachableRangeIx < unreachableRanges.Length && instrOffset > unreachableRanges[currentUnreachableRangeIx].EndOffset)
                 {
                     currentUnreachableRangeIx++;
@@ -554,7 +561,7 @@ namespace Coverlet.Core.Instrumentation
                 }
 
                 // Check is both reachable, _and_ coverable
-                if (isUnreachable || _cecilSymbolHelper.SkipNotCoverableInstruction(method, instruction))
+                if (isUnreachable || _cecilSymbolHelper.SkipNotCoverableInstruction(method, currentInstruction))
                 {
                     index++;
                     continue;
@@ -562,18 +569,18 @@ namespace Coverlet.Core.Instrumentation
 
                 if (sequencePoint != null && !sequencePoint.IsHidden)
                 {
-                    if (_cecilSymbolHelper.SkipInlineAssignedAutoProperty(_parameters.SkipAutoProps, method, instruction))
+                    if (_cecilSymbolHelper.SkipInlineAssignedAutoProperty(_parameters.SkipAutoProps, method, currentInstruction))
                     {
                         index++;
                         continue;
                     }
 
-                    var target = AddInstrumentationCode(method, processor, instruction, sequencePoint);
-                    foreach (var _instruction in processor.Body.Instructions)
-                        ReplaceInstructionTarget(_instruction, instruction, target);
+                    var firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, sequencePoint);
+                    foreach (var bodyInstruction in processor.Body.Instructions)
+                        ReplaceInstructionTarget(bodyInstruction, currentInstruction, firstInjectedInstrumentedOpCode);
 
                     foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
-                        ReplaceExceptionHandlerBoundary(handler, instruction, target);
+                        ReplaceExceptionHandlerBoundary(handler, currentInstruction, firstInjectedInstrumentedOpCode);
 
                     index += 2;
                 }
@@ -589,12 +596,12 @@ namespace Coverlet.Core.Instrumentation
                     if (branchTarget.StartLine == -1 || branchTarget.Document == null)
                         continue;
 
-                    var target = AddInstrumentationCode(method, processor, instruction, branchTarget);
-                    foreach (var _instruction in processor.Body.Instructions)
-                        ReplaceInstructionTarget(_instruction, instruction, target);
+                    var firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, branchTarget);
+                    foreach (var bodyInstruction in processor.Body.Instructions)
+                        ReplaceInstructionTarget(bodyInstruction, currentInstruction, firstInjectedInstrumentedOpCode);
 
                     foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
-                        ReplaceExceptionHandlerBoundary(handler, instruction, target);
+                        ReplaceExceptionHandlerBoundary(handler, currentInstruction, firstInjectedInstrumentedOpCode);
 
                     index += 2;
                 }
@@ -704,20 +711,20 @@ namespace Coverlet.Core.Instrumentation
 
         private static void ReplaceInstructionTarget(Instruction instruction, Instruction oldTarget, Instruction newTarget)
         {
-            if (instruction.Operand is Instruction _instruction)
+            if (instruction.Operand is Instruction operandInstruction)
             {
-                if (_instruction == oldTarget)
+                if (operandInstruction == oldTarget)
                 {
                     instruction.Operand = newTarget;
                     return;
                 }
             }
-            else if (instruction.Operand is Instruction[] _instructions)
+            else if (instruction.Operand is Instruction[] operandInstructions)
             {
-                for (int i = 0; i < _instructions.Length; i++)
+                for (int i = 0; i < operandInstructions.Length; i++)
                 {
-                    if (_instructions[i] == oldTarget)
-                        _instructions[i] = newTarget;
+                    if (operandInstructions[i] == oldTarget)
+                        operandInstructions[i] = newTarget;
                 }
             }
         }
