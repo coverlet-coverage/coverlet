@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Coverlet.Core.Instrumentation
@@ -15,6 +16,7 @@ namespace Coverlet.Core.Instrumentation
     /// As this type is going to be customized for each instrumented module it doesn't follow typical practices
     /// regarding visibility of members, etc.
     /// </remarks>
+    [CompilerGenerated]
     [ExcludeFromCodeCoverage]
     internal static class ModuleTrackerTemplate
     {
