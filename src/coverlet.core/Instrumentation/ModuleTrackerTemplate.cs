@@ -16,8 +16,8 @@ namespace Coverlet.Core.Instrumentation
     /// As this type is going to be customized for each instrumented module it doesn't follow typical practices
     /// regarding visibility of members, etc.
     /// </remarks>
-    [ExcludeFromCodeCoverage]
     [CompilerGenerated]
+    [ExcludeFromCodeCoverage]
     internal static class ModuleTrackerTemplate
     {
         public static string HitsFilePath;
