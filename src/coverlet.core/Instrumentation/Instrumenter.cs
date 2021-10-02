@@ -123,7 +123,7 @@ namespace Coverlet.Core.Instrumentation
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Unable to instrument module: '{_module}' because : {ex.Message}");
+                _logger.LogWarning($"Unable to instrument module: '{_module}'\n{ex}");
                 return false;
             }
         }
