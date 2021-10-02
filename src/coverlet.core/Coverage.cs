@@ -141,7 +141,7 @@ namespace Coverlet.Core
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning($"Unable to instrument module: {module} because : {ex.Message}");
+                        _logger.LogWarning($"Unable to instrument module: {module}\n{ex}");
                         _instrumentationHelper.RestoreOriginalModule(module, _identifier);
                     }
                 }
