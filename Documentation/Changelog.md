@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed 
--Fix threshold doesn't work when coverage empty [#1205](https://github.com/coverlet-coverage/coverlet/issues/1205)
--Fix branch coverage issue for il switch [#1177](https://github.com/coverlet-coverage/coverlet/issues/1177)
--Fix branch coverage with using statement and several awaits[#1176](https://github.com/coverlet-coverage/coverlet/issues/1176)
+-Fix threshold doesn't work when coverage empty [#1205](https://github.com/coverlet-coverage/coverlet/issues/1205)  
+-Fix branch coverage issue for il switch [#1177](https://github.com/coverlet-coverage/coverlet/issues/1177)  
+-Fix branch coverage with using statement and several awaits[#1176](https://github.com/coverlet-coverage/coverlet/issues/1176)  
+
+### Improvements  
+-Improve logging in case of exception inside static ctor of NetstandardAwareAssemblyResolver [#1230](https://github.com/coverlet-coverage/coverlet/pull/1230)  
+-When collecting open the hitfile with read access [#1214](https://github.com/coverlet-coverage/coverlet/pull/1214) by https://github.com/JamesWTruher  
+-Add CompilerGenerated attribute to the tracker [#1229](https://github.com/coverlet-coverage/coverlet/pull/1229)  
 
 ## Release date 2021-07-19
 ### Packages  
