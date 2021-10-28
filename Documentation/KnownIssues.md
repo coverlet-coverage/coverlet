@@ -150,7 +150,9 @@ or by adding the property `<CopyLocalLockFileAssemblies>` to the project file
 
 NB. This **DOESN'T ALWAYS WORK**, for example in case of the shared framework https://github.com/dotnet/cli/issues/12705#issuecomment-536686785
 
-We can do nothing at the moment as this is a build behaviour out of our control. This issue should not happen for .NET runtime version >= 3.0 because the new default behavior is to copy all assets to the build output https://github.com/dotnet/cli/issues/12705#issuecomment-535150372
+We can do nothing at the moment as this is a build behaviour out of our control.
+
+For .NET runtime version >= 3.0 the new default behavior is to copy all assets to the build output (CopyLocalLockFileAssemblies=true) https://github.com/dotnet/cli/issues/12705#issuecomment-535150372, unfortunately the issue could still arise. 
 
 In this case the only workaround at the moment is to *manually copy* missing dlls to the output folder: https://github.com/coverlet-coverage/coverlet/issues/560#issue-496440052 
 
