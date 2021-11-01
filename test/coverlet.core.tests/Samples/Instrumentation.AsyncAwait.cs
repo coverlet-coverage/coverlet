@@ -137,4 +137,18 @@ namespace Coverlet.Core.Samples.Tests
             await Task.CompletedTask;
         }
     }
+
+    public class Issue_1233
+    {
+        async public Task Test()
+        {
+            try
+            {
+            }
+            finally
+            {
+                await Task.CompletedTask;
+            }
+        }
+    }
 }

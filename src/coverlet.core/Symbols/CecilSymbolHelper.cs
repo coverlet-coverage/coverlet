@@ -543,9 +543,9 @@ namespace Coverlet.Core.Symbols
                         instructions[i].Operand is FieldDefinition field &&
                         IsCompilerGenerated(field) && field.FieldType.FullName == "System.Object")
                     {
-                        // We expect the call to GetResult() to be no more than three
+                        // We expect the call to GetResult() to be no more than four
                         // instructions before the loading of the field's value.
-                        int minCallIndex = Math.Max(0, i - 3);
+                        int minCallIndex = Math.Max(0, i - 4);
 
                         for (int j = i - 1; j >= minCallIndex; --j)
                         {
