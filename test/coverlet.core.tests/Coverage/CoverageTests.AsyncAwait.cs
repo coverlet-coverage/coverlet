@@ -154,5 +154,33 @@ namespace Coverlet.Core.Tests
                 File.Delete(path);
             }
         }
+
+        [Fact]
+        public void AsyncAwait_Issue_1233()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1233>(instance =>
+                        {
+                            ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
+                            return Task.CompletedTask;
+                        },
+                        persistPrepareResultToFile: pathSerialize[0]);
+
+                    return 0;
+                }, new string[] { path });
+
+                var document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+                document.AssertLinesCovered(BuildConfiguration.Debug, (150, 1));
+                Assert.DoesNotContain(document.Branches, x => x.Key.Line == 150);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
     }
 }
