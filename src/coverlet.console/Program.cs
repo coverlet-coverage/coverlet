@@ -26,6 +26,7 @@ namespace Coverlet.Console
             IServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+            serviceCollection.AddTransient<IFormatHelper, FormatHelper>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<ILogger, ConsoleLogger>();
             // We need to keep singleton/static semantics
@@ -242,13 +243,15 @@ namespace Coverlet.Console
                 var averageBranchPercent = branchPercentCalculation.AverageModulePercent;
                 var averageMethodPercent = methodPercentCalculation.AverageModulePercent;
 
+                IFormatHelper formatHelper = serviceProvider.GetRequiredService<IFormatHelper>();
+
                 foreach (var _module in result.Modules)
                 {
                     var linePercent = summary.CalculateLineCoverage(_module.Value).Percent;
                     var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
                     var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
-                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), formatHelper.Invariant($"{linePercent}%"), formatHelper.Invariant($"{branchPercent}%"), formatHelper.Invariant($"{methodPercent}%"));
                 }
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
@@ -257,8 +260,8 @@ namespace Coverlet.Console
                 coverageTable.Rows.Clear();
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
-                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
+                coverageTable.AddRow("Total", formatHelper.Invariant($"{totalLinePercent}%"), formatHelper.Invariant($"{totalBranchPercent}%"), formatHelper.Invariant($"{totalMethodPercent}%"));
+                coverageTable.AddRow("Average", formatHelper.Invariant($"{averageLinePercent}%"), formatHelper.Invariant($"{averageBranchPercent}%"), formatHelper.Invariant($"{averageMethodPercent}%"));
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
                 if (process.ExitCode > 0)
