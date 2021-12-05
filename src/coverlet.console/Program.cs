@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -26,7 +27,6 @@ namespace Coverlet.Console
             IServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
-            serviceCollection.AddTransient<IFormatHelper, FormatHelper>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<ILogger, ConsoleLogger>();
             // We need to keep singleton/static semantics
@@ -243,15 +243,13 @@ namespace Coverlet.Console
                 var averageBranchPercent = branchPercentCalculation.AverageModulePercent;
                 var averageMethodPercent = methodPercentCalculation.AverageModulePercent;
 
-                IFormatHelper formatHelper = serviceProvider.GetRequiredService<IFormatHelper>();
-
                 foreach (var _module in result.Modules)
                 {
                     var linePercent = summary.CalculateLineCoverage(_module.Value).Percent;
                     var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
                     var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
-                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), formatHelper.Invariant($"{linePercent}%"), formatHelper.Invariant($"{branchPercent}%"), formatHelper.Invariant($"{methodPercent}%"));
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
                 }
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
@@ -260,8 +258,8 @@ namespace Coverlet.Console
                 coverageTable.Rows.Clear();
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
-                coverageTable.AddRow("Total", formatHelper.Invariant($"{totalLinePercent}%"), formatHelper.Invariant($"{totalBranchPercent}%"), formatHelper.Invariant($"{totalMethodPercent}%"));
-                coverageTable.AddRow("Average", formatHelper.Invariant($"{averageLinePercent}%"), formatHelper.Invariant($"{averageBranchPercent}%"), formatHelper.Invariant($"{averageMethodPercent}%"));
+                coverageTable.AddRow("Total", $"{InvariantFormat(totalLinePercent)}%", $"{InvariantFormat(totalBranchPercent)}%", $"{InvariantFormat(totalMethodPercent)}%");
+                coverageTable.AddRow("Average", $"{InvariantFormat(averageLinePercent)}%", $"{InvariantFormat(averageBranchPercent)}%", $"{InvariantFormat(averageMethodPercent)}%");
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
                 if (process.ExitCode > 0)
@@ -317,5 +315,7 @@ namespace Coverlet.Console
         }
 
         static string GetAssemblyVersion() => typeof(Program).Assembly.GetName().Version.ToString();
+
+        static string InvariantFormat(double value) => value.ToString(CultureInfo.InvariantCulture);
     }
 }
