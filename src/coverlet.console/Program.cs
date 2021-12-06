@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -248,7 +249,7 @@ namespace Coverlet.Console
                     var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
                     var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
-                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
                 }
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
@@ -257,8 +258,8 @@ namespace Coverlet.Console
                 coverageTable.Rows.Clear();
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
-                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
+                coverageTable.AddRow("Total", $"{InvariantFormat(totalLinePercent)}%", $"{InvariantFormat(totalBranchPercent)}%", $"{InvariantFormat(totalMethodPercent)}%");
+                coverageTable.AddRow("Average", $"{InvariantFormat(averageLinePercent)}%", $"{InvariantFormat(averageBranchPercent)}%", $"{InvariantFormat(averageMethodPercent)}%");
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
                 if (process.ExitCode > 0)
@@ -314,5 +315,7 @@ namespace Coverlet.Console
         }
 
         static string GetAssemblyVersion() => typeof(Program).Assembly.GetName().Version.ToString();
+
+        static string InvariantFormat(double value) => value.ToString(CultureInfo.InvariantCulture);
     }
 }

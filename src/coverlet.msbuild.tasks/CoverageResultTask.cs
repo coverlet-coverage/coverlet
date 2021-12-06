@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -206,7 +207,7 @@ namespace Coverlet.MSbuild.Tasks
                     var branchPercent = summary.CalculateBranchCoverage(module.Value).Percent;
                     var methodPercent = summary.CalculateMethodCoverage(module.Value).Percent;
 
-                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
                 }
 
                 Console.WriteLine();
@@ -216,8 +217,8 @@ namespace Coverlet.MSbuild.Tasks
                 coverageTable.Rows.Clear();
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
-                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
+                coverageTable.AddRow("Total", $"{InvariantFormat(totalLinePercent)}%", $"{InvariantFormat(totalBranchPercent)}%", $"{InvariantFormat(totalMethodPercent)}%");
+                coverageTable.AddRow("Average", $"{InvariantFormat(averageLinePercent)}%", $"{InvariantFormat(averageBranchPercent)}%", $"{InvariantFormat(averageMethodPercent)}%");
 
                 Console.WriteLine(coverageTable.ToStringAlternative());
 
@@ -254,5 +255,7 @@ namespace Coverlet.MSbuild.Tasks
 
             return true;
         }
+
+        private static string InvariantFormat(double value) => value.ToString(CultureInfo.InvariantCulture);
     }
 }
