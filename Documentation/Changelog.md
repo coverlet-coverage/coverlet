@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Fixed 
+### Fixed
+-Fix negative coverage exceeding int.MaxValue [#1266](https://github.com/coverlet-coverage/coverlet/issues/1266)
 -Fix summary output format for culture de-DE [#1263](https://github.com/coverlet-coverage/coverlet/issues/1263)
 -Fix branch coverage issue for finally block with await [#1233](https://github.com/coverlet-coverage/coverlet/issues/1233)  
 -Fix threshold doesn't work when coverage empty [#1205](https://github.com/coverlet-coverage/coverlet/issues/1205)  
