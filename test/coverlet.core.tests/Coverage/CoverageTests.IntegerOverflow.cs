@@ -1,6 +1,7 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
-using Coverlet.Core.Samples.Tests;
+using Coverlet.Core.Abstractions;
+using Coverlet.Core.Instrumentation;
+using Moq;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -8,31 +9,57 @@ namespace Coverlet.Core.Tests
     public partial class CoverageTests
     {
         [Fact]
-        public void Overflow_Issue_1266()
+        public void CoverageResult_NegativeLineCoverage_TranslatedToMaxValueOfInt32()
         {
-            string path = Path.GetTempFileName();
-            try
+            InstrumenterResult instrumenterResult = new InstrumenterResult
             {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<IntegerOverflow>(instance =>
-                        {
-                            instance.Test();
-                            return Task.CompletedTask;
-                        },
-                        persistPrepareResultToFile: pathSerialize[0]);
+                HitsFilePath = "HitsFilePath", 
+                SourceLink = "SourceLink", 
+                ModulePath = "ModulePath"
+            };
 
-                    return 0;
-                }, new string[] { path });
+            instrumenterResult.HitCandidates.Add(new HitCandidate(false, 0, 1, 1));
 
-                TestInstrumentationHelper.GetCoverageResult(path)
-                    .Document("Instrumentation.IntegerOverflow.cs")
-                    .AssertLinesCovered(BuildConfiguration.Debug, (16, int.MaxValue), (18, int.MaxValue));
-            }
-            finally
+            var document = new Document
             {
-                File.Delete(path);
-            }
+                Index = 0,
+                Path = "Path0"
+            };
+
+            document.Lines.Add(1, new Line
+            {
+                Class = "Class0",
+                Hits = 0,
+                Method = "Method0",
+                Number = 1
+            });
+
+            instrumenterResult.Documents.Add("document", document);
+
+            CoveragePrepareResult coveragePrepareResult = new CoveragePrepareResult
+            {
+                UseSourceLink = true, 
+                Results = new[] {instrumenterResult}, 
+                Parameters = new CoverageParameters()
+            };
+
+            Stream memoryStream = new MemoryStream();
+            BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+            binaryWriter.Write(1);
+            binaryWriter.Write(-1);
+            memoryStream.Position = 0;
+
+            var fileSystemMock = new Mock<IFileSystem>();
+            fileSystemMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+            fileSystemMock.Setup(x => x.NewFileStream(It.IsAny<string>(), FileMode.Open, FileAccess.Read))
+                .Returns(memoryStream);
+
+            var coverage = new Coverage(coveragePrepareResult, new Mock<ILogger>().Object, new Mock<IInstrumentationHelper>().Object,
+                fileSystemMock.Object, new Mock<ISourceRootTranslator>().Object);
+
+            var coverageResult = coverage.GetCoverageResult();
+            coverageResult.Document("document").AssertLinesCovered(BuildConfiguration.Debug, (1, int.MaxValue));
+
         }
     }
 }

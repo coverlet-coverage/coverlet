@@ -420,6 +420,10 @@ namespace Coverlet.Core
                         var hitLocation = result.HitCandidates[i];
                         var document = documentsList[hitLocation.docIndex];
                         int hits = br.ReadInt32();
+
+                        if (hits == 0)
+                            continue;
+
                         hits = hits < 0 ? int.MaxValue : hits;
 
                         if (hitLocation.isBranch)
