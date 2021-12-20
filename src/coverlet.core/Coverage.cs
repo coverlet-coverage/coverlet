@@ -421,10 +421,18 @@ namespace Coverlet.Core
                         var document = documentsList[hitLocation.docIndex];
                         int hits = br.ReadInt32();
 
+                        if (hits == 0)
+                            continue;
+
+                        hits = hits < 0 ? int.MaxValue : hits;
+
                         if (hitLocation.isBranch)
                         {
                             var branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
                             branch.Hits += hits;
+
+                            if (branch.Hits < 0)
+                                branch.Hits = int.MaxValue;
                         }
                         else
                         {
@@ -437,6 +445,9 @@ namespace Coverlet.Core
 
                                 var line = document.Lines[j];
                                 line.Hits += hits;
+
+                                if (line.Hits < 0)
+                                    line.Hits = int.MaxValue;
                             }
                         }
                     }
