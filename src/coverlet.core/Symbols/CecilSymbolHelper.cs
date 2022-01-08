@@ -855,7 +855,6 @@ namespace Coverlet.Core.Symbols
                 return false;
             }
 
-
             static bool DisposeCheck(List<Instruction> instructions, Instruction instruction, int currentIndex)
             {
                 // Within the compiler-generated async iterator, there are at least a
@@ -889,6 +888,40 @@ namespace Coverlet.Core.Symbols
 
                 return false;
             }
+        }
+
+        private bool SkipGeneratedBranchesForEnumeratorCancellationAttribute(List<Instruction> instructions, Instruction instruction)
+        {
+            // For async-enumerable methods an additional cancellation token despite the default one can be passed.
+            // The EnumeratorCancellation attribute marks the parameter whose value is received by GetAsyncEnumerator(CancellationToken).
+            // Therefore the compiler generates the field x__combinedTokens and generates some additional branch points.
+            //
+            // IL_0118: ldarg.0
+            // IL_0119: ldfld     class [System.Runtime]System.Threading.CancellationTokenSource Issue1275.AwaitForeachReproduction/'<AsyncEnumerable>d__1'::'<>x__combinedTokens'
+            // IL_011E: brfalse.s IL_0133
+            //
+            // We'll eliminate these wherever they appear.  It's reasonable to just look for a "brfalse" or "brfalse.s" instruction, preceded
+            // immediately by "ldfld" of the compiler-generated "<>x__combinedTokens" field.
+
+            int branchIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
+
+            if (instruction.OpCode != OpCodes.Brfalse &&
+                instruction.OpCode != OpCodes.Brfalse_S)
+            {
+                return false;
+            }
+
+            if (branchIndex >= 2 &&
+                instructions[branchIndex - 1].OpCode == OpCodes.Ldfld &&
+                instructions[branchIndex - 1].Operand is FieldDefinition field &&
+                field.FieldType.FullName.Equals("System.Threading.CancellationTokenSource") &&
+                field.FullName.EndsWith("x__combinedTokens") &&
+                (instructions[branchIndex - 2].OpCode == OpCodes.Ldarg ||
+                 instructions[branchIndex - 2].OpCode == OpCodes.Ldarg_0))
+            {
+                return true;
+            }
+            return false;
         }
 
         // https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/Expression%20Breakpoints.md
@@ -971,6 +1004,11 @@ namespace Coverlet.Core.Symbols
                         {
                             continue;
                         }
+                    }
+
+                    if (SkipGeneratedBranchesForEnumeratorCancellationAttribute(instructions, instruction))
+                    {
+                        continue;
                     }
 
                     if (SkipBranchGeneratedExceptionFilter(instruction, methodDefinition))
