@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+-Fix wrong branch coverage with EnumeratorCancellation attribute [#1275](https://github.com/coverlet-coverage/coverlet/issues/1275)
 -Fix negative coverage exceeding int.MaxValue [#1266](https://github.com/coverlet-coverage/coverlet/issues/1266)  
 -Fix summary output format for culture de-DE [#1263](https://github.com/coverlet-coverage/coverlet/issues/1263)  
 -Fix branch coverage issue for finally block with await [#1233](https://github.com/coverlet-coverage/coverlet/issues/1233)  

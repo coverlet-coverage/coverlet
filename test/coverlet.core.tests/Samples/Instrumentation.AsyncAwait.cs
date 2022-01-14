@@ -151,4 +151,28 @@ namespace Coverlet.Core.Samples.Tests
             }
         }
     }
+
+    public class Issue_1275
+    {
+        public async Task<int> Execute(System.Threading.CancellationToken token)
+        {
+            int sum = 0;
+
+            await foreach (int result in AsyncEnumerable(token))
+            {
+                sum += result;
+            }
+
+            return sum;
+        }
+
+        async System.Collections.Generic.IAsyncEnumerable<int> AsyncEnumerable([System.Runtime.CompilerServices.EnumeratorCancellation] System.Threading.CancellationToken cancellationToken)
+        {
+            for (int i = 0; i < 1; i++)
+            {
+                await Task.Delay(1, cancellationToken);
+                yield return i;
+            }
+        }
+    }
 }
