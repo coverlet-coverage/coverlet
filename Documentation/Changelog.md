@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## Release date 2022-01-30
+### Packages  
+coverlet.msbuild 3.1.1  
+coverlet.console 3.1.1  
+coverlet.collector 3.1.1  
 
 ### Fixed
 -Fix wrong branch coverage with EnumeratorCancellation attribute [#1275](https://github.com/coverlet-coverage/coverlet/issues/1275)
