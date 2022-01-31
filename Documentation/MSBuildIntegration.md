@@ -4,6 +4,11 @@ In this mode, Coverlet doesn't require any additional setup other than including
 
 If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
 
+To achieve same behavior above using **powershell** you need to use the verbatim argument marker `--%` like this: 
+```powershell
+dotnet test /p:CollectCoverage=true --% /p:CoverletOutputFormat=\"opencover,lcov\"
+```
+
 ## Code Coverage
 
 Enabling code coverage is as simple as setting the `CollectCoverage` property to `true`
