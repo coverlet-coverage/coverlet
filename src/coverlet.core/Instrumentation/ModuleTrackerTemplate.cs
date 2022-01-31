@@ -25,6 +25,7 @@ namespace Coverlet.Core.Instrumentation
         public static bool SingleHit;
         public static bool FlushHitFile;
         private static readonly bool _enableLog = int.TryParse(Environment.GetEnvironmentVariable("COVERLET_ENABLETRACKERLOG"), out int result) ? result == 1 : false;
+        private static string sessionId = Guid.NewGuid().ToString();
 
         static ModuleTrackerTemplate()
         {
@@ -173,7 +174,7 @@ namespace Coverlet.Core.Instrumentation
                 Assembly currentAssembly = Assembly.GetExecutingAssembly();
                 DirectoryInfo location = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(currentAssembly.Location), "TrackersHitsLog"));
                 location.Create();
-                string logFile = Path.Combine(location.FullName, $"{Path.GetFileName(currentAssembly.Location)}_{DateTime.UtcNow.Ticks}_{Process.GetCurrentProcess().Id}.txt");
+                string logFile = Path.Combine(location.FullName, $"{Path.GetFileName(currentAssembly.Location)}_{DateTime.UtcNow.Ticks}_{sessionId}.txt");
                 using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
                 using (var log = new FileStream(logFile, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
                 using (var logWriter = new StreamWriter(log))
@@ -197,7 +198,7 @@ namespace Coverlet.Core.Instrumentation
                 // We don't set path as global var to keep benign possible errors inside try/catch
                 // I'm not sure that location will be ok in every scenario
                 string location = Assembly.GetExecutingAssembly().Location;
-                File.AppendAllText(Path.Combine(Path.GetDirectoryName(location), Path.GetFileName(location) + "_tracker.txt"), $"[{DateTime.UtcNow} P:{Process.GetCurrentProcess().Id} T:{Thread.CurrentThread.ManagedThreadId}]{logText}{Environment.NewLine}");
+                File.AppendAllText(Path.Combine(Path.GetDirectoryName(location), Path.GetFileName(location) + "_tracker.txt"), $"[{DateTime.UtcNow} S:{sessionId} T:{Thread.CurrentThread.ManagedThreadId}]{logText}{Environment.NewLine}");
             }
         }
     }
