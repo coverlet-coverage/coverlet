@@ -297,10 +297,27 @@ namespace Coverlet.Core.Instrumentation
                         var onProcessExitMethod = new MethodReference("OnProcessExit", module.TypeSystem.Void, appContextType).Resolve();
                         var onProcessExitIl = onProcessExitMethod.Body.GetILProcessor();
 
-                        lastInstr = onProcessExitIl.Body.Instructions.Last();
-                        onProcessExitIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldnull));
-                        onProcessExitIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldnull));
-                        onProcessExitIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Call, customTrackerUnloadModule));
+                        // Put the OnProcessExit body inside try/finally to ensure the call to the UnloadModule.
+                        var lastInst = onProcessExitMethod.Body.Instructions.Last();
+                        var firstNullParam = Instruction.Create(OpCodes.Ldnull);
+                        var secondNullParam = Instruction.Create(OpCodes.Ldnull);
+                        var callUnload = Instruction.Create(OpCodes.Call, customTrackerUnloadModule);
+                        onProcessExitIl.InsertAfter(lastInst, firstNullParam);
+                        onProcessExitIl.InsertAfter(firstNullParam, secondNullParam);
+                        onProcessExitIl.InsertAfter(secondNullParam, callUnload);
+                        var ret = onProcessExitIl.Create(OpCodes.Ret);
+                        var leave = onProcessExitIl.Create(OpCodes.Leave, ret);
+                        onProcessExitIl.InsertAfter(callUnload, leave);
+                        onProcessExitIl.InsertAfter(leave, ret);
+                        var handler = new ExceptionHandler(ExceptionHandlerType.Finally)
+                        {
+                            TryStart = onProcessExitIl.Body.Instructions.First(),
+                            TryEnd = firstNullParam,
+                            HandlerStart = firstNullParam,
+                            HandlerEnd = ret
+                        };
+
+                        onProcessExitMethod.Body.ExceptionHandlers.Add(handler);
                     }
 
                     module.Write(stream, new WriterParameters { WriteSymbols = true });
