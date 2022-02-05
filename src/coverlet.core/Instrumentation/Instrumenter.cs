@@ -305,10 +305,22 @@ namespace Coverlet.Core.Instrumentation
                         onProcessExitIl.InsertAfter(lastInst, firstNullParam);
                         onProcessExitIl.InsertAfter(firstNullParam, secondNullParam);
                         onProcessExitIl.InsertAfter(secondNullParam, callUnload);
+                        var endFinally = Instruction.Create(OpCodes.Endfinally);
+                        onProcessExitIl.InsertAfter(callUnload, endFinally);
                         var ret = onProcessExitIl.Create(OpCodes.Ret);
-                        var leave = onProcessExitIl.Create(OpCodes.Leave, ret);
-                        onProcessExitIl.InsertAfter(callUnload, leave);
-                        onProcessExitIl.InsertAfter(leave, ret);
+                        var leaveAfterFinally = onProcessExitIl.Create(OpCodes.Leave, ret);
+                        onProcessExitIl.InsertAfter(endFinally, ret);
+                        foreach (var inst in onProcessExitMethod.Body.Instructions.ToArray())
+                        {
+                            // Patch ret to leave after the finally
+                            if (inst.OpCode == OpCodes.Ret && inst != ret)
+                            {
+                                var leaveBodyInstAfterFinally = onProcessExitIl.Create(OpCodes.Leave, ret);
+                                var prevInst = inst.Previous;
+                                onProcessExitMethod.Body.Instructions.Remove(inst);
+                                onProcessExitIl.InsertAfter(prevInst, leaveBodyInstAfterFinally);
+                            }
+                        }
                         var handler = new ExceptionHandler(ExceptionHandlerType.Finally)
                         {
                             TryStart = onProcessExitIl.Body.Instructions.First(),
