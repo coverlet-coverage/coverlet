@@ -12,7 +12,7 @@ coverlet.collector 3.1.2
 
 ### Fixed
 -Fix CoreLib's coverage measurement is broken [#1286](https://github.com/coverlet-coverage/coverlet/pull/1286)  
--Fix UnloadModule injection [1291](https://github.com/coverlet-coverage/coverlet/pull/1291)   
+-Fix UnloadModule injection [1291](https://github.com/coverlet-coverage/coverlet/pull/1291)  
 
 ## Release date 2022-01-30
 ### Packages  
