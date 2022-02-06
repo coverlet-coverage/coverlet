@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Packages  
 coverlet.msbuild 3.1.2  
 coverlet.console 3.1.2  
-coverlet.collector 3.1.2    
+coverlet.collector 3.1.2  
 
 ### Fixed
 -Fix CoreLib's coverage measurement is broken [#1286](https://github.com/coverlet-coverage/coverlet/pull/1286)  
