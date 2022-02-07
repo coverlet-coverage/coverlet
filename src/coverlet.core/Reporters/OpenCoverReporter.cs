@@ -9,15 +9,15 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
 {
-    internal class OpenCoverReporter : IReporter
+    internal class OpenCoverReporter : ReporterBase
     {
-        public ReporterOutputType OutputType => ReporterOutputType.File;
+        public override ReporterOutputType OutputType => ReporterOutputType.File;
 
-        public string Format => "opencover";
+        public override string Format => "opencover";
 
-        public string Extension => "opencover.xml";
+        public override string Extension => "opencover.xml";
 
-        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
+        public override string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
             if (result.Parameters.DeterministicReport)
             {

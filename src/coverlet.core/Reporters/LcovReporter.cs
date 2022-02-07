@@ -6,15 +6,15 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
 {
-    internal class LcovReporter : IReporter
+    internal class LcovReporter : ReporterBase
     {
-        public ReporterOutputType OutputType => ReporterOutputType.File;
+        public override ReporterOutputType OutputType => ReporterOutputType.File;
 
-        public string Format => "lcov";
+        public override string Format => "lcov";
 
-        public string Extension => "info";
+        public override string Extension => "info";
 
-        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
+        public override string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
             if (result.Parameters.DeterministicReport)
             {
@@ -23,6 +23,7 @@ namespace Coverlet.Core.Reporters
 
             CoverageSummary summary = new CoverageSummary();
             List<string> lcov = new List<string>();
+            var absolutePaths = GetBasePaths(result.Modules, result.Parameters.UseSourceLink).ToList();
 
             foreach (var module in result.Modules)
             {
@@ -32,7 +33,7 @@ namespace Coverlet.Core.Reporters
                     var docBranchCoverage = summary.CalculateBranchCoverage(doc.Value);
                     var docMethodCoverage = summary.CalculateMethodCoverage(doc.Value);
 
-                    lcov.Add("SF:" + doc.Key);
+                    lcov.Add("SF:" + GetRelativePathFromBase(absolutePaths, doc.Key, result.Parameters.UseSourceLink));
                     foreach (var @class in doc.Value)
                     {
                         foreach (var method in @class.Value)

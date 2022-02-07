@@ -6,15 +6,15 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
 {
-    internal class TeamCityReporter : IReporter
+    internal class TeamCityReporter : ReporterBase
     {
-        public ReporterOutputType OutputType => ReporterOutputType.Console;
+        public override ReporterOutputType OutputType => ReporterOutputType.Console;
 
-        public string Format => "teamcity";
+        public override string Format => "teamcity";
 
-        public string Extension => null;
+        public override string Extension => null;
 
-        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
+        public override string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
             if (result.Parameters.DeterministicReport)
             {
