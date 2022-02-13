@@ -1,14 +1,19 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Xml.Linq;
 
 using Coverlet.Core;
+
 using Newtonsoft.Json;
+
 using NuGet.Packaging;
+
 using Xunit;
 using Xunit.Sdk;
 
@@ -46,7 +51,7 @@ namespace Coverlet.Integration.Tests
             using Stream pkg = File.OpenRead(Directory.GetFiles($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages", filter).Single());
             using var reader = new PackageArchiveReader(pkg);
             using Stream nuspecStream = reader.GetNuspec();
-            Manifest manifest = Manifest.ReadFrom(nuspecStream, false);
+            var manifest = Manifest.ReadFrom(nuspecStream, false);
             return manifest.Metadata.Version.OriginalVersion;
         }
 
@@ -81,7 +86,7 @@ namespace Coverlet.Integration.Tests
         private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
         {
             Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}\nWorkingDirectory: {workingDirectory}");
-            ProcessStartInfo psi = new ProcessStartInfo(command, arguments);
+            var psi = new ProcessStartInfo(command, arguments);
             psi.WorkingDirectory = workingDirectory;
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
@@ -108,7 +113,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("Nuget.config not found", "nuget.config");
             }
             XDocument xml;
-            using (var nugetFileStream = File.OpenRead(nugetFile))
+            using (FileStream? nugetFileStream = File.OpenRead(nugetFile))
             {
                 xml = XDocument.Load(nugetFileStream);
             }
@@ -130,7 +135,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(csproj))
+            using (FileStream? csprojStream = File.OpenRead(csproj))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -150,7 +155,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(csproj))
+            using (FileStream? csprojStream = File.OpenRead(csproj))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -170,7 +175,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(csproj))
+            using (FileStream? csprojStream = File.OpenRead(csproj))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -189,7 +194,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(csproj))
+            using (FileStream? csprojStream = File.OpenRead(csproj))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -257,7 +262,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(project.ProjectFileNamePath))
+            using (FileStream? csprojStream = File.OpenRead(project.ProjectFileNamePath))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -327,15 +332,15 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
 
         public bool IsMultipleTargetFramework()
         {
-            using var csprojStream = File.OpenRead(ProjectFileNamePath);
-            XDocument xml = XDocument.Load(csprojStream);
+            using FileStream? csprojStream = File.OpenRead(ProjectFileNamePath);
+            var xml = XDocument.Load(csprojStream);
             return xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFramework") == null;
         }
 
         public string[] GetTargetFrameworks()
         {
-            using var csprojStream = File.OpenRead(ProjectFileNamePath);
-            XDocument xml = XDocument.Load(csprojStream);
+            using FileStream? csprojStream = File.OpenRead(ProjectFileNamePath);
+            var xml = XDocument.Load(csprojStream);
             XElement element = xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFramework") ?? xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFrameworks")!;
             if (element is null)
             {

@@ -1,6 +1,11 @@
-﻿using coverlet.testsubject;
-using System.Threading.Tasks;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using coverlet.testsubject;
+
 using Xunit;
 
 namespace Coverlet.Core.PerformanceTest
@@ -22,9 +27,9 @@ namespace Coverlet.Core.PerformanceTest
 
             var tasks = new List<Task>();
 
-            for (var i = 0; i < iterations; i++)
+            for (int i = 0; i < iterations; i++)
             {
-                var j = i;
+                int j = i;
                 tasks.Add(Task.Run(() => big.Do(j)));
             }
 

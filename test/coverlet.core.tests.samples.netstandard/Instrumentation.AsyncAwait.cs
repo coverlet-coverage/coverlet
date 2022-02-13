@@ -1,4 +1,5 @@
-﻿// Remember to use full name because adding new using directives change line numbers
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace Coverlet.Core.Tests
 {
@@ -6,7 +7,7 @@ namespace Coverlet.Core.Tests
     {
         private readonly System.Net.Http.HttpClient _httpClient = new System.Net.Http.HttpClient();
 
-        async public System.Threading.Tasks.ValueTask<System.Net.Http.HttpResponseMessage> SendRequest()
+        public async System.Threading.Tasks.ValueTask<System.Net.Http.HttpResponseMessage> SendRequest()
         {
             using (var requestMessage = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, "https://www.google.it"))
             {

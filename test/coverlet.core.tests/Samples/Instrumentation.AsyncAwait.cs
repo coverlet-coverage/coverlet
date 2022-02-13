@@ -1,4 +1,5 @@
-﻿// Remember to use full name because adding new using directives change line numbers
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
 
@@ -114,7 +115,7 @@ namespace Coverlet.Core.Samples.Tests
 
             public async Task Bar()
             {
-                var cat = await _service.GetCat();
+                string cat = await _service.GetCat();
                 await _service.Process(cat);
             }
         }

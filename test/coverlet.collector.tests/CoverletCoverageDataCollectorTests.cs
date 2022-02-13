@@ -1,36 +1,42 @@
+// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
 
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
-using Moq;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Coverlet.Core;
-using Coverlet.Collector.Utilities.Interfaces;
-using Coverlet.Collector.Utilities;
-using Xunit;
 using Coverlet.Collector.DataCollection;
-using Coverlet.Core.Reporters;
+using Coverlet.Collector.Utilities;
+using Coverlet.Collector.Utilities.Interfaces;
+using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
+using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
+
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
+
+using Moq;
+
+using Xunit;
 
 namespace Coverlet.Collector.Tests
 {
     public class CoverletCoverageDataCollectorTests
     {
-        private DataCollectionEnvironmentContext _context;
+        private readonly DataCollectionEnvironmentContext _context;
         private CoverletCoverageCollector _coverletCoverageDataCollector;
-        private DataCollectionContext _dataCollectionContext;
-        private Mock<DataCollectionEvents> _mockDataColectionEvents;
-        private Mock<DataCollectionSink> _mockDataCollectionSink;
-        private Mock<ICoverageWrapper> _mockCoverageWrapper;
-        private Mock<ICountDownEventFactory> _mockCountDownEventFactory;
+        private readonly DataCollectionContext _dataCollectionContext;
+        private readonly Mock<DataCollectionEvents> _mockDataColectionEvents;
+        private readonly Mock<DataCollectionSink> _mockDataCollectionSink;
+        private readonly Mock<ICoverageWrapper> _mockCoverageWrapper;
+        private readonly Mock<ICountDownEventFactory> _mockCountDownEventFactory;
         private XmlElement _configurationElement;
-        private Mock<DataCollectionLogger> _mockLogger;
+        private readonly Mock<DataCollectionLogger> _mockLogger;
 
         public CoverletCoverageDataCollectorTests()
         {
@@ -39,7 +45,7 @@ namespace Coverlet.Collector.Tests
             _mockLogger = new Mock<DataCollectionLogger>();
             _configurationElement = null;
 
-            TestCase testcase = new TestCase { Id = Guid.NewGuid() };
+            var testcase = new TestCase { Id = Guid.NewGuid() };
             _dataCollectionContext = new DataCollectionContext(testcase);
             _context = new DataCollectionEnvironmentContext(_dataCollectionContext);
             _mockCoverageWrapper = new Mock<ICoverageWrapper>();
@@ -53,7 +59,7 @@ namespace Coverlet.Collector.Tests
             Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
             {
                 IServiceCollection serviceCollection = new ServiceCollection();
-                Mock<IFileSystem> fileSystem = new Mock<IFileSystem>();
+                var fileSystem = new Mock<IFileSystem>();
                 fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "abc.dll");
                 serviceCollection.AddTransient(_ => fileSystem.Object);
 
@@ -87,7 +93,7 @@ namespace Coverlet.Collector.Tests
             Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
             {
                 IServiceCollection serviceCollection = new ServiceCollection();
-                Mock<IFileSystem> fileSystem = new Mock<IFileSystem>();
+                var fileSystem = new Mock<IFileSystem>();
                 fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "abc.dll");
                 serviceCollection.AddTransient(_ => fileSystem.Object);
 
@@ -114,7 +120,7 @@ namespace Coverlet.Collector.Tests
                                           new Mock<ILogger>().Object,
                                           new Mock<ISourceRootTranslator>().Object);
 
-            CoverageParameters parameters = new CoverageParameters
+            var parameters = new CoverageParameters
             {
                 IncludeFilters = null,
                 IncludeDirectories = null,
@@ -126,7 +132,7 @@ namespace Coverlet.Collector.Tests
                 UseSourceLink = true
             };
 
-            Coverage coverage = new Coverage("abc.dll", parameters, It.IsAny<ILogger>(), instrumentationHelper, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new Mock<ICecilSymbolHelper>().Object);
+            var coverage = new Coverage("abc.dll", parameters, It.IsAny<ILogger>(), instrumentationHelper, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new Mock<ICecilSymbolHelper>().Object);
 
             sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
             _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>(), It.IsAny<ICecilSymbolHelper>())).Returns(coverage);
@@ -163,7 +169,7 @@ namespace Coverlet.Collector.Tests
             string module = GetType().Assembly.Location;
             string pdb = Path.Combine(Path.GetDirectoryName(module), Path.GetFileNameWithoutExtension(module) + ".pdb");
 
-            var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
 
             File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
             File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
@@ -188,7 +194,7 @@ namespace Coverlet.Collector.Tests
             Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
             {
                 IServiceCollection serviceCollection = new ServiceCollection();
-                Mock<IFileSystem> fileSystem = new Mock<IFileSystem>();
+                var fileSystem = new Mock<IFileSystem>();
                 fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "Test");
                 serviceCollection.AddTransient(_ => fileSystem.Object);
 
@@ -203,7 +209,7 @@ namespace Coverlet.Collector.Tests
             _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, serviceCollectionFactory);
 
             IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f).CreateReporter()).Where(x => x != null).ToList();
-            Mock<DataCollectionSink> mockDataCollectionSink = new Mock<DataCollectionSink>();
+            var mockDataCollectionSink = new Mock<DataCollectionSink>();
             mockDataCollectionSink.Setup(m => m.SendFileAsync(It.IsAny<FileTransferInformation>())).Callback<FileTransferInformation>(fti =>
             {
                 reporters.Remove(reporters.First(x =>
@@ -212,8 +218,8 @@ namespace Coverlet.Collector.Tests
             });
 
             var doc = new XmlDocument();
-            var root = doc.CreateElement("Configuration");
-            var element = doc.CreateElement("Format");
+            XmlElement root = doc.CreateElement("Configuration");
+            XmlElement element = doc.CreateElement("Format");
             element.AppendChild(doc.CreateTextNode(formats));
             root.AppendChild(element);
 
@@ -241,7 +247,7 @@ namespace Coverlet.Collector.Tests
             Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
             {
                 IServiceCollection serviceCollection = new ServiceCollection();
-                Mock<IFileSystem> fileSystem = new Mock<IFileSystem>();
+                var fileSystem = new Mock<IFileSystem>();
                 fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "abc.dll");
                 serviceCollection.AddTransient(_ => fileSystem.Object);
 

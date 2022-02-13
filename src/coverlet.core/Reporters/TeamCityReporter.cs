@@ -1,7 +1,9 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Globalization;
 using System.Text;
-
 using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
@@ -23,9 +25,9 @@ namespace Coverlet.Core.Reporters
 
             // Calculate coverage
             var summary = new CoverageSummary();
-            var overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
-            var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
-            var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
+            CoverageDetails overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
+            CoverageDetails overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
+            CoverageDetails overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
 
             // Report coverage
             var stringBuilder = new StringBuilder();

@@ -1,4 +1,6 @@
-using Coverlet.Core.Helpers;
+// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Xunit;
 
 namespace Coverlet.Core.Helpers.Tests
@@ -12,7 +14,7 @@ namespace Coverlet.Core.Helpers.Tests
         [InlineData("filename{T}.cs", "filename{{T}}.cs")]
         public void TestEscapeFileName(string fileName, string expected)
         {
-            var actual = FileSystem.EscapeFileName(fileName);
+            string actual = FileSystem.EscapeFileName(fileName);
 
             Assert.Equal(expected, actual);
         }

@@ -1,10 +1,12 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-
 using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
@@ -24,63 +26,63 @@ namespace Coverlet.Core.Reporters
                 throw new NotSupportedException("Deterministic report not supported by openCover reporter");
             }
 
-            CoverageSummary summary = new CoverageSummary();
-            XDocument xml = new XDocument();
-            XElement coverage = new XElement("CoverageSession");
-            XElement coverageSummary = new XElement("Summary");
-            XElement modules = new XElement("Modules");
+            var summary = new CoverageSummary();
+            var xml = new XDocument();
+            var coverage = new XElement("CoverageSession");
+            var coverageSummary = new XElement("Summary");
+            var modules = new XElement("Modules");
 
             int numClasses = 0, numMethods = 0;
             int visitedClasses = 0, visitedMethods = 0;
 
             int i = 1;
 
-            foreach (var mod in result.Modules)
+            foreach (System.Collections.Generic.KeyValuePair<string, Documents> mod in result.Modules)
             {
-                XElement module = new XElement("Module");
+                var module = new XElement("Module");
                 module.Add(new XAttribute("hash", Guid.NewGuid().ToString().ToUpper()));
 
-                XElement path = new XElement("ModulePath", mod.Key);
-                XElement time = new XElement("ModuleTime", DateTime.UtcNow.ToString("yyyy-MM-ddThh:mm:ss"));
-                XElement name = new XElement("ModuleName", Path.GetFileNameWithoutExtension(mod.Key));
+                var path = new XElement("ModulePath", mod.Key);
+                var time = new XElement("ModuleTime", DateTime.UtcNow.ToString("yyyy-MM-ddThh:mm:ss"));
+                var name = new XElement("ModuleName", Path.GetFileNameWithoutExtension(mod.Key));
 
                 module.Add(path);
                 module.Add(time);
                 module.Add(name);
 
-                XElement files = new XElement("Files");
-                XElement classes = new XElement("Classes");
+                var files = new XElement("Files");
+                var classes = new XElement("Classes");
 
-                foreach (var doc in mod.Value)
+                foreach (System.Collections.Generic.KeyValuePair<string, Classes> doc in mod.Value)
                 {
-                    XElement file = new XElement("File");
+                    var file = new XElement("File");
                     file.Add(new XAttribute("uid", i.ToString()));
                     file.Add(new XAttribute("fullPath", doc.Key));
                     files.Add(file);
 
-                    foreach (var cls in doc.Value)
+                    foreach (System.Collections.Generic.KeyValuePair<string, Methods> cls in doc.Value)
                     {
-                        XElement @class = new XElement("Class");
-                        XElement classSummary = new XElement("Summary");
+                        var @class = new XElement("Class");
+                        var classSummary = new XElement("Summary");
 
-                        XElement className = new XElement("FullName", cls.Key);
+                        var className = new XElement("FullName", cls.Key);
 
-                        XElement methods = new XElement("Methods");
+                        var methods = new XElement("Methods");
                         int j = 0;
-                        var classVisited = false;
+                        bool classVisited = false;
 
-                        foreach (var meth in cls.Value)
+                        foreach (System.Collections.Generic.KeyValuePair<string, Method> meth in cls.Value)
                         {
                             // Skip all methods with no lines
                             if (meth.Value.Lines.Count == 0)
                                 continue;
 
-                            var methLineCoverage = summary.CalculateLineCoverage(meth.Value.Lines);
-                            var methBranchCoverage = summary.CalculateBranchCoverage(meth.Value.Branches);
-                            var methCyclomaticComplexity = summary.CalculateCyclomaticComplexity(meth.Value.Branches);
-                            var methNpathComplexity = summary.CalculateNpathComplexity(meth.Value.Branches);
+                            CoverageDetails methLineCoverage = summary.CalculateLineCoverage(meth.Value.Lines);
+                            CoverageDetails methBranchCoverage = summary.CalculateBranchCoverage(meth.Value.Branches);
+                            int methCyclomaticComplexity = summary.CalculateCyclomaticComplexity(meth.Value.Branches);
+                            int methNpathComplexity = summary.CalculateNpathComplexity(meth.Value.Branches);
 
-                            XElement method = new XElement("Method");
+                            var method = new XElement("Method");
 
                             method.Add(new XAttribute("cyclomaticComplexity", methCyclomaticComplexity.ToString()));
                             method.Add(new XAttribute("nPathComplexity", methCyclomaticComplexity.ToString()));
@@ -91,12 +93,12 @@ namespace Coverlet.Core.Reporters
                             method.Add(new XAttribute("isSetter", meth.Key.Contains("set_").ToString()));
                             method.Add(new XAttribute("isStatic", (!meth.Key.Contains("get_") || !meth.Key.Contains("set_")).ToString()));
 
-                            XElement methodName = new XElement("Name", meth.Key);
+                            var methodName = new XElement("Name", meth.Key);
 
-                            XElement fileRef = new XElement("FileRef");
+                            var fileRef = new XElement("FileRef");
                             fileRef.Add(new XAttribute("uid", i.ToString()));
 
-                            XElement methodPoint = new XElement("MethodPoint");
+                            var methodPoint = new XElement("MethodPoint");
                             methodPoint.Add(new XAttribute("vc", methLineCoverage.Covered.ToString()));
                             methodPoint.Add(new XAttribute("uspid", "0"));
                             methodPoint.Add(new XAttribute(XName.Get("type", "xsi"), "SequencePoint"));
@@ -111,19 +113,19 @@ namespace Coverlet.Core.Reporters
                             methodPoint.Add(new XAttribute("fileid", i.ToString()));
 
                             // They're really just lines
-                            XElement sequencePoints = new XElement("SequencePoints");
-                            XElement branchPoints = new XElement("BranchPoints");
-                            XElement methodSummary = new XElement("Summary");
+                            var sequencePoints = new XElement("SequencePoints");
+                            var branchPoints = new XElement("BranchPoints");
+                            var methodSummary = new XElement("Summary");
                             int k = 0;
                             int kBr = 0;
-                            var methodVisited = false;
+                            bool methodVisited = false;
 
-                            foreach (var lines in meth.Value.Lines)
+                            foreach (System.Collections.Generic.KeyValuePair<int, int> lines in meth.Value.Lines)
                             {
-                                var lineBranches = meth.Value.Branches.Where(branchInfo => branchInfo.Line == lines.Key).ToArray();
-                                var branchCoverage = summary.CalculateBranchCoverage(lineBranches);
-                                
-                                XElement sequencePoint = new XElement("SequencePoint");
+                                BranchInfo[] lineBranches = meth.Value.Branches.Where(branchInfo => branchInfo.Line == lines.Key).ToArray();
+                                CoverageDetails branchCoverage = summary.CalculateBranchCoverage(lineBranches);
+
+                                var sequencePoint = new XElement("SequencePoint");
                                 sequencePoint.Add(new XAttribute("vc", lines.Value.ToString()));
                                 sequencePoint.Add(new XAttribute("uspid", lines.Key.ToString()));
                                 sequencePoint.Add(new XAttribute("ordinal", k.ToString()));
@@ -145,9 +147,9 @@ namespace Coverlet.Core.Reporters
                                 k++;
                             }
 
-                            foreach (var branche in meth.Value.Branches)
+                            foreach (BranchInfo branche in meth.Value.Branches)
                             {
-                                XElement branchPoint = new XElement("BranchPoint");
+                                var branchPoint = new XElement("BranchPoint");
                                 branchPoint.Add(new XAttribute("vc", branche.Hits.ToString()));
                                 branchPoint.Add(new XAttribute("uspid", branche.Line.ToString()));
                                 branchPoint.Add(new XAttribute("ordinal", branche.Ordinal.ToString()));
@@ -192,11 +194,11 @@ namespace Coverlet.Core.Reporters
                         if (classVisited)
                             visitedClasses++;
 
-                        var classLineCoverage = summary.CalculateLineCoverage(cls.Value);
-                        var classBranchCoverage = summary.CalculateBranchCoverage(cls.Value);
-                        var classMethodCoverage = summary.CalculateMethodCoverage(cls.Value);
-                        var classMaxCyclomaticComplexity = summary.CalculateMaxCyclomaticComplexity(cls.Value);
-                        var classMinCyclomaticComplexity = summary.CalculateMinCyclomaticComplexity(cls.Value);
+                        CoverageDetails classLineCoverage = summary.CalculateLineCoverage(cls.Value);
+                        CoverageDetails classBranchCoverage = summary.CalculateBranchCoverage(cls.Value);
+                        CoverageDetails classMethodCoverage = summary.CalculateMethodCoverage(cls.Value);
+                        int classMaxCyclomaticComplexity = summary.CalculateMaxCyclomaticComplexity(cls.Value);
+                        int classMinCyclomaticComplexity = summary.CalculateMinCyclomaticComplexity(cls.Value);
 
                         classSummary.Add(new XAttribute("numSequencePoints", classLineCoverage.Total.ToString()));
                         classSummary.Add(new XAttribute("visitedSequencePoints", classLineCoverage.Covered.ToString()));
@@ -224,10 +226,10 @@ namespace Coverlet.Core.Reporters
                 modules.Add(module);
             }
 
-            var moduleLineCoverage = summary.CalculateLineCoverage(result.Modules);
-            var moduleBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
-            var moduleMaxCyclomaticComplexity = summary.CalculateMaxCyclomaticComplexity(result.Modules);
-            var moduleMinCyclomaticComplexity = summary.CalculateMinCyclomaticComplexity(result.Modules);
+            CoverageDetails moduleLineCoverage = summary.CalculateLineCoverage(result.Modules);
+            CoverageDetails moduleBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
+            int moduleMaxCyclomaticComplexity = summary.CalculateMaxCyclomaticComplexity(result.Modules);
+            int moduleMinCyclomaticComplexity = summary.CalculateMinCyclomaticComplexity(result.Modules);
 
             coverageSummary.Add(new XAttribute("numSequencePoints", moduleLineCoverage.Total.ToString()));
             coverageSummary.Add(new XAttribute("visitedSequencePoints", moduleLineCoverage.Covered.ToString()));

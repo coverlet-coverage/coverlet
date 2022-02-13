@@ -1,3 +1,6 @@
+// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 
 using Xunit;
@@ -28,7 +31,7 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestRetryWithExponentialRetryBackoff()
         {
-            var currentSleep = 6;
+            int currentSleep = 6;
             Func<TimeSpan> retryStrategy = () =>
             {
                 var sleep = TimeSpan.FromMilliseconds(currentSleep);

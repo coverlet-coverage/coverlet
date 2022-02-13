@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
+// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Linq;
 
-using Coverlet.Core;
-using Moq;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -23,29 +22,29 @@ namespace Coverlet.Core.Tests
 
         private void SetupDataForArithmeticPrecision()
         {
-            Lines lines = new Lines();
+            var lines = new Lines();
             lines.Add(1, 1);
             for (int i = 2; i <= 6; i++)
             {
                 lines.Add(i, 0);
             }
-            Branches branches = new Branches();
+            var branches = new Branches();
             branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
             for (int i = 2; i <= 6; i++)
             {
                 branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = (uint)i });
             }
 
-            Methods methods = new Methods();
-            var methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
+            var methods = new Methods();
+            string methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
             methods.Add(methodString, new Method());
             methods[methodString].Lines = lines;
             methods[methodString].Branches = branches;
 
-            Classes classes = new Classes();
+            var classes = new Classes();
             classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
 
-            Documents documents = new Documents();
+            var documents = new Documents();
             documents.Add("doc.cs", classes);
 
             _moduleArithmeticPrecision = new Modules();
@@ -54,23 +53,23 @@ namespace Coverlet.Core.Tests
 
         private void SetupDataSingleModule()
         {
-            Lines lines = new Lines();
+            var lines = new Lines();
             lines.Add(1, 1);
             lines.Add(2, 0);
-            Branches branches = new Branches();
+            var branches = new Branches();
             branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
             branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 });
 
-            Methods methods = new Methods();
-            var methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
+            var methods = new Methods();
+            string methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
             methods.Add(methodString, new Method());
             methods[methodString].Lines = lines;
             methods[methodString].Branches = branches;
 
-            Classes classes = new Classes();
+            var classes = new Classes();
             classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
 
-            Documents documents = new Documents();
+            var documents = new Documents();
             documents.Add("doc.cs", classes);
 
             _averageCalculationSingleModule = new Modules();
@@ -79,21 +78,21 @@ namespace Coverlet.Core.Tests
 
         private void SetupDataMultipleModule()
         {
-            Lines lines = new Lines
+            var lines = new Lines
             {
                 { 1, 1 }, // covered
                 { 2, 0 }, // not covered
                 { 3, 0 } // not covered
             };
 
-            Branches branches = new Branches
+            var branches = new Branches
             {
                 new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 }, // covered
                 new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 }, // covered
                 new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2 } // not covered
             };
 
-            Methods methods = new Methods();
+            var methods = new Methods();
             string[] methodString = {
                 "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()", // covered
                 "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestAditionalCalculateSummary()" // not covered
@@ -108,12 +107,12 @@ namespace Coverlet.Core.Tests
                 { 1, 0 } // not covered
             };
 
-            Classes classes = new Classes
+            var classes = new Classes
             {
                 { "Coverlet.Core.Tests.CoverageSummaryTests", methods }
             };
 
-            Documents documents = new Documents
+            var documents = new Documents
             {
                 { "doc.cs", classes }
             };
@@ -124,11 +123,11 @@ namespace Coverlet.Core.Tests
                 { "aditionalModule", documents }
             };
         }
-        
+
         [Fact]
         public void TestCalculateLineCoverage_NoModules()
         {
-            CoverageSummary summary = new CoverageSummary();
+            var summary = new CoverageSummary();
             var modules = new Modules();
 
             Assert.Equal(0, summary.CalculateLineCoverage(modules).Percent);
@@ -142,12 +141,12 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateLineCoverage_SingleModule()
         {
-            CoverageSummary summary = new CoverageSummary();
+            var summary = new CoverageSummary();
 
-            var module = _averageCalculationSingleModule.First();
-            var document = module.Value.First();
-            var @class = document.Value.First();
-            var method = @class.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Documents> module = _averageCalculationSingleModule.First();
+            System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Methods> @class = document.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Method> method = @class.Value.First();
 
             Assert.Equal(50, summary.CalculateLineCoverage(_averageCalculationSingleModule).AverageModulePercent);
             Assert.Equal(50, summary.CalculateLineCoverage(module.Value).Percent);
@@ -159,9 +158,9 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateLineCoverage_MultiModule()
         {
-            CoverageSummary summary = new CoverageSummary();
-            var documentsFirstModule = _averageCalculationMultiModule["module"];
-            var documentsSecondModule = _averageCalculationMultiModule["aditionalModule"];
+            var summary = new CoverageSummary();
+            Documents documentsFirstModule = _averageCalculationMultiModule["module"];
+            Documents documentsSecondModule = _averageCalculationMultiModule["aditionalModule"];
 
             Assert.Equal(37.5, summary.CalculateLineCoverage(_averageCalculationMultiModule).AverageModulePercent);
             Assert.Equal(50, summary.CalculateLineCoverage(documentsFirstModule.First().Value).Percent);
@@ -174,12 +173,12 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateBranchCoverage_SingleModule()
         {
-            CoverageSummary summary = new CoverageSummary();
+            var summary = new CoverageSummary();
 
-            var module = _averageCalculationSingleModule.First();
-            var document = module.Value.First();
-            var @class = document.Value.First();
-            var method = @class.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Documents> module = _averageCalculationSingleModule.First();
+            System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Methods> @class = document.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Method> method = @class.Value.First();
 
             Assert.Equal(100, summary.CalculateBranchCoverage(_averageCalculationSingleModule).AverageModulePercent);
             Assert.Equal(100, summary.CalculateBranchCoverage(module.Value).Percent);
@@ -191,9 +190,9 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateBranchCoverage_MultiModule()
         {
-            CoverageSummary summary = new CoverageSummary();
-            var documentsFirstModule = _averageCalculationMultiModule["module"];
-            var documentsSecondModule = _averageCalculationMultiModule["aditionalModule"];
+            var summary = new CoverageSummary();
+            Documents documentsFirstModule = _averageCalculationMultiModule["module"];
+            Documents documentsSecondModule = _averageCalculationMultiModule["aditionalModule"];
 
             Assert.Equal(83.33, summary.CalculateBranchCoverage(_averageCalculationMultiModule).AverageModulePercent);
             Assert.Equal(100, summary.CalculateBranchCoverage(documentsFirstModule.First().Value).Percent);
@@ -203,12 +202,12 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateMethodCoverage_SingleModule()
         {
-            CoverageSummary summary = new CoverageSummary();
+            var summary = new CoverageSummary();
 
-            var module = _averageCalculationSingleModule.First();
-            var document = module.Value.First();
-            var @class = document.Value.First();
-            var method = @class.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Documents> module = _averageCalculationSingleModule.First();
+            System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Methods> @class = document.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Method> method = @class.Value.First();
 
             Assert.Equal(100, summary.CalculateMethodCoverage(_averageCalculationSingleModule).AverageModulePercent);
             Assert.Equal(100, summary.CalculateMethodCoverage(module.Value).Percent);
@@ -220,9 +219,9 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateMethodCoverage_MultiModule()
         {
-            CoverageSummary summary = new CoverageSummary();
-            var documentsFirstModule = _averageCalculationMultiModule["module"];
-            var documentsSecondModule = _averageCalculationMultiModule["aditionalModule"];
+            var summary = new CoverageSummary();
+            Documents documentsFirstModule = _averageCalculationMultiModule["module"];
+            Documents documentsSecondModule = _averageCalculationMultiModule["aditionalModule"];
 
             Assert.Equal(75, summary.CalculateMethodCoverage(_averageCalculationMultiModule).AverageModulePercent);
             Assert.Equal(100, summary.CalculateMethodCoverage(documentsFirstModule.First().Value).Percent);
@@ -232,12 +231,12 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateLineCoveragePercentage_ArithmeticPrecisionCheck()
         {
-            CoverageSummary summary = new CoverageSummary();
+            var summary = new CoverageSummary();
 
-            var module = _moduleArithmeticPrecision.First();
-            var document = module.Value.First();
-            var @class = document.Value.First();
-            var method = @class.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Documents> module = _moduleArithmeticPrecision.First();
+            System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Methods> @class = document.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Method> method = @class.Value.First();
 
             Assert.Equal(16.66, summary.CalculateLineCoverage(_moduleArithmeticPrecision).AverageModulePercent);
             Assert.Equal(16.66, summary.CalculateLineCoverage(module.Value).Percent);
@@ -249,12 +248,12 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCalculateBranchCoveragePercentage_ArithmeticPrecisionCheck()
         {
-            CoverageSummary summary = new CoverageSummary();
+            var summary = new CoverageSummary();
 
-            var module = _moduleArithmeticPrecision.First();
-            var document = module.Value.First();
-            var @class = document.Value.First();
-            var method = @class.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Documents> module = _moduleArithmeticPrecision.First();
+            System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Methods> @class = document.Value.First();
+            System.Collections.Generic.KeyValuePair<string, Method> method = @class.Value.First();
 
             Assert.Equal(16.66, summary.CalculateBranchCoverage(_moduleArithmeticPrecision).AverageModulePercent);
             Assert.Equal(16.66, summary.CalculateBranchCoverage(module.Value).Percent);

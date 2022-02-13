@@ -1,3 +1,6 @@
+// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,11 +50,11 @@ namespace Coverlet.Core.Instrumentation
 
         public override bool Equals(object obj) => Equals(obj);
 
-        public bool Equals(BranchKey other) => other is BranchKey branchKey && branchKey.Line == this.Line && branchKey.Ordinal == this.Ordinal;
+        public bool Equals(BranchKey other) => other is BranchKey branchKey && branchKey.Line == Line && branchKey.Ordinal == Ordinal;
 
         public override int GetHashCode()
         {
-            return (this.Line, this.Ordinal).GetHashCode();
+            return (Line, Ordinal).GetHashCode();
         }
     }
 

@@ -1,4 +1,5 @@
-﻿// Remember to use full name because adding new using directives change line numbers
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace Coverlet.Core.Samples.Tests
 {
@@ -47,7 +48,7 @@ namespace Coverlet.Core.Samples.Tests
         public System.Collections.Generic.IEnumerable<string> Enumerable(System.Collections.Generic.IList<string> ls)
         {
             foreach (
-                    var item
+                    string item
                     in
                     ls
                     )

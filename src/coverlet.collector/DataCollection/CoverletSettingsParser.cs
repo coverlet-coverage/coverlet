@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -89,7 +92,7 @@ namespace Coverlet.Collector.DataCollection
             if (configurationElement != null)
             {
                 XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
-                formats = this.SplitElement(reportFormatElement);
+                formats = SplitElement(reportFormatElement);
             }
 
             return formats is null || formats.Length == 0 ? new[] { CoverletConstants.DefaultReportFormat } : formats;
@@ -103,7 +106,7 @@ namespace Coverlet.Collector.DataCollection
         private string[] ParseIncludeFilters(XmlElement configurationElement)
         {
             XmlElement includeFiltersElement = configurationElement[CoverletConstants.IncludeFiltersElementName];
-            return this.SplitElement(includeFiltersElement);
+            return SplitElement(includeFiltersElement);
         }
 
         /// <summary>
@@ -114,7 +117,7 @@ namespace Coverlet.Collector.DataCollection
         private string[] ParseIncludeDirectories(XmlElement configurationElement)
         {
             XmlElement includeDirectoriesElement = configurationElement[CoverletConstants.IncludeDirectoriesElementName];
-            return this.SplitElement(includeDirectoriesElement);
+            return SplitElement(includeDirectoriesElement);
         }
 
         /// <summary>
@@ -124,12 +127,12 @@ namespace Coverlet.Collector.DataCollection
         /// <returns>Filters to exclude</returns>
         private string[] ParseExcludeFilters(XmlElement configurationElement)
         {
-            List<string> excludeFilters = new List<string> { CoverletConstants.DefaultExcludeFilter };
+            var excludeFilters = new List<string> { CoverletConstants.DefaultExcludeFilter };
 
             if (configurationElement != null)
             {
                 XmlElement excludeFiltersElement = configurationElement[CoverletConstants.ExcludeFiltersElementName];
-                string[] filters = this.SplitElement(excludeFiltersElement);
+                string[] filters = SplitElement(excludeFiltersElement);
                 if (filters != null)
                 {
                     excludeFilters.AddRange(filters);
@@ -147,7 +150,7 @@ namespace Coverlet.Collector.DataCollection
         private string[] ParseExcludeSourceFiles(XmlElement configurationElement)
         {
             XmlElement excludeSourceFilesElement = configurationElement[CoverletConstants.ExcludeSourceFilesElementName];
-            return this.SplitElement(excludeSourceFilesElement);
+            return SplitElement(excludeSourceFilesElement);
         }
 
         /// <summary>
@@ -158,7 +161,7 @@ namespace Coverlet.Collector.DataCollection
         private string[] ParseExcludeAttributes(XmlElement configurationElement)
         {
             XmlElement excludeAttributesElement = configurationElement[CoverletConstants.ExcludeAttributesElementName];
-            return this.SplitElement(excludeAttributesElement);
+            return SplitElement(excludeAttributesElement);
         }
 
         /// <summary>
@@ -240,7 +243,7 @@ namespace Coverlet.Collector.DataCollection
         private string[] ParseDoesNotReturnAttributes(XmlElement configurationElement)
         {
             XmlElement doesNotReturnAttributesElement = configurationElement[CoverletConstants.DoesNotReturnAttributesElementName];
-            return this.SplitElement(doesNotReturnAttributesElement);
+            return SplitElement(doesNotReturnAttributesElement);
         }
 
         /// <summary>

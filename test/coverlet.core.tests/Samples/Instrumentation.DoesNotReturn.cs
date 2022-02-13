@@ -1,4 +1,7 @@
-﻿namespace Coverlet.Core.Samples.Tests
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace Coverlet.Core.Samples.Tests
 {
     public class DoesNotReturn
     {
@@ -70,7 +73,7 @@
 
         public void Subtle()
         {
-            var key = System.Console.ReadKey();
+            System.ConsoleKeyInfo key = System.Console.ReadKey();
 
             switch (key.KeyChar)
             {
@@ -104,7 +107,7 @@
 
         public void UnreachableBranch()
         {
-            var key = System.Console.ReadKey();
+            System.ConsoleKeyInfo key = System.Console.ReadKey();
             Throws();
 
             if (key.KeyChar == 'A')                             // unreachable
@@ -175,7 +178,7 @@
                 Throws();
                 System.Console.WriteLine("Constant-2");     //unreachable
             }                                               //unreachable
-            catch (System.InvalidOperationException e) 
+            catch (System.InvalidOperationException e)
                 when (e.Message != null)
             {
                 System.Console.WriteLine("InCatch-1");

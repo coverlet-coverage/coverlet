@@ -1,4 +1,5 @@
-// Remember to use full name because adding new using directives change line numbers
+// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.IO;
@@ -10,7 +11,7 @@ namespace Coverlet.Core.Samples.Tests
     {
         async public ValueTask<int> AsyncExecution(bool skipLast)
         {
-            var bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+            byte[] bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 
             var stream = new MemoryStream(bytes);
             stream.Position = 0;
@@ -30,14 +31,14 @@ namespace Coverlet.Core.Samples.Tests
 
         async public ValueTask<int> Async(System.IO.MemoryStream stream)
         {
-            var buffer = new byte[4];
+            byte[] buffer = new byte[4];
             await stream.ReadAsync(buffer.AsMemory());      // This overload of ReadAsync() returns a ValueTask<int>
             return buffer[0] + buffer[1] + buffer[2] + buffer[3];
         }
 
         async public ValueTask<int> AsyncExecution(int val)
         {
-            var bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+            byte[] bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
 
             var stream = new MemoryStream(bytes);
             stream.Position = 0;
@@ -85,7 +86,7 @@ namespace Coverlet.Core.Samples.Tests
 
         async public ValueTask<int> ConfigureAwait()
         {
-            var bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            byte[] bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
 
             var stream = new MemoryStream(bytes);
             stream.Position = 0;
@@ -96,12 +97,12 @@ namespace Coverlet.Core.Samples.Tests
 
         async public Task<int> WrappingValueTaskAsTask()
         {
-            var bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            byte[] bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
 
             var stream = new MemoryStream(bytes);
             stream.Position = 0;
 
-            var task = Async(stream).AsTask();
+            Task<int> task = Async(stream).AsTask();
 
             return await task;
         }

@@ -1,3 +1,6 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -6,7 +9,7 @@ namespace Coverlet.Integration.Tests
 {
     public class Msbuild : BaseTest
     {
-        private string _buildConfiguration;
+        private readonly string _buildConfiguration;
 
         public Msbuild()
         {
@@ -177,7 +180,7 @@ namespace Coverlet.Integration.Tests
         public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-            string[] targetFrameworks = new string[] {"net5.0", "netcoreapp3.1" };
+            string[] targetFrameworks = new string[] { "net5.0", "netcoreapp3.1" };
             UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
             Assert.Contains("Passed!", standardOutput);

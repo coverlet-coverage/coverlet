@@ -1,7 +1,13 @@
-﻿using System.IO;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO;
+
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Instrumentation;
+
 using Moq;
+
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -11,10 +17,10 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void CoverageResult_NegativeLineCoverage_TranslatedToMaxValueOfInt32()
         {
-            InstrumenterResult instrumenterResult = new InstrumenterResult
+            var instrumenterResult = new InstrumenterResult
             {
-                HitsFilePath = "HitsFilePath", 
-                SourceLink = "SourceLink", 
+                HitsFilePath = "HitsFilePath",
+                SourceLink = "SourceLink",
                 ModulePath = "ModulePath"
             };
 
@@ -36,15 +42,15 @@ namespace Coverlet.Core.Tests
 
             instrumenterResult.Documents.Add("document", document);
 
-            CoveragePrepareResult coveragePrepareResult = new CoveragePrepareResult
+            var coveragePrepareResult = new CoveragePrepareResult
             {
-                UseSourceLink = true, 
-                Results = new[] {instrumenterResult}, 
+                UseSourceLink = true,
+                Results = new[] { instrumenterResult },
                 Parameters = new CoverageParameters()
             };
 
             Stream memoryStream = new MemoryStream();
-            BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+            var binaryWriter = new BinaryWriter(memoryStream);
             binaryWriter.Write(1);
             binaryWriter.Write(-1);
             memoryStream.Position = 0;
@@ -57,7 +63,7 @@ namespace Coverlet.Core.Tests
             var coverage = new Coverage(coveragePrepareResult, new Mock<ILogger>().Object, new Mock<IInstrumentationHelper>().Object,
                 fileSystemMock.Object, new Mock<ISourceRootTranslator>().Object);
 
-            var coverageResult = coverage.GetCoverageResult();
+            CoverageResult coverageResult = coverage.GetCoverageResult();
             coverageResult.Document("document").AssertLinesCovered(BuildConfiguration.Debug, (1, int.MaxValue));
 
         }

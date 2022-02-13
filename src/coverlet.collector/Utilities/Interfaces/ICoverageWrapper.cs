@@ -1,4 +1,7 @@
-﻿using Coverlet.Collector.DataCollection;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Coverlet.Collector.DataCollection;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 

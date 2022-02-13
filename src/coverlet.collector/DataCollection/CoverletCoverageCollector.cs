@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -124,7 +127,7 @@ namespace Coverlet.Collector.DataCollection
             try
             {
                 // Get coverlet settings
-                IEnumerable<string> testModules = this.GetTestModules(sessionStartEventArgs);
+                IEnumerable<string> testModules = GetTestModules(sessionStartEventArgs);
                 var coverletSettingsParser = new CoverletSettingsParser(_eqtTrace);
                 CoverletSettings coverletSettings = coverletSettingsParser.Parse(_configurationElement, testModules);
 
@@ -142,7 +145,7 @@ namespace Coverlet.Collector.DataCollection
             catch (Exception ex)
             {
                 _logger.LogWarning(ex.ToString());
-                this.Dispose(true);
+                Dispose(true);
             }
         }
 
@@ -179,7 +182,7 @@ namespace Coverlet.Collector.DataCollection
             catch (Exception ex)
             {
                 _logger.LogWarning(ex.ToString());
-                this.Dispose(true);
+                Dispose(true);
             }
         }
 

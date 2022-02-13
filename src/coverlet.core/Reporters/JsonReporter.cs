@@ -1,7 +1,8 @@
-using Newtonsoft.Json;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Coverlet.Core.Abstractions;
-using System;
+using Newtonsoft.Json;
 
 namespace Coverlet.Core.Reporters
 {

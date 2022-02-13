@@ -1,4 +1,5 @@
-﻿// Remember to use full name because adding new using directives change line numbers
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace Coverlet.Core.Samples.Tests
 {
@@ -6,7 +7,7 @@ namespace Coverlet.Core.Samples.Tests
     {
         public void Test(string input)
         {
-            MethodsWithExcludeFromCodeCoverageAttr_Issue670_Startup obj = new MethodsWithExcludeFromCodeCoverageAttr_Issue670_Startup();
+            var obj = new MethodsWithExcludeFromCodeCoverageAttr_Issue670_Startup();
             obj.ObjectExtension(input);
         }
     }

@@ -1,3 +1,6 @@
+// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Xunit;
 
 namespace Coverlet.Integration.Template
@@ -7,7 +10,7 @@ namespace Coverlet.Integration.Template
         [Fact]
         public void Answer()
         {
-            DeepThought dt = new DeepThought();
+            var dt = new DeepThought();
             Assert.Equal(42, dt.AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything());
         }
     }

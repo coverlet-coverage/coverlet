@@ -1,7 +1,9 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
@@ -21,21 +23,21 @@ namespace Coverlet.Core.Reporters
                 throw new NotSupportedException("Deterministic report not supported by lcov reporter");
             }
 
-            CoverageSummary summary = new CoverageSummary();
-            List<string> lcov = new List<string>();
+            var summary = new CoverageSummary();
+            var lcov = new List<string>();
 
-            foreach (var module in result.Modules)
+            foreach (KeyValuePair<string, Documents> module in result.Modules)
             {
-                foreach (var doc in module.Value)
+                foreach (KeyValuePair<string, Classes> doc in module.Value)
                 {
-                    var docLineCoverage = summary.CalculateLineCoverage(doc.Value);
-                    var docBranchCoverage = summary.CalculateBranchCoverage(doc.Value);
-                    var docMethodCoverage = summary.CalculateMethodCoverage(doc.Value);
+                    CoverageDetails docLineCoverage = summary.CalculateLineCoverage(doc.Value);
+                    CoverageDetails docBranchCoverage = summary.CalculateBranchCoverage(doc.Value);
+                    CoverageDetails docMethodCoverage = summary.CalculateMethodCoverage(doc.Value);
 
                     lcov.Add("SF:" + doc.Key);
-                    foreach (var @class in doc.Value)
+                    foreach (KeyValuePair<string, Methods> @class in doc.Value)
                     {
-                        foreach (var method in @class.Value)
+                        foreach (KeyValuePair<string, Method> method in @class.Value)
                         {
                             // Skip all methods with no lines
                             if (method.Value.Lines.Count == 0)
@@ -44,10 +46,10 @@ namespace Coverlet.Core.Reporters
                             lcov.Add($"FN:{method.Value.Lines.First().Key - 1},{method.Key}");
                             lcov.Add($"FNDA:{method.Value.Lines.First().Value},{method.Key}");
 
-                            foreach (var line in method.Value.Lines)
+                            foreach (KeyValuePair<int, int> line in method.Value.Lines)
                                 lcov.Add($"DA:{line.Key},{line.Value}");
 
-                            foreach (var branch in method.Value.Branches)
+                            foreach (BranchInfo branch in method.Value.Branches)
                             {
                                 lcov.Add($"BRDA:{branch.Line},{branch.Offset},{branch.Path},{branch.Hits}");
                             }

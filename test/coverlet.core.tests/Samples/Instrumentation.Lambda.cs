@@ -1,4 +1,5 @@
-﻿// Remember to use full name because adding new using directives change line numbers
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace Coverlet.Core.Samples.Tests
         {
             using (var stream = new System.IO.MemoryStream())
             {
-                var result = getResultFunction(stream, false);
+                T result = getResultFunction(stream, false);
                 return result;
             }
         }
@@ -31,7 +32,7 @@ namespace Coverlet.Core.Samples.Tests
 
         public bool InvokeAnonymous_Test()
         {
-            Lambda_Issue343 demoClass = new Lambda_Issue343();
+            var demoClass = new Lambda_Issue343();
             return demoClass.InvokeAnonymous();
         }
 
@@ -39,7 +40,7 @@ namespace Coverlet.Core.Samples.Tests
         {
             using (var stream = new System.IO.MemoryStream())
             {
-                var result = await getResultFunction(stream, false);
+                T result = await getResultFunction(stream, false);
                 return result;
             }
         }
@@ -58,7 +59,7 @@ namespace Coverlet.Core.Samples.Tests
 
         async public Task<bool> InvokeAnonymousAsync_Test()
         {
-            Lambda_Issue343 demoClass = new Lambda_Issue343();
+            var demoClass = new Lambda_Issue343();
             return await demoClass.InvokeAnonymousAsync();
         }
     }
@@ -72,7 +73,7 @@ namespace Coverlet.Core.Samples.Tests
         async public Task DoSomethingAsyncWithLinq(System.Collections.Generic.IEnumerable<object> objects)
         {
             await Task.Delay(System.TimeSpan.FromMilliseconds(1));
-            var selected = System.Linq.Enumerable.Select(objects, o => o);
+            System.Collections.Generic.IEnumerable<object> selected = System.Linq.Enumerable.Select(objects, o => o);
             _ = System.Linq.Enumerable.ToArray(selected);
         }
     }
@@ -82,7 +83,7 @@ namespace Coverlet.Core.Samples.Tests
         public async Task<int> If()
         {
             var numbers = (System.Collections.Generic.IEnumerable<int>)new[] { 1, 2, 3, 4, 5 };
-            var result = 0;
+            int result = 0;
             if (numbers.Select(i => i * 2).Count() == 5)
             {
                 result = 1;
@@ -94,8 +95,8 @@ namespace Coverlet.Core.Samples.Tests
         public async Task<int> Foreach()
         {
             var numbers = (System.Collections.Generic.IEnumerable<int>)new[] { 1, 2, 3, 4, 5 };
-            var sum = 0;
-            foreach (var i in numbers.Select(n => n * 2))
+            int sum = 0;
+            foreach (int i in numbers.Select(n => n * 2))
             {
                 sum += i;
             }
