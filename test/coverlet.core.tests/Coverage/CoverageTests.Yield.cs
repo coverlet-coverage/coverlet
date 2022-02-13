@@ -1,6 +1,8 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
+using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
 using Tmds.Utils;
 using Xunit;
@@ -19,7 +21,7 @@ namespace Coverlet.Core.Tests
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
-                        foreach (var _ in instance.One()) ;
+                        foreach (dynamic _ in instance.One()) ;
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
@@ -50,7 +52,7 @@ namespace Coverlet.Core.Tests
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
-                        foreach (var _ in instance.Two()) ;
+                        foreach (dynamic _ in instance.Two()) ;
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
@@ -80,7 +82,7 @@ namespace Coverlet.Core.Tests
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
-                        foreach (var _ in instance.OneWithSwitch(2)) ;
+                        foreach (dynamic _ in instance.OneWithSwitch(2)) ;
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
@@ -111,7 +113,7 @@ namespace Coverlet.Core.Tests
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
-                        foreach (var _ in instance.Three()) ;
+                        foreach (dynamic _ in instance.Three()) ;
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
@@ -141,7 +143,7 @@ namespace Coverlet.Core.Tests
                 {
                     CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
-                        foreach (var _ in instance.Enumerable(new[] { "one", "two", "three", "four" })) ;
+                        foreach (dynamic _ in instance.Enumerable(new[] { "one", "two", "three", "four" })) ;
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);

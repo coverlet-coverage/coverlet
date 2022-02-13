@@ -1,8 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using Coverlet.Core;
 using Xunit.Sdk;
 
@@ -16,7 +18,6 @@ namespace Coverlet.Integration.Tests
             {
                 throw new ArgumentNullException(nameof(docName));
             }
-
 
             foreach (KeyValuePair<string, Documents> module in modules)
             {
@@ -39,7 +40,6 @@ namespace Coverlet.Integration.Tests
                 throw new ArgumentNullException(nameof(className));
             }
 
-
             foreach (KeyValuePair<string, Methods> @class in classes)
             {
                 if (@class.Key == className)
@@ -57,7 +57,6 @@ namespace Coverlet.Integration.Tests
             {
                 throw new ArgumentNullException(nameof(methodName));
             }
-
 
             foreach (KeyValuePair<string, Method> method in methods)
             {
@@ -77,7 +76,7 @@ namespace Coverlet.Integration.Tests
                 throw new ArgumentNullException(nameof(lines));
             }
 
-            List<int> linesToCover = new List<int>(lines.Select(l => l.line));
+            var linesToCover = new List<int>(lines.Select(l => l.line));
 
             foreach (KeyValuePair<int, int> line in method.Lines)
             {

@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using Coverlet.Core.Abstractions;
 using Coverlet.MSbuild.Tasks;
 using Moq;
@@ -29,10 +31,10 @@ namespace Coverlet.Core.Reporters.Tests
         [InlineData("netcoreapp2.2", "file", "cobertura", "file.netcoreapp2.2.cobertura.xml")]
         public void Msbuild_ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string coverletOutput, string reportFormat, string expectedFileName)
         {
-            Mock<IFileSystem> fileSystem = new Mock<IFileSystem>();
-            Mock<IConsole> console = new Mock<IConsole>();
+            var fileSystem = new Mock<IFileSystem>();
+            var console = new Mock<IConsole>();
 
-            ReportWriter reportWriter = new ReportWriter(
+            var reportWriter = new ReportWriter(
                 coverletMultiTargetFrameworksCurrentTFM,
                 // mimic code inside CoverageResultTask.cs
                 Path.GetDirectoryName(coverletOutput),
@@ -42,7 +44,7 @@ namespace Coverlet.Core.Reporters.Tests
                 console.Object,
                 new CoverageResult() { Modules = new Modules(), Parameters = new CoverageParameters() }, null);
 
-            var path = reportWriter.WriteReport();
+            string path = reportWriter.WriteReport();
             // Path.Combine depends on OS so we can change only win side to avoid duplication
             Assert.Equal(path.Replace('/', Path.DirectorySeparatorChar), expectedFileName.Replace('/', Path.DirectorySeparatorChar));
         }
