@@ -1,12 +1,10 @@
-// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
-
+using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests

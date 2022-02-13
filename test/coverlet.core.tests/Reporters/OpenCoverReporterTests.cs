@@ -1,16 +1,10 @@
-// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
+using Coverlet.Core.Abstractions;
+using Moq;
 using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-
-using Coverlet.Core.Abstractions;
-
-using Moq;
-
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -20,17 +14,17 @@ namespace Coverlet.Core.Reporters.Tests
         [Fact]
         public void TestReport()
         {
-            var result = new CoverageResult();
+            CoverageResult result = new CoverageResult();
             result.Parameters = new CoverageParameters();
             result.Identifier = Guid.NewGuid().ToString();
 
             result.Modules = new Modules();
             result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
 
-            var reporter = new OpenCoverReporter();
+            OpenCoverReporter reporter = new OpenCoverReporter();
             string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
             Assert.NotEmpty(report);
-            var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+            XDocument doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
             Assert.Empty(doc.Descendants().Attributes("sequenceCoverage").Where(v => v.Value != "33.33"));
             Assert.Empty(doc.Descendants().Attributes("branchCoverage").Where(v => v.Value != "25"));
             Assert.Empty(doc.Descendants().Attributes("nPathComplexity").Where(v => v.Value != "4"));
@@ -39,7 +33,7 @@ namespace Coverlet.Core.Reporters.Tests
         [Fact]
         public void TestFilesHaveUniqueIdsOverMultipleModules()
         {
-            var result = new CoverageResult();
+            CoverageResult result = new CoverageResult();
             result.Parameters = new CoverageParameters();
             result.Identifier = Guid.NewGuid().ToString();
 
@@ -47,8 +41,8 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
             result.Modules.Add("Some.Other.Module", CreateSecondDocuments());
 
-            var reporter = new OpenCoverReporter();
-            string xml = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
+            OpenCoverReporter reporter = new OpenCoverReporter();
+            var xml = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
             Assert.NotEqual(string.Empty, xml);
 
             Assert.Contains(@"<FileRef uid=""1"" />", xml);
@@ -65,7 +59,7 @@ namespace Coverlet.Core.Reporters.Tests
                 Parameters = new CoverageParameters()
             };
 
-            string xml = new OpenCoverReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+            var xml = new OpenCoverReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
 
             // Line 1: Two branches, no coverage (bec = 2, bev = 0)
             Assert.Contains(@"<SequencePoint vc=""1"" uspid=""1"" ordinal=""0"" sl=""1"" sc=""1"" el=""1"" ec=""2"" bec=""2"" bev=""0"" fileid=""1"" />", xml);
@@ -82,27 +76,27 @@ namespace Coverlet.Core.Reporters.Tests
 
         private static Documents CreateFirstDocuments()
         {
-            var lines = new Lines();
+            Lines lines = new Lines();
             lines.Add(1, 1);
             lines.Add(2, 0);
             lines.Add(3, 0);
 
-            var branches = new Branches();
+            Branches branches = new Branches();
             branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 });
             branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 23, EndOffset = 27, Path = 1, Ordinal = 2 });
             branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 41, Path = 0, Ordinal = 3 });
             branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 44, Path = 1, Ordinal = 4 });
 
-            var methods = new Methods();
-            string methodString = "System.Void Coverlet.Core.Reporters.Tests.OpenCoverReporterTests.TestReport()";
+            Methods methods = new Methods();
+            var methodString = "System.Void Coverlet.Core.Reporters.Tests.OpenCoverReporterTests.TestReport()";
             methods.Add(methodString, new Method());
             methods[methodString].Lines = lines;
             methods[methodString].Branches = branches;
 
-            var classes = new Classes();
+            Classes classes = new Classes();
             classes.Add("Coverlet.Core.Reporters.Tests.OpenCoverReporterTests", methods);
 
-            var documents = new Documents();
+            Documents documents = new Documents();
             documents.Add("doc.cs", classes);
 
             return documents;
@@ -110,16 +104,16 @@ namespace Coverlet.Core.Reporters.Tests
 
         private static Documents CreateSecondDocuments()
         {
-            var lines = new Lines();
+            Lines lines = new Lines();
             lines.Add(1, 1);
             lines.Add(2, 0);
 
-            var methods = new Methods();
-            string methodString = "System.Void Some.Other.Module.TestClass.TestMethod()";
+            Methods methods = new Methods();
+            var methodString = "System.Void Some.Other.Module.TestClass.TestMethod()";
             methods.Add(methodString, new Method());
             methods[methodString].Lines = lines;
 
-            var classes2 = new Classes();
+            Classes classes2 = new Classes();
             classes2.Add("Some.Other.Module.TestClass", methods);
 
             var documents = new Documents();

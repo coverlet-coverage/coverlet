@@ -1,11 +1,8 @@
-// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System.IO;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
-
+using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -67,7 +64,7 @@ namespace Coverlet.Core.Tests
                     return 0;
                 }, new string[] { path });
 
-                CoverageResult res = TestInstrumentationHelper.GetCoverageResult(path);
+                var res = TestInstrumentationHelper.GetCoverageResult(path);
                 res.Document("Instrumentation.CatchBlock.cs")
                     .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 45, 59, 113, 127, 137, 138, 139, 153, 154, 155, 156, 175, 189, 199, 200, 201, 222, 223, 224, 225, 252, 266, 335, 349)
                     .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 6)

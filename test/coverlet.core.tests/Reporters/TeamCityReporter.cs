@@ -1,12 +1,7 @@
-﻿// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
+﻿using System;
 
 using Coverlet.Core.Abstractions;
-
 using Moq;
-
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -57,7 +52,7 @@ namespace Coverlet.Core.Reporters.Tests
             };
 
             var methods = new Methods();
-            string methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestReport()";
+            var methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestReport()";
             methods.Add(methodString, new Method());
             methods[methodString].Lines = lines;
             methods[methodString].Branches = branches;
@@ -94,7 +89,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void Report_ReturnsNonNullString()
         {
             // Act
-            string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
+            var output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
             Assert.False(string.IsNullOrWhiteSpace(output), "Output is not null or whitespace");
@@ -104,7 +99,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void Report_ReportsLineCoverage()
         {
             // Act
-            string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
+            var output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLCovered' value='1']", output);
@@ -115,7 +110,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void Report_ReportsBranchCoverage()
         {
             // Act
-            string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
+            var output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBCovered' value='1']", output);
@@ -126,7 +121,7 @@ namespace Coverlet.Core.Reporters.Tests
         public void Report_ReportsMethodCoverage()
         {
             // Act
-            string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
+            var output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
             Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMCovered' value='1']", output);

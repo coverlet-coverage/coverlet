@@ -1,6 +1,3 @@
-// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,9 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
 using Coverlet.Core.Attributes;
-
 using Microsoft.VisualStudio.TestPlatform;
 
 namespace Coverlet.Core.Samples.Tests
@@ -121,7 +116,7 @@ namespace Coverlet.Core.Samples.Tests
             {
                 using (var stream = new MemoryStream())
                 {
-                    long x = stream.Length;
+                    var x = stream.Length;
                     value = x > 1000 ? "yes" : "no";
                 }
             }

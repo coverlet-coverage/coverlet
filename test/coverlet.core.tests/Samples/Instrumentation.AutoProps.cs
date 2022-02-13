@@ -1,13 +1,10 @@
-﻿// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
+﻿using System;
 
 namespace Coverlet.Core.Samples.Tests
 {
     public class AutoProps
     {
-        private readonly int _myVal = 0;
+        private int _myVal = 0;
         public AutoProps()
         {
             _myVal = new Random().Next();
@@ -18,7 +15,7 @@ namespace Coverlet.Core.Samples.Tests
 
     public record RecordWithPropertyInit
     {
-        private readonly int _myRecordVal = 0;
+        private int _myRecordVal = 0;
         public RecordWithPropertyInit()
         {
             _myRecordVal = new Random().Next();

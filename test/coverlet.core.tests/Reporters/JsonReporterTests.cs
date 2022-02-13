@@ -1,12 +1,6 @@
-// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-
 using Coverlet.Core.Abstractions;
-
 using Moq;
-
+using System;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -16,28 +10,28 @@ namespace Coverlet.Core.Reporters.Tests
         [Fact]
         public void TestReport()
         {
-            var result = new CoverageResult();
+            CoverageResult result = new CoverageResult();
             result.Identifier = Guid.NewGuid().ToString();
 
-            var lines = new Lines();
+            Lines lines = new Lines();
             lines.Add(1, 1);
             lines.Add(2, 0);
 
-            var methods = new Methods();
-            string methodString = "System.Void Coverlet.Core.Reporters.Tests.JsonReporterTests.TestReport()";
+            Methods methods = new Methods();
+            var methodString = "System.Void Coverlet.Core.Reporters.Tests.JsonReporterTests.TestReport()";
             methods.Add(methodString, new Method());
             methods[methodString].Lines = lines;
 
-            var classes = new Classes();
+            Classes classes = new Classes();
             classes.Add("Coverlet.Core.Reporters.Tests.JsonReporterTests", methods);
 
-            var documents = new Documents();
+            Documents documents = new Documents();
             documents.Add("doc.cs", classes);
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
 
-            var reporter = new JsonReporter();
+            JsonReporter reporter = new JsonReporter();
             Assert.NotEqual("{\n}", reporter.Report(result, new Mock<ISourceRootTranslator>().Object));
             Assert.NotEqual(string.Empty, reporter.Report(result, new Mock<ISourceRootTranslator>().Object));
         }

@@ -1,16 +1,12 @@
-﻿// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
+﻿using Coverlet.Core.Instrumentation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-
-using Coverlet.Core.Instrumentation;
-
 using Xunit.Sdk;
 
 namespace Coverlet.Core.Tests
@@ -94,18 +90,18 @@ namespace Coverlet.Core.Tests
 
             if (document.Lines.Values.All(l => l.Method != methodName) && document.Branches.Values.All(l => l.Method != methodName))
             {
-                IEnumerable<string> methods = document.Lines.Values.Select(l => $"'{l.Method}'")
+                var methods = document.Lines.Values.Select(l => $"'{l.Method}'")
                     .Concat(document.Branches.Values.Select(b => $"'{b.Method}'"))
                     .Distinct();
                 throw new XunitException($"Method '{methodName}' not found. Methods in document: {string.Join(", ", methods)}");
             }
 
-            foreach (KeyValuePair<int, Line> line in document.Lines.Where(l => l.Value.Method == methodName))
+            foreach (var line in document.Lines.Where(l => l.Value.Method == methodName))
             {
                 methodDoc.Lines[line.Key] = line.Value;
             }
 
-            foreach (KeyValuePair<BranchKey, Branch> branch in document.Branches.Where(b => b.Value.Method == methodName))
+            foreach (var branch in document.Branches.Where(b => b.Value.Method == methodName))
             {
                 methodDoc.Branches[branch.Key] = branch.Value;
             }
@@ -154,7 +150,7 @@ namespace Coverlet.Core.Tests
                 throw new ArgumentNullException(nameof(document));
             }
 
-            var builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder();
             foreach (KeyValuePair<BranchKey, Branch> branch in document.Branches)
             {
                 builder.AppendLine($"({branch.Value.Number}, {branch.Value.Ordinal}, {branch.Value.Hits}),");
@@ -176,7 +172,7 @@ namespace Coverlet.Core.Tests
                 return document;
             }
 
-            var branchesToCover = new List<string>(lines.Select(b => $"[line {b.line} ordinal {b.ordinal}]"));
+            List<string> branchesToCover = new List<string>(lines.Select(b => $"[line {b.line} ordinal {b.ordinal}]"));
             foreach (KeyValuePair<BranchKey, Branch> branch in document.Branches)
             {
                 foreach ((int lineToCheck, int ordinalToCheck, int expectedHits) in lines)
@@ -274,7 +270,7 @@ namespace Coverlet.Core.Tests
                 throw new ArgumentException("to cannot be lower than from");
             }
 
-            var lines = new List<int>();
+            List<int> lines = new List<int>();
             foreach (KeyValuePair<int, Line> line in document.Lines)
             {
                 if (line.Value.Number >= from && line.Value.Number <= to && line.Value.Hits > 0)
@@ -305,7 +301,7 @@ namespace Coverlet.Core.Tests
                 return document;
             }
 
-            var linesToCover = new List<int>(lines.Select(l => l.line));
+            List<int> linesToCover = new List<int>(lines.Select(l => l.line));
             foreach (KeyValuePair<int, Line> line in document.Lines)
             {
                 foreach ((int lineToCheck, int expectedHits) in lines)
@@ -353,7 +349,7 @@ namespace Coverlet.Core.Tests
                 return document;
             }
 
-            var linesToCover = new List<int>(lines);
+            List<int> linesToCover = new List<int>(lines);
             foreach (KeyValuePair<int, Line> line in document.Lines)
             {
                 foreach (int lineToCheck in lines)
@@ -413,7 +409,7 @@ namespace Coverlet.Core.Tests
                 return document;
             }
 
-            IEnumerable<int> unexpectedlyInstrumented = document.Lines.Select(l => l.Value.Number).Intersect(lines);
+            var unexpectedlyInstrumented = document.Lines.Select(l => l.Value.Number).Intersect(lines);
 
             if (unexpectedlyInstrumented.Any())
             {
@@ -439,7 +435,7 @@ namespace Coverlet.Core.Tests
 
             var instrumentedLines = document.Lines.Select(l => l.Value.Number).ToHashSet();
 
-            IEnumerable<int> missing = lines.Where(l => !instrumentedLines.Contains(l));
+            var missing = lines.Where(l => !instrumentedLines.Contains(l));
 
             if (missing.Any())
             {

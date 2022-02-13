@@ -1,12 +1,10 @@
-// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Coverlet.Core.Samples.Tests;
-
+using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -148,7 +146,7 @@ namespace Coverlet.Core.Tests
                     return 0;
                 }, new string[] { path });
 
-                Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+                var document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
                 document.AssertLinesCovered(BuildConfiguration.Debug, (133, 1), (134, 1), (135, 1), (136, 1), (137, 1));
                 Assert.DoesNotContain(document.Branches, x => x.Key.Line == 134);
             }
@@ -176,7 +174,7 @@ namespace Coverlet.Core.Tests
                     return 0;
                 }, new string[] { path });
 
-                Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+                var document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
                 document.AssertLinesCovered(BuildConfiguration.Debug, (150, 1));
                 Assert.DoesNotContain(document.Branches, x => x.Key.Line == 150);
             }
@@ -205,7 +203,7 @@ namespace Coverlet.Core.Tests
                     return 0;
                 }, new string[] { path });
 
-                Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+                var document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
                 document.AssertLinesCoveredFromTo(BuildConfiguration.Debug, 170, 176);
                 document.AssertBranchesCovered(BuildConfiguration.Debug, (171, 0, 1), (171, 1, 1));
                 Assert.DoesNotContain(document.Branches, x => x.Key.Line == 176);

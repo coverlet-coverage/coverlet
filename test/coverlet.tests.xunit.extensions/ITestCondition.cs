@@ -1,7 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-namespace Coverlet.Tests.Xunit.Extensions
+﻿namespace Coverlet.Tests.Xunit.Extensions
 {
     public interface ITestCondition
     {

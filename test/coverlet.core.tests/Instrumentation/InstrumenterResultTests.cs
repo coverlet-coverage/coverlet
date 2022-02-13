@@ -1,9 +1,8 @@
-// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Linq;
 
 using Xunit;
+using Coverlet.Core.Instrumentation;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
@@ -12,14 +11,14 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestEnsureDocumentsPropertyNotNull()
         {
-            var result = new InstrumenterResult();
+            InstrumenterResult result = new InstrumenterResult();
             Assert.NotNull(result.Documents);
         }
 
         [Fact]
         public void TestEnsureLinesAndBranchesPropertyNotNull()
         {
-            var document = new Document();
+            Document document = new Document();
             Assert.NotNull(document.Lines);
             Assert.NotNull(document.Branches);
         }
@@ -27,13 +26,13 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void CoveragePrepareResult_SerializationRoundTrip()
         {
-            var cpr = new CoveragePrepareResult();
+            CoveragePrepareResult cpr = new CoveragePrepareResult();
             cpr.Identifier = "Identifier";
             cpr.MergeWith = "MergeWith";
             cpr.ModuleOrDirectory = "Module";
             cpr.UseSourceLink = true;
 
-            var ir = new InstrumenterResult();
+            InstrumenterResult ir = new InstrumenterResult();
             ir.HitsFilePath = "HitsFilePath";
             ir.Module = "Module";
             ir.ModulePath = "ModulePath";
@@ -96,7 +95,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             ir.Documents.Add("key2", doc2);
             cpr.Results = new InstrumenterResult[] { ir };
 
-            var roundTrip = CoveragePrepareResult.Deserialize(CoveragePrepareResult.Serialize(cpr));
+            CoveragePrepareResult roundTrip = CoveragePrepareResult.Deserialize(CoveragePrepareResult.Serialize(cpr));
 
             Assert.Equal(cpr.Identifier, roundTrip.Identifier);
             Assert.Equal(cpr.MergeWith, roundTrip.MergeWith);
@@ -120,8 +119,8 @@ namespace Coverlet.Core.Instrumentation.Tests
 
                 for (int k = 0; k < cpr.Results[i].Documents.Count; k++)
                 {
-                    System.Collections.Generic.KeyValuePair<string, Document>[] documents = cpr.Results[i].Documents.ToArray();
-                    System.Collections.Generic.KeyValuePair<string, Document>[] documentsRoundTrip = roundTrip.Results[i].Documents.ToArray();
+                    var documents = cpr.Results[i].Documents.ToArray();
+                    var documentsRoundTrip = roundTrip.Results[i].Documents.ToArray();
                     for (int j = 0; j < documents.Length; j++)
                     {
                         Assert.Equal(documents[j].Key, documentsRoundTrip[j].Key);
@@ -130,8 +129,8 @@ namespace Coverlet.Core.Instrumentation.Tests
 
                         for (int v = 0; v < documents[j].Value.Lines.Count; v++)
                         {
-                            System.Collections.Generic.KeyValuePair<int, Line>[] lines = documents[j].Value.Lines.ToArray();
-                            System.Collections.Generic.KeyValuePair<int, Line>[] linesRoundTrip = documentsRoundTrip[j].Value.Lines.ToArray();
+                            var lines = documents[j].Value.Lines.ToArray();
+                            var linesRoundTrip = documentsRoundTrip[j].Value.Lines.ToArray();
 
                             Assert.Equal(lines[v].Key, linesRoundTrip[v].Key);
                             Assert.Equal(lines[v].Value.Class, lines[v].Value.Class);
@@ -142,8 +141,8 @@ namespace Coverlet.Core.Instrumentation.Tests
 
                         for (int v = 0; v < documents[j].Value.Branches.Count; v++)
                         {
-                            System.Collections.Generic.KeyValuePair<BranchKey, Branch>[] branches = documents[j].Value.Branches.ToArray();
-                            System.Collections.Generic.KeyValuePair<BranchKey, Branch>[] branchesRoundTrip = documentsRoundTrip[j].Value.Branches.ToArray();
+                            var branches = documents[j].Value.Branches.ToArray();
+                            var branchesRoundTrip = documentsRoundTrip[j].Value.Branches.ToArray();
 
                             Assert.Equal(branches[v].Key, branchesRoundTrip[v].Key);
                             Assert.Equal(branches[v].Value.Class, branchesRoundTrip[v].Value.Class);

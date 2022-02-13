@@ -1,13 +1,9 @@
-﻿// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 using Coverlet.Core;
-
 using Xunit.Sdk;
 
 namespace Coverlet.Integration.Tests
@@ -81,7 +77,7 @@ namespace Coverlet.Integration.Tests
                 throw new ArgumentNullException(nameof(lines));
             }
 
-            var linesToCover = new List<int>(lines.Select(l => l.line));
+            List<int> linesToCover = new List<int>(lines.Select(l => l.line));
 
             foreach (KeyValuePair<int, int> line in method.Lines)
             {

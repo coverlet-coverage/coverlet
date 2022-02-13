@@ -1,6 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
+﻿// Remember to use full name because adding new using directives change line numbers
 using System.Linq;
 
 namespace Coverlet.Core.Samples.Tests
@@ -61,14 +59,14 @@ namespace Coverlet.Core.Samples.Tests
 
         public System.Collections.Generic.List<Tasks_Issue809> GetTaskForAllCriteria(SearchMsg_Issue809 searchMsg)
         {
-            LinqKit.ExpressionStarter<Tasks_Issue809> criteriaPredicate = LinqKit.PredicateBuilder.New<Tasks_Issue809>(true);
+            var criteriaPredicate = LinqKit.PredicateBuilder.New<Tasks_Issue809>(true);
             if (searchMsg.TaskId > 0)
                 criteriaPredicate = criteriaPredicate.And(tsk => tsk.TaskId == searchMsg.TaskId);
             if (searchMsg.ParentTaskId > 0)
             {
-                ParentTask_Issue809 parentTask = taskContext.ParentTasks.FirstOrDefault(
+                var parentTask = taskContext.ParentTasks.FirstOrDefault(
                    partask => partask.Parent_Task == searchMsg.ParentTaskId);
-                int parentId = (parentTask != default) ? parentTask.Parent_ID : 0;
+                var parentId = (parentTask != default) ? parentTask.Parent_ID : 0;
 
                 criteriaPredicate = criteriaPredicate.And(tsk => tsk.ParentTaskId == parentId);
             }
@@ -85,8 +83,8 @@ namespace Coverlet.Core.Samples.Tests
                 criteriaPredicate = criteriaPredicate.And(tsk =>
                 tsk.TaskDeatails.CompareTo(searchMsg.TaskDescription) == 0);
 
-            System.Collections.Generic.IEnumerable<Tasks_Issue809> anyTaskQuery = from taskEntity in taskContext.Tasks.Where(criteriaPredicate.Compile())
-                                                                                  select taskEntity;
+            var anyTaskQuery = from taskEntity in taskContext.Tasks.Where(criteriaPredicate.Compile())
+                               select taskEntity;
 
             var tasks = anyTaskQuery.ToList();
             tasks.ForEach(task =>
@@ -104,7 +102,7 @@ namespace Coverlet.Core.Samples.Tests
 
         public System.Collections.Generic.List<Tasks_Issue809> GetTaskForAnyCriteria(SearchMsg_Issue809 searchMsg)
         {
-            LinqKit.ExpressionStarter<Tasks_Issue809> criteriaPredicate = LinqKit.PredicateBuilder.New<Tasks_Issue809>(false);
+            var criteriaPredicate = LinqKit.PredicateBuilder.New<Tasks_Issue809>(false);
             if (searchMsg.TaskId > 0)
                 criteriaPredicate = criteriaPredicate.Or(tsk => tsk.TaskId == searchMsg.TaskId);
             if (!string.IsNullOrWhiteSpace(searchMsg.TaskDescription))
@@ -112,9 +110,9 @@ namespace Coverlet.Core.Samples.Tests
                 tsk.TaskDeatails.CompareTo(searchMsg.TaskDescription) == 0);
             if (searchMsg.ParentTaskId > 0)
             {
-                ParentTask_Issue809 parentTask = taskContext.ParentTasks.FirstOrDefault(
+                var parentTask = taskContext.ParentTasks.FirstOrDefault(
                     partask => partask.Parent_Task == searchMsg.ParentTaskId);
-                int parentId = (parentTask != default) ? parentTask.Parent_ID : 0;
+                var parentId = (parentTask != default) ? parentTask.Parent_ID : 0;
 
                 criteriaPredicate = criteriaPredicate.Or(tsk => tsk.ParentTaskId == parentId);
             }
@@ -127,8 +125,8 @@ namespace Coverlet.Core.Samples.Tests
                 criteriaPredicate = criteriaPredicate.Or(tsk => tsk.StartDate == searchMsg.FromDate);
             if (searchMsg.ToDate > System.DateTime.MinValue)
                 criteriaPredicate = criteriaPredicate.Or(tsk => tsk.EndDate == searchMsg.ToDate);
-            System.Collections.Generic.IEnumerable<Tasks_Issue809> anyTaskQuery = from taskEntity in taskContext.Tasks.Where(criteriaPredicate.Compile())
-                                                                                  select taskEntity;
+            var anyTaskQuery = from taskEntity in taskContext.Tasks.Where(criteriaPredicate.Compile())
+                               select taskEntity;
 
             var tasks = anyTaskQuery.ToList();
             tasks.ForEach(task =>
@@ -145,7 +143,7 @@ namespace Coverlet.Core.Samples.Tests
         {
             _ = await manageParentTask(tasks);
             taskContext.Tasks.Add(tasks);
-            int rowsAffected = await taskContext.SaveChangesAsync();
+            var rowsAffected = await taskContext.SaveChangesAsync();
             return (rowsAffected > 0) ? true : false;
 
         }
@@ -167,7 +165,7 @@ namespace Coverlet.Core.Samples.Tests
                                    partask.Parent_ID == taskEntity.ParentTaskId).DefaultIfEmpty()
                                    select new { taskEntity, parTaskEntity };
                 var oldTaskValueObj = oldTaskQuery.FirstOrDefault();
-                Tasks_Issue809 oldTask = oldTaskValueObj.taskEntity;
+                var oldTask = oldTaskValueObj.taskEntity;
                 if (oldTaskValueObj.parTaskEntity != default)
                 {
                     oldTask.ParentTask = new ParentTask_Issue809
@@ -187,7 +185,7 @@ namespace Coverlet.Core.Samples.Tests
 
 
                 taskContext.Update<Tasks_Issue809>(tasks);
-                int rowsAffected = await taskContext.SaveChangesAsync();
+                var rowsAffected = await taskContext.SaveChangesAsync();
 
                 bool combinedResult = (rowsAffected > 0) ? true : false;
                 bool parentUpdateResult = await UpdateParentTakDetails(tasks);
@@ -200,14 +198,14 @@ namespace Coverlet.Core.Samples.Tests
 
         private async System.Threading.Tasks.Task<bool> UpdateParentTakDetails(Tasks_Issue809 task)
         {
-            ParentTask_Issue809 parentTask = taskContext.ParentTasks.FirstOrDefault(parTsk =>
+            var parentTask = taskContext.ParentTasks.FirstOrDefault(parTsk =>
                                                             parTsk.Parent_Task == task.ParentTaskId);
             if ((parentTask != default) &&
                 (parentTask.ParentTaskDescription.CompareTo(task.TaskDeatails) != 0))
             {
                 parentTask.ParentTaskDescription = task.TaskDeatails;
                 taskContext.Update(parentTask);
-                int recordsAffected = await taskContext.SaveChangesAsync();
+                var recordsAffected = await taskContext.SaveChangesAsync();
                 return (recordsAffected > 0) ? true : false;
             }
             return true;
@@ -223,7 +221,7 @@ namespace Coverlet.Core.Samples.Tests
                                                             parTsk.Parent_Task == task.ParentTaskId);
                 if (parentTask == default)
                 {
-                    Tasks_Issue809 parTaskFromTaskEntity = taskContext.Tasks
+                    var parTaskFromTaskEntity = taskContext.Tasks
                         .FirstOrDefault(tsk => tsk.TaskId == task.ParentTaskId);
                     parentTask = new ParentTask_Issue809
                     {

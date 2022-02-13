@@ -1,7 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,20 +6,14 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
-
 using Microsoft.Extensions.DependencyInjection;
-
 using Moq;
-
 using Palmmedia.ReportGenerator.Core;
-
 using Tmds.Utils;
-
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -37,7 +28,7 @@ namespace Coverlet.Core.Tests
         /// </summary>
         public static void GenerateHtmlReport(CoverageResult coverageResult, IReporter reporter = null, string sourceFileFilter = "", [CallerMemberName] string directory = "")
         {
-            var defaultReporter = new JsonReporter();
+            JsonReporter defaultReporter = new JsonReporter();
             reporter ??= new CoberturaReporter();
             DirectoryInfo dir = Directory.CreateDirectory(directory);
             dir.Delete(true);
@@ -71,8 +62,8 @@ namespace Coverlet.Core.Tests
                 Assert.DoesNotContain("not found for module: ", message);
             });
             _processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
-            var coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-            var coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
+            CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
+            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
             return coverage.GetCoverageResult();
         }
 
@@ -102,7 +93,7 @@ namespace Coverlet.Core.Tests
 
             static string[] defaultFilters(string _) => Array.Empty<string>();
 
-            var parameters = new CoverageParameters
+            CoverageParameters parameters = new CoverageParameters
             {
                 IncludeFilters = (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
                 new string[]
@@ -126,14 +117,14 @@ namespace Coverlet.Core.Tests
             };
 
             // Instrument module
-            var coverage = new Coverage(newPath, parameters, new Logger(logFile),
+            Coverage coverage = new Coverage(newPath, parameters, new Logger(logFile),
             _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>(), _processWideContainer.GetService<ICecilSymbolHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
 
             // Load new assembly
-            var asm = Assembly.LoadFile(newPath);
+            Assembly asm = Assembly.LoadFile(newPath);
 
             // Instance type and call method
             await callMethod(Activator.CreateInstance(asm.GetType(typeof(T).FullName)));
@@ -149,7 +140,7 @@ namespace Coverlet.Core.Tests
             tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, new object[2] { null, null });
 
             // Persist CoveragePrepareResult
-            using (var fs = new FileStream(persistPrepareResultToFile, FileMode.Open))
+            using (FileStream fs = new FileStream(persistPrepareResultToFile, FileMode.Open))
             {
                 await CoveragePrepareResult.Serialize(prepareResult).CopyToAsync(fs);
             }
@@ -246,7 +237,7 @@ namespace Coverlet.Core.Tests
     // We log to files for debugging pourpose, we can check if instrumentation is ok
     class Logger : ILogger
     {
-        readonly string _logFile;
+        string _logFile;
 
         public Logger(string logFile) => _logFile = logFile;
 
