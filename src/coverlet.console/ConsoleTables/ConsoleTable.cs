@@ -1,5 +1,24 @@
-﻿// Copyright (c) Toni Solarin-Sodara
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2012 Khalid Abuhakmeh
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ⚠ Do not modify this file. It will be replaced by a package reference once ConsoleTables has a strong name.
@@ -27,14 +46,14 @@ namespace ConsoleTables
 
         public ConsoleTable(ConsoleTableOptions options)
         {
-            Options = options ?? throw new ArgumentNullException(nameof(options));
+            Options = options ?? throw new ArgumentNullException("options");
             Rows = new List<object[]>();
             Columns = new List<object>(options.Columns);
         }
 
         public ConsoleTable AddColumn(IEnumerable<string> names)
         {
-            foreach (string name in names)
+            foreach (var name in names)
                 Columns.Add(name);
             return this;
         }
@@ -59,11 +78,11 @@ namespace ConsoleTables
         {
             var table = new ConsoleTable();
 
-            IEnumerable<string> columns = GetColumns<T>();
+            var columns = GetColumns<T>();
 
             table.AddColumn(columns);
 
-            foreach (IEnumerable<object> propertyValues in values.Select(value => columns.Select(column => GetColumnValue<T>(value, column))))
+            foreach (var propertyValues in values.Select(value => columns.Select(column => GetColumnValue<T>(value, column))))
                 table.AddRow(propertyValues.ToArray());
 
             return table;
@@ -74,30 +93,30 @@ namespace ConsoleTables
             var builder = new StringBuilder();
 
             // find the longest column by searching each row
-            List<int> columnLengths = ColumnLengths();
+            var columnLengths = ColumnLengths();
 
             // create the string format with padding
-            string format = Enumerable.Range(0, Columns.Count)
+            var format = Enumerable.Range(0, Columns.Count)
                 .Select(i => " | {" + i + ",-" + columnLengths[i] + "}")
                 .Aggregate((s, a) => s + a) + " |";
 
             // find the longest formatted line
-            int maxRowLength = Math.Max(0, Rows.Any() ? Rows.Max(row => string.Format(format, row).Length) : 0);
-            string columnHeaders = string.Format(format, Columns.ToArray());
+            var maxRowLength = Math.Max(0, Rows.Any() ? Rows.Max(row => string.Format(format, row).Length) : 0);
+            var columnHeaders = string.Format(format, Columns.ToArray());
 
             // longest line is greater of formatted columnHeader and longest row
-            int longestLine = Math.Max(maxRowLength, columnHeaders.Length);
+            var longestLine = Math.Max(maxRowLength, columnHeaders.Length);
 
             // add each row
             var results = Rows.Select(row => string.Format(format, row)).ToList();
 
             // create the divider
-            string divider = " " + string.Join("", Enumerable.Repeat("-", longestLine - 1)) + " ";
+            var divider = " " + string.Join("", Enumerable.Repeat("-", longestLine - 1)) + " ";
 
             builder.AppendLine(divider);
             builder.AppendLine(columnHeaders);
 
-            foreach (string row in results)
+            foreach (var row in results)
             {
                 builder.AppendLine(divider);
                 builder.AppendLine(row);
@@ -124,19 +143,19 @@ namespace ConsoleTables
             var builder = new StringBuilder();
 
             // find the longest column by searching each row
-            List<int> columnLengths = ColumnLengths();
+            var columnLengths = ColumnLengths();
 
             // create the string format with padding
-            string format = Format(columnLengths, delimiter);
+            var format = Format(columnLengths, delimiter);
 
             // find the longest formatted line
-            string columnHeaders = string.Format(format, Columns.ToArray());
+            var columnHeaders = string.Format(format, Columns.ToArray());
 
             // add each row
             var results = Rows.Select(row => string.Format(format, row)).ToList();
 
             // create the divider
-            string divider = Regex.Replace(columnHeaders, @"[^|]", "-");
+            var divider = Regex.Replace(columnHeaders, @"[^|]", "-");
 
             builder.AppendLine(columnHeaders);
             builder.AppendLine(divider);
@@ -155,25 +174,25 @@ namespace ConsoleTables
             var builder = new StringBuilder();
 
             // find the longest column by searching each row
-            List<int> columnLengths = ColumnLengths();
+            var columnLengths = ColumnLengths();
 
             // create the string format with padding
-            string format = Format(columnLengths);
+            var format = Format(columnLengths);
 
             // find the longest formatted line
-            string columnHeaders = string.Format(format, Columns.ToArray());
+            var columnHeaders = string.Format(format, Columns.ToArray());
 
             // add each row
             var results = Rows.Select(row => string.Format(format, row)).ToList();
 
             // create the divider
-            string divider = Regex.Replace(columnHeaders, @"[^|]", "-");
-            string dividerPlus = divider.Replace("|", "+");
+            var divider = Regex.Replace(columnHeaders, @"[^|]", "-");
+            var dividerPlus = divider.Replace("|", "+");
 
             builder.AppendLine(dividerPlus);
             builder.AppendLine(columnHeaders);
 
-            foreach (string row in results)
+            foreach (var row in results)
             {
                 builder.AppendLine(dividerPlus);
                 builder.AppendLine(row);
@@ -185,8 +204,8 @@ namespace ConsoleTables
 
         private string Format(List<int> columnLengths, char delimiter = '|')
         {
-            string delimiterStr = delimiter == char.MinValue ? string.Empty : delimiter.ToString();
-            string format = (Enumerable.Range(0, Columns.Count)
+            var delimiterStr = delimiter == char.MinValue ? string.Empty : delimiter.ToString();
+            var format = (Enumerable.Range(0, Columns.Count)
                 .Select(i => " " + delimiterStr + " {" + i + ",-" + columnLengths[i] + "}")
                 .Aggregate((s, a) => s + a) + " " + delimiterStr).Trim();
             return format;
