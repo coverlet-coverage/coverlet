@@ -8,8 +8,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-#nullable disable
-
 namespace coverlet.collector.Resources {
     using System;
     
