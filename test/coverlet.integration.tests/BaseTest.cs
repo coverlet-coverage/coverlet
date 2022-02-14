@@ -215,7 +215,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought", bool sourceLink = false, bool deterministicReport = false)
+        private protected string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought", bool sourceLink = false, bool deterministicReport = false, bool reportNameWithFramework = true)
         {
             string runSettings =
 $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
@@ -230,6 +230,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
             <UseSourceLink>{(sourceLink ? "true" : "false")}</UseSourceLink>
             <!-- We need to include test assembly because test and code to cover are in same template project -->
             <IncludeTestAssembly>true</IncludeTestAssembly>
+            <IncludeTargetFramework>{reportNameWithFramework}</IncludeTargetFramework>
         </Configuration>
       </DataCollector>
     </DataCollectors>

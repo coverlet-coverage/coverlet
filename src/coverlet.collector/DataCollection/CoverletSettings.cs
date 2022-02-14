@@ -81,6 +81,16 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         public bool DeterministicReport { get; set; }
 
+        /// <summary>
+        /// Add target framework to report name
+        /// </summary>
+        public bool IncludeTargetFramework { get; set; }
+
+        /// <summary>
+        /// Framework of the test module
+        /// </summary>
+        public string Framework { get; set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -98,6 +108,8 @@ namespace Coverlet.Collector.DataCollection
             builder.AppendFormat("SkipAutoProps: '{0}'", SkipAutoProps);
             builder.AppendFormat("DoesNotReturnAttributes: '{0}'", string.Join(",", DoesNotReturnAttributes ?? Enumerable.Empty<string>()));
             builder.AppendFormat("DeterministicReport: '{0}'", DeterministicReport);
+            builder.AppendFormat("IncludeTargetFramework: '{0}'", IncludeTargetFramework);
+            builder.AppendFormat("Framework: '{0}'", Framework);
 
             return builder.ToString();
         }

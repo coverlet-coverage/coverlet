@@ -22,6 +22,7 @@ namespace Coverlet.Collector.DataCollection
         private readonly Coverage _coverage;
         private readonly ICoverageWrapper _coverageWrapper;
         private readonly ISourceRootTranslator _sourceRootTranslator;
+        private readonly CoverletSettings _settings;
         public IReporter[] Reporters { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper,
@@ -52,6 +53,7 @@ namespace Coverlet.Collector.DataCollection
             Reporters = reporters;
             _coverageWrapper = coverageWrapper;
             _sourceRootTranslator = sourceRootTranslator;
+            _settings = settings;
             // Coverage object
             _coverage = _coverageWrapper.CreateCoverage(settings, logger, instrumentationHelper, fileSystem, sourceRootTranslator, cecilSymbolHelper);
         }
@@ -110,13 +112,32 @@ namespace Coverlet.Collector.DataCollection
         {
             try
             {
-                return Reporters.Select(reporter => (reporter.Report(coverageResult, _sourceRootTranslator), Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension)));
+                return Reporters.Select(reporter => (reporter.Report(coverageResult, _sourceRootTranslator), GetFileName(reporter)));
             }
             catch (Exception ex)
             {
                 string errorMessage = string.Format(Resources.CoverageReportException, CoverletConstants.DataCollectorName);
                 throw new CoverletDataCollectorException(errorMessage, ex);
             }
+        }
+
+        /// <summary>
+        /// Gets filename from coverlet reporter
+        /// </summary>
+        /// <param name="reporter"></param>
+        /// <returns></returns>
+        private string GetFileName(IReporter reporter)
+        {
+            string fileName = Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension);
+            string separatorPoint = string.IsNullOrEmpty(_settings.Framework) ? "" : ".";
+
+            if (!_settings.IncludeTargetFramework)
+                return fileName;
+
+            if (Path.HasExtension(fileName))
+                return $"{Path.GetFileNameWithoutExtension(fileName)}{separatorPoint}{_settings.Framework}{Path.GetExtension(fileName)}";
+
+            return $"{Path.GetFileNameWithoutExtension(fileName)}{separatorPoint}{_settings.Framework}";
         }
     }
 }

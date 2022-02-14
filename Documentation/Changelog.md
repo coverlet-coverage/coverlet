@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -Await foreach has wrong branch coverage when method is generic [#1210](https://github.com/coverlet-coverage/coverlet/issues/1210)
 -ExcludeFromCodeCoverage attribute on local functions ignores lambda expression [#1302](https://github.com/coverlet-coverage/coverlet/issues/1302)
 
+### Added
+-Add target framework moniker to collector output [#1276](https://github.com/coverlet-coverage/coverlet/issues/1276)  
+
 ## Release date 2022-02-06
 ### Packages  
 coverlet.msbuild 3.1.2  

@@ -80,6 +80,7 @@ namespace Coverlet.Collector.Tests
             CreateCoverletNodes(doc, configElement, CoverletConstants.SkipAutoProps, "true");
             CreateCoverletNodes(doc, configElement, CoverletConstants.DeterministicReport, "true");
             CreateCoverletNodes(doc, configElement, CoverletConstants.DoesNotReturnAttributesElementName, doesNotReturnAttributes);
+            CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeTargetFrameworkElementName, "true");
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
@@ -105,6 +106,7 @@ namespace Coverlet.Collector.Tests
             Assert.True(coverletSettings.IncludeTestAssembly);
             Assert.True(coverletSettings.SkipAutoProps);
             Assert.True(coverletSettings.DeterministicReport);
+            Assert.True(coverletSettings.IncludeTargetFramework);
         }
 
         [Fact]
@@ -188,7 +190,32 @@ namespace Coverlet.Collector.Tests
             Assert.Equal(defaultFormat, coverletSettings.ReportFormats[0]);
         }
 
-        private static void CreateCoverletNodes(XmlDocument doc, XmlElement configElement, string nodeSetting, string nodeValue)
+        [Theory]
+        [InlineData(".NETCoreApp, Version=v3.1", "netcoreapp3.1")]
+        [InlineData(".NETFramework,Version=v4.8", "net48")]
+        [InlineData(".NETStandard,Version=v2.1", "netstandard2.1")]
+        [InlineData(".NETCoreApp,Version=v5.0", "net5.0")]
+        [InlineData(".NETCoreApp,Version=v6.0", "net6.0")]
+        [InlineData("netcoreapp3.1", "netcoreapp3.1")]
+        [InlineData("net48", "net48")]
+        [InlineData("netstandard2.1", "netstandard2.1")]
+        [InlineData("net5.0", "net5.0")]
+        [InlineData("net6.0", "net6.0")]
+        [InlineData("supernet", "unsupported")]
+        [InlineData("", "")]
+        public void ParseShouldCorrectlyParseConfigurationElementFramework(string framework, string targetFrameworkMoniker)
+        {
+            var testModules = new List<string> { "abc.dll" };
+            var doc = new XmlDocument();
+            XmlElement configElement = doc.CreateElement("Configuration");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.Framework, framework);
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
+
+            Assert.Equal("abc.dll", coverletSettings.TestModule);
+            Assert.Equal(targetFrameworkMoniker, coverletSettings.Framework);
+        }
+
+        private void CreateCoverletNodes(XmlDocument doc, XmlElement configElement, string nodeSetting, string nodeValue)
         {
             XmlNode node = doc.CreateNode("element", nodeSetting, string.Empty);
             node.InnerText = nodeValue;

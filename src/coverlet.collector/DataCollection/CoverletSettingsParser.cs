@@ -7,6 +7,7 @@ using System.Linq;
 using System.Xml;
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
+using NuGet.Frameworks;
 
 namespace Coverlet.Collector.DataCollection
 {
@@ -48,10 +49,12 @@ namespace Coverlet.Collector.DataCollection
                 coverletSettings.SkipAutoProps = ParseSkipAutoProps(configurationElement);
                 coverletSettings.DoesNotReturnAttributes = ParseDoesNotReturnAttributes(configurationElement);
                 coverletSettings.DeterministicReport = ParseDeterministicReport(configurationElement);
+                coverletSettings.Framework = ParseFramework(configurationElement);
             }
 
             coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
             coverletSettings.ExcludeFilters = ParseExcludeFilters(configurationElement);
+            coverletSettings.IncludeTargetFramework = ParseReportFileNameIncludesTargetFramework(configurationElement);
 
             if (_eqtTrace.IsVerboseEnabled)
             {
@@ -254,6 +257,37 @@ namespace Coverlet.Collector.DataCollection
         private static string[] SplitElement(XmlElement element)
         {
             return element?.InnerText?.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).ToArray();
+        }
+
+        /// <summary>
+        /// Parse includeTargetFramework flag
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <returns>Include target framework Flag</returns>
+        private bool ParseReportFileNameIncludesTargetFramework(XmlElement configurationElement)
+        {
+            bool includeTargetFrameworkInReportName = true;
+
+            if (configurationElement != null)
+            {
+                XmlElement includeTargetFrameworkElement = configurationElement[CoverletConstants.IncludeTargetFrameworkElementName];
+                if (bool.TryParse(includeTargetFrameworkElement?.InnerText, out bool flag))
+                {
+                    includeTargetFrameworkInReportName = flag;
+                }
+            }
+            return includeTargetFrameworkInReportName;
+        }
+
+        /// <summary>
+        /// Parse framework flag
+        /// </summary>
+        /// <param name="configurationElement"></param>
+        /// <returns>Framework tag</returns>
+        private string ParseFramework(XmlElement configurationElement)
+        {
+            XmlElement frameworkElement = configurationElement[CoverletConstants.Framework];
+            return string.IsNullOrEmpty(frameworkElement?.InnerText) ? string.Empty : NuGetFramework.Parse(frameworkElement.InnerText).GetShortFolderName();
         }
     }
 }

@@ -127,7 +127,7 @@ namespace Coverlet.Integration.Tests
             Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-            string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", deterministicReport: true);
+            string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", deterministicReport: true, reportNameWithFramework: false);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out _), standardOutput);
             Assert.Contains("Passed!", standardOutput);
             AssertCoverage(standardOutput);
@@ -155,7 +155,7 @@ namespace Coverlet.Integration.Tests
             Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-            string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", sourceLink: true);
+            string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", sourceLink: true, reportNameWithFramework: false);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out _), standardOutput);
             Assert.Contains("Passed!", standardOutput);
             AssertCoverage(standardOutput, checkDeterministicReport: false);
