@@ -20,6 +20,8 @@ using Coverlet.Core.Helpers;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 
+#nullable disable
+
 namespace Coverlet.Collector.Tests
 {
     public class CoverletCoverageDataCollectorTests

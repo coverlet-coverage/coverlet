@@ -5,6 +5,8 @@ using System.IO;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.MSbuild.Tasks
 {
     internal class ReportWriter

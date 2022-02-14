@@ -14,6 +14,8 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 
+#nullable disable
+
 namespace Coverlet.Core.Symbols
 {
     internal class CecilSymbolHelper : ICecilSymbolHelper

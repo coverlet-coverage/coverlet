@@ -19,6 +19,8 @@ using Palmmedia.ReportGenerator.Core;
 using Tmds.Utils;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Tests
 {
     static class TestInstrumentationHelper

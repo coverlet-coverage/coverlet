@@ -3,6 +3,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Coverlet.Core.Samples.Tests
 {
     public class Lambda_Issue343

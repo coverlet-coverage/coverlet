@@ -4,6 +4,8 @@
 using System;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Coverlet.Tests.Xunit.Extensions
 {
     public enum OS

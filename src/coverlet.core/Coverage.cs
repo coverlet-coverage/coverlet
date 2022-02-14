@@ -12,6 +12,8 @@ using Coverlet.Core.Instrumentation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+#nullable disable
+
 namespace Coverlet.Core
 {
     [DataContract]

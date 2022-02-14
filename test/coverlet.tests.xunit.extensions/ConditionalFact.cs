@@ -6,6 +6,8 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
+#nullable disable
+
 namespace Coverlet.Tests.Xunit.Extensions
 {
     [AttributeUsage(AttributeTargets.Method)]

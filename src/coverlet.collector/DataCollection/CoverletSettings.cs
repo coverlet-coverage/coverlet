@@ -4,6 +4,8 @@
 using System.Linq;
 using System.Text;
 
+#nullable disable
+
 namespace Coverlet.Collector.DataCollection
 {
     /// <summary>

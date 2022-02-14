@@ -10,6 +10,8 @@ using System.Text;
 using System.Xml.Linq;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Reporters.Tests
 {
     public class OpenCoverReporterTests

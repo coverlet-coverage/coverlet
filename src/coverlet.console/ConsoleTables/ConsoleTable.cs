@@ -30,6 +30,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace ConsoleTables
 {
     class ConsoleTable

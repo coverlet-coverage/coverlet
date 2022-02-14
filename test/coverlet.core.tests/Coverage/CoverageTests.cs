@@ -9,6 +9,8 @@ using Coverlet.Core.Symbols;
 using Moq;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests

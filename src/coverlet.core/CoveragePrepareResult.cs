@@ -5,6 +5,8 @@ using System.IO;
 using System.Runtime.Serialization;
 using Coverlet.Core.Instrumentation;
 
+#nullable disable
+
 namespace Coverlet.Core
 {
     // Followed safe serializer guide, will emit xml format

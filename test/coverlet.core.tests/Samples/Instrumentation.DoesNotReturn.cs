@@ -1,4 +1,6 @@
-﻿namespace Coverlet.Core.Samples.Tests
+﻿#nullable disable
+
+namespace Coverlet.Core.Samples.Tests
 {
     public class DoesNotReturn
     {

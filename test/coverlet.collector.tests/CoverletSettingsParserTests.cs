@@ -8,6 +8,8 @@ using Coverlet.Collector.DataCollection;
 using Coverlet.Collector.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Collector.Tests
 {
     public class CoverletSettingsParserTests

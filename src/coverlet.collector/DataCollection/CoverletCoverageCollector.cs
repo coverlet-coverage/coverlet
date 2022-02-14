@@ -14,6 +14,8 @@ using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
+#nullable disable
+
 namespace Coverlet.Collector.DataCollection
 {
     /// <summary>

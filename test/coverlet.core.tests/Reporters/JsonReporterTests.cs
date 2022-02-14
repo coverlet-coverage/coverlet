@@ -6,6 +6,8 @@ using Moq;
 using System;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Reporters.Tests
 {
     public class JsonReporterTests

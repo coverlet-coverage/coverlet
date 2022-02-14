@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Threading;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Core.Helpers
 {
     // A slightly amended version of the code found here: https://stackoverflow.com/a/1563234/186184

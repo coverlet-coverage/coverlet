@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Coverlet.Core.Abstractions
 {
     internal interface IProcessExitHandler

@@ -4,6 +4,8 @@
 using Xunit;
 using System.Linq;
 
+#nullable disable
+
 namespace Coverlet.Core.Instrumentation.Tests
 {
     public class InstrumenterResultTests

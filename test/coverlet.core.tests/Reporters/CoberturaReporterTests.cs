@@ -14,6 +14,8 @@ using Coverlet.Core.Abstractions;
 using Moq;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Reporters.Tests
 {
     public class CoberturaReporterTests

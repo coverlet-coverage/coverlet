@@ -3,6 +3,8 @@
 
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Helpers.Tests
 {
     public class FileSystemTests

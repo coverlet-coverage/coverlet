@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Core.Helpers
 {
     [DebuggerDisplay("ProjectPath = {ProjectPath} OriginalPath = {OriginalPath}")]

@@ -2,6 +2,8 @@
 
 using System.Data;
 
+#nullable disable
+
 namespace Coverlet.Core.Samples.Tests
 {
     public class MethodsWithExcludeFromCodeCoverageAttr

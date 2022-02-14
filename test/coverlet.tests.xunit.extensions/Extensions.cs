@@ -5,6 +5,8 @@ using System.Linq;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
+#nullable disable
+
 namespace Coverlet.Tests.Xunit.Extensions
 {
     internal static class TestMethodExtensions

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
+#nullable disable
+
 namespace Coverlet.Core.Instrumentation
 {
     [DebuggerDisplay("Number = {Number} Hits = {Hits} Class = {Class} Method = {Method}")]

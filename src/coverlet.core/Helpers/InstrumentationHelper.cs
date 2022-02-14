@@ -13,6 +13,8 @@ using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Core.Helpers
 {
     internal class InstrumentationHelper : IInstrumentationHelper

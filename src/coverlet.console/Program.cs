@@ -20,6 +20,8 @@ using Coverlet.Core.Symbols;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 
+#nullable disable
+
 namespace Coverlet.Console
 {
     class Program

@@ -4,6 +4,8 @@
 using System;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Coverlet.Core.Symbols
 {
     /// <summary>

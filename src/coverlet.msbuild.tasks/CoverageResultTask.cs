@@ -16,6 +16,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
+#nullable disable
+
 namespace Coverlet.MSbuild.Tasks
 {
     public class CoverageResultTask : BaseTask

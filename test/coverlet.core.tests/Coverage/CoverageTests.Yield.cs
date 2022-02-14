@@ -7,6 +7,8 @@ using Coverlet.Core.Samples.Tests;
 using Tmds.Utils;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests : ExternalProcessExecutionTest

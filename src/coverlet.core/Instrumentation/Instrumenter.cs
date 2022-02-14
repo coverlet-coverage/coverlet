@@ -18,6 +18,8 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 
+#nullable disable
+
 namespace Coverlet.Core.Instrumentation
 {
     internal class Instrumenter

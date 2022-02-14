@@ -4,6 +4,8 @@
 using System;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Helpers.Tests
 {
     public class RetryHelperTests

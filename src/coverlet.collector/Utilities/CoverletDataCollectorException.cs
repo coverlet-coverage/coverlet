@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Coverlet.Collector.Utilities
 {
     internal class CoverletDataCollectorException : Exception

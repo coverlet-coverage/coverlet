@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using Coverlet.Core.Helpers;
 
+#nullable disable
+
 namespace Coverlet.Core.Abstractions
 {
     internal interface ISourceRootTranslator

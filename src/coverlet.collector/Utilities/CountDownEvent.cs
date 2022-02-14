@@ -5,6 +5,8 @@ using System;
 using System.Threading;
 using Coverlet.Collector.Utilities.Interfaces;
 
+#nullable disable
+
 namespace Coverlet.Collector.Utilities
 {
     internal class CollectorCountdownEventFactory : ICountDownEventFactory

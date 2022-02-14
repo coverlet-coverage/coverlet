@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests

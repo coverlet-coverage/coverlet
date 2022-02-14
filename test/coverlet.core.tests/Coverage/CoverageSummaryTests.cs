@@ -4,6 +4,8 @@
 using System.Linq;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Tests
 {
     public class CoverageSummaryTests

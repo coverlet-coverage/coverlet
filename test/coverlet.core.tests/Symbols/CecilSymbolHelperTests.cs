@@ -10,6 +10,8 @@ using coverlet.tests.projectsample.netframework;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
+#nullable disable
+
 namespace Coverlet.Core.Symbols.Tests
 {
     public class CecilSymbolHelperTests

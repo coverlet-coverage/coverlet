@@ -5,6 +5,8 @@ using System;
 using Coverlet.Core.Abstractions;
 using static System.Console;
 
+#nullable disable
+
 namespace Coverlet.Console.Logging
 {
     class ConsoleLogger : ILogger

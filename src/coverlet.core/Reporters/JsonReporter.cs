@@ -4,6 +4,8 @@
 using Coverlet.Core.Abstractions;
 using Newtonsoft.Json;
 
+#nullable disable
+
 namespace Coverlet.Core.Reporters
 {
     internal class JsonReporter : IReporter

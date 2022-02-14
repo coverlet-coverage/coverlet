@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
+#nullable disable
+
 namespace Coverlet.Core.Instrumentation
 {
     /// <summary>

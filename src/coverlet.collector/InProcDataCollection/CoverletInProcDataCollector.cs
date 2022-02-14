@@ -12,6 +12,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollector.InProcDataCollector;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.InProcDataCollector;
 
+#nullable disable
+
 namespace Coverlet.Collector.DataCollection
 {
     public class CoverletInProcDataCollector : InProcDataCollection

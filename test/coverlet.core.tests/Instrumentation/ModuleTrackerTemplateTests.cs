@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Coverlet.Core.Instrumentation;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Tests.Instrumentation
 {
     class TrackerContext : IDisposable

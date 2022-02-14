@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Coverlet.Core.Attributes;
 using Microsoft.VisualStudio.TestPlatform;
 
+#nullable disable
+
 namespace Coverlet.Core.Samples.Tests
 {
     class ConstructorNotDeclaredClass

@@ -6,6 +6,8 @@ using System.Globalization;
 using System.Text;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Core.Reporters
 {
     internal class TeamCityReporter : IReporter

@@ -6,6 +6,8 @@ using System.Linq;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Instrumentation;
 
+#nullable disable
+
 namespace Coverlet.Core
 {
     internal class BranchInfo

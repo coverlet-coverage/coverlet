@@ -4,6 +4,8 @@
 using System;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Core.Helpers
 {
     public class SystemConsole : IConsole
