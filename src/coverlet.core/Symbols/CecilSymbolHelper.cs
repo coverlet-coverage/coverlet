@@ -1,12 +1,12 @@
-//
-// This class is based heavily on the work of the OpenCover
-// team in OpenCover.Framework.Symbols.CecilSymbolManager
-//
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Extensions;
 
@@ -272,10 +272,10 @@ namespace Coverlet.Core.Symbols
 
             int branchIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
 
-            return new[] {2,3}.Any(x => branchIndex >= x && 
-                                        instructions[branchIndex - x].OpCode == OpCodes.Isinst && 
-                                        instructions[branchIndex - x].Operand is TypeReference tr && 
-                                        tr.FullName == "System.Exception")
+            return new[] { 2, 3 }.Any(x => branchIndex >= x &&
+                                           instructions[branchIndex - x].OpCode == OpCodes.Isinst &&
+                                           instructions[branchIndex - x].Operand is TypeReference tr &&
+                                           tr.FullName == "System.Exception")
                 &&
                 // check for throw opcode after branch
                 instructions.Count - branchIndex >= 3 &&
@@ -399,11 +399,11 @@ namespace Coverlet.Core.Symbols
             */
             if (!_compilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
             {
-                List<int> detectedBranches = new List<int>();
+                var detectedBranches = new List<int>();
                 Collection<ExceptionHandler> handlers = methodDefinition.Body.ExceptionHandlers;
 
                 int numberOfCatchBlocks = 1;
-                foreach (var handler in handlers)
+                foreach (ExceptionHandler handler in handlers)
                 {
                     if (handlers.Any(h => h.HandlerStart == handler.HandlerEnd))
                     {
@@ -663,7 +663,7 @@ namespace Coverlet.Core.Symbols
                 {
                     return false;
                 }
-                
+
                 bool isFollowedByDisposeAsync = false;
 
                 if (instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
@@ -1021,13 +1021,13 @@ namespace Coverlet.Core.Symbols
                         continue;
                     }
 
-                    var pathCounter = 0;
+                    int pathCounter = 0;
 
                     // store branch origin offset
-                    var branchOffset = instruction.Offset;
-                    var closestSeqPt = FindClosestInstructionWithSequencePoint(methodDefinition.Body, instruction).Maybe(i => methodDefinition.DebugInformation.GetSequencePoint(i));
-                    var branchingInstructionLine = closestSeqPt.Maybe(x => x.StartLine, -1);
-                    var document = closestSeqPt.Maybe(x => x.Document.Url);
+                    int branchOffset = instruction.Offset;
+                    SequencePoint closestSeqPt = FindClosestInstructionWithSequencePoint(methodDefinition.Body, instruction).Maybe(i => methodDefinition.DebugInformation.GetSequencePoint(i));
+                    int branchingInstructionLine = closestSeqPt.Maybe(x => x.StartLine, -1);
+                    string document = closestSeqPt.Maybe(x => x.Document.Url);
 
                     if (instruction.Next == null)
                     {
@@ -1054,9 +1054,9 @@ namespace Coverlet.Core.Symbols
             // Add Default branch (Path=0)
 
             // Follow else/default instruction
-            var @else = instruction.Next;
+            Instruction @else = instruction.Next;
 
-            var pathOffsetList = GetBranchPath(@else);
+            List<int> pathOffsetList = GetBranchPath(@else);
 
             // add Path 0
             var path0 = new BranchPoint
@@ -1077,8 +1077,7 @@ namespace Coverlet.Core.Symbols
             if (instruction.OpCode.Code != Code.Switch)
             {
                 // Follow instruction at operand
-                var @then = instruction.Operand as Instruction;
-                if (@then == null)
+                if (instruction.Operand is not Instruction @then)
                     return false;
 
                 ordinal = BuildPointsForBranch(list, then, branchingInstructionLine, document, branchOffset,
@@ -1086,8 +1085,7 @@ namespace Coverlet.Core.Symbols
             }
             else // instruction.OpCode.Code == Code.Switch
             {
-                var branchInstructions = instruction.Operand as Instruction[];
-                if (branchInstructions == null || branchInstructions.Length == 0)
+                if (instruction.Operand is not Instruction[] branchInstructions || branchInstructions.Length == 0)
                     return false;
 
                 ordinal = BuildPointsForSwitchCases(list, path0, branchInstructions, branchingInstructionLine,
@@ -1099,7 +1097,7 @@ namespace Coverlet.Core.Symbols
         private static uint BuildPointsForBranch(List<BranchPoint> list, Instruction then, int branchingInstructionLine, string document,
             int branchOffset, uint ordinal, int pathCounter, BranchPoint path0, List<Instruction> instructions, MethodDefinition methodDefinition)
         {
-            var pathOffsetList1 = GetBranchPath(@then);
+            List<int> pathOffsetList1 = GetBranchPath(@then);
 
             // Add path 1
             var path1 = new BranchPoint
@@ -1119,7 +1117,7 @@ namespace Coverlet.Core.Symbols
             // only add branch if branch does not match a known sequence 
             // e.g. auto generated field assignment
             // or encapsulates at least one sequence point
-            var offsets = new[]
+            int[] offsets = new[]
             {
                 path0.Offset,
                 path0.EndOffset,
@@ -1127,22 +1125,22 @@ namespace Coverlet.Core.Symbols
                 path1.EndOffset
             };
 
-            var ignoreSequences = new[]
+            Code[][] ignoreSequences = new[]
             {
                 // we may need other samples
                 new[] {Code.Brtrue_S, Code.Pop, Code.Ldsfld, Code.Ldftn, Code.Newobj, Code.Dup, Code.Stsfld, Code.Newobj}, // CachedAnonymousMethodDelegate field allocation 
             };
 
-            var bs = offsets.Min();
-            var be = offsets.Max();
+            int bs = offsets.Min();
+            int be = offsets.Max();
 
             var range = instructions.Where(i => (i.Offset >= bs) && (i.Offset <= be)).ToList();
 
-            var match = ignoreSequences
+            bool match = ignoreSequences
                 .Where(ignoreSequence => range.Count >= ignoreSequence.Length)
                 .Any(ignoreSequence => range.Zip(ignoreSequence, (instruction, code) => instruction.OpCode.Code == code).All(x => x));
 
-            var count = range
+            int count = range
                 .Count(i => methodDefinition.DebugInformation.GetSequencePoint(i) != null);
 
             if (!match || count > 0)
@@ -1156,7 +1154,7 @@ namespace Coverlet.Core.Symbols
         private static uint BuildPointsForSwitchCases(List<BranchPoint> list, BranchPoint path0, Instruction[] branchInstructions,
             int branchingInstructionLine, string document, int branchOffset, uint ordinal, ref int pathCounter)
         {
-            var counter = pathCounter;
+            int counter = pathCounter;
             list.Add(path0);
             // Add Conditional Branches (Path>0)
             list.AddRange(branchInstructions.Select(GetBranchPath)
@@ -1342,7 +1340,7 @@ namespace Coverlet.Core.Symbols
                 }
                 ...
             */
-            var autogeneratedBackingFields = methodDefinition.DeclaringType.Fields.Where(x =>
+            IEnumerable<FieldDefinition> autogeneratedBackingFields = methodDefinition.DeclaringType.Fields.Where(x =>
                 x.CustomAttributes.Any(ca => ca.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName)) &&
                 x.FullName.EndsWith("k__BackingField"));
 
@@ -1354,15 +1352,15 @@ namespace Coverlet.Core.Symbols
 
         private static bool SkipDefaultInitializationSystemObject(Instruction instruction)
         {
-        /*
-            A type always has a constructor with a default instantiation of System.Object. For record types these
-            instructions can have a own sequence point. This means that even the default constructor would be instrumented.
-            To skip this we search for call instructions with a method reference that declares System.Object.
+            /*
+                A type always has a constructor with a default instantiation of System.Object. For record types these
+                instructions can have a own sequence point. This means that even the default constructor would be instrumented.
+                To skip this we search for call instructions with a method reference that declares System.Object.
 
-            IL_0000: ldarg.0
-            IL_0001: call instance void [System.Runtime]System.Object::.ctor()
-            IL_0006: ret
-            */
+                IL_0000: ldarg.0
+                IL_0001: call instance void [System.Runtime]System.Object::.ctor()
+                IL_0006: ret
+                */
             return instruction.OpCode == OpCodes.Ldarg &&
                    instruction.Next?.OpCode == OpCodes.Call &&
                    instruction.Next?.Operand is MethodReference mr && mr.DeclaringType.FullName.Equals(typeof(System.Object).FullName);
@@ -1378,7 +1376,7 @@ namespace Coverlet.Core.Symbols
                 .Where(e => e.HandlerType == ExceptionHandlerType.Filter)
                 .ToList();
 
-            foreach (var exceptionHandler in handlers)
+            foreach (ExceptionHandler exceptionHandler in handlers)
             {
                 Instruction startFilter = exceptionHandler.FilterStart;
                 Instruction endFilter = startFilter;
@@ -1418,7 +1416,7 @@ namespace Coverlet.Core.Symbols
 
         private static int GetOffsetOfNextEndfinally(MethodBody body, int startOffset)
         {
-            var lastOffset = body.Instructions.LastOrDefault().Maybe(i => i.Offset, int.MaxValue);
+            int lastOffset = body.Instructions.LastOrDefault().Maybe(i => i.Offset, int.MaxValue);
             return body.Instructions.FirstOrDefault(i => i.Offset >= startOffset && i.OpCode.Code == Code.Endfinally).Maybe(i => i.Offset, lastOffset);
         }
 
@@ -1428,12 +1426,11 @@ namespace Coverlet.Core.Symbols
 
             if (instruction != null)
             {
-                var point = instruction;
+                Instruction point = instruction;
                 offsetList.Add(point.Offset);
                 while (point.OpCode == OpCodes.Br || point.OpCode == OpCodes.Br_S)
                 {
-                    var nextPoint = point.Operand as Instruction;
-                    if (nextPoint != null)
+                    if (point.Operand is Instruction nextPoint)
                     {
                         point = nextPoint;
                         offsetList.Add(point.Offset);
@@ -1453,12 +1450,12 @@ namespace Coverlet.Core.Symbols
             var sequencePointsInMethod = methodBody.Instructions.Where(i => HasValidSequencePoint(i, methodBody.Method)).ToList();
             if (!sequencePointsInMethod.Any())
                 return null;
-            var idx = sequencePointsInMethod.BinarySearch(instruction, new InstructionByOffsetComparer());
+            int idx = sequencePointsInMethod.BinarySearch(instruction, new InstructionByOffsetComparer());
             Instruction prev;
             if (idx < 0)
             {
                 // no exact match, idx corresponds to the next, larger element
-                var lower = Math.Max(~idx - 1, 0);
+                int lower = Math.Max(~idx - 1, 0);
                 prev = sequencePointsInMethod[lower];
             }
             else
@@ -1472,7 +1469,7 @@ namespace Coverlet.Core.Symbols
 
         private static bool HasValidSequencePoint(Instruction instruction, MethodDefinition methodDefinition)
         {
-            var sp = methodDefinition.DebugInformation.GetSequencePoint(instruction);
+            SequencePoint sp = methodDefinition.DebugInformation.GetSequencePoint(instruction);
             return sp != null && sp.StartLine != StepOverLineCode;
         }
 

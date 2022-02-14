@@ -1,14 +1,16 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Linq;
-
 using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
 {
     internal class ReporterFactory
     {
-        private string _format;
-        private IReporter[] _reporters;
+        private readonly string _format;
+        private readonly IReporter[] _reporters;
 
         public ReporterFactory(string format)
         {

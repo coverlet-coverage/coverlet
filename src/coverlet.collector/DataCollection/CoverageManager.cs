@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -77,8 +80,8 @@ namespace Coverlet.Collector.DataCollection
         public IEnumerable<(string report, string fileName)> GetCoverageReports()
         {
             // Get coverage result
-            CoverageResult coverageResult = this.GetCoverageResult();
-            return this.GetCoverageReports(coverageResult);
+            CoverageResult coverageResult = GetCoverageResult();
+            return GetCoverageReports(coverageResult);
         }
 
         /// <summary>

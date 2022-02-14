@@ -1,7 +1,9 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
 using Xunit;
 using Coverlet.Core.Samples.Tests;
 using coverlet.tests.projectsample.netframework;
@@ -19,7 +21,7 @@ namespace Coverlet.Core.Symbols.Tests
 
         public CecilSymbolHelperTests()
         {
-            var location = GetType().Assembly.Location;
+            string location = GetType().Assembly.Location;
             _resolver = new DefaultAssemblyResolver();
             _resolver.AddSearchDirectory(Path.GetDirectoryName(location));
             _parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = _resolver };
@@ -31,11 +33,11 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_OneBranch()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSingleDecision)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSingleDecision)}"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -53,11 +55,11 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_Using_Where_GeneratedBranchesIgnored()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSimpleUsingStatement)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSimpleUsingStatement)}"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             Assert.Equal(2, points.Count());
         }
@@ -66,11 +68,11 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_GeneratedBranches_DueToCachedAnonymousMethodDelegate_Ignored()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSimpleTaskWithLambda)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSimpleTaskWithLambda)}"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             Assert.Empty(points);
         }
@@ -79,11 +81,11 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_TwoBranch()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasTwoDecisions)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasTwoDecisions)}"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -98,11 +100,11 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_CompleteIf()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasCompleteIf)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasCompleteIf)}"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -117,11 +119,11 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_Switch()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitch)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitch)}"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -140,11 +142,11 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_SwitchWithDefault()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithDefault)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithDefault)}"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -163,11 +165,11 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_SwitchWithBreaks()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithBreaks)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithBreaks)}"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -186,11 +188,11 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_SwitchWithMultipleCases()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithMultipleCases)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.HasSwitchWithMultipleCases)}"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
@@ -215,15 +217,15 @@ namespace Coverlet.Core.Symbols.Tests
              * in this case for an anonymous class the compiler will dynamically create an Equals 'utility' method. 
              */
             // arrange
-            var type = _module.Types.First(x => x.FullName.Contains("f__AnonymousType"));
-            var method = type.Methods.First(x => x.FullName.Contains("::Equals"));
+            TypeDefinition type = _module.Types.First(x => x.FullName.Contains("f__AnonymousType"));
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains("::Equals"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.NotNull(points);
-            foreach (var branchPoint in points)
+            foreach (BranchPoint branchPoint in points)
                 Assert.Equal(-1, branchPoint.StartLine);
         }
 
@@ -231,8 +233,8 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_UsingWithException_Issue243_IgnoresBranchInFinallyBlock()
         {
             // arrange
-            var type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
-            var method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.UsingWithException_Issue243)}"));
+            TypeDefinition type = _module.Types.First(x => x.FullName == typeof(DeclaredConstructorClass).FullName);
+            MethodDefinition method = type.Methods.First(x => x.FullName.Contains($"::{nameof(DeclaredConstructorClass.UsingWithException_Issue243)}"));
 
             // check that the method is laid out the way we discovered it to be during the defect
             // @see https://github.com/OpenCover/opencover/issues/243
@@ -243,7 +245,7 @@ namespace Coverlet.Core.Symbols.Tests
             Assert.True(method.Body.Instructions.First(i => i.OpCode.FlowControl == FlowControl.Cond_Branch).Offset > method.Body.ExceptionHandlers[0].HandlerStart.Offset);
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -253,13 +255,13 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoresSwitchIn_GeneratedMoveNext()
         {
             // arrange
-            var nestedName = typeof(Iterator).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(Iterator).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(Iterator).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(Iterator).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -269,13 +271,13 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoresBranchesIn_GeneratedMoveNextForSingletonIterator()
         {
             // arrange
-            var nestedName = typeof(SingletonIterator).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(SingletonIterator).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(SingletonIterator).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(SingletonIterator).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -285,13 +287,13 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoresBranchesIn_AsyncAwaitStateMachine()
         {
             // arrange
-            var nestedName = typeof(AsyncAwaitStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachine).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(AsyncAwaitStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachine).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -305,13 +307,13 @@ namespace Coverlet.Core.Symbols.Tests
             _resolver.AddSearchDirectory(Path.GetDirectoryName(location));
             _module = ModuleDefinition.ReadModule(location, _parameters);
 
-            var nestedName = typeof(AsyncAwaitStateMachineNetFramework).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachineNetFramework).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(AsyncAwaitStateMachineNetFramework).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachineNetFramework).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -321,13 +323,13 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoresBranchesIn_AsyncAwaitValueTaskStateMachine()
         {
             // arrange
-            var nestedName = typeof(AsyncAwaitValueTaskStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitValueTaskStateMachine).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(AsyncAwaitValueTaskStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitValueTaskStateMachine).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -337,13 +339,13 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoresMostBranchesIn_AwaitForeachStateMachine()
         {
             // arrange
-            var nestedName = typeof(AwaitForeachStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitForeachStateMachine).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(AwaitForeachStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitForeachStateMachine).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             // We do expect there to be a two-way branch (stay in the loop or not?) on
@@ -359,13 +361,13 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoresMostBranchesIn_AwaitForeachStateMachine_WithBranchesWithinIt()
         {
             // arrange
-            var nestedName = typeof(AwaitForeachStateMachine_WithBranches).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitForeachStateMachine_WithBranches).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(AwaitForeachStateMachine_WithBranches).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitForeachStateMachine_WithBranches).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             // We do expect there to be four branch points (two places where we can branch
@@ -386,13 +388,13 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoresExtraBranchesIn_AsyncIteratorStateMachine()
         {
             // arrange
-            var nestedName = typeof(AsyncIteratorStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncIteratorStateMachine).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(AsyncIteratorStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncIteratorStateMachine).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
             
             // assert
             // We do expect the "for" loop to be a branch with two branch points, but that's it.
@@ -406,13 +408,13 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoreBranchesIn_AwaitUsingStateMachine()
         {
             // arrange
-            var nestedName = typeof(AwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitUsingStateMachine).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(AwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitUsingStateMachine).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -422,13 +424,13 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_IgnoreBranchesIn_ScopedAwaitUsingStateMachine()
         {
             // arrange
-            var nestedName = typeof(ScopedAwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
-            var type = _module.Types.FirstOrDefault(x => x.FullName == typeof(ScopedAwaitUsingStateMachine).FullName);
-            var nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
-            var method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+            string nestedName = typeof(ScopedAwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+            TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(ScopedAwaitUsingStateMachine).FullName);
+            TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
+            MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
 
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             // assert
             Assert.Empty(points);
@@ -438,10 +440,10 @@ namespace Coverlet.Core.Symbols.Tests
         public void GetBranchPoints_ExceptionFilter()
         {
             // arrange
-            var type = _module.Types.Single(x => x.FullName == typeof(ExceptionFilter).FullName);
-            var method = type.Methods.Single(x => x.FullName.Contains($"::{nameof(ExceptionFilter.Test)}"));
+            TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(ExceptionFilter).FullName);
+            MethodDefinition method = type.Methods.Single(x => x.FullName.Contains($"::{nameof(ExceptionFilter.Test)}"));
             // act
-            var points = _cecilSymbolHelper.GetBranchPoints(method);
+            System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
             Assert.Empty(points);
         }

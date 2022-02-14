@@ -1,3 +1,6 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -6,7 +9,7 @@ namespace Coverlet.Integration.Tests
 {
     public class Msbuild : BaseTest
     {
-        private string _buildConfiguration;
+        private readonly string _buildConfiguration;
 
         public Msbuild()
         {

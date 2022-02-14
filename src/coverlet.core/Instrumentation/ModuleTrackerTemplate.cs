@@ -1,5 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
@@ -25,7 +27,7 @@ namespace Coverlet.Core.Instrumentation
         public static bool SingleHit;
         public static bool FlushHitFile;
         private static readonly bool _enableLog = int.TryParse(Environment.GetEnvironmentVariable("COVERLET_ENABLETRACKERLOG"), out int result) ? result == 1 : false;
-        private static string _sessionId = Guid.NewGuid().ToString();
+        private static readonly string _sessionId = Guid.NewGuid().ToString();
 
         static ModuleTrackerTemplate()
         {
@@ -171,8 +173,8 @@ namespace Coverlet.Core.Instrumentation
         {
             if (_enableLog)
             {
-                Assembly currentAssembly = Assembly.GetExecutingAssembly();
-                DirectoryInfo location = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(currentAssembly.Location), "TrackersHitsLog"));
+                var currentAssembly = Assembly.GetExecutingAssembly();
+                var location = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(currentAssembly.Location), "TrackersHitsLog"));
                 location.Create();
                 string logFile = Path.Combine(location.FullName, $"{Path.GetFileName(currentAssembly.Location)}_{DateTime.UtcNow.Ticks}_{_sessionId}.txt");
                 using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))

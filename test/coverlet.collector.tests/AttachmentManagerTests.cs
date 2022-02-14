@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.ComponentModel;
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -14,14 +17,14 @@ namespace Coverlet.Collector.Tests
     public class AttachmentManagerTests
     {
         private AttachmentManager _attachmentManager;
-        private Mock<DataCollectionSink> _mockDataCollectionSink;
-        private DataCollectionContext _dataCollectionContext;
-        private TestPlatformLogger _testPlatformLogger;
-        private TestPlatformEqtTrace _eqtTrace;
-        private Mock<IFileHelper> _mockFileHelper;
-        private Mock<IDirectoryHelper> _mockDirectoryHelper;
-        private Mock<ICountDownEvent> _mockCountDownEvent;
-        private Mock<DataCollectionLogger> _mockDataCollectionLogger;
+        private readonly Mock<DataCollectionSink> _mockDataCollectionSink;
+        private readonly DataCollectionContext _dataCollectionContext;
+        private readonly TestPlatformLogger _testPlatformLogger;
+        private readonly TestPlatformEqtTrace _eqtTrace;
+        private readonly Mock<IFileHelper> _mockFileHelper;
+        private readonly Mock<IDirectoryHelper> _mockDirectoryHelper;
+        private readonly Mock<ICountDownEvent> _mockCountDownEvent;
+        private readonly Mock<DataCollectionLogger> _mockDataCollectionLogger;
 
         public AttachmentManagerTests()
         {
@@ -71,7 +74,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void SendCoverageReportShouldSendAttachmentToTestPlatform()
         {
-            var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             _attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger,
                _eqtTrace, directory.ToString(), new FileHelper(), _mockDirectoryHelper.Object, _mockCountDownEvent.Object);
 

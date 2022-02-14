@@ -1,8 +1,11 @@
-﻿using Coverlet.Core.Abstractions;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
@@ -52,7 +55,7 @@ namespace Coverlet.Core.Helpers
                 throw new ArgumentNullException(nameof(sourceRootMapping));
             }
 
-            Dictionary<string, List<string>> sourceToDeterministicPathMapping = new Dictionary<string, List<string>>();
+            var sourceToDeterministicPathMapping = new Dictionary<string, List<string>>();
             foreach (KeyValuePair<string, List<SourceRootMapping>> sourceRootMappingEntry in sourceRootMapping)
             {
                 foreach (SourceRootMapping originalPath in sourceRootMappingEntry.Value)
@@ -70,7 +73,7 @@ namespace Coverlet.Core.Helpers
 
         private Dictionary<string, List<SourceRootMapping>> LoadSourceRootMapping(string directory)
         {
-            Dictionary<string, List<SourceRootMapping>> mapping = new Dictionary<string, List<SourceRootMapping>>();
+            var mapping = new Dictionary<string, List<SourceRootMapping>>();
 
             string mappingFilePath = Path.Combine(directory, MappingFileName);
             if (!_fileSystem.Exists(mappingFilePath))
@@ -138,7 +141,7 @@ namespace Coverlet.Core.Helpers
 
         public string ResolveDeterministicPath(string originalFileName)
         {
-            foreach (var originalPath in _sourceToDeterministicPathMapping)
+            foreach (KeyValuePair<string, List<string>> originalPath in _sourceToDeterministicPathMapping)
             {
                 if (originalFileName.StartsWith(originalPath.Key))
                 {

@@ -1,14 +1,14 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
-using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
 
@@ -19,7 +19,7 @@ namespace Coverlet.Core.Tests
         [Fact]
         public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
         {
-            Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
+            var partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
             {
@@ -29,11 +29,11 @@ namespace Coverlet.Core.Tests
 
             string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
 
-            InstrumentationHelper instrumentationHelper =
+            var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                           new SourceRootTranslator(excludedbyattributeDll, new Mock<ILogger>().Object, new FileSystem()));
 
-            CoverageParameters parameters = new CoverageParameters
+            var parameters = new CoverageParameters
             {
                 IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
                 IncludeDirectories = Array.Empty<string>(),
@@ -74,7 +74,7 @@ namespace Coverlet.Core.Tests
 
                 CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
-                var document = result.Document("Instrumentation.ExcludeFromCoverage.cs");
+                Core.Instrumentation.Document document = result.Document("Instrumentation.ExcludeFromCoverage.cs");
 
                 // Invoking method "Test" of class "MethodsWithExcludeFromCodeCoverageAttr" we expect to cover 100% lines for MethodsWithExcludeFromCodeCoverageAttr 
                 Assert.DoesNotContain(document.Lines, l =>

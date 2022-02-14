@@ -1,10 +1,13 @@
-﻿using Coverlet.Core.Abstractions;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Mono.Collections.Generic;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Coverlet.Core.Abstractions;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 
 namespace Coverlet.Core.Instrumentation.Reachability
 {
@@ -252,11 +255,11 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 return new ReachabilityHelper(ImmutableHashSet<MetadataToken>.Empty);
             }
 
-            var processedMethods = ImmutableHashSet<MetadataToken>.Empty;
-            var doNotReturn = ImmutableHashSet.CreateBuilder<MetadataToken>();
-            foreach (var type in module.Types)
+            ImmutableHashSet<MetadataToken> processedMethods = ImmutableHashSet<MetadataToken>.Empty;
+            ImmutableHashSet<MetadataToken>.Builder doNotReturn = ImmutableHashSet.CreateBuilder<MetadataToken>();
+            foreach (TypeDefinition type in module.Types)
             {
-                foreach (var mtd in type.Methods)
+                foreach (MethodDefinition mtd in type.Methods)
                 {
                     if (mtd.IsNative)
                     {
@@ -278,14 +281,14 @@ namespace Coverlet.Core.Instrumentation.Reachability
                         continue;
                     }
 
-                    foreach (var instr in body.Instructions)
+                    foreach (Instruction instr in body.Instructions)
                     {
-                        if (!IsCall(instr, out var calledMtd))
+                        if (!IsCall(instr, out MethodReference calledMtd))
                         {
                             continue;
                         }
 
-                        var token = calledMtd.MetadataToken;
+                        MetadataToken token = calledMtd.MetadataToken;
                         if (processedMethods.Contains(token))
                         {
                             continue;
@@ -314,8 +317,8 @@ namespace Coverlet.Core.Instrumentation.Reachability
                             continue;
                         }
 
-                        var hasDoesNotReturnAttribute = false;
-                        foreach (var attr in mtdDef.CustomAttributes)
+                        bool hasDoesNotReturnAttribute = false;
+                        foreach (CustomAttribute attr in mtdDef.CustomAttributes)
                         {
                             if (Array.IndexOf(doesNotReturnAttributes, attr.AttributeType.Name) != -1)
                             {
@@ -333,7 +336,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 }
             }
 
-            var doNoReturnTokens = doNotReturn.ToImmutable();
+            ImmutableHashSet<MetadataToken> doNoReturnTokens = doNotReturn.ToImmutable();
 
             return new ReachabilityHelper(doNoReturnTokens);
         }
@@ -374,7 +377,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 return ImmutableArray<UnreachableRange>.Empty;
             }
 
-            var (mayContainUnreachableCode, branches) = AnalyzeInstructions(instrs, exceptionHandlers);
+            (bool mayContainUnreachableCode, ImmutableArray<BranchInstruction> branches) = AnalyzeInstructions(instrs, exceptionHandlers);
 
             // no need to do any more work, nothing unreachable here
             if (!mayContainUnreachableCode)
@@ -382,9 +385,9 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 return ImmutableArray<UnreachableRange>.Empty;
             }
 
-            var lastInstr = instrs[instrs.Count - 1];
+            Instruction lastInstr = instrs[instrs.Count - 1];
 
-            var blocks = CreateBasicBlocks(instrs, exceptionHandlers, branches);
+            ImmutableArray<BasicBlock> blocks = CreateBasicBlocks(instrs, exceptionHandlers, branches);
 
             DetermineHeadReachability(blocks);
             return DetermineUnreachableRanges(blocks, lastInstr.Offset);
@@ -396,16 +399,16 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// </summary>
         private (bool MayContainUnreachableCode, ImmutableArray<BranchInstruction> Branches) AnalyzeInstructions(Collection<Instruction> instrs, Collection<ExceptionHandler> exceptionHandlers)
         {
-            var containsDoesNotReturnCall = false;
+            bool containsDoesNotReturnCall = false;
 
-            var ret = ImmutableArray.CreateBuilder<BranchInstruction>();
-            foreach (var i in instrs)
+            ImmutableArray<BranchInstruction>.Builder ret = ImmutableArray.CreateBuilder<BranchInstruction>();
+            foreach (Instruction i in instrs)
             {
                 containsDoesNotReturnCall = containsDoesNotReturnCall || DoesNotReturn(i);
 
                 if (BRANCH_OPCODES.Contains(i.OpCode))
                 {
-                    var (singleTargetOffset, multiTargetOffsets) = GetInstructionTargets(i, exceptionHandlers);
+                    (int? singleTargetOffset, ImmutableArray<int> multiTargetOffsets) = GetInstructionTargets(i, exceptionHandlers);
 
                     if (singleTargetOffset != null)
                     {
@@ -435,7 +438,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 singleTargetOffset = null;
 
                 multiTargetOffsets = ImmutableArray.Create(i.Next.Offset);
-                foreach (var instr in multiTarget)
+                foreach (Instruction instr in multiTarget)
                 {
                     // in practice these are small arrays, so a scan should be fine
                     if (multiTargetOffsets.Contains(instr.Offset))
@@ -467,15 +470,15 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 //   flow is allowed so we can scan backwards to see find the block
 
                 ExceptionHandler filterForHandler = null;
-                foreach (var handler in exceptionHandlers)
+                foreach (ExceptionHandler handler in exceptionHandlers)
                 {
                     if (handler.FilterStart == null)
                     {
                         continue;
                     }
 
-                    var startsAt = handler.FilterStart;
-                    var cur = startsAt;
+                    Instruction startsAt = handler.FilterStart;
+                    Instruction cur = startsAt;
                     while (cur != null && cur.Offset < i.Offset)
                     {
                         cur = cur.Next;
@@ -526,13 +529,13 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// </summary>
         private ImmutableArray<UnreachableRange> DetermineUnreachableRanges(ImmutableArray<BasicBlock> blocks, int lastInstructionOffset)
         {
-            var ret = ImmutableArray.CreateBuilder<UnreachableRange>();
+            ImmutableArray<UnreachableRange>.Builder ret = ImmutableArray.CreateBuilder<UnreachableRange>();
 
-            var endOfMethodOffset = lastInstructionOffset + 1; // add 1 so we point _past_ the end of the method
+            int endOfMethodOffset = lastInstructionOffset + 1; // add 1 so we point _past_ the end of the method
 
-            for (var curBlockIx = 0; curBlockIx < blocks.Length; curBlockIx++)
+            for (int curBlockIx = 0; curBlockIx < blocks.Length; curBlockIx++)
             {
-                var curBlock = blocks[curBlockIx];
+                BasicBlock curBlock = blocks[curBlockIx];
 
                 int endOfCurBlockOffset;
                 if (curBlockIx == blocks.Length - 1)
@@ -553,11 +556,11 @@ namespace Coverlet.Core.Instrumentation.Reachability
                     }
 
                     // tail isn't reachable, which means there's a call to something that doesn't return...
-                    var doesNotReturnInstr = curBlock.UnreachableAfter;
+                    Instruction doesNotReturnInstr = curBlock.UnreachableAfter;
 
                     // and it's everything _after_ the following instruction that is unreachable
                     // so record the following instruction through the end of the block
-                    var followingInstr = doesNotReturnInstr.Next;
+                    Instruction followingInstr = doesNotReturnInstr.Next;
 
                     ret.Add(new UnreachableRange(followingInstr.Offset, endOfCurBlockOffset));
                 }
@@ -581,13 +584,13 @@ namespace Coverlet.Core.Instrumentation.Reachability
         {
             var blockLookup = blocks.ToImmutableDictionary(b => b.StartOffset);
 
-            var headBlock = blockLookup[0];
+            BasicBlock headBlock = blockLookup[0];
 
             var knownLive = ImmutableStack.Create(headBlock);
 
             while (!knownLive.IsEmpty)
             {
-                knownLive = knownLive.Pop(out var block);
+                knownLive = knownLive.Pop(out BasicBlock block);
 
                 if (block.HeadReachable)
                 {
@@ -601,18 +604,18 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 if (block.TailReachable)
                 {
                     // we can reach all the blocks it might flow to
-                    foreach (var reachableOffset in block.BranchesTo)
+                    foreach (int reachableOffset in block.BranchesTo)
                     {
-                        var reachableBlock = blockLookup[reachableOffset];
+                        BasicBlock reachableBlock = blockLookup[reachableOffset];
                         knownLive = knownLive.Push(reachableBlock);
                     }
                 }
 
                 // if the block is covered by an exception handler, then executing _any_ instruction in it
                 //   could conceivably cause those handlers to be visited
-                foreach (var exceptionHandlerOffset in block.ExceptionBranchesTo)
+                foreach (int exceptionHandlerOffset in block.ExceptionBranchesTo)
                 {
-                    var reachableHandler = blockLookup[exceptionHandlerOffset];
+                    BasicBlock reachableHandler = blockLookup[exceptionHandlerOffset];
                     knownLive = knownLive.Push(reachableHandler);
                 }
             }
@@ -629,16 +632,16 @@ namespace Coverlet.Core.Instrumentation.Reachability
         private ImmutableArray<BasicBlock> CreateBasicBlocks(Collection<Instruction> instrs, Collection<ExceptionHandler> exceptionHandlers, ImmutableArray<BranchInstruction> branches)
         {
             // every branch-like instruction starts or stops a block
-            var branchInstrLocs = branches.ToLookup(i => i.Offset);
+            ILookup<int, BranchInstruction> branchInstrLocs = branches.ToLookup(i => i.Offset);
             var branchInstrOffsets = branchInstrLocs.Select(k => k.Key).ToImmutableHashSet();
 
             // every target that might be branched to starts or stops a block
-            var branchTargetOffsetsBuilder = ImmutableHashSet.CreateBuilder<int>();
-            foreach (var branch in branches)
+            ImmutableHashSet<int>.Builder branchTargetOffsetsBuilder = ImmutableHashSet.CreateBuilder<int>();
+            foreach (BranchInstruction branch in branches)
             {
                 if (branch.HasMultiTargets)
                 {
-                    foreach (var target in branch.TargetOffsets)
+                    foreach (int target in branch.TargetOffsets)
                     {
                         branchTargetOffsetsBuilder.Add(target);
                     }
@@ -651,7 +654,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
             // every exception handler an entry point
             //   either it's handler, or it's filter (if present)
-            foreach (var handler in exceptionHandlers)
+            foreach (ExceptionHandler handler in exceptionHandlers)
             {
                 if (handler.FilterStart != null)
                 {
@@ -663,18 +666,18 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 }
             }
 
-            var branchTargetOffsets = branchTargetOffsetsBuilder.ToImmutable();
+            ImmutableHashSet<int> branchTargetOffsets = branchTargetOffsetsBuilder.ToImmutable();
 
             // ending the method is also important
-            var endOfMethodOffset = instrs[instrs.Count - 1].Offset;
+            int endOfMethodOffset = instrs[instrs.Count - 1].Offset;
 
-            var blocks = ImmutableArray<BasicBlock>.Empty;
+            ImmutableArray<BasicBlock> blocks = ImmutableArray<BasicBlock>.Empty;
             int? blockStartedAt = null;
             Instruction unreachableAfter = null;
-            foreach (var i in instrs)
+            foreach (Instruction i in instrs)
             {
-                var offset = i.Offset;
-                var branchesAtLoc = branchInstrLocs[offset];
+                int offset = i.Offset;
+                System.Collections.Generic.IEnumerable<BranchInstruction> branchesAtLoc = branchInstrLocs[offset];
 
                 if (blockStartedAt == null)
                 {
@@ -682,19 +685,19 @@ namespace Coverlet.Core.Instrumentation.Reachability
                     unreachableAfter = null;
                 }
 
-                var isBranch = branchInstrOffsets.Contains(offset);
-                var isFollowedByBranchTarget = i.Next != null && branchTargetOffsets.Contains(i.Next.Offset);
-                var isEndOfMtd = endOfMethodOffset == offset;
+                bool isBranch = branchInstrOffsets.Contains(offset);
+                bool isFollowedByBranchTarget = i.Next != null && branchTargetOffsets.Contains(i.Next.Offset);
+                bool isEndOfMtd = endOfMethodOffset == offset;
 
                 if (unreachableAfter == null && DoesNotReturn(i))
                 {
                     unreachableAfter = i;
                 }
 
-                var blockEnds = isBranch || isFollowedByBranchTarget || isEndOfMtd;
+                bool blockEnds = isBranch || isFollowedByBranchTarget || isEndOfMtd;
                 if (blockEnds)
                 {
-                    var nextInstr = i.Next;
+                    Instruction nextInstr = i.Next;
 
                     // figure out all the different places the basic block could lead to
                     ImmutableArray<int> goesTo;
@@ -702,7 +705,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
                     {
                         // it ends in a branch, where all does it branch?
                         goesTo = ImmutableArray<int>.Empty;
-                        foreach (var branch in branchesAtLoc)
+                        foreach (BranchInstruction branch in branchesAtLoc)
                         {
                             if (branch.HasMultiTargets)
                             {
@@ -725,30 +728,30 @@ namespace Coverlet.Core.Instrumentation.Reachability
                         goesTo = ImmutableArray<int>.Empty;
                     }
 
-                    var exceptionSwitchesTo = ImmutableArray<int>.Empty;
+                    ImmutableArray<int> exceptionSwitchesTo = ImmutableArray<int>.Empty;
 
                     // if the block is covered by any exception handlers then
                     //   it is possible that it will branch to its handler block
-                    foreach (var handler in exceptionHandlers)
+                    foreach (ExceptionHandler handler in exceptionHandlers)
                     {
-                        var tryStart = handler.TryStart.Offset;
-                        var tryEnd = handler.TryEnd.Offset;
+                        int tryStart = handler.TryStart.Offset;
+                        int tryEnd = handler.TryEnd.Offset;
 
-                        var containsStartOfTry =
+                        bool containsStartOfTry =
                             tryStart >= blockStartedAt.Value &&
                             tryStart <= i.Offset;
 
-                        var containsEndOfTry =
+                        bool containsEndOfTry =
                             tryEnd >= blockStartedAt.Value &&
                             tryEnd <= i.Offset;
 
-                        var blockInsideTry = blockStartedAt.Value >= tryStart && i.Offset <= tryEnd;
+                        bool blockInsideTry = blockStartedAt.Value >= tryStart && i.Offset <= tryEnd;
 
                         // blocks do not necessarily align to the TRY part of exception handlers, so we need to handle three cases:
                         //  - the try _starts_ in the block
                         //  - the try _ends_ in the block
                         //  - the try complete covers the block, but starts and ends before and after it (respectively)
-                        var tryOverlapsBlock = containsStartOfTry || containsEndOfTry || blockInsideTry;
+                        bool tryOverlapsBlock = containsStartOfTry || containsEndOfTry || blockInsideTry;
 
                         if (!tryOverlapsBlock)
                         {
@@ -783,7 +786,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// </summary>
         private bool DoesNotReturn(Instruction instr)
         {
-            if (!IsCall(instr, out var mtd))
+            if (!IsCall(instr, out MethodReference mtd))
             {
                 return false;
             }
@@ -798,7 +801,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// </summary>
         private static bool IsCall(Instruction instr, out MethodReference mtd)
         {
-            var opcode = instr.OpCode;
+            OpCode opcode = instr.OpCode;
             if (opcode != OpCodes.Call && opcode != OpCodes.Callvirt)
             {
                 mtd = null;

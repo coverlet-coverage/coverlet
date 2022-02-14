@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -38,7 +41,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                 ModuleTrackerTemplate.HitsArray = new[] { 1, 2, 0, 3 };
                 ModuleTrackerTemplate.UnloadModule(null, null);
 
-                var expectedHitsArray = new[] { 1, 2, 0, 3 };
+                int[] expectedHitsArray = new[] { 1, 2, 0, 3 };
                 Assert.Equal(expectedHitsArray, ReadHitsFile());
 
                 return _success;
@@ -63,7 +66,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         {
             FunctionExecutor.Run(() =>
             {
-                List<Thread> threads = new List<Thread>();
+                var threads = new List<Thread>();
                 using var ctx = new TrackerContext();
                 ModuleTrackerTemplate.HitsArray = new[] { 0, 0, 0, 0 };
                 for (int i = 0; i < ModuleTrackerTemplate.HitsArray.Length; ++i)
@@ -79,12 +82,12 @@ namespace Coverlet.Core.Tests.Instrumentation
                 }
 
                 ModuleTrackerTemplate.UnloadModule(null, null);
-                var expectedHitsArray = new[] { 4, 3, 2, 1 };
+                int[] expectedHitsArray = new[] { 4, 3, 2, 1 };
                 Assert.Equal(expectedHitsArray, ReadHitsFile());
 
                 static void HitIndex(object index)
                 {
-                    var hitIndex = (int)index;
+                    int hitIndex = (int)index;
                     for (int i = 0; i <= hitIndex; ++i)
                     {
                         ModuleTrackerTemplate.RecordHit(i);
@@ -107,7 +110,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                 ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
                 ModuleTrackerTemplate.UnloadModule(null, null);
 
-                var expectedHitsArray = new[] { 0, 4, 4, 4 };
+                int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
                 Assert.Equal(expectedHitsArray, ReadHitsFile());
 
                 return _success;
@@ -137,7 +140,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                     mutex.ReleaseMutex();
                     await unloadTask;
 
-                    var expectedHitsArray = new[] { 0, 4, 4, 4 };
+                    int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
                     Assert.Equal(expectedHitsArray, ReadHitsFile());
                 }
 
@@ -164,7 +167,7 @@ namespace Coverlet.Core.Tests.Instrumentation
             using (var fs = new FileStream(ModuleTrackerTemplate.HitsFilePath, FileMode.Open))
             using (var br = new BinaryReader(fs))
             {
-                var hitsArray = new int[br.ReadInt32()];
+                int[] hitsArray = new int[br.ReadInt32()];
                 for (int i = 0; i < hitsArray.Length; ++i)
                 {
                     hitsArray[i] = br.ReadInt32();

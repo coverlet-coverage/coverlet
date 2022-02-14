@@ -1,8 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
@@ -167,8 +169,8 @@ namespace Coverlet.Core.Instrumentation
                 throw new AssemblyResolutionException(name);
             }
 
-            using DependencyContextJsonReader contextJsonReader = new DependencyContextJsonReader();
-            Dictionary<string, Lazy<AssemblyDefinition>> libraries = new Dictionary<string, Lazy<AssemblyDefinition>>();
+            using var contextJsonReader = new DependencyContextJsonReader();
+            var libraries = new Dictionary<string, Lazy<AssemblyDefinition>>();
 
             foreach (string fileName in Directory.GetFiles(Path.GetDirectoryName(_modulePath), "*.deps.json"))
             {
@@ -248,7 +250,7 @@ namespace Coverlet.Core.Instrumentation
                     continue;
                 }
 
-                foreach (var file in Directory.GetFiles(sharedFrameworkPath))
+                foreach (string file in Directory.GetFiles(sharedFrameworkPath))
                 {
                     if (Path.GetFileName(file).Equals(dllName, StringComparison.OrdinalIgnoreCase))
                     {
