@@ -1,8 +1,6 @@
 ﻿// Remember to use full name because adding new using directives change line numbers
 using System.Linq;
 
-#nullable disable
-
 namespace Coverlet.Core.Samples.Tests
 {
 

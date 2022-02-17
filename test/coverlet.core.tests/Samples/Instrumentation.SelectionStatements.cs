@@ -1,7 +1,5 @@
 ﻿// Remember to use full name because adding new using directives change line numbers
 
-#nullable disable
-
 namespace Coverlet.Core.Samples.Tests
 {
     public class SelectionStatements

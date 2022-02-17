@@ -1,7 +1,5 @@
 ﻿using System;
 
-#nullable disable
-
 namespace Coverlet.Core.Samples.Tests
 {
     public class AutoProps

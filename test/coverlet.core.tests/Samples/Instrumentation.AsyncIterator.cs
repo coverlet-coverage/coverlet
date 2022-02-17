@@ -6,8 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-#nullable disable
-
 namespace Coverlet.Core.Samples.Tests
 {
     public class AsyncIterator
