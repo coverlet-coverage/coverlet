@@ -30,7 +30,7 @@ namespace Coverlet.Core.Tests.Instrumentation
 
     public class ModuleTrackerTemplateTests : ExternalProcessExecutionTest
     {
-        private static readonly Task<int> _success = Task.FromResult(0);
+        private static readonly Task<int> s_success = Task.FromResult(0);
 
         [Fact]
         public void HitsFileCorrectlyWritten()
@@ -44,7 +44,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                 int[] expectedHitsArray = new[] { 1, 2, 0, 3 };
                 Assert.Equal(expectedHitsArray, ReadHitsFile());
 
-                return _success;
+                return s_success;
             });
         }
 
@@ -57,7 +57,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                 WriteHitsFile(new[] { 1, 2, 3 });
                 ModuleTrackerTemplate.HitsArray = new[] { 1 };
                 Assert.Throws<InvalidOperationException>(() => ModuleTrackerTemplate.UnloadModule(null, null));
-                return _success;
+                return s_success;
             });
         }
 
@@ -94,7 +94,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                     }
                 }
 
-                return _success;
+                return s_success;
             });
         }
 
@@ -113,7 +113,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                 int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
                 Assert.Equal(expectedHitsArray, ReadHitsFile());
 
-                return _success;
+                return s_success;
             });
         }
 
@@ -149,32 +149,28 @@ namespace Coverlet.Core.Tests.Instrumentation
 
         }
 
-        private void WriteHitsFile(int[] hitsArray)
+        private static void WriteHitsFile(int[] hitsArray)
         {
-            using (var fs = new FileStream(ModuleTrackerTemplate.HitsFilePath, FileMode.Create))
-            using (var bw = new BinaryWriter(fs))
+            using var fs = new FileStream(ModuleTrackerTemplate.HitsFilePath, FileMode.Create);
+            using var bw = new BinaryWriter(fs);
+            bw.Write(hitsArray.Length);
+            foreach (int hitCount in hitsArray)
             {
-                bw.Write(hitsArray.Length);
-                foreach (int hitCount in hitsArray)
-                {
-                    bw.Write(hitCount);
-                }
+                bw.Write(hitCount);
             }
         }
 
-        private int[] ReadHitsFile()
+        private static int[] ReadHitsFile()
         {
-            using (var fs = new FileStream(ModuleTrackerTemplate.HitsFilePath, FileMode.Open))
-            using (var br = new BinaryReader(fs))
+            using var fs = new FileStream(ModuleTrackerTemplate.HitsFilePath, FileMode.Open);
+            using var br = new BinaryReader(fs);
+            int[] hitsArray = new int[br.ReadInt32()];
+            for (int i = 0; i < hitsArray.Length; ++i)
             {
-                int[] hitsArray = new int[br.ReadInt32()];
-                for (int i = 0; i < hitsArray.Length; ++i)
-                {
-                    hitsArray[i] = br.ReadInt32();
-                }
-
-                return hitsArray;
+                hitsArray[i] = br.ReadInt32();
             }
+
+            return hitsArray;
         }
     }
 }

@@ -26,12 +26,12 @@ namespace Coverlet.Core.Instrumentation.Tests
 {
     public class InstrumenterTests : IDisposable
     {
-        private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
-        private Action disposeAction;
+        private readonly Mock<ILogger> _mockLogger = new();
+        private Action _disposeAction;
 
         public void Dispose()
         {
-            disposeAction?.Invoke();
+            _disposeAction?.Invoke();
         }
 
         [ConditionalFact]
@@ -192,9 +192,7 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
-#pragma warning disable CS0612 // Type or member is obsolete
             bool found = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::Method(System.String)"));
-#pragma warning restore CS0612 // Type or member is obsolete
             Assert.False(found, "Method decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);
@@ -211,14 +209,10 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
-#pragma warning disable CS0612 // Type or member is obsolete
             bool getFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::get_Property()"));
-#pragma warning restore CS0612 // Type or member is obsolete
             Assert.False(getFound, "Property getter decorated with with exclude attribute should be excluded");
 
-#pragma warning disable CS0612 // Type or member is obsolete
             bool setFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::set_Property()"));
-#pragma warning restore CS0612 // Type or member is obsolete
             Assert.False(setFound, "Property setter decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);
@@ -587,7 +581,7 @@ public class SampleClass
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
-            disposeAction = () => Directory.Delete(tempDirectory, true);
+            _disposeAction = () => Directory.Delete(tempDirectory, true);
 
             var partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
@@ -656,10 +650,10 @@ public class SampleClass
             Assert.Contains(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLambda(System.String,System.Int32)");
             Assert.DoesNotContain(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLambda(System.String)");
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestLambda", 0));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestLambda", 0));
             Assert.DoesNotContain(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2::TestLambda(System.String,System.Int32)");
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestLambda", 1));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestLambda", 1));
             Assert.Contains(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2::TestLambda(System.String)");
 
             instrumenterTest.Directory.Delete(true);
@@ -677,15 +671,15 @@ public class SampleClass
             Assert.Contains(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLocalFunction(System.String,System.Int32)");
             Assert.DoesNotContain(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLocalFunction(System.String)");
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class == "Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr" &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestLocalFunction", 6));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestLocalFunction", 6));
             Assert.Contains(doc.Lines.Values, l => l.Class == "Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr" &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestLocalFunction", 7));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestLocalFunction", 7));
             Assert.DoesNotContain(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2::TestLocalFunction(System.String,System.Int32)");
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class == "Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2" &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestLocalFunction", 7));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestLocalFunction", 7));
             Assert.Contains(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2::TestLocalFunction(System.String)");
             Assert.Contains(doc.Lines.Values, l => l.Class == "Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2" &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestLocalFunction", 6));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestLocalFunction", 6));
 
             instrumenterTest.Directory.Delete(true);
         }
@@ -700,13 +694,13 @@ public class SampleClass
             Assert.NotNull(doc);
 
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 2));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 2));
             Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 3));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 3));
             Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 2));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 2));
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 3));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 3));
 
             instrumenterTest.Directory.Delete(true);
         }
@@ -721,13 +715,13 @@ public class SampleClass
             Assert.NotNull(doc);
 
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 4));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 4));
             Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 5));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 5));
             Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 4));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 4));
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
-                instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 5));
+                Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 5));
 
             instrumenterTest.Directory.Delete(true);
         }

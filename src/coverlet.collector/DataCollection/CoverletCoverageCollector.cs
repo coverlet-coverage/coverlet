@@ -23,10 +23,9 @@ namespace Coverlet.Collector.DataCollection
     [DataCollectorFriendlyName(CoverletConstants.FriendlyName)]
     public class CoverletCoverageCollector : DataCollector
     {
-        private readonly TestPlatformEqtTrace _eqtTrace;
         private readonly ICoverageWrapper _coverageWrapper;
         private readonly ICountDownEventFactory _countDownEventFactory;
-        private readonly Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> _serviceCollectionFactory;
+        private readonly Func<TestPlatformLogger, string, IServiceCollection> _serviceCollectionFactory;
 
         private DataCollectionEvents _events;
         private TestPlatformLogger _logger;
@@ -36,19 +35,18 @@ namespace Coverlet.Collector.DataCollection
         private CoverageManager _coverageManager;
         private IServiceProvider _serviceProvider;
 
-        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper(), new CollectorCountdownEventFactory(), GetDefaultServiceCollection)
+        public CoverletCoverageCollector() : this(new CoverageWrapper(), new CollectorCountdownEventFactory(), GetDefaultServiceCollection)
         {
         }
 
-        internal CoverletCoverageCollector(TestPlatformEqtTrace eqtTrace, ICoverageWrapper coverageWrapper, ICountDownEventFactory countDownEventFactory, Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory) : base()
+        internal CoverletCoverageCollector(ICoverageWrapper coverageWrapper, ICountDownEventFactory countDownEventFactory, Func<TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory) : base()
         {
-            _eqtTrace = eqtTrace;
             _coverageWrapper = coverageWrapper;
             _countDownEventFactory = countDownEventFactory;
             _serviceCollectionFactory = serviceCollectionFactory;
         }
 
-        private void AttachDebugger()
+        private static void AttachDebugger()
         {
             if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_DATACOLLECTOR_OUTOFPROC_DEBUG"), out int result) && result == 1)
             {
@@ -75,9 +73,9 @@ namespace Coverlet.Collector.DataCollection
 
             AttachDebugger();
 
-            if (_eqtTrace.IsInfoEnabled)
+            if (TestPlatformEqtTrace.IsInfoEnabled)
             {
-                _eqtTrace.Info("Initializing {0} with configuration: '{1}'", CoverletConstants.DataCollectorName, configurationElement?.OuterXml);
+                TestPlatformEqtTrace.Info("Initializing {0} with configuration: '{1}'", CoverletConstants.DataCollectorName, configurationElement?.OuterXml);
             }
 
             // Store input variables
@@ -98,7 +96,7 @@ namespace Coverlet.Collector.DataCollection
         /// <param name="disposing">Disposing flag</param>
         protected override void Dispose(bool disposing)
         {
-            _eqtTrace.Verbose("{0}: Disposing", CoverletConstants.DataCollectorName);
+            TestPlatformEqtTrace.Verbose("{0}: Disposing", CoverletConstants.DataCollectorName);
 
             // Unregister events
             if (_events != null)
@@ -122,22 +120,21 @@ namespace Coverlet.Collector.DataCollection
         /// <param name="sessionStartEventArgs">Event args</param>
         private void OnSessionStart(object sender, SessionStartEventArgs sessionStartEventArgs)
         {
-            _eqtTrace.Verbose("{0}: SessionStart received", CoverletConstants.DataCollectorName);
+            TestPlatformEqtTrace.Verbose("{0}: SessionStart received", CoverletConstants.DataCollectorName);
 
             try
             {
                 // Get coverlet settings
                 IEnumerable<string> testModules = GetTestModules(sessionStartEventArgs);
-                var coverletSettingsParser = new CoverletSettingsParser(_eqtTrace);
-                CoverletSettings coverletSettings = coverletSettingsParser.Parse(_configurationElement, testModules);
+                CoverletSettings coverletSettings = CoverletSettingsParser.Parse(_configurationElement, testModules);
 
                 // Build services container
-                _serviceProvider = _serviceCollectionFactory(_eqtTrace, _logger, coverletSettings.TestModule).BuildServiceProvider();
+                _serviceProvider = _serviceCollectionFactory(_logger, coverletSettings.TestModule).BuildServiceProvider();
 
                 // Get coverage and attachment managers
-                _coverageManager = new CoverageManager(coverletSettings, _eqtTrace, _logger, _coverageWrapper,
-                                                        _serviceProvider.GetRequiredService<IInstrumentationHelper>(), _serviceProvider.GetRequiredService<IFileSystem>(),
-                                                        _serviceProvider.GetRequiredService<ISourceRootTranslator>(), _serviceProvider.GetRequiredService<ICecilSymbolHelper>());
+                _coverageManager = new CoverageManager(coverletSettings, _logger, _coverageWrapper, _serviceProvider.GetRequiredService<IInstrumentationHelper>(),
+                                                        _serviceProvider.GetRequiredService<IFileSystem>(), _serviceProvider.GetRequiredService<ISourceRootTranslator>(),
+                                                        _serviceProvider.GetRequiredService<ICecilSymbolHelper>());
 
                 // Instrument modules
                 _coverageManager.InstrumentModules();
@@ -158,25 +155,23 @@ namespace Coverlet.Collector.DataCollection
         {
             try
             {
-                _eqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
+                TestPlatformEqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
 
                 // Get coverage reports
                 IEnumerable<(string report, string fileName)> coverageReports = _coverageManager?.GetCoverageReports();
 
-                if (coverageReports != null && coverageReports.Count() > 0)
+                if (coverageReports != null && coverageReports.Any())
                 {
                     // Send result attachments to test platform.
-                    using (var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30))))
+                    using var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30)));
+                    foreach ((string report, string fileName) in coverageReports)
                     {
-                        foreach ((string report, string fileName) in coverageReports)
-                        {
-                            attachmentManager.SendCoverageReport(report, fileName);
-                        }
+                        attachmentManager.SendCoverageReport(report, fileName);
                     }
                 }
                 else
                 {
-                    _eqtTrace.Verbose("{0}: No coverage reports specified", CoverletConstants.DataCollectorName);
+                    TestPlatformEqtTrace.Verbose("{0}: No coverage reports specified", CoverletConstants.DataCollectorName);
                 }
             }
             catch (Exception ex)
@@ -191,14 +186,14 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="sessionStartEventArgs">Event args</param>
         /// <returns>Test modules list</returns>
-        private IEnumerable<string> GetTestModules(SessionStartEventArgs sessionStartEventArgs)
+        private static IEnumerable<string> GetTestModules(SessionStartEventArgs sessionStartEventArgs)
         {
             try
             {
                 IEnumerable<string> testModules = GetPropertyValueWrapper(sessionStartEventArgs);
-                if (_eqtTrace.IsInfoEnabled)
+                if (TestPlatformEqtTrace.IsInfoEnabled)
                 {
-                    _eqtTrace.Info("{0}: TestModules: '{1}'",
+                    TestPlatformEqtTrace.Info("{0}: TestModules: '{1}'",
                         CoverletConstants.DataCollectorName,
                         string.Join(",", testModules ?? Enumerable.Empty<string>()));
                 }
@@ -220,13 +215,13 @@ namespace Coverlet.Collector.DataCollection
             return sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
         }
 
-        private static IServiceCollection GetDefaultServiceCollection(TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule)
+        private static IServiceCollection GetDefaultServiceCollection(TestPlatformLogger logger, string testModule)
         {
             IServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
-            serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+            serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(logger));
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             // We cache resolutions

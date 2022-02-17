@@ -17,7 +17,6 @@ namespace Coverlet.Collector.DataCollection
     internal class AttachmentManager : IDisposable
     {
         private readonly DataCollectionSink _dataSink;
-        private readonly TestPlatformEqtTrace _eqtTrace;
         private readonly TestPlatformLogger _logger;
         private readonly DataCollectionContext _dataCollectionContext;
         private readonly IFileHelper _fileHelper;
@@ -25,11 +24,10 @@ namespace Coverlet.Collector.DataCollection
         private readonly ICountDownEvent _countDownEvent;
         private readonly string _reportDirectory;
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, ICountDownEvent countDownEvent)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, ICountDownEvent countDownEvent)
             : this(dataSink,
                   dataCollectionContext,
                   logger,
-                  eqtTrace,
                   Guid.NewGuid().ToString(),
                   new FileHelper(),
                   new DirectoryHelper(),
@@ -37,13 +35,12 @@ namespace Coverlet.Collector.DataCollection
         {
         }
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper, ICountDownEvent countDownEvent)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper, ICountDownEvent countDownEvent)
         {
             // Store input variabless
             _dataSink = dataSink;
             _dataCollectionContext = dataCollectionContext;
             _logger = logger;
-            _eqtTrace = eqtTrace;
             _fileHelper = fileHelper;
             _directoryHelper = directoryHelper;
             _countDownEvent = countDownEvent;
@@ -103,7 +100,7 @@ namespace Coverlet.Collector.DataCollection
                 _directoryHelper.CreateDirectory(_reportDirectory);
                 string filePath = Path.Combine(_reportDirectory, reportFileName);
                 _fileHelper.WriteAllText(filePath, report);
-                _eqtTrace.Info("{0}: Saved coverage report to path: '{1}'", CoverletConstants.DataCollectorName, filePath);
+                TestPlatformEqtTrace.Info("{0}: Saved coverage report to path: '{1}'", CoverletConstants.DataCollectorName, filePath);
 
                 return filePath;
             }
@@ -123,7 +120,7 @@ namespace Coverlet.Collector.DataCollection
         {
             try
             {
-                _eqtTrace.Verbose("{0}: SendFileCompleted received", CoverletConstants.DataCollectorName);
+                TestPlatformEqtTrace.Verbose("{0}: SendFileCompleted received", CoverletConstants.DataCollectorName);
             }
             catch (Exception ex)
             {
@@ -144,12 +141,12 @@ namespace Coverlet.Collector.DataCollection
             if (_fileHelper.Exists(attachmentPath))
             {
                 // Send coverage attachment to test platform.
-                _eqtTrace.Verbose("{0}: Sending attachment to test platform", CoverletConstants.DataCollectorName);
+                TestPlatformEqtTrace.Verbose("{0}: Sending attachment to test platform", CoverletConstants.DataCollectorName);
                 _dataSink.SendFileAsync(_dataCollectionContext, attachmentPath, false);
             }
             else
             {
-                _eqtTrace.Warning("{0}: Attachment file does not exist", CoverletConstants.DataCollectorName);
+                TestPlatformEqtTrace.Warning("{0}: Attachment file does not exist", CoverletConstants.DataCollectorName);
             }
         }
 
@@ -163,7 +160,7 @@ namespace Coverlet.Collector.DataCollection
                 if (_directoryHelper.Exists(_reportDirectory))
                 {
                     _directoryHelper.Delete(_reportDirectory, true);
-                    _eqtTrace.Verbose("{0}: Deleted report directory: '{1}'", CoverletConstants.DataCollectorName, _reportDirectory);
+                    TestPlatformEqtTrace.Verbose("{0}: Deleted report directory: '{1}'", CoverletConstants.DataCollectorName, _reportDirectory);
                 }
             }
             catch (Exception ex)

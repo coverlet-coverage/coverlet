@@ -100,9 +100,9 @@ namespace Coverlet.Core.Instrumentation.Reachability
             /// <summary>
             /// Returns true if this branch has multiple targets.
             /// </summary>
-            public bool HasMultiTargets => _TargetOffset == -1;
+            public bool HasMultiTargets => _targetOffset == -1;
 
-            private readonly int _TargetOffset;
+            private readonly int _targetOffset;
 
             /// <summary>
             /// Target of the branch, assuming it has a single target.
@@ -118,11 +118,11 @@ namespace Coverlet.Core.Instrumentation.Reachability
                         throw new InvalidOperationException($"{HasMultiTargets} is true");
                     }
 
-                    return _TargetOffset;
+                    return _targetOffset;
                 }
             }
 
-            private readonly ImmutableArray<int> _TargetOffsets;
+            private readonly ImmutableArray<int> _targetOffsets;
 
             /// <summary>
             /// Targets of the branch, assuming it has multiple targets.
@@ -138,15 +138,15 @@ namespace Coverlet.Core.Instrumentation.Reachability
                         throw new InvalidOperationException($"{HasMultiTargets} is false");
                     }
 
-                    return _TargetOffsets;
+                    return _targetOffsets;
                 }
             }
 
             public BranchInstruction(int offset, int targetOffset)
             {
                 Offset = offset;
-                _TargetOffset = targetOffset;
-                _TargetOffsets = ImmutableArray<int>.Empty;
+                _targetOffset = targetOffset;
+                _targetOffsets = ImmutableArray<int>.Empty;
             }
 
             public BranchInstruction(int offset, ImmutableArray<int> targetOffset)
@@ -157,8 +157,8 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 }
 
                 Offset = offset;
-                _TargetOffset = -1;
-                _TargetOffsets = targetOffset;
+                _targetOffset = -1;
+                _targetOffsets = targetOffset;
             }
 
             public override string ToString()
@@ -169,7 +169,9 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// OpCodes that transfer control code, even if they do not
         /// introduce branch points.
         /// </summary>
+#pragma warning disable IDE1006 // Naming Styles
         private static readonly ImmutableHashSet<OpCode> BRANCH_OPCODES =
+#pragma warning restore IDE1006 // Naming Styles
             ImmutableHashSet.CreateRange(
                 new[]
                 {
@@ -224,7 +226,9 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// OpCodes that unconditionally transfer control, so there
         /// is not "fall through" branch target.
         /// </summary>
+#pragma warning disable IDE1006 // Naming Styles
         private static readonly ImmutableHashSet<OpCode> UNCONDITIONAL_BRANCH_OPCODES =
+#pragma warning restore IDE1006 // Naming Styles
             ImmutableHashSet.CreateRange(
                 new[]
                 {
@@ -235,11 +239,11 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 }
             );
 
-        private readonly ImmutableHashSet<MetadataToken> DoesNotReturnMethods;
+        private readonly ImmutableHashSet<MetadataToken> _doesNotReturnMethods;
 
         private ReachabilityHelper(ImmutableHashSet<MetadataToken> doesNotReturnMethods)
         {
-            DoesNotReturnMethods = doesNotReturnMethods;
+            _doesNotReturnMethods = doesNotReturnMethods;
         }
 
         /// <summary>
@@ -372,7 +376,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
             }
 
             // no known methods that do not return, so everything is reachable by definition
-            if (DoesNotReturnMethods.IsEmpty)
+            if (_doesNotReturnMethods.IsEmpty)
             {
                 return ImmutableArray<UnreachableRange>.Empty;
             }
@@ -527,7 +531,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// <summary>
         /// Calculates which ranges of IL are unreachable, given blocks which have head and tail reachability calculated.
         /// </summary>
-        private ImmutableArray<UnreachableRange> DetermineUnreachableRanges(ImmutableArray<BasicBlock> blocks, int lastInstructionOffset)
+        private static ImmutableArray<UnreachableRange> DetermineUnreachableRanges(ImmutableArray<BasicBlock> blocks, int lastInstructionOffset)
         {
             ImmutableArray<UnreachableRange>.Builder ret = ImmutableArray.CreateBuilder<UnreachableRange>();
 
@@ -580,7 +584,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// 
         /// "Tail reachability" will have already been determined in CreateBlocks.
         /// </summary>
-        private void DetermineHeadReachability(ImmutableArray<BasicBlock> blocks)
+        private static void DetermineHeadReachability(ImmutableArray<BasicBlock> blocks)
         {
             var blockLookup = blocks.ToImmutableDictionary(b => b.StartOffset);
 
@@ -791,7 +795,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
                 return false;
             }
 
-            return DoesNotReturnMethods.Contains(mtd.MetadataToken);
+            return _doesNotReturnMethods.Contains(mtd.MetadataToken);
         }
 
         /// <summary>

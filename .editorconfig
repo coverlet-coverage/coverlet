@@ -87,6 +87,22 @@ dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
 dotnet_style_prefer_auto_properties = true:warning
 dotnet_style_prefer_conditional_expression_over_assignment = true:silent
 dotnet_style_prefer_conditional_expression_over_return = true:silent
+# CA1805: Do not initialize unnecessarily
+dotnet_diagnostic.CA1805.severity = warning
+# CA1822: Mark members as static
+dotnet_diagnostic.CA1822.severity = warning
+# IDE0063: Use simple 'using' statement
+dotnet_diagnostic.IDE0063.severity = warning
+# IDE0057: Use range operator
+dotnet_diagnostic.IDE0057.severity = warning
+# IDE0075: Simplify conditional expression
+dotnet_diagnostic.IDE0075.severity = warning
+# IDE0071: Simplify interpolation
+dotnet_diagnostic.IDE0071.severity = warning
+# CA1829: Use Length/Count property instead of Count() when available
+dotnet_diagnostic.CA1829.severity = warning
+# CA1827: Do not use Count() or LongCount() when Any() can be used
+dotnet_diagnostic.CA1827.severity = warning
 ###############################
 # Naming Conventions          #
 ###############################
@@ -114,6 +130,10 @@ dotnet_naming_symbols.private_internal_fields.applicable_kinds = field
 dotnet_naming_symbols.private_internal_fields.applicable_accessibilities = private, internal
 dotnet_naming_style.camel_case_underscore_style.required_prefix = _
 dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
+# IDE1006: Naming Styles
+dotnet_diagnostic.IDE1006.severity = warning
+# IDE0090: Use 'new(...)'
+dotnet_diagnostic.IDE0090.severity = warning
 ###############################
 # C# Coding Conventions       #
 ###############################

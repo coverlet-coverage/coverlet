@@ -24,10 +24,9 @@ namespace Coverlet.Core.Reporters
             }
 
             // Calculate coverage
-            var summary = new CoverageSummary();
-            CoverageDetails overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
-            CoverageDetails overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
-            CoverageDetails overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
+            CoverageDetails overallLineCoverage = CoverageSummary.CalculateLineCoverage(result.Modules);
+            CoverageDetails overallBranchCoverage = CoverageSummary.CalculateBranchCoverage(result.Modules);
+            CoverageDetails overallMethodCoverage = CoverageSummary.CalculateMethodCoverage(result.Modules);
 
             // Report coverage
             var stringBuilder = new StringBuilder();
@@ -39,7 +38,7 @@ namespace Coverlet.Core.Reporters
             return stringBuilder.ToString();
         }
 
-        private void OutputLineCoverage(CoverageDetails coverageDetails, StringBuilder builder)
+        private static void OutputLineCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The number of covered lines
             OutputTeamCityServiceMessage("CodeCoverageAbsLCovered", coverageDetails.Covered, builder);
@@ -48,7 +47,7 @@ namespace Coverlet.Core.Reporters
             OutputTeamCityServiceMessage("CodeCoverageAbsLTotal", coverageDetails.Total, builder);
         }
 
-        private void OutputBranchCoverage(CoverageDetails coverageDetails, StringBuilder builder)
+        private static void OutputBranchCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The number of covered branches
             OutputTeamCityServiceMessage("CodeCoverageAbsBCovered", coverageDetails.Covered, builder);
@@ -57,7 +56,7 @@ namespace Coverlet.Core.Reporters
             OutputTeamCityServiceMessage("CodeCoverageAbsBTotal", coverageDetails.Total, builder);
         }
 
-        private void OutputMethodCoverage(CoverageDetails coverageDetails, StringBuilder builder)
+        private static void OutputMethodCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The number of covered methods
             OutputTeamCityServiceMessage("CodeCoverageAbsMCovered", coverageDetails.Covered, builder);
@@ -66,7 +65,7 @@ namespace Coverlet.Core.Reporters
             OutputTeamCityServiceMessage("CodeCoverageAbsMTotal", coverageDetails.Total, builder);
         }
 
-        private void OutputTeamCityServiceMessage(string key, double value, StringBuilder builder)
+        private static void OutputTeamCityServiceMessage(string key, double value, StringBuilder builder)
         {
             builder.AppendLine($"##teamcity[buildStatisticValue key='{key}' value='{value.ToString("0.##", new CultureInfo("en-US"))}']");
         }

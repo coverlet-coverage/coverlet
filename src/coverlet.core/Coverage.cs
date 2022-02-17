@@ -330,7 +330,7 @@ namespace Coverlet.Core
             return false;
         }
 
-        private Method GetMethodWithSameLineInSameDocument(Classes documentClasses, string compilerGeneratedClassName, int branchLine)
+        private static Method GetMethodWithSameLineInSameDocument(Classes documentClasses, string compilerGeneratedClassName, int branchLine)
         {
             foreach (KeyValuePair<string, Methods> @class in documentClasses)
             {

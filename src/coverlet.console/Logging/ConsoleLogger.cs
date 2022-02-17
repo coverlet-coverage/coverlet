@@ -9,7 +9,8 @@ namespace Coverlet.Console.Logging
 {
     class ConsoleLogger : ILogger
     {
-        private static readonly object _sync = new object();
+        private static readonly object s_sync = new();
+
         public LogLevel Level { get; set; } = LogLevel.Normal;
 
         public void LogError(string message) => Log(LogLevel.Quiet, message, ConsoleColor.Red);
@@ -26,7 +27,7 @@ namespace Coverlet.Console.Logging
         {
             if (level < Level) return;
 
-            lock (_sync)
+            lock (s_sync)
             {
                 ConsoleColor currentForegroundColor;
                 if (color != (currentForegroundColor = ForegroundColor))

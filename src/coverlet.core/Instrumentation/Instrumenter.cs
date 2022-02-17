@@ -49,7 +49,7 @@ namespace Coverlet.Core.Instrumentation
         private readonly string[] _doesNotReturnAttributes;
         private ReachabilityHelper _reachabilityHelper;
 
-        public bool SkipModule { get; set; } = false;
+        public bool SkipModule { get; set; }
 
         public Instrumenter(
             string module,
@@ -185,158 +185,150 @@ namespace Coverlet.Core.Instrumentation
         // locking issues if we do it while writing.
         private void CreateReachabilityHelper()
         {
-            using (Stream stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read))
-            using (var resolver = new NetstandardAwareAssemblyResolver(_module, _logger))
+            using Stream stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read);
+            using var resolver = new NetstandardAwareAssemblyResolver(_module, _logger);
+            resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
+            var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
+            if (_isCoreLibrary)
             {
-                resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
-                var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
-                if (_isCoreLibrary)
-                {
-                    parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
-                }
-
-                using (var module = ModuleDefinition.ReadModule(stream, parameters))
-                {
-                    _reachabilityHelper = ReachabilityHelper.CreateForModule(module, _doesNotReturnAttributes, _logger);
-                }
+                parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
             }
+
+            using var module = ModuleDefinition.ReadModule(stream, parameters);
+            _reachabilityHelper = ReachabilityHelper.CreateForModule(module, _doesNotReturnAttributes, _logger);
         }
 
         private void InstrumentModule()
         {
             CreateReachabilityHelper();
 
-            using (Stream stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite))
-            using (var resolver = new NetstandardAwareAssemblyResolver(_module, _logger))
+            using Stream stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite);
+            using var resolver = new NetstandardAwareAssemblyResolver(_module, _logger);
+            resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
+            var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
+            if (_isCoreLibrary)
             {
-                resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
-                var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
-                if (_isCoreLibrary)
+                parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
+            }
+
+            using var module = ModuleDefinition.ReadModule(stream, parameters);
+            foreach (CustomAttribute customAttribute in module.Assembly.CustomAttributes)
+            {
+                if (IsExcludeAttribute(customAttribute))
                 {
-                    parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
-                }
-
-                using (var module = ModuleDefinition.ReadModule(stream, parameters))
-                {
-                    foreach (CustomAttribute customAttribute in module.Assembly.CustomAttributes)
-                    {
-                        if (IsExcludeAttribute(customAttribute))
-                        {
-                            _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute {customAttribute.AttributeType.FullName}");
-                            SkipModule = true;
-                            return;
-                        }
-                    }
-
-                    bool containsAppContext = module.GetType(nameof(System), nameof(AppContext)) != null;
-                    IEnumerable<TypeDefinition> types = module.GetTypes();
-                    AddCustomModuleTrackerToModule(module);
-
-                    CustomDebugInformation sourceLinkDebugInfo = module.CustomDebugInformations.FirstOrDefault(c => c.Kind == CustomDebugInformationKind.SourceLink);
-                    if (sourceLinkDebugInfo != null)
-                    {
-                        _result.SourceLink = ((SourceLinkDebugInformation)sourceLinkDebugInfo).Content;
-                    }
-
-                    foreach (TypeDefinition type in types)
-                    {
-                        if (
-                            !Is_System_Threading_Interlocked_CoreLib_Type(type) &&
-                            !IsTypeExcluded(type) &&
-                            _instrumentationHelper.IsTypeIncluded(_module, type.FullName, _parameters.IncludeFilters)
-                            )
-                        {
-                            if (IsSynthesizedMemberToBeExcluded(type))
-                            {
-                                (_excludedCompilerGeneratedTypes ??= new List<string>()).Add(type.FullName);
-                            }
-                            else
-                            {
-                                InstrumentType(type);
-                            }
-                        }
-                    }
-
-                    // Fixup the custom tracker class constructor, according to all instrumented types
-                    if (_customTrackerRegisterUnloadEventsMethod == null)
-                    {
-                        _customTrackerRegisterUnloadEventsMethod = new MethodReference(
-                            nameof(ModuleTrackerTemplate.RegisterUnloadEvents), module.TypeSystem.Void, _customTrackerTypeDef);
-                    }
-
-                    Instruction lastInstr = _customTrackerClassConstructorIl.Body.Instructions.Last();
-
-                    if (!containsAppContext)
-                    {
-                        // For "normal" cases, where the instrumented assembly is not the core library, we add a call to
-                        // RegisterUnloadEvents to the static constructor of the generated custom tracker. Due to static
-                        // initialization constraints, the core library is handled separately below.
-                        _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Call, _customTrackerRegisterUnloadEventsMethod));
-                    }
-
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Newarr, module.TypeSystem.Int32));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(_parameters.SingleHit ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerSingleHit));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4_1));
-                    _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerFlushHitFile));
-
-                    if (containsAppContext)
-                    {
-                        // Handle the core library by instrumenting System.AppContext.OnProcessExit to directly call
-                        // the UnloadModule method of the custom tracker type. This avoids loops between the static
-                        // initialization of the custom tracker and the static initialization of the hosting AppDomain
-                        // (which for the core library case will be instrumented code).
-                        var eventArgsType = new TypeReference(nameof(System), nameof(EventArgs), module, module.TypeSystem.CoreLibrary);
-                        var customTrackerUnloadModule = new MethodReference(nameof(ModuleTrackerTemplate.UnloadModule), module.TypeSystem.Void, _customTrackerTypeDef);
-                        customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(module.TypeSystem.Object));
-                        customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(eventArgsType));
-
-                        var appContextType = new TypeReference(nameof(System), nameof(AppContext), module, module.TypeSystem.CoreLibrary);
-                        MethodDefinition onProcessExitMethod = new MethodReference("OnProcessExit", module.TypeSystem.Void, appContextType).Resolve();
-                        ILProcessor onProcessExitIl = onProcessExitMethod.Body.GetILProcessor();
-
-                        // Put the OnProcessExit body inside try/finally to ensure the call to the UnloadModule.
-                        Instruction lastInst = onProcessExitMethod.Body.Instructions.Last();
-                        var firstNullParam = Instruction.Create(OpCodes.Ldnull);
-                        var secondNullParam = Instruction.Create(OpCodes.Ldnull);
-                        var callUnload = Instruction.Create(OpCodes.Call, customTrackerUnloadModule);
-                        onProcessExitIl.InsertAfter(lastInst, firstNullParam);
-                        onProcessExitIl.InsertAfter(firstNullParam, secondNullParam);
-                        onProcessExitIl.InsertAfter(secondNullParam, callUnload);
-                        var endFinally = Instruction.Create(OpCodes.Endfinally);
-                        onProcessExitIl.InsertAfter(callUnload, endFinally);
-                        Instruction ret = onProcessExitIl.Create(OpCodes.Ret);
-                        Instruction leaveAfterFinally = onProcessExitIl.Create(OpCodes.Leave, ret);
-                        onProcessExitIl.InsertAfter(endFinally, ret);
-                        foreach (Instruction inst in onProcessExitMethod.Body.Instructions.ToArray())
-                        {
-                            // Patch ret to leave after the finally
-                            if (inst.OpCode == OpCodes.Ret && inst != ret)
-                            {
-                                Instruction leaveBodyInstAfterFinally = onProcessExitIl.Create(OpCodes.Leave, ret);
-                                Instruction prevInst = inst.Previous;
-                                onProcessExitMethod.Body.Instructions.Remove(inst);
-                                onProcessExitIl.InsertAfter(prevInst, leaveBodyInstAfterFinally);
-                            }
-                        }
-                        var handler = new ExceptionHandler(ExceptionHandlerType.Finally)
-                        {
-                            TryStart = onProcessExitIl.Body.Instructions.First(),
-                            TryEnd = firstNullParam,
-                            HandlerStart = firstNullParam,
-                            HandlerEnd = ret
-                        };
-
-                        onProcessExitMethod.Body.ExceptionHandlers.Add(handler);
-                    }
-
-                    module.Write(stream, new WriterParameters { WriteSymbols = true });
+                    _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute {customAttribute.AttributeType.FullName}");
+                    SkipModule = true;
+                    return;
                 }
             }
+
+            bool containsAppContext = module.GetType(nameof(System), nameof(AppContext)) != null;
+            IEnumerable<TypeDefinition> types = module.GetTypes();
+            AddCustomModuleTrackerToModule(module);
+
+            CustomDebugInformation sourceLinkDebugInfo = module.CustomDebugInformations.FirstOrDefault(c => c.Kind == CustomDebugInformationKind.SourceLink);
+            if (sourceLinkDebugInfo != null)
+            {
+                _result.SourceLink = ((SourceLinkDebugInformation)sourceLinkDebugInfo).Content;
+            }
+
+            foreach (TypeDefinition type in types)
+            {
+                if (
+                    !Is_System_Threading_Interlocked_CoreLib_Type(type) &&
+                    !IsTypeExcluded(type) &&
+                    _instrumentationHelper.IsTypeIncluded(_module, type.FullName, _parameters.IncludeFilters)
+                    )
+                {
+                    if (IsSynthesizedMemberToBeExcluded(type))
+                    {
+                        (_excludedCompilerGeneratedTypes ??= new List<string>()).Add(type.FullName);
+                    }
+                    else
+                    {
+                        InstrumentType(type);
+                    }
+                }
+            }
+
+            // Fixup the custom tracker class constructor, according to all instrumented types
+            if (_customTrackerRegisterUnloadEventsMethod == null)
+            {
+                _customTrackerRegisterUnloadEventsMethod = new MethodReference(
+                    nameof(ModuleTrackerTemplate.RegisterUnloadEvents), module.TypeSystem.Void, _customTrackerTypeDef);
+            }
+
+            Instruction lastInstr = _customTrackerClassConstructorIl.Body.Instructions.Last();
+
+            if (!containsAppContext)
+            {
+                // For "normal" cases, where the instrumented assembly is not the core library, we add a call to
+                // RegisterUnloadEvents to the static constructor of the generated custom tracker. Due to static
+                // initialization constraints, the core library is handled separately below.
+                _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Call, _customTrackerRegisterUnloadEventsMethod));
+            }
+
+            _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count));
+            _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Newarr, module.TypeSystem.Int32));
+            _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
+            _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldstr, _result.HitsFilePath));
+            _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsFilePath));
+            _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(_parameters.SingleHit ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+            _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerSingleHit));
+            _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4_1));
+            _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerFlushHitFile));
+
+            if (containsAppContext)
+            {
+                // Handle the core library by instrumenting System.AppContext.OnProcessExit to directly call
+                // the UnloadModule method of the custom tracker type. This avoids loops between the static
+                // initialization of the custom tracker and the static initialization of the hosting AppDomain
+                // (which for the core library case will be instrumented code).
+                var eventArgsType = new TypeReference(nameof(System), nameof(EventArgs), module, module.TypeSystem.CoreLibrary);
+                var customTrackerUnloadModule = new MethodReference(nameof(ModuleTrackerTemplate.UnloadModule), module.TypeSystem.Void, _customTrackerTypeDef);
+                customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(module.TypeSystem.Object));
+                customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(eventArgsType));
+
+                var appContextType = new TypeReference(nameof(System), nameof(AppContext), module, module.TypeSystem.CoreLibrary);
+                MethodDefinition onProcessExitMethod = new MethodReference("OnProcessExit", module.TypeSystem.Void, appContextType).Resolve();
+                ILProcessor onProcessExitIl = onProcessExitMethod.Body.GetILProcessor();
+
+                // Put the OnProcessExit body inside try/finally to ensure the call to the UnloadModule.
+                Instruction lastInst = onProcessExitMethod.Body.Instructions.Last();
+                var firstNullParam = Instruction.Create(OpCodes.Ldnull);
+                var secondNullParam = Instruction.Create(OpCodes.Ldnull);
+                var callUnload = Instruction.Create(OpCodes.Call, customTrackerUnloadModule);
+                onProcessExitIl.InsertAfter(lastInst, firstNullParam);
+                onProcessExitIl.InsertAfter(firstNullParam, secondNullParam);
+                onProcessExitIl.InsertAfter(secondNullParam, callUnload);
+                var endFinally = Instruction.Create(OpCodes.Endfinally);
+                onProcessExitIl.InsertAfter(callUnload, endFinally);
+                Instruction ret = onProcessExitIl.Create(OpCodes.Ret);
+                Instruction leaveAfterFinally = onProcessExitIl.Create(OpCodes.Leave, ret);
+                onProcessExitIl.InsertAfter(endFinally, ret);
+                foreach (Instruction inst in onProcessExitMethod.Body.Instructions.ToArray())
+                {
+                    // Patch ret to leave after the finally
+                    if (inst.OpCode == OpCodes.Ret && inst != ret)
+                    {
+                        Instruction leaveBodyInstAfterFinally = onProcessExitIl.Create(OpCodes.Leave, ret);
+                        Instruction prevInst = inst.Previous;
+                        onProcessExitMethod.Body.Instructions.Remove(inst);
+                        onProcessExitIl.InsertAfter(prevInst, leaveBodyInstAfterFinally);
+                    }
+                }
+                var handler = new ExceptionHandler(ExceptionHandlerType.Finally)
+                {
+                    TryStart = onProcessExitIl.Body.Instructions.First(),
+                    TryEnd = firstNullParam,
+                    HandlerStart = firstNullParam,
+                    HandlerEnd = ret
+                };
+
+                onProcessExitMethod.Body.ExceptionHandlers.Add(handler);
+            }
+
+            module.Write(stream, new WriterParameters { WriteSymbols = true });
         }
 
         private void AddCustomModuleTrackerToModule(ModuleDefinition module)
@@ -837,7 +829,7 @@ namespace Coverlet.Core.Instrumentation
         // Check if the name is synthesized by the compiler
         // Refer to https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs
         // to see how the compiler generate names for lambda, local function, yield or async/await expressions
-        internal bool IsSynthesizedNameOf(string name, string methodName, int methodOrdinal)
+        internal static bool IsSynthesizedNameOf(string name, string methodName, int methodOrdinal)
         {
             return
                 // Lambda method
@@ -864,52 +856,52 @@ namespace Coverlet.Core.Instrumentation
 
             private class CoreLibMetadataImporter : IMetadataImporter
             {
-                private readonly ModuleDefinition module;
-                private readonly DefaultMetadataImporter defaultMetadataImporter;
+                private readonly ModuleDefinition _module;
+                private readonly DefaultMetadataImporter _defaultMetadataImporter;
 
                 public CoreLibMetadataImporter(ModuleDefinition module)
                 {
-                    this.module = module;
-                    defaultMetadataImporter = new DefaultMetadataImporter(module);
+                    _module = module;
+                    _defaultMetadataImporter = new DefaultMetadataImporter(module);
                 }
 
                 public AssemblyNameReference ImportReference(AssemblyNameReference reference)
                 {
-                    return defaultMetadataImporter.ImportReference(reference);
+                    return _defaultMetadataImporter.ImportReference(reference);
                 }
 
                 public TypeReference ImportReference(TypeReference type, IGenericParameterProvider context)
                 {
-                    TypeReference importedRef = defaultMetadataImporter.ImportReference(type, context);
-                    importedRef.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+                    TypeReference importedRef = _defaultMetadataImporter.ImportReference(type, context);
+                    importedRef.GetElementType().Scope = _module.TypeSystem.CoreLibrary;
                     return importedRef;
                 }
 
                 public FieldReference ImportReference(FieldReference field, IGenericParameterProvider context)
                 {
-                    FieldReference importedRef = defaultMetadataImporter.ImportReference(field, context);
-                    importedRef.FieldType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+                    FieldReference importedRef = _defaultMetadataImporter.ImportReference(field, context);
+                    importedRef.FieldType.GetElementType().Scope = _module.TypeSystem.CoreLibrary;
                     return importedRef;
                 }
 
                 public MethodReference ImportReference(MethodReference method, IGenericParameterProvider context)
                 {
-                    MethodReference importedRef = defaultMetadataImporter.ImportReference(method, context);
-                    importedRef.DeclaringType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+                    MethodReference importedRef = _defaultMetadataImporter.ImportReference(method, context);
+                    importedRef.DeclaringType.GetElementType().Scope = _module.TypeSystem.CoreLibrary;
 
                     foreach (ParameterDefinition parameter in importedRef.Parameters)
                     {
-                        if (parameter.ParameterType.Scope == module.TypeSystem.CoreLibrary)
+                        if (parameter.ParameterType.Scope == _module.TypeSystem.CoreLibrary)
                         {
                             continue;
                         }
 
-                        parameter.ParameterType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+                        parameter.ParameterType.GetElementType().Scope = _module.TypeSystem.CoreLibrary;
                     }
 
-                    if (importedRef.ReturnType.Scope != module.TypeSystem.CoreLibrary)
+                    if (importedRef.ReturnType.Scope != _module.TypeSystem.CoreLibrary)
                     {
-                        importedRef.ReturnType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+                        importedRef.ReturnType.GetElementType().Scope = _module.TypeSystem.CoreLibrary;
                     }
 
                     return importedRef;

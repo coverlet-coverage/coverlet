@@ -48,7 +48,7 @@ namespace Coverlet.Core.Helpers
             _sourceToDeterministicPathMapping = LoadSourceToDeterministicPathMapping(_sourceRootMapping);
         }
 
-        private Dictionary<string, List<string>> LoadSourceToDeterministicPathMapping(Dictionary<string, List<SourceRootMapping>> sourceRootMapping)
+        private static Dictionary<string, List<string>> LoadSourceToDeterministicPathMapping(Dictionary<string, List<SourceRootMapping>> sourceRootMapping)
         {
             if (sourceRootMapping is null)
             {

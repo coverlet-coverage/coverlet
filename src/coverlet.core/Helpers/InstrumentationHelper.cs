@@ -18,7 +18,7 @@ namespace Coverlet.Core.Helpers
     internal class InstrumentationHelper : IInstrumentationHelper
     {
         private const int RetryAttempts = 12;
-        private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _backupList = new();
         private readonly IRetryHelper _retryHelper;
         private readonly IFileSystem _fileSystem;
         private readonly ISourceRootTranslator _sourceRootTranslator;
@@ -83,27 +83,25 @@ namespace Coverlet.Core.Helpers
         public bool HasPdb(string module, out bool embedded)
         {
             embedded = false;
-            using (Stream moduleStream = _fileSystem.OpenRead(module))
-            using (var peReader = new PEReader(moduleStream))
+            using Stream moduleStream = _fileSystem.OpenRead(module);
+            using var peReader = new PEReader(moduleStream);
+            foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
             {
-                foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
+                if (entry.Type == DebugDirectoryEntryType.CodeView)
                 {
-                    if (entry.Type == DebugDirectoryEntryType.CodeView)
+                    CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
+                    if (_sourceRootTranslator.ResolveFilePath(codeViewData.Path) == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
                     {
-                        CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                        if (_sourceRootTranslator.ResolveFilePath(codeViewData.Path) == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
-                        {
-                            // PDB is embedded
-                            embedded = true;
-                            return true;
-                        }
-
-                        return _fileSystem.Exists(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
+                        // PDB is embedded
+                        embedded = true;
+                        return true;
                     }
-                }
 
-                return false;
+                    return _fileSystem.Exists(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
+                }
             }
+
+            return false;
         }
 
         public bool EmbeddedPortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
@@ -116,17 +114,15 @@ namespace Coverlet.Core.Helpers
                 {
                     if (entry.Type == DebugDirectoryEntryType.EmbeddedPortablePdb)
                     {
-                        using (MetadataReaderProvider embeddedMetadataProvider = peReader.ReadEmbeddedPortablePdbDebugDirectoryData(entry))
+                        using MetadataReaderProvider embeddedMetadataProvider = peReader.ReadEmbeddedPortablePdbDebugDirectoryData(entry);
+                        MetadataReader metadataReader = embeddedMetadataProvider.GetMetadataReader();
+
+                        (bool allDocumentsMatch, string notFoundDocument) = MatchDocumentsWithSources(metadataReader);
+
+                        if (!allDocumentsMatch)
                         {
-                            MetadataReader metadataReader = embeddedMetadataProvider.GetMetadataReader();
-
-                            (bool allDocumentsMatch, string notFoundDocument) = MatchDocumentsWithSources(metadataReader);
-
-                            if (!allDocumentsMatch)
-                            {
-                                firstNotFoundDocument = notFoundDocument;
-                                return false;
-                            }
+                            firstNotFoundDocument = notFoundDocument;
+                            return false;
                         }
                     }
                 }
@@ -388,7 +384,7 @@ namespace Coverlet.Core.Helpers
             _logger = logger;
         }
 
-        private bool IsTypeFilterMatch(string module, string type, string[] filters)
+        private static bool IsTypeFilterMatch(string module, string type, string[] filters)
         {
             Debug.Assert(module != null);
             Debug.Assert(filters != null);
@@ -408,7 +404,7 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
-        private string GetBackupPath(string module, string identifier)
+        private static string GetBackupPath(string module, string identifier)
         {
             return Path.Combine(
                 Path.GetTempPath(),
@@ -428,14 +424,14 @@ namespace Coverlet.Core.Helpers
             return retryStrategy;
         }
 
-        private string WildcardToRegex(string pattern)
+        private static string WildcardToRegex(string pattern)
         {
             return "^" + Regex.Escape(pattern).
             Replace("\\*", ".*").
             Replace("\\?", "?") + "$";
         }
 
-        private bool IsAssembly(string filePath)
+        private static bool IsAssembly(string filePath)
         {
             Debug.Assert(filePath != null);
 
@@ -453,7 +449,7 @@ namespace Coverlet.Core.Helpers
             }
         }
 
-        private bool IsUnknownModuleInFSharpAssembly(Guid languageGuid, string docName)
+        private static bool IsUnknownModuleInFSharpAssembly(Guid languageGuid, string docName)
         {
             // https://github.com/dotnet/runtime/blob/main/docs/design/specs/PortablePdb-Metadata.md#document-table-0x30
             return languageGuid.Equals(new Guid("ab4f38c9-b6e6-43ba-be3b-58080b2ccce3"))

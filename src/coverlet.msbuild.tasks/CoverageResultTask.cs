@@ -152,9 +152,9 @@ namespace Coverlet.MSbuild.Tasks
                 if (Threshold.Contains(','))
                 {
                     IEnumerable<string> thresholdValues = Threshold.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
-                    if (thresholdValues.Count() != thresholdTypeFlagQueue.Count())
+                    if (thresholdValues.Count() != thresholdTypeFlagQueue.Count)
                     {
-                        throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count()}) and values count ({thresholdValues.Count()}) doesn't match");
+                        throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
                     }
 
                     foreach (string threshold in thresholdValues)
@@ -190,11 +190,10 @@ namespace Coverlet.MSbuild.Tasks
                 }
 
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-                var summary = new CoverageSummary();
 
-                CoverageDetails linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
-                CoverageDetails branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
-                CoverageDetails methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
+                CoverageDetails linePercentCalculation = CoverageSummary.CalculateLineCoverage(result.Modules);
+                CoverageDetails branchPercentCalculation = CoverageSummary.CalculateBranchCoverage(result.Modules);
+                CoverageDetails methodPercentCalculation = CoverageSummary.CalculateMethodCoverage(result.Modules);
 
                 double totalLinePercent = linePercentCalculation.Percent;
                 double totalBranchPercent = branchPercentCalculation.Percent;
@@ -206,9 +205,9 @@ namespace Coverlet.MSbuild.Tasks
 
                 foreach (KeyValuePair<string, Documents> module in result.Modules)
                 {
-                    double linePercent = summary.CalculateLineCoverage(module.Value).Percent;
-                    double branchPercent = summary.CalculateBranchCoverage(module.Value).Percent;
-                    double methodPercent = summary.CalculateMethodCoverage(module.Value).Percent;
+                    double linePercent = CoverageSummary.CalculateLineCoverage(module.Value).Percent;
+                    double branchPercent = CoverageSummary.CalculateBranchCoverage(module.Value).Percent;
+                    double methodPercent = CoverageSummary.CalculateMethodCoverage(module.Value).Percent;
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
                 }
@@ -225,7 +224,7 @@ namespace Coverlet.MSbuild.Tasks
 
                 Console.WriteLine(coverageTable.ToStringAlternative());
 
-                ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStat);
+                ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(thresholdTypeFlagValues, thresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
                     var exceptionMessageBuilder = new StringBuilder();
