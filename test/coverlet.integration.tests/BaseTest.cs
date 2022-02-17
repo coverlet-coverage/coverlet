@@ -39,12 +39,13 @@ namespace Coverlet.Integration.Tests
 
         private protected string GetPackageVersion(string filter)
         {
-            if (!Directory.Exists($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages"))
+            string packagesPath = $"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages";
+
+            if (!Directory.Exists(packagesPath))
             {
                 throw new DirectoryNotFoundException("Package directory not found, run 'dotnet pack' on repository root");
             }
 
-            string packagesPath = $"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages";
             var files = Directory.GetFiles(packagesPath, filter).ToList();
             if (files.Count == 0)
             {
