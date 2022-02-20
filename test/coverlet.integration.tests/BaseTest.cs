@@ -39,16 +39,30 @@ namespace Coverlet.Integration.Tests
 
         private protected string GetPackageVersion(string filter)
         {
-            if (!Directory.Exists($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages"))
+            string packagesPath = $"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages";
+
+            if (!Directory.Exists(packagesPath))
             {
                 throw new DirectoryNotFoundException("Package directory not found, run 'dotnet pack' on repository root");
             }
 
-            using Stream pkg = File.OpenRead(Directory.GetFiles($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages", filter).Single());
-            using var reader = new PackageArchiveReader(pkg);
-            using Stream nuspecStream = reader.GetNuspec();
-            var manifest = Manifest.ReadFrom(nuspecStream, false);
-            return manifest.Metadata.Version.OriginalVersion;
+            var files = Directory.GetFiles(packagesPath, filter).ToList();
+            if (files.Count == 0)
+            {
+                throw new InvalidOperationException($"Could not find any package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was called.");
+            }
+            else if (files.Count > 1)
+            {
+                throw new InvalidOperationException($"Found more than one package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was only called once.");
+            }
+            else
+            {
+                using Stream pkg = File.OpenRead(files[0]);
+                using var reader = new PackageArchiveReader(pkg);
+                using Stream nuspecStream = reader.GetNuspec();
+                var manifest = Manifest.ReadFrom(nuspecStream, false);
+                return manifest.Metadata.Version.OriginalVersion;
+            }
         }
 
         private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
