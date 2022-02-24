@@ -13,7 +13,7 @@ namespace Coverlet.Core.Tests
 {
     public partial class CoverageTests
     {
-        private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
+        private readonly Mock<ILogger> _mockLogger = new();
 
         [Fact]
         public void TestCoverage()

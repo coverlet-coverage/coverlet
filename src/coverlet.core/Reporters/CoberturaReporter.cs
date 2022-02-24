@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -111,14 +111,13 @@ namespace Coverlet.Core.Reporters
                                     {
                                         var condition = new XElement("condition");
                                         condition.Add(new XAttribute("number", entry.Key));
-                                        condition.Add(new XAttribute("type", entry.Value.Count() > 2 ? "switch" : "jump")); // Just guessing here
+                                        condition.Add(new XAttribute("type", entry.Value.Count > 2 ? "switch" : "jump")); // Just guessing here
                                         condition.Add(new XAttribute("coverage", $"{summary.CalculateBranchCoverage(entry.Value).Percent.ToString(CultureInfo.InvariantCulture)}%"));
                                         conditions.Add(condition);
                                     }
 
                                     line.Add(conditions);
                                 }
-
 
                                 lines.Add(line);
                                 classLines.Add(line);

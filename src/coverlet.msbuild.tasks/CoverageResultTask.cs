@@ -152,9 +152,9 @@ namespace Coverlet.MSbuild.Tasks
                 if (Threshold.Contains(','))
                 {
                     IEnumerable<string> thresholdValues = Threshold.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
-                    if (thresholdValues.Count() != thresholdTypeFlagQueue.Count())
+                    if (thresholdValues.Count() != thresholdTypeFlagQueue.Count)
                     {
-                        throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count()}) and values count ({thresholdValues.Count()}) doesn't match");
+                        throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
                     }
 
                     foreach (string threshold in thresholdValues)

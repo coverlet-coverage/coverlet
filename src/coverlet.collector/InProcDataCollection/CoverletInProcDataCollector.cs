@@ -17,7 +17,7 @@ namespace Coverlet.Collector.DataCollection
     public class CoverletInProcDataCollector : InProcDataCollection
     {
         private TestPlatformEqtTrace _eqtTrace;
-        private bool _enableExceptionLog = false;
+        private bool _enableExceptionLog;
 
         private void AttachDebugger()
         {

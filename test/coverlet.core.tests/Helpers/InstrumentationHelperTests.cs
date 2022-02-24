@@ -15,7 +15,7 @@ namespace Coverlet.Core.Helpers.Tests
     public class InstrumentationHelperTests
     {
         private readonly InstrumentationHelper _instrumentationHelper =
-            new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
+            new(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
 
         [Fact]
         public void TestGetDependencies()

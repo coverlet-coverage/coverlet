@@ -188,14 +188,14 @@ namespace Coverlet.Collector.Tests
             Assert.Equal(defaultFormat, coverletSettings.ReportFormats[0]);
         }
 
-        private void CreateCoverletNodes(XmlDocument doc, XmlElement configElement, string nodeSetting, string nodeValue)
+        private static void CreateCoverletNodes(XmlDocument doc, XmlElement configElement, string nodeSetting, string nodeValue)
         {
             XmlNode node = doc.CreateNode("element", nodeSetting, string.Empty);
             node.InnerText = nodeValue;
             configElement.AppendChild(node);
         }
 
-        private void CreateCoverletNullInnerTextNodes(XmlDocument doc, XmlElement configElement, string nodeSetting)
+        private static void CreateCoverletNullInnerTextNodes(XmlDocument doc, XmlElement configElement, string nodeSetting)
         {
             XmlNode node = doc.CreateNode("element", nodeSetting, string.Empty);
             node.InnerText = null;

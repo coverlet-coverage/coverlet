@@ -41,7 +41,7 @@ namespace Coverlet.Core.Symbols.Tests
 
             // assert
             Assert.NotNull(points);
-            Assert.Equal(2, points.Count());
+            Assert.Equal(2, points.Count);
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(0, points[0].Path);
             Assert.Equal(1, points[1].Path);
@@ -61,7 +61,7 @@ namespace Coverlet.Core.Symbols.Tests
             // act
             System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
 
-            Assert.Equal(2, points.Count());
+            Assert.Equal(2, points.Count);
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace Coverlet.Core.Symbols.Tests
 
             // assert
             Assert.NotNull(points);
-            Assert.Equal(4, points.Count());
+            Assert.Equal(4, points.Count);
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(points[2].Offset, points[3].Offset);
             Assert.Equal(28, points[0].StartLine);
@@ -108,7 +108,7 @@ namespace Coverlet.Core.Symbols.Tests
 
             // assert
             Assert.NotNull(points);
-            Assert.Equal(2, points.Count());
+            Assert.Equal(2, points.Count);
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(35, points[0].StartLine);
             Assert.Equal(35, points[1].StartLine);
@@ -127,7 +127,7 @@ namespace Coverlet.Core.Symbols.Tests
 
             // assert
             Assert.NotNull(points);
-            Assert.Equal(4, points.Count());
+            Assert.Equal(4, points.Count);
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
@@ -150,7 +150,7 @@ namespace Coverlet.Core.Symbols.Tests
 
             // assert
             Assert.NotNull(points);
-            Assert.Equal(4, points.Count());
+            Assert.Equal(4, points.Count);
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
@@ -173,7 +173,7 @@ namespace Coverlet.Core.Symbols.Tests
 
             // assert
             Assert.NotNull(points);
-            Assert.Equal(4, points.Count());
+            Assert.Equal(4, points.Count);
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(3, points[3].Path);
@@ -196,7 +196,7 @@ namespace Coverlet.Core.Symbols.Tests
 
             // assert
             Assert.NotNull(points);
-            Assert.Equal(4, points.Count());
+            Assert.Equal(4, points.Count);
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(points[0].Offset, points[2].Offset);
             Assert.Equal(points[0].Offset, points[3].Offset);
@@ -351,7 +351,7 @@ namespace Coverlet.Core.Symbols.Tests
             // We do expect there to be a two-way branch (stay in the loop or not?) on
             // the line containing "await foreach".
             Assert.NotNull(points);
-            Assert.Equal(2, points.Count());
+            Assert.Equal(2, points.Count);
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(204, points[0].StartLine);
             Assert.Equal(204, points[1].StartLine);
@@ -375,7 +375,7 @@ namespace Coverlet.Core.Symbols.Tests
             // containing "await foreach" and the other being the "if" statement inside
             // the loop.
             Assert.NotNull(points);
-            Assert.Equal(4, points.Count());
+            Assert.Equal(4, points.Count);
             Assert.Equal(points[0].Offset, points[1].Offset);
             Assert.Equal(points[2].Offset, points[3].Offset);
             Assert.Equal(219, points[0].StartLine);
@@ -399,7 +399,7 @@ namespace Coverlet.Core.Symbols.Tests
             // assert
             // We do expect the "for" loop to be a branch with two branch points, but that's it.
             Assert.NotNull(points);
-            Assert.Equal(2, points.Count());
+            Assert.Equal(2, points.Count);
             Assert.Equal(237, points[0].StartLine);
             Assert.Equal(237, points[1].StartLine);
         }

@@ -112,13 +112,9 @@ namespace Coverlet.MSbuild.Tasks
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());
-                using (Stream instrumentedStateFile = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write))
-                {
-                    using (Stream serializedState = CoveragePrepareResult.Serialize(prepareResult))
-                    {
-                        serializedState.CopyTo(instrumentedStateFile);
-                    }
-                }
+                using Stream instrumentedStateFile = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write);
+                using Stream serializedState = CoveragePrepareResult.Serialize(prepareResult);
+                serializedState.CopyTo(instrumentedStateFile);
             }
             catch (Exception ex)
             {

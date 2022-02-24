@@ -163,15 +163,13 @@ namespace Coverlet.Collector.DataCollection
                 // Get coverage reports
                 IEnumerable<(string report, string fileName)> coverageReports = _coverageManager?.GetCoverageReports();
 
-                if (coverageReports != null && coverageReports.Count() > 0)
+                if (coverageReports != null && coverageReports.Any())
                 {
                     // Send result attachments to test platform.
-                    using (var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30))))
+                    using var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30)));
+                    foreach ((string report, string fileName) in coverageReports)
                     {
-                        foreach ((string report, string fileName) in coverageReports)
-                        {
-                            attachmentManager.SendCoverageReport(report, fileName);
-                        }
+                        attachmentManager.SendCoverageReport(report, fileName);
                     }
                 }
                 else

@@ -23,7 +23,7 @@ namespace Coverlet.Core.Tests
 {
     static class TestInstrumentationHelper
     {
-        private static IServiceProvider _processWideContainer;
+        private static IServiceProvider s_processWideContainer;
 
         /// <summary>
         /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");
@@ -64,9 +64,9 @@ namespace Coverlet.Core.Tests
             {
                 Assert.DoesNotContain("not found for module: ", message);
             });
-            _processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
+            s_processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
             var coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-            var coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
+            var coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, s_processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
             return coverage.GetCoverageResult();
         }
 
@@ -121,7 +121,7 @@ namespace Coverlet.Core.Tests
 
             // Instrument module
             var coverage = new Coverage(newPath, parameters, new Logger(logFile),
-            _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>(), _processWideContainer.GetService<ICecilSymbolHelper>());
+            s_processWideContainer.GetService<IInstrumentationHelper>(), s_processWideContainer.GetService<IFileSystem>(), s_processWideContainer.GetService<ISourceRootTranslator>(), s_processWideContainer.GetService<ICecilSymbolHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
@@ -153,7 +153,7 @@ namespace Coverlet.Core.Tests
 
         private static void SetTestContainer(string testModule = null, bool disableRestoreModules = false)
         {
-            LazyInitializer.EnsureInitialized(ref _processWideContainer, () =>
+            LazyInitializer.EnsureInitialized(ref s_processWideContainer, () =>
             {
                 var serviceCollection = new ServiceCollection();
                 serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
@@ -291,7 +291,7 @@ namespace Coverlet.Core.Tests
 
     public abstract class ExternalProcessExecutionTest
     {
-        protected FunctionExecutor FunctionExecutor = new FunctionExecutor(
+        protected FunctionExecutor FunctionExecutor = new(
         o =>
         {
             o.StartInfo.RedirectStandardError = true;
