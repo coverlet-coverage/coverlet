@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace Coverlet.Core
 {
-    internal static class CoverageSummary
+    internal class CoverageSummary
     {
-        public static CoverageDetails CalculateLineCoverage(Lines lines)
+        public CoverageDetails CalculateLineCoverage(Lines lines)
         {
             var details = new CoverageDetails();
             details.Covered = lines.Where(l => l.Value > 0).Count();
@@ -17,7 +17,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateLineCoverage(Methods methods)
+        public CoverageDetails CalculateLineCoverage(Methods methods)
         {
             var details = new CoverageDetails();
             foreach (KeyValuePair<string, Method> method in methods)
@@ -29,7 +29,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateLineCoverage(Classes classes)
+        public CoverageDetails CalculateLineCoverage(Classes classes)
         {
             var details = new CoverageDetails();
             foreach (KeyValuePair<string, Methods> @class in classes)
@@ -41,7 +41,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateLineCoverage(Documents documents)
+        public CoverageDetails CalculateLineCoverage(Documents documents)
         {
             var details = new CoverageDetails();
             foreach (KeyValuePair<string, Classes> document in documents)
@@ -53,7 +53,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateLineCoverage(Modules modules)
+        public CoverageDetails CalculateLineCoverage(Modules modules)
         {
             var details = new CoverageDetails { Modules = modules };
             double accumPercent = 0.0D;
@@ -72,7 +72,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateBranchCoverage(IList<BranchInfo> branches)
+        public CoverageDetails CalculateBranchCoverage(IList<BranchInfo> branches)
         {
             var details = new CoverageDetails();
             details.Covered = branches.Count(bi => bi.Hits > 0);
@@ -80,7 +80,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static int CalculateNpathComplexity(IList<BranchInfo> branches)
+        public int CalculateNpathComplexity(IList<BranchInfo> branches)
         {
             // Adapted from OpenCover see https://github.com/OpenCover/opencover/blob/master/main/OpenCover.Framework/Persistance/BasePersistance.cs#L419
             if (!branches.Any())
@@ -114,47 +114,47 @@ namespace Coverlet.Core
             return npath;
         }
 
-        public static int CalculateCyclomaticComplexity(IList<BranchInfo> branches)
+        public int CalculateCyclomaticComplexity(IList<BranchInfo> branches)
         {
             return Math.Max(1, branches.Count);
         }
 
-        public static int CalculateCyclomaticComplexity(Methods methods)
+        public int CalculateCyclomaticComplexity(Methods methods)
         {
             return methods.Values.Select(m => CalculateCyclomaticComplexity(m.Branches)).Sum();
         }
 
-        public static int CalculateMaxCyclomaticComplexity(Methods methods)
+        public int CalculateMaxCyclomaticComplexity(Methods methods)
         {
             return methods.Values.Select(m => CalculateCyclomaticComplexity(m.Branches)).DefaultIfEmpty(1).Max();
         }
 
-        public static int CalculateMinCyclomaticComplexity(Methods methods)
+        public int CalculateMinCyclomaticComplexity(Methods methods)
         {
             return methods.Values.Select(m => CalculateCyclomaticComplexity(m.Branches)).DefaultIfEmpty(1).Min();
         }
 
-        public static int CalculateCyclomaticComplexity(Modules modules)
+        public int CalculateCyclomaticComplexity(Modules modules)
         {
             return modules.Values.Select(CalculateCyclomaticComplexity).Sum();
         }
 
-        public static int CalculateMaxCyclomaticComplexity(Modules modules)
+        public int CalculateMaxCyclomaticComplexity(Modules modules)
         {
             return modules.Values.Select(CalculateCyclomaticComplexity).DefaultIfEmpty(1).Max();
         }
 
-        public static int CalculateMinCyclomaticComplexity(Modules modules)
+        public int CalculateMinCyclomaticComplexity(Modules modules)
         {
             return modules.Values.Select(CalculateCyclomaticComplexity).DefaultIfEmpty(1).Min();
         }
 
-        public static int CalculateCyclomaticComplexity(Documents documents)
+        public int CalculateCyclomaticComplexity(Documents documents)
         {
             return documents.Values.SelectMany(c => c.Values.Select(CalculateCyclomaticComplexity)).Sum();
         }
 
-        public static CoverageDetails CalculateBranchCoverage(Methods methods)
+        public CoverageDetails CalculateBranchCoverage(Methods methods)
         {
             var details = new CoverageDetails();
             foreach (KeyValuePair<string, Method> method in methods)
@@ -166,7 +166,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateBranchCoverage(Classes classes)
+        public CoverageDetails CalculateBranchCoverage(Classes classes)
         {
             var details = new CoverageDetails();
             foreach (KeyValuePair<string, Methods> @class in classes)
@@ -178,7 +178,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateBranchCoverage(Documents documents)
+        public CoverageDetails CalculateBranchCoverage(Documents documents)
         {
             var details = new CoverageDetails();
             foreach (KeyValuePair<string, Classes> document in documents)
@@ -190,7 +190,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateBranchCoverage(Modules modules)
+        public CoverageDetails CalculateBranchCoverage(Modules modules)
         {
             var details = new CoverageDetails { Modules = modules };
             double accumPercent = 0.0D;
@@ -209,7 +209,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateMethodCoverage(Lines lines)
+        public CoverageDetails CalculateMethodCoverage(Lines lines)
         {
             var details = new CoverageDetails();
             details.Covered = lines.Any(l => l.Value > 0) ? 1 : 0;
@@ -217,7 +217,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateMethodCoverage(Methods methods)
+        public CoverageDetails CalculateMethodCoverage(Methods methods)
         {
             var details = new CoverageDetails();
             IEnumerable<KeyValuePair<string, Method>> methodsWithLines = methods.Where(m => m.Value.Lines.Count > 0);
@@ -230,7 +230,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateMethodCoverage(Classes classes)
+        public CoverageDetails CalculateMethodCoverage(Classes classes)
         {
             var details = new CoverageDetails();
             foreach (KeyValuePair<string, Methods> @class in classes)
@@ -242,7 +242,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateMethodCoverage(Documents documents)
+        public CoverageDetails CalculateMethodCoverage(Documents documents)
         {
             var details = new CoverageDetails();
             foreach (KeyValuePair<string, Classes> document in documents)
@@ -254,7 +254,7 @@ namespace Coverlet.Core
             return details;
         }
 
-        public static CoverageDetails CalculateMethodCoverage(Modules modules)
+        public CoverageDetails CalculateMethodCoverage(Modules modules)
         {
             var details = new CoverageDetails { Modules = modules };
             double accumPercent = 0.0D;

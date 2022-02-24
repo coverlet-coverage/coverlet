@@ -26,7 +26,7 @@ namespace Coverlet.Integration.Tests
     {
         private static int s_folderSuffix;
 
-        protected static BuildConfiguration GetAssemblyBuildConfiguration()
+        protected BuildConfiguration GetAssemblyBuildConfiguration()
         {
 #if DEBUG
             return BuildConfiguration.Debug;
@@ -37,7 +37,7 @@ namespace Coverlet.Integration.Tests
             throw new NotSupportedException($"Build configuration not supported");
         }
 
-        private protected static string GetPackageVersion(string filter)
+        private protected string GetPackageVersion(string filter)
         {
             if (!Directory.Exists($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages"))
             {
@@ -51,7 +51,7 @@ namespace Coverlet.Integration.Tests
             return manifest.Metadata.Version.OriginalVersion;
         }
 
-        private protected static ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
+        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
         {
             DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N")[..6]}{Interlocked.Increment(ref s_folderSuffix)}");
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
@@ -79,7 +79,7 @@ namespace Coverlet.Integration.Tests
             return new ClonedTemplateProject(finalRoot.FullName, cleanupOnDispose);
         }
 
-        private protected static bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
+        private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
         {
             Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}\nWorkingDirectory: {workingDirectory}");
             var psi = new ProcessStartInfo(command, arguments);
@@ -96,12 +96,12 @@ namespace Coverlet.Integration.Tests
             return commandProcess.ExitCode == 0;
         }
 
-        private protected static bool DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
+        private protected bool DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
         {
             return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
         }
 
-        private protected static void UpdateNugeConfigtWithLocalPackageFolder(string projectPath)
+        private protected void UpdateNugeConfigtWithLocalPackageFolder(string projectPath)
         {
             string nugetFile = Path.Combine(projectPath, "nuget.config");
             if (!File.Exists(nugetFile))
@@ -123,7 +123,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(nugetFile);
         }
 
-        private static void SetIsTestProjectTrue(string projectPath)
+        private void SetIsTestProjectTrue(string projectPath)
         {
             string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
             if (!File.Exists(csproj))
@@ -143,7 +143,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected static void AddMicrosoftNETTestSdkRef(string projectPath, string version)
+        private protected void AddMicrosoftNETTestSdkRef(string projectPath, string version)
         {
             string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
             if (!File.Exists(csproj))
@@ -163,7 +163,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected static void AddCoverletMsbuildRef(string projectPath)
+        private protected void AddCoverletMsbuildRef(string projectPath)
         {
             string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
             if (!File.Exists(csproj))
@@ -182,7 +182,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected static void AddCoverletCollectosRef(string projectPath)
+        private protected void AddCoverletCollectosRef(string projectPath)
         {
             string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
             if (!File.Exists(csproj))
@@ -201,13 +201,13 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected static string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought", bool sourceLink = false, bool deterministicReport = false)
+        private protected string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought", bool sourceLink = false, bool deterministicReport = false)
         {
             string runSettings =
 $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
   <RunSettings>
-    <DataCollectionRunSettings>
-      <DataCollectors>
+    <DataCollectionRunSettings>  
+      <DataCollectors>  
         <DataCollector friendlyName=""XPlat code coverage"" >
            <Configuration>
             <Format>json,cobertura</Format>
@@ -227,7 +227,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
             return runsettingsPath;
         }
 
-        private protected static void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json", string standardOutput = "")
+        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json", string standardOutput = "")
         {
             if (GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
             {
@@ -246,7 +246,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
             }
         }
 
-        private protected static void UpdateProjectTargetFramework(ClonedTemplateProject project, params string[] targetFrameworks)
+        private protected void UpdateProjectTargetFramework(ClonedTemplateProject project, params string[] targetFrameworks)
         {
             if (targetFrameworks is null || targetFrameworks.Length == 0)
             {
@@ -283,7 +283,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
             xml.Save(project.ProjectFileNamePath);
         }
 
-        private protected static void PinSDK(ClonedTemplateProject project, string sdkVersion)
+        private protected void PinSDK(ClonedTemplateProject project, string sdkVersion)
         {
             if (project is null)
             {

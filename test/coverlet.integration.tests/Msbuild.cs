@@ -16,7 +16,7 @@ namespace Coverlet.Integration.Tests
             _buildConfiguration = GetAssemblyBuildConfiguration().ToString();
         }
 
-        private static ClonedTemplateProject PrepareTemplateProject()
+        private ClonedTemplateProject PrepareTemplateProject()
         {
             ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
             UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);

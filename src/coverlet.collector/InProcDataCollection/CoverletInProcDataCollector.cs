@@ -16,9 +16,10 @@ namespace Coverlet.Collector.DataCollection
 {
     public class CoverletInProcDataCollector : InProcDataCollection
     {
+        private TestPlatformEqtTrace _eqtTrace;
         private bool _enableExceptionLog;
 
-        private static void AttachDebugger()
+        private void AttachDebugger()
         {
             if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_DATACOLLECTOR_INPROC_DEBUG"), out int result) && result == 1)
             {
@@ -40,7 +41,8 @@ namespace Coverlet.Collector.DataCollection
             AttachDebugger();
             EnableExceptionLog();
 
-            TestPlatformEqtTrace.Verbose("Initialize CoverletInProcDataCollector");
+            _eqtTrace = new TestPlatformEqtTrace();
+            _eqtTrace.Verbose("Initialize CoverletInProcDataCollector");
         }
 
         public void TestCaseEnd(TestCaseEndArgs testCaseEndArgs)
@@ -63,17 +65,17 @@ namespace Coverlet.Collector.DataCollection
 
                 try
                 {
-                    TestPlatformEqtTrace.Verbose($"Calling ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
+                    _eqtTrace.Verbose($"Calling ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
                     MethodInfo unloadModule = injectedInstrumentationClass.GetMethod(nameof(ModuleTrackerTemplate.UnloadModule), new[] { typeof(object), typeof(EventArgs) });
                     unloadModule.Invoke(null, new[] { (object)this, EventArgs.Empty });
                     injectedInstrumentationClass.GetField("FlushHitFile", BindingFlags.Static | BindingFlags.Public).SetValue(null, false);
-                    TestPlatformEqtTrace.Verbose($"Called ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
+                    _eqtTrace.Verbose($"Called ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
                 }
                 catch (Exception ex)
                 {
                     if (_enableExceptionLog)
                     {
-                        TestPlatformEqtTrace.Error("{0}: Failed to unload module with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
+                        _eqtTrace.Error("{0}: Failed to unload module with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
                         string errorMessage = string.Format(Resources.FailedToUnloadModule, CoverletConstants.InProcDataCollectorName);
                         throw new CoverletDataCollectorException(errorMessage, ex);
                     }
@@ -118,7 +120,7 @@ namespace Coverlet.Collector.DataCollection
                         }
                     }
 
-                    TestPlatformEqtTrace.Warning(exceptionString.ToString());
+                    _eqtTrace.Warning(exceptionString.ToString());
                 }
 
                 return null;

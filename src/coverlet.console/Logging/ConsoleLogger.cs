@@ -10,7 +10,7 @@ namespace Coverlet.Console.Logging
     class ConsoleLogger : ILogger
     {
         private static readonly object s_sync = new();
-
+        
         public LogLevel Level { get; set; } = LogLevel.Normal;
 
         public void LogError(string message) => Log(LogLevel.Quiet, message, ConsoleColor.Red);

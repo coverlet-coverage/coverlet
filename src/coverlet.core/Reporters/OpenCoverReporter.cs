@@ -26,6 +26,7 @@ namespace Coverlet.Core.Reporters
                 throw new NotSupportedException("Deterministic report not supported by openCover reporter");
             }
 
+            var summary = new CoverageSummary();
             var xml = new XDocument();
             var coverage = new XElement("CoverageSession");
             var coverageSummary = new XElement("Summary");
@@ -76,10 +77,10 @@ namespace Coverlet.Core.Reporters
                             if (meth.Value.Lines.Count == 0)
                                 continue;
 
-                            CoverageDetails methLineCoverage = CoverageSummary.CalculateLineCoverage(meth.Value.Lines);
-                            CoverageDetails methBranchCoverage = CoverageSummary.CalculateBranchCoverage(meth.Value.Branches);
-                            int methCyclomaticComplexity = CoverageSummary.CalculateCyclomaticComplexity(meth.Value.Branches);
-                            int methNpathComplexity = CoverageSummary.CalculateNpathComplexity(meth.Value.Branches);
+                            CoverageDetails methLineCoverage = summary.CalculateLineCoverage(meth.Value.Lines);
+                            CoverageDetails methBranchCoverage = summary.CalculateBranchCoverage(meth.Value.Branches);
+                            int methCyclomaticComplexity = summary.CalculateCyclomaticComplexity(meth.Value.Branches);
+                            int methNpathComplexity = summary.CalculateNpathComplexity(meth.Value.Branches);
 
                             var method = new XElement("Method");
 
@@ -122,7 +123,7 @@ namespace Coverlet.Core.Reporters
                             foreach (System.Collections.Generic.KeyValuePair<int, int> lines in meth.Value.Lines)
                             {
                                 BranchInfo[] lineBranches = meth.Value.Branches.Where(branchInfo => branchInfo.Line == lines.Key).ToArray();
-                                CoverageDetails branchCoverage = CoverageSummary.CalculateBranchCoverage(lineBranches);
+                                CoverageDetails branchCoverage = summary.CalculateBranchCoverage(lineBranches);
 
                                 var sequencePoint = new XElement("SequencePoint");
                                 sequencePoint.Add(new XAttribute("vc", lines.Value.ToString()));
@@ -193,11 +194,11 @@ namespace Coverlet.Core.Reporters
                         if (classVisited)
                             visitedClasses++;
 
-                        CoverageDetails classLineCoverage = CoverageSummary.CalculateLineCoverage(cls.Value);
-                        CoverageDetails classBranchCoverage = CoverageSummary.CalculateBranchCoverage(cls.Value);
-                        CoverageDetails classMethodCoverage = CoverageSummary.CalculateMethodCoverage(cls.Value);
-                        int classMaxCyclomaticComplexity = CoverageSummary.CalculateMaxCyclomaticComplexity(cls.Value);
-                        int classMinCyclomaticComplexity = CoverageSummary.CalculateMinCyclomaticComplexity(cls.Value);
+                        CoverageDetails classLineCoverage = summary.CalculateLineCoverage(cls.Value);
+                        CoverageDetails classBranchCoverage = summary.CalculateBranchCoverage(cls.Value);
+                        CoverageDetails classMethodCoverage = summary.CalculateMethodCoverage(cls.Value);
+                        int classMaxCyclomaticComplexity = summary.CalculateMaxCyclomaticComplexity(cls.Value);
+                        int classMinCyclomaticComplexity = summary.CalculateMinCyclomaticComplexity(cls.Value);
 
                         classSummary.Add(new XAttribute("numSequencePoints", classLineCoverage.Total.ToString()));
                         classSummary.Add(new XAttribute("visitedSequencePoints", classLineCoverage.Covered.ToString()));
@@ -225,10 +226,10 @@ namespace Coverlet.Core.Reporters
                 modules.Add(module);
             }
 
-            CoverageDetails moduleLineCoverage = CoverageSummary.CalculateLineCoverage(result.Modules);
-            CoverageDetails moduleBranchCoverage = CoverageSummary.CalculateBranchCoverage(result.Modules);
-            int moduleMaxCyclomaticComplexity = CoverageSummary.CalculateMaxCyclomaticComplexity(result.Modules);
-            int moduleMinCyclomaticComplexity = CoverageSummary.CalculateMinCyclomaticComplexity(result.Modules);
+            CoverageDetails moduleLineCoverage = summary.CalculateLineCoverage(result.Modules);
+            CoverageDetails moduleBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
+            int moduleMaxCyclomaticComplexity = summary.CalculateMaxCyclomaticComplexity(result.Modules);
+            int moduleMinCyclomaticComplexity = summary.CalculateMinCyclomaticComplexity(result.Modules);
 
             coverageSummary.Add(new XAttribute("numSequencePoints", moduleLineCoverage.Total.ToString()));
             coverageSummary.Add(new XAttribute("visitedSequencePoints", moduleLineCoverage.Covered.ToString()));

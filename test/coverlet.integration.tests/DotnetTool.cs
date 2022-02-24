@@ -10,7 +10,7 @@ namespace Coverlet.Integration.Tests
 {
     public class DotnetGlobalTools : BaseTest
     {
-        private static string InstallTool(string projectPath)
+        private string InstallTool(string projectPath)
         {
             _ = DotnetCli($"tool install coverlet.console --version {GetPackageVersion("*console*.nupkg")} --tool-path \"{Path.Combine(projectPath, "coverletTool")}\"", out string standardOutput, out _, projectPath);
             Assert.Contains("was successfully installed.", standardOutput);

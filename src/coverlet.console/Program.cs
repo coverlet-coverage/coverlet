@@ -231,10 +231,11 @@ namespace Coverlet.Console
                 }
 
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
+                var summary = new CoverageSummary();
 
-                CoverageDetails linePercentCalculation = CoverageSummary.CalculateLineCoverage(result.Modules);
-                CoverageDetails branchPercentCalculation = CoverageSummary.CalculateBranchCoverage(result.Modules);
-                CoverageDetails methodPercentCalculation = CoverageSummary.CalculateMethodCoverage(result.Modules);
+                CoverageDetails linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
+                CoverageDetails branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
+                CoverageDetails methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
 
                 double totalLinePercent = linePercentCalculation.Percent;
                 double totalBranchPercent = branchPercentCalculation.Percent;
@@ -246,9 +247,9 @@ namespace Coverlet.Console
 
                 foreach (KeyValuePair<string, Documents> _module in result.Modules)
                 {
-                    double linePercent = CoverageSummary.CalculateLineCoverage(_module.Value).Percent;
-                    double branchPercent = CoverageSummary.CalculateBranchCoverage(_module.Value).Percent;
-                    double methodPercent = CoverageSummary.CalculateMethodCoverage(_module.Value).Percent;
+                    double linePercent = summary.CalculateLineCoverage(_module.Value).Percent;
+                    double branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
+                    double methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
                     coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
                 }
@@ -268,7 +269,7 @@ namespace Coverlet.Console
                     exitCode += (int)CommandExitCodes.TestFailed;
                 }
 
-                ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(thresholdTypeFlagValues, dThresholdStat);
+                ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, dThresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
                     exitCode += (int)CommandExitCodes.CoverageBelowThreshold;

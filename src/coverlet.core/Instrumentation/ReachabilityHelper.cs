@@ -169,9 +169,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// OpCodes that transfer control code, even if they do not
         /// introduce branch points.
         /// </summary>
-#pragma warning disable IDE1006 // Naming Styles
-        private static readonly ImmutableHashSet<OpCode> BRANCH_OPCODES =
-#pragma warning restore IDE1006 // Naming Styles
+        private static readonly ImmutableHashSet<OpCode> s_branchOpCodes =
             ImmutableHashSet.CreateRange(
                 new[]
                 {
@@ -226,9 +224,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
         /// OpCodes that unconditionally transfer control, so there
         /// is not "fall through" branch target.
         /// </summary>
-#pragma warning disable IDE1006 // Naming Styles
-        private static readonly ImmutableHashSet<OpCode> UNCONDITIONAL_BRANCH_OPCODES =
-#pragma warning restore IDE1006 // Naming Styles
+        private static readonly ImmutableHashSet<OpCode> s_unconditionalBranchOpCodes =
             ImmutableHashSet.CreateRange(
                 new[]
                 {
@@ -410,7 +406,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
             {
                 containsDoesNotReturnCall = containsDoesNotReturnCall || DoesNotReturn(i);
 
-                if (BRANCH_OPCODES.Contains(i.OpCode))
+                if (s_branchOpCodes.Contains(i.OpCode))
                 {
                     (int? singleTargetOffset, ImmutableArray<int> multiTargetOffsets) = GetInstructionTargets(i, exceptionHandlers);
 
@@ -457,7 +453,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
             {
                 // it's any of the B.*(_S)? or Leave(_S)? instructions
 
-                if (UNCONDITIONAL_BRANCH_OPCODES.Contains(i.OpCode))
+                if (s_unconditionalBranchOpCodes.Contains(i.OpCode))
                 {
                     multiTargetOffsets = ImmutableArray<int>.Empty;
                     singleTargetOffset = targetInstr.Offset;

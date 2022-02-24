@@ -12,10 +12,12 @@ namespace Coverlet.Collector.DataCollection
     /// </summary>
     internal class CoverletLogger : ILogger
     {
+        private readonly TestPlatformEqtTrace _eqtTrace;
         private readonly TestPlatformLogger _logger;
 
-        public CoverletLogger(TestPlatformLogger logger)
+        public CoverletLogger(TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger)
         {
+            _eqtTrace = eqtTrace;
             _logger = logger;
         }
 
@@ -44,7 +46,7 @@ namespace Coverlet.Collector.DataCollection
         /// <param name="important">importance</param>
         public void LogInformation(string message, bool important = false)
         {
-            TestPlatformEqtTrace.Info(message);
+            _eqtTrace.Info(message);
         }
 
         /// <summary>
@@ -53,7 +55,7 @@ namespace Coverlet.Collector.DataCollection
         /// <param name="message">Verbose message</param>
         public void LogVerbose(string message)
         {
-            TestPlatformEqtTrace.Verbose(message);
+            _eqtTrace.Verbose(message);
         }
 
         /// <summary>
@@ -62,7 +64,7 @@ namespace Coverlet.Collector.DataCollection
         /// <param name="message">Warning message</param>
         public void LogWarning(string message)
         {
-            TestPlatformEqtTrace.Warning(message);
+            _eqtTrace.Warning(message);
         }
     }
 }

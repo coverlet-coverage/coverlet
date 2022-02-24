@@ -829,7 +829,7 @@ namespace Coverlet.Core.Instrumentation
         // Check if the name is synthesized by the compiler
         // Refer to https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs
         // to see how the compiler generate names for lambda, local function, yield or async/await expressions
-        internal static bool IsSynthesizedNameOf(string name, string methodName, int methodOrdinal)
+        internal bool IsSynthesizedNameOf(string name, string methodName, int methodOrdinal)
         {
             return
                 // Lambda method

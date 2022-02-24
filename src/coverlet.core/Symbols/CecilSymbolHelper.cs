@@ -1213,7 +1213,7 @@ namespace Coverlet.Core.Symbols
            IL_00eb: br.s IL_00ed
            ...
        */
-        public static bool SkipNotCoverableInstructionAfterExceptionRethrowInsiceCatchBlock(MethodDefinition methodDefinition, Instruction instruction)
+        public bool SkipNotCoverableInstructionAfterExceptionRethrowInsiceCatchBlock(MethodDefinition methodDefinition, Instruction instruction)
         {
             if (!IsMoveNextInsideAsyncStateMachine(methodDefinition))
             {

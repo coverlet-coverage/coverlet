@@ -24,15 +24,15 @@ namespace Coverlet.Collector.DataCollection
         private readonly ISourceRootTranslator _sourceRootTranslator;
         public IReporter[] Reporters { get; }
 
-        public CoverageManager(CoverletSettings settings, TestPlatformLogger logger, ICoverageWrapper coverageWrapper, IInstrumentationHelper instrumentationHelper,
-                               IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
+        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper,
+                               IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
             : this(settings,
             settings.ReportFormats.Select(format =>
             {
                 var reporterFactory = new ReporterFactory(format);
                 if (!reporterFactory.IsValidFormat())
                 {
-                    TestPlatformEqtTrace.Warning($"Invalid report format '{format}'");
+                    eqtTrace.Warning($"Invalid report format '{format}'");
                     return null;
                 }
                 else
@@ -40,7 +40,7 @@ namespace Coverlet.Collector.DataCollection
                     return reporterFactory.CreateReporter();
                 }
             }).Where(r => r != null).ToArray(),
-            new CoverletLogger(logger),
+            new CoverletLogger(eqtTrace, logger),
             coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator, cecilSymbolHelper)
         {
         }

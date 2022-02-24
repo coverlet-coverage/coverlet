@@ -12,10 +12,17 @@ namespace Coverlet.Collector.Tests
 {
     public class CoverletSettingsParserTests
     {
+        private readonly CoverletSettingsParser _coverletSettingsParser;
+
+        public CoverletSettingsParserTests()
+        {
+            _coverletSettingsParser = new CoverletSettingsParser(new TestPlatformEqtTrace());
+        }
+
         [Fact]
         public void ParseShouldThrowCoverletDataCollectorExceptionIfTestModulesIsNull()
         {
-            string message = Assert.Throws<CoverletDataCollectorException>(() => CoverletSettingsParser.Parse(null, null)).Message;
+            string message = Assert.Throws<CoverletDataCollectorException>(() => _coverletSettingsParser.Parse(null, null)).Message;
 
             Assert.Equal("CoverletCoverageDataCollector: No test modules found", message);
         }
@@ -23,7 +30,7 @@ namespace Coverlet.Collector.Tests
         [Fact]
         public void ParseShouldThrowCoverletDataCollectorExceptionIfTestModulesIsEmpty()
         {
-            string message = Assert.Throws<CoverletDataCollectorException>(() => CoverletSettingsParser.Parse(null, Enumerable.Empty<string>())).Message;
+            string message = Assert.Throws<CoverletDataCollectorException>(() => _coverletSettingsParser.Parse(null, Enumerable.Empty<string>())).Message;
 
             Assert.Equal("CoverletCoverageDataCollector: No test modules found", message);
         }
@@ -33,7 +40,7 @@ namespace Coverlet.Collector.Tests
         {
             var testModules = new List<string> { "module1.dll", "module2.dll", "module3.dll" };
 
-            CoverletSettings coverletSettings = CoverletSettingsParser.Parse(null, testModules);
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(null, testModules);
 
             Assert.Equal("module1.dll", coverletSettings.TestModule);
         }
@@ -74,7 +81,7 @@ namespace Coverlet.Collector.Tests
             CreateCoverletNodes(doc, configElement, CoverletConstants.DeterministicReport, "true");
             CreateCoverletNodes(doc, configElement, CoverletConstants.DoesNotReturnAttributesElementName, doesNotReturnAttributes);
 
-            CoverletSettings coverletSettings = CoverletSettingsParser.Parse(configElement, testModules);
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
             Assert.Equal("abc.dll", coverletSettings.TestModule);
             Assert.Equal("[*]*", coverletSettings.IncludeFilters[0]);
@@ -112,7 +119,7 @@ namespace Coverlet.Collector.Tests
             CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName);
             CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName);
 
-            CoverletSettings coverletSettings = CoverletSettingsParser.Parse(configElement, testModules);
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
             Assert.Equal("abc.dll", coverletSettings.TestModule);
             Assert.Empty(coverletSettings.IncludeFilters);
@@ -129,7 +136,7 @@ namespace Coverlet.Collector.Tests
             var doc = new XmlDocument();
             XmlElement configElement = doc.CreateElement("Configuration");
 
-            CoverletSettings coverletSettings = CoverletSettingsParser.Parse(configElement, testModules);
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
             Assert.Equal("abc.dll", coverletSettings.TestModule);
             Assert.Null(coverletSettings.IncludeFilters);
@@ -159,7 +166,7 @@ namespace Coverlet.Collector.Tests
             XmlElement configElement = doc.CreateElement("Configuration");
             CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
 
-            CoverletSettings coverletSettings = CoverletSettingsParser.Parse(configElement, testModules);
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
             Assert.Equal(expectedReportFormats, coverletSettings.ReportFormats);
             Assert.Equal(formatsCount, coverletSettings.ReportFormats.Length);
@@ -176,7 +183,7 @@ namespace Coverlet.Collector.Tests
             XmlElement configElement = doc.CreateElement("Configuration");
             CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
 
-            CoverletSettings coverletSettings = CoverletSettingsParser.Parse(configElement, testModules);
+            CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
             Assert.Equal(defaultFormat, coverletSettings.ReportFormats[0]);
         }

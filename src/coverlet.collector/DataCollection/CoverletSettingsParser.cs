@@ -13,15 +13,22 @@ namespace Coverlet.Collector.DataCollection
     /// <summary>
     /// Coverlet settings parser
     /// </summary>
-    internal static class CoverletSettingsParser
+    internal class CoverletSettingsParser
     {
+        private readonly TestPlatformEqtTrace _eqtTrace;
+
+        public CoverletSettingsParser(TestPlatformEqtTrace eqtTrace)
+        {
+            _eqtTrace = eqtTrace;
+        }
+
         /// <summary>
         /// Parser coverlet settings
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <param name="testModules">Test modules</param>
         /// <returns>Coverlet settings</returns>
-        public static CoverletSettings Parse(XmlElement configurationElement, IEnumerable<string> testModules)
+        public CoverletSettings Parse(XmlElement configurationElement, IEnumerable<string> testModules)
         {
             var coverletSettings = new CoverletSettings
             {
@@ -46,9 +53,9 @@ namespace Coverlet.Collector.DataCollection
             coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
             coverletSettings.ExcludeFilters = ParseExcludeFilters(configurationElement);
 
-            if (TestPlatformEqtTrace.IsVerboseEnabled)
+            if (_eqtTrace.IsVerboseEnabled)
             {
-                TestPlatformEqtTrace.Verbose("{0}: Initializing coverlet process with settings: \"{1}\"", CoverletConstants.DataCollectorName, coverletSettings.ToString());
+                _eqtTrace.Verbose("{0}: Initializing coverlet process with settings: \"{1}\"", CoverletConstants.DataCollectorName, coverletSettings.ToString());
             }
 
             return coverletSettings;
