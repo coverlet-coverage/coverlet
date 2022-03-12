@@ -54,5 +54,13 @@ namespace Coverlet.Core.Samples.Tests
 
             return sum;
         }
+
+        public async ValueTask GenericAsyncForeach<T>(IAsyncEnumerable<int> ints)
+        {
+            await foreach (int obj in ints)
+            {
+                await Task.Delay(1);
+            }
+        }
     }
 }

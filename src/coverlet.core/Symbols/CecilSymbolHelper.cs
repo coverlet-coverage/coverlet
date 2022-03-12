@@ -496,8 +496,11 @@ namespace Coverlet.Core.Symbols
                     (instructions[currentIndex - 2].OpCode == OpCodes.Ldarg ||
                      instructions[currentIndex - 2].OpCode == OpCodes.Ldarg_0) &&
                     instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
-                    instructions[currentIndex - 1].Operand is FieldDefinition field &&
-                    IsCompilerGenerated(field) && field.FieldType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator"))
+                    (
+                        (instructions[currentIndex - 1].Operand is FieldDefinition field && IsCompilerGenerated(field) && field.FieldType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator")) ||
+                        (instructions[currentIndex - 1].Operand is FieldReference fieldRef && IsCompilerGenerated(fieldRef.Resolve()) && fieldRef.FieldType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator"))
+                    )
+                )
                 {
                     return true;
                 }
@@ -538,8 +541,10 @@ namespace Coverlet.Core.Symbols
                 for (int i = currentIndex - 1; i >= minFieldIndex; --i)
                 {
                     if (instructions[i].OpCode == OpCodes.Ldfld &&
-                        instructions[i].Operand is FieldDefinition field &&
-                        IsCompilerGenerated(field) && field.FieldType.FullName == "System.Object")
+                        (
+                            (instructions[i].Operand is FieldDefinition field && IsCompilerGenerated(field) && field.FieldType.FullName == "System.Object") ||
+                            (instructions[i].Operand is FieldReference fieldRef && IsCompilerGenerated(fieldRef.Resolve()) && fieldRef.FieldType.FullName == "System.Object")
+                        ))
                     {
                         // We expect the call to GetResult() to be no more than four
                         // instructions before the loading of the field's value.
