@@ -277,5 +277,32 @@ namespace Coverlet.Core.Tests
                 File.Delete(path);
             }
         }
+
+        [Fact]
+        public void ExcludeFromCodeCoverage_Issue1302()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue1302>(instance =>
+                    {
+                        instance.Run();
+                        return Task.CompletedTask;
+                    }, persistPrepareResultToFile: pathSerialize[0]);
+
+                    return 0;
+                }, new string[] { path });
+
+                TestInstrumentationHelper.GetCoverageResult(path)
+                    .Document("Instrumentation.ExcludeFromCoverage.Issue1302.cs")
+                    .AssertNonInstrumentedLines(BuildConfiguration.Debug, 10, 13);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
     }
 }

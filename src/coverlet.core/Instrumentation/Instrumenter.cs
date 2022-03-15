@@ -45,6 +45,7 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _excludedSourceFiles;
         private List<string> _branchesInCompiledGeneratedClass;
         private List<(MethodDefinition, int)> _excludedMethods;
+        private List<string> _excludedLambdaMethods;
         private List<string> _excludedCompilerGeneratedTypes;
         private readonly string[] _doesNotReturnAttributes;
         private ReachabilityHelper _reachabilityHelper;
@@ -500,12 +501,18 @@ namespace Coverlet.Core.Instrumentation
                     continue;
                 }
 
+                if (_excludedLambdaMethods != null && _excludedLambdaMethods.Contains(method.FullName))
+                {
+                    continue;
+                }
+
                 if (!customAttributes.Any(IsExcludeAttribute))
                 {
                     InstrumentMethod(method);
                 }
                 else
                 {
+                    (_excludedLambdaMethods ??= new List<string>()).AddRange(CollectLambdaMethodsInsideLocalFunction(method));
                     (_excludedMethods ??= new List<(MethodDefinition, int)>()).Add((method, ordinal));
                 }
             }
@@ -840,6 +847,19 @@ namespace Coverlet.Core.Instrumentation
                 name.IndexOf($"<{methodName}>d__{methodOrdinal}") != -1 ||
                 // Local function
                 (name.IndexOf($"<{methodName}>g__") != -1 && name.IndexOf($"|{methodOrdinal}_") != -1);
+        }
+
+        private static IEnumerable<string> CollectLambdaMethodsInsideLocalFunction(MethodDefinition methodDefinition)
+        {
+            if (!methodDefinition.Name.Contains(">g__")) yield break;
+
+            foreach (Instruction instruction in methodDefinition.Body.Instructions.ToList())
+            {
+                if (instruction.OpCode == OpCodes.Ldftn && instruction.Operand is MethodReference mr && mr.Name.Contains(">b__"))
+                {
+                    yield return mr.FullName;
+                }
+            }
         }
 
         /// <summary>
