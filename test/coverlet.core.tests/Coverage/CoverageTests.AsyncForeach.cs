@@ -24,6 +24,7 @@ namespace Coverlet.Core.Tests
                         int res = ((ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5))).GetAwaiter().GetResult();
                         res += ((ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3))).GetAwaiter().GetResult();
                         res += ((ValueTask<int>)instance.SumEmpty()).GetAwaiter().GetResult();
+                        ((ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3))).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
@@ -43,7 +44,9 @@ namespace Coverlet.Core.Tests
                                     // Sum(IAsyncEnumerable<int>)
                                     (34, 1), (35, 1), (37, 9), (38, 3), (39, 3), (40, 3), (42, 1), (43, 1),
                                     // SumEmpty()
-                                    (47, 1), (48, 1), (50, 3), (51, 0), (52, 0), (53, 0), (55, 1), (56, 1)
+                                    (47, 1), (48, 1), (50, 3), (51, 0), (52, 0), (53, 0), (55, 1), (56, 1),
+                                    // GenericAsyncForeach
+                                    (59,1), (60, 9), (61, 3), (62, 3), (63, 3), (64, 1)
                                     )
                 .AssertBranchesCovered(BuildConfiguration.Debug,
                                        // SumWithATwist(IAsyncEnumerable<int>)
@@ -53,9 +56,10 @@ namespace Coverlet.Core.Tests
                                        // SumEmpty()
                                        // If we never entered the loop, that's a branch not taken, which is
                                        // what we want to see.
-                                       (50, 0, 1), (50, 1, 0)
+                                       (50, 0, 1), (50, 1, 0),
+                                       (60, 0, 1), (60, 1, 3)
                                        )
-                .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 4);
+                .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 5);
             }
             finally
             {

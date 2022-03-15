@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+-Await foreach has wrong branch coverage when method is generic [#1210](https://github.com/coverlet-coverage/coverlet/issues/1210)
+
 ## Release date 2022-02-06
 ### Packages  
 coverlet.msbuild 3.1.2  
