@@ -9,31 +9,6 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask
-    TaskName="CalculateTestFileNameHash"
-    TaskFactory="RoslynCodeTaskFactory"
-    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
-    <ParameterGroup>
-      <TestContainerAssemblyName ParameterType="System.String" Required="True" Output="False"/>
-      <TestContainerAssemblyNameHash ParameterType="System.String" Required="False" Output="True"/>
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System"/>
-      <Using Namespace="System.IO"/>
-      <Using Namespace="System.Text"/>
-      <Using Namespace="System.Security.Cryptography"/>
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-using (MD5 hash = MD5.Create())
-{
-    byte[] data = hash.ComputeHash(Encoding.UTF8.GetBytes(TestContainerAssemblyName));
-    TestContainerAssemblyNameHash = BitConverter.ToString(data).Replace("-","");
-}
-]]>
-      </Code>
-    </Task>
-  </UsingTask>
-
   <Target Name="CopyCoverletDataCollectorFiles" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
       <CoverletDataCollectorFiles Include="$(MSBuildThisFileDirectory)\*.*" />
@@ -57,9 +32,6 @@ using (MD5 hash = MD5.Create())
   </PropertyGroup>
 
   <Target Name="ReferencedPathMaps" BeforeTargets="CoreCompile" DependsOnTargets="ResolveProjectReferences" >
-    <CalculateTestFileNameHash TestContainerAssemblyName="$(AssemblyName)" >
-      <Output PropertyName="TestContainerAssemblyNameHash" TaskParameter="TestContainerAssemblyNameHash" />
-    </CalculateTestFileNameHash>
     <MSBuild Projects="@(AnnotatedProjects->'%(FullPath)')"
              Targets="$(_CoverletSourceRootTargetName)"
              Properties="TargetFramework=%(AnnotatedProjects.NearestTargetFramework)"
@@ -72,7 +44,7 @@ using (MD5 hash = MD5.Create())
       <_mapping Include="@(_byProject->'%(Identity)|%(OriginalPath)=%(MappedPath)')" />
     </ItemGroup>
     <PropertyGroup>
-      <_sourceRootMappingFilePath>$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))CoverletSourceRootsMapping_$(TestContainerAssemblyNameHash)</_sourceRootMappingFilePath>
+      <_sourceRootMappingFilePath>$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))CoverletSourceRootsMapping_$(AssemblyName)</_sourceRootMappingFilePath>
     </PropertyGroup>
     <WriteLinesToFile File="$(_sourceRootMappingFilePath)" Lines="@(_mapping)"
                       Overwrite="true" Encoding="Unicode"

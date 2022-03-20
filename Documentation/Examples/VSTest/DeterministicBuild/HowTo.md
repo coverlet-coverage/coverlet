@@ -59,7 +59,7 @@ Add collectors package version generated to `"..\Documentation\Examples\VSTest\D
 Go to test project folder and run
 ```
 C:\git\coverlet\Documentation\Examples\VSTest\DeterministicBuild (detbuilddocs -> origin)
-λ dotnet test --collect:"XPlat Code Coverage" /p:DeterministicSourcePaths=true
+λ dotnet test --collect:"XPlat Code Coverage" /p:DeterministicSourcePaths=true -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.DeterministicReport=true
 Test run for C:\git\coverlet\Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\XUnitTestProject1.dll(.NETCoreApp,Version=v3.1)
 Microsoft (R) Test Execution Command Line Tool Version 16.5.0
 Copyright (c) Microsoft Corporation.  All rights reserved.
@@ -78,5 +78,5 @@ Total tests: 1
 You should see on output folder the coverlet source root mapping file generated.  
 This is the confirmation that you're running coverage on deterministic build.
 ```
-Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\CoverletSourceRootsMapping
+Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\CoverletSourceRootsMapping_XUnitTestProject1
 ```
