@@ -16,6 +16,7 @@ namespace Coverlet.Integration.Tests
         private readonly string _testProjectPath = Path.GetFullPath("../../../../coverlet.integration.determisticbuild");
         private string? _testProjectTfm;
         private const string PropsFileName = "DeterministicTest.props";
+        private const string ExpectedMappingFileName = "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild";
         private readonly string _buildConfiguration;
 
         public DeterministicBuild()
@@ -75,7 +76,7 @@ namespace Coverlet.Integration.Tests
             CreateDeterministicTestPropsFile();
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string _, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, "CoverletSourceRootsMapping");
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, ExpectedMappingFileName);
             Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
             Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
@@ -98,7 +99,7 @@ namespace Coverlet.Integration.Tests
             CreateDeterministicTestPropsFile();
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string _, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, "CoverletSourceRootsMapping");
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, ExpectedMappingFileName);
             Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
             Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
@@ -122,7 +123,7 @@ namespace Coverlet.Integration.Tests
             CreateDeterministicTestPropsFile();
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string _, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, "CoverletSourceRootsMapping");
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, ExpectedMappingFileName);
             Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
             Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
@@ -150,7 +151,7 @@ namespace Coverlet.Integration.Tests
             CreateDeterministicTestPropsFile();
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string _, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, "CoverletSourceRootsMapping");
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, ExpectedMappingFileName);
             Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
             Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
