@@ -22,7 +22,7 @@ namespace Coverlet.Core.Helpers
         private readonly IFileSystem _fileSystem;
         private readonly Dictionary<string, List<SourceRootMapping>> _sourceRootMapping;
         private readonly Dictionary<string, List<string>> _sourceToDeterministicPathMapping;
-        private const string MappingFileName = "CoverletSourceRootsMapping";
+        private readonly string _mappingFileName;
         private Dictionary<string, string> _resolutionCacheFiles;
 
         public SourceRootTranslator(ILogger logger, IFileSystem fileSystem)
@@ -44,6 +44,7 @@ namespace Coverlet.Core.Helpers
             {
                 throw new FileNotFoundException($"Module test path '{moduleTestPath}' not found", moduleTestPath);
             }
+            _mappingFileName = $"CoverletSourceRootsMapping_{Path.GetFileNameWithoutExtension(moduleTestPath)}";
             _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath));
             _sourceToDeterministicPathMapping = LoadSourceToDeterministicPathMapping(_sourceRootMapping);
         }
@@ -75,7 +76,7 @@ namespace Coverlet.Core.Helpers
         {
             var mapping = new Dictionary<string, List<SourceRootMapping>>();
 
-            string mappingFilePath = Path.Combine(directory, MappingFileName);
+            string mappingFilePath = Path.Combine(directory, _mappingFileName);
             if (!_fileSystem.Exists(mappingFilePath))
             {
                 return mapping;

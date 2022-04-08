@@ -44,7 +44,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
       <_mapping Include="@(_byProject->'%(Identity)|%(OriginalPath)=%(MappedPath)')" />
     </ItemGroup>
     <PropertyGroup>
-      <_sourceRootMappingFilePath>$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))CoverletSourceRootsMapping</_sourceRootMappingFilePath>
+      <_sourceRootMappingFilePath>$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))CoverletSourceRootsMapping_$(AssemblyName)</_sourceRootMappingFilePath>
     </PropertyGroup>
     <WriteLinesToFile File="$(_sourceRootMappingFilePath)" Lines="@(_mapping)"
                       Overwrite="true" Encoding="Unicode"
