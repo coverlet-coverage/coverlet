@@ -1,3 +1,7 @@
+variables:
+- name: System.Debug
+  value: true 
+
 trigger:
   branches:
     include: ["master", "*_validate"]
