@@ -6,6 +6,11 @@ steps:
 
 - task: UseDotNet@2
   inputs:
+    version: 5.0.406
+  displayName: Install .NET Core SDK 5.0.406
+  
+- task: UseDotNet@2
+  inputs:
     version: 6.0.201
   displayName: Install .NET Core SDK 6.0.201
 
