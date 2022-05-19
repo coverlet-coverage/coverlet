@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Coverlet.Core.Enums;
+using FluentAssertions;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -68,7 +69,7 @@ namespace Coverlet.Core.Tests
             ThresholdStatistic thresholdStatic = ThresholdStatistic.Minimum;
 
             ThresholdTypeFlags resThresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStatic);
-            Assert.Equal(ThresholdTypeFlags.Line, resThresholdTypeFlags);
+            resThresholdTypeFlags.Should().Be(ThresholdTypeFlags.Line);
         }
 
         [Fact]
@@ -88,7 +89,7 @@ namespace Coverlet.Core.Tests
             ThresholdStatistic thresholdStatic = ThresholdStatistic.Minimum;
 
             ThresholdTypeFlags resThresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStatic);
-            Assert.Equal(ThresholdTypeFlags.Method, resThresholdTypeFlags);
+            resThresholdTypeFlags.Should().Be(ThresholdTypeFlags.Method);
         }
 
         [Fact]
@@ -108,7 +109,7 @@ namespace Coverlet.Core.Tests
             ThresholdStatistic thresholdStatic = ThresholdStatistic.Total;
 
             ThresholdTypeFlags resThresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStatic);
-            Assert.Equal(ThresholdTypeFlags.Branch, resThresholdTypeFlags);
+            resThresholdTypeFlags.Should().Be(ThresholdTypeFlags.Branch);
         }
 
         [Fact]
@@ -128,7 +129,7 @@ namespace Coverlet.Core.Tests
             ThresholdStatistic thresholdStatic = ThresholdStatistic.Average;
 
             ThresholdTypeFlags resThresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStatic);
-            Assert.Equal(ThresholdTypeFlags.None, resThresholdTypeFlags);
+            resThresholdTypeFlags.Should().Be(ThresholdTypeFlags.None);
         }
 
         [Fact]
@@ -149,7 +150,7 @@ namespace Coverlet.Core.Tests
             ThresholdStatistic thresholdStatic = ThresholdStatistic.Minimum;
 
             ThresholdTypeFlags resThresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStatic);
-            Assert.Equal(thresholdTypeFlags, resThresholdTypeFlags);
+            resThresholdTypeFlags.Should().Be(thresholdTypeFlags);
         }
 
         [Fact]
@@ -170,7 +171,7 @@ namespace Coverlet.Core.Tests
             ThresholdStatistic thresholdStatic = ThresholdStatistic.Minimum;
 
             ThresholdTypeFlags resThresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStatic);
-            Assert.Equal(thresholdTypeFlags, resThresholdTypeFlags);
+            resThresholdTypeFlags.Should().Be(thresholdTypeFlags);
         }
     }
 }
