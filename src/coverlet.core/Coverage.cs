@@ -513,8 +513,12 @@ namespace Coverlet.Core
             string replacement = Path.Combine(relativePathOfBestMatch, Path.GetFileName(document));
             replacement = replacement.Replace('\\', '/');
 
-            url = sourceLinkDocuments[keyWithBestMatch];
-            return url.Replace("*", replacement);
+            if (sourceLinkDocuments.TryGetValue(keyWithBestMatch, out url))
+            {
+                return url.Replace("*", replacement);
+            }
+
+            return document;
         }
     }
 }
