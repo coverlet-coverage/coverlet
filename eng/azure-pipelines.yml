@@ -1,6 +1,4 @@
 variables:
-- name: System.Debug
-  value: false 
 
 trigger:
   branches:
@@ -38,3 +36,18 @@ jobs:
       ArtifactName: Packages
       publishLocation: Container
     condition: eq(variables['BuildConfiguration'], 'Release')
+
+  - task: CopyFiles@2
+    displayName: Collect dump
+    inputs:
+      SourceFolder: $(Agent.TempDirectory)\*\
+      Contents: |
+        *.dmp
+      TargetFolder: $(Build.ArtifactStagingDirectory)\Dumps
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish dumps
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)\Dumps
+      ArtifactName: Dumps
+      publishLocation: Container
