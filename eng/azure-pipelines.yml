@@ -1,6 +1,6 @@
 variables:
 - name: System.Debug
-  value: true 
+  value: false 
 
 trigger:
   branches:
