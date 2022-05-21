@@ -125,6 +125,7 @@ namespace Coverlet.Core
 
                 if (instrumenter.CanInstrument())
                 {
+                    _logger.LogVerbose($"Included module: '{module}'");
                     _instrumentationHelper.BackupOriginalModule(module, Identifier);
 
                     // Guard code path and restore if instrumentation fails.
