@@ -114,6 +114,8 @@ namespace Coverlet.Core
                     continue;
                 }
 
+                _logger.LogVerbose($"Included module: '{module}'");
+
                 var instrumenter = new Instrumenter(module,
                                                     Identifier,
                                                     _parameters,
@@ -125,7 +127,7 @@ namespace Coverlet.Core
 
                 if (instrumenter.CanInstrument())
                 {
-                    _logger.LogVerbose($"Included module: '{module}'");
+                    _logger.LogVerbose($"Instrumentable module: '{module}'");
                     _instrumentationHelper.BackupOriginalModule(module, Identifier);
 
                     // Guard code path and restore if instrumentation fails.
