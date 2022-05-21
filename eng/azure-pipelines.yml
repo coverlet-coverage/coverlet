@@ -34,7 +34,6 @@ jobs:
       ArtifactName: Packages
       publishLocation: Container
     condition: eq(variables['BuildConfiguration'], 'Release')
-
   - task: CopyFiles@2
     displayName: Collect dump
     inputs:
@@ -42,7 +41,6 @@ jobs:
       Contents: |
         *.dmp
       TargetFolder: $(Build.ArtifactStagingDirectory)\Dumps
-
   - task: PublishBuildArtifacts@1
     displayName: Publish dumps
     inputs:
