@@ -38,31 +38,3 @@ jobs:
       ArtifactName: Packages
       publishLocation: Container
     condition: eq(variables['BuildConfiguration'], 'Release')
-
-- job: macOS
-  displayName: macOS
-  continueOnError: 'true'
-  strategy:
-    matrix:
-      Debug:
-        buildConfiguration: "Debug"
-      Release:
-        buildConfiguration: "Release"
-  pool:
-    vmImage: 'macOS-latest'
-  steps:
-  - template: build.yml
-
-- job: Linux
-  displayName: Linux
-  continueOnError: 'true'
-  strategy:
-    matrix:
-      Debug:
-        buildConfiguration: "Debug"
-      Release:
-        buildConfiguration: "Release"
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-  - template: build.yml
