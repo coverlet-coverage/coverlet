@@ -37,7 +37,6 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect dump
     inputs:
-      SourceFolder: $(Agent.TempDirectory)\*\
       Contents: |
         *.dmp
       TargetFolder: $(Build.ArtifactStagingDirectory)\Dumps
