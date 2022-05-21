@@ -6,13 +6,8 @@ steps:
 
 - task: UseDotNet@2
   inputs:
-    version: 5.0.406
-  displayName: Install .NET Core SDK 5.0.406
-  
-- task: UseDotNet@2
-  inputs:
-    version: 6.0.201
-  displayName: Install .NET Core SDK 6.0.201
+    version: 5.0.401
+  displayName: Install .NET Core SDK 5.0.401
 
 - script: dotnet restore
   displayName: Restore packages
@@ -27,5 +22,5 @@ steps:
   displayName: Run tests
   inputs:
     command: test
-    arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.collector]*%2c[coverlet.core]*%2c[coverlet.msbuild.tasks]*" /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*" --diag:log.txt
+    arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.collector]*%2c[coverlet.core]*%2c[coverlet.msbuild.tasks]*" /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*"
     testRunTitle: $(Agent.JobName)
