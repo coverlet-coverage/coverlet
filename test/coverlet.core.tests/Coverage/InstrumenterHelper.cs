@@ -124,6 +124,8 @@ namespace Coverlet.Core.Tests
             s_processWideContainer.GetService<IInstrumentationHelper>(), s_processWideContainer.GetService<IFileSystem>(), s_processWideContainer.GetService<ISourceRootTranslator>(), s_processWideContainer.GetService<ICecilSymbolHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
+            Assert.True(false, File.ReadAllText(logFile));
+
             Assert.Single(prepareResult.Results);
 
             // Load new assembly
