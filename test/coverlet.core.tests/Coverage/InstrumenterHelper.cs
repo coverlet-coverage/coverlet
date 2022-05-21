@@ -125,6 +125,7 @@ namespace Coverlet.Core.Tests
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             File.AppendAllText(logFile, "\nTest file:" + newPath);
+            File.AppendAllText(logFile, "\nExists:" + File.Exists(newPath));
             Assert.True(false, File.ReadAllText(logFile));
 
             Assert.Single(prepareResult.Results);
