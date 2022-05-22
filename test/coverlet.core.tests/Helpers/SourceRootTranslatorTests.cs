@@ -21,7 +21,7 @@ namespace Coverlet.Core.Helpers.Tests
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string p) =>
             {
-                if (p == "testLib.dll" || p == @"C:\git\coverlet\src\coverlet.core\obj\Debug\netstandard2.0\coverlet.core.pdb" || p == "CoverletSourceRootsMapping_testLib") return true;
+                if (p == "testLib.dll" || p == @"C:\git\coverlet\src\coverlet.core\obj\Debug\netstandard2.0\coverlet.core.pdb" || p == "CoverletSourceRootsMapping") return true;
                 return false;
             });
             fileSystem.Setup(f => f.ReadAllLines(It.IsAny<string>())).Returns(File.ReadAllLines(@"TestAssets/CoverletSourceRootsMappingTest"));
@@ -39,7 +39,7 @@ namespace Coverlet.Core.Helpers.Tests
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string p) =>
             {
-                if (p == "testLib.dll" || p == @"C:\git\coverlet\src\coverlet.core\obj\Debug\netstandard2.0\coverlet.core.pdb" || p == "CoverletSourceRootsMapping_testLib") return true;
+                if (p == "testLib.dll" || p == @"C:\git\coverlet\src\coverlet.core\obj\Debug\netstandard2.0\coverlet.core.pdb" || p == "CoverletSourceRootsMapping") return true;
                 return false;
             });
             fileSystem.Setup(f => f.ReadAllLines(It.IsAny<string>())).Returns(File.ReadAllLines(@"TestAssets/CoverletSourceRootsMappingTest"));
@@ -71,7 +71,7 @@ namespace Coverlet.Core.Helpers.Tests
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string p) =>
             {
-                if (p == "testLib.dll" || p == "CoverletSourceRootsMapping_testLib") return true;
+                if (p == "testLib.dll" || p == "CoverletSourceRootsMapping") return true;
                 return false;
             });
             fileSystem.Setup(f => f.ReadAllLines(It.IsAny<string>())).Returns(new string[1] { "malformedRow" });
