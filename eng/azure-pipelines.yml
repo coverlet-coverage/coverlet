@@ -34,17 +34,31 @@ jobs:
       ArtifactName: Packages
       publishLocation: Container
     condition: eq(variables['BuildConfiguration'], 'Release')
-#  - task: CopyFiles@2
-#    displayName: Collect dump
-#    inputs:
-#      SourceFolder: $(Agent.TempDirectory)
-#      Contents: '**\*.dmp'
-#      TargetFolder: $(Build.ArtifactStagingDirectory)\Dumps
-#    condition: always()
-#  - task: PublishBuildArtifacts@1
-#    displayName: Publish dumps
-#    inputs:
-#      PathtoPublish: $(Build.ArtifactStagingDirectory)\Dumps
-#      ArtifactName: Dumps
-#      publishLocation: Container
-#    condition: always()
+
+- job: macOS
+  displayName: macOS
+  continueOnError: 'true'
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "Debug"
+      Release:
+        buildConfiguration: "Release"
+  pool:
+    vmImage: 'macOS-latest'
+  steps:
+  - template: build.yml
+
+- job: Linux
+  displayName: Linux
+  continueOnError: 'true'
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "Debug"
+      Release:
+        buildConfiguration: "Release"
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - template: build.yml
