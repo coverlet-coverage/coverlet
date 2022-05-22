@@ -32,4 +32,3 @@ steps:
     command: test
     arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.collector]*%2c[coverlet.core]*%2c[coverlet.msbuild.tasks]*" /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*" --blame-crash --blame-hang --blame-hang-timeout 15m
     testRunTitle: $(Agent.JobName)
-    continueOnError: true
