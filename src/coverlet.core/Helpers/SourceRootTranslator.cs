@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+
 using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers
@@ -106,6 +107,17 @@ namespace Coverlet.Core.Helpers
             }
 
             return mapping;
+        }
+
+        public bool AddMappingInCache(string originalFileName, string targetFileName)
+        {
+            if (_resolutionCacheFiles != null && _resolutionCacheFiles.ContainsKey(originalFileName))
+            {
+                return false;
+            }
+
+             (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, targetFileName);
+            return true;
         }
 
         public IReadOnlyList<SourceRootMapping> ResolvePathRoot(string pathRoot)

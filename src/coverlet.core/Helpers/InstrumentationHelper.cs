@@ -97,7 +97,24 @@ namespace Coverlet.Core.Helpers
                         return true;
                     }
 
-                    return _fileSystem.Exists(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
+                    if (_fileSystem.Exists(_sourceRootTranslator.ResolveFilePath(codeViewData.Path)))
+                    {
+                        // local PDB is located within original build location
+                        embedded = false;
+                        return true;
+                    }
+
+                    string localPdbFileName = Path.Combine(Path.GetDirectoryName(module), Path.GetFileName(codeViewData.Path));
+                    if (_fileSystem.Exists(localPdbFileName))
+                    {
+                        // local PDB is located within same folder as module
+                        embedded = false;
+
+                        // mapping need to be registered in _sourceRootTranslator to use that discovery
+                        _sourceRootTranslator.AddMappingInCache(codeViewData.Path, localPdbFileName);
+
+                        return true;
+                    }
                 }
             }
 

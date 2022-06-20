@@ -36,7 +36,7 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void EmbeddedPortablePDPHasLocalSource_DocumentDoesNotExist_ReturnsFalse()
         {
-            var fileSystem = new Mock<FileSystem> {CallBase = true};
+            var fileSystem = new Mock<FileSystem> { CallBase = true };
             fileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
 
             var instrumentationHelper =
@@ -54,9 +54,18 @@ namespace Coverlet.Core.Helpers.Tests
         }
 
         [Fact]
-        public void TestHasPdb()
+        public void TestHasPdbOfLocalAssembly()
         {
             Assert.True(_instrumentationHelper.HasPdb(typeof(InstrumentationHelperTests).Assembly.Location, out bool embeddedPdb));
+            Assert.False(embeddedPdb);
+        }
+
+        [Fact]
+        public void TestHasPdbOfExternalAssembly()
+        {
+            string testAssemblyLocation = GetType().Assembly.Location;
+            string externalAssemblyFileName = Path.Combine(Path.GetDirectoryName(testAssemblyLocation), "TestAssets", "75d9f96508d74def860a568f426ea4a4.dll");
+            Assert.True(_instrumentationHelper.HasPdb(externalAssemblyFileName, out bool embeddedPdb));
             Assert.False(embeddedPdb);
         }
 
