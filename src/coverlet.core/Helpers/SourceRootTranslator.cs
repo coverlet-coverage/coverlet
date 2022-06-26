@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-
 using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers

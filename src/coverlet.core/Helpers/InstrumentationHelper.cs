@@ -90,7 +90,8 @@ namespace Coverlet.Core.Helpers
                 if (entry.Type == DebugDirectoryEntryType.CodeView)
                 {
                     CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                    if (_sourceRootTranslator.ResolveFilePath(codeViewData.Path) == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
+                    string modulePdbFileName = $"{Path.GetFileNameWithoutExtension(module)}.pdb";
+                    if (_sourceRootTranslator.ResolveFilePath(codeViewData.Path) == modulePdbFileName)
                     {
                         // PDB is embedded
                         embedded = true;
@@ -104,7 +105,7 @@ namespace Coverlet.Core.Helpers
                         return true;
                     }
 
-                    string localPdbFileName = Path.Combine(Path.GetDirectoryName(module), Path.GetFileName(codeViewData.Path));
+                    string localPdbFileName = Path.Combine(Path.GetDirectoryName(module), modulePdbFileName);
                     if (_fileSystem.Exists(localPdbFileName))
                     {
                         // local PDB is located within same folder as module
