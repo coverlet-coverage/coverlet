@@ -108,6 +108,17 @@ namespace Coverlet.Core.Helpers
             return mapping;
         }
 
+        public bool AddMappingInCache(string originalFileName, string targetFileName)
+        {
+            if (_resolutionCacheFiles != null && _resolutionCacheFiles.ContainsKey(originalFileName))
+            {
+                return false;
+            }
+
+             (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, targetFileName);
+            return true;
+        }
+
         public IReadOnlyList<SourceRootMapping> ResolvePathRoot(string pathRoot)
         {
             return _sourceRootMapping.TryGetValue(pathRoot, out List<SourceRootMapping> sourceRootMapping) ? sourceRootMapping.AsReadOnly() : null;

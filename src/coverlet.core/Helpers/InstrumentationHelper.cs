@@ -90,14 +90,32 @@ namespace Coverlet.Core.Helpers
                 if (entry.Type == DebugDirectoryEntryType.CodeView)
                 {
                     CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                    if (_sourceRootTranslator.ResolveFilePath(codeViewData.Path) == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
+                    string modulePdbFileName = $"{Path.GetFileNameWithoutExtension(module)}.pdb";
+                    if (_sourceRootTranslator.ResolveFilePath(codeViewData.Path) == modulePdbFileName)
                     {
                         // PDB is embedded
                         embedded = true;
                         return true;
                     }
 
-                    return _fileSystem.Exists(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
+                    if (_fileSystem.Exists(_sourceRootTranslator.ResolveFilePath(codeViewData.Path)))
+                    {
+                        // local PDB is located within original build location
+                        embedded = false;
+                        return true;
+                    }
+
+                    string localPdbFileName = Path.Combine(Path.GetDirectoryName(module), modulePdbFileName);
+                    if (_fileSystem.Exists(localPdbFileName))
+                    {
+                        // local PDB is located within same folder as module
+                        embedded = false;
+
+                        // mapping need to be registered in _sourceRootTranslator to use that discovery
+                        _sourceRootTranslator.AddMappingInCache(codeViewData.Path, localPdbFileName);
+
+                        return true;
+                    }
                 }
             }
 
