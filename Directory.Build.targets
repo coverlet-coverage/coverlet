@@ -13,7 +13,7 @@
     <PackageReference Update="Mono.Cecil" Version="0.11.1" />
     <PackageReference Update="Moq" Version="4.10.1" />
     <!-- Do not upgrade this version or we won't support old SDK -->
-    <PackageReference Update="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Update="NuGet.Packaging" Version="5.4.0" />
     <PackageReference Update="ReportGenerator.Core" Version="4.6.0" />
     <!--
