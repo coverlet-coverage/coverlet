@@ -94,6 +94,10 @@ namespace Coverlet.Core.Instrumentation
             {
                 if (_instrumentationHelper.HasPdb(_module, out bool embeddedPdb))
                 {
+                    if (this._parameters.InstrumentModulesWithoutLocalSources)
+                    {
+                        return true;
+                    }
                     if (embeddedPdb)
                     {
                         if (_instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, out string firstNotFoundDocument))

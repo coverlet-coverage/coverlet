@@ -48,6 +48,7 @@ namespace Coverlet.Collector.DataCollection
                 coverletSettings.SkipAutoProps = ParseSkipAutoProps(configurationElement);
                 coverletSettings.DoesNotReturnAttributes = ParseDoesNotReturnAttributes(configurationElement);
                 coverletSettings.DeterministicReport = ParseDeterministicReport(configurationElement);
+                coverletSettings.InstrumentModulesWithoutLocalSources = ParseInstrumentModulesWithoutLocalSources(configurationElement);
             }
 
             coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
@@ -209,6 +210,19 @@ namespace Coverlet.Collector.DataCollection
             XmlElement deterministicReportElement = configurationElement[CoverletConstants.DeterministicReport];
             bool.TryParse(deterministicReportElement?.InnerText, out bool deterministicReport);
             return deterministicReport;
+        }
+
+
+        /// <summary>
+        /// Parse InstrumentModulesWithoutLocalSources flag
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <returns>InstrumentModulesWithoutLocalSources flag</returns>
+        private static bool ParseInstrumentModulesWithoutLocalSources(XmlElement configurationElement)
+        {
+            XmlElement instrumentModulesWithoutLocalSourcesElement = configurationElement[CoverletConstants.InstrumentModulesWithoutLocalSources];
+            bool.TryParse(instrumentModulesWithoutLocalSourcesElement?.InnerText, out bool instrumentModulesWithoutLocalSources);
+            return instrumentModulesWithoutLocalSources;
         }
 
         /// <summary>
