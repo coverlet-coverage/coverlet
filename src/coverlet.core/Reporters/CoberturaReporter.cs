@@ -228,7 +228,7 @@ namespace Coverlet.Core.Reporters
                 }
             }
 
-            Debug.Assert(false, "Unexpected, we should find at least one path starts with one pre-build roots list");
+            //Debug.Assert(false, "Unexpected, we should find at least one path starts with one pre-build roots list");
 
             return path;
         }
