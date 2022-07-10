@@ -81,6 +81,11 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         public bool DeterministicReport { get; set; }
 
+        /// <summary>
+        /// Instruments modules even if the sources from the PDBs can't be resolved.
+        /// </summary>
+        public bool InstrumentModulesWithoutLocalSources { get;  set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -98,6 +103,7 @@ namespace Coverlet.Collector.DataCollection
             builder.AppendFormat("SkipAutoProps: '{0}'", SkipAutoProps);
             builder.AppendFormat("DoesNotReturnAttributes: '{0}'", string.Join(",", DoesNotReturnAttributes ?? Enumerable.Empty<string>()));
             builder.AppendFormat("DeterministicReport: '{0}'", DeterministicReport);
+            builder.AppendFormat("InstrumentModulesWithoutLocalSources: '{0}'", InstrumentModulesWithoutLocalSources);
 
             return builder.ToString();
         }
