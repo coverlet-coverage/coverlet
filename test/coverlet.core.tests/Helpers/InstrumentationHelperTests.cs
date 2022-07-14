@@ -137,7 +137,7 @@ namespace Coverlet.Core.Helpers.Tests
         {
             bool result = _instrumentationHelper.IsModuleForcedToBeInstrumented("Module.dll", new string[0]);
 
-            Assert.True(result);
+            Assert.False(result);
         }
 
         [Theory]
