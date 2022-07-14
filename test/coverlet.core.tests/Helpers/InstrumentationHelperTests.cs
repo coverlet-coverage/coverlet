@@ -132,6 +132,14 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.True(result);
         }
 
+        [Fact]
+        public void TestIsModuleForcedToBeInstrumentedWithoutFilter()
+        {
+            bool result = _instrumentationHelper.IsModuleForcedToBeInstrumented("Module.dll", new string[0]);
+
+            Assert.True(result);
+        }
+
         [Theory]
         [InlineData("[Module]mismatch")]
         [InlineData("[Mismatch]*")]
@@ -150,20 +158,31 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.False(result);
         }
 
+        [Fact]
+        public void TestIsModuleForcedToBeInstrumentedWithSingleMismatchFilter()
+        {
+            bool result = _instrumentationHelper.IsModuleForcedToBeInstrumented("Module.dll", new[] { "[Mismatch]*" });
+
+            Assert.False(result);
+        }
+
         [Theory]
         [MemberData(nameof(ValidModuleFilterData))]
-        public void TestIsModuleExcludedAndIncludedWithFilter(string filter)
+        public void TestIsModuleExcludedAndIncludedAndForcedToBeInstrumentedWithFilter(string filter)
         {
             bool result = _instrumentationHelper.IsModuleExcluded("Module.dll", new[] { filter });
             Assert.True(result);
 
             result = _instrumentationHelper.IsModuleIncluded("Module.dll", new[] { filter });
             Assert.True(result);
+
+            result = _instrumentationHelper.IsModuleForcedToBeInstrumented("Module.dll", new[] { filter });
+            Assert.True(result);
         }
 
         [Theory]
         [MemberData(nameof(ValidModuleFilterData))]
-        public void TestIsModuleExcludedAndIncludedWithMatchingAndMismatchingFilter(string filter)
+        public void TestIsModuleExcludedAndIncludedAndForcedToBeInstrumentedWithMatchingAndMismatchingFilter(string filter)
         {
             string[] filters = new[] { "[Mismatch]*", filter, "[Mismatch]*" };
 
@@ -171,6 +190,9 @@ namespace Coverlet.Core.Helpers.Tests
             Assert.True(result);
 
             result = _instrumentationHelper.IsModuleIncluded("Module.dll", filters);
+            Assert.True(result);
+
+            result = _instrumentationHelper.IsModuleForcedToBeInstrumented("Module.dll", new[] { filter });
             Assert.True(result);
         }
 

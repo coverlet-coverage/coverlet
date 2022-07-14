@@ -64,7 +64,7 @@ namespace Coverlet.Core.Reporters
                         string fileName;
                         if (!result.Parameters.DeterministicReport)
                         {
-                            fileName = GetRelativePathFromBase(absolutePaths, document.Key, result.Parameters.UseSourceLink);
+                            fileName = GetRelativePathFromBase(absolutePaths, document.Key, result.Parameters);
                         }
                         else
                         {
@@ -213,9 +213,9 @@ namespace Coverlet.Core.Reporters
             });
         }
 
-        private static string GetRelativePathFromBase(IEnumerable<string> basePaths, string path, bool useSourceLink)
+        private static string GetRelativePathFromBase(IEnumerable<string> basePaths, string path, CoverageParameters parameters)
         {
-            if (useSourceLink)
+            if (parameters.UseSourceLink)
             {
                 return path;
             }
@@ -226,6 +226,11 @@ namespace Coverlet.Core.Reporters
                 {
                     return path.Substring(basePath.Length);
                 }
+            }
+
+            if (parameters.ForceInstrumentModules != null && parameters.ForceInstrumentModules.Any())
+            {
+                return path;
             }
 
             Debug.Assert(false, "Unexpected, we should find at least one path starts with one pre-build roots list");

@@ -43,6 +43,8 @@ namespace Coverlet.Core
         public bool SkipAutoProps { get; set; }
         [DataMember]
         public bool DeterministicReport { get; set; }
+        [DataMember]
+        public string[] ForceInstrumentModules { get; set; }
     }
 
     internal class Coverage

@@ -81,6 +81,11 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         public bool DeterministicReport { get; set; }
 
+        /// <summary>
+        /// Modules that should be instrumented even without existing source files
+        /// </summary>
+        public string[] ForceInstrumentModules { get; set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -98,6 +103,7 @@ namespace Coverlet.Collector.DataCollection
             builder.AppendFormat("SkipAutoProps: '{0}'", SkipAutoProps);
             builder.AppendFormat("DoesNotReturnAttributes: '{0}'", string.Join(",", DoesNotReturnAttributes ?? Enumerable.Empty<string>()));
             builder.AppendFormat("DeterministicReport: '{0}'", DeterministicReport);
+            builder.AppendFormat("ForceInstrumentModules: '{0}'", string.Join(",", ForceInstrumentModules ?? Enumerable.Empty<string>()));
 
             return builder.ToString();
         }

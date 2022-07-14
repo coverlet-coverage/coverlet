@@ -92,6 +92,12 @@ namespace Coverlet.Core.Instrumentation
         {
             try
             {
+                if (_instrumentationHelper.IsModuleForcedToBeInstrumented(_module, _parameters.ForceInstrumentModules))
+                {
+                    _logger.LogVerbose($"Module '{_module}' was forced to be instrumented");
+                    return true;
+                }
+
                 if (_instrumentationHelper.HasPdb(_module, out bool embeddedPdb))
                 {
                     if (embeddedPdb)

@@ -48,6 +48,7 @@ namespace Coverlet.Collector.DataCollection
                 coverletSettings.SkipAutoProps = ParseSkipAutoProps(configurationElement);
                 coverletSettings.DoesNotReturnAttributes = ParseDoesNotReturnAttributes(configurationElement);
                 coverletSettings.DeterministicReport = ParseDeterministicReport(configurationElement);
+                coverletSettings.ForceInstrumentModules = ParseForceInstrument(configurationElement);
             }
 
             coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
@@ -161,6 +162,17 @@ namespace Coverlet.Collector.DataCollection
         private static string[] ParseExcludeAttributes(XmlElement configurationElement)
         {
             XmlElement excludeAttributesElement = configurationElement[CoverletConstants.ExcludeAttributesElementName];
+            return SplitElement(excludeAttributesElement);
+        }
+
+        /// <summary>
+        /// Parse modules forced to be instrumented
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <returns>Modules forced to be instrumented</returns>
+        private static string[] ParseForceInstrument(XmlElement configurationElement)
+        {
+            XmlElement excludeAttributesElement = configurationElement[CoverletConstants.ForceInstrumentElementName];
             return SplitElement(excludeAttributesElement);
         }
 

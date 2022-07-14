@@ -793,5 +793,27 @@ public class SampleClass
 
             instrumenterTest.Directory.Delete(true);
         }
+
+        [Fact]
+        public void TestCanInstrumentForcedModule()
+        {
+            const string xunitModuleName = "xunit.core";
+
+            string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), $"{xunitModuleName}.dll").First();
+            var loggerMock = new Mock<ILogger>();
+
+            var instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                                          new SourceRootTranslator(xunitDll, new Mock<ILogger>().Object, new FileSystem()));
+
+            var parameters = new CoverageParameters
+            {
+                ForceInstrumentModules = new[] { $"[{xunitModuleName}]" }
+            };
+            var instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", parameters, loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(xunitDll, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            Assert.True(instrumentationHelper.HasPdb(xunitDll, out bool embedded));
+            Assert.True(embedded);
+            Assert.True(instrumenter.CanInstrument());
+        }
     }
 }

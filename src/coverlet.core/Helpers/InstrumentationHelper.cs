@@ -353,22 +353,19 @@ namespace Coverlet.Core.Helpers
             if (module == null)
                 return false;
 
-            foreach (string filter in includeFilters)
-            {
-                string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+            return IsModuleIncludeFilterMatch(module, includeFilters);
+        }
 
-                if (modulePattern == "*")
-                    return true;
+        public bool IsModuleForcedToBeInstrumented(string module, string[] forcedModules)
+        {
+            if (forcedModules == null || forcedModules.Length == 0)
+                return false;
 
-                modulePattern = WildcardToRegex(modulePattern);
+            module = Path.GetFileNameWithoutExtension(module);
+            if (module == null)
+                return false;
 
-                var regex = new Regex(modulePattern);
-
-                if (regex.IsMatch(module))
-                    return true;
-            }
-
-            return false;
+            return IsModuleIncludeFilterMatch(module, forcedModules);
         }
 
         public bool IsTypeExcluded(string module, string type, string[] excludeFilters)
@@ -401,6 +398,29 @@ namespace Coverlet.Core.Helpers
         public void SetLogger(ILogger logger)
         {
             _logger = logger;
+        }
+
+        private static bool IsModuleIncludeFilterMatch(string module, string[] filters)
+        {
+            Debug.Assert(module != null);
+            Debug.Assert(filters != null);
+
+            foreach (string filter in filters)
+            {
+                string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+
+                if (modulePattern == "*")
+                    return true;
+
+                modulePattern = WildcardToRegex(modulePattern);
+
+                var regex = new Regex(modulePattern);
+
+                if (regex.IsMatch(module))
+                    return true;
+            }
+
+            return false;
         }
 
         private static bool IsTypeFilterMatch(string module, string type, string[] filters)

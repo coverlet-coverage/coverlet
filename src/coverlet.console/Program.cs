@@ -70,6 +70,7 @@ namespace Coverlet.Console
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
             CommandOption doesNotReturnAttributes = app.Option("--does-not-return-attribute", "Attributes that mark methods that do not return.", CommandOptionType.MultipleValue);
+            CommandOption forceInstrumentModules = app.Option("--force-instrument", "Modules that should be instrumented even without existing source files.", CommandOptionType.MultipleValue);
 
             app.OnExecute(() =>
             {
@@ -97,7 +98,8 @@ namespace Coverlet.Console
                     MergeWith = mergeWith.Value(),
                     UseSourceLink = useSourceLink.HasValue(),
                     SkipAutoProps = skipAutoProp.HasValue(),
-                    DoesNotReturnAttributes = doesNotReturnAttributes.Values.ToArray()
+                    DoesNotReturnAttributes = doesNotReturnAttributes.Values.ToArray(),
+                    ForceInstrumentModules = forceInstrumentModules.Values.ToArray(),
                 };
 
                 ISourceRootTranslator sourceRootTranslator = serviceProvider.GetRequiredService<ISourceRootTranslator>();
