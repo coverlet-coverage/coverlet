@@ -47,6 +47,8 @@ namespace Coverlet.MSbuild.Tasks
 
         public bool DeterministicReport { get; set; }
 
+        public bool InstrumentModulesWithoutLocalSources { get; set; }
+
         [Output]
         public ITaskItem InstrumenterState { get; set; }
 
@@ -99,6 +101,7 @@ namespace Coverlet.MSbuild.Tasks
                     UseSourceLink = UseSourceLink,
                     SkipAutoProps = SkipAutoProps,
                     DeterministicReport = DeterministicReport,
+                    InstrumentModulesWithoutLocalSources = InstrumentModulesWithoutLocalSources,
                     DoesNotReturnAttributes = DoesNotReturnAttribute?.Split(',')
                 };
 

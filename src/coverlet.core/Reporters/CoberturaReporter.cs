@@ -227,9 +227,6 @@ namespace Coverlet.Core.Reporters
                     return path.Substring(basePath.Length);
                 }
             }
-
-            Debug.Assert(false, "Unexpected, we should find at least one path starts with one pre-build roots list");
-
             return path;
         }
     }
