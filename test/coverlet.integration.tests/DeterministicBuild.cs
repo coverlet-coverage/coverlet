@@ -46,7 +46,7 @@ namespace Coverlet.Integration.Tests
                 foreach (string coverageFile in Directory.GetFiles(_testProjectPath, "coverage.json", SearchOption.AllDirectories))
                 {
                     JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
-                    .Document("DeepThought.cs")
+                    ?.Document("DeepThought.cs")
                     .Class("Coverlet.Integration.DeterministicBuild.DeepThought")
                     .Method("System.Int32 Coverlet.Integration.DeterministicBuild.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
                     .AssertLinesCovered((6, 1), (7, 1), (8, 1));
