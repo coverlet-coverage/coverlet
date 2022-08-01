@@ -248,8 +248,8 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
                 bool coverageChecked = false;
                 foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
                 {
-                    JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
-                    ?.Document("DeepThought.cs")
+                    (JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile)) ?? new Modules())
+                    .Document("DeepThought.cs")
                     .Class("Coverlet.Integration.Template.DeepThought")
                     .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
                     .AssertLinesCovered((6, 1), (7, 1), (8, 1));
