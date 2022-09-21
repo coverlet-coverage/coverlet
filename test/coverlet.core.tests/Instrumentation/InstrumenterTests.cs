@@ -524,6 +524,20 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.True(instrumenter.CanInstrument());
         }
 
+        [Fact]
+        public void CanInstrument_AssemblySearchTypeNone_ReturnsTrue()
+        {
+            var loggerMock = new Mock<ILogger>();
+            var instrumentationHelper = new Mock<IInstrumentationHelper>();
+            bool embeddedPdb;
+            instrumentationHelper.Setup(x => x.HasPdb(It.IsAny<string>(), out embeddedPdb)).Returns(true);
+
+            var instrumenter = new Instrumenter(It.IsAny<string>(), It.IsAny<string>(), new CoverageParameters{ExcludeAssembliesWithoutSources = "None"},
+                loggerMock.Object, instrumentationHelper.Object, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new CecilSymbolHelper());
+
+            Assert.True(instrumenter.CanInstrument());
+        }
+
         [Theory]
         [InlineData("NotAMatch", new string[] { }, false)]
         [InlineData("ExcludeFromCoverageAttribute", new string[] { }, true)]

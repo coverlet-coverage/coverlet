@@ -26,6 +26,6 @@ namespace Coverlet.Collector.Utilities
         public const string SkipAutoProps = "SkipAutoProps";
         public const string DoesNotReturnAttributesElementName = "DoesNotReturnAttribute";
         public const string DeterministicReport = "DeterministicReport";
-        public const string InstrumentModulesWithoutLocalSources = "InstrumentModulesWithoutLocalSources";
+        public const string ExcludeAssembliesWithoutSources = "ExcludeAssembliesWithoutSources";
     }
 }

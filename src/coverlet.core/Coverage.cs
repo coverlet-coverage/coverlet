@@ -44,7 +44,7 @@ namespace Coverlet.Core
         [DataMember]
         public bool DeterministicReport { get; set; }
         [DataMember]
-        public bool InstrumentModulesWithoutLocalSources { get; set; }
+        public string ExcludeAssembliesWithoutSources { get; set; }
     }
 
     internal class Coverage

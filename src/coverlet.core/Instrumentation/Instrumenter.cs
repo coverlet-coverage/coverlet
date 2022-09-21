@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Attributes;
+using coverlet.core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation.Reachability;
 using Coverlet.Core.Symbols;
@@ -49,6 +50,7 @@ namespace Coverlet.Core.Instrumentation
         private List<string> _excludedCompilerGeneratedTypes;
         private readonly string[] _doesNotReturnAttributes;
         private ReachabilityHelper _reachabilityHelper;
+        private readonly AsssemblySearchType _excludeAssembliesWithoutSources;
 
         public bool SkipModule { get; set; }
 
@@ -74,6 +76,16 @@ namespace Coverlet.Core.Instrumentation
             _sourceRootTranslator = sourceRootTranslator;
             _cecilSymbolHelper = cecilSymbolHelper;
             _doesNotReturnAttributes = PrepareAttributes(parameters.DoesNotReturnAttributes);
+            _excludeAssembliesWithoutSources = DetermineHeuristics(parameters.ExcludeAssembliesWithoutSources);
+        }
+
+        private AsssemblySearchType DetermineHeuristics(string parametersExcludeAssembliesWithoutSources)
+        {
+            if (Enum.TryParse(parametersExcludeAssembliesWithoutSources, out AsssemblySearchType option))
+            {
+                return option;
+            }
+            return AsssemblySearchType.MissingAll;
         }
 
         private static string[] PrepareAttributes(IEnumerable<string> providedAttrs, params string[] defaultAttrs)
@@ -94,34 +106,18 @@ namespace Coverlet.Core.Instrumentation
             {
                 if (_instrumentationHelper.HasPdb(_module, out bool embeddedPdb))
                 {
-                    if (this._parameters.InstrumentModulesWithoutLocalSources)
+                    if (_excludeAssembliesWithoutSources.Equals(AsssemblySearchType.None))
                     {
                         return true;
                     }
 					
                     if (embeddedPdb)
                     {
-                        if (_instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            _logger.LogVerbose($"Unable to instrument module: {_module}, embedded pdb without local source files, [{FileSystem.EscapeFileName(firstNotFoundDocument)}]");
-                            return false;
-                        }
+                        return _instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, _excludeAssembliesWithoutSources);
                     }
                     else
                     {
-                        if (_instrumentationHelper.PortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            _logger.LogVerbose($"Unable to instrument module: {_module}, pdb without local source files, [{FileSystem.EscapeFileName(firstNotFoundDocument)}]");
-                            return false;
-                        }
+                        return _instrumentationHelper.PortablePdbHasLocalSource(_module, _excludeAssembliesWithoutSources);
                     }
                 }
                 else

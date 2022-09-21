@@ -12,6 +12,8 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using Coverlet.Core.Abstractions;
+using coverlet.core.Enums;
+using Document = System.Reflection.Metadata.Document;
 
 namespace Coverlet.Core.Helpers
 {
@@ -122,9 +124,10 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
-        public bool EmbeddedPortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
+        //think about better way to pass parameter to the function
+        public bool EmbeddedPortablePdbHasLocalSource(string module,
+            AsssemblySearchType excludeAssembliesWithoutSources)
         {
-            firstNotFoundDocument = "";
             using (Stream moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
@@ -135,11 +138,8 @@ namespace Coverlet.Core.Helpers
                         using MetadataReaderProvider embeddedMetadataProvider = peReader.ReadEmbeddedPortablePdbDebugDirectoryData(entry);
                         MetadataReader metadataReader = embeddedMetadataProvider.GetMetadataReader();
 
-                        (bool allDocumentsMatch, string notFoundDocument) = MatchDocumentsWithSources(metadataReader);
-
-                        if (!allDocumentsMatch)
+                        if (!MatchDocumentsWithSources(module, excludeAssembliesWithoutSources, metadataReader))
                         {
-                            firstNotFoundDocument = notFoundDocument;
                             return false;
                         }
                     }
@@ -151,9 +151,8 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        public bool PortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
+        public bool PortablePdbHasLocalSource(string module, AsssemblySearchType excludeAssembliesWithoutSources)
         {
-            firstNotFoundDocument = "";
             using (Stream moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
@@ -175,11 +174,8 @@ namespace Coverlet.Core.Helpers
                             return true;
                         }
 
-                        (bool allDocumentsMatch, string notFoundDocument) = MatchDocumentsWithSources(metadataReader);
-
-                        if (!allDocumentsMatch)
+                        if (!MatchDocumentsWithSources(module, excludeAssembliesWithoutSources, metadataReader))
                         {
-                            firstNotFoundDocument = notFoundDocument;
                             return false;
                         }
                     }
@@ -189,25 +185,57 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        private (bool allDocumentsMatch, string notFoundDocument) MatchDocumentsWithSources(MetadataReader metadataReader)
+        private bool MatchDocumentsWithSources(string module, AsssemblySearchType excludeAssembliesWithoutSources,
+            MetadataReader metadataReader)
         {
-            foreach (DocumentHandle docHandle in metadataReader.Documents)
+            if (excludeAssembliesWithoutSources.Equals(AsssemblySearchType.MissingAll))
+            {
+                bool anyDocumentMatches = MatchDocumentsWithSourcesMissingAll(metadataReader);
+                if (!anyDocumentMatches)
+                {
+                    _logger.LogVerbose($"Unable to instrument module: {module}, pdb without any local source files");
+                    return false;
+                }
+            }
+
+            if (excludeAssembliesWithoutSources.Equals(AsssemblySearchType.MissingAny))
+            {
+                (bool allDocumentsMatch, string notFoundDocument) = MatchDocumentsWithSourcesMissingAny(metadataReader);
+
+                if (!allDocumentsMatch)
+                {
+                    _logger.LogVerbose(
+                        $"Unable to instrument module: {module}, pdb without local source files, [{FileSystem.EscapeFileName(notFoundDocument)}]");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private IEnumerable<(string documentName, bool documentExists)> DocumentSourceMap(MetadataReader metadataReader)
+        {
+            return metadataReader.Documents.ToList().Select(docHandle =>
             {
                 Document document = metadataReader.GetDocument(docHandle);
                 string docName = _sourceRootTranslator.ResolveFilePath(metadataReader.GetString(document.Name));
-                Guid languageGuid = metadataReader.GetGuid(document.Language);
+                return (docName, _fileSystem.Exists(docName));
+            });
+        }
 
-                // We verify all docs and return false if not all are present in local
-                // We could have false negative if doc is not a source
-                // Btw check for all possible extension could be weak approach
-                // We exlude from the check the autogenerated source file(i.e. source generators)
-                // We exclude special F# construct https://github.com/coverlet-coverage/coverlet/issues/1145
-                if (!_fileSystem.Exists(docName) && !IsGeneratedDocumentName(docName) &&
-                    !IsUnknownModuleInFSharpAssembly(languageGuid, docName))
-                {
-                    return (false, docName);
-                }
-            }
+        private bool MatchDocumentsWithSourcesMissingAll(MetadataReader metadataReader)
+        {
+            var documentSourceMap = DocumentSourceMap(metadataReader).ToList();
+            return documentSourceMap.Any(x => x.documentExists.Equals(true));
+        }
+
+        private (bool allDocumentsMatch, string notFoundDocument) MatchDocumentsWithSourcesMissingAny(
+            MetadataReader metadataReader)
+        {
+            var documentSourceMap = DocumentSourceMap(metadataReader).ToList();
+
+            if (documentSourceMap.Any(x => x.documentExists.Equals(false)))
+                return (false, documentSourceMap.FirstOrDefault(x => x.documentExists.Equals(false)).documentName);
             return (true, string.Empty);
         }
 
@@ -466,42 +494,6 @@ namespace Coverlet.Core.Helpers
             {
                 return false;
             }
-        }
-
-        // Follow the same rules that exist in Microsoft.CodeAnalysis
-        // https://sourceroslyn.io/#Microsoft.CodeAnalysis/InternalUtilities/GeneratedCodeUtilities.cs,55bff725ec9f1338,references
-        private static bool IsGeneratedDocumentName(string docPath)
-        {
-            if (!string.IsNullOrEmpty(docPath))
-            {
-                string fileName = Path.GetFileName(docPath);
-                if (fileName.StartsWith("TemporaryGeneratedFile_", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                string extension = Path.GetExtension(fileName);
-                if (!string.IsNullOrEmpty(extension))
-                {
-                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(docPath);
-                    if (fileNameWithoutExtension.EndsWith(".designer", StringComparison.OrdinalIgnoreCase) ||
-                        fileNameWithoutExtension.EndsWith(".generated", StringComparison.OrdinalIgnoreCase) ||
-                        fileNameWithoutExtension.EndsWith(".g", StringComparison.OrdinalIgnoreCase) ||
-                        fileNameWithoutExtension.EndsWith(".g.i", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private static bool IsUnknownModuleInFSharpAssembly(Guid languageGuid, string docName)
-        {
-            // https://github.com/dotnet/runtime/blob/main/docs/design/specs/PortablePdb-Metadata.md#document-table-0x30
-            return languageGuid.Equals(new Guid("ab4f38c9-b6e6-43ba-be3b-58080b2ccce3"))
-                   && docName.EndsWith("unknown");
         }
     }
 }

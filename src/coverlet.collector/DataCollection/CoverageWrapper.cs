@@ -34,7 +34,7 @@ namespace Coverlet.Collector.DataCollection
                 SkipAutoProps = settings.SkipAutoProps,
                 DoesNotReturnAttributes = settings.DoesNotReturnAttributes,
                 DeterministicReport = settings.DeterministicReport,
-                InstrumentModulesWithoutLocalSources = settings.InstrumentModulesWithoutLocalSources
+                ExcludeAssembliesWithoutSources = settings.ExcludeAssembliesWithoutSources
             };
 
             return new Coverage(

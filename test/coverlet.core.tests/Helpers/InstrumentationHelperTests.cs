@@ -9,6 +9,7 @@ using System.Linq;
 using Castle.Core.Internal;
 using Moq;
 using Coverlet.Core.Abstractions;
+using coverlet.core.Enums;
 
 namespace Coverlet.Core.Helpers.Tests
 {
@@ -34,7 +35,7 @@ namespace Coverlet.Core.Helpers.Tests
         }
 
         [Fact]
-        public void EmbeddedPortablePDPHasLocalSource_DocumentDoesNotExist_ReturnsFalse()
+        public void EmbeddedPortablePDPHasLocalSource_NoDocumentsExist_ReturnsFalse()
         {
             var fileSystem = new Mock<FileSystem> {CallBase = true};
             fileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
@@ -42,15 +43,15 @@ namespace Coverlet.Core.Helpers.Tests
             var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object, new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
 
-            Assert.False(instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, out string notFoundDocument));
-            Assert.False(notFoundDocument.IsNullOrEmpty());
+            Assert.False(instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, AsssemblySearchType.MissingAny));
+            Assert.False(instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, AsssemblySearchType.MissingAll));
         }
 
         [Fact]
-        public void EmbeddedPortablePDPHasLocalSource_AllDocumentsExist_ReturnsTrue()
+        public void EmbeddedPortablePDPWithAssemblySearchTypeMissingAny_AllDocumentsExist_ReturnsTrue()
         {
-            Assert.True(_instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, out string notFoundDocument));
-            Assert.True(notFoundDocument.IsNullOrEmpty());
+            Assert.True(_instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, AsssemblySearchType.MissingAny));
+            Assert.True(_instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, AsssemblySearchType.MissingAll));
         }
 
         [Fact]
