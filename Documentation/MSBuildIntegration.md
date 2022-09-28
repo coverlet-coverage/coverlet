@@ -181,6 +181,10 @@ You can also include coverage of the test assembly itself by setting `/p:Include
 Neither track nor record auto-implemented properties.  
 Syntax:  `/p:SkipAutoProps=true`
 
+### Instrument module wihtout local sources file.  
+
+Syntax:  `/p:InstrumentModulesWithoutLocalSources=true`
+
 ### Methods that do not return
 
 Methods that do not return can be marked with attributes to cause statements after them to be excluded from coverage.
