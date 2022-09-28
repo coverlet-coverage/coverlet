@@ -38,6 +38,7 @@ Options:
   --merge-with                 Path to existing coverage result to merge.
   --use-source-link            Specifies whether to use SourceLink URIs in place of file system paths.
   --does-not-return-attribute  Attributes that mark methods that do not return.
+  --instrument-modules-without-local-sources Specifies whether modules should be instrumented even if the sources from the PDBs can't be found locally.
 ```
 
 NB. For a [multiple value] options you have to specify values multiple times i.e.
