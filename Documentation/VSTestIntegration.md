@@ -97,7 +97,8 @@ These are a list of options that are supported by coverlet. These can be specifi
 | IncludeTestAssembly      | Include coverage of the test assembly.                                                                                                                          |
 | SkipAutoProps            | Neither track nor record auto-implemented properties.                                                                                                           |
 | DoesNotReturnAttribute   | Methods marked with these attributes are known not to return, statements following them will be excluded from coverage                                          |
-| DeterministicReport      | Generates deterministic report in context of deterministic build. Take a look at [documentation](DeterministicBuild.md) for further informations. | 
+| DeterministicReport      | Generates deterministic report in context of deterministic build. Take a look at [documentation](DeterministicBuild.md) for further informations.               | 
+| InstrumentModulesWithoutLocalSources      | Specifies whether modules should be instrumented even if the sources from the PDBs can't be found locally.               | 
 
 How to specify these options via runsettings?
 
@@ -119,6 +120,7 @@ How to specify these options via runsettings?
           <IncludeTestAssembly>true</IncludeTestAssembly>
           <SkipAutoProps>true</SkipAutoProps>
           <DeterministicReport>false</DeterministicReport>
+          <InstrumentModulesWithoutLocalSources>false</InstrumentModulesWithoutLocalSources>
         </Configuration>
       </DataCollector>
     </DataCollectors>
