@@ -629,7 +629,8 @@ namespace Coverlet.Core.Instrumentation
                         continue;
 
                     Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, branchTarget);
-                    targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
+                    if (!targetsMap.ContainsKey(currentInstruction.Offset))
+                        targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
 
                     index += 2;
                 }
