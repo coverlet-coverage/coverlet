@@ -572,6 +572,7 @@ namespace Coverlet.Core.Instrumentation
             int index = 0;
             int count = processor.Body.Instructions.Count;
             IReadOnlyList<BranchPoint> branchPoints = _cecilSymbolHelper.GetBranchPoints(method);
+            IDictionary<int, Instruction> targetsMap = new Dictionary<int, Instruction>();
             System.Collections.Immutable.ImmutableArray<ReachabilityHelper.UnreachableRange> unreachableRanges = _reachabilityHelper.FindUnreachableIL(processor.Body.Instructions, processor.Body.ExceptionHandlers);
             int currentUnreachableRangeIx = 0;
             for (int n = 0; n < count; n++)
@@ -611,11 +612,7 @@ namespace Coverlet.Core.Instrumentation
                     }
 
                     Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, sequencePoint);
-                    foreach (Instruction bodyInstruction in processor.Body.Instructions)
-                        ReplaceInstructionTarget(bodyInstruction, currentInstruction, firstInjectedInstrumentedOpCode);
-
-                    foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
-                        ReplaceExceptionHandlerBoundary(handler, currentInstruction, firstInjectedInstrumentedOpCode);
+                    targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
 
                     index += 2;
                 }
@@ -632,17 +629,19 @@ namespace Coverlet.Core.Instrumentation
                         continue;
 
                     Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, branchTarget);
-                    foreach (Instruction bodyInstruction in processor.Body.Instructions)
-                        ReplaceInstructionTarget(bodyInstruction, currentInstruction, firstInjectedInstrumentedOpCode);
-
-                    foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
-                        ReplaceExceptionHandlerBoundary(handler, currentInstruction, firstInjectedInstrumentedOpCode);
+                    targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
 
                     index += 2;
                 }
 
                 index++;
             }
+
+            foreach (Instruction bodyInstruction in processor.Body.Instructions)
+                ReplaceInstructionTarget(bodyInstruction, targetsMap);
+
+            foreach (ExceptionHandler handler in processor.Body.ExceptionHandlers)
+                ReplaceExceptionHandlerBoundary(handler, targetsMap);
 
             method.Body.OptimizeMacros();
         }
@@ -744,42 +743,41 @@ namespace Coverlet.Core.Instrumentation
             return indxInstr;
         }
 
-        private static void ReplaceInstructionTarget(Instruction instruction, Instruction oldTarget, Instruction newTarget)
+        private static void ReplaceInstructionTarget(Instruction instruction, IDictionary<int, Instruction> targetsMap)
         {
             if (instruction.Operand is Instruction operandInstruction)
             {
-                if (operandInstruction == oldTarget)
+                if (targetsMap.TryGetValue(operandInstruction.Offset, out Instruction newTarget))
                 {
                     instruction.Operand = newTarget;
-                    return;
                 }
             }
             else if (instruction.Operand is Instruction[] operandInstructions)
             {
                 for (int i = 0; i < operandInstructions.Length; i++)
                 {
-                    if (operandInstructions[i] == oldTarget)
+                    if (targetsMap.TryGetValue(operandInstructions[i].Offset, out Instruction newTarget))
                         operandInstructions[i] = newTarget;
                 }
             }
         }
 
-        private static void ReplaceExceptionHandlerBoundary(ExceptionHandler handler, Instruction oldTarget, Instruction newTarget)
+        private static void ReplaceExceptionHandlerBoundary(ExceptionHandler handler, IDictionary<int, Instruction> targetsMap)
         {
-            if (handler.FilterStart == oldTarget)
-                handler.FilterStart = newTarget;
+            if (handler.FilterStart is not null && targetsMap.TryGetValue(handler.FilterStart.Offset, out Instruction newFilterStart))
+                handler.FilterStart = newFilterStart;
 
-            if (handler.HandlerEnd == oldTarget)
-                handler.HandlerEnd = newTarget;
+            if (handler.HandlerEnd is not null && targetsMap.TryGetValue(handler.HandlerEnd.Offset, out Instruction newHandlerEnd))
+                handler.HandlerEnd = newHandlerEnd;
 
-            if (handler.HandlerStart == oldTarget)
-                handler.HandlerStart = newTarget;
+            if (handler.HandlerStart is not null && targetsMap.TryGetValue(handler.HandlerStart.Offset, out Instruction newHandlerStart))
+                handler.HandlerStart = newHandlerStart;
 
-            if (handler.TryEnd == oldTarget)
-                handler.TryEnd = newTarget;
+            if (handler.TryEnd is not null && targetsMap.TryGetValue(handler.TryEnd.Offset, out Instruction newTryEnd))
+                handler.TryEnd = newTryEnd;
 
-            if (handler.TryStart == oldTarget)
-                handler.TryStart = newTarget;
+            if (handler.TryStart is not null && targetsMap.TryGetValue(handler.TryStart.Offset, out Instruction newTryStart))
+                handler.TryStart = newTryStart;
         }
 
         private bool IsExcludeAttribute(CustomAttribute customAttribute)
