@@ -423,7 +423,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             var loggerMock = new Mock<ILogger>();
 
             var instrumentationHelper =
-                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), loggerMock.Object,
                                           new SourceRootTranslator(xunitDll, new Mock<ILogger>().Object, new FileSystem()));
 
             var instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(xunitDll, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
@@ -488,7 +488,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
             Assert.False(embedded);
             Assert.False(instrumenter.CanInstrument());
-            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+            _mockLogger.Verify(l => l.LogVerbose(It.IsAny<string>()));
         }
 
         [Fact]
