@@ -232,7 +232,7 @@ To generate deterministc report the parameter is:
 ## Exclude assemblies without sources from coverage
 
 The heuristic coverlet uses to determine if an assembly is a third-party dependency is based on the matching of the assembly`s source documents and the corresponding source files.
-This parameter has three different values to control the this automatic assembly exclusion. 
+This parameter has three different values to control the automatic assembly exclusion. 
 
 | Parameter | Description |
 |-----------|-------------|
@@ -240,7 +240,7 @@ This parameter has three different values to control the this automatic assembly
 | MissingAll | Includes the assembly only if all documents can be matched to corresponding source files. |
 | None | No assembly is excluded. |
 
-Here is an example how specifiy the parameter:
+Here is an example of how to specifiy the parameter:
 ```
 /p:ExcludeAssembliesWithoutSources="MissingAny"
 ```

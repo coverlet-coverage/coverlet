@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using coverlet.core.Enums;
+using Coverlet.Core.Enums;
 
 namespace Coverlet.Core.Abstractions
 {
@@ -17,8 +17,8 @@ namespace Coverlet.Core.Abstractions
         bool IsTypeExcluded(string module, string type, string[] excludeFilters);
         bool IsTypeIncluded(string module, string type, string[] includeFilters);
         void RestoreOriginalModule(string module, string identifier);
-        bool EmbeddedPortablePdbHasLocalSource(string module, AsssemblySearchType excludeAssembliesWithoutSources);
-        bool PortablePdbHasLocalSource(string module, AsssemblySearchType excludeAssembliesWithoutSources);
+        bool EmbeddedPortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources);
+        bool PortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources);
         bool IsLocalMethod(string method);
         void SetLogger(ILogger logger);
     }

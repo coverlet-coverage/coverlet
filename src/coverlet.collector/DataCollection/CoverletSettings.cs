@@ -82,7 +82,7 @@ namespace Coverlet.Collector.DataCollection
         public bool DeterministicReport { get; set; }
 
         /// <summary>
-        /// ##############################################
+        /// Switch for heuristic to automatically exclude assemblies without source.
         /// </summary>
         public string ExcludeAssembliesWithoutSources { get;  set; }
 

@@ -213,10 +213,10 @@ namespace Coverlet.Collector.DataCollection
         }
 
         /// <summary>
-        /// Parse InstrumentModulesWithoutLocalSources flag
+        /// Parse ExcludeAssembliesWithoutSources flag
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
-        /// <returns>InstrumentModulesWithoutLocalSources flag</returns>
+        /// <returns>ExcludeAssembliesWithoutSources flag</returns>
         private static string ParseExcludeAssembliesWithoutSources(XmlElement configurationElement)
         {
             XmlElement instrumentModulesWithoutLocalSourcesElement = configurationElement[CoverletConstants.ExcludeAssembliesWithoutSources];

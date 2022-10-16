@@ -12,8 +12,7 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using Coverlet.Core.Abstractions;
-using coverlet.core.Enums;
-using Document = System.Reflection.Metadata.Document;
+using Coverlet.Core.Enums;
 
 namespace Coverlet.Core.Helpers
 {
@@ -124,9 +123,7 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
-        //think about better way to pass parameter to the function
-        public bool EmbeddedPortablePdbHasLocalSource(string module,
-            AsssemblySearchType excludeAssembliesWithoutSources)
+        public bool EmbeddedPortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources)
         {
             using (Stream moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
@@ -151,7 +148,7 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        public bool PortablePdbHasLocalSource(string module, AsssemblySearchType excludeAssembliesWithoutSources)
+        public bool PortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources)
         {
             using (Stream moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
@@ -185,10 +182,10 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        private bool MatchDocumentsWithSources(string module, AsssemblySearchType excludeAssembliesWithoutSources,
+        private bool MatchDocumentsWithSources(string module, AssemblySearchType excludeAssembliesWithoutSources,
             MetadataReader metadataReader)
         {
-            if (excludeAssembliesWithoutSources.Equals(AsssemblySearchType.MissingAll))
+            if (excludeAssembliesWithoutSources.Equals(AssemblySearchType.MissingAll))
             {
                 bool anyDocumentMatches = MatchDocumentsWithSourcesMissingAll(metadataReader);
                 if (!anyDocumentMatches)
@@ -198,7 +195,7 @@ namespace Coverlet.Core.Helpers
                 }
             }
 
-            if (excludeAssembliesWithoutSources.Equals(AsssemblySearchType.MissingAny))
+            if (excludeAssembliesWithoutSources.Equals(AssemblySearchType.MissingAny))
             {
                 (bool allDocumentsMatch, string notFoundDocument) = MatchDocumentsWithSourcesMissingAny(metadataReader);
 
