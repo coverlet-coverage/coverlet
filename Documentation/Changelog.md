@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
--Fix TypeLoadException when referencing Microsoft.Extensions.DependencyInjection 6.0.1 [#1390](https://github.com/coverlet-coverage/coverlet/issues/1390)
+-Fix TypeLoadException when referencing Microsoft.Extensions.DependencyInjection v6.0.1 [#1390](https://github.com/coverlet-coverage/coverlet/issues/1390)
 -Source Link for code generators fails [#1322](https://github.com/coverlet-coverage/coverlet/issues/1322)
 -Await foreach has wrong branch coverage when method is generic [#1210](https://github.com/coverlet-coverage/coverlet/issues/1210)
 -ExcludeFromCodeCoverage attribute on local functions ignores lambda expression [#1302](https://github.com/coverlet-coverage/coverlet/issues/1302)
