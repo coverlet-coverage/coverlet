@@ -17,6 +17,8 @@ coverlet.collector 3.2.0
 -Source Link for code generators fails [#1322](https://github.com/coverlet-coverage/coverlet/issues/1322)  
 -Await foreach has wrong branch coverage when method is generic [#1210](https://github.com/coverlet-coverage/coverlet/issues/1210)  
 -ExcludeFromCodeCoverage attribute on local functions ignores lambda expression [#1302](https://github.com/coverlet-coverage/coverlet/issues/1302)  
+
+### Added  
 -Added InstrumentModulesWithoutLocalSources setting [#1360](https://github.com/coverlet-coverage/coverlet/pull/1360) by @TFTomSun  
 
 ## Release date 2022-02-06
