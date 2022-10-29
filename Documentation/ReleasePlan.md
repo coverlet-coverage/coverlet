@@ -30,6 +30,7 @@ We release 3 components as NuGet packages:
 
 | Release Date      | coverlet.msbuild | coverlet.console  | coverlet.collector| commit hash                              | notes                          |
 | :-----------------|:-----------------|:------------------|:------------------|:-----------------------------------------|:-------------------------------|
+| 29 Oct 2022       | 3.2.0            | 3.2.0             |   3.2.0           | e2c9d84a84a9d2d240ac15feb70f9198c6f8e173 |                                | 
 | 06 Feb 2022       | 3.1.2            | 3.1.2             |   3.1.2           | e335b1a8025e49e2f2de6b40ef12ec9d3ed11ceb | Fix CoreLib coverage issues    | 
 | 30 Jan 2022       | 3.1.1            | 3.1.1             |   3.1.1           | e4278c06faba63122a870df15a1a1b934f6bc81d |                                | 
 | 19 July 2021      | 3.1.0            | 3.1.0             |   3.1.0           | 5a0ecc1e92fd754e2439dc3e4c828ff7386aa1a7 | Support for determistic build  | 
