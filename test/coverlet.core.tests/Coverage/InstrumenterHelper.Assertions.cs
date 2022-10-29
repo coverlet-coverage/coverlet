@@ -11,6 +11,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Xunit.Sdk;
 
+#nullable disable
+
 namespace Coverlet.Core.Tests
 {
     [Flags]

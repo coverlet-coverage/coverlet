@@ -4,6 +4,8 @@
 using System;
 using Coverlet.Core.Attributes;
 
+#nullable disable
+
 namespace Coverlet.Core.Extensions
 {
     internal static class HelperExtensions

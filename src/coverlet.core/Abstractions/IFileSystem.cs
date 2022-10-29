@@ -3,6 +3,8 @@
 
 using System.IO;
 
+#nullable disable
+
 namespace Coverlet.Core.Abstractions
 {
     internal interface IFileSystem

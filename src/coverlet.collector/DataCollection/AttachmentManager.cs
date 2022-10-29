@@ -9,6 +9,8 @@ using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
+#nullable disable
+
 namespace Coverlet.Collector.DataCollection
 {
     /// <summary>

@@ -12,6 +12,8 @@ using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Reporters;
 
+#nullable disable
+
 namespace Coverlet.Collector.DataCollection
 {
     /// <summary>

@@ -13,6 +13,7 @@
     <AnalysisLevel>preview</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);NU5105</NoWarn>
     <RestoreSources>
       https://api.nuget.org/v3/index.json;

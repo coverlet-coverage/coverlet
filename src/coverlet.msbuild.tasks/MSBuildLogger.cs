@@ -6,6 +6,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using ILogger = Coverlet.Core.Abstractions.ILogger;
 
+#nullable disable
+
 namespace Coverlet.MSbuild.Tasks
 {
     class MSBuildLogger : ILogger

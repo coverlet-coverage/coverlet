@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Mono.Cecil;
 
+#nullable disable
+
 namespace Coverlet.Core.Instrumentation
 {
     /// <summary>

@@ -5,6 +5,8 @@ using System;
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Collector.DataCollection
 {
     /// <summary>

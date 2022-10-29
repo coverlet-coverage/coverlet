@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Coverlet.Core.Attributes
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class)]

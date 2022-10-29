@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
 </Project>

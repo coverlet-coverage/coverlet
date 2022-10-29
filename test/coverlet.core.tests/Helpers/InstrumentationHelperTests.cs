@@ -10,6 +10,8 @@ using Castle.Core.Internal;
 using Moq;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Core.Helpers.Tests
 {
     public class InstrumentationHelperTests

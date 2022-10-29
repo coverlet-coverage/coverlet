@@ -4,6 +4,8 @@
 using System.IO;
 using Coverlet.Collector.Utilities.Interfaces;
 
+#nullable disable
+
 namespace Coverlet.Collector.Utilities
 {
     /// <inheritdoc />

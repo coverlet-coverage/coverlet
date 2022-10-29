@@ -4,6 +4,8 @@
 using System;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Coverlet.MSbuild.Tasks
 {
     public abstract class BaseTask : Task

@@ -8,6 +8,8 @@ using System.Xml;
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 
+#nullable disable
+
 namespace Coverlet.Collector.DataCollection
 {
     /// <summary>

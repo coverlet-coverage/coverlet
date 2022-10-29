@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Coverlet.Core.Enums;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Tests
 {
     public class CoverageResultTests

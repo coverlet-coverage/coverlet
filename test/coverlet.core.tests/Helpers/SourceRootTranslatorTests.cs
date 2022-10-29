@@ -7,6 +7,8 @@ using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Helpers.Tests
 {
     public class SourceRootTranslatorTests

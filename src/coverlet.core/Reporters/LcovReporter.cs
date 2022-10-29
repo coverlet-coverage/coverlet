@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Core.Reporters
 {
     internal class LcovReporter : IReporter

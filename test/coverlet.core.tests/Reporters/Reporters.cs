@@ -7,6 +7,8 @@ using Coverlet.MSbuild.Tasks;
 using Moq;
 using Xunit;
 
+#nullable disable
+
 namespace Coverlet.Core.Reporters.Tests
 {
     public class Reporters

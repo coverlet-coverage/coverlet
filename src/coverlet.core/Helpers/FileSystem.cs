@@ -4,6 +4,8 @@
 using System.IO;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Core.Helpers
 {
     internal class FileSystem : IFileSystem

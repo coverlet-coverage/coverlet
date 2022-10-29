@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ILogger = Coverlet.Core.Abstractions.ILogger;
 
+#nullable disable
+
 namespace Coverlet.MSbuild.Tasks
 {
     public class InstrumentationTask : BaseTask

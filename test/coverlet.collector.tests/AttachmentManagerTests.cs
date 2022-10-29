@@ -12,6 +12,8 @@ using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Collector.DataCollection;
 
+#nullable disable
+
 namespace Coverlet.Collector.Tests
 {
     public class AttachmentManagerTests

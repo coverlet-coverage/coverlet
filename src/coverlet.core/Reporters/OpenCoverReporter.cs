@@ -9,6 +9,8 @@ using System.Text;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
 
+#nullable disable
+
 namespace Coverlet.Core.Reporters
 {
     internal class OpenCoverReporter : IReporter

@@ -3,6 +3,8 @@
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
+#nullable disable
+
 namespace Coverlet.Collector.Utilities
 {
     /// <summary>

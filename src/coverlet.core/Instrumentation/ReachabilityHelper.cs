@@ -9,6 +9,8 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 
+#nullable disable
+
 namespace Coverlet.Core.Instrumentation.Reachability
 {
     /// <summary>

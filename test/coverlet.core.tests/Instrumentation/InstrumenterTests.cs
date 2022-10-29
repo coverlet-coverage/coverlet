@@ -22,6 +22,8 @@ using Microsoft.Extensions.DependencyModel;
 using Microsoft.VisualStudio.TestPlatform;
 using Coverlet.Core.Tests;
 
+#nullable disable
+
 namespace Coverlet.Core.Instrumentation.Tests
 {
     public class InstrumenterTests : IDisposable
@@ -538,6 +540,8 @@ namespace Coverlet.Core.Instrumentation.Tests
                 SyntaxTree attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
                 SyntaxTree instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
 [assembly:{attributeName}]
+#nullable disable
+
 namespace coverlet.tests.projectsample.excludedbyattribute{{
 public class SampleClass
 {{

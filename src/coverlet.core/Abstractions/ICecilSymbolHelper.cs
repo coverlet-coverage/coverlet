@@ -6,6 +6,8 @@ using Coverlet.Core.Symbols;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
+#nullable disable
+
 namespace Coverlet.Core.Abstractions
 {
     internal interface ICecilSymbolHelper
