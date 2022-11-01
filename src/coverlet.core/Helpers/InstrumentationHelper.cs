@@ -190,7 +190,7 @@ namespace Coverlet.Core.Helpers
                 bool anyDocumentMatches = MatchDocumentsWithSourcesMissingAll(metadataReader);
                 if (!anyDocumentMatches)
                 {
-                    _logger.LogVerbose($"Unable to instrument module: {module}, pdb without any local source files");
+                    _logger.LogVerbose($"Excluding module from instrumentation: {module}, pdb without any local source files");
                     return false;
                 }
             }
@@ -202,7 +202,7 @@ namespace Coverlet.Core.Helpers
                 if (!allDocumentsMatch)
                 {
                     _logger.LogVerbose(
-                        $"Unable to instrument module: {module}, pdb without local source files, [{FileSystem.EscapeFileName(notFoundDocument)}]");
+                        $"Excluding module from instrumentation: {module}, pdb without local source files, [{FileSystem.EscapeFileName(notFoundDocument)}]");
                     return false;
                 }
             }
@@ -212,7 +212,7 @@ namespace Coverlet.Core.Helpers
 
         private IEnumerable<(string documentName, bool documentExists)> DocumentSourceMap(MetadataReader metadataReader)
         {
-            return metadataReader.Documents.ToList().Select(docHandle =>
+            return metadataReader.Documents.Select(docHandle =>
             {
                 Document document = metadataReader.GetDocument(docHandle);
                 string docName = _sourceRootTranslator.ResolveFilePath(metadataReader.GetString(document.Name));
@@ -222,8 +222,7 @@ namespace Coverlet.Core.Helpers
 
         private bool MatchDocumentsWithSourcesMissingAll(MetadataReader metadataReader)
         {
-            var documentSourceMap = DocumentSourceMap(metadataReader).ToList();
-            return documentSourceMap.Any(x => x.documentExists.Equals(true));
+            return DocumentSourceMap(metadataReader).Any(x => x.documentExists);
         }
 
         private (bool allDocumentsMatch, string notFoundDocument) MatchDocumentsWithSourcesMissingAny(
@@ -231,8 +230,9 @@ namespace Coverlet.Core.Helpers
         {
             var documentSourceMap = DocumentSourceMap(metadataReader).ToList();
 
-            if (documentSourceMap.Any(x => x.documentExists.Equals(false)))
-                return (false, documentSourceMap.FirstOrDefault(x => x.documentExists.Equals(false)).documentName);
+            if (documentSourceMap.Any(x => !x.documentExists))
+                return (false, documentSourceMap.FirstOrDefault(x => !x.documentExists).documentName);
+
             return (true, string.Empty);
         }
 

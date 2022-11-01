@@ -48,10 +48,30 @@ namespace Coverlet.Core.Helpers.Tests
         }
 
         [Fact]
-        public void EmbeddedPortablePDPWithAssemblySearchTypeMissingAny_AllDocumentsExist_ReturnsTrue()
+        public void EmbeddedPortablePDPHasLocalSource_AllDocumentsExist_ReturnsTrue()
         {
             Assert.True(_instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, AssemblySearchType.MissingAny));
             Assert.True(_instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, AssemblySearchType.MissingAll));
+        }
+
+        [Theory]
+        [InlineData(AssemblySearchType.MissingAny, false)]
+        [InlineData(AssemblySearchType.MissingAll, true)]
+        public void EmbeddedPortablePDPHasLocalSource_FirstDocumentDoesNotExist_ReturnsExpectedValue(object assemblySearchType, bool result)
+        {
+            var fileSystem = new Mock<FileSystem> { CallBase = true };
+            fileSystem.SetupSequence(x => x.Exists(It.IsAny<string>()))
+                .Returns(false)
+                .Returns(() =>
+                {
+                    fileSystem.Setup(y => y.Exists(It.IsAny<string>())).Returns(true);
+                    return true;
+                });
+
+            var instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object, new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
+
+            Assert.Equal(result, instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, (AssemblySearchType) assemblySearchType));
         }
 
         [Fact]

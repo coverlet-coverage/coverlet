@@ -236,8 +236,8 @@ This parameter has three different values to control the automatic assembly excl
 
 | Parameter | Description |
 |-----------|-------------|
-| MissingAny | Includes the assembly if at least one document is matching. In case the `ExcludeAssembliesWithoutSources` parameter is not specified the default value is `MissingAny`. |
-| MissingAll | Includes the assembly only if all documents can be matched to corresponding source files. |
+| MissingAll | Includes the assembly if at least one document is matching. In case the `ExcludeAssembliesWithoutSources` parameter is not specified the default value is `MissingAll`. |
+| MissingAny | Includes the assembly only if all documents can be matched to corresponding source files. |
 | None | No assembly is excluded. |
 
 Here is an example of how to specifiy the parameter:
