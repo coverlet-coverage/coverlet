@@ -24,9 +24,6 @@ coverlet.collector 3.2.0
 ### Added  
 -Added InstrumentModulesWithoutLocalSources setting [#1360](https://github.com/coverlet-coverage/coverlet/pull/1360) by @TFTomSun  
 
-### Improvements  
--Added new parameter to control automatic assembly exclusion and changed the default behavior [#1164](https://github.com/coverlet-coverage/coverlet/issues/1164) 
-
 ## Release date 2022-02-06
 ### Packages  
 coverlet.msbuild 3.1.2  
