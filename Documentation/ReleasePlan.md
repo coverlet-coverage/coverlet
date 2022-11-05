@@ -23,9 +23,9 @@ We release 3 components as NuGet packages:
 
 | Package               | Version |
 |:----------------------|:--------|
-|**coverlet.msbuild**   | 3.1.2   | 
-|**coverlet.console**   | 3.1.2   |
-|**coverlet.collector** | 3.1.2   |
+|**coverlet.msbuild**   | 3.2.0   | 
+|**coverlet.console**   | 3.2.0   |
+|**coverlet.collector** | 3.2.0   |
 
 
 | Release Date      | coverlet.msbuild | coverlet.console  | coverlet.collector| commit hash                              | notes                          |
