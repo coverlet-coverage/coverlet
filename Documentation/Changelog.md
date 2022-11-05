@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Breaking changes
--New parameter ExcludeAssembliesWithoutSources to control automatic assembly exclusion [1164](https://github.com/coverlet-coverage/coverlet/issues/1164)
+-New parameter ExcludeAssembliesWithoutSources to control automatic assembly exclusion [1164](https://github.com/coverlet-coverage/coverlet/issues/1164) 
 
 ## Release date 2022-10-29
 ### Packages  
