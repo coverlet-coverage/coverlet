@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>5.7.2</AssemblyVersion>
+    <AssemblyVersion>5.8.0</AssemblyVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -14,7 +14,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 
 </Project>
