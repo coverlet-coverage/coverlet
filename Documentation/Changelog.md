@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Breaking changes
+- New parameter `ExcludeAssembliesWithoutSources` to control automatic assembly exclusion [1164](https://github.com/coverlet-coverage/coverlet/issues/1164). The parameter `InstrumentModulesWithoutLocalSources` has been removed. since it can be handled by setting `ExcludeAssembliesWithoutSources` to `None`.
+- The default heuristics for determining whether to instrument an assembly has been changed. In previous versions any missing source file was taken as a signal that it was a third-party project that shouldn't be instrumented, with exceptions for some common file name patterns for source generators. Now only assemblies where no source files at all can be found are excluded from instrumentation, and the code for detecting source generator files have been removed. To get back to the behaviour that at least one missing file is sufficient to exclude an assembly, set `ExcludeAssembliesWithoutSources` to `MissingAny`, or use assembly exclusion filters for more fine-grained control.
+
 ## Release date 2022-10-29
 ### Packages  
 coverlet.msbuild 3.2.0  

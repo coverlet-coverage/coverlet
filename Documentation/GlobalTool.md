@@ -14,31 +14,31 @@ Cross platform .NET Core code coverage tool 3.0.0.0
 Usage: coverlet [arguments] [options]
 
 Arguments:
-  <ASSEMBLY|DIRECTORY>         Path to the test assembly or application directory.
+  <ASSEMBLY|DIRECTORY>                  Path to the test assembly or application directory.
 
 Options:
-  -h|--help                    Show help information
-  -v|--version                 Show version information
-  -t|--target                  Path to the test runner application.
-  -a|--targetargs              Arguments to be passed to the test runner.
-  -o|--output                  Output of the generated coverage report
-  -v|--verbosity               Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
-  -f|--format                  Format of the generated coverage report.
-  --threshold                  Exits with error if the coverage % is below value.
-  --threshold-type             Coverage type to apply the threshold to.
-  --threshold-stat             Coverage statistic used to enforce the threshold value.
-  --exclude                    Filter expressions to exclude specific modules and types.
-  --include                    Filter expressions to include only specific modules and types.
-  --exclude-by-file            Glob patterns specifying source files to exclude.
-  --include-directory          Include directories containing additional assemblies to be instrumented.
-  --exclude-by-attribute       Attributes to exclude from code coverage.
-  --include-test-assembly      Specifies whether to report code coverage of the test assembly.
-  --single-hit                 Specifies whether to limit code coverage hit reporting to a single hit for each location
-  --skipautoprops              Neither track nor record auto-implemented properties.
-  --merge-with                 Path to existing coverage result to merge.
-  --use-source-link            Specifies whether to use SourceLink URIs in place of file system paths.
-  --does-not-return-attribute  Attributes that mark methods that do not return.
-  --instrument-modules-without-local-sources Specifies whether modules should be instrumented even if the sources from the PDBs can't be found locally.
+  -h|--help                             Show help information
+  -v|--version                          Show version information
+  -t|--target                           Path to the test runner application.
+  -a|--targetargs                       Arguments to be passed to the test runner.
+  -o|--output                           Output of the generated coverage report
+  -v|--verbosity                        Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
+  -f|--format                           Format of the generated coverage report.
+  --threshold                           Exits with error if the coverage % is below value.
+  --threshold-type                      Coverage type to apply the threshold to.
+  --threshold-stat                      Coverage statistic used to enforce the threshold value.
+  --exclude                             Filter expressions to exclude specific modules and types.
+  --include                             Filter expressions to include only specific modules and types.
+  --exclude-by-file                     Glob patterns specifying source files to exclude.
+  --include-directory                   Include directories containing additional assemblies to be instrumented.
+  --exclude-by-attribute                Attributes to exclude from code coverage.
+  --include-test-assembly               Specifies whether to report code coverage of the test assembly.
+  --single-hit                          Specifies whether to limit code coverage hit reporting to a single hit for each location
+  --skipautoprops                       Neither track nor record auto-implemented properties.
+  --merge-with                          Path to existing coverage result to merge.
+  --use-source-link                     Specifies whether to use SourceLink URIs in place of file system paths.
+  --does-not-return-attribute           Attributes that mark methods that do not return.
+  --exclude-assemblies-without-sources  Specifies behaviour of heuristic to ignore assemblies with missing source documents.
 ```
 
 NB. For a [multiple value] options you have to specify values multiple times i.e.

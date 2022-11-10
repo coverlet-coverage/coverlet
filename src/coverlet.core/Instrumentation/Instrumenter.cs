@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Attributes;
+using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation.Reachability;
 using Coverlet.Core.Symbols;
@@ -33,6 +34,8 @@ namespace Coverlet.Core.Instrumentation
         private readonly IFileSystem _fileSystem;
         private readonly ISourceRootTranslator _sourceRootTranslator;
         private readonly ICecilSymbolHelper _cecilSymbolHelper;
+        private readonly string[] _doesNotReturnAttributes;
+        private readonly AssemblySearchType _excludeAssembliesWithoutSources;
         private InstrumenterResult _result;
         private FieldDefinition _customTrackerHitsArray;
         private FieldDefinition _customTrackerHitsFilePath;
@@ -47,7 +50,6 @@ namespace Coverlet.Core.Instrumentation
         private List<(MethodDefinition, int)> _excludedMethods;
         private List<string> _excludedLambdaMethods;
         private List<string> _excludedCompilerGeneratedTypes;
-        private readonly string[] _doesNotReturnAttributes;
         private ReachabilityHelper _reachabilityHelper;
 
         public bool SkipModule { get; set; }
@@ -74,6 +76,16 @@ namespace Coverlet.Core.Instrumentation
             _sourceRootTranslator = sourceRootTranslator;
             _cecilSymbolHelper = cecilSymbolHelper;
             _doesNotReturnAttributes = PrepareAttributes(parameters.DoesNotReturnAttributes);
+            _excludeAssembliesWithoutSources = DetermineHeuristics(parameters.ExcludeAssembliesWithoutSources);
+        }
+
+        private AssemblySearchType DetermineHeuristics(string parametersExcludeAssembliesWithoutSources)
+        {
+            if (Enum.TryParse(parametersExcludeAssembliesWithoutSources, true, out AssemblySearchType option))
+            {
+                return option;
+            }
+            return AssemblySearchType.MissingAll;
         }
 
         private static string[] PrepareAttributes(IEnumerable<string> providedAttrs, params string[] defaultAttrs)
@@ -94,34 +106,18 @@ namespace Coverlet.Core.Instrumentation
             {
                 if (_instrumentationHelper.HasPdb(_module, out bool embeddedPdb))
                 {
-                    if (this._parameters.InstrumentModulesWithoutLocalSources)
+                    if (_excludeAssembliesWithoutSources.Equals(AssemblySearchType.None))
                     {
                         return true;
                     }
 					
                     if (embeddedPdb)
                     {
-                        if (_instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            _logger.LogVerbose($"Unable to instrument module: {_module}, embedded pdb without local source files, [{FileSystem.EscapeFileName(firstNotFoundDocument)}]");
-                            return false;
-                        }
+                        return _instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, _excludeAssembliesWithoutSources);
                     }
                     else
                     {
-                        if (_instrumentationHelper.PortablePdbHasLocalSource(_module, out string firstNotFoundDocument))
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            _logger.LogVerbose($"Unable to instrument module: {_module}, pdb without local source files, [{FileSystem.EscapeFileName(firstNotFoundDocument)}]");
-                            return false;
-                        }
+                        return _instrumentationHelper.PortablePdbHasLocalSource(_module, _excludeAssembliesWithoutSources);
                     }
                 }
                 else
