@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
     <MSBuildWarningsAsMessages>NU1702</MSBuildWarningsAsMessages>
@@ -33,12 +33,15 @@
 
   <ItemGroup>
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="5.0.23" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
     <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
-    <PackageReference Include="System.Linq.Async" Version="5.0.0" />
-  </ItemGroup>
+    <PackageReference Include="System.Linq.Async" />
+
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
+   </ItemGroup>
 
   <ItemGroup>
     <None Update="TestAssets\75d9f96508d74def860a568f426ea4a4.dll">

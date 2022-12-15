@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Coverlet.Tests.Xunit.Extensions;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -14,6 +15,7 @@ namespace Coverlet.Integration.Tests
         {
             _ = DotnetCli($"tool install coverlet.console --version {GetPackageVersion("*console*.nupkg")} --tool-path \"{Path.Combine(projectPath, "coverletTool")}\"", out string standardOutput, out _, projectPath);
             Assert.Contains("was successfully installed.", standardOutput);
+            Debug.WriteLine($"dotnet tool installed - toolpath:  {projectPath}\\coverletTool");
             return Path.Combine(projectPath, "coverletTool", "coverlet ");
         }
 

@@ -1,0 +1,46 @@
+<Project>
+  <PropertyGroup>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.5.119" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.3" />
+    <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="2.6.0" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.4.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+    <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
+    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.4.0" />
+    <PackageVersion Include="Mono.Cecil" Version="0.11.4" />
+    <PackageVersion Include="Moq" Version="4.18.3" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageVersion Include="NuGet.Packaging" Version="6.4.0" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.1.12" />
+    <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
+    <!--
+        Do not change System.Reflection.Metadata version since we need to support VSTest DataCollectors. Goto https://www.nuget.org/packages/System.Reflection.Metadata to check versions.
+        We need to load assembly version 1.6.0 to properly work
+        We can check minimum supported package version here https://github.com/Microsoft/vstest/blob/master/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L29
+     -->
+    <PackageVersion Include="System.Reflection.Metadata" Version="1.6.0" />
+    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+
+    <PackageVersion Include="xunit" Version="2.4.2" />
+    <PackageVersion Include="xunit.assert" Version="2.4.2" />
+    <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5"/>
+    <PackageVersion Include="xunit.runner.utility" Version="2.4.2" />
+    <PackageVersion Include="Tmds.ExecFunction" Version="0.6.0" />
+    
+  </ItemGroup>
+</Project>

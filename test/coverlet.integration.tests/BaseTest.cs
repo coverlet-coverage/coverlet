@@ -65,7 +65,7 @@ namespace Coverlet.Integration.Tests
             }
         }
 
-        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
+        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "17.4.0")
         {
             DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N")[..6]}{Interlocked.Increment(ref s_folderSuffix)}");
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
@@ -101,9 +101,9 @@ namespace Coverlet.Integration.Tests
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
             Process commandProcess = Process.Start(psi)!;
-            if (!commandProcess.WaitForExit((int)TimeSpan.FromMinutes(5).TotalMilliseconds))
+            if (!commandProcess.WaitForExit((int)TimeSpan.FromMinutes(3).TotalMilliseconds))
             {
-                throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
+                throw new XunitException($"Command 'dotnet {arguments}' didn't end after 3 minute");
             }
             standardOutput = commandProcess.StandardOutput.ReadToEnd();
             standardError = commandProcess.StandardError.ReadToEnd();
@@ -248,11 +248,13 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
                 bool coverageChecked = false;
                 foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
                 {
+#pragma warning disable CS8604 // Possible null reference argument.
                     JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
                     .Document("DeepThought.cs")
                     .Class("Coverlet.Integration.Template.DeepThought")
                     .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
                     .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+#pragma warning restore CS8604 // Possible null reference argument.
                     coverageChecked = true;
                 }
 
