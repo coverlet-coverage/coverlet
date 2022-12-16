@@ -101,9 +101,9 @@ namespace Coverlet.Integration.Tests
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
             Process commandProcess = Process.Start(psi)!;
-            if (!commandProcess.WaitForExit((int)TimeSpan.FromMinutes(3).TotalMilliseconds))
+            if (!commandProcess.WaitForExit((int)TimeSpan.FromMinutes(5).TotalMilliseconds))
             {
-                throw new XunitException($"Command 'dotnet {arguments}' didn't end after 3 minute");
+                throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
             }
             standardOutput = commandProcess.StandardOutput.ReadToEnd();
             standardError = commandProcess.StandardError.ReadToEnd();
