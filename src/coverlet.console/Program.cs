@@ -139,7 +139,7 @@ namespace Coverlet.Console
                 process.WaitForExit();
 
                 string dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
-                List<string> dThresholdTypes = thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" });
+                List<string> dThresholdTypes = (List<string>)(thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" }));
                 ThresholdStatistic dThresholdStat = thresholdStat.HasValue() ? Enum.Parse<ThresholdStatistic>(thresholdStat.Value(), true) : Enum.Parse<ThresholdStatistic>("minimum", true);
 
                 logger.LogInformation("\nCalculating coverage result...");
