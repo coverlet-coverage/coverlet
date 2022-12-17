@@ -24,6 +24,7 @@
     <PackageVersion Include="Mono.Cecil" Version="0.11.4" />
     <PackageVersion Include="Moq" Version="4.18.3" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageVersion Include="NuGet.Frameworks" Version="6.4.0" />
     <PackageVersion Include="NuGet.Packaging" Version="6.4.0" />
     <PackageVersion Include="ReportGenerator.Core" Version="5.1.12" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
@@ -34,6 +35,7 @@
      -->
     <PackageVersion Include="System.Reflection.Metadata" Version="1.6.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+    <PackageVersion Include="System.Text.Json" Version="7.0.1" />
 
     <PackageVersion Include="xunit" Version="2.4.2" />
     <PackageVersion Include="xunit.assert" Version="2.4.2" />
