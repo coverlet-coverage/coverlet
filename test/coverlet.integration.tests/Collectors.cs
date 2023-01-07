@@ -26,11 +26,11 @@ namespace Coverlet.Integration.Tests
         }
     }
 
-    public class TestSDK_17_4_0 : Collectors
+    public class TestSDK_17_5_0 : Collectors
     {
-        public TestSDK_17_4_0()
+        public TestSDK_17_5_0()
         {
-            TestSDKVersion = "17.4.0";
+            TestSDKVersion = "17.5.0";
         }
     }
 
@@ -38,7 +38,7 @@ namespace Coverlet.Integration.Tests
     {
         public TestSDK_Preview()
         {
-            TestSDKVersion = "17.5.0-preview-20221003-04";
+            TestSDKVersion = "17.5.0-preview-20221221-03";
         }
     }
 

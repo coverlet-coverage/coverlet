@@ -45,15 +45,16 @@ namespace Coverlet.Integration.Tests
                 string reportFilePath = "";
                 foreach (string coverageFile in Directory.GetFiles(_testProjectPath, "coverage.json", SearchOption.AllDirectories))
                 {
-#pragma warning disable CS8604 // Possible null reference argument.
-                    JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
-                    .Document("DeepThought.cs")
+                    Modules? coverage = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile));
+                    if (coverage != null)
+                    {
+                    coverage.Document("DeepThought.cs")
                     .Class("Coverlet.Integration.DeterministicBuild.DeepThought")
                     .Method("System.Int32 Coverlet.Integration.DeterministicBuild.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
                     .AssertLinesCovered((6, 1), (7, 1), (8, 1));
-#pragma warning restore CS8604 // Possible null reference argument.
                     coverageChecked = true;
                     reportFilePath = coverageFile;
+                    }
                 }
                 Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
                 File.Delete(reportFilePath);

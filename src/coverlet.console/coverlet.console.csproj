@@ -2,13 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <ToolCommandName>coverlet</ToolCommandName>
     <PackAsTool>true</PackAsTool>
     <AssemblyTitle>coverlet.console</AssemblyTitle>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>coverlet.console.snk</AssemblyOriginatorKeyFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
@@ -22,7 +21,6 @@
     <PackageProjectUrl>https://github.com/coverlet-coverage/coverlet</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
-
   </PropertyGroup>
 
   <ItemGroup>

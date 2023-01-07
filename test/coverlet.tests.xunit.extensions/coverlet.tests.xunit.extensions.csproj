@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.core" />
+    <PackageReference Include="xunit.analyzers" />
     <PackageReference Include="xunit.abstractions" />
   </ItemGroup>
 </Project>
