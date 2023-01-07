@@ -17,7 +17,6 @@
           If you are packing with NuGet's MSBuild Pack target, you can set <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking> in any PropertyGroup in your project file.
     -->
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 

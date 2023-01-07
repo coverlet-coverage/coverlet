@@ -1,13 +1,13 @@
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 6.0.404
-  displayName: Install .NET 6.0 SDK 6.0.404
+    version: 6.0.406
+  displayName: Install .NET 6.0 SDK 6.0.406
 
 - task: UseDotNet@2
   inputs:
-    version: 7.0.101
-  displayName: Install .NET 7.0 SDK 7.0.101
+    version: 7.0.200
+  displayName: Install .NET 7.0 SDK 7.0.200
 
 - task: UseDotNet@2
   inputs:
