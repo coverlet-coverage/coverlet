@@ -82,8 +82,6 @@ This is the steps to release new packages to nuget.org
 
 1. Update projects version in file `version.json` in root of repo (remove `-preview.{height}` and adjust version)
 
-Update core lib project file version https://github.com/coverlet-coverage/coverlet/blob/master/src/coverlet.core/coverlet.core.csproj.  
-
 Do a PR and merge to master.
 
 2. Clone repo, **remember to build packages from master and not from your fork or metadata links will point to your forked repo.** . Run `git log -5` from repo root to verify last commit.

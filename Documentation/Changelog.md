@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 -Incorrect coverage for methods returning IAsyncEnumerable in generic classes [#1383](https://github.com/coverlet-coverage/coverlet/issues/1383)
+-Allign published nuget package version to github release version [#1413](https://github.com/coverlet-coverage/coverlet/issues/1413)  
+-Sync nuget and github release versions [#1122](https://github.com/coverlet-coverage/coverlet/issues/1122)  
 
 ### Breaking changes
 - New parameter `ExcludeAssembliesWithoutSources` to control automatic assembly exclusion [1164](https://github.com/coverlet-coverage/coverlet/issues/1164). The parameter `InstrumentModulesWithoutLocalSources` has been removed. since it can be handled by setting `ExcludeAssembliesWithoutSources` to `None`.
