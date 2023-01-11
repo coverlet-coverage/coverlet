@@ -199,6 +199,7 @@ namespace Coverlet.Core.Symbols
                         operand.DeclaringType.Scope.Name == "System.Runtime" ||
                         operand.DeclaringType.Scope.Name == "netstandard" ||
                         operand.DeclaringType.Scope.Name == "mscorlib" ||
+                        operand.DeclaringType.Scope.Name == "System.Threading.Tasks" ||
                         operand.DeclaringType.Scope.Name == "System.Threading.Tasks.Extensions"
                     )
                )
