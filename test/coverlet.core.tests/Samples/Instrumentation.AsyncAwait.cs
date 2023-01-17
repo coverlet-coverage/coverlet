@@ -125,4 +125,54 @@ namespace Coverlet.Core.Samples.Tests
             Task Process(string cat);
         }
     }
+
+    public class Issue_1177
+    {
+        async public Task Test()
+        {
+            await Task.CompletedTask;
+            using var _ = new System.IO.MemoryStream();
+            await Task.CompletedTask;
+            await Task.CompletedTask;
+            await Task.CompletedTask;
+        }
+    }
+
+    public class Issue_1233
+    {
+        async public Task Test()
+        {
+            try
+            {
+            }
+            finally
+            {
+                await Task.CompletedTask;
+            }
+        }
+    }
+
+    public class Issue_1275
+    {
+        public async Task<int> Execute(System.Threading.CancellationToken token)
+        {
+            int sum = 0;
+
+            await foreach (int result in AsyncEnumerable(token))
+            {
+                sum += result;
+            }
+
+            return sum;
+        }
+
+        async System.Collections.Generic.IAsyncEnumerable<int> AsyncEnumerable([System.Runtime.CompilerServices.EnumeratorCancellation] System.Threading.CancellationToken cancellationToken)
+        {
+            for (int i = 0; i < 1; i++)
+            {
+                await Task.Delay(1, cancellationToken);
+                yield return i;
+            }
+        }
+    }
 }

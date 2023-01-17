@@ -4,6 +4,96 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+-Allign published nuget package version to github release version [#1413](https://github.com/coverlet-coverage/coverlet/issues/1413)  
+-Sync nuget and github release versions [#1122](https://github.com/coverlet-coverage/coverlet/issues/1122)  
+
+### Breaking changes
+- New parameter `ExcludeAssembliesWithoutSources` to control automatic assembly exclusion [1164](https://github.com/coverlet-coverage/coverlet/issues/1164). The parameter `InstrumentModulesWithoutLocalSources` has been removed. since it can be handled by setting `ExcludeAssembliesWithoutSources` to `None`.
+- The default heuristics for determining whether to instrument an assembly has been changed. In previous versions any missing source file was taken as a signal that it was a third-party project that shouldn't be instrumented, with exceptions for some common file name patterns for source generators. Now only assemblies where no source files at all can be found are excluded from instrumentation, and the code for detecting source generator files have been removed. To get back to the behaviour that at least one missing file is sufficient to exclude an assembly, set `ExcludeAssembliesWithoutSources` to `MissingAny`, or use assembly exclusion filters for more fine-grained control.
+
+## Release date 2022-10-29
+### Packages  
+coverlet.msbuild 3.2.0  
+coverlet.console 3.2.0  
+coverlet.collector 3.2.0  
+
+### Fixed
+-Fix TypeLoadException when referencing Microsoft.Extensions.DependencyInjection v6.0.1 [#1390](https://github.com/coverlet-coverage/coverlet/issues/1390)  
+-Source Link for code generators fails [#1322](https://github.com/coverlet-coverage/coverlet/issues/1322)  
+-Await foreach has wrong branch coverage when method is generic [#1210](https://github.com/coverlet-coverage/coverlet/issues/1210)  
+-ExcludeFromCodeCoverage attribute on local functions ignores lambda expression [#1302](https://github.com/coverlet-coverage/coverlet/issues/1302)  
+
+### Added  
+-Added InstrumentModulesWithoutLocalSources setting [#1360](https://github.com/coverlet-coverage/coverlet/pull/1360) by @TFTomSun  
+
+## Release date 2022-02-06
+### Packages  
+coverlet.msbuild 3.1.2  
+coverlet.console 3.1.2  
+coverlet.collector 3.1.2  
+
+### Fixed
+-Fix CoreLib's coverage measurement is broken [#1286](https://github.com/coverlet-coverage/coverlet/pull/1286)  
+-Fix UnloadModule injection [1291](https://github.com/coverlet-coverage/coverlet/pull/1291)  
+
+## Release date 2022-01-30
+### Packages  
+coverlet.msbuild 3.1.1  
+coverlet.console 3.1.1  
+coverlet.collector 3.1.1  
+
+### Fixed
+-Fix wrong branch coverage with EnumeratorCancellation attribute [#1275](https://github.com/coverlet-coverage/coverlet/issues/1275)
+-Fix negative coverage exceeding int.MaxValue [#1266](https://github.com/coverlet-coverage/coverlet/issues/1266)  
+-Fix summary output format for culture de-DE [#1263](https://github.com/coverlet-coverage/coverlet/issues/1263)  
+-Fix branch coverage issue for finally block with await [#1233](https://github.com/coverlet-coverage/coverlet/issues/1233)  
+-Fix threshold doesn't work when coverage empty [#1205](https://github.com/coverlet-coverage/coverlet/issues/1205)  
+-Fix branch coverage issue for il switch [#1177](https://github.com/coverlet-coverage/coverlet/issues/1177)  
+-Fix branch coverage with using statement and several awaits[#1176](https://github.com/coverlet-coverage/coverlet/issues/1176)  
+-Fix `CopyCoverletDataCollectorFiles` to avoid to override user dlls for `dotnet publish` scenario  [#1243](https://github.com/coverlet-coverage/coverlet/pull/1243)  
+
+### Improvements  
+-Improve logging in case of exception inside static ctor of NetstandardAwareAssemblyResolver [#1230](https://github.com/coverlet-coverage/coverlet/pull/1230)  
+-When collecting open the hitfile with read access [#1214](https://github.com/coverlet-coverage/coverlet/pull/1214) by https://github.com/JamesWTruher  
+-Add CompilerGenerated attribute to the tracker [#1229](https://github.com/coverlet-coverage/coverlet/pull/1229)  
+
+## Release date 2021-07-19
+### Packages  
+coverlet.msbuild 3.1.0  
+coverlet.console 3.1.0  
+coverlet.collector 3.1.0
+
+### Fixed  
+-Fix branch coverage for targetframework net472 [#1167](https://github.com/coverlet-coverage/coverlet/issues/1167)  
+-Fix F# projects with `unkown` source [#1145](https://github.com/coverlet-coverage/coverlet/issues/1145)  
+-Fix SkipAutoProps for inline assigned properties [#1139](https://github.com/coverlet-coverage/coverlet/issues/1139)  
+-Fix partially covered throw statement [#1144](https://github.com/coverlet-coverage/coverlet/pull/1144)  
+-Fix coverage threshold not failing when no coverage [#1115](https://github.com/coverlet-coverage/coverlet/pull/1115)  
+-Fix partially covered `await foreach` statement [#1107](https://github.com/coverlet-coverage/coverlet/pull/1107) by https://github.com/alexthornton1  
+-Fix `System.MissingMethodException`(TryGetIntArgFromDict) [#1101](https://github.com/coverlet-coverage/coverlet/pull/1101)  
+-Fix ExcludeFromCodeCoverage on props [#1114](https://github.com/coverlet-coverage/coverlet/pull/1114)  
+-Fix incorrect branch coverage with await using [#1111](https://github.com/coverlet-coverage/coverlet/pull/1111) by https://github.com/alexthornton1 
+
+### Added
+-Support deterministic reports [#1113](https://github.com/coverlet-coverage/coverlet/pull/1113)  
+-Specifying threshold level for each threshold type  [#1123](https://github.com/coverlet-coverage/coverlet/pull/1123) by https://github.com/pbmiguel  
+
+### Improvements
+-Implementation of Npath complexity for the OpenCover reports [#1058](https://github.com/coverlet-coverage/coverlet/pull/1058) by https://github.com/benjaminZale
+
+## Release date 2021-02-21
+### Packages  
+coverlet.msbuild 3.0.3  
+coverlet.console 3.0.3  
+coverlet.collector 3.0.3  
+
+### Fixed
+
+-Fix code coverage stops working if assembly contains source generators generated file [#1091](https://github.com/coverlet-coverage/coverlet/pull/1091)
+
 ## Release date 2021-01-24
 ### Packages  
 coverlet.msbuild 3.0.2  

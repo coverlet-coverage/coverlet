@@ -1,7 +1,9 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.ComponentModel;
 using System.IO;
-
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
@@ -50,7 +52,7 @@ namespace Coverlet.Collector.DataCollection
             _reportDirectory = Path.Combine(Path.GetTempPath(), reportDirectoryName);
 
             // Register events
-            _dataSink.SendFileCompleted += this.OnSendFileCompleted;
+            _dataSink.SendFileCompleted += OnSendFileCompleted;
         }
 
         /// <summary>
@@ -61,10 +63,10 @@ namespace Coverlet.Collector.DataCollection
         public void SendCoverageReport(string coverageReport, string coverageReportFileName)
         {
             // Save coverage report to file
-            string coverageReportPath = this.SaveCoverageReport(coverageReport, coverageReportFileName);
+            string coverageReportPath = SaveCoverageReport(coverageReport, coverageReportFileName);
 
             // Send coverage attachment to test platform.
-            this.SendAttachment(coverageReportPath);
+            SendAttachment(coverageReportPath);
         }
 
         /// <summary>
@@ -78,9 +80,9 @@ namespace Coverlet.Collector.DataCollection
                 _countDownEvent.Wait();
                 if (_dataSink != null)
                 {
-                    _dataSink.SendFileCompleted -= this.OnSendFileCompleted;
+                    _dataSink.SendFileCompleted -= OnSendFileCompleted;
                 }
-                this.CleanupReportDirectory();
+                CleanupReportDirectory();
             }
             catch (Exception ex)
             {

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,9 +20,8 @@ namespace Coverlet.Collector.DataCollection
     internal class CoverageManager
     {
         private readonly Coverage _coverage;
-
-        private ICoverageWrapper _coverageWrapper;
-
+        private readonly ICoverageWrapper _coverageWrapper;
+        private readonly ISourceRootTranslator _sourceRootTranslator;
         public IReporter[] Reporters { get; }
 
         public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper,
@@ -49,7 +51,7 @@ namespace Coverlet.Collector.DataCollection
             // Store input vars
             Reporters = reporters;
             _coverageWrapper = coverageWrapper;
-
+            _sourceRootTranslator = sourceRootTranslator;
             // Coverage object
             _coverage = _coverageWrapper.CreateCoverage(settings, logger, instrumentationHelper, fileSystem, sourceRootTranslator, cecilSymbolHelper);
         }
@@ -78,8 +80,8 @@ namespace Coverlet.Collector.DataCollection
         public IEnumerable<(string report, string fileName)> GetCoverageReports()
         {
             // Get coverage result
-            CoverageResult coverageResult = this.GetCoverageResult();
-            return this.GetCoverageReports(coverageResult);
+            CoverageResult coverageResult = GetCoverageResult();
+            return GetCoverageReports(coverageResult);
         }
 
         /// <summary>
@@ -108,7 +110,7 @@ namespace Coverlet.Collector.DataCollection
         {
             try
             {
-                return Reporters.Select(reporter => (reporter.Report(coverageResult), Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension)));
+                return Reporters.Select(reporter => (reporter.Report(coverageResult, _sourceRootTranslator), Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension)));
             }
             catch (Exception ex)
             {

@@ -1,3 +1,6 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,15 +11,15 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
-
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Enums;
 
 namespace Coverlet.Core.Helpers
 {
     internal class InstrumentationHelper : IInstrumentationHelper
     {
         private const int RetryAttempts = 12;
-        private readonly ConcurrentDictionary<string, string> _backupList = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _backupList = new();
         private readonly IRetryHelper _retryHelper;
         private readonly IFileSystem _fileSystem;
         private readonly ISourceRootTranslator _sourceRootTranslator;
@@ -81,32 +84,47 @@ namespace Coverlet.Core.Helpers
         public bool HasPdb(string module, out bool embedded)
         {
             embedded = false;
-            using (var moduleStream = _fileSystem.OpenRead(module))
-            using (var peReader = new PEReader(moduleStream))
+            using Stream moduleStream = _fileSystem.OpenRead(module);
+            using var peReader = new PEReader(moduleStream);
+            foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
             {
-                foreach (var entry in peReader.ReadDebugDirectory())
+                if (entry.Type == DebugDirectoryEntryType.CodeView)
                 {
-                    if (entry.Type == DebugDirectoryEntryType.CodeView)
+                    CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
+                    string modulePdbFileName = $"{Path.GetFileNameWithoutExtension(module)}.pdb";
+                    if (_sourceRootTranslator.ResolveFilePath(codeViewData.Path) == modulePdbFileName)
                     {
-                        var codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                        if (_sourceRootTranslator.ResolveFilePath(codeViewData.Path) == $"{Path.GetFileNameWithoutExtension(module)}.pdb")
-                        {
-                            // PDB is embedded
-                            embedded = true;
-                            return true;
-                        }
+                        // PDB is embedded
+                        embedded = true;
+                        return true;
+                    }
 
-                        return _fileSystem.Exists(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
+                    if (_fileSystem.Exists(_sourceRootTranslator.ResolveFilePath(codeViewData.Path)))
+                    {
+                        // local PDB is located within original build location
+                        embedded = false;
+                        return true;
+                    }
+
+                    string localPdbFileName = Path.Combine(Path.GetDirectoryName(module), modulePdbFileName);
+                    if (_fileSystem.Exists(localPdbFileName))
+                    {
+                        // local PDB is located within same folder as module
+                        embedded = false;
+
+                        // mapping need to be registered in _sourceRootTranslator to use that discovery
+                        _sourceRootTranslator.AddMappingInCache(codeViewData.Path, localPdbFileName);
+
+                        return true;
                     }
                 }
-
-                return false;
             }
+
+            return false;
         }
 
-        public bool EmbeddedPortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
+        public bool EmbeddedPortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources)
         {
-            firstNotFoundDocument = "";
             using (Stream moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
@@ -114,23 +132,12 @@ namespace Coverlet.Core.Helpers
                 {
                     if (entry.Type == DebugDirectoryEntryType.EmbeddedPortablePdb)
                     {
-                        using (MetadataReaderProvider embeddedMetadataProvider = peReader.ReadEmbeddedPortablePdbDebugDirectoryData(entry))
-                        {
-                            MetadataReader metadataReader = embeddedMetadataProvider.GetMetadataReader();
-                            foreach (DocumentHandle docHandle in metadataReader.Documents)
-                            {
-                                Document document = metadataReader.GetDocument(docHandle);
-                                string docName = _sourceRootTranslator.ResolveFilePath(metadataReader.GetString(document.Name));
+                        using MetadataReaderProvider embeddedMetadataProvider = peReader.ReadEmbeddedPortablePdbDebugDirectoryData(entry);
+                        MetadataReader metadataReader = embeddedMetadataProvider.GetMetadataReader();
 
-                                // We verify all docs and return false if not all are present in local
-                                // We could have false negative if doc is not a source
-                                // Btw check for all possible extension could be weak approach
-                                if (!_fileSystem.Exists(docName))
-                                {
-                                    firstNotFoundDocument = docName;
-                                    return false;
-                                }
-                            }
+                        if (!MatchDocumentsWithSources(module, excludeAssembliesWithoutSources, metadataReader))
+                        {
+                            return false;
                         }
                     }
                 }
@@ -141,19 +148,18 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
-        public bool PortablePdbHasLocalSource(string module, out string firstNotFoundDocument)
+        public bool PortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources)
         {
-            firstNotFoundDocument = "";
-            using (var moduleStream = _fileSystem.OpenRead(module))
+            using (Stream moduleStream = _fileSystem.OpenRead(module))
             using (var peReader = new PEReader(moduleStream))
             {
-                foreach (var entry in peReader.ReadDebugDirectory())
+                foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
                 {
                     if (entry.Type == DebugDirectoryEntryType.CodeView)
                     {
-                        var codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
+                        CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
                         using Stream pdbStream = _fileSystem.OpenRead(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
-                        using MetadataReaderProvider metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
+                        using var metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
                         MetadataReader metadataReader = null;
                         try
                         {
@@ -164,19 +170,10 @@ namespace Coverlet.Core.Helpers
                             _logger.LogWarning($"{nameof(BadImageFormatException)} during MetadataReaderProvider.FromPortablePdbStream in InstrumentationHelper.PortablePdbHasLocalSource, unable to check if module has got local source.");
                             return true;
                         }
-                        foreach (DocumentHandle docHandle in metadataReader.Documents)
-                        {
-                            Document document = metadataReader.GetDocument(docHandle);
-                            string docName = _sourceRootTranslator.ResolveFilePath(metadataReader.GetString(document.Name));
 
-                            // We verify all docs and return false if not all are present in local
-                            // We could have false negative if doc is not a source
-                            // Btw check for all possible extension could be weak approach
-                            if (!_fileSystem.Exists(docName))
-                            {
-                                firstNotFoundDocument = docName;
-                                return false;
-                            }
+                        if (!MatchDocumentsWithSources(module, excludeAssembliesWithoutSources, metadataReader))
+                        {
+                            return false;
                         }
                     }
                 }
@@ -185,17 +182,71 @@ namespace Coverlet.Core.Helpers
             return true;
         }
 
+        private bool MatchDocumentsWithSources(string module, AssemblySearchType excludeAssembliesWithoutSources,
+            MetadataReader metadataReader)
+        {
+            if (excludeAssembliesWithoutSources.Equals(AssemblySearchType.MissingAll))
+            {
+                bool anyDocumentMatches = MatchDocumentsWithSourcesMissingAll(metadataReader);
+                if (!anyDocumentMatches)
+                {
+                    _logger.LogVerbose($"Excluding module from instrumentation: {module}, pdb without any local source files");
+                    return false;
+                }
+            }
+
+            if (excludeAssembliesWithoutSources.Equals(AssemblySearchType.MissingAny))
+            {
+                (bool allDocumentsMatch, string notFoundDocument) = MatchDocumentsWithSourcesMissingAny(metadataReader);
+
+                if (!allDocumentsMatch)
+                {
+                    _logger.LogVerbose(
+                        $"Excluding module from instrumentation: {module}, pdb without local source files, [{FileSystem.EscapeFileName(notFoundDocument)}]");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private IEnumerable<(string documentName, bool documentExists)> DocumentSourceMap(MetadataReader metadataReader)
+        {
+            return metadataReader.Documents.Select(docHandle =>
+            {
+                Document document = metadataReader.GetDocument(docHandle);
+                string docName = _sourceRootTranslator.ResolveFilePath(metadataReader.GetString(document.Name));
+                return (docName, _fileSystem.Exists(docName));
+            });
+        }
+
+        private bool MatchDocumentsWithSourcesMissingAll(MetadataReader metadataReader)
+        {
+            return DocumentSourceMap(metadataReader).Any(x => x.documentExists);
+        }
+
+        private (bool allDocumentsMatch, string notFoundDocument) MatchDocumentsWithSourcesMissingAny(
+            MetadataReader metadataReader)
+        {
+            var documentSourceMap = DocumentSourceMap(metadataReader).ToList();
+
+            if (documentSourceMap.Any(x => !x.documentExists))
+                return (false, documentSourceMap.FirstOrDefault(x => !x.documentExists).documentName);
+
+            return (true, string.Empty);
+        }
+
         public void BackupOriginalModule(string module, string identifier)
         {
-            var backupPath = GetBackupPath(module, identifier);
-            var backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
+            string backupPath = GetBackupPath(module, identifier);
+            string backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
             _fileSystem.Copy(module, backupPath, true);
             if (!_backupList.TryAdd(module, backupPath))
             {
                 throw new ArgumentException($"Key already added '{module}'");
             }
 
-            var symbolFile = Path.ChangeExtension(module, ".pdb");
+            string symbolFile = Path.ChangeExtension(module, ".pdb");
             if (_fileSystem.Exists(symbolFile))
             {
                 _fileSystem.Copy(symbolFile, backupSymbolPath, true);
@@ -208,12 +259,12 @@ namespace Coverlet.Core.Helpers
 
         public virtual void RestoreOriginalModule(string module, string identifier)
         {
-            var backupPath = GetBackupPath(module, identifier);
-            var backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
+            string backupPath = GetBackupPath(module, identifier);
+            string backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
 
             // Restore the original module - retry up to 10 times, since the destination file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
-            var retryStrategy = CreateRetryStrategy();
+            Func<TimeSpan> retryStrategy = CreateRetryStrategy();
 
             _retryHelper.Retry(() =>
             {
@@ -238,7 +289,7 @@ namespace Coverlet.Core.Helpers
         {
             // Restore the original module - retry up to 10 times, since the destination file could be locked
             // See: https://github.com/tonerdo/coverlet/issues/25
-            var retryStrategy = CreateRetryStrategy();
+            Func<TimeSpan> retryStrategy = CreateRetryStrategy();
 
             foreach (string key in _backupList.Keys.ToList())
             {
@@ -254,7 +305,7 @@ namespace Coverlet.Core.Helpers
 
         public void DeleteHitsFile(string path)
         {
-            var retryStrategy = CreateRetryStrategy();
+            Func<TimeSpan> retryStrategy = CreateRetryStrategy();
             _retryHelper.Retry(() => _fileSystem.Delete(path), retryStrategy, RetryAttempts);
         }
 
@@ -299,7 +350,7 @@ namespace Coverlet.Core.Helpers
             if (module == null)
                 return false;
 
-            foreach (var filter in excludeFilters)
+            foreach (string filter in excludeFilters)
             {
                 string typePattern = filter.Substring(filter.IndexOf(']') + 1);
 
@@ -327,7 +378,7 @@ namespace Coverlet.Core.Helpers
             if (module == null)
                 return false;
 
-            foreach (var filter in includeFilters)
+            foreach (string filter in includeFilters)
             {
                 string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
 
@@ -377,12 +428,12 @@ namespace Coverlet.Core.Helpers
             _logger = logger;
         }
 
-        private bool IsTypeFilterMatch(string module, string type, string[] filters)
+        private static bool IsTypeFilterMatch(string module, string type, string[] filters)
         {
             Debug.Assert(module != null);
             Debug.Assert(filters != null);
 
-            foreach (var filter in filters)
+            foreach (string filter in filters)
             {
                 string typePattern = filter.Substring(filter.IndexOf(']') + 1);
                 string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
@@ -397,7 +448,7 @@ namespace Coverlet.Core.Helpers
             return false;
         }
 
-        private string GetBackupPath(string module, string identifier)
+        private static string GetBackupPath(string module, string identifier)
         {
             return Path.Combine(
                 Path.GetTempPath(),
@@ -417,14 +468,14 @@ namespace Coverlet.Core.Helpers
             return retryStrategy;
         }
 
-        private string WildcardToRegex(string pattern)
+        private static string WildcardToRegex(string pattern)
         {
             return "^" + Regex.Escape(pattern).
             Replace("\\*", ".*").
             Replace("\\?", "?") + "$";
         }
 
-        private bool IsAssembly(string filePath)
+        private static bool IsAssembly(string filePath)
         {
             Debug.Assert(filePath != null);
 

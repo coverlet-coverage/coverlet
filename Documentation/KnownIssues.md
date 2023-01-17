@@ -150,7 +150,9 @@ or by adding the property `<CopyLocalLockFileAssemblies>` to the project file
 
 NB. This **DOESN'T ALWAYS WORK**, for example in case of the shared framework https://github.com/dotnet/cli/issues/12705#issuecomment-536686785
 
-We can do nothing at the moment as this is a build behaviour out of our control. This issue should not happen for .NET runtime version >= 3.0 because the new default behavior is to copy all assets to the build output https://github.com/dotnet/cli/issues/12705#issuecomment-535150372
+We can do nothing at the moment as this is a build behaviour out of our control.
+
+For .NET runtime version >= 3.0 the new default behavior is to copy all assets to the build output (CopyLocalLockFileAssemblies=true) https://github.com/dotnet/cli/issues/12705#issuecomment-535150372, unfortunately the issue could still arise. 
 
 In this case the only workaround at the moment is to *manually copy* missing dlls to the output folder: https://github.com/coverlet-coverage/coverlet/issues/560#issue-496440052 
 
@@ -199,3 +201,33 @@ NB. Workaround doesn't work if test method itself explicitly creates an appdomai
 SUT (System Under Test) assembly is also not listed in MSBuild logs - "Instrumented module" is missing for your dll.
 
 *Solution*: Check whether deterministic build is turned on for your solution, if so, follow the [instructions](DeterministicBuild.md) on how to handle deterministic builds.
+
+## Failure to produce Code Coverage Report
+
+*Symptoms:*
+
+```log
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(39,5): error : Stream was too long. [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(39,5): error :    at System.IO.MemoryStream.Write(Byte[] buffer, Int32 offset, Int32 count) [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(39,5): error :    at System.Xml.XmlStreamNodeWriter.FlushBuffer() [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(39,5): error :    at System.Xml.XmlStreamNodeWriter.GetBuffer(Int32 count, Int32& offset) [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(39,5): error :    at System.Xml.XmlStreamNodeWriter.UnsafeWriteUTF8Chars(Char* chars, Int32 charCount) [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(39,5): error :    at System.Xml.XmlUTF8NodeWriter.WriteEscapedText(String s) [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(39,5): error :    at System.Xml.XmlBaseWriter.WriteString(String value) [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(39,5): error :    at System.Runtime.Serialization.XmlObjectSerializerWriteContext.WriteString(XmlWriterDelegator xmlWriter, String value, XmlDictionaryString name, XmlDictionaryString ns) [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(39,5): error :    at WriteLineToXml(XmlWriterDelegator , Object , XmlObjectSerializerWriteContext , ClassDataContract ) [REDACTED.csproj]
+
+....
+
+Calculating coverage result...
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(71,5): error : Unexpected end of file. [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(71,5): error :    at System.Xml.EncodingStreamWrapper.ReadBOMEncoding(Boolean notOutOfBand) [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(71,5): error :    at System.Xml.EncodingStreamWrapper..ctor(Stream stream, Encoding encoding) [REDACTED.csproj]
+C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.targets(71,5): error :    at System.Xml.XmlUTF8TextReader.SetInput(Stream stream, Encoding encoding, XmlDictionaryReaderQuotas quotas, OnXmlDictionaryReaderClose onClose) [REDACTED.csproj]
+```
+
+The XML code coverage report is too large for the coverlet to parse.
+
+*Potential Solutions:*
+* Reduce noise from auto generated code, for example excluding your EntityFrameworkCore Migrations namespace or automatically generated typed Http Clients. See [Excluding From Coverage](./MSBuildIntegration.md#excluding-from-coverage) for more information on ignoring namespaces from code coverage. 
+

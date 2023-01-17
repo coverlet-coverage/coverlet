@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO;
 using System.Runtime.Serialization;
 using Coverlet.Core.Instrumentation;
 
@@ -20,6 +23,8 @@ namespace Coverlet.Core
         public bool UseSourceLink { get; set; }
         [DataMember]
         public InstrumenterResult[] Results { get; set; }
+        [DataMember]
+        public CoverageParameters Parameters { get; set; }
 
         public static CoveragePrepareResult Deserialize(Stream serializedInstrumentState)
         {
@@ -28,7 +33,7 @@ namespace Coverlet.Core
 
         public static Stream Serialize(CoveragePrepareResult instrumentState)
         {
-            MemoryStream ms = new MemoryStream();
+            var ms = new MemoryStream();
             new DataContractSerializer(typeof(CoveragePrepareResult)).WriteObject(ms, instrumentState);
             ms.Position = 0;
             return ms;

@@ -1,10 +1,14 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
-
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
@@ -35,11 +39,13 @@ namespace Coverlet.Console
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
             var logger = (ConsoleLogger)serviceProvider.GetService<ILogger>();
-            var fileSystem = serviceProvider.GetService<IFileSystem>();
+            IFileSystem fileSystem = serviceProvider.GetService<IFileSystem>();
 
-            var app = new CommandLineApplication();
-            app.Name = "coverlet";
-            app.FullName = "Cross platform .NET Core code coverage tool";
+            var app = new CommandLineApplication
+            {
+                Name = "coverlet",
+                FullName = "Cross platform .NET Core code coverage tool"
+            };
             app.HelpOption("-h|--help");
             app.VersionOption("-v|--version", GetAssemblyVersion());
             int exitCode = (int)CommandExitCodes.Success;
@@ -64,6 +70,7 @@ namespace Coverlet.Console
             CommandOption mergeWith = app.Option("--merge-with", "Path to existing coverage result to merge.", CommandOptionType.SingleValue);
             CommandOption useSourceLink = app.Option("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.", CommandOptionType.NoValue);
             CommandOption doesNotReturnAttributes = app.Option("--does-not-return-attribute", "Attributes that mark methods that do not return.", CommandOptionType.MultipleValue);
+            CommandOption excludeAssembliesWithoutSources = app.Option("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
@@ -79,7 +86,7 @@ namespace Coverlet.Console
                     logger.Level = verbosity.ParsedValue;
                 }
 
-                CoverageParameters parameters = new CoverageParameters
+                CoverageParameters parameters = new()
                 {
                     IncludeFilters = includeFilters.Values.ToArray(),
                     IncludeDirectories = includeDirectories.Values.ToArray(),
@@ -91,19 +98,22 @@ namespace Coverlet.Console
                     MergeWith = mergeWith.Value(),
                     UseSourceLink = useSourceLink.HasValue(),
                     SkipAutoProps = skipAutoProp.HasValue(),
-                    DoesNotReturnAttributes = doesNotReturnAttributes.Values.ToArray()
+                    DoesNotReturnAttributes = doesNotReturnAttributes.Values.ToArray(),
+                    ExcludeAssembliesWithoutSources = excludeAssembliesWithoutSources.Value()
                 };
 
-                Coverage coverage = new Coverage(moduleOrAppDirectory.Value,
+                ISourceRootTranslator sourceRootTranslator = serviceProvider.GetRequiredService<ISourceRootTranslator>();
+
+                Coverage coverage = new(moduleOrAppDirectory.Value,
                                                  parameters,
                                                  logger,
                                                  serviceProvider.GetRequiredService<IInstrumentationHelper>(),
                                                  fileSystem,
-                                                 serviceProvider.GetRequiredService<ISourceRootTranslator>(),
+                                                 sourceRootTranslator,
                                                  serviceProvider.GetRequiredService<ICecilSymbolHelper>());
                 coverage.PrepareModules();
 
-                Process process = new Process();
+                Process process = new();
                 process.StartInfo.FileName = target.Value();
                 process.StartInfo.Arguments = targs.HasValue() ? targs.Value() : string.Empty;
                 process.StartInfo.CreateNoWindow = true;
@@ -128,15 +138,15 @@ namespace Coverlet.Console
 
                 process.WaitForExit();
 
-                var dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
-                var dThreshold = threshold.HasValue() ? double.Parse(threshold.Value()) : 0;
-                var dThresholdTypes = thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" });
-                var dThresholdStat = thresholdStat.HasValue() ? Enum.Parse<ThresholdStatistic>(thresholdStat.Value(), true) : Enum.Parse<ThresholdStatistic>("minimum", true);
+                string dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
+                List<string> dThresholdTypes = thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" });
+                ThresholdStatistic dThresholdStat = thresholdStat.HasValue() ? Enum.Parse<ThresholdStatistic>(thresholdStat.Value(), true) : Enum.Parse<ThresholdStatistic>("minimum", true);
 
                 logger.LogInformation("\nCalculating coverage result...");
 
-                var result = coverage.GetCoverageResult();
-                var directory = Path.GetDirectoryName(dOutput);
+                CoverageResult result = coverage.GetCoverageResult();
+
+                string directory = Path.GetDirectoryName(dOutput);
                 if (directory == string.Empty)
                 {
                     directory = Directory.GetCurrentDirectory();
@@ -146,9 +156,9 @@ namespace Coverlet.Console
                     Directory.CreateDirectory(directory);
                 }
 
-                foreach (var format in (formats.HasValue() ? formats.Values : new List<string>(new string[] { "json" })))
+                foreach (string format in formats.HasValue() ? formats.Values : new List<string>(new string[] { "json" }))
                 {
-                    var reporter = new ReporterFactory(format).CreateReporter();
+                    Core.Abstractions.IReporter reporter = new ReporterFactory(format).CreateReporter();
                     if (reporter == null)
                     {
                         throw new Exception($"Specified output format '{format}' is not supported");
@@ -158,62 +168,92 @@ namespace Coverlet.Console
                     {
                         // Output to console
                         logger.LogInformation("  Outputting results to console", important: true);
-                        logger.LogInformation(reporter.Report(result), important: true);
+                        logger.LogInformation(reporter.Report(result, sourceRootTranslator), important: true);
                     }
                     else
                     {
                         // Output to file
-                        var filename = Path.GetFileName(dOutput);
+                        string filename = Path.GetFileName(dOutput);
                         filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
                         filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
-                        var report = Path.Combine(directory, filename);
+                        string report = Path.Combine(directory, filename);
                         logger.LogInformation($"  Generating report '{report}'", important: true);
-                        fileSystem.WriteAllText(report, reporter.Report(result));
+                        fileSystem.WriteAllText(report, reporter.Report(result, sourceRootTranslator));
                     }
                 }
 
-                var thresholdTypeFlags = ThresholdTypeFlags.None;
+                var thresholdTypeFlagQueue = new Queue<ThresholdTypeFlags>();
 
-                foreach (var thresholdType in dThresholdTypes)
+                foreach (string thresholdType in dThresholdTypes)
                 {
                     if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
                     {
-                        thresholdTypeFlags |= ThresholdTypeFlags.Line;
+                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Line);
                     }
                     else if (thresholdType.Equals("branch", StringComparison.OrdinalIgnoreCase))
                     {
-                        thresholdTypeFlags |= ThresholdTypeFlags.Branch;
+                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Branch);
                     }
                     else if (thresholdType.Equals("method", StringComparison.OrdinalIgnoreCase))
                     {
-                        thresholdTypeFlags |= ThresholdTypeFlags.Method;
+                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Method);
+                    }
+                }
+
+                var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>();
+                if (threshold.HasValue() && threshold.Value().Contains(','))
+                {
+                    IEnumerable<string> thresholdValues = threshold.Value().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
+                    if (thresholdValues.Count() != thresholdTypeFlagQueue.Count)
+                    {
+                        throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
+                    }
+
+                    foreach (string thresholdValue in thresholdValues)
+                    {
+                        if (double.TryParse(thresholdValue, out double value))
+                        {
+                            thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = value;
+                        }
+                        else
+                        {
+                            throw new Exception($"Invalid threshold value must be numeric");
+                        }
+                    }
+                }
+                else
+                {
+                    double thresholdValue = threshold.HasValue() ? double.Parse(threshold.Value()) : 0;
+
+                    while (thresholdTypeFlagQueue.Any())
+                    {
+                        thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = thresholdValue;
                     }
                 }
 
                 var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
                 var summary = new CoverageSummary();
-                int numModules = result.Modules.Count;
 
-                var linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
-                var branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
-                var methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
+                CoverageDetails linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
+                CoverageDetails branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
+                CoverageDetails methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
 
-                var totalLinePercent = linePercentCalculation.Percent;
-                var totalBranchPercent = branchPercentCalculation.Percent;
-                var totalMethodPercent = methodPercentCalculation.Percent;
+                double totalLinePercent = linePercentCalculation.Percent;
+                double totalBranchPercent = branchPercentCalculation.Percent;
+                double totalMethodPercent = methodPercentCalculation.Percent;
 
-                var averageLinePercent = linePercentCalculation.AverageModulePercent;
-                var averageBranchPercent = branchPercentCalculation.AverageModulePercent;
-                var averageMethodPercent = methodPercentCalculation.AverageModulePercent;
+                double averageLinePercent = linePercentCalculation.AverageModulePercent;
+                double averageBranchPercent = branchPercentCalculation.AverageModulePercent;
+                double averageMethodPercent = methodPercentCalculation.AverageModulePercent;
 
-                foreach (var _module in result.Modules)
+                foreach (KeyValuePair<string, Documents> _module in result.Modules)
                 {
-                    var linePercent = summary.CalculateLineCoverage(_module.Value).Percent;
-                    var branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
-                    var methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
+                    double linePercent = summary.CalculateLineCoverage(_module.Value).Percent;
+                    double branchPercent = summary.CalculateBranchCoverage(_module.Value).Percent;
+                    double methodPercent = summary.CalculateMethodCoverage(_module.Value).Percent;
 
-                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{linePercent}%", $"{branchPercent}%", $"{methodPercent}%");
+                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
                 }
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
@@ -222,34 +262,34 @@ namespace Coverlet.Console
                 coverageTable.Rows.Clear();
 
                 coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
-                coverageTable.AddRow("Total", $"{totalLinePercent}%", $"{totalBranchPercent}%", $"{totalMethodPercent}%");
-                coverageTable.AddRow("Average", $"{averageLinePercent}%", $"{averageBranchPercent}%", $"{averageMethodPercent}%");
+                coverageTable.AddRow("Total", $"{InvariantFormat(totalLinePercent)}%", $"{InvariantFormat(totalBranchPercent)}%", $"{InvariantFormat(totalMethodPercent)}%");
+                coverageTable.AddRow("Average", $"{InvariantFormat(averageLinePercent)}%", $"{InvariantFormat(averageBranchPercent)}%", $"{InvariantFormat(averageMethodPercent)}%");
 
                 logger.LogInformation(coverageTable.ToStringAlternative());
                 if (process.ExitCode > 0)
                 {
                     exitCode += (int)CommandExitCodes.TestFailed;
                 }
-                thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, dThreshold, thresholdTypeFlags, dThresholdStat);
+
+                ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, dThresholdStat);
                 if (thresholdTypeFlags != ThresholdTypeFlags.None)
                 {
                     exitCode += (int)CommandExitCodes.CoverageBelowThreshold;
                     var exceptionMessageBuilder = new StringBuilder();
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} line coverage is below the specified {dThreshold}");
+                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line]}");
                     }
 
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} branch coverage is below the specified {dThreshold}");
+                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} branch coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Branch]}");
                     }
 
                     if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
                     {
-                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} method coverage is below the specified {dThreshold}");
+                        exceptionMessageBuilder.AppendLine($"The {dThresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
                     }
-
                     throw new Exception(exceptionMessageBuilder.ToString());
                 }
 
@@ -279,5 +319,7 @@ namespace Coverlet.Console
         }
 
         static string GetAssemblyVersion() => typeof(Program).Assembly.GetName().Version.ToString();
+
+        static string InvariantFormat(double value) => value.ToString(CultureInfo.InvariantCulture);
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace Coverlet.Collector.Utilities
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace Coverlet.Collector.Utilities
 {
     internal static class CoverletConstants
     {
@@ -22,5 +25,7 @@
         public const string InProcDataCollectorName = "CoverletInProcDataCollector";
         public const string SkipAutoProps = "SkipAutoProps";
         public const string DoesNotReturnAttributesElementName = "DoesNotReturnAttribute";
+        public const string DeterministicReport = "DeterministicReport";
+        public const string ExcludeAssembliesWithoutSources = "ExcludeAssembliesWithoutSources";
     }
 }

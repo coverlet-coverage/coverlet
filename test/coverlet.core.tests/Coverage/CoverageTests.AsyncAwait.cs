@@ -1,8 +1,10 @@
-using System.IO;
-using System.Threading.Tasks;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
-using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -119,6 +121,92 @@ namespace Coverlet.Core.Tests
                 .Document("Instrumentation.AsyncAwait.cs")
                 .AssertLinesCovered(BuildConfiguration.Debug, (7, 1), (10, 1), (11, 1), (12, 1), (13, 1), (15, 1))
                 .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void AsyncAwait_Issue_1177()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1177>(instance =>
+                        {
+                            ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
+                            return Task.CompletedTask;
+                        },
+                        persistPrepareResultToFile: pathSerialize[0]);
+
+                    return 0;
+                }, new string[] { path });
+
+                Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+                document.AssertLinesCovered(BuildConfiguration.Debug, (133, 1), (134, 1), (135, 1), (136, 1), (137, 1));
+                Assert.DoesNotContain(document.Branches, x => x.Key.Line == 134);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void AsyncAwait_Issue_1233()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1233>(instance =>
+                        {
+                            ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
+                            return Task.CompletedTask;
+                        },
+                        persistPrepareResultToFile: pathSerialize[0]);
+
+                    return 0;
+                }, new string[] { path });
+
+                Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+                document.AssertLinesCovered(BuildConfiguration.Debug, (150, 1));
+                Assert.DoesNotContain(document.Branches, x => x.Key.Line == 150);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void AsyncAwait_Issue_1275()
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1275>(instance =>
+                        {
+                            var cts = new CancellationTokenSource();
+                            ((Task)instance.Execute(cts.Token)).ConfigureAwait(false).GetAwaiter().GetResult();
+                            return Task.CompletedTask;
+                        },
+                        persistPrepareResultToFile: pathSerialize[0]);
+
+                    return 0;
+                }, new string[] { path });
+
+                Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+                document.AssertLinesCoveredFromTo(BuildConfiguration.Debug, 170, 176);
+                document.AssertBranchesCovered(BuildConfiguration.Debug, (171, 0, 1), (171, 1, 1));
+                Assert.DoesNotContain(document.Branches, x => x.Key.Line == 176);
             }
             finally
             {

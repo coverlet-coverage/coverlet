@@ -1,8 +1,11 @@
-﻿using Coverlet.Core.Abstractions;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
@@ -18,6 +21,7 @@ namespace Coverlet.Core.Helpers
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly Dictionary<string, List<SourceRootMapping>> _sourceRootMapping;
+        private readonly Dictionary<string, List<string>> _sourceToDeterministicPathMapping;
         private const string MappingFileName = "CoverletSourceRootsMapping";
         private Dictionary<string, string> _resolutionCacheFiles;
 
@@ -41,11 +45,35 @@ namespace Coverlet.Core.Helpers
                 throw new FileNotFoundException($"Module test path '{moduleTestPath}' not found", moduleTestPath);
             }
             _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath));
+            _sourceToDeterministicPathMapping = LoadSourceToDeterministicPathMapping(_sourceRootMapping);
+        }
+
+        private static Dictionary<string, List<string>> LoadSourceToDeterministicPathMapping(Dictionary<string, List<SourceRootMapping>> sourceRootMapping)
+        {
+            if (sourceRootMapping is null)
+            {
+                throw new ArgumentNullException(nameof(sourceRootMapping));
+            }
+
+            var sourceToDeterministicPathMapping = new Dictionary<string, List<string>>();
+            foreach (KeyValuePair<string, List<SourceRootMapping>> sourceRootMappingEntry in sourceRootMapping)
+            {
+                foreach (SourceRootMapping originalPath in sourceRootMappingEntry.Value)
+                {
+                    if (!sourceToDeterministicPathMapping.ContainsKey(originalPath.OriginalPath))
+                    {
+                        sourceToDeterministicPathMapping.Add(originalPath.OriginalPath, new List<string>());
+                    }
+                    sourceToDeterministicPathMapping[originalPath.OriginalPath].Add(sourceRootMappingEntry.Key);
+                }
+            }
+
+            return sourceToDeterministicPathMapping;
         }
 
         private Dictionary<string, List<SourceRootMapping>> LoadSourceRootMapping(string directory)
         {
-            Dictionary<string, List<SourceRootMapping>> mapping = new Dictionary<string, List<SourceRootMapping>>();
+            var mapping = new Dictionary<string, List<SourceRootMapping>>();
 
             string mappingFilePath = Path.Combine(directory, MappingFileName);
             if (!_fileSystem.Exists(mappingFilePath))
@@ -70,10 +98,25 @@ namespace Coverlet.Core.Helpers
                 {
                     mapping.Add(mappedPath, new List<SourceRootMapping>());
                 }
-                mapping[mappedPath].Add(new SourceRootMapping() { OriginalPath = originalPath, ProjectPath = projectPath });
+
+                foreach (string path in originalPath.Split(';'))
+                {
+                    mapping[mappedPath].Add(new SourceRootMapping() { OriginalPath = path, ProjectPath = projectPath });
+                }
             }
 
             return mapping;
+        }
+
+        public bool AddMappingInCache(string originalFileName, string targetFileName)
+        {
+            if (_resolutionCacheFiles != null && _resolutionCacheFiles.ContainsKey(originalFileName))
+            {
+                return false;
+            }
+
+             (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, targetFileName);
+            return true;
         }
 
         public IReadOnlyList<SourceRootMapping> ResolvePathRoot(string pathRoot)
@@ -104,6 +147,22 @@ namespace Coverlet.Core.Helpers
                     }
                 }
             }
+            return originalFileName;
+        }
+
+        public string ResolveDeterministicPath(string originalFileName)
+        {
+            foreach (KeyValuePair<string, List<string>> originalPath in _sourceToDeterministicPathMapping)
+            {
+                if (originalFileName.StartsWith(originalPath.Key))
+                {
+                    foreach (string deterministicPath in originalPath.Value)
+                    {
+                        originalFileName = originalFileName.Replace(originalPath.Key, deterministicPath).Replace('\\', '/');
+                    }
+                }
+            }
+
             return originalFileName;
         }
     }

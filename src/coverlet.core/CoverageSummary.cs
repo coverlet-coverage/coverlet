@@ -1,3 +1,6 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +20,9 @@ namespace Coverlet.Core
         public CoverageDetails CalculateLineCoverage(Methods methods)
         {
             var details = new CoverageDetails();
-            foreach (var method in methods)
+            foreach (KeyValuePair<string, Method> method in methods)
             {
-                var methodCoverage = CalculateLineCoverage(method.Value.Lines);
+                CoverageDetails methodCoverage = CalculateLineCoverage(method.Value.Lines);
                 details.Covered += methodCoverage.Covered;
                 details.Total += methodCoverage.Total;
             }
@@ -29,9 +32,9 @@ namespace Coverlet.Core
         public CoverageDetails CalculateLineCoverage(Classes classes)
         {
             var details = new CoverageDetails();
-            foreach (var @class in classes)
+            foreach (KeyValuePair<string, Methods> @class in classes)
             {
-                var classCoverage = CalculateLineCoverage(@class.Value);
+                CoverageDetails classCoverage = CalculateLineCoverage(@class.Value);
                 details.Covered += classCoverage.Covered;
                 details.Total += classCoverage.Total;
             }
@@ -41,9 +44,9 @@ namespace Coverlet.Core
         public CoverageDetails CalculateLineCoverage(Documents documents)
         {
             var details = new CoverageDetails();
-            foreach (var document in documents)
+            foreach (KeyValuePair<string, Classes> document in documents)
             {
-                var documentCoverage = CalculateLineCoverage(document.Value);
+                CoverageDetails documentCoverage = CalculateLineCoverage(document.Value);
                 details.Covered += documentCoverage.Covered;
                 details.Total += documentCoverage.Total;
             }
@@ -52,11 +55,15 @@ namespace Coverlet.Core
 
         public CoverageDetails CalculateLineCoverage(Modules modules)
         {
-            var details = new CoverageDetails();
-            var accumPercent = 0.0D;
-            foreach (var module in modules)
+            var details = new CoverageDetails { Modules = modules };
+            double accumPercent = 0.0D;
+
+            if (modules.Count == 0)
+                return details;
+
+            foreach (KeyValuePair<string, Documents> module in modules)
             {
-                var moduleCoverage = CalculateLineCoverage(module.Value);
+                CoverageDetails moduleCoverage = CalculateLineCoverage(module.Value);
                 details.Covered += moduleCoverage.Covered;
                 details.Total += moduleCoverage.Total;
                 accumPercent += moduleCoverage.Percent;
@@ -71,6 +78,40 @@ namespace Coverlet.Core
             details.Covered = branches.Count(bi => bi.Hits > 0);
             details.Total = branches.Count;
             return details;
+        }
+
+        public int CalculateNpathComplexity(IList<BranchInfo> branches)
+        {
+            // Adapted from OpenCover see https://github.com/OpenCover/opencover/blob/master/main/OpenCover.Framework/Persistance/BasePersistance.cs#L419
+            if (!branches.Any())
+            {
+                return 0;
+            }
+
+            var paths = new Dictionary<int, int>();
+            foreach (BranchInfo branch in branches)
+            {
+                if (!paths.TryGetValue(branch.Offset, out int count))
+                {
+                    count = 0;
+                }
+                paths[branch.Offset] = ++count;
+            }
+
+            int npath = 1;
+            foreach (int branchPoints in paths.Values)
+            {
+                try
+                {
+                    npath = checked(npath * branchPoints);
+                }
+                catch (OverflowException)
+                {
+                    npath = int.MaxValue;
+                    break;
+                }
+            }
+            return npath;
         }
 
         public int CalculateCyclomaticComplexity(IList<BranchInfo> branches)
@@ -116,9 +157,9 @@ namespace Coverlet.Core
         public CoverageDetails CalculateBranchCoverage(Methods methods)
         {
             var details = new CoverageDetails();
-            foreach (var method in methods)
+            foreach (KeyValuePair<string, Method> method in methods)
             {
-                var methodCoverage = CalculateBranchCoverage(method.Value.Branches);
+                CoverageDetails methodCoverage = CalculateBranchCoverage(method.Value.Branches);
                 details.Covered += methodCoverage.Covered;
                 details.Total += methodCoverage.Total;
             }
@@ -128,9 +169,9 @@ namespace Coverlet.Core
         public CoverageDetails CalculateBranchCoverage(Classes classes)
         {
             var details = new CoverageDetails();
-            foreach (var @class in classes)
+            foreach (KeyValuePair<string, Methods> @class in classes)
             {
-                var classCoverage = CalculateBranchCoverage(@class.Value);
+                CoverageDetails classCoverage = CalculateBranchCoverage(@class.Value);
                 details.Covered += classCoverage.Covered;
                 details.Total += classCoverage.Total;
             }
@@ -140,9 +181,9 @@ namespace Coverlet.Core
         public CoverageDetails CalculateBranchCoverage(Documents documents)
         {
             var details = new CoverageDetails();
-            foreach (var document in documents)
+            foreach (KeyValuePair<string, Classes> document in documents)
             {
-                var documentCoverage = CalculateBranchCoverage(document.Value);
+                CoverageDetails documentCoverage = CalculateBranchCoverage(document.Value);
                 details.Covered += documentCoverage.Covered;
                 details.Total += documentCoverage.Total;
             }
@@ -151,16 +192,20 @@ namespace Coverlet.Core
 
         public CoverageDetails CalculateBranchCoverage(Modules modules)
         {
-            var details = new CoverageDetails();
-            var accumPercent = 0.0D;
-            foreach (var module in modules)
+            var details = new CoverageDetails { Modules = modules };
+            double accumPercent = 0.0D;
+
+            if (modules.Count == 0)
+                return details;
+
+            foreach (KeyValuePair<string, Documents> module in modules)
             {
-                var moduleCoverage = CalculateBranchCoverage(module.Value);
+                CoverageDetails moduleCoverage = CalculateBranchCoverage(module.Value);
                 details.Covered += moduleCoverage.Covered;
                 details.Total += moduleCoverage.Total;
                 accumPercent += moduleCoverage.Percent;
             }
-            details.AverageModulePercent = accumPercent / modules.Count;
+            details.AverageModulePercent = modules.Count == 0 ? 0 : accumPercent / modules.Count;
             return details;
         }
 
@@ -175,10 +220,10 @@ namespace Coverlet.Core
         public CoverageDetails CalculateMethodCoverage(Methods methods)
         {
             var details = new CoverageDetails();
-            var methodsWithLines = methods.Where(m => m.Value.Lines.Count > 0);
-            foreach (var method in methodsWithLines)
+            IEnumerable<KeyValuePair<string, Method>> methodsWithLines = methods.Where(m => m.Value.Lines.Count > 0);
+            foreach (KeyValuePair<string, Method> method in methodsWithLines)
             {
-                var methodCoverage = CalculateMethodCoverage(method.Value.Lines);
+                CoverageDetails methodCoverage = CalculateMethodCoverage(method.Value.Lines);
                 details.Covered += methodCoverage.Covered;
             }
             details.Total = methodsWithLines.Count();
@@ -188,9 +233,9 @@ namespace Coverlet.Core
         public CoverageDetails CalculateMethodCoverage(Classes classes)
         {
             var details = new CoverageDetails();
-            foreach (var @class in classes)
+            foreach (KeyValuePair<string, Methods> @class in classes)
             {
-                var classCoverage = CalculateMethodCoverage(@class.Value);
+                CoverageDetails classCoverage = CalculateMethodCoverage(@class.Value);
                 details.Covered += classCoverage.Covered;
                 details.Total += classCoverage.Total;
             }
@@ -200,9 +245,9 @@ namespace Coverlet.Core
         public CoverageDetails CalculateMethodCoverage(Documents documents)
         {
             var details = new CoverageDetails();
-            foreach (var document in documents)
+            foreach (KeyValuePair<string, Classes> document in documents)
             {
-                var documentCoverage = CalculateMethodCoverage(document.Value);
+                CoverageDetails documentCoverage = CalculateMethodCoverage(document.Value);
                 details.Covered += documentCoverage.Covered;
                 details.Total += documentCoverage.Total;
             }
@@ -211,16 +256,20 @@ namespace Coverlet.Core
 
         public CoverageDetails CalculateMethodCoverage(Modules modules)
         {
-            var details = new CoverageDetails();
-            var accumPercent = 0.0D;
-            foreach (var module in modules)
+            var details = new CoverageDetails { Modules = modules };
+            double accumPercent = 0.0D;
+
+            if (modules.Count == 0)
+                return details;
+
+            foreach (KeyValuePair<string, Documents> module in modules)
             {
-                var moduleCoverage = CalculateMethodCoverage(module.Value);
+                CoverageDetails moduleCoverage = CalculateMethodCoverage(module.Value);
                 details.Covered += moduleCoverage.Covered;
                 details.Total += moduleCoverage.Total;
                 accumPercent += moduleCoverage.Percent;
             }
-            details.AverageModulePercent = accumPercent / modules.Count;
+            details.AverageModulePercent = modules.Count == 0 ? 0 : accumPercent / modules.Count;
             return details;
         }
     }

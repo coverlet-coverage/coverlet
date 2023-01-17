@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Linq;
 using System.Text;
 
 namespace Coverlet.Collector.DataCollection
@@ -73,6 +76,16 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         public string[] DoesNotReturnAttributes { get; set; }
 
+        /// <summary>
+        /// DeterministicReport flag
+        /// </summary>
+        public bool DeterministicReport { get; set; }
+
+        /// <summary>
+        /// Switch for heuristic to automatically exclude assemblies without source.
+        /// </summary>
+        public string ExcludeAssembliesWithoutSources { get;  set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -89,6 +102,8 @@ namespace Coverlet.Collector.DataCollection
             builder.AppendFormat("IncludeTestAssembly: '{0}'", IncludeTestAssembly);
             builder.AppendFormat("SkipAutoProps: '{0}'", SkipAutoProps);
             builder.AppendFormat("DoesNotReturnAttributes: '{0}'", string.Join(",", DoesNotReturnAttributes ?? Enumerable.Empty<string>()));
+            builder.AppendFormat("DeterministicReport: '{0}'", DeterministicReport);
+            builder.AppendFormat("ExcludeAssembliesWithoutSources: '{0}'", ExcludeAssembliesWithoutSources);
 
             return builder.ToString();
         }

@@ -6,8 +6,8 @@ steps:
 
 - task: UseDotNet@2
   inputs:
-    version: 5.0.101
-  displayName: Install .NET Core SDK 5.0.101
+    version: 5.0.401
+  displayName: Install .NET Core SDK 5.0.401
 
 - script: dotnet restore
   displayName: Restore packages

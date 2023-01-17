@@ -4,6 +4,11 @@ In this mode, Coverlet doesn't require any additional setup other than including
 
 If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
 
+To achieve same behavior above using **powershell** you need to use the verbatim argument marker `--%` like this: 
+```powershell
+dotnet test /p:CollectCoverage=true --% /p:CoverletOutputFormat=\"opencover,lcov\"
+```
+
 ## Code Coverage
 
 Enabling code coverage is as simple as setting the `CollectCoverage` property to `true`
@@ -98,7 +103,12 @@ The above command will automatically fail the build if the line, branch or metho
 dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
 ```
 
-You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`.
+You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`. 
+You can do the same for `Threshold` as well.
+
+```bash
+dotnet test /p:CollectCoverage=true /p:Threshold=\"80,100,70\" /p:ThresholdType=\"line,branch,method\"
+```
 
 By default, Coverlet will validate the threshold value against the coverage result of each module. The `/p:ThresholdStat` option allows you to change this behaviour and can have any of the following values:
 
@@ -171,6 +181,10 @@ You can also include coverage of the test assembly itself by setting `/p:Include
 Neither track nor record auto-implemented properties.  
 Syntax:  `/p:SkipAutoProps=true`
 
+### Instrument module wihtout local sources file.  
+
+Syntax:  `/p:InstrumentModulesWithoutLocalSources=true`
+
 ### Methods that do not return
 
 Methods that do not return can be marked with attributes to cause statements after them to be excluded from coverage.
@@ -206,3 +220,27 @@ The workaround is to use the .NET Core `dotnet msbuild` command instead of using
 ## SourceLink
 
 Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `/p:UseSourceLink=true` property, Coverlet will generate results that contain the URL to the source files in your source control instead of local file paths.
+
+## Deterministic build
+
+Take a look at [documentation](DeterministicBuild.md) for further informations.  
+To generate deterministc report the parameter is:
+```
+/p:DeterministicReport=true
+```
+
+## Exclude assemblies without sources from coverage
+
+The heuristic coverlet uses to determine if an assembly is a third-party dependency is based on the matching of the assembly`s source documents and the corresponding source files.
+This parameter has three different values to control the automatic assembly exclusion. 
+
+| Parameter | Description |
+|-----------|-------------|
+| MissingAll | Includes the assembly if at least one document is matching. In case the `ExcludeAssembliesWithoutSources` parameter is not specified the default value is `MissingAll`. |
+| MissingAny | Includes the assembly only if all documents can be matched to corresponding source files. |
+| None | No assembly is excluded. |
+
+Here is an example of how to specifiy the parameter:
+```
+/p:ExcludeAssembliesWithoutSources="MissingAny"
+```

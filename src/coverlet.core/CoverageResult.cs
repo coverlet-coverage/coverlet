@@ -1,10 +1,10 @@
-using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Instrumentation;
-using Coverlet.Core.Symbols;
 
 namespace Coverlet.Core
 {
@@ -39,63 +39,63 @@ namespace Coverlet.Core
 
     internal class CoverageResult
     {
-        public string Identifier;
-        public Modules Modules;
-        public bool UseSourceLink;
-        internal List<InstrumenterResult> InstrumentedResults;
+        public string Identifier { get; set; }
+        public Modules Modules { get; set; }
+        public List<InstrumenterResult> InstrumentedResults { get; set; }
+        public CoverageParameters Parameters { get; set; }
 
-        internal CoverageResult() { }
+        public CoverageResult() { }
 
-        internal void Merge(Modules modules)
+        public void Merge(Modules modules)
         {
-            foreach (var module in modules)
+            foreach (KeyValuePair<string, Documents> module in modules)
             {
-                if (!this.Modules.Keys.Contains(module.Key))
+                if (!Modules.Keys.Contains(module.Key))
                 {
-                    this.Modules.Add(module.Key, module.Value);
+                    Modules.Add(module.Key, module.Value);
                 }
                 else
                 {
-                    foreach (var document in module.Value)
+                    foreach (KeyValuePair<string, Classes> document in module.Value)
                     {
-                        if (!this.Modules[module.Key].ContainsKey(document.Key))
+                        if (!Modules[module.Key].ContainsKey(document.Key))
                         {
-                            this.Modules[module.Key].Add(document.Key, document.Value);
+                            Modules[module.Key].Add(document.Key, document.Value);
                         }
                         else
                         {
-                            foreach (var @class in document.Value)
+                            foreach (KeyValuePair<string, Methods> @class in document.Value)
                             {
-                                if (!this.Modules[module.Key][document.Key].ContainsKey(@class.Key))
+                                if (!Modules[module.Key][document.Key].ContainsKey(@class.Key))
                                 {
-                                    this.Modules[module.Key][document.Key].Add(@class.Key, @class.Value);
+                                    Modules[module.Key][document.Key].Add(@class.Key, @class.Value);
                                 }
                                 else
                                 {
-                                    foreach (var method in @class.Value)
+                                    foreach (KeyValuePair<string, Method> method in @class.Value)
                                     {
-                                        if (!this.Modules[module.Key][document.Key][@class.Key].ContainsKey(method.Key))
+                                        if (!Modules[module.Key][document.Key][@class.Key].ContainsKey(method.Key))
                                         {
-                                            this.Modules[module.Key][document.Key][@class.Key].Add(method.Key, method.Value);
+                                            Modules[module.Key][document.Key][@class.Key].Add(method.Key, method.Value);
                                         }
                                         else
                                         {
-                                            foreach (var line in method.Value.Lines)
+                                            foreach (KeyValuePair<int, int> line in method.Value.Lines)
                                             {
-                                                if (!this.Modules[module.Key][document.Key][@class.Key][method.Key].Lines.ContainsKey(line.Key))
+                                                if (!Modules[module.Key][document.Key][@class.Key][method.Key].Lines.ContainsKey(line.Key))
                                                 {
-                                                    this.Modules[module.Key][document.Key][@class.Key][method.Key].Lines.Add(line.Key, line.Value);
+                                                    Modules[module.Key][document.Key][@class.Key][method.Key].Lines.Add(line.Key, line.Value);
                                                 }
                                                 else
                                                 {
-                                                    this.Modules[module.Key][document.Key][@class.Key][method.Key].Lines[line.Key] += line.Value;
+                                                    Modules[module.Key][document.Key][@class.Key][method.Key].Lines[line.Key] += line.Value;
                                                 }
                                             }
 
-                                            foreach (var branch in method.Value.Branches)
+                                            foreach (BranchInfo branch in method.Value.Branches)
                                             {
-                                                var branches = this.Modules[module.Key][document.Key][@class.Key][method.Key].Branches;
-                                                var branchInfo = branches.FirstOrDefault(b => b.EndOffset == branch.EndOffset && b.Line == branch.Line && b.Offset == branch.Offset && b.Ordinal == branch.Ordinal && b.Path == branch.Path);
+                                                Branches branches = Modules[module.Key][document.Key][@class.Key][method.Key].Branches;
+                                                BranchInfo branchInfo = branches.FirstOrDefault(b => b.EndOffset == branch.EndOffset && b.Line == branch.Line && b.Offset == branch.Offset && b.Ordinal == branch.Ordinal && b.Path == branch.Path);
                                                 if (branchInfo == null)
                                                     branches.Add(branch);
                                                 else
@@ -111,36 +111,23 @@ namespace Coverlet.Core
             }
         }
 
-        public ThresholdTypeFlags GetThresholdTypesBelowThreshold(CoverageSummary summary, double threshold, ThresholdTypeFlags thresholdTypes, ThresholdStatistic thresholdStat)
+        public ThresholdTypeFlags GetThresholdTypesBelowThreshold(CoverageSummary summary, Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues, ThresholdStatistic thresholdStat)
         {
-            var thresholdTypeFlags = ThresholdTypeFlags.None;
+            ThresholdTypeFlags thresholdTypeFlags = ThresholdTypeFlags.None;
             switch (thresholdStat)
             {
                 case ThresholdStatistic.Minimum:
                     {
-                        foreach (var module in Modules)
+                        if (!Modules.Any())
+                            thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, 0, 0, 0);
+
+                        foreach (KeyValuePair<string, Documents> module in Modules)
                         {
                             double line = summary.CalculateLineCoverage(module.Value).Percent;
                             double branch = summary.CalculateBranchCoverage(module.Value).Percent;
                             double method = summary.CalculateMethodCoverage(module.Value).Percent;
 
-                            if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
-                            {
-                                if (line < threshold)
-                                    thresholdTypeFlags |= ThresholdTypeFlags.Line;
-                            }
-
-                            if ((thresholdTypes & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
-                            {
-                                if (branch < threshold)
-                                    thresholdTypeFlags |= ThresholdTypeFlags.Branch;
-                            }
-
-                            if ((thresholdTypes & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
-                            {
-                                if (method < threshold)
-                                    thresholdTypeFlags |= ThresholdTypeFlags.Method;
-                            }
+                            thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, line, branch, method);
                         }
                     }
                     break;
@@ -150,23 +137,7 @@ namespace Coverlet.Core
                         double branch = summary.CalculateBranchCoverage(Modules).AverageModulePercent;
                         double method = summary.CalculateMethodCoverage(Modules).AverageModulePercent;
 
-                        if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
-                        {
-                            if (line < threshold)
-                                thresholdTypeFlags |= ThresholdTypeFlags.Line;
-                        }
-
-                        if ((thresholdTypes & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
-                        {
-                            if (branch < threshold)
-                                thresholdTypeFlags |= ThresholdTypeFlags.Branch;
-                        }
-
-                        if ((thresholdTypes & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
-                        {
-                            if (method < threshold)
-                                thresholdTypeFlags |= ThresholdTypeFlags.Method;
-                        }
+                        thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, line, branch, method);
                     }
                     break;
                 case ThresholdStatistic.Total:
@@ -175,25 +146,34 @@ namespace Coverlet.Core
                         double branch = summary.CalculateBranchCoverage(Modules).Percent;
                         double method = summary.CalculateMethodCoverage(Modules).Percent;
 
-                        if ((thresholdTypes & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
-                        {
-                            if (line < threshold)
-                                thresholdTypeFlags |= ThresholdTypeFlags.Line;
-                        }
-
-                        if ((thresholdTypes & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
-                        {
-                            if (branch < threshold)
-                                thresholdTypeFlags |= ThresholdTypeFlags.Branch;
-                        }
-
-                        if ((thresholdTypes & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
-                        {
-                            if (method < threshold)
-                                thresholdTypeFlags |= ThresholdTypeFlags.Method;
-                        }
+                        thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, line, branch, method);
                     }
                     break;
+            }
+
+            return thresholdTypeFlags;
+        }
+
+        private static ThresholdTypeFlags CompareThresholdValues(
+            Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues, ThresholdTypeFlags thresholdTypeFlags,
+            double line, double branch, double method)
+        {
+            if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Line, out double lineThresholdValue) &&
+                lineThresholdValue > line)
+            {
+                thresholdTypeFlags |= ThresholdTypeFlags.Line;
+            }
+
+            if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Branch, out double branchThresholdValue) &&
+                branchThresholdValue > branch)
+            {
+                thresholdTypeFlags |= ThresholdTypeFlags.Branch;
+            }
+
+            if (thresholdTypeFlagValues.TryGetValue(ThresholdTypeFlags.Method, out double methodThresholdValue) &&
+                methodThresholdValue > method)
+            {
+                thresholdTypeFlags |= ThresholdTypeFlags.Method;
             }
 
             return thresholdTypeFlags;

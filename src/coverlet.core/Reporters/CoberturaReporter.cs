@@ -1,3 +1,6 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,6 +9,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+
+using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
 {
@@ -17,66 +22,80 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => "cobertura.xml";
 
-        public string Report(CoverageResult result)
+        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
-            CoverageSummary summary = new CoverageSummary();
+            var summary = new CoverageSummary();
 
-            var lineCoverage = summary.CalculateLineCoverage(result.Modules);
-            var branchCoverage = summary.CalculateBranchCoverage(result.Modules);
+            CoverageDetails lineCoverage = summary.CalculateLineCoverage(result.Modules);
+            CoverageDetails branchCoverage = summary.CalculateBranchCoverage(result.Modules);
 
-            XDocument xml = new XDocument();
-            XElement coverage = new XElement("coverage");
+            var xml = new XDocument();
+            var coverage = new XElement("coverage");
             coverage.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(result.Modules).Percent / 100).ToString(CultureInfo.InvariantCulture)));
             coverage.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(result.Modules).Percent / 100).ToString(CultureInfo.InvariantCulture)));
             coverage.Add(new XAttribute("version", "1.9"));
             coverage.Add(new XAttribute("timestamp", (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds));
 
-            XElement sources = new XElement("sources");
-            var absolutePaths = GetBasePaths(result.Modules, result.UseSourceLink).ToList();
-            absolutePaths.ForEach(x => sources.Add(new XElement("source", x)));
+            var sources = new XElement("sources");
 
-            XElement packages = new XElement("packages");
-            foreach (var module in result.Modules)
+            var absolutePaths = new List<string>();
+            if (!result.Parameters.DeterministicReport)
             {
-                XElement package = new XElement("package");
+                absolutePaths = GetBasePaths(result.Modules, result.Parameters.UseSourceLink).ToList();
+                absolutePaths.ForEach(x => sources.Add(new XElement("source", x)));
+            }
+
+            var packages = new XElement("packages");
+            foreach (KeyValuePair<string, Documents> module in result.Modules)
+            {
+                var package = new XElement("package");
                 package.Add(new XAttribute("name", Path.GetFileNameWithoutExtension(module.Key)));
                 package.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(module.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                 package.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(module.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                 package.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(module.Value)));
 
-                XElement classes = new XElement("classes");
-                foreach (var document in module.Value)
+                var classes = new XElement("classes");
+                foreach (KeyValuePair<string, Classes> document in module.Value)
                 {
-                    foreach (var cls in document.Value)
+                    foreach (KeyValuePair<string, Methods> cls in document.Value)
                     {
-                        XElement @class = new XElement("class");
+                        var @class = new XElement("class");
                         @class.Add(new XAttribute("name", cls.Key));
-                        @class.Add(new XAttribute("filename", GetRelativePathFromBase(absolutePaths, document.Key, result.UseSourceLink)));
+                        string fileName;
+                        if (!result.Parameters.DeterministicReport)
+                        {
+                            fileName = GetRelativePathFromBase(absolutePaths, document.Key, result.Parameters.UseSourceLink);
+                        }
+                        else
+                        {
+                            fileName = sourceRootTranslator.ResolveDeterministicPath(document.Key);
+                        }
+                        @class.Add(new XAttribute("filename", fileName));
                         @class.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                         @class.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(cls.Value)));
 
-                        XElement classLines = new XElement("lines");
-                        XElement methods = new XElement("methods");
+                        var classLines = new XElement("lines");
+                        var methods = new XElement("methods");
 
-                        foreach (var meth in cls.Value)
+                        foreach (KeyValuePair<string, Method> meth in cls.Value)
                         {
                             // Skip all methods with no lines
                             if (meth.Value.Lines.Count == 0)
                                 continue;
 
-                            XElement method = new XElement("method");
+                            var method = new XElement("method");
                             method.Add(new XAttribute("name", meth.Key.Split(':').Last().Split('(').First()));
                             method.Add(new XAttribute("signature", "(" + meth.Key.Split(':').Last().Split('(').Last()));
                             method.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(meth.Value.Lines).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                             method.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(meth.Value.Branches).Percent / 100).ToString(CultureInfo.InvariantCulture)));
                             method.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(meth.Value.Branches)));
 
-                            XElement lines = new XElement("lines");
-                            foreach (var ln in meth.Value.Lines)
+                            var lines = new XElement("lines");
+                            foreach (KeyValuePair<int, int> ln in meth.Value.Lines)
                             {
                                 bool isBranchPoint = meth.Value.Branches.Any(b => b.Line == ln.Key);
-                                XElement line = new XElement("line");
+                                var line = new XElement("line");
                                 line.Add(new XAttribute("number", ln.Key.ToString()));
                                 line.Add(new XAttribute("hits", ln.Value.ToString()));
                                 line.Add(new XAttribute("branch", isBranchPoint.ToString()));
@@ -84,22 +103,21 @@ namespace Coverlet.Core.Reporters
                                 if (isBranchPoint)
                                 {
                                     var branches = meth.Value.Branches.Where(b => b.Line == ln.Key).ToList();
-                                    var branchInfoCoverage = summary.CalculateBranchCoverage(branches);
+                                    CoverageDetails branchInfoCoverage = summary.CalculateBranchCoverage(branches);
                                     line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent.ToString(CultureInfo.InvariantCulture)}% ({branchInfoCoverage.Covered.ToString(CultureInfo.InvariantCulture)}/{branchInfoCoverage.Total.ToString(CultureInfo.InvariantCulture)})"));
-                                    XElement conditions = new XElement("conditions");
+                                    var conditions = new XElement("conditions");
                                     var byOffset = branches.GroupBy(b => b.Offset).ToDictionary(b => b.Key, b => b.ToList());
-                                    foreach (var entry in byOffset)
+                                    foreach (KeyValuePair<int, List<BranchInfo>> entry in byOffset)
                                     {
-                                        XElement condition = new XElement("condition");
+                                        var condition = new XElement("condition");
                                         condition.Add(new XAttribute("number", entry.Key));
-                                        condition.Add(new XAttribute("type", entry.Value.Count() > 2 ? "switch" : "jump")); // Just guessing here
+                                        condition.Add(new XAttribute("type", entry.Value.Count > 2 ? "switch" : "jump")); // Just guessing here
                                         condition.Add(new XAttribute("coverage", $"{summary.CalculateBranchCoverage(entry.Value).Percent.ToString(CultureInfo.InvariantCulture)}%"));
                                         conditions.Add(condition);
                                     }
 
                                     line.Add(conditions);
                                 }
-
 
                                 lines.Add(line);
                                 classLines.Add(line);
@@ -202,16 +220,13 @@ namespace Coverlet.Core.Reporters
                 return path;
             }
 
-            foreach (var basePath in basePaths)
+            foreach (string basePath in basePaths)
             {
                 if (path.StartsWith(basePath))
                 {
                     return path.Substring(basePath.Length);
                 }
             }
-
-            Debug.Assert(false, "Unexpected, we should find at least one path starts with one pre-build roots list");
-
             return path;
         }
     }

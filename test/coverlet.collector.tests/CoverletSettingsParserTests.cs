@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Coverlet.Collector.DataCollection;
@@ -9,7 +12,7 @@ namespace Coverlet.Collector.Tests
 {
     public class CoverletSettingsParserTests
     {
-        private CoverletSettingsParser _coverletSettingsParser;
+        private readonly CoverletSettingsParser _coverletSettingsParser;
 
         public CoverletSettingsParserTests()
         {
@@ -64,18 +67,19 @@ namespace Coverlet.Collector.Tests
         {
             var testModules = new List<string> { "abc.dll" };
             var doc = new XmlDocument();
-            var configElement = doc.CreateElement("Configuration");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName, includeFilters);
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName, excludeFilters);
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName, includeDirectories);
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName, excludeSourceFiles);
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName, excludeAttributes);
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.MergeWithElementName, "/path/to/result.json");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.UseSourceLinkElementName, "false");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.SingleHitElementName, "true");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeTestAssemblyElementName, "true");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.SkipAutoProps, "true");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.DoesNotReturnAttributesElementName, doesNotReturnAttributes);
+            XmlElement configElement = doc.CreateElement("Configuration");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName, includeFilters);
+            CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName, excludeFilters);
+            CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName, includeDirectories);
+            CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName, excludeSourceFiles);
+            CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName, excludeAttributes);
+            CreateCoverletNodes(doc, configElement, CoverletConstants.MergeWithElementName, "/path/to/result.json");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.UseSourceLinkElementName, "false");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.SingleHitElementName, "true");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeTestAssemblyElementName, "true");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.SkipAutoProps, "true");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.DeterministicReport, "true");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.DoesNotReturnAttributesElementName, doesNotReturnAttributes);
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
@@ -100,6 +104,7 @@ namespace Coverlet.Collector.Tests
             Assert.True(coverletSettings.SingleHit);
             Assert.True(coverletSettings.IncludeTestAssembly);
             Assert.True(coverletSettings.SkipAutoProps);
+            Assert.True(coverletSettings.DeterministicReport);
         }
 
         [Fact]
@@ -107,12 +112,12 @@ namespace Coverlet.Collector.Tests
         {
             var testModules = new List<string> { "abc.dll" };
             var doc = new XmlDocument();
-            var configElement = doc.CreateElement("Configuration");
-            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName);
-            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName);
-            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName);
-            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName);
-            this.CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName);
+            XmlElement configElement = doc.CreateElement("Configuration");
+            CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName);
+            CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName);
+            CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeDirectoriesElementName);
+            CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeSourceFilesElementName);
+            CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeAttributesElementName);
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
@@ -129,7 +134,7 @@ namespace Coverlet.Collector.Tests
         {
             var testModules = new List<string> { "abc.dll" };
             var doc = new XmlDocument();
-            var configElement = doc.CreateElement("Configuration");
+            XmlElement configElement = doc.CreateElement("Configuration");
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
@@ -158,8 +163,8 @@ namespace Coverlet.Collector.Tests
         {
             var testModules = new List<string> { "abc.dll" };
             var doc = new XmlDocument();
-            var configElement = doc.CreateElement("Configuration");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
+            XmlElement configElement = doc.CreateElement("Configuration");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
@@ -173,26 +178,26 @@ namespace Coverlet.Collector.Tests
         public void ParseShouldUseDefaultFormatWhenNoFormatSpecified(string formats)
         {
             var testModules = new List<string> { "abc.dll" };
-            var defaultFormat = CoverletConstants.DefaultReportFormat;
+            string defaultFormat = CoverletConstants.DefaultReportFormat;
             var doc = new XmlDocument();
-            var configElement = doc.CreateElement("Configuration");
-            this.CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
+            XmlElement configElement = doc.CreateElement("Configuration");
+            CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
 
             CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
 
             Assert.Equal(defaultFormat, coverletSettings.ReportFormats[0]);
         }
 
-        private void CreateCoverletNodes(XmlDocument doc, XmlElement configElement, string nodeSetting, string nodeValue)
+        private static void CreateCoverletNodes(XmlDocument doc, XmlElement configElement, string nodeSetting, string nodeValue)
         {
-            var node = doc.CreateNode("element", nodeSetting, string.Empty);
+            XmlNode node = doc.CreateNode("element", nodeSetting, string.Empty);
             node.InnerText = nodeValue;
             configElement.AppendChild(node);
         }
 
-        private void CreateCoverletNullInnerTextNodes(XmlDocument doc, XmlElement configElement, string nodeSetting)
+        private static void CreateCoverletNullInnerTextNodes(XmlDocument doc, XmlElement configElement, string nodeSetting)
         {
-            var node = doc.CreateNode("element", nodeSetting, string.Empty);
+            XmlNode node = doc.CreateNode("element", nodeSetting, string.Empty);
             node.InnerText = null;
             configElement.AppendChild(node);
         }

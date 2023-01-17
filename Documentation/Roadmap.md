@@ -39,7 +39,6 @@ This is the list of features we should develop soon as possible:
 ### Low priority
 
 - Rethink hits reports strategy https://github.com/coverlet-coverage/coverlet/issues/808 
-- Support coverage on netfx for collectors integration https://github.com/coverlet-coverage/coverlet/issues/705 
 
 ## Maintainers discussion channel
 

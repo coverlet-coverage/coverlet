@@ -1,4 +1,7 @@
-﻿using Coverlet.Collector.Utilities.Interfaces;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 
@@ -17,7 +20,7 @@ namespace Coverlet.Collector.DataCollection
         /// <returns>Coverage object</returns>
         public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
         {
-            CoverageParameters parameters = new CoverageParameters
+            CoverageParameters parameters = new()
             {
                 IncludeFilters = settings.IncludeFilters,
                 IncludeDirectories = settings.IncludeDirectories,
@@ -29,7 +32,9 @@ namespace Coverlet.Collector.DataCollection
                 MergeWith = settings.MergeWith,
                 UseSourceLink = settings.UseSourceLink,
                 SkipAutoProps = settings.SkipAutoProps,
-                DoesNotReturnAttributes = settings.DoesNotReturnAttributes
+                DoesNotReturnAttributes = settings.DoesNotReturnAttributes,
+                DeterministicReport = settings.DeterministicReport,
+                ExcludeAssembliesWithoutSources = settings.ExcludeAssembliesWithoutSources
             };
 
             return new Coverage(

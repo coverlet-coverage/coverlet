@@ -1,7 +1,10 @@
-﻿using System.Globalization;
-using Coverlet.Core;
-using Coverlet.Core.Reporters;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Globalization;
 using System.Text;
+using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
 {
@@ -13,13 +16,18 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => null;
 
-        public string Report(CoverageResult result)
+        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
+            if (result.Parameters.DeterministicReport)
+            {
+                throw new NotSupportedException("Deterministic report not supported by teamcity reporter");
+            }
+
             // Calculate coverage
             var summary = new CoverageSummary();
-            var overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
-            var overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
-            var overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
+            CoverageDetails overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
+            CoverageDetails overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
+            CoverageDetails overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
 
             // Report coverage
             var stringBuilder = new StringBuilder();
@@ -31,7 +39,7 @@ namespace Coverlet.Core.Reporters
             return stringBuilder.ToString();
         }
 
-        private void OutputLineCoverage(CoverageDetails coverageDetails, StringBuilder builder)
+        private static void OutputLineCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The number of covered lines
             OutputTeamCityServiceMessage("CodeCoverageAbsLCovered", coverageDetails.Covered, builder);
@@ -40,7 +48,7 @@ namespace Coverlet.Core.Reporters
             OutputTeamCityServiceMessage("CodeCoverageAbsLTotal", coverageDetails.Total, builder);
         }
 
-        private void OutputBranchCoverage(CoverageDetails coverageDetails, StringBuilder builder)
+        private static void OutputBranchCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The number of covered branches
             OutputTeamCityServiceMessage("CodeCoverageAbsBCovered", coverageDetails.Covered, builder);
@@ -49,7 +57,7 @@ namespace Coverlet.Core.Reporters
             OutputTeamCityServiceMessage("CodeCoverageAbsBTotal", coverageDetails.Total, builder);
         }
 
-        private void OutputMethodCoverage(CoverageDetails coverageDetails, StringBuilder builder)
+        private static void OutputMethodCoverage(CoverageDetails coverageDetails, StringBuilder builder)
         {
             // The number of covered methods
             OutputTeamCityServiceMessage("CodeCoverageAbsMCovered", coverageDetails.Covered, builder);
@@ -58,7 +66,7 @@ namespace Coverlet.Core.Reporters
             OutputTeamCityServiceMessage("CodeCoverageAbsMTotal", coverageDetails.Total, builder);
         }
 
-        private void OutputTeamCityServiceMessage(string key, double value, StringBuilder builder)
+        private static void OutputTeamCityServiceMessage(string key, double value, StringBuilder builder)
         {
             builder.AppendLine($"##teamcity[buildStatisticValue key='{key}' value='{value.ToString("0.##", new CultureInfo("en-US"))}']");
         }

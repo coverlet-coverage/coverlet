@@ -1,10 +1,12 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Samples.Tests;
@@ -24,15 +26,12 @@ namespace Coverlet.Core.Instrumentation.Tests
 {
     public class InstrumenterTests : IDisposable
     {
-        private readonly Mock<ILogger> _mockLogger = new Mock<ILogger>();
-        private Action disposeAction;
+        private readonly Mock<ILogger> _mockLogger = new();
+        private Action _disposeAction;
 
         public void Dispose()
         {
-            if (disposeAction != null)
-            {
-                disposeAction();
-            }
+            _disposeAction?.Invoke();
         }
 
         [ConditionalFact]
@@ -47,12 +46,12 @@ namespace Coverlet.Core.Instrumentation.Tests
                 "System.Private.CoreLib.pdb"
             };
 
-            foreach (var file in files)
+            foreach (string file in files)
             {
                 File.Copy(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets", file), Path.Combine(directory.FullName, file), overwrite: true);
             }
 
-            Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
+            var partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.OpenRead(It.IsAny<string>())).Returns((string path) =>
             {
@@ -84,10 +83,10 @@ namespace Coverlet.Core.Instrumentation.Tests
                 }
             });
             var sourceRootTranslator = new SourceRootTranslator(_mockLogger.Object, new FileSystem());
-            InstrumentationHelper instrumentationHelper =
+            var parameters = new CoverageParameters();
+            var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object, _mockLogger.Object, sourceRootTranslator);
-            Instrumenter instrumenter = new Instrumenter(Path.Combine(directory.FullName, files[0]), "_coverlet_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                                         Array.Empty<string>(), Array.Empty<string>(), false, false, _mockLogger.Object, instrumentationHelper, partialMockFileSystem.Object, sourceRootTranslator, new CecilSymbolHelper());
+            var instrumenter = new Instrumenter(Path.Combine(directory.FullName, files[0]), "_coverlet_instrumented", parameters, _mockLogger.Object, instrumentationHelper, partialMockFileSystem.Object, sourceRootTranslator, new CecilSymbolHelper());
 
             Assert.True(instrumenter.CanInstrument());
             InstrumenterResult result = instrumenter.Instrument();
@@ -105,9 +104,9 @@ namespace Coverlet.Core.Instrumentation.Tests
         [InlineData(false)]
         public void TestInstrument(bool singleHit)
         {
-            var instrumenterTest = CreateInstrumentor(singleHit: singleHit);
+            InstrumenterTest instrumenterTest = CreateInstrumentor(singleHit: singleHit);
 
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
             Assert.Equal(Path.GetFileNameWithoutExtension(instrumenterTest.Module), result.Module);
             Assert.Equal(instrumenterTest.Module, result.ModulePath);
@@ -120,9 +119,9 @@ namespace Coverlet.Core.Instrumentation.Tests
         [InlineData(false)]
         public void TestInstrumentCoreLib(bool singleHit)
         {
-            var instrumenterTest = CreateInstrumentor(fakeCoreLibModule: true, singleHit: singleHit);
+            InstrumenterTest instrumenterTest = CreateInstrumentor(fakeCoreLibModule: true, singleHit: singleHit);
 
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
             Assert.Equal(Path.GetFileNameWithoutExtension(instrumenterTest.Module), result.Module);
             Assert.Equal(instrumenterTest.Module, result.ModulePath);
@@ -135,13 +134,13 @@ namespace Coverlet.Core.Instrumentation.Tests
         [InlineData(typeof(ClassExcludedByCoverletCodeCoverageAttr))]
         public void TestInstrument_ClassesWithExcludeAttributeAreExcluded(Type excludedType)
         {
-            var instrumenterTest = CreateInstrumentor();
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor();
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
 
-            var found = doc.Lines.Values.Any(l => l.Class == excludedType.FullName);
+            bool found = doc.Lines.Values.Any(l => l.Class == excludedType.FullName);
             Assert.False(found, "Class decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);
@@ -151,13 +150,13 @@ namespace Coverlet.Core.Instrumentation.Tests
         [InlineData(typeof(ClassExcludedByAttrWithoutAttributeNameSuffix), nameof(TestSDKAutoGeneratedCode))]
         public void TestInstrument_ClassesWithExcludeAttributeWithoutAttributeNameSuffixAreExcluded(Type excludedType, string excludedAttribute)
         {
-            var instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
 
-            var found = doc.Lines.Values.Any(l => l.Class == excludedType.FullName);
+            bool found = doc.Lines.Values.Any(l => l.Class == excludedType.FullName);
             Assert.False(found, "Class decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);
@@ -169,13 +168,13 @@ namespace Coverlet.Core.Instrumentation.Tests
         [InlineData(nameof(TestSDKAutoGeneratedCode))]
         public void TestInstrument_ClassesWithCustomExcludeAttributeAreExcluded(string excludedAttribute)
         {
-            var instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
 #pragma warning disable CS0612 // Type or member is obsolete
-            var found = doc.Lines.Values.Any(l => l.Class.Equals(nameof(ClassExcludedByObsoleteAttr)));
+            bool found = doc.Lines.Values.Any(l => l.Class.Equals(nameof(ClassExcludedByObsoleteAttr)));
 #pragma warning restore CS0612 // Type or member is obsolete
             Assert.False(found, "Class decorated with with exclude attribute should be excluded");
 
@@ -188,14 +187,12 @@ namespace Coverlet.Core.Instrumentation.Tests
         [InlineData(nameof(TestSDKAutoGeneratedCode), "ClassExcludedByAttrWithoutAttributeNameSuffix")]
         public void TestInstrument_ClassesWithMethodWithCustomExcludeAttributeAreExcluded(string excludedAttribute, string testClassName)
         {
-            var instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
-#pragma warning disable CS0612 // Type or member is obsolete
-            var found = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::Method(System.String)"));
-#pragma warning restore CS0612 // Type or member is obsolete
+            bool found = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::Method(System.String)"));
             Assert.False(found, "Method decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);
@@ -207,19 +204,15 @@ namespace Coverlet.Core.Instrumentation.Tests
         [InlineData(nameof(TestSDKAutoGeneratedCode), "ClassExcludedByAttrWithoutAttributeNameSuffix")]
         public void TestInstrument_ClassesWithPropertyWithCustomExcludeAttributeAreExcluded(string excludedAttribute, string testClassName)
         {
-            var instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
-#pragma warning disable CS0612 // Type or member is obsolete
-            var getFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::get_Property()"));
-#pragma warning restore CS0612 // Type or member is obsolete
+            bool getFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::get_Property()"));
             Assert.False(getFound, "Property getter decorated with with exclude attribute should be excluded");
 
-#pragma warning disable CS0612 // Type or member is obsolete
-            var setFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::set_Property()"));
-#pragma warning restore CS0612 // Type or member is obsolete
+            bool setFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::set_Property()"));
             Assert.False(setFound, "Property setter decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);
@@ -248,12 +241,16 @@ namespace Coverlet.Core.Instrumentation.Tests
             File.Copy(module, Path.Combine(directory.FullName, destModule), true);
             File.Copy(pdb, Path.Combine(directory.FullName, destPdb), true);
 
-            InstrumentationHelper instrumentationHelper =
+            var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object, new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
 
             module = Path.Combine(directory.FullName, destModule);
-            Instrumenter instrumenter = new Instrumenter(module, identifier, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), attributesToIgnore, new string[] { "DoesNotReturnAttribute" }, false, false,
-                                                         _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
+            CoverageParameters parameters = new()
+            {
+                ExcludeAttributes = attributesToIgnore,
+                DoesNotReturnAttributes = new string[] { "DoesNotReturnAttribute" }
+            };
+            var instrumenter = new Instrumenter(module, identifier, parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
             return new InstrumenterTest
             {
                 Instrumenter = instrumenter,
@@ -277,7 +274,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument_NetStandardAwareAssemblyResolver_FromRuntime()
         {
-            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(null, _mockLogger.Object);
+            var netstandardResolver = new NetstandardAwareAssemblyResolver(null, _mockLogger.Object);
 
             // We ask for "official" netstandard.dll implementation with know MS public key cc7b13ffcd2ddd51 same in all runtime
             AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse("netstandard, Version=0.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51"));
@@ -294,7 +291,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             // conflicts with "official" resolution
 
             // We create dummy netstandard.dll
-            CSharpCompilation compilation = CSharpCompilation.Create(
+            var compilation = CSharpCompilation.Create(
                 "netstandard",
                 new[] { CSharpSyntaxTree.ParseText("") },
                 new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location) },
@@ -311,7 +308,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 File.WriteAllBytes("netstandard.dll", dllStream.ToArray());
             }
 
-            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(newAssemlby.Location, _mockLogger.Object);
+            var netstandardResolver = new NetstandardAwareAssemblyResolver(newAssemlby.Location, _mockLogger.Object);
             AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse(newAssemlby.FullName));
 
             // We check if final netstandard.dll resolved is local folder one and not "official" netstandard.dll
@@ -425,12 +422,11 @@ namespace Coverlet.Core.Instrumentation.Tests
             string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.core.dll").First();
             var loggerMock = new Mock<ILogger>();
 
-            InstrumentationHelper instrumentationHelper =
-                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+            var instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), loggerMock.Object,
                                           new SourceRootTranslator(xunitDll, new Mock<ILogger>().Object, new FileSystem()));
 
-            Instrumenter instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                                         Array.Empty<string>(), Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(xunitDll, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            var instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(xunitDll, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
             Assert.True(instrumentationHelper.HasPdb(xunitDll, out bool embedded));
             Assert.True(embedded);
             Assert.False(instrumenter.CanInstrument());
@@ -442,8 +438,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                           new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem()));
 
-            instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_empty", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                            Array.Empty<string>(), Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_empty", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
 
             Assert.True(instrumentationHelper.HasPdb(sample, out embedded));
             Assert.False(embedded);
@@ -459,7 +454,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             string dllFileName = "75d9f96508d74def860a568f426ea4a4.dll";
             string pdbFileName = "75d9f96508d74def860a568f426ea4a4.pdb";
 
-            Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
+            var partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.OpenRead(It.IsAny<string>())).Returns((string path) =>
             {
@@ -484,17 +479,16 @@ namespace Coverlet.Core.Instrumentation.Tests
                 }
             });
 
-            InstrumentationHelper instrumentationHelper =
+            var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), partialMockFileSystem.Object, _mockLogger.Object, new SourceRootTranslator(_mockLogger.Object, new FileSystem()));
             string sample = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), dllFileName).First();
             var loggerMock = new Mock<ILogger>();
-            Instrumenter instrumenter = new Instrumenter(sample, "_75d9f96508d74def860a568f426ea4a4_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                                         Array.Empty<string>(), Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            var instrumenter = new Instrumenter(sample, "_75d9f96508d74def860a568f426ea4a4_instrumented", new CoverageParameters(), loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
 
             Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
             Assert.False(embedded);
             Assert.False(instrumenter.CanInstrument());
-            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+            _mockLogger.Verify(l => l.LogVerbose(It.IsAny<string>()));
         }
 
         [Fact]
@@ -502,15 +496,46 @@ namespace Coverlet.Core.Instrumentation.Tests
         {
             var loggerMock = new Mock<ILogger>();
 
-            InstrumentationHelper instrumentationHelper =
+            var instrumentationHelper =
                     new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                               new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
 
-            var instrumenter = new Instrumenter("test", "_test_instrumented", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                                Array.Empty<string>(), Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            var instrumenter = new Instrumenter("test", "_test_instrumented", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
 
             Assert.False(instrumenter.CanInstrument());
             loggerMock.Verify(l => l.LogWarning(It.IsAny<string>()));
+        }
+
+        [Fact]
+        public void CanInstrumentFSharpAssemblyWithAnonymousRecord()
+        {
+            var loggerMock = new Mock<ILogger>();
+
+            string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.fsharp.dll").First();
+            var instrumentationHelper =
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                    new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem()));
+
+            var instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_fsharp", new CoverageParameters(), loggerMock.Object, instrumentationHelper,
+                new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+
+            Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
+            Assert.False(embedded);
+            Assert.True(instrumenter.CanInstrument());
+        }
+
+        [Fact]
+        public void CanInstrument_AssemblySearchTypeNone_ReturnsTrue()
+        {
+            var loggerMock = new Mock<ILogger>();
+            var instrumentationHelper = new Mock<IInstrumentationHelper>();
+            bool embeddedPdb;
+            instrumentationHelper.Setup(x => x.HasPdb(It.IsAny<string>(), out embeddedPdb)).Returns(true);
+
+            var instrumenter = new Instrumenter(It.IsAny<string>(), It.IsAny<string>(), new CoverageParameters{ExcludeAssembliesWithoutSources = "None"},
+                loggerMock.Object, instrumentationHelper.Object, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new CecilSymbolHelper());
+
+            Assert.True(instrumenter.CanInstrument());
         }
 
         [Theory]
@@ -524,8 +549,8 @@ namespace Coverlet.Core.Instrumentation.Tests
         {
             string EmitAssemblyToInstrument(string outputFolder)
             {
-                var attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
-                var instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
+                SyntaxTree attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
+                SyntaxTree instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
 [assembly:{attributeName}]
 namespace coverlet.tests.projectsample.excludedbyattribute{{
 public class SampleClass
@@ -538,26 +563,26 @@ public class SampleClass
 
 }}
 ");
-                var compilation = CSharpCompilation.Create(attributeName, new List<SyntaxTree>
+                CSharpCompilation compilation = CSharpCompilation.Create(attributeName, new List<SyntaxTree>
                 {
                     attributeClassSyntaxTree,instrumentableClassSyntaxTree
                 }).AddReferences(
                     MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location)).
                 WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, false));
 
-                var dllPath = Path.Combine(outputFolder, $"{attributeName}.dll");
-                var pdbPath = Path.Combine(outputFolder, $"{attributeName}.pdb");
+                string dllPath = Path.Combine(outputFolder, $"{attributeName}.dll");
+                string pdbPath = Path.Combine(outputFolder, $"{attributeName}.pdb");
 
-                using (var outputStream = File.Create(dllPath))
-                using (var pdbStream = File.Create(pdbPath))
+                using (FileStream outputStream = File.Create(dllPath))
+                using (FileStream pdbStream = File.Create(pdbPath))
                 {
-                    var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+                    bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
                     var emitOptions = new EmitOptions(pdbFilePath: pdbPath);
-                    var emitResult = compilation.Emit(outputStream, pdbStream, options: isWindows ? emitOptions : emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb));
+                    EmitResult emitResult = compilation.Emit(outputStream, pdbStream, options: isWindows ? emitOptions : emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb));
                     if (!emitResult.Success)
                     {
-                        var message = "Failure to dynamically create dll";
-                        foreach (var diagnostic in emitResult.Diagnostics)
+                        string message = "Failure to dynamically create dll";
+                        foreach (Diagnostic diagnostic in emitResult.Diagnostics)
                         {
                             message += Environment.NewLine;
                             message += diagnostic.GetMessage();
@@ -570,9 +595,9 @@ public class SampleClass
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
-            disposeAction = () => Directory.Delete(tempDirectory, true);
+            _disposeAction = () => Directory.Delete(tempDirectory, true);
 
-            Mock<FileSystem> partialMockFileSystem = new Mock<FileSystem>();
+            var partialMockFileSystem = new Mock<FileSystem>();
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
             {
@@ -582,12 +607,12 @@ public class SampleClass
 
             string excludedbyattributeDll = EmitAssemblyToInstrument(tempDirectory);
 
-            InstrumentationHelper instrumentationHelper =
+            var instrumentationHelper =
                     new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                               new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
-
-            Instrumenter instrumenter = new Instrumenter(excludedbyattributeDll, "_xunit_excludedbyattribute", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(),
-                                                         excludedAttributes, Array.Empty<string>(), false, false, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            CoverageParameters parametes = new();
+            parametes.ExcludeAttributes = excludedAttributes;
+            var instrumenter = new Instrumenter(excludedbyattributeDll, "_xunit_excludedbyattribute", parametes, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
 
             InstrumenterResult result = instrumenter.Instrument();
             if (expectedExcludes)
@@ -604,8 +629,8 @@ public class SampleClass
         [Fact]
         public void TestInstrument_AspNetCoreSharedFrameworkResolver()
         {
-            AspNetCoreSharedFrameworkResolver resolver = new AspNetCoreSharedFrameworkResolver(_mockLogger.Object);
-            CompilationLibrary compilationLibrary = new CompilationLibrary(
+            var resolver = new AspNetCoreSharedFrameworkResolver(_mockLogger.Object);
+            var compilationLibrary = new CompilationLibrary(
                 "package",
                 "Microsoft.Extensions.Logging.Abstractions",
                 "2.2.0",
@@ -614,7 +639,7 @@ public class SampleClass
                 Enumerable.Empty<Dependency>(),
                 true);
 
-            List<string> assemblies = new List<string>();
+            var assemblies = new List<string>();
             Assert.True(resolver.TryResolveAssemblyPaths(compilationLibrary, assemblies));
             Assert.NotEmpty(assemblies);
         }
@@ -622,7 +647,7 @@ public class SampleClass
         [Fact]
         public void TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext()
         {
-            NetstandardAwareAssemblyResolver netstandardResolver = new NetstandardAwareAssemblyResolver(Assembly.GetExecutingAssembly().Location, _mockLogger.Object);
+            var netstandardResolver = new NetstandardAwareAssemblyResolver(Assembly.GetExecutingAssembly().Location, _mockLogger.Object);
             AssemblyDefinition asm = netstandardResolver.TryWithCustomResolverOnDotNetCore(new AssemblyNameReference("Microsoft.Extensions.Logging.Abstractions", new Version("2.2.0")));
             Assert.NotNull(asm);
         }
@@ -630,10 +655,10 @@ public class SampleClass
         [Fact]
         public void TestInstrument_LambdaInsideMethodWithExcludeAttributeAreExcluded()
         {
-            var instrumenterTest = CreateInstrumentor();
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor();
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
             Assert.NotNull(doc);
 
             Assert.Contains(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLambda(System.String,System.Int32)");
@@ -651,10 +676,10 @@ public class SampleClass
         [Fact]
         public void TestInstrument_LocalFunctionInsideMethodWithExcludeAttributeAreExcluded()
         {
-            var instrumenterTest = CreateInstrumentor();
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor();
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
             Assert.NotNull(doc);
 
             Assert.Contains(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLocalFunction(System.String,System.Int32)");
@@ -676,10 +701,10 @@ public class SampleClass
         [Fact]
         public void TestInstrument_YieldInsideMethodWithExcludeAttributeAreExcluded()
         {
-            var instrumenterTest = CreateInstrumentor();
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor();
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
             Assert.NotNull(doc);
 
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
@@ -697,10 +722,10 @@ public class SampleClass
         [Fact]
         public void TestInstrument_AsyncAwaitInsideMethodWithExcludeAttributeAreExcluded()
         {
-            var instrumenterTest = CreateInstrumentor();
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor();
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
             Assert.NotNull(doc);
 
             Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
@@ -718,7 +743,7 @@ public class SampleClass
         [Fact]
         public void TestReachabilityHelper()
         {
-            var allInstrumentableLines =
+            int[] allInstrumentableLines =
                 new[]
                 {
                     // Throws
@@ -746,7 +771,7 @@ public class SampleClass
                     // FiltersAndFinallies
                     171, 173, 174, 175, 176, 177, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 192, 193, 194, 195, 196, 197
                 };
-            var notReachableLines =
+            int[] notReachableLines =
                 new[]
                 {
                     // NoBranches
@@ -769,12 +794,12 @@ public class SampleClass
                     176, 177, 183, 184, 189, 190, 195, 196, 197
                 };
 
-            var expectedToBeInstrumented = allInstrumentableLines.Except(notReachableLines).ToArray();
+            int[] expectedToBeInstrumented = allInstrumentableLines.Except(notReachableLines).ToArray();
 
-            var instrumenterTest = CreateInstrumentor();
-            var result = instrumenterTest.Instrumenter.Instrument();
+            InstrumenterTest instrumenterTest = CreateInstrumentor();
+            InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-            var doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.DoesNotReturn.cs");
+            Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.DoesNotReturn.cs");
 
             // check for instrumented lines
             doc.AssertNonInstrumentedLines(BuildConfiguration.Debug, notReachableLines);

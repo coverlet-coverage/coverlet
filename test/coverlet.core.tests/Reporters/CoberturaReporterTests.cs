@@ -1,3 +1,6 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Xml.Linq;
+using Coverlet.Core.Abstractions;
+using Moq;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
@@ -16,27 +21,27 @@ namespace Coverlet.Core.Reporters.Tests
         [Fact]
         public void TestReport()
         {
-            CoverageResult result = new CoverageResult();
+            var result = new CoverageResult();
             result.Identifier = Guid.NewGuid().ToString();
 
-            Lines lines = new Lines();
+            var lines = new Lines();
             lines.Add(1, 1);
             lines.Add(2, 0);
 
-            Branches branches = new Branches();
+            var branches = new Branches();
             branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 });
             branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 23, EndOffset = 27, Path = 1, Ordinal = 2 });
 
-            Methods methods = new Methods();
-            var methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestReport()";
+            var methods = new Methods();
+            string methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestReport()";
             methods.Add(methodString, new Method());
             methods[methodString].Lines = lines;
             methods[methodString].Branches = branches;
 
-            Classes classes = new Classes();
+            var classes = new Classes();
             classes.Add("Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods);
 
-            Documents documents = new Documents();
+            var documents = new Documents();
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -49,6 +54,7 @@ namespace Coverlet.Core.Reporters.Tests
 
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
+            result.Parameters = new CoverageParameters();
 
             CultureInfo currentCulture = Thread.CurrentThread.CurrentCulture;
             Thread.CurrentThread.CurrentCulture = new CultureInfo("it-IT");
@@ -58,15 +64,15 @@ namespace Coverlet.Core.Reporters.Tests
                 // where decimal char is comma.
                 Assert.Equal("1,5", (1.5).ToString());
 
-                CoberturaReporter reporter = new CoberturaReporter();
-                string report = reporter.Report(result);
+                var reporter = new CoberturaReporter();
+                string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
                 Assert.NotEmpty(report);
 
                 var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
 
-                var matchingRateAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate"));
-                var rateParentNodeNames = matchingRateAttributes.Select(attr => attr.Parent.Name.LocalName);
+                IEnumerable<XAttribute> matchingRateAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate"));
+                IEnumerable<string> rateParentNodeNames = matchingRateAttributes.Select(attr => attr.Parent.Name.LocalName);
                 Assert.Contains("package", rateParentNodeNames);
                 Assert.Contains("class", rateParentNodeNames);
                 Assert.Contains("method", rateParentNodeNames);
@@ -78,8 +84,8 @@ namespace Coverlet.Core.Reporters.Tests
                     Assert.Equal(0.5, double.Parse(value, CultureInfo.InvariantCulture));
                 });
 
-                var matchingComplexityAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.Equals("complexity"));
-                var complexityParentNodeNames = matchingComplexityAttributes.Select(attr => attr.Parent.Name.LocalName);
+                IEnumerable<XAttribute> matchingComplexityAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.Equals("complexity"));
+                IEnumerable<string> complexityParentNodeNames = matchingComplexityAttributes.Select(attr => attr.Parent.Name.LocalName);
                 Assert.Contains("package", complexityParentNodeNames);
                 Assert.Contains("class", complexityParentNodeNames);
                 Assert.Contains("method", complexityParentNodeNames);
@@ -109,24 +115,25 @@ namespace Coverlet.Core.Reporters.Tests
             string expectedMethodName,
             string expectedSignature)
         {
-            CoverageResult result = new CoverageResult();
+            var result = new CoverageResult();
+            result.Parameters = new CoverageParameters();
             result.Identifier = Guid.NewGuid().ToString();
 
-            Lines lines = new Lines();
+            var lines = new Lines();
             lines.Add(1, 1);
 
-            Branches branches = new Branches();
+            var branches = new Branches();
             branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 });
 
-            Methods methods = new Methods();
+            var methods = new Methods();
             methods.Add(methodString, new Method());
             methods[methodString].Lines = lines;
             methods[methodString].Branches = branches;
 
-            Classes classes = new Classes();
+            var classes = new Classes();
             classes.Add("Google.Protobuf.Reflection.MessageDescriptor", methods);
 
-            Documents documents = new Documents();
+            var documents = new Documents();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 documents.Add(@"C:\doc.cs", classes);
@@ -139,8 +146,8 @@ namespace Coverlet.Core.Reporters.Tests
             result.Modules = new Modules();
             result.Modules.Add("module", documents);
 
-            CoberturaReporter reporter = new CoberturaReporter();
-            string report = reporter.Report(result);
+            var reporter = new CoberturaReporter();
+            string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
             Assert.NotEmpty(report);
 
@@ -156,7 +163,8 @@ namespace Coverlet.Core.Reporters.Tests
         [Fact]
         public void TestReportWithDifferentDirectories()
         {
-            CoverageResult result = new CoverageResult();
+            var result = new CoverageResult();
+            result.Parameters = new CoverageParameters();
             result.Identifier = Guid.NewGuid().ToString();
 
             string absolutePath1;
@@ -209,16 +217,16 @@ namespace Coverlet.Core.Reporters.Tests
 
             result.Modules = new Modules { { "Module", documents } };
 
-            CoberturaReporter reporter = new CoberturaReporter();
-            string report = reporter.Report(result);
+            var reporter = new CoberturaReporter();
+            string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
             var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
 
-            List<string> basePaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
-            List<string> relativePaths = doc.Element("coverage").Element("packages").Element("package")
+            var basePaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
+            var relativePaths = doc.Element("coverage").Element("packages").Element("package")
                 .Element("classes").Elements().Select(e => e.Attribute("filename").Value).ToList();
 
-            List<string> possiblePaths = new List<string>();
+            var possiblePaths = new List<string>();
             foreach (string basePath in basePaths)
             {
                 foreach (string relativePath in relativePaths)
@@ -241,9 +249,9 @@ namespace Coverlet.Core.Reporters.Tests
         [Fact]
         public void TestReportWithSourcelinkPaths()
         {
-            CoverageResult result = new CoverageResult { UseSourceLink = true, Identifier = Guid.NewGuid().ToString() };
+            var result = new CoverageResult { Parameters = new CoverageParameters() { UseSourceLink = true }, Identifier = Guid.NewGuid().ToString() };
 
-            var absolutePath =
+            string absolutePath =
                 @"https://raw.githubusercontent.com/johndoe/Coverlet/02c09baa8bfdee3b6cdf4be89bd98c8157b0bc08/Demo.cs";
 
             var classes = new Classes { { "Class", new Methods() } };
@@ -251,11 +259,11 @@ namespace Coverlet.Core.Reporters.Tests
 
             result.Modules = new Modules { { "Module", documents } };
 
-            CoberturaReporter reporter = new CoberturaReporter();
-            string report = reporter.Report(result);
+            var reporter = new CoberturaReporter();
+            string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
             var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
-            var fileName = doc.Element("coverage").Element("packages").Element("package").Element("classes").Elements()
+            string fileName = doc.Element("coverage").Element("packages").Element("package").Element("classes").Elements()
                 .Select(e => e.Attribute("filename").Value).Single();
 
             Assert.Equal(absolutePath, fileName);

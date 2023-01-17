@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -44,6 +47,8 @@ namespace Coverlet.Collector.DataCollection
                 coverletSettings.IncludeTestAssembly = ParseIncludeTestAssembly(configurationElement);
                 coverletSettings.SkipAutoProps = ParseSkipAutoProps(configurationElement);
                 coverletSettings.DoesNotReturnAttributes = ParseDoesNotReturnAttributes(configurationElement);
+                coverletSettings.DeterministicReport = ParseDeterministicReport(configurationElement);
+                coverletSettings.ExcludeAssembliesWithoutSources = ParseExcludeAssembliesWithoutSources(configurationElement);
             }
 
             coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
@@ -62,7 +67,7 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="testModules">Test modules</param>
         /// <returns>Test module</returns>
-        private string ParseTestModule(IEnumerable<string> testModules)
+        private static string ParseTestModule(IEnumerable<string> testModules)
         {
             // Validate if at least one source present.
             if (testModules == null || !testModules.Any())
@@ -82,13 +87,13 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Report formats</returns>
-        private string[] ParseReportFormats(XmlElement configurationElement)
+        private static string[] ParseReportFormats(XmlElement configurationElement)
         {
             string[] formats = Array.Empty<string>();
             if (configurationElement != null)
             {
                 XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
-                formats = this.SplitElement(reportFormatElement);
+                formats = SplitElement(reportFormatElement);
             }
 
             return formats is null || formats.Length == 0 ? new[] { CoverletConstants.DefaultReportFormat } : formats;
@@ -99,10 +104,10 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Filters to include</returns>
-        private string[] ParseIncludeFilters(XmlElement configurationElement)
+        private static string[] ParseIncludeFilters(XmlElement configurationElement)
         {
             XmlElement includeFiltersElement = configurationElement[CoverletConstants.IncludeFiltersElementName];
-            return this.SplitElement(includeFiltersElement);
+            return SplitElement(includeFiltersElement);
         }
 
         /// <summary>
@@ -110,10 +115,10 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Directories to include</returns>
-        private string[] ParseIncludeDirectories(XmlElement configurationElement)
+        private static string[] ParseIncludeDirectories(XmlElement configurationElement)
         {
             XmlElement includeDirectoriesElement = configurationElement[CoverletConstants.IncludeDirectoriesElementName];
-            return this.SplitElement(includeDirectoriesElement);
+            return SplitElement(includeDirectoriesElement);
         }
 
         /// <summary>
@@ -121,14 +126,14 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Filters to exclude</returns>
-        private string[] ParseExcludeFilters(XmlElement configurationElement)
+        private static string[] ParseExcludeFilters(XmlElement configurationElement)
         {
-            List<string> excludeFilters = new List<string> { CoverletConstants.DefaultExcludeFilter };
+            var excludeFilters = new List<string> { CoverletConstants.DefaultExcludeFilter };
 
             if (configurationElement != null)
             {
                 XmlElement excludeFiltersElement = configurationElement[CoverletConstants.ExcludeFiltersElementName];
-                string[] filters = this.SplitElement(excludeFiltersElement);
+                string[] filters = SplitElement(excludeFiltersElement);
                 if (filters != null)
                 {
                     excludeFilters.AddRange(filters);
@@ -143,10 +148,10 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Source files to exclude</returns>
-        private string[] ParseExcludeSourceFiles(XmlElement configurationElement)
+        private static string[] ParseExcludeSourceFiles(XmlElement configurationElement)
         {
             XmlElement excludeSourceFilesElement = configurationElement[CoverletConstants.ExcludeSourceFilesElementName];
-            return this.SplitElement(excludeSourceFilesElement);
+            return SplitElement(excludeSourceFilesElement);
         }
 
         /// <summary>
@@ -154,10 +159,10 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Attributes to exclude</returns>
-        private string[] ParseExcludeAttributes(XmlElement configurationElement)
+        private static string[] ParseExcludeAttributes(XmlElement configurationElement)
         {
             XmlElement excludeAttributesElement = configurationElement[CoverletConstants.ExcludeAttributesElementName];
-            return this.SplitElement(excludeAttributesElement);
+            return SplitElement(excludeAttributesElement);
         }
 
         /// <summary>
@@ -165,7 +170,7 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Merge with attribute</returns>
-        private string ParseMergeWith(XmlElement configurationElement)
+        private static string ParseMergeWith(XmlElement configurationElement)
         {
             XmlElement mergeWithElement = configurationElement[CoverletConstants.MergeWithElementName];
             return mergeWithElement?.InnerText;
@@ -176,7 +181,7 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Use source link flag</returns>
-        private bool ParseUseSourceLink(XmlElement configurationElement)
+        private static bool ParseUseSourceLink(XmlElement configurationElement)
         {
             XmlElement useSourceLinkElement = configurationElement[CoverletConstants.UseSourceLinkElementName];
             bool.TryParse(useSourceLinkElement?.InnerText, out bool useSourceLink);
@@ -188,7 +193,7 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Single hit flag</returns>
-        private bool ParseSingleHit(XmlElement configurationElement)
+        private static bool ParseSingleHit(XmlElement configurationElement)
         {
             XmlElement singleHitElement = configurationElement[CoverletConstants.SingleHitElementName];
             bool.TryParse(singleHitElement?.InnerText, out bool singleHit);
@@ -196,11 +201,34 @@ namespace Coverlet.Collector.DataCollection
         }
 
         /// <summary>
+        /// Parse ParseDeterministicReport flag
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <returns>ParseDeterministicReport flag</returns>
+        private static bool ParseDeterministicReport(XmlElement configurationElement)
+        {
+            XmlElement deterministicReportElement = configurationElement[CoverletConstants.DeterministicReport];
+            bool.TryParse(deterministicReportElement?.InnerText, out bool deterministicReport);
+            return deterministicReport;
+        }
+
+        /// <summary>
+        /// Parse ExcludeAssembliesWithoutSources flag
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <returns>ExcludeAssembliesWithoutSources flag</returns>
+        private static string ParseExcludeAssembliesWithoutSources(XmlElement configurationElement)
+        {
+            XmlElement instrumentModulesWithoutLocalSourcesElement = configurationElement[CoverletConstants.ExcludeAssembliesWithoutSources];
+            return instrumentModulesWithoutLocalSourcesElement?.InnerText;
+        }
+
+        /// <summary>
         /// Parse include test assembly flag
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Include Test Assembly Flag</returns>
-        private bool ParseIncludeTestAssembly(XmlElement configurationElement)
+        private static bool ParseIncludeTestAssembly(XmlElement configurationElement)
         {
             XmlElement includeTestAssemblyElement = configurationElement[CoverletConstants.IncludeTestAssemblyElementName];
             bool.TryParse(includeTestAssemblyElement?.InnerText, out bool includeTestAssembly);
@@ -212,7 +240,7 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>Include Test Assembly Flag</returns>
-        private bool ParseSkipAutoProps(XmlElement configurationElement)
+        private static bool ParseSkipAutoProps(XmlElement configurationElement)
         {
             XmlElement skipAutoPropsElement = configurationElement[CoverletConstants.SkipAutoProps];
             bool.TryParse(skipAutoPropsElement?.InnerText, out bool skipAutoProps);
@@ -224,10 +252,10 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="configurationElement">Configuration element</param>
         /// <returns>DoesNotReturn attributes</returns>
-        private string[] ParseDoesNotReturnAttributes(XmlElement configurationElement)
+        private static string[] ParseDoesNotReturnAttributes(XmlElement configurationElement)
         {
             XmlElement doesNotReturnAttributesElement = configurationElement[CoverletConstants.DoesNotReturnAttributesElementName];
-            return this.SplitElement(doesNotReturnAttributesElement);
+            return SplitElement(doesNotReturnAttributesElement);
         }
 
         /// <summary>
@@ -235,7 +263,7 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="element">The element to split</param>
         /// <returns>An array of the values in the element</returns>
-        private string[] SplitElement(XmlElement element)
+        private static string[] SplitElement(XmlElement element)
         {
             return element?.InnerText?.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).ToArray();
         }

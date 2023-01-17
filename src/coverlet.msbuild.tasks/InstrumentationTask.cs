@@ -1,7 +1,9 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Diagnostics;
 using System.IO;
-
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
@@ -9,6 +11,7 @@ using Coverlet.Core.Symbols;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+
 using ILogger = Coverlet.Core.Abstractions.ILogger;
 
 namespace Coverlet.MSbuild.Tasks
@@ -42,6 +45,10 @@ namespace Coverlet.MSbuild.Tasks
 
         public string DoesNotReturnAttribute { get; set; }
 
+        public bool DeterministicReport { get; set; }
+
+        public string ExcludeAssembliesWithoutSources { get; set; }
+
         [Output]
         public ITaskItem InstrumenterState { get; set; }
 
@@ -50,26 +57,18 @@ namespace Coverlet.MSbuild.Tasks
             _logger = new MSBuildLogger(Log);
         }
 
-        private void WaitForDebuggerIfEnabled()
+        private void AttachDebugger()
         {
             if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_MSBUILD_INSTRUMENTATIONTASK_DEBUG"), out int result) && result == 1)
             {
-                Console.WriteLine("Coverlet msbuild instrumentation task debugging is enabled. Please attach debugger to process to continue");
-                Process currentProcess = Process.GetCurrentProcess();
-                Console.WriteLine($"Process Id: {currentProcess.Id} Name: {currentProcess.ProcessName}");
-
-                while (!Debugger.IsAttached)
-                {
-                    System.Threading.Tasks.Task.Delay(1000).Wait();
-                }
-
+                Debugger.Launch();
                 Debugger.Break();
             }
         }
 
         public override bool Execute()
         {
-            WaitForDebuggerIfEnabled();
+            AttachDebugger();
 
             IServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
@@ -87,9 +86,9 @@ namespace Coverlet.MSbuild.Tasks
 
             try
             {
-                var fileSystem = ServiceProvider.GetService<IFileSystem>();
+                IFileSystem fileSystem = ServiceProvider.GetService<IFileSystem>();
 
-                CoverageParameters parameters = new CoverageParameters
+                var parameters = new CoverageParameters
                 {
                     IncludeFilters = Include?.Split(','),
                     IncludeDirectories = IncludeDirectory?.Split(','),
@@ -101,10 +100,12 @@ namespace Coverlet.MSbuild.Tasks
                     MergeWith = MergeWith,
                     UseSourceLink = UseSourceLink,
                     SkipAutoProps = SkipAutoProps,
+                    DeterministicReport = DeterministicReport,
+                    ExcludeAssembliesWithoutSources = ExcludeAssembliesWithoutSources,
                     DoesNotReturnAttributes = DoesNotReturnAttribute?.Split(',')
                 };
 
-                Coverage coverage = new Coverage(Path,
+                var coverage = new Coverage(Path,
                                                  parameters,
                                                  _logger,
                                                  ServiceProvider.GetService<IInstrumentationHelper>(),
@@ -114,13 +115,9 @@ namespace Coverlet.MSbuild.Tasks
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
                 InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());
-                using (var instrumentedStateFile = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write))
-                {
-                    using (Stream serializedState = CoveragePrepareResult.Serialize(prepareResult))
-                    {
-                        serializedState.CopyTo(instrumentedStateFile);
-                    }
-                }
+                using Stream instrumentedStateFile = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write);
+                using Stream serializedState = CoveragePrepareResult.Serialize(prepareResult);
+                serializedState.CopyTo(instrumentedStateFile);
             }
             catch (Exception ex)
             {

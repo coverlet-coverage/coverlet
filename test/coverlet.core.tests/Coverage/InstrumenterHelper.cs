@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,7 +23,7 @@ namespace Coverlet.Core.Tests
 {
     static class TestInstrumentationHelper
     {
-        private static IServiceProvider _processWideContainer;
+        private static IServiceProvider s_processWideContainer;
 
         /// <summary>
         /// caller sample:  TestInstrumentationHelper.GenerateHtmlReport(result, sourceFileFilter: @"+**\Samples\Instrumentation.cs");
@@ -28,15 +31,15 @@ namespace Coverlet.Core.Tests
         /// </summary>
         public static void GenerateHtmlReport(CoverageResult coverageResult, IReporter reporter = null, string sourceFileFilter = "", [CallerMemberName] string directory = "")
         {
-            JsonReporter defaultReporter = new JsonReporter();
+            var defaultReporter = new JsonReporter();
             reporter ??= new CoberturaReporter();
             DirectoryInfo dir = Directory.CreateDirectory(directory);
             dir.Delete(true);
             dir.Create();
             string reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", defaultReporter.Extension));
-            File.WriteAllText(reportFile, defaultReporter.Report(coverageResult));
+            File.WriteAllText(reportFile, defaultReporter.Report(coverageResult, new Mock<ISourceRootTranslator>().Object));
             reportFile = Path.Combine(dir.FullName, Path.ChangeExtension("report", reporter.Extension));
-            File.WriteAllText(reportFile, reporter.Report(coverageResult));
+            File.WriteAllText(reportFile, reporter.Report(coverageResult, new Mock<ISourceRootTranslator>().Object));
             // i.e. reportgenerator -reports:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If\report.cobertura.xml" -targetdir:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If" -filefilters:+**\Samples\Instrumentation.cs
             Assert.True(new Generator().GenerateReport(new ReportConfiguration(
             new[] { reportFile },
@@ -61,13 +64,13 @@ namespace Coverlet.Core.Tests
             {
                 Assert.DoesNotContain("not found for module: ", message);
             });
-            _processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
-            CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-            Coverage coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, _processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
+            s_processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
+            var coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
+            var coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, s_processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
             return coverage.GetCoverageResult();
         }
 
-        async public static Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod,
+        public static async Task<CoveragePrepareResult> Run<T>(Func<dynamic, Task> callMethod,
                                                                Func<string, string[]> includeFilter = null,
                                                                Func<string, string[]> excludeFilter = null,
                                                                Func<string, string[]> doesNotReturnAttributes = null,
@@ -93,7 +96,7 @@ namespace Coverlet.Core.Tests
 
             static string[] defaultFilters(string _) => Array.Empty<string>();
 
-            CoverageParameters parameters = new CoverageParameters
+            var parameters = new CoverageParameters
             {
                 IncludeFilters = (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
                 new string[]
@@ -117,14 +120,14 @@ namespace Coverlet.Core.Tests
             };
 
             // Instrument module
-            Coverage coverage = new Coverage(newPath, parameters, new Logger(logFile),
-            _processWideContainer.GetService<IInstrumentationHelper>(), _processWideContainer.GetService<IFileSystem>(), _processWideContainer.GetService<ISourceRootTranslator>(), _processWideContainer.GetService<ICecilSymbolHelper>());
+            var coverage = new Coverage(newPath, parameters, new Logger(logFile),
+            s_processWideContainer.GetService<IInstrumentationHelper>(), s_processWideContainer.GetService<IFileSystem>(), s_processWideContainer.GetService<ISourceRootTranslator>(), s_processWideContainer.GetService<ICecilSymbolHelper>());
             CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
             Assert.Single(prepareResult.Results);
 
             // Load new assembly
-            Assembly asm = Assembly.LoadFile(newPath);
+            var asm = Assembly.LoadFile(newPath);
 
             // Instance type and call method
             await callMethod(Activator.CreateInstance(asm.GetType(typeof(T).FullName)));
@@ -140,7 +143,7 @@ namespace Coverlet.Core.Tests
             tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, new object[2] { null, null });
 
             // Persist CoveragePrepareResult
-            using (FileStream fs = new FileStream(persistPrepareResultToFile, FileMode.Open))
+            using (var fs = new FileStream(persistPrepareResultToFile, FileMode.Open))
             {
                 await CoveragePrepareResult.Serialize(prepareResult).CopyToAsync(fs);
             }
@@ -150,7 +153,7 @@ namespace Coverlet.Core.Tests
 
         private static void SetTestContainer(string testModule = null, bool disableRestoreModules = false)
         {
-            LazyInitializer.EnsureInitialized(ref _processWideContainer, () =>
+            LazyInitializer.EnsureInitialized(ref s_processWideContainer, () =>
             {
                 var serviceCollection = new ServiceCollection();
                 serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
@@ -237,7 +240,7 @@ namespace Coverlet.Core.Tests
     // We log to files for debugging pourpose, we can check if instrumentation is ok
     class Logger : ILogger
     {
-        string _logFile;
+        readonly string _logFile;
 
         public Logger(string logFile) => _logFile = logFile;
 
@@ -288,7 +291,7 @@ namespace Coverlet.Core.Tests
 
     public abstract class ExternalProcessExecutionTest
     {
-        protected FunctionExecutor FunctionExecutor = new FunctionExecutor(
+        protected FunctionExecutor FunctionExecutor = new(
         o =>
         {
             o.StartInfo.RedirectStandardError = true;

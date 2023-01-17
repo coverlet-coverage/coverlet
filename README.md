@@ -37,9 +37,7 @@ Coverlet can be used through three different *drivers*
 Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk?view=vs-2019  
 
 
-### VSTest Integration (preferred due to [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test) supports only .NET Core application)
-
-At the moment collectors integration **does not support** .NET Framework application.
+### VSTest Integration (preferred due to [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation
 ```bash
@@ -174,6 +172,7 @@ Author and owner
 Co-maintainers
 
 * [Peter Liljenberg](https://github.com/petli)  
+* [David Müller](https://github.com/daveMueller)
 * [Marco Rossignoli](https://github.com/MarcoRossignoli)
 
 ## Code of Conduct

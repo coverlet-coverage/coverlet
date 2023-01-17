@@ -1,11 +1,12 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Xml.Linq;
-
 using Coverlet.Core;
 using Newtonsoft.Json;
 using NuGet.Packaging;
@@ -23,7 +24,7 @@ namespace Coverlet.Integration.Tests
 
     public abstract class BaseTest
     {
-        private static int _folderSuffix = 0;
+        private static int s_folderSuffix;
 
         protected BuildConfiguration GetAssemblyBuildConfiguration()
         {
@@ -38,21 +39,35 @@ namespace Coverlet.Integration.Tests
 
         private protected string GetPackageVersion(string filter)
         {
-            if (!Directory.Exists($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages"))
+            string packagesPath = $"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages";
+
+            if (!Directory.Exists(packagesPath))
             {
                 throw new DirectoryNotFoundException("Package directory not found, run 'dotnet pack' on repository root");
             }
 
-            using Stream pkg = File.OpenRead(Directory.GetFiles($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages", filter).Single());
-            using var reader = new PackageArchiveReader(pkg);
-            using Stream nuspecStream = reader.GetNuspec();
-            Manifest manifest = Manifest.ReadFrom(nuspecStream, false);
-            return manifest.Metadata.Version.OriginalVersion;
+            var files = Directory.GetFiles(packagesPath, filter).ToList();
+            if (files.Count == 0)
+            {
+                throw new InvalidOperationException($"Could not find any package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was called.");
+            }
+            else if (files.Count > 1)
+            {
+                throw new InvalidOperationException($"Found more than one package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was only called once.");
+            }
+            else
+            {
+                using Stream pkg = File.OpenRead(files[0]);
+                using var reader = new PackageArchiveReader(pkg);
+                using Stream nuspecStream = reader.GetNuspec();
+                var manifest = Manifest.ReadFrom(nuspecStream, false);
+                return manifest.Metadata.Version.OriginalVersion;
+            }
         }
 
         private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
         {
-            DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N").Substring(0, 6)}{Interlocked.Increment(ref _folderSuffix)}");
+            DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N")[..6]}{Interlocked.Increment(ref s_folderSuffix)}");
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "*.csproj")
                     .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "nuget.config")))))
@@ -80,8 +95,8 @@ namespace Coverlet.Integration.Tests
 
         private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
         {
-            Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}");
-            ProcessStartInfo psi = new ProcessStartInfo(command, arguments);
+            Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}\nWorkingDirectory: {workingDirectory}");
+            var psi = new ProcessStartInfo(command, arguments);
             psi.WorkingDirectory = workingDirectory;
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
@@ -108,7 +123,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("Nuget.config not found", "nuget.config");
             }
             XDocument xml;
-            using (var nugetFileStream = File.OpenRead(nugetFile))
+            using (FileStream? nugetFileStream = File.OpenRead(nugetFile))
             {
                 xml = XDocument.Load(nugetFileStream);
             }
@@ -130,7 +145,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(csproj))
+            using (FileStream? csprojStream = File.OpenRead(csproj))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -150,7 +165,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(csproj))
+            using (FileStream? csprojStream = File.OpenRead(csproj))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -170,7 +185,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(csproj))
+            using (FileStream? csprojStream = File.OpenRead(csproj))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -189,7 +204,7 @@ namespace Coverlet.Integration.Tests
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(csproj))
+            using (FileStream? csprojStream = File.OpenRead(csproj))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -200,7 +215,7 @@ namespace Coverlet.Integration.Tests
             xml.Save(csproj);
         }
 
-        private protected string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought", bool sourceLink = false)
+        private protected string AddCollectorRunsettingsFile(string projectPath, string includeFilter = "[coverletsamplelib.integration.template]*DeepThought", bool sourceLink = false, bool deterministicReport = false)
         {
             string runSettings =
 $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
@@ -210,6 +225,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
         <DataCollector friendlyName=""XPlat code coverage"" >
            <Configuration>
             <Format>json,cobertura</Format>
+            <DeterministicReport>{deterministicReport}</DeterministicReport>
             <Include>{includeFilter}</Include>
             <UseSourceLink>{(sourceLink ? "true" : "false")}</UseSourceLink>
             <!-- We need to include test assembly because test and code to cover are in same template project -->
@@ -256,7 +272,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
                 throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
             }
             XDocument xml;
-            using (var csprojStream = File.OpenRead(project.ProjectFileNamePath))
+            using (FileStream? csprojStream = File.OpenRead(project.ProjectFileNamePath))
             {
                 xml = XDocument.Load(csprojStream);
             }
@@ -326,15 +342,15 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
 
         public bool IsMultipleTargetFramework()
         {
-            using var csprojStream = File.OpenRead(ProjectFileNamePath);
-            XDocument xml = XDocument.Load(csprojStream);
+            using FileStream? csprojStream = File.OpenRead(ProjectFileNamePath);
+            var xml = XDocument.Load(csprojStream);
             return xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFramework") == null;
         }
 
         public string[] GetTargetFrameworks()
         {
-            using var csprojStream = File.OpenRead(ProjectFileNamePath);
-            XDocument xml = XDocument.Load(csprojStream);
+            using FileStream? csprojStream = File.OpenRead(ProjectFileNamePath);
+            var xml = XDocument.Load(csprojStream);
             XElement element = xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFramework") ?? xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFrameworks")!;
             if (element is null)
             {

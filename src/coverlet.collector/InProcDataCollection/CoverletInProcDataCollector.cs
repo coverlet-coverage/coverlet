@@ -1,8 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-
 using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Instrumentation;
@@ -15,7 +17,7 @@ namespace Coverlet.Collector.DataCollection
     public class CoverletInProcDataCollector : InProcDataCollection
     {
         private TestPlatformEqtTrace _eqtTrace;
-        private bool _enableExceptionLog = false;
+        private bool _enableExceptionLog;
 
         private void AttachDebugger()
         {
@@ -53,7 +55,7 @@ namespace Coverlet.Collector.DataCollection
 
         public void TestSessionEnd(TestSessionEndArgs testSessionEndArgs)
         {
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 Type injectedInstrumentationClass = GetInstrumentationClass(assembly);
                 if (injectedInstrumentationClass is null)
@@ -64,7 +66,7 @@ namespace Coverlet.Collector.DataCollection
                 try
                 {
                     _eqtTrace.Verbose($"Calling ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
-                    var unloadModule = injectedInstrumentationClass.GetMethod(nameof(ModuleTrackerTemplate.UnloadModule), new[] { typeof(object), typeof(EventArgs) });
+                    MethodInfo unloadModule = injectedInstrumentationClass.GetMethod(nameof(ModuleTrackerTemplate.UnloadModule), new[] { typeof(object), typeof(EventArgs) });
                     unloadModule.Invoke(null, new[] { (object)this, EventArgs.Empty });
                     injectedInstrumentationClass.GetField("FlushHitFile", BindingFlags.Static | BindingFlags.Public).SetValue(null, false);
                     _eqtTrace.Verbose($"Called ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
@@ -89,7 +91,7 @@ namespace Coverlet.Collector.DataCollection
         {
             try
             {
-                foreach (var type in assembly.GetTypes())
+                foreach (Type type in assembly.GetTypes())
                 {
                     if (type.Namespace == "Coverlet.Core.Instrumentation.Tracker"
                         && type.Name.StartsWith(assembly.GetName().Name + "_"))
@@ -104,7 +106,7 @@ namespace Coverlet.Collector.DataCollection
             {
                 if (_enableExceptionLog)
                 {
-                    StringBuilder exceptionString = new StringBuilder();
+                    var exceptionString = new StringBuilder();
                     exceptionString.AppendFormat("{0}: Failed to get Instrumentation class for assembly '{1}' with error: {2}",
                         CoverletConstants.InProcDataCollectorName, assembly, ex);
                     exceptionString.AppendLine();

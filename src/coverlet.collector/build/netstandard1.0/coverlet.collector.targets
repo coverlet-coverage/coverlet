@@ -12,6 +12,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
   <Target Name="CopyCoverletDataCollectorFiles" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
       <CoverletDataCollectorFiles Include="$(MSBuildThisFileDirectory)\*.*" />
+      <CoverletDataCollectorFiles Remove="@(ResolvedFileToPublish->'$(MSBuildThisFileDirectory)%(Filename)%(Extension)')" />
     </ItemGroup>
     <Copy SourceFiles="@(CoverletDataCollectorFiles)" DestinationFolder="$(PublishDir)%(RecursiveDir)" />
 

@@ -1,3 +1,6 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using Coverlet.Core.Abstractions;
 using static System.Console;
@@ -6,7 +9,8 @@ namespace Coverlet.Console.Logging
 {
     class ConsoleLogger : ILogger
     {
-        private static readonly object _sync = new object();
+        private static readonly object s_sync = new();
+        
         public LogLevel Level { get; set; } = LogLevel.Normal;
 
         public void LogError(string message) => Log(LogLevel.Quiet, message, ConsoleColor.Red);
@@ -23,7 +27,7 @@ namespace Coverlet.Console.Logging
         {
             if (level < Level) return;
 
-            lock (_sync)
+            lock (s_sync)
             {
                 ConsoleColor currentForegroundColor;
                 if (color != (currentForegroundColor = ForegroundColor))

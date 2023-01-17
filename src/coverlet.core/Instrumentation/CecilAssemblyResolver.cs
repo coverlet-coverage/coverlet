@@ -1,8 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
@@ -15,21 +17,21 @@ namespace Coverlet.Core.Instrumentation
     /// In case of testing different runtime i.e. netfx we could find netstandard.dll in folder.
     /// netstandard.dll is a forward only lib, there is no IL but only forwards to "runtime" implementation.
     /// For some classes implementation are in different assembly for different runtime for instance:
-    /// 
+    ///
     /// For NetFx 4.7
     /// // Token: 0x2700072C RID: 1836
     /// .class extern forwarder System.Security.Cryptography.X509Certificates.StoreName
     /// {
     ///    .assembly extern System
-    /// }    
-    /// 
+    /// }
+    ///
     /// For netcoreapp2.2
     /// Token: 0x2700072C RID: 1836
     /// .class extern forwarder System.Security.Cryptography.X509Certificates.StoreName
     /// {
     ///    .assembly extern System.Security.Cryptography.X509Certificates
     /// }
-    /// 
+    ///
     /// There is a concrete possibility that Cecil cannot find implementation and throws StackOverflow exception https://github.com/jbevain/cecil/issues/575
     /// This custom resolver check if requested lib is a "official" netstandard.dll and load once of "current runtime" with
     /// correct forwards.
@@ -37,10 +39,10 @@ namespace Coverlet.Core.Instrumentation
     /// </summary>
     internal class NetstandardAwareAssemblyResolver : DefaultAssemblyResolver
     {
-        private static readonly System.Reflection.Assembly _netStandardAssembly;
-        private static readonly string _name;
-        private static readonly byte[] _publicKeyToken;
-        private static readonly AssemblyDefinition _assemblyDefinition;
+        private static readonly System.Reflection.Assembly s_netStandardAssembly;
+        private static readonly string s_name;
+        private static readonly byte[] s_publicKeyToken;
+        private static readonly AssemblyDefinition s_assemblyDefinition;
 
         private readonly string _modulePath;
         private readonly Lazy<CompositeCompilationAssemblyResolver> _compositeResolver;
@@ -51,11 +53,11 @@ namespace Coverlet.Core.Instrumentation
             try
             {
                 // To be sure to load information of "real" runtime netstandard implementation
-                _netStandardAssembly = System.Reflection.Assembly.LoadFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll"));
-                System.Reflection.AssemblyName name = _netStandardAssembly.GetName();
-                _name = name.Name;
-                _publicKeyToken = name.GetPublicKeyToken();
-                _assemblyDefinition = AssemblyDefinition.ReadAssembly(_netStandardAssembly.Location);
+                s_netStandardAssembly = System.Reflection.Assembly.LoadFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll"));
+                System.Reflection.AssemblyName name = s_netStandardAssembly.GetName();
+                s_name = name.Name;
+                s_publicKeyToken = name.GetPublicKeyToken();
+                s_assemblyDefinition = AssemblyDefinition.ReadAssembly(s_netStandardAssembly.Location);
             }
             catch (FileNotFoundException)
             {
@@ -68,7 +70,7 @@ namespace Coverlet.Core.Instrumentation
             _modulePath = modulePath;
             _logger = logger;
 
-            // this is lazy because we cannot create AspNetCoreSharedFrameworkResolver if not on .NET Core runtime, 
+            // this is lazy because we cannot create AspNetCoreSharedFrameworkResolver if not on .NET Core runtime,
             // runtime folders are different
             _compositeResolver = new Lazy<CompositeCompilationAssemblyResolver>(() => new CompositeCompilationAssemblyResolver(new ICompilationAssemblyResolver[]
             {
@@ -80,26 +82,26 @@ namespace Coverlet.Core.Instrumentation
         }
 
         // Check name and public key but not version that could be different
-        private bool CheckIfSearchingNetstandard(AssemblyNameReference name)
+        private static bool CheckIfSearchingNetstandard(AssemblyNameReference name)
         {
-            if (_netStandardAssembly is null)
+            if (s_netStandardAssembly is null)
             {
                 return false;
             }
 
-            if (_name != name.Name)
+            if (s_name != name.Name)
             {
                 return false;
             }
 
-            if (name.PublicKeyToken.Length != _publicKeyToken.Length)
+            if (name.PublicKeyToken.Length != s_publicKeyToken.Length)
             {
                 return false;
             }
 
             for (int i = 0; i < name.PublicKeyToken.Length; i++)
             {
-                if (_publicKeyToken[i] != name.PublicKeyToken[i])
+                if (s_publicKeyToken[i] != name.PublicKeyToken[i])
                 {
                     return false;
                 }
@@ -112,7 +114,7 @@ namespace Coverlet.Core.Instrumentation
         {
             if (CheckIfSearchingNetstandard(name))
             {
-                return _assemblyDefinition;
+                return s_assemblyDefinition;
             }
             else
             {
@@ -134,21 +136,21 @@ namespace Coverlet.Core.Instrumentation
             }
         }
 
-        private bool IsDotNetCore()
+        private static bool IsDotNetCore()
         {
             // object for .NET Framework is inside mscorlib.dll
             return Path.GetFileName(typeof(object).Assembly.Location) == "System.Private.CoreLib.dll";
         }
 
         /// <summary>
-        /// 
+        ///
         /// We try to manually load assembly.
         /// To work test project needs to use
         ///
         /// <PropertyGroup>
         ///     <PreserveCompilationContext>true</PreserveCompilationContext>
         /// </PropertyGroup>
-        /// 
+        ///
         /// Runtime configuration file doc https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md
         ///
         /// </summary>
@@ -167,8 +169,8 @@ namespace Coverlet.Core.Instrumentation
                 throw new AssemblyResolutionException(name);
             }
 
-            using DependencyContextJsonReader contextJsonReader = new DependencyContextJsonReader();
-            Dictionary<string, Lazy<AssemblyDefinition>> libraries = new Dictionary<string, Lazy<AssemblyDefinition>>();
+            using var contextJsonReader = new DependencyContextJsonReader();
+            var libraries = new Dictionary<string, Lazy<AssemblyDefinition>>();
 
             foreach (string fileName in Directory.GetFiles(Path.GetDirectoryName(_modulePath), "*.deps.json"))
             {
@@ -200,7 +202,7 @@ namespace Coverlet.Core.Instrumentation
                     catch (Exception ex)
                     {
                         // if we don't find a lib go on
-                        _logger.LogVerbose($"TryWithCustomResolverOnDotNetCore exception: {ex.ToString()}");
+                        _logger.LogVerbose($"TryWithCustomResolverOnDotNetCore exception: {ex}");
                     }
                 }
             }
@@ -216,8 +218,8 @@ namespace Coverlet.Core.Instrumentation
 
     internal class AspNetCoreSharedFrameworkResolver : ICompilationAssemblyResolver
     {
-        private readonly string[] _aspNetSharedFrameworkDirs = null;
-        private readonly ILogger _logger = null;
+        private readonly string[] _aspNetSharedFrameworkDirs;
+        private readonly ILogger _logger;
 
         public AspNetCoreSharedFrameworkResolver(ILogger logger)
         {
@@ -248,7 +250,7 @@ namespace Coverlet.Core.Instrumentation
                     continue;
                 }
 
-                foreach (var file in Directory.GetFiles(sharedFrameworkPath))
+                foreach (string file in Directory.GetFiles(sharedFrameworkPath))
                 {
                     if (Path.GetFileName(file).Equals(dllName, StringComparison.OrdinalIgnoreCase))
                     {
