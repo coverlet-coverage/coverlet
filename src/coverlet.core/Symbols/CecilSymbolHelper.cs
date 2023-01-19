@@ -878,8 +878,10 @@ namespace Coverlet.Core.Symbols
 
                 if (currentIndex >= 2 &&
                     instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
-                    instructions[currentIndex - 1].Operand is FieldDefinition field &&
-                    IsCompilerGenerated(field) && field.FullName.EndsWith("__disposeMode") &&
+                    (
+                        (instructions[currentIndex - 1].Operand is FieldDefinition field && IsCompilerGenerated(field) && field.FullName.EndsWith("__disposeMode")) ||
+                        (instructions[currentIndex - 1].Operand is FieldReference fieldRef && IsCompilerGenerated(fieldRef.Resolve()) && fieldRef.FullName.EndsWith("__disposeMode"))
+                    ) &&
                     (instructions[currentIndex - 2].OpCode == OpCodes.Ldarg ||
                      instructions[currentIndex - 2].OpCode == OpCodes.Ldarg_0))
                 {

@@ -101,7 +101,7 @@ namespace Coverlet.Core.Tests
                 IncludeFilters = (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
                 new string[]
                 {
-                    $"[{Path.GetFileNameWithoutExtension(fileName)}*]{typeof(T).FullName}*"
+                    $"[{Path.GetFileNameWithoutExtension(fileName)}*]{GetTypeFullName<T>()}*"
                 }).ToArray(),
                 IncludeDirectories = Array.Empty<string>(),
                 ExcludeFilters = (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)).Concat(new string[]
@@ -179,6 +179,17 @@ namespace Coverlet.Core.Tests
 
                 return serviceCollection.BuildServiceProvider();
             });
+        }
+
+        private static string GetTypeFullName<T>()
+        {
+            string name = typeof(T).FullName;
+            if (typeof(T).IsGenericType && name != null)
+            {
+                int index = name.IndexOf('`');
+                return index == -1 ? name : name[..index];
+            }
+            return name;
         }
     }
 
