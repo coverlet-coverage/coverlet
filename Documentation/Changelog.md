@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+-Incorrect coverage for methods returning IAsyncEnumerable in generic classes [#1383](https://github.com/coverlet-coverage/coverlet/issues/1383)
+-Wrong branch coverage for async methods .NET Standard 1.x [#1376](https://github.com/coverlet-coverage/coverlet/issues/1376) 
 -Empty path exception in visual basic projects [#775](https://github.com/coverlet-coverage/coverlet/issues/775)
 -Allign published nuget package version to github release version [#1413](https://github.com/coverlet-coverage/coverlet/issues/1413)  
 -Sync nuget and github release versions [#1122](https://github.com/coverlet-coverage/coverlet/issues/1122)  
