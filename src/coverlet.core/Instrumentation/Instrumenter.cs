@@ -531,6 +531,9 @@ namespace Coverlet.Core.Instrumentation
         private void InstrumentMethod(MethodDefinition method)
         {
             string sourceFile = method.DebugInformation.SequencePoints.Select(s => _sourceRootTranslator.ResolveFilePath(s.Document.Url)).FirstOrDefault();
+
+            if (string.IsNullOrEmpty(sourceFile)) return;
+
             if (!string.IsNullOrEmpty(sourceFile) && _excludedFilesHelper.Exclude(sourceFile))
             {
                 if (!(_excludedSourceFiles ??= new List<string>()).Contains(sourceFile))
