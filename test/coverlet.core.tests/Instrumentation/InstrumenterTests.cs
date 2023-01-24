@@ -615,15 +615,8 @@ public class SampleClass
             var instrumenter = new Instrumenter(excludedbyattributeDll, "_xunit_excludedbyattribute", parametes, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
 
             InstrumenterResult result = instrumenter.Instrument();
-            if (expectedExcludes)
-            {
-                Assert.Empty(result.Documents);
-                loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
-            }
-            else
-            {
-                Assert.Empty(result.Documents);
-            }
+            Assert.Empty(result.Documents);
+            if (expectedExcludes) { loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>())); }
         }
 
         [Fact]
