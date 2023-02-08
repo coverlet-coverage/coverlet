@@ -87,7 +87,7 @@ The output format of the coverage report can also be changed without a runsettin
 dotnet test --collect:"XPlat Code Coverage;Format=json"
 ```
 
-It is even possible to specify the output in multiple formats.
+It is even possible to specify the coverage output in multiple formats.
 ```
 dotnet test --collect:"XPlat Code Coverage;Format=json,lcov,cobertura"
 ```
