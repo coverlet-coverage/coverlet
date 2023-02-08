@@ -77,9 +77,20 @@ We're working to fill the gaps.
 
 ### Default option (if you don't specify a runsettings file)
 
-| Option             | Summary                                                                                                                                                                              |
-|:-------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|Format              | Results format in which coverage output is generated. Default format is cobertura. Supported format lcov, opencover, cobertura, teamcity, json (default coverlet proprietary format) | 
+Without specifying a runsettings file and calling coverlet by just the name of the collector, the result of the generated coverage output is by default in cobertura format.
+```
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+The output format of the coverage report can also be changed without a runsettings file by specifying it in a parameter. The supported formats are lcov, opencover, cobertura, teamcity, json (default coverlet proprietary format).
+```
+dotnet test --collect:"XPlat Code Coverage;Format=json"
+```
+
+It is even possible to specify the output in multiple formats.
+```
+dotnet test --collect:"XPlat Code Coverage;Format=json,lcov,cobertura"
+```
 
 ### Advanced Options (Supported via runsettings)
 
