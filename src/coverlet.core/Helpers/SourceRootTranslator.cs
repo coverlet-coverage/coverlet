@@ -77,37 +77,37 @@ namespace Coverlet.Core.Helpers
             var mapping = new Dictionary<string, List<SourceRootMapping>>();
 
             string mappingFilePath = Path.Combine(directory, _mappingFileName);
-            throw new Exception(mappingFilePath + " --- " + _fileSystem.Exists(mappingFilePath));
-            //if (!_fileSystem.Exists(mappingFilePath))
-            //{
-            //    return mapping;
-            //}
+            //throw new Exception(mappingFilePath + " --- " + _fileSystem.Exists(mappingFilePath));
+            if (!_fileSystem.Exists(mappingFilePath))
+            {
+                return mapping;
+            }
 
-            //foreach (string mappingRecord in _fileSystem.ReadAllLines(mappingFilePath))
-            //{
-            //    int projectFileSeparatorIndex = mappingRecord.IndexOf('|');
-            //    int pathMappingSeparatorIndex = mappingRecord.IndexOf('=');
-            //    if (projectFileSeparatorIndex == -1 || pathMappingSeparatorIndex == -1)
-            //    {
-            //        _logger.LogWarning($"Malformed mapping '{mappingRecord}'");
-            //        continue;
-            //    }
-            //    string projectPath = mappingRecord.Substring(0, projectFileSeparatorIndex);
-            //    string originalPath = mappingRecord.Substring(projectFileSeparatorIndex + 1, pathMappingSeparatorIndex - projectFileSeparatorIndex - 1);
-            //    string mappedPath = mappingRecord.Substring(pathMappingSeparatorIndex + 1);
+            foreach (string mappingRecord in _fileSystem.ReadAllLines(mappingFilePath))
+            {
+                int projectFileSeparatorIndex = mappingRecord.IndexOf('|');
+                int pathMappingSeparatorIndex = mappingRecord.IndexOf('=');
+                if (projectFileSeparatorIndex == -1 || pathMappingSeparatorIndex == -1)
+                {
+                    _logger.LogWarning($"Malformed mapping '{mappingRecord}'");
+                    continue;
+                }
+                string projectPath = mappingRecord.Substring(0, projectFileSeparatorIndex);
+                string originalPath = mappingRecord.Substring(projectFileSeparatorIndex + 1, pathMappingSeparatorIndex - projectFileSeparatorIndex - 1);
+                string mappedPath = mappingRecord.Substring(pathMappingSeparatorIndex + 1);
 
-            //    if (!mapping.ContainsKey(mappedPath))
-            //    {
-            //        mapping.Add(mappedPath, new List<SourceRootMapping>());
-            //    }
+                if (!mapping.ContainsKey(mappedPath))
+                {
+                    mapping.Add(mappedPath, new List<SourceRootMapping>());
+                }
 
-            //    foreach (string path in originalPath.Split(';'))
-            //    {
-            //        mapping[mappedPath].Add(new SourceRootMapping() { OriginalPath = path, ProjectPath = projectPath });
-            //    }
-            //}
+                foreach (string path in originalPath.Split(';'))
+                {
+                    mapping[mappedPath].Add(new SourceRootMapping() { OriginalPath = path, ProjectPath = projectPath });
+                }
+            }
 
-            //return mapping;
+            return mapping;
         }
 
         public IReadOnlyList<SourceRootMapping> ResolvePathRoot(string pathRoot)
