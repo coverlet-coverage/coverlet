@@ -44,7 +44,7 @@ namespace Coverlet.Core.Helpers
             {
                 throw new FileNotFoundException($"Module test path '{moduleTestPath}' not found", moduleTestPath);
             }
-            _mappingFileName = $"CoverletSourceRootsMapping_{Path.GetFileNameWithoutExtension(moduleTestPath)}";
+            _mappingFileName = $"CoverletSourceRootsMapping";
             _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath));
             _sourceToDeterministicPathMapping = LoadSourceToDeterministicPathMapping(_sourceRootMapping);
         }
