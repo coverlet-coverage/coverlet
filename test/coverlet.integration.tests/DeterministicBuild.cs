@@ -99,6 +99,7 @@ namespace Coverlet.Integration.Tests
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string _, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
             string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, "CoverletSourceRootsMapping");
+            throw new Exception(sourceRootMappingFilePath);
             Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
             Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
