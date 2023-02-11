@@ -75,7 +75,7 @@ namespace Coverlet.Integration.Tests
             CreateDeterministicTestPropsFile();
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string _, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, $"CoverletSourceRootsMapping_{Path.GetFileNameWithoutExtension(_testProjectPath)}");
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, $"CoverletSourceRootsMapping_coverlet.integration.determisticbuild");
             Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
             Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
@@ -98,23 +98,22 @@ namespace Coverlet.Integration.Tests
             CreateDeterministicTestPropsFile();
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string _, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, $"CoverletSourceRootsMapping_{Path.GetFileNameWithoutExtension(_testProjectPath)}");
-            throw new Exception(sourceRootMappingFilePath);
-            //Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
-            //Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
-            //Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", _buildConfiguration, _testProjectTfm!, $"CoverletSourceRootsMapping_coverlet.integration.determisticbuild");
+            Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
+            Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
+            Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-            //DotnetCli($"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out _, _testProjectPath);
-            //Assert.Contains("Passed!", standardOutput);
-            //Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
-            //Assert.True(File.Exists(Path.Combine(_testProjectPath, "coverage.json")));
-            //Assert.Contains("raw.githubusercontent.com", File.ReadAllText(Path.Combine(_testProjectPath, "coverage.json")));
-            //AssertCoverage(standardOutput, checkDeterministicReport: false);
+            DotnetCli($"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true", out standardOutput, out _, _testProjectPath);
+            Assert.Contains("Passed!", standardOutput);
+            Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
+            Assert.True(File.Exists(Path.Combine(_testProjectPath, "coverage.json")));
+            Assert.Contains("raw.githubusercontent.com", File.ReadAllText(Path.Combine(_testProjectPath, "coverage.json")));
+            AssertCoverage(standardOutput, checkDeterministicReport: false);
 
-            //// Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
-            //// DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
-            //// Assert.False(File.Exists(sourceRootMappingFilePath));
-            //RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
+            // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
+            // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
+            // Assert.False(File.Exists(sourceRootMappingFilePath));
+            RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
         }
 
         [Fact]
@@ -123,7 +122,7 @@ namespace Coverlet.Integration.Tests
             CreateDeterministicTestPropsFile();
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string _, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, $"CoverletSourceRootsMapping_{Path.GetFileNameWithoutExtension(_testProjectPath)}");
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, $"CoverletSourceRootsMapping_coverlet.integration.determisticbuild");
             Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
             Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
@@ -151,7 +150,7 @@ namespace Coverlet.Integration.Tests
             CreateDeterministicTestPropsFile();
             DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string _, _testProjectPath);
             Assert.Contains("Build succeeded.", standardOutput);
-            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, $"CoverletSourceRootsMapping_{Path.GetFileNameWithoutExtension(_testProjectPath)}");
+            string sourceRootMappingFilePath = Path.Combine(_testProjectPath, "bin", GetAssemblyBuildConfiguration().ToString(), _testProjectTfm!, $"CoverletSourceRootsMapping_coverlet.integration.determisticbuild");
             Assert.True(File.Exists(sourceRootMappingFilePath), sourceRootMappingFilePath);
             Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
