@@ -22,7 +22,7 @@ namespace Coverlet.Core.Helpers
         private readonly IFileSystem _fileSystem;
         private readonly Dictionary<string, List<SourceRootMapping>> _sourceRootMapping;
         private readonly Dictionary<string, List<string>> _sourceToDeterministicPathMapping;
-        private readonly string MappingFileName = "CoverletSourceRootsMapping";
+        private const string MappingFileName = "CoverletSourceRootsMapping";
         private Dictionary<string, string> _resolutionCacheFiles;
 
         public SourceRootTranslator(ILogger logger, IFileSystem fileSystem)
