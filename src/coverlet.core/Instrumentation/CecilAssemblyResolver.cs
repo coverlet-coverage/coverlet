@@ -10,6 +10,8 @@ using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Mono.Cecil;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core.Instrumentation
 {
@@ -70,14 +72,14 @@ namespace Coverlet.Core.Instrumentation
             _modulePath = modulePath;
             _logger = logger;
 
-            // this is lazy because we cannot create AspNetCoreSharedFrameworkResolver if not on .NET Core runtime,
+            // this is lazy because we cannot create NetCoreSharedFrameworkResolver if not on .NET Core runtime,
             // runtime folders are different
             _compositeResolver = new Lazy<CompositeCompilationAssemblyResolver>(() => new CompositeCompilationAssemblyResolver(new ICompilationAssemblyResolver[]
             {
                 new AppBaseCompilationAssemblyResolver(),
-                new ReferenceAssemblyPathResolver(),
                 new PackageCompilationAssemblyResolver(),
-                new AspNetCoreSharedFrameworkResolver(_logger)
+                new NetCoreSharedFrameworkResolver(modulePath, _logger),
+                new ReferenceAssemblyPathResolver(),
             }), true);
         }
 
@@ -216,23 +218,37 @@ namespace Coverlet.Core.Instrumentation
         }
     }
 
-    internal class AspNetCoreSharedFrameworkResolver : ICompilationAssemblyResolver
+    internal class NetCoreSharedFrameworkResolver : ICompilationAssemblyResolver
     {
-        private readonly string[] _aspNetSharedFrameworkDirs;
+        private readonly List<string> _aspNetSharedFrameworkDirs = new();
         private readonly ILogger _logger;
 
-        public AspNetCoreSharedFrameworkResolver(ILogger logger)
+        public NetCoreSharedFrameworkResolver(string modulePath, ILogger logger)
         {
             _logger = logger;
-            string runtimeRootPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
-            string runtimeVersion = runtimeRootPath.Substring(runtimeRootPath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-            _aspNetSharedFrameworkDirs = new string[]
-            {
-               Path.GetFullPath(Path.Combine(runtimeRootPath,"../../Microsoft.AspNetCore.All", runtimeVersion)),
-               Path.GetFullPath(Path.Combine(runtimeRootPath, "../../Microsoft.AspNetCore.App", runtimeVersion))
-            };
 
-            _logger.LogVerbose("AspNetCoreSharedFrameworkResolver search paths:");
+            string runtimeConfigFile = Path.Combine(
+                Path.GetDirectoryName(modulePath)!,
+                Path.GetFileNameWithoutExtension(modulePath) + ".runtimeconfig.json");
+            if (!File.Exists(runtimeConfigFile))
+            {
+                return;
+            }
+
+            var reader = new RuntimeConfigurationReader(runtimeConfigFile);
+            IEnumerable<(string Name, string Version)> referencedFrameworks = reader.GetFrameworks();
+            string runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            string runtimeRootPath = Path.Combine(runtimePath!, "../..");
+            foreach ((string frameworkName, string frameworkVersion) in referencedFrameworks)
+            {
+                var majorVersion = string.Join(".", frameworkVersion.Split('.').Take(2)) + ".";
+                var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
+                var latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
+                    .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
+                _aspNetSharedFrameworkDirs.Add(Path.Combine(directory.FullName, majorVersion + latestVersion));
+            }
+
+            _logger.LogVerbose("NetCoreSharedFrameworkResolver search paths:");
             foreach (string searchPath in _aspNetSharedFrameworkDirs)
             {
                 _logger.LogVerbose(searchPath);
@@ -250,7 +266,8 @@ namespace Coverlet.Core.Instrumentation
                     continue;
                 }
 
-                foreach (string file in Directory.GetFiles(sharedFrameworkPath))
+                string[] files = Directory.GetFiles(sharedFrameworkPath);
+                foreach (string file in files)
                 {
                     if (Path.GetFileName(file).Equals(dllName, StringComparison.OrdinalIgnoreCase))
                     {
@@ -262,6 +279,38 @@ namespace Coverlet.Core.Instrumentation
             }
 
             return false;
+        }
+    }
+
+    internal class RuntimeConfigurationReader
+    {
+        private readonly string _runtimeConfigFile;
+
+        public RuntimeConfigurationReader(string runtimeConfigFile)
+        {
+            _runtimeConfigFile = runtimeConfigFile;
+        }
+
+        public IEnumerable<(string Name, string Version)> GetFrameworks()
+        {
+            JObject configuration =
+                new JsonSerializer().Deserialize<JObject>(
+                    new JsonTextReader(new StringReader(File.ReadAllText(_runtimeConfigFile))));
+
+            JToken runtimeOptions = configuration["runtimeOptions"];
+            JToken framework = runtimeOptions?["framework"];
+            if (framework != null)
+            {
+                return new[] {(framework["name"].Value<string>(), framework["version"].Value<string>())};
+            }
+
+            JToken frameworks = runtimeOptions?["frameworks"];
+            if (frameworks != null)
+            {
+                return frameworks.Select(x => (x["name"].Value<string>(), x["version"].Value<string>()));
+            }
+
+            throw new InvalidOperationException($"Unable to read runtime configuration from {_runtimeConfigFile}.");
         }
     }
 }
