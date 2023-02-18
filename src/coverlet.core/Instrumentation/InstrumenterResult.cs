@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 
 namespace Coverlet.Core.Instrumentation
@@ -79,6 +80,7 @@ namespace Coverlet.Core.Instrumentation
 
     [DebuggerDisplay("isBranch = {isBranch} docIndex = {docIndex} start = {start} end = {end}")]
     [DataContract]
+    [SuppressMessage("Style", "IDE1006", Justification = "suppress casing error for API compatibility")]
     internal class HitCandidate
     {
         public HitCandidate(bool isBranch, int docIndex, int start, int end) => (this.isBranch, this.docIndex, this.start, this.end) = (isBranch, docIndex, start, end);
