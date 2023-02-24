@@ -57,10 +57,10 @@ After the above command is run, a `coverage.cobertura.xml` file containing the r
 See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
 #### Requirements
-* _You need to be running .NET 6.0 SDK v6.0.404 or newer_
-* _You need to reference version 17.4.0 and above of Microsoft.NET.Test.Sdk_
+* _You need to be running .NET 6.0 SDK v6.0.406 or newer e.g. v7.0.200_
+* _You need to reference version 17.5.0 and above of Microsoft.NET.Test.Sdk_
 ```
-<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
 ```
 
 ### MSBuild Integration (suffers of possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
