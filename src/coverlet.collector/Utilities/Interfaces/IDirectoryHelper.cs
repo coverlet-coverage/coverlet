@@ -18,8 +18,8 @@ namespace Coverlet.Collector.Utilities.Interfaces
         /// <summary>
         /// Creates all directories and subdirectories in the specified path unless they already exist.
         /// </summary>
-        /// <param name="directory">The directory to create.</param>
-        void CreateDirectory(string directory);
+        /// <param name="path">The directory to create.</param>
+        void CreateDirectory(string path);
 
         /// <summary>
         /// Deletes the specified directory and, if indicated, any subdirectories and files in the directory.
