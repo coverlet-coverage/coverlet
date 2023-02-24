@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,11 +12,9 @@
     <PackageVersion Include="FSharp.Core" Version="7.0.0" />
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.3" />
     <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="4.0.2" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.4.0"/>
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.5.0"/>
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
-    <!-- Detected package downgrade: System.Reflection.Metadata from 5.0.0 to centrally defined 1.6.0 -->
-    <!--<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />-->
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
@@ -31,9 +29,10 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageVersion Include="NuGet.Frameworks" Version="6.5.0" />
     <PackageVersion Include="NuGet.Packaging" Version="6.5.0" />
-    <PackageVersion Include="ReportGenerator.Core" Version="5.1.17" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.1.18" />
     <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
+    <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
 
     <!--
         Do not change System.Reflection.Metadata version since we need to support VSTest DataCollectors. Goto https://www.nuget.org/packages/System.Reflection.Metadata to check versions.

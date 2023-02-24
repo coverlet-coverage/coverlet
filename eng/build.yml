@@ -52,19 +52,19 @@ steps:
   continueOnError: true
   condition: always()
 
-- task: reportgenerator@5
-  displayName: ReportGenerator
-  condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
-  inputs:
-    reports: $(Build.SourcesDirectory)/**/coverage.opencover.xml
-    targetdir: $(Build.SourcesDirectory)/CoverageReport
-    reporttypes: Html;HtmlInline_AzurePipelines_Dark;Cobertura
-    verbosity: 'Verbose'
-    assemblyfilters: ${{parameters.assemblyfilters}}
+#- task: reportgenerator@5
+#  displayName: ReportGenerator
+#  condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
+#  inputs:
+#    reports: $(Build.SourcesDirectory)/**/coverage.opencover.xml
+#    targetdir: $(Build.SourcesDirectory)/CoverageReport
+#    reporttypes: Html;HtmlInline_AzurePipelines_Dark;Cobertura
+#    verbosity: 'Verbose'
+#    assemblyfilters: ${{parameters.assemblyfilters}}
 
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage'
-  condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '$(Build.SourcesDirectory)/CoverageReport/Cobertura.xml'
+#- task: PublishCodeCoverageResults@1
+#  displayName: 'Publish code coverage'
+#  condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
+#  inputs:
+#    codeCoverageTool: Cobertura
+#    summaryFileLocation: '$(Build.SourcesDirectory)/CoverageReport/Cobertura.xml'

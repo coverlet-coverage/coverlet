@@ -19,6 +19,7 @@
     <PackageReference Include="xunit.assert" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Tmds.ExecFunction" />
+    <PackageReference Include="System.Reflection.Metadata" VersionOverride="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
