@@ -132,12 +132,15 @@ dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
 dotnet_diagnostic.IDE1006.severity = warning
 # IDE0090: Use 'new(...)'
 dotnet_diagnostic.IDE0090.severity = warning
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
+tab_width = 2
+end_of_line = crlf
 ###############################
 # C# Coding Conventions       #
 ###############################
 [*.cs]
 # Organize usings
-csharp_using_directive_placement = outside_namespace:warning
+csharp_using_directive_placement = outside_namespace:silent
 # var preferences - use keywords instead of BCL types, and permit var only when the type is clear
 csharp_style_var_for_built_in_types = false:warning
 csharp_style_var_when_type_is_apparent = true:warning
@@ -213,3 +216,53 @@ csharp_space_between_square_brackets = false
 # Wrapping preferences
 csharp_preserve_single_line_statements = true
 csharp_preserve_single_line_blocks = true
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_namespace_declarations = block_scoped:silent
+csharp_style_prefer_method_group_conversion = true:silent
+csharp_style_prefer_top_level_statements = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_local_functions = false:silent
+dotnet_diagnostic.S1116.severity = suggestion
+dotnet_diagnostic.S1481.severity = suggestion
+dotnet_diagnostic.S1854.severity = suggestion
+dotnet_diagnostic.S125.severity = suggestion
+dotnet_diagnostic.S108.severity = suggestion
+dotnet_diagnostic.S4136.severity = suggestion
+dotnet_diagnostic.S1172.severity = suggestion
+dotnet_diagnostic.S101.severity = suggestion
+dotnet_diagnostic.S2346.severity = suggestion
+dotnet_diagnostic.S112.severity = suggestion
+dotnet_diagnostic.S3885.severity = suggestion
+dotnet_diagnostic.S1751.severity = suggestion
+dotnet_diagnostic.S3881.severity = suggestion
+
+# S1075: URIs should not be hardcoded
+dotnet_diagnostic.S1075.severity = suggestion
+dotnet_diagnostic.S1118.severity = suggestion
+dotnet_diagnostic.S3928.severity = suggestion
+dotnet_diagnostic.S1135.severity = suggestion
+dotnet_diagnostic.S1121.severity = suggestion
+dotnet_diagnostic.S2344.severity = suggestion
+dotnet_diagnostic.S3871.severity = suggestion
+dotnet_diagnostic.S3267.severity = suggestion
+dotnet_diagnostic.S3963.severity = suggestion
+dotnet_diagnostic.S1066.severity = suggestion
+dotnet_diagnostic.S3260.severity = silent
+dotnet_diagnostic.S1168.severity = suggestion
+dotnet_diagnostic.S2190.severity = suggestion
+dotnet_diagnostic.S3217.severity = suggestion
+dotnet_diagnostic.S1450.severity = suggestion
+dotnet_diagnostic.S1186.severity = suggestion
+dotnet_diagnostic.S4070.severity = suggestion
+dotnet_diagnostic.S3376.severity = suggestion
+dotnet_diagnostic.S1133.severity = suggestion
+dotnet_diagnostic.S3903.severity = suggestion
+dotnet_diagnostic.S2699.severity = suggestion
+dotnet_diagnostic.S3626.severity = suggestion
+dotnet_diagnostic.S2259.severity = suggestion
+dotnet_diagnostic.S5445.severity = silent
+# ToDo list for findings
+dotnet_diagnostic.S2971.severity = suggestion
+dotnet_diagnostic.S927.severity = suggestion
+dotnet_diagnostic.S2589.severity = suggestion
+dotnet_diagnostic.S3442.severity = suggestion

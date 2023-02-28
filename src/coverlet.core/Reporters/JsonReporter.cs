@@ -14,7 +14,7 @@ namespace Coverlet.Core.Reporters
 
         public string Extension => "json";
 
-        public string Report(CoverageResult result, ISourceRootTranslator _)
+        public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
         {
             return JsonConvert.SerializeObject(result.Modules, Formatting.Indented);
         }

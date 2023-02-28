@@ -555,10 +555,10 @@ namespace Coverlet.Core.Instrumentation.Tests
 namespace coverlet.tests.projectsample.excludedbyattribute{{
 public class SampleClass
 {{
-	public int SampleMethod()
-	{{
-		return new System.Random().Next();
-	}}
+  public int SampleMethod()
+  {{
+    return new System.Random().Next();
+  }}
 }}
 
 }}

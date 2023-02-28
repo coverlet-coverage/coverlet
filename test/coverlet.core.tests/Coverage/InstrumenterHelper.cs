@@ -135,7 +135,7 @@ namespace Coverlet.Core.Tests
             // Flush tracker
             Type tracker = asm.GetTypes().Single(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker"));
 
-            // For debugging purpouse
+            // For debugging purpose
             // int[] hitsArray = (int[])tracker.GetField("HitsArray").GetValue(null);
             // string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
 

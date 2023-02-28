@@ -47,10 +47,12 @@ namespace Coverlet.Collector.DataCollection
 
         public void TestCaseEnd(TestCaseEndArgs testCaseEndArgs)
         {
+            // empty block
         }
 
         public void TestCaseStart(TestCaseStartArgs testCaseStartArgs)
         {
+            // empty block
         }
 
         public void TestSessionEnd(TestSessionEndArgs testSessionEndArgs)
@@ -85,6 +87,7 @@ namespace Coverlet.Collector.DataCollection
 
         public void TestSessionStart(TestSessionStartArgs testSessionStartArgs)
         {
+          // empty block
         }
 
         private Type GetInstrumentationClass(Assembly assembly)
