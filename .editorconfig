@@ -135,6 +135,7 @@ dotnet_diagnostic.IDE0090.severity = warning
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 tab_width = 2
 end_of_line = crlf
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
 ###############################
 # C# Coding Conventions       #
 ###############################
@@ -265,4 +266,4 @@ dotnet_diagnostic.S5445.severity = silent
 dotnet_diagnostic.S2971.severity = suggestion
 dotnet_diagnostic.S927.severity = suggestion
 dotnet_diagnostic.S2589.severity = suggestion
-dotnet_diagnostic.S3442.severity = suggestion
+# dotnet_diagnostic.S3442.severity = suggestion

@@ -46,7 +46,7 @@ namespace Coverlet.Integration.Tests
     {
         private readonly string _buildConfiguration;
 
-        public Collectors()
+        protected Collectors()
         {
             _buildConfiguration = GetAssemblyBuildConfiguration().ToString();
         }
