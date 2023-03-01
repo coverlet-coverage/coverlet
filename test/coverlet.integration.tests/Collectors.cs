@@ -57,7 +57,7 @@ namespace Coverlet.Integration.Tests
         {
             if (TestSDKVersion is null)
             {
-                throw new ArgumentNullException("Invalid TestSDKVersion");
+                throw new NotSupportedException("Invalid TestSDKVersion");
             }
 
             ClonedTemplateProject clonedTemplateProject = CloneTemplateProject(testSDKVersion: TestSDKVersion);

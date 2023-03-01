@@ -356,7 +356,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
             XElement element = xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFramework") ?? xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFrameworks")!;
             if (element is null)
             {
-                throw new ArgumentNullException("No 'TargetFramework' neither 'TargetFrameworks' found in csproj file");
+                throw new NotSupportedException("No 'TargetFramework' neither 'TargetFrameworks' found in csproj file");
             }
             return element.Value.Split(";");
         }

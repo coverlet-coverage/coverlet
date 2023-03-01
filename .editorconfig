@@ -42,7 +42,7 @@ end_of_line = crlf
 
 # Code files
 [*.{cs,csx,vb,vbx}]
-indent_size = 4
+indent_size = 2
 insert_final_newline = true
 charset = utf-8-bom
 ###############################
@@ -240,11 +240,12 @@ dotnet_diagnostic.S3881.severity = suggestion
 s1075: uris should not be hardcoded
 dotnet_diagnostic.s1075.severity = suggestion
 dotnet_diagnostic.s1118.severity = suggestion
-dotnet_diagnostic.s3928.severity = suggestion
+# dotnet_diagnostic.s3928.severity = suggestion
 dotnet_diagnostic.s1135.severity = suggestion
 dotnet_diagnostic.s1121.severity = suggestion
 dotnet_diagnostic.s2344.severity = suggestion
 dotnet_diagnostic.s3871.severity = suggestion
+# Loop(s) should be simplified
 dotnet_diagnostic.s3267.severity = suggestion
 dotnet_diagnostic.s3963.severity = suggestion
 dotnet_diagnostic.s1066.severity = suggestion
