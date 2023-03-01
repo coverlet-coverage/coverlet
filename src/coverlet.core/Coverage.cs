@@ -391,19 +391,16 @@ namespace Coverlet.Core
 
                     foreach (HitCandidate hitCandidateToCompare in result.HitCandidates.Where(x => x.docIndex.Equals(hitCandidate.docIndex)))
                     {
-                        if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch)
+                      if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch && hitCandidateToCompare.start > hitCandidate.start &&
+                             hitCandidateToCompare.end < hitCandidate.end)
+                      {
+                        for (int i = hitCandidateToCompare.start;
+                             i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);
+                             i++)
                         {
-                            if (hitCandidateToCompare.start > hitCandidate.start &&
-                               hitCandidateToCompare.end < hitCandidate.end)
-                            {
-                                for (int i = hitCandidateToCompare.start;
-                                     i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);
-                                     i++)
-                                {
-                                    (hitCandidate.AccountedByNestedInstrumentation ??= new HashSet<int>()).Add(i);
-                                }
-                            }
+                          (hitCandidate.AccountedByNestedInstrumentation ??= new HashSet<int>()).Add(i);
                         }
+                      }
                     }
                 }
 

@@ -179,19 +179,16 @@ namespace Coverlet.Core.Tests
             {
                 foreach ((int lineToCheck, int ordinalToCheck, int expectedHits) in lines)
                 {
-                    if (branch.Value.Number == lineToCheck)
-                    {
-                        if (branch.Value.Ordinal == ordinalToCheck)
-                        {
-                            branchesToCover.Remove($"[line {branch.Value.Number} ordinal {branch.Value.Ordinal}]");
+                if (branch.Value.Number == lineToCheck && branch.Value.Ordinal == ordinalToCheck)
+                {
+                  branchesToCover.Remove($"[line {branch.Value.Number} ordinal {branch.Value.Ordinal}]");
 
-                            if (branch.Value.Hits != expectedHits)
-                            {
-                                throw new XunitException($"Unexpected hits expected line: {lineToCheck} ordinal {ordinalToCheck} hits: {expectedHits} actual hits: {branch.Value.Hits}");
-                            }
-                        }
-                    }
+                  if (branch.Value.Hits != expectedHits)
+                  {
+                    throw new XunitException($"Unexpected hits expected line: {lineToCheck} ordinal {ordinalToCheck} hits: {expectedHits} actual hits: {branch.Value.Hits}");
+                  }
                 }
+              }
             }
 
             if (branchesToCover.Count != 0)
