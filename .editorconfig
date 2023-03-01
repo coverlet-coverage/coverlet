@@ -263,7 +263,7 @@ dotnet_diagnostic.S3626.severity = suggestion
 dotnet_diagnostic.S2259.severity = suggestion
 dotnet_diagnostic.S5445.severity = silent
 # ToDo list for findings
-dotnet_diagnostic.S2971.severity = suggestion
-dotnet_diagnostic.S927.severity = suggestion
+# dotnet_diagnostic.S2971.severity = suggestion
+# dotnet_diagnostic.S927.severity = suggestion
 # dotnet_diagnostic.S2589.severity = suggestion
 # dotnet_diagnostic.S3442.severity = suggestion
