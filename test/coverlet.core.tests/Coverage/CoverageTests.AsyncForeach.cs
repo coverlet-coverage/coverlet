@@ -21,9 +21,9 @@ namespace Coverlet.Core.Tests
                 {
                     _ = await TestInstrumentationHelper.Run<AsyncForeach>(instance =>
                     {
-                        int res = ((ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5))).GetAwaiter().GetResult();
-                        res += ((ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3))).GetAwaiter().GetResult();
-                        res += ((ValueTask<int>)instance.SumEmpty()).GetAwaiter().GetResult();
+                        ((ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5))).GetAwaiter().GetResult();
+                        ((ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3))).GetAwaiter().GetResult();
+                        ((ValueTask<int>)instance.SumEmpty()).GetAwaiter().GetResult();
                         ((ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3))).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;

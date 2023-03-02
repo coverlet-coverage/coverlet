@@ -24,8 +24,8 @@ namespace Coverlet.Core.Tests
                     {
                         instance.AutoPropsNonInit = 10;
                         instance.AutoPropsInit = 20;
-                        int readValue = instance.AutoPropsNonInit;
-                        readValue = instance.AutoPropsInit;
+                        _ = instance.AutoPropsNonInit;
+                        _ = instance.AutoPropsInit;
                         return Task.CompletedTask;
                     },
                     persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
@@ -72,8 +72,8 @@ namespace Coverlet.Core.Tests
                         {
                             instance.RecordAutoPropsNonInit = string.Empty;
                             instance.RecordAutoPropsInit = string.Empty;
-                            string readValue = instance.RecordAutoPropsInit;
-                            readValue = instance.RecordAutoPropsNonInit;
+                            _ = instance.RecordAutoPropsInit;
+                            _ = instance.RecordAutoPropsNonInit;
                             return Task.CompletedTask;
                         },
                     persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));

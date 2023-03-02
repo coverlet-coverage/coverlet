@@ -231,7 +231,7 @@ dotnet_diagnostic.S1116.severity = suggestion
 # Unused local variables should be removed
 # dotnet_diagnostic.S1481.severity = suggestion
 # s1854: Unused assignments should be removed
-dotnet_diagnostic.S1854.severity = suggestion
+# dotnet_diagnostic.S1854.severity = suggestion
 # s125: Sections of code should not be commented out
 dotnet_diagnostic.S125.severity = suggestion
 # s108: Nested blocks of code should not be left empty

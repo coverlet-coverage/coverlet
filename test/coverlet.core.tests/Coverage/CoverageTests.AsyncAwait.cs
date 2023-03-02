@@ -23,12 +23,12 @@ namespace Coverlet.Core.Tests
                     {
                         instance.SyncExecution();
 
-                        int res = ((Task<int>)instance.AsyncExecution(true)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        res = ((Task<int>)instance.AsyncExecution(1)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        res = ((Task<int>)instance.AsyncExecution(2)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        res = ((Task<int>)instance.AsyncExecution(3)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        res = ((Task<int>)instance.ContinuationCalled()).ConfigureAwait(false).GetAwaiter().GetResult();
-                        res = ((Task<int>)instance.ConfigureAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task<int>)instance.AsyncExecution(true)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task<int>)instance.AsyncExecution(1)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task<int>)instance.AsyncExecution(2)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task<int>)instance.AsyncExecution(3)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task<int>)instance.ContinuationCalled()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        ((Task<int>)instance.ConfigureAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
