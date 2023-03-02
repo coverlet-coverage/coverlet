@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -20,7 +20,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+                    _ = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                     {
                         try { instance.NoBranches(); }
                         catch (Exception) { }
@@ -52,7 +52,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+                    _ = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                         {
                             try { instance.If(); }
                             catch (Exception) { }
@@ -84,7 +84,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+                    _ = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                         {
                             try { instance.Switch(); }
                             catch (Exception) { }
@@ -116,7 +116,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+                    _ = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                         {
                             try { instance.Subtle(); }
                             catch (Exception) { }
@@ -148,7 +148,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+                    _ = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                         {
                             try { instance.UnreachableBranch(); }
                             catch (Exception) { }
@@ -180,7 +180,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+                    _ = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                         {
                             try { instance.CallsGenericMethodDoesNotReturn(); }
                             catch (Exception) { }
@@ -212,7 +212,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+                    _ = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                         {
                             try { instance.CallsGenericClassDoesNotReturn(); }
                             catch (Exception) { }
@@ -244,7 +244,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+                    _ = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                         {
                             try { instance.WithLeave(); }
                             catch (Exception) { }
@@ -276,7 +276,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+                    _ = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                         {
                             try { instance.FiltersAndFinallies(); }
                             catch (Exception) { }

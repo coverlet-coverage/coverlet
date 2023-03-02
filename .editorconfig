@@ -229,7 +229,7 @@ csharp_style_expression_bodied_local_functions = false:silent
 # s1116: Empty statements should be removed
 dotnet_diagnostic.S1116.severity = suggestion
 # Unused local variables should be removed
-dotnet_diagnostic.S1481.severity = suggestion
+# dotnet_diagnostic.S1481.severity = suggestion
 # s1854: Unused assignments should be removed
 dotnet_diagnostic.S1854.severity = suggestion
 # s125: Sections of code should not be commented out
@@ -274,7 +274,7 @@ dotnet_diagnostic.s3963.severity = suggestion
 # s1066: Collapsible "if" statements should be merged
 dotnet_diagnostic.s1066.severity = suggestion
 # s3260: Non-derived "private" classes and records should be "sealed"
-dotnet_diagnostic.s3260.severity = silent
+dotnet_diagnostic.s3260.severity = suggestion
 # s1168: Empty arrays and collections should be returned instead of null
 dotnet_diagnostic.s1168.severity = suggestion
 # s2190: Recursion should not be infinite
@@ -300,7 +300,7 @@ dotnet_diagnostic.s3626.severity = suggestion
 # s2259: Null pointers should not be dereferenced
 dotnet_diagnostic.s2259.severity = suggestion
 # s5445: Insecure temporary file creation methods should not be used
-dotnet_diagnostic.s5445.severity = silent
+dotnet_diagnostic.s5445.severity = suggestion
 
 # ToDo list for findings
 # s2971: "IEnumerable" LINQs should be simplified

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -18,7 +18,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Lambda_Issue343>(instance =>
                     {
                         instance.InvokeAnonymous_Test();
                         ((Task<bool>)instance.InvokeAnonymousAsync_Test()).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -53,7 +53,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_730>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Issue_730>(instance =>
                     {
                         ((Task)instance.Invoke()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
@@ -82,7 +82,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_760>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Issue_760>(instance =>
                     {
                         ((Task)instance.If()).ConfigureAwait(false).GetAwaiter().GetResult();
                         ((Task)instance.Foreach()).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -112,7 +112,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1056>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Issue_1056>(instance =>
                     {
                         instance.T1();
                         return Task.CompletedTask;

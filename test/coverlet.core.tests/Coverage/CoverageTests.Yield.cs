@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -19,7 +19,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
                         foreach (dynamic _ in instance.One()) ;
 
@@ -50,7 +50,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
                         foreach (dynamic _ in instance.Two()) ;
 
@@ -80,7 +80,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
                         foreach (dynamic _ in instance.OneWithSwitch(2)) ;
 
@@ -111,7 +111,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
                         foreach (dynamic _ in instance.Three()) ;
 
@@ -141,7 +141,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Yield>(instance =>
                     {
                         foreach (dynamic _ in instance.Enumerable(new[] { "one", "two", "three", "four" })) ;
 

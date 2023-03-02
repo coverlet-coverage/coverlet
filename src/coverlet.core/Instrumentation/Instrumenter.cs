@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -305,7 +305,7 @@ namespace Coverlet.Core.Instrumentation
                 var endFinally = Instruction.Create(OpCodes.Endfinally);
                 onProcessExitIl.InsertAfter(callUnload, endFinally);
                 Instruction ret = onProcessExitIl.Create(OpCodes.Ret);
-                Instruction leaveAfterFinally = onProcessExitIl.Create(OpCodes.Leave, ret);
+                _ = onProcessExitIl.Create(OpCodes.Leave, ret);
                 onProcessExitIl.InsertAfter(endFinally, ret);
                 foreach (Instruction inst in onProcessExitMethod.Body.Instructions.ToArray())
                 {

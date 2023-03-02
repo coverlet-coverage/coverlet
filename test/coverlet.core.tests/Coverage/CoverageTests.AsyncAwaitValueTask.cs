@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -18,7 +18,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwaitValueTask>(async instance =>
+                    _ = await TestInstrumentationHelper.Run<AsyncAwaitValueTask>(async instance =>
                     {
                         instance.SyncExecution();
 

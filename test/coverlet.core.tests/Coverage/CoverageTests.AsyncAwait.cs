@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -19,7 +19,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwait>(instance =>
+                    _ = await TestInstrumentationHelper.Run<AsyncAwait>(instance =>
                     {
                         instance.SyncExecution();
 
@@ -76,7 +76,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_1>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Issue_669_1>(instance =>
                     {
                         ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
@@ -107,7 +107,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Issue_669_2>(instance =>
                     {
                         ((ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
@@ -136,7 +136,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1177>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Issue_1177>(instance =>
                         {
                             ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
                             return Task.CompletedTask;
@@ -164,7 +164,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1233>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Issue_1233>(instance =>
                         {
                             ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
                             return Task.CompletedTask;
@@ -192,7 +192,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1275>(instance =>
+                    _ = await TestInstrumentationHelper.Run<Issue_1275>(instance =>
                         {
                             var cts = new CancellationTokenSource();
                             ((Task)instance.Execute(cts.Token)).ConfigureAwait(false).GetAwaiter().GetResult();

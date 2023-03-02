@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -99,7 +99,6 @@ namespace Coverlet.Integration.Tests
         public void TestVsTest_VsTest()
         {
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-            string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
             Assert.True(DotnetCli($"publish -c {_buildConfiguration} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError), standardOutput);
             string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish"));
             Assert.NotNull(publishedTestFile);

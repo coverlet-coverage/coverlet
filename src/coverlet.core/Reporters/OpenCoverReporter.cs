@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -80,7 +80,7 @@ namespace Coverlet.Core.Reporters
                             CoverageDetails methLineCoverage = summary.CalculateLineCoverage(meth.Value.Lines);
                             CoverageDetails methBranchCoverage = summary.CalculateBranchCoverage(meth.Value.Branches);
                             int methCyclomaticComplexity = summary.CalculateCyclomaticComplexity(meth.Value.Branches);
-                            int methNpathComplexity = summary.CalculateNpathComplexity(meth.Value.Branches);
+                            _ = summary.CalculateNpathComplexity(meth.Value.Branches);
 
                             var method = new XElement("Method");
 

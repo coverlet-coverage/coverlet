@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -23,7 +23,7 @@ namespace Coverlet.Core.Tests
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
                     // Run load and call a delegate passing class as dynamic to simplify method call
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                    _ = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                     {
                         // We call method to trigger coverage hits
                         instance.If(true);
@@ -65,7 +65,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                    _ = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                     {
                         instance.Switch(1);
                         return Task.CompletedTask;
@@ -95,7 +95,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                    _ = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                     {
                         instance.SwitchCsharp8(int.MaxValue);
                         return Task.CompletedTask;
@@ -124,7 +124,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                    _ = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                     {
                         instance.SwitchCsharp8(int.MaxValue);
                         instance.SwitchCsharp8(uint.MaxValue);

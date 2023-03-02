@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -19,9 +19,9 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<GenericAsyncIterator<int>>(instance =>
+                    _ = await TestInstrumentationHelper.Run<GenericAsyncIterator<int>>(instance =>
                     {
-                        List<int> res = ((Task<List<int>>)instance.Issue1383()).GetAwaiter().GetResult();
+                        _ = ((Task<List<int>>)instance.Issue1383()).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);

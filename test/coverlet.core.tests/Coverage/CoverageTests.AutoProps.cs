@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -20,7 +20,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] parameters) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoProps>(instance =>
+                    _ = await TestInstrumentationHelper.Run<AutoProps>(instance =>
                     {
                         instance.AutoPropsNonInit = 10;
                         instance.AutoPropsInit = 20;
@@ -68,7 +68,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] parameters) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordWithPropertyInit>(instance =>
+                    _ = await TestInstrumentationHelper.Run<RecordWithPropertyInit>(instance =>
                         {
                             instance.RecordAutoPropsNonInit = string.Empty;
                             instance.RecordAutoPropsInit = string.Empty;
@@ -115,7 +115,7 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] parameters) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithAutoRecordProperties>(instance =>
+                    _ = await TestInstrumentationHelper.Run<ClassWithAutoRecordProperties>(instance =>
                         {
                             return Task.CompletedTask;
                         },
