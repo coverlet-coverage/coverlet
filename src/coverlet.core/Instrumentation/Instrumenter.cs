@@ -214,14 +214,13 @@ namespace Coverlet.Core.Instrumentation
             }
 
             using var module = ModuleDefinition.ReadModule(stream, parameters);
-            foreach (CustomAttribute customAttribute in module.Assembly.CustomAttributes)
+            foreach (var customAttribute in from CustomAttribute customAttribute in module.Assembly.CustomAttributes
+                                            where IsExcludeAttribute(customAttribute)
+                                            select customAttribute)
             {
-                if (IsExcludeAttribute(customAttribute))
-                {
-                    _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute {customAttribute.AttributeType.FullName}");
-                    SkipModule = true;
-                    return;
-                }
+                _logger.LogVerbose($"Excluded module: '{module}' for assembly level attribute {customAttribute.AttributeType.FullName}");
+                SkipModule = true;
+                return;
             }
 
             bool containsAppContext = module.GetType(nameof(System), nameof(AppContext)) != null;

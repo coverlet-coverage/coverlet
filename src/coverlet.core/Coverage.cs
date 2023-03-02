@@ -252,46 +252,42 @@ namespace Coverlet.Core
             List<string> compileGeneratedClassToRemove = null;
             foreach (KeyValuePair<string, Documents> module in modules)
             {
-                foreach (KeyValuePair<string, Classes> document in module.Value)
-                {
-                    foreach (KeyValuePair<string, Methods> @class in document.Value)
-                    {
-                        // We fix only lamda generated class
-                        // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L18
-                        if (!@class.Key.Contains("<>c"))
+              foreach (var (document, @class) in from KeyValuePair<string, Classes> document in module.Value
+                                               from KeyValuePair<string, Methods> @class in document.Value
+                                               select (document, @class))
+              {
+              // We fix only lamda generated class
+              // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L18
+              if (!@class.Key.Contains("<>c"))
+                      {
+                          continue;
+                      }
+
+                      foreach (KeyValuePair<string, Method> method in @class.Value)
+                      {
+                        foreach (var (branch, actualMethod) in from BranchInfo branch in method.Value.Branches
+                                                               where BranchInCompilerGeneratedClass(method.Key)
+                                                               let actualMethod = GetMethodWithSameLineInSameDocument(document.Value, @class.Key, branch.Line)
+                                                               select (branch, actualMethod))
                         {
+                          if (actualMethod is null)
+                          {
                             continue;
+                          }
+
+                          actualMethod.Branches.Add(branch);
+                          if (compileGeneratedClassToRemove is null)
+                          {
+                            compileGeneratedClassToRemove = new List<string>();
+                          }
+
+                          if (!compileGeneratedClassToRemove.Contains(@class.Key))
+                          {
+                            compileGeneratedClassToRemove.Add(@class.Key);
+                          }
                         }
-
-                        foreach (KeyValuePair<string, Method> method in @class.Value)
-                        {
-                            foreach (BranchInfo branch in method.Value.Branches)
-                            {
-                                if (BranchInCompilerGeneratedClass(method.Key))
-                                {
-                                    Method actualMethod = GetMethodWithSameLineInSameDocument(document.Value, @class.Key, branch.Line);
-
-                                    if (actualMethod is null)
-                                    {
-                                        continue;
-                                    }
-
-                                    actualMethod.Branches.Add(branch);
-
-                                    if (compileGeneratedClassToRemove is null)
-                                    {
-                                        compileGeneratedClassToRemove = new List<string>();
-                                    }
-
-                                    if (!compileGeneratedClassToRemove.Contains(@class.Key))
-                                    {
-                                        compileGeneratedClassToRemove.Add(@class.Key);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                      }
+                  }
             }
 
             // After method/branches analysis of compiled generated class we can remove noise from reports
@@ -322,13 +318,13 @@ namespace Coverlet.Core
 
         private bool BranchInCompilerGeneratedClass(string methodName)
         {
-            foreach (InstrumenterResult instrumentedResult in _results)
+            foreach (var _ in from InstrumenterResult instrumentedResult in _results
+                              where instrumentedResult.BranchesInCompiledGeneratedClass.Contains(methodName)
+                              select new { })
             {
-                if (instrumentedResult.BranchesInCompiledGeneratedClass.Contains(methodName))
-                {
-                    return true;
-                }
+                return true;
             }
+
             return false;
         }
 

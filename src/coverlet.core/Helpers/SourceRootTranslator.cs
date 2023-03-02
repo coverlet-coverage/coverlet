@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Coverlet.Core.Abstractions;
+using System.Linq;
 
 namespace Coverlet.Core.Helpers
 {
@@ -131,36 +132,31 @@ namespace Coverlet.Core.Helpers
                 return _resolutionCacheFiles[originalFileName];
             }
 
-            foreach (KeyValuePair<string, List<SourceRootMapping>> mapping in _sourceRootMapping)
+            foreach (var (mapping, srm) in from KeyValuePair<string, List<SourceRootMapping>> mapping in _sourceRootMapping
+                                         where originalFileName.StartsWith(mapping.Key)
+                                         from SourceRootMapping srm in mapping.Value
+                                         select (mapping, srm))
             {
-                if (originalFileName.StartsWith(mapping.Key))
-                {
-                    foreach (SourceRootMapping srm in mapping.Value)
-                    {
-                        string pathToCheck;
-                        if (_fileSystem.Exists(pathToCheck = Path.GetFullPath(originalFileName.Replace(mapping.Key, srm.OriginalPath))))
-                        {
-                            (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
-                            _logger.LogVerbose($"Mapping resolved: '{FileSystem.EscapeFileName(originalFileName)}' -> '{FileSystem.EscapeFileName(pathToCheck)}'");
-                            return pathToCheck;
-                        }
-                    }
-                }
+              string pathToCheck;
+              if (_fileSystem.Exists(pathToCheck = Path.GetFullPath(originalFileName.Replace(mapping.Key, srm.OriginalPath))))
+              {
+                (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
+                _logger.LogVerbose($"Mapping resolved: '{FileSystem.EscapeFileName(originalFileName)}' -> '{FileSystem.EscapeFileName(pathToCheck)}'");
+                return pathToCheck;
+              }
             }
-            return originalFileName;
+
+      return originalFileName;
         }
 
         public string ResolveDeterministicPath(string originalFileName)
         {
-            foreach (KeyValuePair<string, List<string>> originalPath in _sourceToDeterministicPathMapping)
+            foreach (var (originalPath, deterministicPath) in from KeyValuePair<string, List<string>> originalPath in _sourceToDeterministicPathMapping
+                                                              where originalFileName.StartsWith(originalPath.Key)
+                                                              from string deterministicPath in originalPath.Value
+                                                              select (originalPath, deterministicPath))
             {
-                if (originalFileName.StartsWith(originalPath.Key))
-                {
-                    foreach (string deterministicPath in originalPath.Value)
-                    {
-                        originalFileName = originalFileName.Replace(originalPath.Key, deterministicPath).Replace('\\', '/');
-                    }
-                }
+                originalFileName = originalFileName.Replace(originalPath.Key, deterministicPath).Replace('\\', '/');
             }
 
             return originalFileName;

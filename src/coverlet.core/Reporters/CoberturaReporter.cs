@@ -220,13 +220,13 @@ namespace Coverlet.Core.Reporters
                 return path;
             }
 
-            foreach (string basePath in basePaths)
+            foreach (var basePath in from string basePath in basePaths
+                                     where path.StartsWith(basePath)
+                                     select basePath)
             {
-                if (path.StartsWith(basePath))
-                {
-                    return path.Substring(basePath.Length);
-                }
+                return path.Substring(basePath.Length);
             }
+
             return path;
         }
     }

@@ -65,12 +65,11 @@ namespace Coverlet.Core.Symbols
         {
             if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
             {
-                foreach (InterfaceImplementation implementedInterface in methodDefinition.DeclaringType.Interfaces)
+                foreach (var _ in from InterfaceImplementation implementedInterface in methodDefinition.DeclaringType.Interfaces
+                                  where implementedInterface.InterfaceType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator`1<")
+                                  select new { })
                 {
-                    if (implementedInterface.InterfaceType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator`1<"))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
 

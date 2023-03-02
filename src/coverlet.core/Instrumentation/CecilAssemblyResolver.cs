@@ -250,14 +250,13 @@ namespace Coverlet.Core.Instrumentation
                     continue;
                 }
 
-                foreach (string file in Directory.GetFiles(sharedFrameworkPath))
+                foreach (var file in from string file in Directory.GetFiles(sharedFrameworkPath)
+                                     where Path.GetFileName(file).Equals(dllName, StringComparison.OrdinalIgnoreCase)
+                                     select file)
                 {
-                    if (Path.GetFileName(file).Equals(dllName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        _logger.LogVerbose($"'{dllName}' found in '{file}'");
-                        assemblies.Add(file);
-                        return true;
-                    }
+                    _logger.LogVerbose($"'{dllName}' found in '{file}'");
+                    assemblies.Add(file);
+                    return true;
                 }
             }
 
