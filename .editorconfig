@@ -256,7 +256,7 @@ dotnet_diagnostic.S3881.severity = suggestion
 # s1075: uris should not be hardcoded
 dotnet_diagnostic.s1075.severity = suggestion
 # s1118: Utility classes should not have public constructors
-dotnet_diagnostic.s1118.severity = suggestion
+# dotnet_diagnostic.s1118.severity = suggestion
 # s3928: Parameter names used into ArgumentException constructors should match an existing one
 # dotnet_diagnostic.s3928.severity = suggestion
 # s1135: Track uses of "TODO" tags

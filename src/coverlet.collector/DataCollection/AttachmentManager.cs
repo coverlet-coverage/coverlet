@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -39,7 +39,7 @@ namespace Coverlet.Collector.DataCollection
 
         public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper, ICountDownEvent countDownEvent)
         {
-            // Store input variabless
+            // Store input variables
             _dataSink = dataSink;
             _dataCollectionContext = dataCollectionContext;
             _logger = logger;
