@@ -266,7 +266,7 @@ dotnet_diagnostic.s1121.severity = suggestion
 # s2344: Enumeration type names should not have "Flags" or "Enum" suffixes
 dotnet_diagnostic.s2344.severity = suggestion
 # s3871: Exception types should be "public"
-dotnet_diagnostic.s3871.severity = suggestion
+# dotnet_diagnostic.s3871.severity = suggestion
 # s3267: Loop(s) should be simplified
 dotnet_diagnostic.s3267.severity = suggestion
 # s3963: "static" fields should be initialized inline
