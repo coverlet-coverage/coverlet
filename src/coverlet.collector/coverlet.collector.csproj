@@ -90,13 +90,8 @@
 
   <Target Name="PackBuildOutputs">
     <ItemGroup>
-      <!--<TfmSpecificPackageFile Include="$(TargetDir)\*.dll" PackagePath="build\netstandard2.0\" />-->
-      <TfmSpecificPackageFile Include="$(TargetDir)\coverlet.*.dll" PackagePath="build\netstandard2.0\" />
-      <TfmSpecificPackageFile Include="$(TargetDir)\mono.cecil*.dll" PackagePath="build\netstandard2.0\" />
-      <TfmSpecificPackageFile Include="$(TargetDir)\Microsoft.Bcl.AsyncInterfaces.dll" PackagePath="build\netstandard2.0\" />
-      <TfmSpecificPackageFile Include="$(TargetDir)\Newtonsoft.Json.dll" PackagePath="build\netstandard2.0\" />
+      <TfmSpecificPackageFile Include="$(TargetDir)\*.dll" PackagePath="build\netstandard2.0\" />
       <TfmSpecificPackageFile Include="$(TargetDir)\*.pdb" PackagePath="build\netstandard2.0\" />
-      <!--<TfmSpecificPackageFile Include="$(TargetDir)\*.deps.json" PackagePath="build\netstandard2.0\" />-->
     </ItemGroup>
   </Target>
 </Project>
