@@ -1385,11 +1385,11 @@ namespace Coverlet.Core.Symbols
                 while (endFilter != null && endFilter.OpCode != OpCodes.Endfilter)
                 {
                     endFilter = endFilter.Next;
-                }
 
-                if (branchInstruction.Offset >= startFilter.Offset && branchInstruction.Offset <= endFilter.Offset)
-                {
-                    return true;
+                    if (branchInstruction.Offset >= startFilter.Offset && branchInstruction.Offset <= endFilter.Offset)
+                    {
+                        return true;
+                    }
                 }
             }
 

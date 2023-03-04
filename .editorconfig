@@ -298,7 +298,7 @@ dotnet_diagnostic.s2699.severity = suggestion
 # s3626: Jump statements should not be redundant
 dotnet_diagnostic.s3626.severity = suggestion
 # s2259: Null pointers should not be dereferenced
-dotnet_diagnostic.s2259.severity = suggestion
+# dotnet_diagnostic.s2259.severity = suggestion
 # s5445: Insecure temporary file creation methods should not be used
 dotnet_diagnostic.s5445.severity = suggestion
 
