@@ -288,7 +288,7 @@ dotnet_diagnostic.s1186.severity = suggestion
 # s4070: Non-flags enums should not be marked with "FlagsAttribute"
 dotnet_diagnostic.s4070.severity = suggestion
 # s3376: Attribute, EventArgs, and Exception type names should end with the type being extended
-dotnet_diagnostic.s3376.severity = suggestion
+# dotnet_diagnostic.s3376.severity = suggestion
 # s1133: Deprecated code should be removed
 dotnet_diagnostic.s1133.severity = suggestion
 # s3903: Types should be defined in named namespaces

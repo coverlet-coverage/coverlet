@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -10,7 +10,7 @@ namespace Coverlet.Tests.Xunit.Extensions
 {
     [AttributeUsage(AttributeTargets.Method)]
     [XunitTestCaseDiscoverer("Coverlet.Tests.Xunit.Extensions." + nameof(ConditionalFactDiscoverer), "coverlet.tests.xunit.extensions")]
-    public class ConditionalFact : FactAttribute { }
+    public class ConditionalFactAttribute : FactAttribute { }
 
     internal class ConditionalFactDiscoverer : FactDiscoverer
     {
