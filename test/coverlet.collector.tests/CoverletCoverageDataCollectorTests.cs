@@ -31,7 +31,7 @@ namespace Coverlet.Collector.Tests
         private readonly Mock<DataCollectionSink> _mockDataCollectionSink;
         private readonly Mock<ICoverageWrapper> _mockCoverageWrapper;
         private readonly Mock<ICountDownEventFactory> _mockCountDownEventFactory;
-        private XmlElement _configurationElement;
+        private readonly XmlElement _configurationElement;
         private readonly Mock<DataCollectionLogger> _mockLogger;
 
         public CoverletCoverageDataCollectorTests()
@@ -184,62 +184,62 @@ namespace Coverlet.Collector.Tests
             directory.Delete(true);
         }
 
-        [Theory]
-        [InlineData("noValidFormat", 0)]
-        [InlineData("json,cobertura", 2)]
-        [InlineData("json,cobertura,lcov", 3)]
-        public void OnSessionEndShouldSendCoverageReportsForMultipleFormatsToTestPlatform(string formats, int sendReportsCount)
-        {
-            //Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
-            //{
-            //    IServiceCollection serviceCollection = new ServiceCollection();
-            //    var fileSystem = new Mock<IFileSystem>();
-            //    fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "Test");
-            //    serviceCollection.AddTransient(_ => fileSystem.Object);
+        //[Theory]
+        //[InlineData("noValidFormat", 0)]
+        //[InlineData("json,cobertura", 2)]
+        //[InlineData("json,cobertura,lcov", 3)]
+        //public void OnSessionEndShouldSendCoverageReportsForMultipleFormatsToTestPlatform(string formats, int sendReportsCount)
+        //{
+        //    Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
+        //    {
+        //        IServiceCollection serviceCollection = new ServiceCollection();
+        //        var fileSystem = new Mock<IFileSystem>();
+        //        fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "Test");
+        //        serviceCollection.AddTransient(_ => fileSystem.Object);
 
-            //    serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
-            //    serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
-            //    serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
-            //    serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
-            //    serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-            //    serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
-            //    serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
-            //    return serviceCollection;
-            //};
-            //_coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, serviceCollectionFactory);
+        //        serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+        //        serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+        //        serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
+        //        serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+        //        serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+        //        serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
+        //        serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
+        //        return serviceCollection;
+        //    };
+        //    _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, serviceCollectionFactory);
 
-            //IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f).CreateReporter()).Where(x => x != null).ToList();
-            //var mockDataCollectionSink = new Mock<DataCollectionSink>();
-            //mockDataCollectionSink.Setup(m => m.SendFileAsync(It.IsAny<FileTransferInformation>())).Callback<FileTransferInformation>(fti =>
-            //{
-            //    reporters.Remove(reporters.First(x =>
-            //        Path.GetFileName(fti.Path) == Path.ChangeExtension(CoverletConstants.DefaultFileName, x.Extension))
-            //    );
-            //});
+        //    IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f).CreateReporter()).Where(x => x != null).ToList();
+        //    var mockDataCollectionSink = new Mock<DataCollectionSink>();
+        //    mockDataCollectionSink.Setup(m => m.SendFileAsync(It.IsAny<FileTransferInformation>())).Callback<FileTransferInformation>(fti =>
+        //    {
+        //        reporters.Remove(reporters.First(x =>
+        //            Path.GetFileName(fti.Path) == Path.ChangeExtension(CoverletConstants.DefaultFileName, x.Extension))
+        //        );
+        //    });
 
-            //var doc = new XmlDocument();
-            //XmlElement root = doc.CreateElement("Configuration");
-            //XmlElement element = doc.CreateElement("Format");
-            //element.AppendChild(doc.CreateTextNode(formats));
-            //root.AppendChild(element);
+        //    var doc = new XmlDocument();
+        //    XmlElement root = doc.CreateElement("Configuration");
+        //    XmlElement element = doc.CreateElement("Format");
+        //    element.AppendChild(doc.CreateTextNode(formats));
+        //    root.AppendChild(element);
 
-            //_configurationElement = root;
+        //    _configurationElement = root;
 
-            //_coverletCoverageDataCollector.Initialize(
-            //    _configurationElement,
-            //    _mockDataColectionEvents.Object,
-            //    mockDataCollectionSink.Object,
-            //    _mockLogger.Object,
-            //    _context);
+        //    _coverletCoverageDataCollector.Initialize(
+        //        _configurationElement,
+        //        _mockDataColectionEvents.Object,
+        //        mockDataCollectionSink.Object,
+        //        _mockLogger.Object,
+        //        _context);
 
-            //var sessionStartProperties = new Dictionary<string, object> { { "TestSources", new List<string> { "Test" } } };
+        //    var sessionStartProperties = new Dictionary<string, object> { { "TestSources", new List<string> { "Test" } } };
 
-            //_mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
-            //_mockDataColectionEvents.Raise(x => x.SessionEnd += null, new SessionEndEventArgs());
+        //    _mockDataColectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
+        //    _mockDataColectionEvents.Raise(x => x.SessionEnd += null, new SessionEndEventArgs());
 
-            //mockDataCollectionSink.Verify(x => x.SendFileAsync(It.IsAny<FileTransferInformation>()), Times.Exactly(sendReportsCount));
-            //Assert.Empty(reporters);
-        }
+        //    mockDataCollectionSink.Verify(x => x.SendFileAsync(It.IsAny<FileTransferInformation>()), Times.Exactly(sendReportsCount));
+        //    Assert.Empty(reporters);
+        //}
 
         [Fact]
         public void OnSessionStartShouldLogWarningIfInstrumentationFailed()
