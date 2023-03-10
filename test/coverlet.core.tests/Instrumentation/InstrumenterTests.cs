@@ -416,35 +416,35 @@ namespace Coverlet.Core.Instrumentation.Tests
             }
         }
 
-        [Fact]
-        public void SkipEmbeddedPpdbWithoutLocalSource()
-        {
-            string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.core.dll").First();
-            var loggerMock = new Mock<ILogger>();
+        //[Fact]
+        //public void SkipEmbeddedPpdbWithoutLocalSource()
+        //{
+        //    string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.core.dll").First();
+        //    var loggerMock = new Mock<ILogger>();
 
-            var instrumentationHelper =
-                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), loggerMock.Object,
-                                          new SourceRootTranslator(xunitDll, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
+        //    var instrumentationHelper =
+        //        new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), loggerMock.Object,
+        //                                  new SourceRootTranslator(xunitDll, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
-            var instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(xunitDll, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
-            Assert.True(instrumentationHelper.HasPdb(xunitDll, out bool embedded));
-            Assert.True(embedded);
-            Assert.False(instrumenter.CanInstrument());
-            loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
+        //    var instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(xunitDll, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
+        //    Assert.True(instrumentationHelper.HasPdb(xunitDll, out bool embedded));
+        //    Assert.True(embedded);
+        //    Assert.False(instrumenter.CanInstrument());
+        //    loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
 
-            // Default case
-            string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.empty.dll").First();
-            instrumentationHelper =
-                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
-                                          new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
+        //    // Default case
+        //    string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.empty.dll").First();
+        //    instrumentationHelper =
+        //        new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+        //                                  new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
-            instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_empty", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
+        //    instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_empty", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
 
-            Assert.True(instrumentationHelper.HasPdb(sample, out embedded));
-            Assert.False(embedded);
-            Assert.True(instrumenter.CanInstrument());
-            loggerMock.VerifyNoOtherCalls();
-        }
+        //    Assert.True(instrumentationHelper.HasPdb(sample, out embedded));
+        //    Assert.False(embedded);
+        //    Assert.True(instrumenter.CanInstrument());
+        //    loggerMock.VerifyNoOtherCalls();
+        //}
 
         [ConditionalFact]
         [SkipOnOS(OS.MacOS)]

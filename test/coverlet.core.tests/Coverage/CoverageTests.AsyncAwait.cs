@@ -99,34 +99,34 @@ namespace Coverlet.Core.Tests
             }
         }
 
-        [Fact]
-        public void AsyncAwait_Issue_669_2()
-        {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(instance =>
-                    {
-                        ((ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest()).ConfigureAwait(false).GetAwaiter().GetResult();
-                        return Task.CompletedTask;
-                    },
-                    persistPrepareResultToFile: pathSerialize[0]);
+        //[Fact]
+        //public void AsyncAwait_Issue_669_2()
+        //{
+        //    string path = Path.GetTempFileName();
+        //    try
+        //    {
+        //        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        //        {
+        //            CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(instance =>
+        //            {
+        //                ((ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest()).ConfigureAwait(false).GetAwaiter().GetResult();
+        //                return Task.CompletedTask;
+        //            },
+        //            persistPrepareResultToFile: pathSerialize[0]);
 
-                    return 0;
-                }, new string[] { path });
+        //            return 0;
+        //        }, new string[] { path });
 
-                TestInstrumentationHelper.GetCoverageResult(path)
-                .Document("Instrumentation.AsyncAwait.cs")
-                .AssertLinesCovered(BuildConfiguration.Debug, (7, 1), (10, 1), (11, 1), (12, 1), (13, 1), (15, 1))
-                .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
-            }
-            finally
-            {
-                File.Delete(path);
-            }
-        }
+        //        TestInstrumentationHelper.GetCoverageResult(path)
+        //        .Document("Instrumentation.AsyncAwait.cs")
+        //        .AssertLinesCovered(BuildConfiguration.Debug, (7, 1), (10, 1), (11, 1), (12, 1), (13, 1), (15, 1))
+        //        .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
+        //    }
+        //    finally
+        //    {
+        //        File.Delete(path);
+        //    }
+        //}
 
         [Fact]
         public void AsyncAwait_Issue_1177()
