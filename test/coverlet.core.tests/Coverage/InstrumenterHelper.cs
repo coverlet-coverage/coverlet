@@ -173,7 +173,7 @@ namespace Coverlet.Core.Tests
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider =>
                 string.IsNullOrEmpty(testModule) ?
                 new SourceRootTranslator(serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()) :
-                new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+                new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
 
                 serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
 

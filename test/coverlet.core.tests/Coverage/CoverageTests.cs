@@ -29,7 +29,7 @@ namespace Coverlet.Core.Tests
             // TODO: Find a way to mimick hits
             var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
-                                          new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem()));
+                                          new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
             var parameters = new CoverageParameters
             {
@@ -67,7 +67,7 @@ namespace Coverlet.Core.Tests
 
             var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
-                                          new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem()));
+                                          new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
             var parameters = new CoverageParameters
             {
@@ -83,7 +83,7 @@ namespace Coverlet.Core.Tests
             };
 
             var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(),
-                                        new SourceRootTranslator(module, _mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
+                                        new SourceRootTranslator(module, _mockLogger.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
             coverage.PrepareModules();
 
             CoverageResult result = coverage.GetCoverageResult();

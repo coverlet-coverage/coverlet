@@ -73,11 +73,13 @@ namespace Coverlet.MSbuild.Tasks
             IServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
             serviceCollection.AddTransient<IConsole, SystemConsole>();
             serviceCollection.AddTransient<ILogger, MSBuildLogger>(_ => _logger);
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             // We cache resolutions
-            serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(Path, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+            serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider =>
+                new SourceRootTranslator(Path, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();

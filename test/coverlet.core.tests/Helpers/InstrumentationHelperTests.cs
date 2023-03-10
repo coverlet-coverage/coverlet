@@ -16,7 +16,7 @@ namespace Coverlet.Core.Helpers.Tests
     public class InstrumentationHelperTests
     {
         private readonly InstrumentationHelper _instrumentationHelper =
-            new(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
+            new(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
         [Fact]
         public void TestGetDependencies()
@@ -41,7 +41,7 @@ namespace Coverlet.Core.Helpers.Tests
             fileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
 
             var instrumentationHelper =
-                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object, new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object, new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
             Assert.False(instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, AssemblySearchType.MissingAny));
             Assert.False(instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, AssemblySearchType.MissingAll));
@@ -69,7 +69,7 @@ namespace Coverlet.Core.Helpers.Tests
                 });
 
             var instrumentationHelper =
-                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object, new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem()));
+                new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystem.Object, new Mock<ILogger>().Object, new SourceRootTranslator(typeof(InstrumentationHelperTests).Assembly.Location, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
             Assert.Equal(result, instrumentationHelper.PortablePdbHasLocalSource(typeof(InstrumentationHelperTests).Assembly.Location, (AssemblySearchType) assemblySearchType));
         }

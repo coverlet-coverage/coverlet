@@ -8,7 +8,9 @@ using System.Linq;
 using System.Xml;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
+using coverlet.core.Abstractions;
 using Coverlet.Core.Abstractions;
+using coverlet.core.Helpers;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
@@ -224,11 +226,13 @@ namespace Coverlet.Collector.DataCollection
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
+            serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
             serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
             // We need to keep singleton/static semantics
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             // We cache resolutions
-            serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+            serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider =>
+                new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
             serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
             return serviceCollection;
         }
