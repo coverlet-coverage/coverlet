@@ -62,6 +62,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+                serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
                 serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
@@ -96,6 +97,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
+                serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
                 serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
@@ -148,6 +150,7 @@ namespace Coverlet.Collector.Tests
                 serviceCollection.AddTransient<IFileSystem, FileSystem>();
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+                serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
@@ -196,6 +199,7 @@ namespace Coverlet.Collector.Tests
 
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+                serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
@@ -249,6 +253,7 @@ namespace Coverlet.Collector.Tests
 
                 serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+                serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
                 serviceCollection.AddTransient<ILogger, CoverletLogger>(_ => new CoverletLogger(eqtTrace, logger));
                 serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));

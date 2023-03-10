@@ -159,6 +159,7 @@ namespace Coverlet.Core.Tests
                 serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
                 serviceCollection.AddTransient<IFileSystem, FileSystem>();
+                serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
                 serviceCollection.AddTransient(_ => new Mock<ILogger>().Object);
 
                 // We need to keep singleton/static semantics
