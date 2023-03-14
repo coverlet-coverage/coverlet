@@ -76,7 +76,8 @@ namespace Coverlet.Core.Tests
                                                                Func<string, string[]> doesNotReturnAttributes = null,
                                                                string persistPrepareResultToFile = null,
                                                                bool disableRestoreModules = false,
-                                                               bool skipAutoProps = false)
+                                                               bool skipAutoProps = false,
+                                                               string assemblyLocation = null)
         {
             if (persistPrepareResultToFile is null)
             {
@@ -92,8 +93,9 @@ namespace Coverlet.Core.Tests
             File.Copy(location, newPath);
             File.Copy(Path.ChangeExtension(location, ".pdb"), Path.ChangeExtension(newPath, ".pdb"));
 
-            SetTestContainer(newPath, disableRestoreModules);
-
+            string sourceRootTranslatorModulePath = assemblyLocation ?? newPath;
+            SetTestContainer(sourceRootTranslatorModulePath, disableRestoreModules);
+            
             static string[] defaultFilters(string _) => Array.Empty<string>();
 
             var parameters = new CoverageParameters
