@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+-Could not write lines to file CoverletSourceRootsMapping - in use by another process [#1155](https://github.com/coverlet-coverage/coverlet/issues/1155)
 -Incorrect coverage for methods returning IAsyncEnumerable in generic classes [#1383](https://github.com/coverlet-coverage/coverlet/issues/1383)
 -Wrong branch coverage for async methods .NET Standard 1.x [#1376](https://github.com/coverlet-coverage/coverlet/issues/1376) 
 -Empty path exception in visual basic projects [#775](https://github.com/coverlet-coverage/coverlet/issues/775)

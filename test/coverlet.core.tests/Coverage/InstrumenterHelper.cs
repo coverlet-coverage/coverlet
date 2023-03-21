@@ -76,7 +76,8 @@ namespace Coverlet.Core.Tests
                                                                Func<string, string[]> doesNotReturnAttributes = null,
                                                                string persistPrepareResultToFile = null,
                                                                bool disableRestoreModules = false,
-                                                               bool skipAutoProps = false)
+                                                               bool skipAutoProps = false,
+                                                               string assemblyLocation = null)
         {
             if (persistPrepareResultToFile is null)
             {
@@ -92,8 +93,9 @@ namespace Coverlet.Core.Tests
             File.Copy(location, newPath);
             File.Copy(Path.ChangeExtension(location, ".pdb"), Path.ChangeExtension(newPath, ".pdb"));
 
-            SetTestContainer(newPath, disableRestoreModules);
-
+            string sourceRootTranslatorModulePath = assemblyLocation ?? newPath;
+            SetTestContainer(sourceRootTranslatorModulePath, disableRestoreModules);
+            
             static string[] defaultFilters(string _) => Array.Empty<string>();
 
             var parameters = new CoverageParameters
@@ -159,6 +161,7 @@ namespace Coverlet.Core.Tests
                 serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
                 serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
                 serviceCollection.AddTransient<IFileSystem, FileSystem>();
+                serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
                 serviceCollection.AddTransient(_ => new Mock<ILogger>().Object);
 
                 // We need to keep singleton/static semantics
@@ -173,7 +176,7 @@ namespace Coverlet.Core.Tests
                 serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider =>
                 string.IsNullOrEmpty(testModule) ?
                 new SourceRootTranslator(serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()) :
-                new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>()));
+                new SourceRootTranslator(testModule, serviceProvider.GetRequiredService<ILogger>(), serviceProvider.GetRequiredService<IFileSystem>(), serviceProvider.GetRequiredService<IAssemblyAdapter>()));
 
                 serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
 

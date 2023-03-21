@@ -424,9 +424,9 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), loggerMock.Object,
-                                          new SourceRootTranslator(xunitDll, new Mock<ILogger>().Object, new FileSystem()));
+                                          new SourceRootTranslator(xunitDll, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
-            var instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(xunitDll, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            var instrumenter = new Instrumenter(xunitDll, "_xunit_instrumented", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(xunitDll, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
             Assert.True(instrumentationHelper.HasPdb(xunitDll, out bool embedded));
             Assert.True(embedded);
             Assert.False(instrumenter.CanInstrument());
@@ -436,9 +436,9 @@ namespace Coverlet.Core.Instrumentation.Tests
             string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.empty.dll").First();
             instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
-                                          new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem()));
+                                          new SourceRootTranslator(Assembly.GetExecutingAssembly().Location, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
-            instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_empty", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+            instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_empty", new CoverageParameters(), loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(Assembly.GetExecutingAssembly().Location, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
 
             Assert.True(instrumentationHelper.HasPdb(sample, out embedded));
             Assert.False(embedded);
@@ -514,10 +514,10 @@ namespace Coverlet.Core.Instrumentation.Tests
             string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.fsharp.dll").First();
             var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
-                    new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem()));
+                    new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
             var instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_fsharp", new CoverageParameters(), loggerMock.Object, instrumentationHelper,
-                new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+                new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
 
             Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
             Assert.False(embedded);
@@ -816,12 +816,12 @@ public class SampleClass
 
             var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
-                    new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem()));
+                    new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
             CoverageParameters parameters = new();
 
             var instrumenter = new Instrumenter(Path.Combine(directory.FullName, Path.GetFileName(module)), "_coverlet_tests_projectsample_vbmynamespace", parameters,
-                loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(Path.Combine(directory.FullName, Path.GetFileName(module)), loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+                loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(Path.Combine(directory.FullName, Path.GetFileName(module)), loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
             
             instrumentationHelper.BackupOriginalModule(Path.Combine(directory.FullName, Path.GetFileName(module)), "_coverlet_tests_projectsample_vbmynamespace");
 

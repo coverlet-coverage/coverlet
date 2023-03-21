@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
@@ -112,7 +113,8 @@ namespace Coverlet.Core.Tests
                         ((ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize[0]);
+                    persistPrepareResultToFile: pathSerialize[0],
+                    assemblyLocation: Assembly.GetExecutingAssembly().Location);
 
                     return 0;
                 }, new string[] { path });
