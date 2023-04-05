@@ -65,7 +65,7 @@ namespace Coverlet.Integration.Tests
             }
         }
 
-        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "16.5.0")
+        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "17.5.0")
         {
             DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N")[..6]}{Interlocked.Increment(ref s_folderSuffix)}");
             foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
@@ -248,12 +248,14 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
                 bool coverageChecked = false;
                 foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
                 {
-                    JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))
-                    .Document("DeepThought.cs")
-                    .Class("Coverlet.Integration.Template.DeepThought")
-                    .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
-                    .AssertLinesCovered((6, 1), (7, 1), (8, 1));
-                    coverageChecked = true;
+                    Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
+                    if (document != null)
+                    {
+                        document.Class("Coverlet.Integration.Template.DeepThought")
+                            .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
+                            .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+                        coverageChecked = true;
+                    }
                 }
 
                 Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");

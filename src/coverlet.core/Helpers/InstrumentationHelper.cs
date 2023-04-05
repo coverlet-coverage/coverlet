@@ -125,20 +125,18 @@ namespace Coverlet.Core.Helpers
 
         public bool EmbeddedPortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources)
         {
-            using (Stream moduleStream = _fileSystem.OpenRead(module))
-            using (var peReader = new PEReader(moduleStream))
+            using Stream moduleStream = _fileSystem.OpenRead(module);
+            using var peReader = new PEReader(moduleStream);
+            foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
             {
-                foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
+                if (entry.Type == DebugDirectoryEntryType.EmbeddedPortablePdb)
                 {
-                    if (entry.Type == DebugDirectoryEntryType.EmbeddedPortablePdb)
-                    {
-                        using MetadataReaderProvider embeddedMetadataProvider = peReader.ReadEmbeddedPortablePdbDebugDirectoryData(entry);
-                        MetadataReader metadataReader = embeddedMetadataProvider.GetMetadataReader();
+                    using MetadataReaderProvider embeddedMetadataProvider = peReader.ReadEmbeddedPortablePdbDebugDirectoryData(entry);
+                    MetadataReader metadataReader = embeddedMetadataProvider.GetMetadataReader();
 
-                        if (!MatchDocumentsWithSources(module, excludeAssembliesWithoutSources, metadataReader))
-                        {
-                            return false;
-                        }
+                    if (!MatchDocumentsWithSources(module, excludeAssembliesWithoutSources, metadataReader))
+                    {
+                        return false;
                     }
                 }
             }
@@ -150,31 +148,29 @@ namespace Coverlet.Core.Helpers
 
         public bool PortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources)
         {
-            using (Stream moduleStream = _fileSystem.OpenRead(module))
-            using (var peReader = new PEReader(moduleStream))
+            using Stream moduleStream = _fileSystem.OpenRead(module);
+            using var peReader = new PEReader(moduleStream);
+            foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
             {
-                foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
+                if (entry.Type == DebugDirectoryEntryType.CodeView)
                 {
-                    if (entry.Type == DebugDirectoryEntryType.CodeView)
+                    CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
+                    using Stream pdbStream = _fileSystem.OpenRead(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
+                    using var metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
+                    MetadataReader metadataReader = null;
+                    try
                     {
-                        CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
-                        using Stream pdbStream = _fileSystem.OpenRead(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
-                        using var metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
-                        MetadataReader metadataReader = null;
-                        try
-                        {
-                            metadataReader = metadataReaderProvider.GetMetadataReader();
-                        }
-                        catch (BadImageFormatException)
-                        {
-                            _logger.LogWarning($"{nameof(BadImageFormatException)} during MetadataReaderProvider.FromPortablePdbStream in InstrumentationHelper.PortablePdbHasLocalSource, unable to check if module has got local source.");
-                            return true;
-                        }
+                        metadataReader = metadataReaderProvider.GetMetadataReader();
+                    }
+                    catch (BadImageFormatException)
+                    {
+                        _logger.LogWarning($"{nameof(BadImageFormatException)} during MetadataReaderProvider.FromPortablePdbStream in InstrumentationHelper.PortablePdbHasLocalSource, unable to check if module has got local source.");
+                        return true;
+                    }
 
-                        if (!MatchDocumentsWithSources(module, excludeAssembliesWithoutSources, metadataReader))
-                        {
-                            return false;
-                        }
+                    if (!MatchDocumentsWithSources(module, excludeAssembliesWithoutSources, metadataReader))
+                    {
+                        return false;
                     }
                 }
             }
