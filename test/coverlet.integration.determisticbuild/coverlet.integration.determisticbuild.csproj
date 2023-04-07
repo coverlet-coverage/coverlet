@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" />
   
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsample.integration.determisticbuild</AssemblyName>
     <RestoreSources>
