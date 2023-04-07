@@ -9,6 +9,11 @@ steps:
     version: 5.0.401
   displayName: Install .NET Core SDK 5.0.401
 
+- task: UseDotNet@2
+  inputs:
+    version: 6.0.407
+  displayName: Install .NET Core SDK 6.0.407
+
 - script: dotnet restore
   displayName: Restore packages
 
