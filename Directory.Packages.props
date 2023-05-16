@@ -5,12 +5,12 @@
 
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.5.119" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.6.132" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageVersion Include="FSharp.Core" Version="7.0.0" />
-    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.3" />
+    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.4" />
     <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="4.0.2" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.5.0"/>
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
@@ -24,12 +24,12 @@
     <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
     <PackageVersion Include="Microsoft.TestPlatform" Version="17.5.0" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.5.0" />
-    <PackageVersion Include="Mono.Cecil" Version="0.11.4" />
+    <PackageVersion Include="Mono.Cecil" Version="0.11.5" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NuGet.Frameworks" Version="6.5.0" />
     <PackageVersion Include="NuGet.Packaging" Version="6.5.0" />
-    <PackageVersion Include="ReportGenerator.Core" Version="5.1.19" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.1.20" />
     <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
@@ -44,7 +44,7 @@
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="7.0.1" />
     <PackageVersion Include="System.Text.Json" Version="7.0.2" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
-    
+
     <PackageVersion Include="xunit.core" Version="2.4.2" />
     <PackageVersion Include="xunit.assert" Version="2.4.2" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
