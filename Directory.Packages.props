@@ -39,7 +39,9 @@
         We need to load assembly version 1.6.0 to properly work
         We can check minimum supported package version here https://github.com/Microsoft/vstest/blob/master/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L29
      -->
+    <PackageVersion Include="System.Formats.Asn1" Version="7.0.0" />
     <PackageVersion Include="System.Reflection.Metadata" Version="1.6.0" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="7.0.1" />
     <PackageVersion Include="System.Text.Json" Version="7.0.2" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     
