@@ -514,11 +514,11 @@ namespace Coverlet.Core.Instrumentation.Tests
             string sample = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.fsharp.dll").First();
             var instrumentationHelper =
                 new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
-                    new SourceRootTranslator(sample, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
+                    new SourceRootTranslator(Assembly.GetExecutingAssembly().Location, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
             var instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_fsharp", new CoverageParameters(), loggerMock.Object, instrumentationHelper,
-                new FileSystem(), new SourceRootTranslator(sample, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
-
+                new FileSystem(), new SourceRootTranslator(Assembly.GetExecutingAssembly().Location, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
+            
             Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
             Assert.False(embedded);
             Assert.True(instrumenter.CanInstrument());

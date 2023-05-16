@@ -6,7 +6,7 @@
     <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
     <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
     <PackageReference Update="Microsoft.Extensions.FileSystemGlobbing" Version="2.0.1" />
-    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <!-- https://github.com/coverlet-coverage/coverlet/issues/1042 -->
     <PackageReference Update="Microsoft.TestPlatform.ObjectModel" Version="16.9.1" />
     <PackageReference Update="Mono.Cecil" Version="0.11.1" />
@@ -21,8 +21,8 @@
         We can check minimum supported package version here https://github.com/Microsoft/vstest/blob/master/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L37
      -->
     <PackageReference Update="System.Reflection.Metadata" Version="1.5.0" />
-    <PackageReference Update="xunit" Version="2.4.1" />
-    <PackageReference Update="xunit.assert" Version="2.4.1" />
+    <PackageReference Update="xunit" Version="2.4.2" />
+    <PackageReference Update="xunit.assert" Version="2.4.2" />
     <PackageReference Update="xunit.runner.visualstudio" Version="2.4.1"/>
     <PackageReference Update="Tmds.ExecFunction" Version="0.4.0" />
   </ItemGroup>
