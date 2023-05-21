@@ -123,26 +123,24 @@ namespace Coverlet.Core.Tests.Instrumentation
             FunctionExecutor.Run(async () =>
             {
                 using var ctx = new TrackerContext();
-                using (var mutex = new Mutex(
-                true, Path.GetFileNameWithoutExtension(ModuleTrackerTemplate.HitsFilePath) + "_Mutex", out bool createdNew))
-                {
-                    Assert.True(createdNew);
+                using var mutex = new Mutex(
+                    true, Path.GetFileNameWithoutExtension(ModuleTrackerTemplate.HitsFilePath) + "_Mutex", out bool createdNew);
+                Assert.True(createdNew);
 
-                    ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
-                    var unloadTask = Task.Run(() => ModuleTrackerTemplate.UnloadModule(null, null));
+                ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
+                var unloadTask = Task.Run(() => ModuleTrackerTemplate.UnloadModule(null, null));
 
-                    Assert.False(unloadTask.Wait(5));
+                Assert.False(unloadTask.Wait(5));
 
-                    WriteHitsFile(new[] { 0, 3, 2, 1 });
+                WriteHitsFile(new[] { 0, 3, 2, 1 });
 
-                    Assert.False(unloadTask.Wait(5));
+                Assert.False(unloadTask.Wait(5));
 
-                    mutex.ReleaseMutex();
-                    await unloadTask;
+                mutex.ReleaseMutex();
+                await unloadTask;
 
-                    int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
-                    Assert.Equal(expectedHitsArray, ReadHitsFile());
-                }
+                int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
+                Assert.Equal(expectedHitsArray, ReadHitsFile());
 
                 return 0;
             });
