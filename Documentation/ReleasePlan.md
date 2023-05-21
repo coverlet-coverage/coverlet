@@ -23,13 +23,14 @@ We release 3 components as NuGet packages:
 
 | Package               | Version |
 |:----------------------|:--------|
-|**coverlet.msbuild**   | 3.2.0   | 
-|**coverlet.console**   | 3.2.0   |
-|**coverlet.collector** | 3.2.0   |
+|**coverlet.msbuild**   | 6.0.0   | 
+|**coverlet.console**   | 6.0.0   |
+|**coverlet.collector** | 6.0.0   |
 
 
 | Release Date      | coverlet.msbuild | coverlet.console  | coverlet.collector| commit hash                              | notes                          |
 | :-----------------|:-----------------|:------------------|:------------------|:-----------------------------------------|:-------------------------------|
+| 05 May 2023       | 6.0.0            | 6.0.0             |   6.0.0           | 3ad4fa1d5cd7ffe206c0cb9dc805ee6ca5a7b550 | Version aligned with github one| 
 | 29 Oct 2022       | 3.2.0            | 3.2.0             |   3.2.0           | e2c9d84a84a9d2d240ac15feb70f9198c6f8e173 |                                | 
 | 06 Feb 2022       | 3.1.2            | 3.1.2             |   3.1.2           | e335b1a8025e49e2f2de6b40ef12ec9d3ed11ceb | Fix CoreLib coverage issues    | 
 | 30 Jan 2022       | 3.1.1            | 3.1.1             |   3.1.1           | e4278c06faba63122a870df15a1a1b934f6bc81d |                                | 
