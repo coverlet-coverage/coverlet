@@ -8,11 +8,11 @@ using Xunit;
 
 namespace Coverlet.Integration.Tests
 {
-    public class TestSDK_16_2_0 : Collectors
+    public class TestSDK_17_3_2 : Collectors
     {
-        public TestSDK_16_2_0()
+        public TestSDK_17_3_2()
         {
-            TestSDKVersion = "16.2.0";
+            TestSDKVersion = "17.3.2";
         }
 
         private protected override void AssertCollectorsInjection(ClonedTemplateProject clonedTemplateProject)
@@ -26,11 +26,11 @@ namespace Coverlet.Integration.Tests
         }
     }
 
-    public class TestSDK_16_5_0 : Collectors
+    public class TestSDK_17_5_0 : Collectors
     {
-        public TestSDK_16_5_0()
+        public TestSDK_17_5_0()
         {
-            TestSDKVersion = "16.5.0";
+            TestSDKVersion = "17.5.0";
         }
     }
 
@@ -38,7 +38,7 @@ namespace Coverlet.Integration.Tests
     {
         public TestSDK_Preview()
         {
-            TestSDKVersion = "16.5.0-preview-20200203-01";
+            TestSDKVersion = "17.5.0-preview-20221221-03";
         }
     }
 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <!-- Import coverlet version-->
   <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" />
   
@@ -13,15 +13,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.msbuild" Version="$(coverletMsbuilVersion)">
+    <PackageReference Include="coverlet.msbuild" VersionOverride="$(coverletMsbuildVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="$(coverletCollectorsVersion)">
+    <PackageReference Include="coverlet.collector" VersionOverride="$(coverletCollectorsVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.core" />
+    <PackageReference Include="xunit.assert" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
   </ItemGroup>

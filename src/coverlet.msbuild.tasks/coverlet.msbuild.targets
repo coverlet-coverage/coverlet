@@ -6,7 +6,7 @@
   <PropertyGroup>
     <_CoverletSdkNETCoreSdkVersion>$(NETCoreSdkVersion)</_CoverletSdkNETCoreSdkVersion>
     <_CoverletSdkNETCoreSdkVersion Condition="$(_CoverletSdkNETCoreSdkVersion.Contains('-'))">$(_CoverletSdkNETCoreSdkVersion.Split('-')[0])</_CoverletSdkNETCoreSdkVersion>
-    <_CoverletSdkMinVersionWithDependencyTarget>3.1.300</_CoverletSdkMinVersionWithDependencyTarget>
+    <_CoverletSdkMinVersionWithDependencyTarget>6.0.408</_CoverletSdkMinVersionWithDependencyTarget>
     <_CoverletSourceRootTargetName>CoverletGetPathMap</_CoverletSourceRootTargetName>
     <_CoverletSourceRootTargetName Condition="'$([System.Version]::Parse($(_CoverletSdkNETCoreSdkVersion)).CompareTo($([System.Version]::Parse($(_CoverletSdkMinVersionWithDependencyTarget)))))' &gt;= '0' ">InitializeSourceRootMappedPaths</_CoverletSourceRootTargetName>
   </PropertyGroup>

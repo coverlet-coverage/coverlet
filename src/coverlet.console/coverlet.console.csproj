@@ -6,6 +6,8 @@
     <ToolCommandName>coverlet</ToolCommandName>
     <PackAsTool>true</PackAsTool>
     <AssemblyTitle>coverlet.console</AssemblyTitle>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>coverlet.console.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->

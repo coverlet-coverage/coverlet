@@ -1,16 +1,16 @@
 # Coverlet
 
-[![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/coverlet-coverage.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=5&branchName=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/coverlet-coverage/coverlet/blob/master/LICENSE)   
+[![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/coverlet-coverage.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=5&branchName=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/coverlet-coverage/coverlet/blob/master/LICENSE)
 
 | Driver  |  Current version  | Downloads  |
 |---|---|---|
-|  coverlet.collector  | [![NuGet](https://img.shields.io/nuget/v/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/)    |  [![NuGet](https://img.shields.io/nuget/dt/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/) 
+|  coverlet.collector  | [![NuGet](https://img.shields.io/nuget/v/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/)    |  [![NuGet](https://img.shields.io/nuget/dt/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/)
 |  coverlet.msbuild |  [![NuGet](https://img.shields.io/nuget/v/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/)   |  [![NuGet](https://img.shields.io/nuget/dt/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/) |
 |  coverlet.console |  [![NuGet](https://img.shields.io/nuget/v/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/)     |  [![NuGet](https://img.shields.io/nuget/dt/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/) |
 
 Coverlet is a cross platform code coverage framework for .NET, with support for line, branch and method coverage. It works with .NET Framework on Windows and .NET Core on all supported platforms.
 
-**Coverlet documentation reflect the current repository state of the features, not the released ones.**  
+**Coverlet documentation reflect the current repository state of the features, not the released ones.**
 **Check the [changelog](Documentation/Changelog.md) to understand if the documented feature you want to use has been officially released.**
 
 # Main contents
@@ -28,13 +28,13 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 
 ## Quick Start
 
-Coverlet can be used through three different *drivers* 
+Coverlet can be used through three different *drivers*
 
 * VSTest engine integration
 * MSBuild task integration
 * As a .NET Global tool (supports standalone integration tests)
 
-Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk?view=vs-2019  
+Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk?view=vs-2019
 
 
 ### VSTest Integration (preferred due to [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
@@ -43,7 +43,7 @@ Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visua
 ```bash
 dotnet add package coverlet.collector
 ```
-N.B. You **MUST** add package only to test projects and if you create xunit test projects (`dotnet new xunit`) you'll find the reference already present in `csproj` file because Coverlet is the default coverage tool for every .NET Core and >= .NET 5 applications, you've only to update to last version if needed.
+N.B. You **MUST** add package only to test projects and if you create xunit test projects (`dotnet new xunit`) you'll find the reference already present in `csproj` file because Coverlet is the default coverage tool for every .NET Core and >= .NET 6 applications, you've only to update to last version if needed.
 
 ### Usage
 Coverlet is integrated into the Visual Studio Test Platform as a [data collector](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md). To get coverage simply run the following command:
@@ -57,10 +57,10 @@ After the above command is run, a `coverage.cobertura.xml` file containing the r
 See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
 #### Requirements
-* _You need to be running .NET Core SDK v2.2.401 or newer_
-* _You need to reference version 16.5.0 and above of Microsoft.NET.Test.Sdk_
+* _You need to be running .NET 6.0 SDK v6.0.408 or newer e.g. v7.0.200_
+* _You need to reference version 17.5.0 and above of Microsoft.NET.Test.Sdk_
 ```
-<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
 ```
 
 ### MSBuild Integration (suffers of possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
@@ -69,7 +69,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 ```bash
 dotnet add package coverlet.msbuild
 ```
-N.B. You **MUST** add package only to test projects  
+N.B. You **MUST** add package only to test projects
 
 ### Usage
 
@@ -111,7 +111,7 @@ See [documentation](Documentation/GlobalTool.md) for advanced usage.
 #### Requirements
 .NET global tools rely on a .NET Core runtime installed on your machine https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong
 
-.NET Coverlet global tool requires _.NET Core 2.2 and above_ 
+.NET Coverlet global tool requires _.NET 6.0 and above_
 
 
 ## How It Works
@@ -131,14 +131,14 @@ Coverlet generates code coverage information by going through the following proc
 
 ## Deterministic build support
 
-Coverlet supports coverage for deterministic builds. The solution at the moment is not optimal and need a workaround.  
+Coverlet supports coverage for deterministic builds. The solution at the moment is not optimal and need a workaround.
 Take a look at [documentation](Documentation/DeterministicBuild.md).
 
 ## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)!
 
 ## Known Issues
 
-Unfortunately we have some known issues, check it [here](Documentation/KnownIssues.md) 
+Unfortunately we have some known issues, check it [here](Documentation/KnownIssues.md)
 
 ## Cake Add-In
 
@@ -166,12 +166,12 @@ If you find a bug or have a feature request, please report them at this reposito
 
 ## Coverlet Team
 
-Author and owner    
-* [Toni Solarin-Sodara](https://github.com/tonerdo)  
+Author and owner
+* [Toni Solarin-Sodara](https://github.com/tonerdo)
 
 Co-maintainers
 
-* [Peter Liljenberg](https://github.com/petli)  
+* [Peter Liljenberg](https://github.com/petli)
 * [David Müller](https://github.com/daveMueller)
 * [Marco Rossignoli](https://github.com/MarcoRossignoli)
 
@@ -188,6 +188,6 @@ Part of the code is based on work done by OpenCover team https://github.com/Open
 
 ## License
 
-This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.  
-  
+This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.
+
 ## Supported by the [.NET Foundation](https://dotnetfoundation.org/)
