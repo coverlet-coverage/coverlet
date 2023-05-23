@@ -110,7 +110,7 @@ namespace Coverlet.Core.Instrumentation
                     {
                         return true;
                     }
-                    
+
                     if (embeddedPdb)
                     {
                         return _instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, _excludeAssembliesWithoutSources);

@@ -26,7 +26,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
   <PropertyGroup>
     <_CoverletSdkNETCoreSdkVersion>$(NETCoreSdkVersion)</_CoverletSdkNETCoreSdkVersion>
     <_CoverletSdkNETCoreSdkVersion Condition="$(_CoverletSdkNETCoreSdkVersion.Contains('-'))">$(_CoverletSdkNETCoreSdkVersion.Split('-')[0])</_CoverletSdkNETCoreSdkVersion>
-    <_CoverletSdkMinVersionWithDependencyTarget>6.0.408</_CoverletSdkMinVersionWithDependencyTarget>
+    <_CoverletSdkMinVersionWithDependencyTarget>6.0.100</_CoverletSdkMinVersionWithDependencyTarget>
     <_CoverletSourceRootTargetName>CoverletGetPathMap</_CoverletSourceRootTargetName>
     <_CoverletSourceRootTargetName Condition="'$([System.Version]::Parse($(_CoverletSdkNETCoreSdkVersion)).CompareTo($([System.Version]::Parse($(_CoverletSdkMinVersionWithDependencyTarget)))))' &gt;= '0' ">InitializeSourceRootMappedPaths</_CoverletSourceRootTargetName>
   </PropertyGroup>
