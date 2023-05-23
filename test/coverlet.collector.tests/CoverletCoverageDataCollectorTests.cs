@@ -22,7 +22,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Coverlet.Collector.Tests
 {
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
     public class CoverletCoverageDataCollectorTests
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
     {
         private readonly DataCollectionEnvironmentContext _context;
         private CoverletCoverageCollector _coverletCoverageDataCollector;
@@ -207,8 +209,9 @@ namespace Coverlet.Collector.Tests
                 return serviceCollection;
             };
             _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, serviceCollectionFactory);
-
+#pragma warning disable CA1062
             IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f).CreateReporter()).Where(x => x != null).ToList();
+#pragma warning restore CA1062
             var mockDataCollectionSink = new Mock<DataCollectionSink>();
             mockDataCollectionSink.Setup(m => m.SendFileAsync(It.IsAny<FileTransferInformation>())).Callback<FileTransferInformation>(fti =>
             {

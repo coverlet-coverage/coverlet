@@ -14,7 +14,9 @@ using Coverlet.Collector.DataCollection;
 
 namespace Coverlet.Collector.Tests
 {
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
     public class AttachmentManagerTests
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
     {
         private AttachmentManager _attachmentManager;
         private readonly Mock<DataCollectionSink> _mockDataCollectionSink;

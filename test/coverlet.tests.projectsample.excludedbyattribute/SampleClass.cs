@@ -7,9 +7,9 @@ namespace coverlet.tests.projectsample.excludedbyattribute
 {
     public class SampleClass
     {
-        public int SampleMethod()
-        {
-            return new Random().Next();
-        }
+    public int SampleMethod()
+    {
+      return new Random().Next();
     }
+  }
 }

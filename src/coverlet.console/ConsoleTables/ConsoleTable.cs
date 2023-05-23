@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -46,7 +47,7 @@ namespace ConsoleTables
 
         public ConsoleTable(ConsoleTableOptions options)
         {
-            Options = options ?? throw new ArgumentNullException("options");
+            Options = options ?? throw new ArgumentNullException(nameof(options));
             Rows = new List<object[]>();
             Columns = new List<object>(options.Columns);
         }
@@ -64,10 +65,10 @@ namespace ConsoleTables
                 throw new ArgumentNullException(nameof(values));
 
             if (!Columns.Any())
-                throw new Exception("Please set the columns first");
+                throw new ArgumentException("Please set the columns first");
 
             if (Columns.Count != values.Length)
-                throw new Exception(
+                throw new ArgumentException(
                     $"The number columns in the row ({Columns.Count}) does not match the values ({values.Length}");
 
             Rows.Add(values);
@@ -101,14 +102,14 @@ namespace ConsoleTables
                 .Aggregate((s, a) => s + a) + " |";
 
             // find the longest formatted line
-            var maxRowLength = Math.Max(0, Rows.Any() ? Rows.Max(row => string.Format(format, row).Length) : 0);
-            var columnHeaders = string.Format(format, Columns.ToArray());
+            var maxRowLength = Math.Max(0, Rows.Any() ? Rows.Max(row => string.Format(CultureInfo.InvariantCulture, format, row).Length) : 0);
+            var columnHeaders = string.Format(CultureInfo.InvariantCulture, format, Columns.ToArray());
 
             // longest line is greater of formatted columnHeader and longest row
             var longestLine = Math.Max(maxRowLength, columnHeaders.Length);
 
             // add each row
-            var results = Rows.Select(row => string.Format(format, row)).ToList();
+            var results = Rows.Select(row => string.Format(CultureInfo.InvariantCulture, format, row)).ToList();
 
             // create the divider
             var divider = " " + string.Join("", Enumerable.Repeat("-", longestLine - 1)) + " ";
@@ -127,7 +128,7 @@ namespace ConsoleTables
             if (Options.EnableCount)
             {
                 builder.AppendLine("");
-                builder.AppendFormat(" Count: {0}", Rows.Count);
+                builder.AppendFormat(CultureInfo.InvariantCulture, " Count: {0}", Rows.Count);
             }
 
             return builder.ToString();
@@ -149,10 +150,10 @@ namespace ConsoleTables
             var format = Format(columnLengths, delimiter);
 
             // find the longest formatted line
-            var columnHeaders = string.Format(format, Columns.ToArray());
+            var columnHeaders = string.Format(CultureInfo.InvariantCulture, format, Columns.ToArray());
 
             // add each row
-            var results = Rows.Select(row => string.Format(format, row)).ToList();
+            var results = Rows.Select(row => string.Format(CultureInfo.InvariantCulture, format, row)).ToList();
 
             // create the divider
             var divider = Regex.Replace(columnHeaders, @"[^|]", "-");
@@ -180,10 +181,10 @@ namespace ConsoleTables
             var format = Format(columnLengths);
 
             // find the longest formatted line
-            var columnHeaders = string.Format(format, Columns.ToArray());
+            var columnHeaders = string.Format(CultureInfo.InvariantCulture, format, Columns.ToArray());
 
             // add each row
-            var results = Rows.Select(row => string.Format(format, row)).ToList();
+            var results = Rows.Select(row => string.Format(CultureInfo.InvariantCulture, format, row)).ToList();
 
             // create the divider
             var divider = Regex.Replace(columnHeaders, @"[^|]", "-");

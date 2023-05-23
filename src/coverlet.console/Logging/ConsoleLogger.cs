@@ -7,6 +7,7 @@ using static System.Console;
 
 namespace Coverlet.Console.Logging
 {
+#pragma warning disable CA1812
     class ConsoleLogger : ILogger
     {
         private static readonly object s_sync = new();
@@ -43,4 +44,5 @@ namespace Coverlet.Console.Logging
             }
         }
     }
+#pragma warning restore CA1812
 }

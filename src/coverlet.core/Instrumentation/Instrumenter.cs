@@ -938,7 +938,7 @@ namespace Coverlet.Core.Instrumentation
     {
         readonly Matcher _matcher;
 
-        public ExcludedFilesHelper(string[] excludes, ILogger logger)
+        public ExcludedFilesHelper(string[] excludes, ILogger _logger)
         {
             if (excludes != null && excludes.Length > 0)
             {

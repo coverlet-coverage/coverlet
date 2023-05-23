@@ -8,6 +8,8 @@
     <AssemblyTitle>coverlet.console</AssemblyTitle>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>coverlet.console.snk</AssemblyOriginatorKeyFile>
+    <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->

@@ -41,7 +41,7 @@ namespace Coverlet.Console
             var logger = (ConsoleLogger)serviceProvider.GetService<ILogger>();
             IFileSystem fileSystem = serviceProvider.GetService<IFileSystem>();
 
-            var app = new CommandLineApplication
+            using var app = new CommandLineApplication
             {
                 Name = "coverlet",
                 FullName = "Cross platform .NET Core code coverage tool"
@@ -139,7 +139,7 @@ namespace Coverlet.Console
                 process.WaitForExit();
 
                 string dOutput = output.HasValue() ? output.Value() : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
-                List<string> dThresholdTypes = (List<string>)(thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" }));
+                var dThresholdTypes = (List<string>)(thresholdTypes.HasValue() ? thresholdTypes.Values : new List<string>(new string[] { "line", "branch", "method" }));
                 ThresholdStatistic dThresholdStat = thresholdStat.HasValue() ? Enum.Parse<ThresholdStatistic>(thresholdStat.Value(), true) : Enum.Parse<ThresholdStatistic>("minimum", true);
 
                 logger.LogInformation("\nCalculating coverage result...");
@@ -147,7 +147,7 @@ namespace Coverlet.Console
                 CoverageResult result = coverage.GetCoverageResult();
 
                 string directory = Path.GetDirectoryName(dOutput);
-                if (directory == string.Empty)
+                if (string.IsNullOrEmpty(directory))
                 {
                     directory = Directory.GetCurrentDirectory();
                 }
@@ -161,7 +161,7 @@ namespace Coverlet.Console
                     Core.Abstractions.IReporter reporter = new ReporterFactory(format).CreateReporter();
                     if (reporter == null)
                     {
-                        throw new Exception($"Specified output format '{format}' is not supported");
+                        throw new ArgumentException($"Specified output format '{format}' is not supported");
                     }
 
                     if (reporter.OutputType == ReporterOutputType.Console)
@@ -174,7 +174,7 @@ namespace Coverlet.Console
                     {
                         // Output to file
                         string filename = Path.GetFileName(dOutput);
-                        filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+                        filename = (string.IsNullOrEmpty(filename)) ? $"coverage.{reporter.Extension}" : filename;
                         filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
 
                         string report = Path.Combine(directory, filename);
@@ -202,12 +202,12 @@ namespace Coverlet.Console
                 }
 
                 var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>();
-                if (threshold.HasValue() && threshold.Value().Contains(','))
+                if (threshold.HasValue() && threshold.Value().Contains(',', StringComparison.InvariantCulture))
                 {
                     IEnumerable<string> thresholdValues = threshold.Value().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
                     if (thresholdValues.Count() != thresholdTypeFlagQueue.Count)
                     {
-                        throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
+                        throw new ArgumentOutOfRangeException($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
                     }
 
                     foreach (string thresholdValue in thresholdValues)
@@ -218,7 +218,7 @@ namespace Coverlet.Console
                         }
                         else
                         {
-                            throw new Exception($"Invalid threshold value must be numeric");
+                            throw new ArgumentException($"Invalid threshold value must be numeric");
                         }
                     }
                 }

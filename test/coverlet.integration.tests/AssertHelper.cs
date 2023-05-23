@@ -60,7 +60,7 @@ namespace Coverlet.Integration.Tests
 
             foreach (KeyValuePair<string, Method> method in methods)
             {
-                if (method.Key.Contains(methodName))
+                if (method.Key.Contains(methodName, StringComparison.InvariantCulture))
                 {
                     return method.Value;
                 }

@@ -26,7 +26,7 @@ namespace Coverlet.Integration.Tests
     {
         private static int s_folderSuffix;
 
-        protected BuildConfiguration GetAssemblyBuildConfiguration()
+        protected static BuildConfiguration GetAssemblyBuildConfiguration()
         {
 #if DEBUG
             return BuildConfiguration.Debug;
