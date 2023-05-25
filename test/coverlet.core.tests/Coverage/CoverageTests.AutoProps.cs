@@ -28,7 +28,7 @@ namespace Coverlet.Core.Tests
                         readValue = instance.AutoPropsInit;
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
+                    persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1])).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path, skipAutoProps.ToString() });
@@ -76,7 +76,7 @@ namespace Coverlet.Core.Tests
                             readValue = instance.RecordAutoPropsNonInit;
                             return Task.CompletedTask;
                         },
-                    persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
+                    persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1])).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path, skipAutoProps.ToString() });
@@ -119,7 +119,7 @@ namespace Coverlet.Core.Tests
                         {
                             return Task.CompletedTask;
                         },
-                        persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
+                        persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1])).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path, skipAutoProps.ToString() });

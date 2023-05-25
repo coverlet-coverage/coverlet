@@ -70,7 +70,7 @@ namespace Coverlet.Collector.Tests
                                     + "</coverage>";
 
             string message = Assert.Throws<CoverletDataCollectorException>(() => _attachmentManager.SendCoverageReport(coverageReport, null)).Message;
-            Assert.Contains("CoverletCoverageDataCollector: Failed to save coverage report", message);
+            Assert.Contains("CoverletCoverageDataCollector: Failed to save coverage report", message, StringComparison.InvariantCulture);
         }
 
         [Fact]

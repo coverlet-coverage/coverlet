@@ -21,6 +21,7 @@ using Xunit;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.VisualStudio.TestPlatform;
 using Coverlet.Core.Tests;
+using System.Globalization;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
@@ -72,7 +73,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 }
                 else
                 {
-                    if (path.Contains(@":\git\runtime"))
+                    if (path.Contains(@":\git\runtime", StringComparison.InvariantCulture))
                     {
                         return true;
                     }
@@ -94,7 +95,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             Assert.Equal(1052, result.Documents.Count);
             foreach ((string docName, Document _) in result.Documents)
             {
-                Assert.False(docName.EndsWith(@"System.Private.CoreLib\src\System\Threading\Interlocked.cs"));
+                Assert.False(docName.EndsWith(@"System.Private.CoreLib\src\System\Threading\Interlocked.cs", StringComparison.InvariantCulture));
             }
             directory.Delete(true);
         }
@@ -174,7 +175,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
 #pragma warning disable CS0612 // Type or member is obsolete
-            bool found = doc.Lines.Values.Any(l => l.Class.Equals(nameof(ClassExcludedByObsoleteAttr)));
+            bool found = doc.Lines.Values.Any(l => l.Class.Equals(nameof(ClassExcludedByObsoleteAttr), StringComparison.Ordinal));
 #pragma warning restore CS0612 // Type or member is obsolete
             Assert.False(found, "Class decorated with with exclude attribute should be excluded");
 
@@ -192,7 +193,7 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
-            bool found = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::Method(System.String)"));
+            bool found = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::Method(System.String)", StringComparison.Ordinal));
             Assert.False(found, "Method decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);
@@ -209,10 +210,10 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
             Assert.NotNull(doc);
-            bool getFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::get_Property()"));
+            bool getFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::get_Property()", StringComparison.Ordinal));
             Assert.False(getFound, "Property getter decorated with with exclude attribute should be excluded");
 
-            bool setFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::set_Property()"));
+            bool setFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::set_Property()", StringComparison.Ordinal));
             Assert.False(setFound, "Property setter decorated with with exclude attribute should be excluded");
 
             instrumenterTest.Directory.Delete(true);
@@ -274,7 +275,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         [Fact]
         public void TestInstrument_NetStandardAwareAssemblyResolver_FromRuntime()
         {
-            var netstandardResolver = new NetstandardAwareAssemblyResolver(null, _mockLogger.Object);
+            using var netstandardResolver = new NetstandardAwareAssemblyResolver(null, _mockLogger.Object);
 
             // We ask for "official" netstandard.dll implementation with know MS public key cc7b13ffcd2ddd51 same in all runtime
             AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse("netstandard, Version=0.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51"));
@@ -308,7 +309,7 @@ namespace Coverlet.Core.Instrumentation.Tests
                 File.WriteAllBytes("netstandard.dll", dllStream.ToArray());
             }
 
-            var netstandardResolver = new NetstandardAwareAssemblyResolver(newAssemlby.Location, _mockLogger.Object);
+            using var netstandardResolver = new NetstandardAwareAssemblyResolver(newAssemlby.Location, _mockLogger.Object);
             AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse(newAssemlby.FullName));
 
             // We check if final netstandard.dll resolved is local folder one and not "official" netstandard.dll
@@ -399,19 +400,19 @@ namespace Coverlet.Core.Instrumentation.Tests
         [MemberData(nameof(TestInstrument_ExcludedFilesHelper_Data))]
         public void TestInstrument_ExcludedFilesHelper(string[] excludeFilterHelper, ValueTuple<string, bool, bool>[] result)
         {
-            var exludeFilterHelper = new ExcludedFilesHelper(excludeFilterHelper, new Mock<ILogger>().Object);
+            var _excludeFilterHelper = new ExcludedFilesHelper(excludeFilterHelper, new Mock<ILogger>().Object);
             foreach (ValueTuple<string, bool, bool> checkFile in result)
             {
                 if (checkFile.Item3) // run test only on windows platform
                 {
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
-                        Assert.Equal(checkFile.Item2, exludeFilterHelper.Exclude(checkFile.Item1));
+                        Assert.Equal(checkFile.Item2, _excludeFilterHelper.Exclude(checkFile.Item1));
                     }
                 }
                 else
                 {
-                    Assert.Equal(checkFile.Item2, exludeFilterHelper.Exclude(checkFile.Item1));
+                    Assert.Equal(checkFile.Item2, _excludeFilterHelper.Exclude(checkFile.Item1));
                 }
             }
         }
@@ -555,10 +556,10 @@ namespace Coverlet.Core.Instrumentation.Tests
 namespace coverlet.tests.projectsample.excludedbyattribute{{
 public class SampleClass
 {{
-	public int SampleMethod()
-	{{
-		return new System.Random().Next();
-	}}
+    public int SampleMethod()
+    {{
+        return new System.Random().Next();
+    }}
 }}
 
 }}
@@ -585,7 +586,7 @@ public class SampleClass
                         foreach (Diagnostic diagnostic in emitResult.Diagnostics)
                         {
                             message += Environment.NewLine;
-                            message += diagnostic.GetMessage();
+                            message += diagnostic.GetMessage(CultureInfo.InvariantCulture);
                         }
                         throw new Xunit.Sdk.XunitException(message);
                     }
@@ -640,7 +641,7 @@ public class SampleClass
         [Fact]
         public void TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext()
         {
-            var netstandardResolver = new NetstandardAwareAssemblyResolver(Assembly.GetExecutingAssembly().Location, _mockLogger.Object);
+            using var netstandardResolver = new NetstandardAwareAssemblyResolver(Assembly.GetExecutingAssembly().Location, _mockLogger.Object);
             AssemblyDefinition asm = netstandardResolver.TryWithCustomResolverOnDotNetCore(new AssemblyNameReference("Microsoft.Extensions.Logging.Abstractions", new Version("2.2.0")));
             Assert.NotNull(asm);
         }
@@ -656,10 +657,10 @@ public class SampleClass
 
             Assert.Contains(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLambda(System.String,System.Int32)");
             Assert.DoesNotContain(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr::TestLambda(System.String)");
-            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
+            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestLambda", 0));
             Assert.DoesNotContain(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2::TestLambda(System.String,System.Int32)");
-            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
+            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestLambda", 1));
             Assert.Contains(doc.Lines.Values, l => l.Method == "System.Int32 Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2::TestLambda(System.String)");
 
@@ -700,13 +701,13 @@ public class SampleClass
             Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
             Assert.NotNull(doc);
 
-            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
+            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 2));
-            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
+            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 3));
-            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
+            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 2));
-            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
+            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestYield", 3));
 
             instrumenterTest.Directory.Delete(true);
@@ -721,13 +722,13 @@ public class SampleClass
             Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.ExcludeFromCoverage.cs");
             Assert.NotNull(doc);
 
-            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
+            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 4));
-            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/") &&
+            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 5));
-            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
+            Assert.Contains(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 4));
-            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/") &&
+            Assert.DoesNotContain(doc.Lines.Values, l => l.Class.StartsWith("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr2/", StringComparison.InvariantCulture) &&
                 instrumenterTest.Instrumenter.IsSynthesizedNameOf(l.Method, "TestAsyncAwait", 5));
 
             instrumenterTest.Directory.Delete(true);

@@ -61,7 +61,7 @@ namespace Coverlet.Core.Tests
                         ((Task)instance.TestAsync_Catch_WithNestedCatch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 

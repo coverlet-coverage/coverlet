@@ -18,7 +18,7 @@ namespace Coverlet.Integration.Tests
         private protected override void AssertCollectorsInjection(ClonedTemplateProject clonedTemplateProject)
         {
             // Check out/in process collectors injection
-            Assert.Contains("[coverlet]", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()));
+            Assert.Contains("[coverlet]", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()), StringComparison.InvariantCulture);
 
             // There is a bug in this SDK version https://github.com/microsoft/vstest/pull/2221
             // in-proc coverlet.collector.dll collector with version != 1.0.0.0 won't be loaded
@@ -69,8 +69,8 @@ namespace Coverlet.Integration.Tests
         private protected virtual void AssertCollectorsInjection(ClonedTemplateProject clonedTemplateProject)
         {
             // Check out/in process collectors injection
-            Assert.Contains("[coverlet]Initializing CoverletCoverageDataCollector with configuration:", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()));
-            Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(clonedTemplateProject.GetFiles("log.host.*.txt").Single()));
+            Assert.Contains("[coverlet]Initializing CoverletCoverageDataCollector with configuration:", File.ReadAllText(clonedTemplateProject.GetFiles("log.datacollector.*.txt").Single()), StringComparison.InvariantCulture);
+            Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(clonedTemplateProject.GetFiles("log.host.*.txt").Single()), StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace Coverlet.Integration.Tests
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!), standardOutput);
             // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
             // IncludeTestAssembly=true we do it in other test
-            Assert.Contains("Passed!", standardOutput);
+            Assert.Contains("Passed!", standardOutput, StringComparison.InvariantCulture);
             AssertCollectorsInjection(clonedTemplateProject);
         }
 
@@ -90,7 +90,7 @@ namespace Coverlet.Integration.Tests
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
             string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
             Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError), standardOutput);
-            Assert.Contains("Passed!", standardOutput);
+            Assert.Contains("Passed!", standardOutput, StringComparison.InvariantCulture);
             AssertCoverage(clonedTemplateProject);
             AssertCollectorsInjection(clonedTemplateProject);
         }
@@ -101,12 +101,12 @@ namespace Coverlet.Integration.Tests
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
             string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
             Assert.True(DotnetCli($"publish -c {_buildConfiguration} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError), standardOutput);
-            string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish"));
+            string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish", StringComparison.InvariantCulture));
             Assert.NotNull(publishedTestFile);
             Assert.True(DotnetCli($"vstest \"{publishedTestFile}\" --collect:\"XPlat Code Coverage\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out standardOutput, out standardError), standardOutput);
             // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
             // IncludeTestAssembly=true we do it in other test
-            Assert.Contains("Passed!", standardOutput);
+            Assert.Contains("Passed!", standardOutput, StringComparison.InvariantCulture);
             AssertCollectorsInjection(clonedTemplateProject);
         }
 
@@ -116,10 +116,10 @@ namespace Coverlet.Integration.Tests
             using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
             string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
             Assert.True(DotnetCli($"publish -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\"", out string standardOutput, out string standardError), standardOutput);
-            string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish"));
+            string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish", StringComparison.InvariantCulture));
             Assert.NotNull(publishedTestFile);
             Assert.True(DotnetCli($"vstest \"{publishedTestFile}\" --collect:\"XPlat Code Coverage\" --ResultsDirectory:\"{clonedTemplateProject.ProjectRootPath}\" /settings:\"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out standardOutput, out standardError), standardOutput);
-            Assert.Contains("Passed!", standardOutput);
+            Assert.Contains("Passed!", standardOutput, StringComparison.InvariantCulture);
             AssertCoverage(clonedTemplateProject);
             AssertCollectorsInjection(clonedTemplateProject);
         }

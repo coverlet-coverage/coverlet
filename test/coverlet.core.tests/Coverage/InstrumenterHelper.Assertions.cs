@@ -5,6 +5,7 @@ using Coverlet.Core.Instrumentation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -155,7 +156,7 @@ namespace Coverlet.Core.Tests
             var builder = new StringBuilder();
             foreach (KeyValuePair<BranchKey, Branch> branch in document.Branches)
             {
-                builder.AppendLine($"({branch.Value.Number}, {branch.Value.Ordinal}, {branch.Value.Hits}),");
+                builder.AppendLine(CultureInfo.CurrentCulture, $"({branch.Value.Number}, {branch.Value.Ordinal}, {branch.Value.Hits}),");
             }
             return builder.ToString();
         }
@@ -321,7 +322,7 @@ namespace Coverlet.Core.Tests
 
             if (linesToCover.Count != 0)
             {
-                throw new XunitException($"Not all requested line found, {linesToCover.Select(l => l.ToString()).Aggregate((a, b) => $"{a}, {b}")}");
+                throw new XunitException($"Not all requested line found, {linesToCover.Select(l => l.ToString(CultureInfo.InvariantCulture)).Aggregate((a, b) => $"{a}, {b}")}");
             }
 
             return document;
@@ -372,7 +373,7 @@ namespace Coverlet.Core.Tests
 
             if (linesToCover.Count != 0)
             {
-                throw new XunitException($"Not all requested line found, {linesToCover.Select(l => l.ToString()).Aggregate((a, b) => $"{a}, {b}")}");
+                throw new XunitException($"Not all requested line found, {linesToCover.Select(l => l.ToString(CultureInfo.InvariantCulture)).Aggregate((a, b) => $"{a}, {b}")}");
             }
 
             return document;

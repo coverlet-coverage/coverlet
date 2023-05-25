@@ -19,20 +19,20 @@ namespace Coverlet.Core.Samples.Tests
 
         public bool HasSingleDecision(string input)
         {
-            if (input.Contains("test")) return true;
+            if (input.Contains("test", StringComparison.InvariantCulture)) return true;
             return false;
         }
 
         public bool HasTwoDecisions(string input)
         {
-            if (input.Contains("test")) return true;
-            if (input.Contains("xxx")) return true;
+            if (input.Contains("test", StringComparison.InvariantCulture)) return true;
+            if (input.Contains("xxx", StringComparison.InvariantCulture)) return true;
             return false;
         }
 
         public bool HasCompleteIf(string input)
         {
-            if (input.Contains("test"))
+            if (input.Contains("test", StringComparison.InvariantCulture))
             {
                 return true;
             }

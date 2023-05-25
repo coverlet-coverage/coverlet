@@ -132,6 +132,11 @@ dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
 dotnet_diagnostic.IDE1006.severity = warning
 # IDE0090: Use 'new(...)'
 dotnet_diagnostic.IDE0090.severity = warning
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
+tab_width = 2
+end_of_line = crlf
+dotnet_diagnostic.CA2007.severity = warning
+dotnet_diagnostic.CA1822.severity = suggestion
 ###############################
 # C# Coding Conventions       #
 ###############################
@@ -213,3 +218,11 @@ csharp_space_between_square_brackets = false
 # Wrapping preferences
 csharp_preserve_single_line_statements = true
 csharp_preserve_single_line_blocks = true
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_namespace_declarations = block_scoped:silent
+csharp_style_prefer_method_group_conversion = true:silent
+csharp_style_prefer_top_level_statements = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_local_functions = false:silent
+csharp_style_prefer_local_over_anonymous_function = true:suggestion
+csharp_prefer_static_local_function = true:suggestion

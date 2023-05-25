@@ -16,8 +16,8 @@ namespace Coverlet.Core.Tests
         {
             var instrumenterResult = new InstrumenterResult
             {
-                HitsFilePath = "HitsFilePath", 
-                SourceLink = "SourceLink", 
+                HitsFilePath = "HitsFilePath",
+                SourceLink = "SourceLink",
                 ModulePath = "ModulePath"
             };
 
@@ -41,13 +41,13 @@ namespace Coverlet.Core.Tests
 
             var coveragePrepareResult = new CoveragePrepareResult
             {
-                UseSourceLink = true, 
-                Results = new[] {instrumenterResult}, 
+                UseSourceLink = true,
+                Results = new[] { instrumenterResult },
                 Parameters = new CoverageParameters()
             };
 
             Stream memoryStream = new MemoryStream();
-            var binaryWriter = new BinaryWriter(memoryStream);
+            using var binaryWriter = new BinaryWriter(memoryStream);
             binaryWriter.Write(1);
             binaryWriter.Write(-1);
             memoryStream.Position = 0;
@@ -62,7 +62,6 @@ namespace Coverlet.Core.Tests
 
             CoverageResult coverageResult = coverage.GetCoverageResult();
             coverageResult.Document("document").AssertLinesCovered(BuildConfiguration.Debug, (1, int.MaxValue));
-
         }
     }
 }

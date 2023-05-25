@@ -44,13 +44,13 @@ namespace Coverlet.Core.Tests
             Assert.True(new Generator().GenerateReport(new ReportConfiguration(
             new[] { reportFile },
             dir.FullName,
-            new string[0],
+            Array.Empty<string>(),
             null,
-            new string[0],
-            new string[0],
-            new string[0],
-            new string[0],
-            string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : new[] { sourceFileFilter },
+            Array.Empty<string>(),
+            Array.Empty<string>(),
+            Array.Empty<string>(),
+            Array.Empty<string>(),
+            string.IsNullOrEmpty(sourceFileFilter) ? Array.Empty<string>() : new[] { sourceFileFilter },
             null,
             null)));
         }
@@ -62,7 +62,7 @@ namespace Coverlet.Core.Tests
             var logger = new Mock<ILogger>();
             logger.Setup(l => l.LogVerbose(It.IsAny<string>())).Callback((string message) =>
             {
-                Assert.DoesNotContain("not found for module: ", message);
+                Assert.DoesNotContain("not found for module: ", message, StringComparison.InvariantCulture);
             });
             s_processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
             var coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
@@ -132,10 +132,10 @@ namespace Coverlet.Core.Tests
             var asm = Assembly.LoadFile(newPath);
 
             // Instance type and call method
-            await callMethod(Activator.CreateInstance(asm.GetType(typeof(T).FullName)));
+            await callMethod(Activator.CreateInstance(asm.GetType(typeof(T).FullName))).ConfigureAwait(false);
 
             // Flush tracker
-            Type tracker = asm.GetTypes().Single(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker"));
+            Type tracker = asm.GetTypes().Single(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker", StringComparison.InvariantCulture));
 
             // For debugging purpouse
             // int[] hitsArray = (int[])tracker.GetField("HitsArray").GetValue(null);
@@ -147,7 +147,7 @@ namespace Coverlet.Core.Tests
             // Persist CoveragePrepareResult
             using (var fs = new FileStream(persistPrepareResultToFile, FileMode.Open))
             {
-                await CoveragePrepareResult.Serialize(prepareResult).CopyToAsync(fs);
+                await CoveragePrepareResult.Serialize(prepareResult).CopyToAsync(fs).ConfigureAwait(false);
             }
 
             return prepareResult;
@@ -189,7 +189,7 @@ namespace Coverlet.Core.Tests
             string name = typeof(T).FullName;
             if (typeof(T).IsGenericType && name != null)
             {
-                int index = name.IndexOf('`');
+                int index = name.IndexOf('`', StringComparison.InvariantCulture);
                 return index == -1 ? name : name[..index];
             }
             return name;
@@ -226,7 +226,7 @@ namespace Coverlet.Core.Tests
                 }
                 catch (Exception ex)
                 {
-                    if (ex.ToString().Contains("RestoreOriginalModules") || ex.ToString().Contains("RestoreOriginalModule"))
+                    if (ex.ToString().Contains("RestoreOriginalModules", StringComparison.InvariantCulture) || ex.ToString().Contains("RestoreOriginalModule", StringComparison.InvariantCulture))
                     {
                         // If we're restoring modules mean that process are closing and we cannot override copied test file because is locked so we hide error
                         // to have a correct process exit value

@@ -6,7 +6,6 @@ using System.IO;
 using Xunit;
 using System.Collections.Generic;
 using System.Linq;
-using Castle.Core.Internal;
 using Moq;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
@@ -140,7 +139,7 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestIsModuleExcludedWithoutFilter()
         {
-            bool result = _instrumentationHelper.IsModuleExcluded("Module.dll", new string[0]);
+            bool result = _instrumentationHelper.IsModuleExcluded("Module.dll", Array.Empty<string>());
 
             Assert.False(result);
         }
@@ -148,7 +147,7 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestIsModuleIncludedWithoutFilter()
         {
-            bool result = _instrumentationHelper.IsModuleIncluded("Module.dll", new string[0]);
+            bool result = _instrumentationHelper.IsModuleIncluded("Module.dll", Array.Empty<string>());
 
             Assert.True(result);
         }
@@ -198,7 +197,7 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestIsTypeExcludedWithoutFilter()
         {
-            bool result = _instrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new string[0]);
+            bool result = _instrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", Array.Empty<string>());
 
             Assert.False(result);
         }
@@ -222,7 +221,7 @@ namespace Coverlet.Core.Helpers.Tests
         [Fact]
         public void TestIsTypeIncludedWithoutFilter()
         {
-            bool result = _instrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", new string[0]);
+            bool result = _instrumentationHelper.IsTypeIncluded("Module.dll", "a.b.Dto", Array.Empty<string>());
 
             Assert.True(result);
         }

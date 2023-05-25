@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Coverlet.Core.Abstractions;
@@ -48,8 +48,8 @@ namespace Coverlet.Core.Reporters.Tests
             string xml = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
             Assert.NotEqual(string.Empty, xml);
 
-            Assert.Contains(@"<FileRef uid=""1"" />", xml);
-            Assert.Contains(@"<FileRef uid=""2"" />", xml);
+            Assert.Contains(@"<FileRef uid=""1"" />", xml, StringComparison.InvariantCulture);
+            Assert.Contains(@"<FileRef uid=""2"" />", xml, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -65,16 +65,16 @@ namespace Coverlet.Core.Reporters.Tests
             string xml = new OpenCoverReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
 
             // Line 1: Two branches, no coverage (bec = 2, bev = 0)
-            Assert.Contains(@"<SequencePoint vc=""1"" uspid=""1"" ordinal=""0"" sl=""1"" sc=""1"" el=""1"" ec=""2"" bec=""2"" bev=""0"" fileid=""1"" />", xml);
+            Assert.Contains(@"<SequencePoint vc=""1"" uspid=""1"" ordinal=""0"" sl=""1"" sc=""1"" el=""1"" ec=""2"" bec=""2"" bev=""0"" fileid=""1"" />", xml, StringComparison.InvariantCulture);
 
             // Line 2: Two branches, one covered (bec = 2, bev = 1)
-            Assert.Contains(@"<SequencePoint vc=""1"" uspid=""2"" ordinal=""1"" sl=""2"" sc=""1"" el=""2"" ec=""2"" bec=""2"" bev=""1"" fileid=""1"" />", xml);
+            Assert.Contains(@"<SequencePoint vc=""1"" uspid=""2"" ordinal=""1"" sl=""2"" sc=""1"" el=""2"" ec=""2"" bec=""2"" bev=""1"" fileid=""1"" />", xml, StringComparison.InvariantCulture);
 
             // Line 3: Two branches, all covered (bec = 2, bev = 2)
-            Assert.Contains(@"<SequencePoint vc=""1"" uspid=""3"" ordinal=""2"" sl=""3"" sc=""1"" el=""3"" ec=""2"" bec=""2"" bev=""2"" fileid=""1"" />", xml);
+            Assert.Contains(@"<SequencePoint vc=""1"" uspid=""3"" ordinal=""2"" sl=""3"" sc=""1"" el=""3"" ec=""2"" bec=""2"" bev=""2"" fileid=""1"" />", xml, StringComparison.InvariantCulture);
 
             // Line 4: Three branches, two covered (bec = 3, bev = 2)
-            Assert.Contains(@"<SequencePoint vc=""1"" uspid=""4"" ordinal=""3"" sl=""4"" sc=""1"" el=""4"" ec=""2"" bec=""3"" bev=""2"" fileid=""1"" />", xml);
+            Assert.Contains(@"<SequencePoint vc=""1"" uspid=""4"" ordinal=""3"" sl=""4"" sc=""1"" el=""4"" ec=""2"" bec=""3"" bev=""2"" fileid=""1"" />", xml, StringComparison.InvariantCulture);
         }
 
         private static Documents CreateFirstDocuments()

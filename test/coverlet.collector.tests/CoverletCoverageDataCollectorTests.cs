@@ -85,7 +85,7 @@ namespace Coverlet.Collector.Tests
 
             _mockDataCollectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
-            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => string.Equals(y.TestModule, "abc.dll")), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>(), It.IsAny<ICecilSymbolHelper>()), Times.Once);
+            _mockCoverageWrapper.Verify(x => x.CreateCoverage(It.Is<CoverletSettings>(y => string.Equals(y.TestModule, "abc.dll", StringComparison.Ordinal)), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>(), It.IsAny<ICecilSymbolHelper>()), Times.Once);
         }
 
         [Fact]

@@ -23,7 +23,7 @@ namespace Coverlet.Core.Tests
                         int res = ((Task<int>)instance.Issue1104_Repro()).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 

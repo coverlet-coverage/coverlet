@@ -6,3 +6,5 @@ root = true
 [*.cs]
 # Default severity for all analyzer diagnostics
 dotnet_analyzer_diagnostic.severity = none
+dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.CA5394.severity = none

@@ -24,7 +24,7 @@ namespace Coverlet.Core.Tests
                         foreach (dynamic _ in instance.One()) ;
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });
@@ -55,7 +55,7 @@ namespace Coverlet.Core.Tests
                         foreach (dynamic _ in instance.Two()) ;
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 
@@ -85,7 +85,7 @@ namespace Coverlet.Core.Tests
                         foreach (dynamic _ in instance.OneWithSwitch(2)) ;
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });
@@ -116,7 +116,7 @@ namespace Coverlet.Core.Tests
                         foreach (dynamic _ in instance.Three()) ;
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 
@@ -146,7 +146,7 @@ namespace Coverlet.Core.Tests
                         foreach (dynamic _ in instance.Enumerable(new[] { "one", "two", "three", "four" })) ;
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 

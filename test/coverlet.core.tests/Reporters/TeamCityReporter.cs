@@ -104,8 +104,8 @@ namespace Coverlet.Core.Reporters.Tests
             string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLCovered' value='1']", output);
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLTotal' value='2']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLCovered' value='1']", output, StringComparison.InvariantCulture);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLTotal' value='2']", output, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -115,8 +115,8 @@ namespace Coverlet.Core.Reporters.Tests
             string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBCovered' value='1']", output);
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBTotal' value='3']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBCovered' value='1']", output, StringComparison.InvariantCulture);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBTotal' value='3']", output, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -126,8 +126,8 @@ namespace Coverlet.Core.Reporters.Tests
             string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
 
             // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMCovered' value='1']", output);
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMTotal' value='1']", output);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMCovered' value='1']", output, StringComparison.InvariantCulture);
+            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMTotal' value='1']", output, StringComparison.InvariantCulture);
         }
     }
 }

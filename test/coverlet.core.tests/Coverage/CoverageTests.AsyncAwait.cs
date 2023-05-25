@@ -32,7 +32,7 @@ namespace Coverlet.Core.Tests
                         res = ((Task<int>)instance.ConfigureAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 
@@ -82,7 +82,7 @@ namespace Coverlet.Core.Tests
                         ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize[0]);
+                    persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });
@@ -114,7 +114,7 @@ namespace Coverlet.Core.Tests
                         return Task.CompletedTask;
                     },
                     persistPrepareResultToFile: pathSerialize[0],
-                    assemblyLocation: Assembly.GetExecutingAssembly().Location);
+                    assemblyLocation: Assembly.GetExecutingAssembly().Location).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });
@@ -143,7 +143,7 @@ namespace Coverlet.Core.Tests
                             ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
                             return Task.CompletedTask;
                         },
-                        persistPrepareResultToFile: pathSerialize[0]);
+                        persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });
@@ -171,7 +171,7 @@ namespace Coverlet.Core.Tests
                             ((Task)instance.Test()).ConfigureAwait(false).GetAwaiter().GetResult();
                             return Task.CompletedTask;
                         },
-                        persistPrepareResultToFile: pathSerialize[0]);
+                        persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });
@@ -200,7 +200,7 @@ namespace Coverlet.Core.Tests
                             ((Task)instance.Execute(cts.Token)).ConfigureAwait(false).GetAwaiter().GetResult();
                             return Task.CompletedTask;
                         },
-                        persistPrepareResultToFile: pathSerialize[0]);
+                        persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });

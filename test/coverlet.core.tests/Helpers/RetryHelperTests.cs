@@ -21,7 +21,9 @@ namespace Coverlet.Core.Helpers.Tests
             {
                 new RetryHelper().Retry(() => target.TargetActionThrows(), retryStrategy, 7);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Assert.Equal(7, target.Calls);
             }
@@ -43,7 +45,9 @@ namespace Coverlet.Core.Helpers.Tests
             {
                 new RetryHelper().Retry(() => target.TargetActionThrows(), retryStrategy, 3);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Assert.Equal(3, target.Calls);
                 Assert.Equal(24, currentSleep);
@@ -71,12 +75,12 @@ namespace Coverlet.Core.Helpers.Tests
         public void TargetActionThrows()
         {
             Calls++;
-            throw new Exception("Simulating Failure");
+            throw new InvalidOperationException("Simulating Failure");
         }
         public void TargetActionThrows5Times()
         {
             Calls++;
-            if (Calls < 6) throw new Exception("Simulating Failure");
+            if (Calls < 6) throw new InvalidOperationException("Simulating Failure");
         }
     }
 }

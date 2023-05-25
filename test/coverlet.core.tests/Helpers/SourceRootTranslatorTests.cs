@@ -64,7 +64,7 @@ namespace Coverlet.Core.Helpers.Tests
                 if (p == "testLib.dll" || p == "CoverletSourceRootsMapping_testLib") return true;
                 return false;
             });
-            fileSystem.Setup(f => f.ReadAllLines(It.IsAny<string>())).Returns(new string[0]);
+            fileSystem.Setup(f => f.ReadAllLines(It.IsAny<string>())).Returns(System.Array.Empty<string>());
             var translator = new SourceRootTranslator("testLib.dll", logger.Object, fileSystem.Object, assemblyAdapter.Object);
             Assert.Equal(fileToTranslate, translator.ResolveFilePath(fileToTranslate));
         }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Coverlet.Core;
@@ -95,7 +96,7 @@ namespace Coverlet.Integration.Tests
 
             if (linesToCover.Count != 0)
             {
-                throw new XunitException($"Not all requested line found, {linesToCover.Select(l => l.ToString()).Aggregate((a, b) => $"{a}, {b}")}");
+                throw new XunitException($"Not all requested line found, {linesToCover.Select(l => l.ToString(CultureInfo.InvariantCulture)).Aggregate((a, b) => $"{a}, {b}")}");
             }
         }
     }

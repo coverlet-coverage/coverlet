@@ -12,7 +12,7 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <LangVersion>preview</LangVersion>
-    <NoWarn>$(NoWarn);NU5105;CA1707;CA1303</NoWarn>
+    <NoWarn>$(NoWarn);NU5105;CA1707;CA1303;CS1591</NoWarn>
     <RestoreSources>
       https://api.nuget.org/v3/index.json;
     </RestoreSources>

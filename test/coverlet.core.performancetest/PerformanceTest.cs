@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Coverlet.Core.PerformanceTest
+namespace Coverlet.Core.PerformanceTests
 {
     /// <summary>
     /// Test the performance of coverlet by running a unit test that calls a reasonably big and complex test class.

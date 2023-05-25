@@ -24,7 +24,7 @@ namespace Coverlet.Core.Tests
                         ((Task<bool>)instance.InvokeAnonymousAsync_Test()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 
@@ -58,7 +58,7 @@ namespace Coverlet.Core.Tests
                         ((Task)instance.Invoke()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize[0]);
+                    persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });
@@ -88,7 +88,7 @@ namespace Coverlet.Core.Tests
                         ((Task)instance.Foreach()).ConfigureAwait(false).GetAwaiter().GetResult();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize[0]);
+                    persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });
@@ -117,7 +117,7 @@ namespace Coverlet.Core.Tests
                         instance.T1();
                         return Task.CompletedTask;
                     },
-                    persistPrepareResultToFile: pathSerialize[0]);
+                    persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     return 0;
                 }, new string[] { path });

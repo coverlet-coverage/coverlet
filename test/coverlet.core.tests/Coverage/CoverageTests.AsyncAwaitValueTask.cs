@@ -28,7 +28,7 @@ namespace Coverlet.Core.Tests
                         res = await ((ValueTask<int>)instance.AsyncExecution(3)).ConfigureAwait(false);
                         res = await ((ValueTask<int>)instance.ConfigureAwait()).ConfigureAwait(false);
                         res = ((Task<int>)instance.WrappingValueTaskAsTask()).ConfigureAwait(false).GetAwaiter().GetResult();
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 

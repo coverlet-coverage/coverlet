@@ -137,7 +137,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                 Assert.False(unloadTask.Wait(5));
 
                 mutex.ReleaseMutex();
-                await unloadTask;
+                await unloadTask.ConfigureAwait(false);
 
                 int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
                 Assert.Equal(expectedHitsArray, ReadHitsFile());

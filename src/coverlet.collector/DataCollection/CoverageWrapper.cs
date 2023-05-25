@@ -17,6 +17,10 @@ namespace Coverlet.Collector.DataCollection
         /// </summary>
         /// <param name="settings">Coverlet settings</param>
         /// <param name="coverletLogger">Coverlet logger</param>
+        /// <param name="instrumentationHelper"></param>
+        /// <param name="fileSystem"></param>
+        /// <param name="sourceRootTranslator"></param>
+        /// <param name="cecilSymbolHelper"></param>
         /// <returns>Coverage object</returns>
         public Coverage CreateCoverage(CoverletSettings settings, ILogger coverletLogger, IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
         {

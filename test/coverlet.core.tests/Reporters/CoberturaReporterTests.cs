@@ -62,7 +62,7 @@ namespace Coverlet.Core.Reporters.Tests
             {
                 // Assert conversion behaviour to be sure to be in a Italian culture context
                 // where decimal char is comma.
-                Assert.Equal("1,5", (1.5).ToString());
+                Assert.Equal("1,5", (1.5).ToString(CultureInfo.CurrentCulture));
 
                 var reporter = new CoberturaReporter();
                 string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
@@ -71,7 +71,7 @@ namespace Coverlet.Core.Reporters.Tests
 
                 var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
 
-                IEnumerable<XAttribute> matchingRateAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate"));
+                IEnumerable<XAttribute> matchingRateAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate", StringComparison.InvariantCulture));
                 IEnumerable<string> rateParentNodeNames = matchingRateAttributes.Select(attr => attr.Parent.Name.LocalName);
                 Assert.Contains("package", rateParentNodeNames);
                 Assert.Contains("class", rateParentNodeNames);
@@ -79,12 +79,12 @@ namespace Coverlet.Core.Reporters.Tests
                 Assert.All(matchingRateAttributes.Select(attr => attr.Value),
                 value =>
                 {
-                    Assert.DoesNotContain(",", value);
-                    Assert.Contains(".", value);
+                    Assert.DoesNotContain(",", value, StringComparison.InvariantCulture);
+                    Assert.Contains(".", value, StringComparison.InvariantCulture);
                     Assert.Equal(0.5, double.Parse(value, CultureInfo.InvariantCulture));
                 });
 
-                IEnumerable<XAttribute> matchingComplexityAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.Equals("complexity"));
+                IEnumerable<XAttribute> matchingComplexityAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.Equals("complexity", StringComparison.Ordinal));
                 IEnumerable<string> complexityParentNodeNames = matchingComplexityAttributes.Select(attr => attr.Parent.Name.LocalName);
                 Assert.Contains("package", complexityParentNodeNames);
                 Assert.Contains("class", complexityParentNodeNames);

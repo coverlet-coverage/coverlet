@@ -30,7 +30,7 @@ namespace Coverlet.Core.Tests
 
                         // For now we have only async Run helper
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
 
                     // we return 0 if we return something different assert fail
                     return 0;
@@ -69,7 +69,7 @@ namespace Coverlet.Core.Tests
                     {
                         instance.Switch(1);
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 
@@ -99,7 +99,7 @@ namespace Coverlet.Core.Tests
                     {
                         instance.SwitchCsharp8(int.MaxValue);
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 
@@ -135,7 +135,7 @@ namespace Coverlet.Core.Tests
                         }
                         catch { }
                         return Task.CompletedTask;
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+                    }, persistPrepareResultToFile: pathSerialize[0]).ConfigureAwait(false);
                     return 0;
                 }, new string[] { path });
 
