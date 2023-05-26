@@ -41,11 +41,9 @@ namespace Coverlet.Console
             var logger = (ConsoleLogger)serviceProvider.GetService<ILogger>();
             IFileSystem fileSystem = serviceProvider.GetService<IFileSystem>();
 
-            using var app = new CommandLineApplication
-            {
-                Name = "coverlet",
-                FullName = "Cross platform .NET Core code coverage tool"
-            };
+            using var app = new CommandLineApplication();
+            app.Name = "coverlet";
+            app.FullName = "Cross platform .NET Core code coverage tool";
             app.HelpOption("-h|--help");
             app.VersionOption("--version", GetAssemblyVersion());
             int exitCode = (int)CommandExitCodes.Success;
