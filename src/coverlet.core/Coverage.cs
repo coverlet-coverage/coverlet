@@ -411,7 +411,16 @@ namespace Coverlet.Core
                 using (Stream fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open, FileAccess.Read))
                 using (var br = new BinaryReader(fs))
                 {
-                    int hitCandidatesCount = br.ReadInt32();
+                    int hitCandidatesCount;
+                    try
+                    {
+                        fs.Position = 0;
+                        hitCandidatesCount = br.ReadInt32();
+                    } catch (IOException ex)
+                    {
+                        _logger.LogWarning($"Unable to read hit file: {result.HitsFilePath} {result.HitCandidates.Count} because : {ex.Message}");
+                        throw;
+                    }
 
                     // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
 
