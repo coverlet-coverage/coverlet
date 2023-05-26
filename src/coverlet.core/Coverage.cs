@@ -409,16 +409,17 @@ namespace Coverlet.Core
 
                 var documentsList = result.Documents.Values.ToList();
                 using (Stream fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open, FileAccess.Read))
-                using (var br = new BinaryReader(fs))
                 {
+                    using var br = new BinaryReader(fs);
                     int hitCandidatesCount;
                     try
                     {
                         fs.Position = 0;
                         hitCandidatesCount = br.ReadInt32();
-                    } catch (IOException ex)
+                    }
+                    catch (IOException ex)
                     {
-                        _logger.LogWarning($"Unable to read hit file: {result.HitsFilePath} {result.HitCandidates.Count} because : {ex.Message}");
+                        _logger.LogWarning($"Unable to read hit file: '{result.HitsFilePath}' '{result.HitCandidates.Count}' because : {ex.Message}");
                         throw;
                     }
 
