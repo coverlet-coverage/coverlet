@@ -13,6 +13,9 @@ indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
 
+spelling_exclusion_path = ./exclusion.dic
+spelling_languages = en-us
+
 # XML project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
 indent_size = 2
