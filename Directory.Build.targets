@@ -1,6 +1,5 @@
 <Project>
   <ItemGroup>
-    <PackageReference Update="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
     <PackageReference Update="Microsoft.Build.Utilities.Core" Version="15.5.180"/>
     <PackageReference Update="Microsoft.CodeAnalysis.CSharp" Version="2.10.0" />
     <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
@@ -25,6 +24,8 @@
     <PackageReference Update="xunit.assert" Version="2.4.2" />
     <PackageReference Update="xunit.runner.visualstudio" Version="2.4.1"/>
     <PackageReference Update="Tmds.ExecFunction" Version="0.4.0" />
+    <PackageReference Update="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Update="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 
   <!-- Deterministic build workaround -->
