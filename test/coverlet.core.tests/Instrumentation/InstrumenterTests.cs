@@ -444,9 +444,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             loggerMock.VerifyNoOtherCalls();
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
-        [SkipOnOS(OS.Linux)]
+        [Fact]
         public void SkipPpdbWithoutLocalSource()
         {
             string dllFileName = "75d9f96508d74def860a568f426ea4a4.dll";
@@ -456,7 +454,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.OpenRead(It.IsAny<string>())).Returns((string path) =>
             {
-                if (Path.GetFileName(path) == pdbFileName)
+                if (Path.GetFileName(path.Replace(@"\", @"/")) == pdbFileName)
                 {
                     return File.OpenRead(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName));
                 }
@@ -467,7 +465,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             });
             partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
             {
-                if (Path.GetFileName(path) == pdbFileName)
+                if (Path.GetFileName(path.Replace(@"\", @"/")) == pdbFileName)
                 {
                     return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName));
                 }
