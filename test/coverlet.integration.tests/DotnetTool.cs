@@ -42,5 +42,56 @@ namespace Coverlet.Integration.Tests
             Assert.Contains("Hello World!", standardOutput);
             AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
         }
+
+        [ConditionalFact]
+        [SkipOnOS(OS.Linux)]
+        [SkipOnOS(OS.MacOS)]
+        public void StandAloneThreshold()
+        {
+            using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
+            UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+            string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+            DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
+            string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
+            Assert.False( RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError));
+            Assert.Contains("Hello World!", standardOutput);
+            AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
+            Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
+            Assert.Contains("The minimum method coverage is below the specified 80", standardOutput);
+        }
+
+        [ConditionalFact]
+        [SkipOnOS(OS.Linux)]
+        [SkipOnOS(OS.MacOS)]
+        public void StandAloneThresholdLine()
+        {
+            using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
+            UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+            string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+            DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
+            string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
+            Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError));
+            Assert.Contains("Hello World!", standardOutput);
+            AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
+            Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
+            Assert.DoesNotContain("The minimum method coverage is below the specified 80", standardOutput);
+        }
+
+        [ConditionalFact]
+        [SkipOnOS(OS.Linux)]
+        [SkipOnOS(OS.MacOS)]
+        public void StandAloneThresholdLineAndMethod ()
+        {
+            using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
+            UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+            string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+            DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
+            string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
+            Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --threshold-type method --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError));
+            Assert.Contains("Hello World!", standardOutput);
+            AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
+            Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
+            Assert.Contains("The minimum method coverage is below the specified 80", standardOutput);
+        }
     }
 }
