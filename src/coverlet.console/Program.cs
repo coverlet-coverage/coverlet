@@ -11,7 +11,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
 using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
@@ -21,68 +20,138 @@ using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
-using Newtonsoft.Json;
 
 namespace Coverlet.Console
 {
     public static class Program
     {
-        public static async Task<int> Main(string[] args)
+         static int Main(string[] args)
         {
-            var root = new RootCommand
-            {
-            new Argument<string>("path", "Path to the test assembly or application directory."),
-            new Option<string>(new[] { "--target", "-t" }, "Path to the test runner application."){Arity = ArgumentArity.ZeroOrOne,IsRequired = true},
-            new Option<string>(new[] { "--targetargs", "-a" }, "Arguments to be passed to the test runner."){Arity = ArgumentArity.ZeroOrOne},
-            new Option<string>(new[] { "--output", "-o" }, "Output of the generated coverage report"){Arity = ArgumentArity.ZeroOrOne},
-            new Option<LogLevel>(new[] { "--verbosity", "-v" }, () => LogLevel.Normal, "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed."){Arity = ArgumentArity.ZeroOrOne},
-            new Option<string[]>(new[] { "--formats", "-f" }, () => new[] {"json"} , "Format of the generated coverage report."){Arity = ArgumentArity.ZeroOrMore},
-            new Option<string>("--threshold", "Exits with error if the coverage % is below value."){Arity = ArgumentArity.ZeroOrOne},
-            new Option<List<string>>("--threshold-type", () => new List<string>(new string[] { "line", "branch", "method" }), "Coverage type to apply the threshold to.") {Arity = ArgumentArity.ZeroOrMore},
-            new Option<ThresholdStatistic>("--threshold-stat", () => ThresholdStatistic.Minimum, "Coverage statistic used to enforce the threshold value."){Arity = ArgumentArity.ZeroOrMore},
-            new Option<string[]>("--exclude", "Filter expressions to exclude specific modules and types."){Arity = ArgumentArity.ZeroOrMore},
-            new Option<string[]>("--include", "Filter expressions to include only specific modules and types."){Arity = ArgumentArity.ZeroOrMore},
-            new Option<string[]>("--exclude-by-file", "Glob patterns specifying source files to exclude."){Arity = ArgumentArity.ZeroOrMore},
-            new Option<string[]>("--include-directory", "Include directories containing additional assemblies to be instrumented."){Arity = ArgumentArity.ZeroOrMore},
-            new Option<string[]>("--exclude-by-attribute", "Attributes to exclude from code coverage.") { Arity = ArgumentArity.ZeroOrOne },
-            new Option<bool>("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.") { Arity = ArgumentArity.Zero },
-            new Option<bool>("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location"){ Arity = ArgumentArity.Zero },
-            new Option<bool>("--skipautoprops", "Neither track nor record auto-implemented properties.") { Arity = ArgumentArity.Zero },
-            new Option<string>("--merge-with", "Path to existing coverage result to merge.") { Arity = ArgumentArity.ZeroOrOne },
-            new Option<bool>("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.") { Arity = ArgumentArity.Zero },
-            new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return"){Arity = ArgumentArity.ZeroOrMore},
-            new Option<string>("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents."){ Arity = ArgumentArity.ZeroOrOne }
-            }.WithHandler(nameof(HandleCommandAsync));
+            var moduleOrAppDirectory = new Argument<string>("path", "Path to the test assembly or application directory.");
+            var target = new Option<string>(new[] { "--target", "-t" }, "Path to the test runner application.") { Arity = ArgumentArity.ZeroOrOne, IsRequired = true };
+            var targs = new Option<string>(new[] { "--targetargs", "-a" }, "Arguments to be passed to the test runner.") { Arity = ArgumentArity.ZeroOrOne };
+            var output = new Option<string>(new[] { "--output", "-o" }, "Output of the generated coverage report") { Arity = ArgumentArity.ZeroOrOne };
+            var verbosity = new Option<LogLevel>(new[] { "--verbosity", "-v" }, () => LogLevel.Normal, "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.") { Arity = ArgumentArity.ZeroOrOne };
+            var formats = new Option<string[]>(new[] { "--format", "-f" }, () => new[] { "json" }, "Format of the generated coverage report.") { Arity = ArgumentArity.ZeroOrMore };
+            var threshold = new Option<string>("--threshold", "Exits with error if the coverage % is below value.") { Arity = ArgumentArity.ZeroOrOne };
+            var thresholdTypes = new Option<List<string>>("--threshold-type", () => new List<string>(new string[] { "line", "branch", "method" }), "Coverage type to apply the threshold to.").FromAmong("line", "branch", "method");
+            var thresholdStat = new Option<ThresholdStatistic>("--threshold-stat", () => ThresholdStatistic.Minimum, "Coverage statistic used to enforce the threshold value.") { Arity = ArgumentArity.ZeroOrMore };
+            var excludeFilters = new Option<string[]>("--exclude", "Filter expressions to exclude specific modules and types.") { Arity = ArgumentArity.ZeroOrMore };
+            var includeFilters = new Option<string[]>("--include", "Filter expressions to include only specific modules and types.") { Arity = ArgumentArity.ZeroOrMore };
+            var excludedSourceFiles = new Option<string[]>("--exclude-by-file", "Glob patterns specifying source files to exclude.") { Arity = ArgumentArity.ZeroOrMore };
+            var includeDirectories = new Option<string[]>("--include-directory", "Include directories containing additional assemblies to be instrumented.") { Arity = ArgumentArity.ZeroOrMore };
+            var excludeAttributes = new Option<string[]>("--exclude-by-attribute", "Attributes to exclude from code coverage.") { Arity = ArgumentArity.ZeroOrOne };
+            var includeTestAssembly = new Option<bool>("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.") { Arity = ArgumentArity.Zero };
+            var singleHit = new Option<bool>("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location") { Arity = ArgumentArity.Zero };
+            var skipAutoProp = new Option<bool>("--skipautoprops", "Neither track nor record auto-implemented properties.") { Arity = ArgumentArity.Zero };
+            var mergeWith = new Option<string>("--merge-with", "Path to existing coverage result to merge.") { Arity = ArgumentArity.ZeroOrOne };
+            var useSourceLink = new Option<bool>("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.") { Arity = ArgumentArity.Zero };
+            var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore };
+            var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
 
-            root.Description = "Cross platform .NET Core code coverage tool";
-            return await root.InvokeAsync(args);
+            RootCommand rootCommand = new ()
+            {
+                moduleOrAppDirectory,
+                target,
+                targs,
+                output,
+                verbosity,
+                formats,
+                threshold,
+                thresholdTypes,
+                thresholdStat,
+                excludeFilters,
+                includeFilters,
+                excludedSourceFiles,
+                includeDirectories,
+                excludeAttributes,
+                includeTestAssembly,
+                singleHit,
+                skipAutoProp,
+                mergeWith,
+                useSourceLink,
+                doesNotReturnAttributes,
+                excludeAssembliesWithoutSources
+            };
+
+            rootCommand.Description = "Cross platform .NET Core code coverage tool";
+
+            rootCommand.SetHandler(async (context) =>
+            {
+                string moduleOrAppDirectoryValue = context.ParseResult.GetValueForArgument(moduleOrAppDirectory);
+                string targetValue = context.ParseResult.GetValueForOption(target);
+                string targsValue = context.ParseResult.GetValueForOption(targs);
+                string outputValue = context.ParseResult.GetValueForOption(output);
+                LogLevel verbosityValue = context.ParseResult.GetValueForOption(verbosity);
+                string[] formatsValue = context.ParseResult.GetValueForOption(formats);
+                string thresholdValue = context.ParseResult.GetValueForOption(threshold);
+                List<string> thresholdTypesValue = context.ParseResult.GetValueForOption(thresholdTypes);
+                ThresholdStatistic thresholdStatValue = context.ParseResult.GetValueForOption(thresholdStat);
+                string[] excludeFiltersValue = context.ParseResult.GetValueForOption(excludeFilters);
+                string[] includeFiltersValue = context.ParseResult.GetValueForOption(includeFilters);
+                string[] excludedSourceFilesValue = context.ParseResult.GetValueForOption(excludedSourceFiles);
+                string[] includeDirectoriesValue = context.ParseResult.GetValueForOption(includeDirectories);
+                string[] excludeAttributesValue = context.ParseResult.GetValueForOption(excludeAttributes);
+                bool includeTestAssemblyValue = context.ParseResult.GetValueForOption(includeTestAssembly);
+                bool singleHitValue = context.ParseResult.GetValueForOption(singleHit);
+                bool skipAutoPropValue = context.ParseResult.GetValueForOption(skipAutoProp);
+                string mergeWithValue = context.ParseResult.GetValueForOption(mergeWith);
+                bool useSourceLinkValue = context.ParseResult.GetValueForOption(useSourceLink);
+                string[] doesNotReturnAttributesValue = context.ParseResult.GetValueForOption(doesNotReturnAttributes);
+                string excludeAssembliesWithoutSourcesValue = context.ParseResult.GetValueForOption(excludeAssembliesWithoutSources);
+
+                if (string.IsNullOrEmpty(moduleOrAppDirectoryValue) || string.IsNullOrWhiteSpace(moduleOrAppDirectoryValue))
+                    throw new ArgumentException("No test assembly or application directory specified.");
+
+                var taskStatus = await HandleCommand(moduleOrAppDirectoryValue,
+                        targetValue,
+                        targsValue,
+                        outputValue,
+                        verbosityValue,
+                        formatsValue,
+                        thresholdValue,
+                        thresholdTypesValue,
+                        thresholdStatValue,
+                        excludeFiltersValue,
+                        includeFiltersValue,
+                        excludedSourceFilesValue,
+                        includeDirectoriesValue,
+                        excludeAttributesValue,
+                        includeTestAssemblyValue,
+                        singleHitValue,
+                        skipAutoPropValue,
+                        mergeWithValue,
+                        useSourceLinkValue,
+                        doesNotReturnAttributesValue,
+                        excludeAssembliesWithoutSourcesValue);
+                context.ExitCode = taskStatus;
+
+            });
+            return rootCommand.Invoke(args);
         }
-        private static async Task<int> HandleCommandAsync(string moduleOrAppDirectory,
+        private static Task<int> HandleCommand(string moduleOrAppDirectory,
                                                                string target,
-                                                               string targetargs,
+                                                               string targs,
                                                                string output,
                                                                LogLevel verbosity,
                                                                string[] formats,
                                                                string threshold,
                                                                List<string> thresholdType,
                                                                ThresholdStatistic thresholdStat,
-                                                               string[] exclude,
-                                                               string[] include,
-                                                               string[] excludeByFile,
-                                                               string[] includeDirectory,
-                                                               string[] excludeByAttribute,
+                                                               string[] excludeFilters,
+                                                               string[] includeFilters,
+                                                               string[] excludedSourceFiles,
+                                                               string[] includeDirectories,
+                                                               string[] excludeAttributes,
                                                                bool includeTestAssembly,
                                                                bool singleHit,
-                                                               bool skipautoprops,
+                                                               bool skipAutoProp,
                                                                string mergeWith,
                                                                bool useSourceLink,
-                                                               string[] doesNotReturnAttribute,
+                                                               string[] doesNotReturnAttributes,
                                                                string excludeAssembliesWithoutSources
                  )
             {
-
-
 
             IServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
@@ -102,21 +171,22 @@ namespace Coverlet.Console
             // Adjust log level based on user input.
             logger.Level = verbosity;
             int exitCode = (int)CommandExitCodes.Success;
+
             try
             {
                 CoverageParameters parameters = new()
                 {
-                    IncludeFilters = include,
-                    IncludeDirectories = includeDirectory,
-                    ExcludeFilters = exclude,
-                    ExcludedSourceFiles = excludeByFile,
-                    ExcludeAttributes = excludeByAttribute,
+                    IncludeFilters = includeFilters,
+                    IncludeDirectories = includeDirectories,
+                    ExcludeFilters = excludeFilters,
+                    ExcludedSourceFiles = excludedSourceFiles,
+                    ExcludeAttributes = excludeAttributes,
                     IncludeTestAssembly = includeTestAssembly,
                     SingleHit = singleHit,
                     MergeWith = mergeWith,
                     UseSourceLink = useSourceLink,
-                    SkipAutoProps = skipautoprops,
-                    DoesNotReturnAttributes = doesNotReturnAttribute,
+                    SkipAutoProps = skipAutoProp,
+                    DoesNotReturnAttributes = doesNotReturnAttributes,
                     ExcludeAssembliesWithoutSources = excludeAssembliesWithoutSources
                 };
                 ISourceRootTranslator sourceRootTranslator = serviceProvider.GetRequiredService<ISourceRootTranslator>();
@@ -132,7 +202,7 @@ namespace Coverlet.Console
 
                 Process process = new();
                 process.StartInfo.FileName = target;
-                process.StartInfo.Arguments = targetargs != null ? targetargs : string.Empty;
+                process.StartInfo.Arguments = targs != null ? targs : string.Empty;
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.RedirectStandardError = true;
@@ -176,7 +246,7 @@ namespace Coverlet.Console
                     Core.Abstractions.IReporter reporter = new ReporterFactory(fmt).CreateReporter();
                     if (reporter == null)
                     {
-                        throw new Exception($"Specified output format '{formats}' is not supported");
+                        throw new Exception($"Specified output format '{fmt}' is not supported");
                     }
 
                     if (reporter.OutputType == ReporterOutputType.Console)
@@ -200,17 +270,17 @@ namespace Coverlet.Console
 
                 var thresholdTypeFlagQueue = new Queue<ThresholdTypeFlags>();
 
-                foreach (string thresholdTyp in thresholdType)
+                foreach (string thresholdMode in thresholdType)
                 {
-                    if (thresholdTyp.Equals("line", StringComparison.OrdinalIgnoreCase))
+                    if (thresholdMode.Equals("line", StringComparison.OrdinalIgnoreCase))
                     {
                         thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Line);
                     }
-                    else if (thresholdTyp.Equals("branch", StringComparison.OrdinalIgnoreCase))
+                    else if (thresholdMode.Equals("branch", StringComparison.OrdinalIgnoreCase))
                     {
                         thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Branch);
                     }
-                    else if (thresholdTyp.Equals("method", StringComparison.OrdinalIgnoreCase))
+                    else if (thresholdMode.Equals("method", StringComparison.OrdinalIgnoreCase))
                     {
                         thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Method);
                     }
@@ -308,7 +378,7 @@ namespace Coverlet.Console
                     throw new Exception(exceptionMessageBuilder.ToString());
                 }
 
-                return exitCode;
+                return Task.FromResult(exitCode);
 
 
             }
@@ -316,25 +386,15 @@ namespace Coverlet.Console
             catch (Win32Exception we) when (we.Source == "System.Diagnostics.Process")
             {
                 logger.LogError($"Start process '{target}' failed with '{we.Message}'");
-                return exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception;
+                return Task.FromResult(exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex.Message);
-                return exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception;
+                return Task.FromResult(exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception);
             }
 
         }
-
-        private static Command WithHandler(this Command command, string methodName)
-        {
-            var method = typeof(Program).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
-            var handler = CommandHandler.Create(method!);
-            command.Handler = handler;
-            return command;
-        }
-
-static string GetAssemblyVersion() => typeof(Program).Assembly.GetName().Version.ToString();
 
         static string InvariantFormat(double value) => value.ToString(CultureInfo.InvariantCulture);
     }
