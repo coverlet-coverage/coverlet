@@ -2,27 +2,33 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Reflection;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Instrumentation;
+using Coverlet.Tests.Xunit.Extensions;
 using Microsoft.Extensions.DependencyModel;
 using Moq;
 using Xunit;
 
-namespace coverlet.tests.projectsample.aspnet6.tests
+namespace Coverlet.Integration.Tests
 {
-    public class ResolverTests
+    public class WpfResolverTests : BaseTest
     {
-        [Fact]
+        [ConditionalFact]
+        [SkipOnOS(OS.Linux, "WPF only runs on Windows")]
+        [SkipOnOS(OS.MacOS, "WPF only runs on Windows")]
         public void TestInstrument_NetCoreSharedFrameworkResolver()
         {
-            Assembly assembly = GetType().Assembly;
+            string wpfProjectPath = "../../../../coverlet.tests.projectsample.wpf6";
+            Assert.True(DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
+            string assemblyLocation = Directory.GetFiles($"{wpfProjectPath}/bin", "coverlet.tests.projectsample.wpf6.dll", SearchOption.AllDirectories).First();
+
             var mockLogger = new Mock<ILogger>();
-            var resolver = new NetCoreSharedFrameworkResolver(assembly.Location, mockLogger.Object);
+            var resolver = new NetCoreSharedFrameworkResolver(assemblyLocation, mockLogger.Object);
             var compilationLibrary = new CompilationLibrary(
                 "package",
-                "Microsoft.Extensions.Logging.Abstractions",
+                "System.Drawing",
                 "0.0.0.0",
                 "sha512-not-relevant",
                 Enumerable.Empty<string>(),
