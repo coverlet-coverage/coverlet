@@ -43,7 +43,7 @@ Options:
 
 NB. For a [multiple value] options you have to specify values multiple times i.e.
 ```
---exclude-by-attribute 'Obsolete' --exclude-by-attribute'GeneratedCode' --exclude-by-attribute 'CompilerGenerated'
+--exclude-by-attribute 'Obsolete' --exclude-by-attribute 'GeneratedCode' --exclude-by-attribute 'CompilerGenerated'
 ```
 For `--merge-with` [check the sample](Examples.md).
 
