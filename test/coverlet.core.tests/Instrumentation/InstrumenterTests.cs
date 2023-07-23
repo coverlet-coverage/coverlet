@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -34,9 +34,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             _disposeAction?.Invoke();
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.Linux)]
-        [SkipOnOS(OS.MacOS)]
+        [Fact]
         public void TestCoreLibInstrumentation()
         {
             DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), nameof(TestCoreLibInstrumentation)));
@@ -55,7 +53,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.OpenRead(It.IsAny<string>())).Returns((string path) =>
             {
-                if (Path.GetFileName(path) == files[1])
+                if (Path.GetFileName(path.Replace(@"\", @"/")) == files[1])
                 {
                     return File.OpenRead(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), files[1]));
                 }
@@ -66,7 +64,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             });
             partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
             {
-                if (Path.GetFileName(path) == files[1])
+                if (Path.GetFileName(path.Replace(@"\", @"/")) == files[1])
                 {
                     return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), files[1]));
                 }
@@ -446,9 +444,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             loggerMock.VerifyNoOtherCalls();
         }
 
-        [ConditionalFact]
-        [SkipOnOS(OS.MacOS)]
-        [SkipOnOS(OS.Linux)]
+        [Fact]
         public void SkipPpdbWithoutLocalSource()
         {
             string dllFileName = "75d9f96508d74def860a568f426ea4a4.dll";
@@ -458,7 +454,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             partialMockFileSystem.CallBase = true;
             partialMockFileSystem.Setup(fs => fs.OpenRead(It.IsAny<string>())).Returns((string path) =>
             {
-                if (Path.GetFileName(path) == pdbFileName)
+                if (Path.GetFileName(path.Replace(@"\", @"/")) == pdbFileName)
                 {
                     return File.OpenRead(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName));
                 }
@@ -469,7 +465,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             });
             partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
             {
-                if (Path.GetFileName(path) == pdbFileName)
+                if (Path.GetFileName(path.Replace(@"\", @"/")) == pdbFileName)
                 {
                     return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), pdbFileName));
                 }
