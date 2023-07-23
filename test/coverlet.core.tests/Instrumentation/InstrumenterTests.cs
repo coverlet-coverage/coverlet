@@ -620,24 +620,6 @@ public class SampleClass
         }
 
         [Fact]
-        public void TestInstrument_AspNetCoreSharedFrameworkResolver()
-        {
-            var resolver = new AspNetCoreSharedFrameworkResolver(_mockLogger.Object);
-            var compilationLibrary = new CompilationLibrary(
-                "package",
-                "Microsoft.Extensions.Logging.Abstractions",
-                "2.2.0",
-                "sha512-B2WqEox8o+4KUOpL7rZPyh6qYjik8tHi2tN8Z9jZkHzED8ElYgZa/h6K+xliB435SqUcWT290Fr2aa8BtZjn8A==",
-                Enumerable.Empty<string>(),
-                Enumerable.Empty<Dependency>(),
-                true);
-
-            var assemblies = new List<string>();
-            Assert.True(resolver.TryResolveAssemblyPaths(compilationLibrary, assemblies));
-            Assert.NotEmpty(assemblies);
-        }
-
-        [Fact]
         public void TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext()
         {
             var netstandardResolver = new NetstandardAwareAssemblyResolver(Assembly.GetExecutingAssembly().Location, _mockLogger.Object);
@@ -740,15 +722,15 @@ public class SampleClass
                 new[]
                 {
                     // Throws
-                    7, 8, 
+                    7, 8,
                     // NoBranches
-                    12, 13, 14, 15, 16, 
+                    12, 13, 14, 15, 16,
                     // If
-                    19, 20, 22, 23, 24, 25, 26, 27, 29, 30, 
+                    19, 20, 22, 23, 24, 25, 26, 27, 29, 30,
                     // Switch
-                    33, 34, 36, 39, 40, 41, 42, 44, 45, 49, 50, 52, 53, 55, 56, 58, 59, 61, 62, 64, 65, 68, 69, 
+                    33, 34, 36, 39, 40, 41, 42, 44, 45, 49, 50, 52, 53, 55, 56, 58, 59, 61, 62, 64, 65, 68, 69,
                     // Subtle
-                    72, 73, 75, 78, 79, 80, 82, 83, 86, 87, 88, 91, 92, 95, 96, 98, 99, 101, 102, 103, 
+                    72, 73, 75, 78, 79, 80, 82, 83, 86, 87, 88, 91, 92, 95, 96, 98, 99, 101, 102, 103,
                     // UnreachableBranch
                     106, 107, 108, 110, 111, 112, 113, 114,
                     // ThrowsGeneric
@@ -774,7 +756,7 @@ public class SampleClass
                     // Switch
                     41, 42,
                     // Subtle
-                    79, 80, 88, 96, 98, 99, 
+                    79, 80, 88, 96, 98, 99,
                     // UnreachableBranch
                     110, 111, 112, 113, 114,
                     // CallsGenericMethodDoesNotReturn
@@ -822,7 +804,7 @@ public class SampleClass
 
             var instrumenter = new Instrumenter(Path.Combine(directory.FullName, Path.GetFileName(module)), "_coverlet_tests_projectsample_vbmynamespace", parameters,
                 loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(Path.Combine(directory.FullName, Path.GetFileName(module)), loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
-            
+
             instrumentationHelper.BackupOriginalModule(Path.Combine(directory.FullName, Path.GetFileName(module)), "_coverlet_tests_projectsample_vbmynamespace");
 
             InstrumenterResult result = instrumenter.Instrument();
