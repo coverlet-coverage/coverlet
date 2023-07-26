@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+-Fix problem with coverage for .net5 WPF application [#1221](https://github.com/coverlet-coverage/coverlet/issues/1221) by https://github.com/lg2de
+-Fix unable to instrument module for Microsoft.AspNetCore.Mvc.Razor [#1459](https://github.com/coverlet-coverage/coverlet/issues/1459) by https://github.com/lg2de
+
 ## Release date 2023-05-21
 ### Packages  
 coverlet.msbuild 6.0.0  

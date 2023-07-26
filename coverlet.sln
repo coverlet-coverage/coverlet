@@ -1,4 +1,3 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32208.508
@@ -54,17 +53,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{9A8B19D4
 		test\Directory.Build.targets = test\Directory.Build.targets
 	EndProjectSection
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "coverlet.tests.projectsample.vbmynamespace", "test\coverlet.tests.projectsample.vbmynamespace\coverlet.tests.projectsample.vbmynamespace.vbproj", "{C9B7DC34-3E04-4F20-AED4-73791AF8020D}"
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "coverlet.tests.projectsample.vbmynamespace", "test\coverlet.tests.projectsample.vbmynamespace\coverlet.tests.projectsample.vbmynamespace.vbproj", "{C9B7DC34-3E04-4F20-AED4-73791AF8020D}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "coverlet.tests.projectsample.fsharp", "test\coverlet.tests.projectsample.fsharp\coverlet.tests.projectsample.fsharp.fsproj", "{1CBF6966-2A67-4D2C-8598-D174B83072F4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.netframework", "test\coverlet.tests.projectsample.netframework\coverlet.tests.projectsample.netframework.csproj", "{E69D68C9-78ED-4076-A14B-D07295A4B2A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.projectsample.aspnet6", "test\coverlet.tests.projectsample.aspnet6\coverlet.tests.projectsample.aspnet6.csproj", "{1C3CA3F8-DF8C-433F-8A56-69102D2BBDF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.aspnet6", "test\coverlet.tests.projectsample.aspnet6\coverlet.tests.projectsample.aspnet6.csproj", "{1C3CA3F8-DF8C-433F-8A56-69102D2BBDF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.projectsample.aspnet6.tests", "test\coverlet.tests.projectsample.aspnet6.tests\coverlet.tests.projectsample.aspnet6.tests.csproj", "{8EC065A4-7700-45E6-8B90-0182E3649DEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.aspnet6.tests", "test\coverlet.tests.projectsample.aspnet6.tests\coverlet.tests.projectsample.aspnet6.tests.csproj", "{8EC065A4-7700-45E6-8B90-0182E3649DEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.projectsample.wpf6", "test\coverlet.tests.projectsample.wpf6\coverlet.tests.projectsample.wpf6.csproj", "{988A5FF0-4326-4F5B-9F05-CB165543A555}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.wpf6", "test\coverlet.tests.projectsample.wpf6\coverlet.tests.projectsample.wpf6.csproj", "{988A5FF0-4326-4F5B-9F05-CB165543A555}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.projectsample.aspmvcrazor", "test\coverlet.tests.projectsample.aspmvcrazor\coverlet.tests.projectsample.aspmvcrazor.csproj", "{6ACF69B1-C01F-44A4-8F8E-2501884238D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.projectsample.aspmvcrazor.tests", "test\coverlet.tests.projectsample.aspmvcrazor.tests\coverlet.tests.projectsample.aspmvcrazor.tests.csproj", "{F508CCDD-5BC8-4AB6-97B3-D37498813C41}"
+	ProjectSection(ProjectDependencies) = postProject
+		{31084026-D563-4B91-BE71-174C4270CCF4} = {31084026-D563-4B91-BE71-174C4270CCF4}
+		{6ACF69B1-C01F-44A4-8F8E-2501884238D4} = {6ACF69B1-C01F-44A4-8F8E-2501884238D4}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -152,6 +159,14 @@ Global
 		{988A5FF0-4326-4F5B-9F05-CB165543A555}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{988A5FF0-4326-4F5B-9F05-CB165543A555}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{988A5FF0-4326-4F5B-9F05-CB165543A555}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ACF69B1-C01F-44A4-8F8E-2501884238D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ACF69B1-C01F-44A4-8F8E-2501884238D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ACF69B1-C01F-44A4-8F8E-2501884238D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ACF69B1-C01F-44A4-8F8E-2501884238D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F508CCDD-5BC8-4AB6-97B3-D37498813C41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F508CCDD-5BC8-4AB6-97B3-D37498813C41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F508CCDD-5BC8-4AB6-97B3-D37498813C41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F508CCDD-5BC8-4AB6-97B3-D37498813C41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -172,12 +187,14 @@ Global
 		{5FF404AD-7C0B-465A-A1E9-558CDC642B0C} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F8199E19-FA9A-4559-9101-CAD7028121B4} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{9A8B19D4-4A24-4217-AEFE-159B68F029A1} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{C9B7DC34-3E04-4F20-AED4-73791AF8020D} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{1CBF6966-2A67-4D2C-8598-D174B83072F4} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{E69D68C9-78ED-4076-A14B-D07295A4B2A5} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
-		{C9B7DC34-3E04-4F20-AED4-73791AF8020D} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{1C3CA3F8-DF8C-433F-8A56-69102D2BBDF6} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{8EC065A4-7700-45E6-8B90-0182E3649DEA} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{988A5FF0-4326-4F5B-9F05-CB165543A555} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{6ACF69B1-C01F-44A4-8F8E-2501884238D4} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{F508CCDD-5BC8-4AB6-97B3-D37498813C41} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}
