@@ -29,7 +29,7 @@ namespace Coverlet.Integration.Tests
             deterministicTestProps.Add(
                     new XElement("Project",
                         new XElement("PropertyGroup",
-                            new XElement("coverletMsbuilVersion", GetPackageVersion("*msbuild*.nupkg")),
+                            new XElement("coverletMsbuildVersion", GetPackageVersion("*msbuild*.nupkg")),
                             new XElement("coverletCollectorsVersion", GetPackageVersion("*collector*.nupkg")))));
             _testProjectTfm = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!.
                              Descendants("PropertyGroup")!.Single().Element("TargetFramework")!.Value;
@@ -88,7 +88,7 @@ namespace Coverlet.Integration.Tests
             Assert.True(File.Exists(Path.Combine(_testProjectPath, "coverage.json")));
             AssertCoverage(standardOutput);
 
-            // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
+            // Process exits hang on clean seem that process doesn't close, maybe some msbuild node reuse? btw manually tested
             // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
             // Assert.False(File.Exists(sourceRootMappingFilePath));
             RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
@@ -112,7 +112,7 @@ namespace Coverlet.Integration.Tests
             Assert.Contains("raw.githubusercontent.com", File.ReadAllText(Path.Combine(_testProjectPath, "coverage.json")));
             AssertCoverage(standardOutput, checkDeterministicReport: false);
 
-            // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
+            // Process exits hang on clean seem that process doesn't close, maybe some msbuild node reuse? btw manually tested
             // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
             // Assert.False(File.Exists(sourceRootMappingFilePath));
             RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
@@ -140,7 +140,7 @@ namespace Coverlet.Integration.Tests
             Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(Directory.GetFiles(_testProjectPath, "log.host.*.txt").Single()));
             Assert.Contains("[coverlet]Mapping resolved", dataCollectorLogContent);
 
-            // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
+            // Process exits hang on clean seem that process doesn't close, maybe some msbuild node reuse? btw manually tested
             // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
             // Assert.False(File.Exists(sourceRootMappingFilePath));
             RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
@@ -169,7 +169,7 @@ namespace Coverlet.Integration.Tests
             Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(Directory.GetFiles(_testProjectPath, "log.host.*.txt").Single()));
             Assert.Contains("[coverlet]Mapping resolved", dataCollectorLogContent);
 
-            // Process exits hang on clean seem that process doesn't close, maybe some mbuild node reuse? btw manually tested
+            // Process exits hang on clean seem that process doesn't close, maybe some msbuild node reuse? btw manually tested
             // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
             // Assert.False(File.Exists(sourceRootMappingFilePath));
             RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);

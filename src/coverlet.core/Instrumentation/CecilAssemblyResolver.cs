@@ -5,13 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Mono.Cecil;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core.Instrumentation
 {
@@ -293,21 +292,27 @@ namespace Coverlet.Core.Instrumentation
 
         public IEnumerable<(string Name, string Version)> GetFrameworks()
         {
-            JObject configuration =
-                new JsonSerializer().Deserialize<JObject>(
-                    new JsonTextReader(new StringReader(File.ReadAllText(_runtimeConfigFile))));
+            string jsonString = File.ReadAllText(_runtimeConfigFile);
 
-            JToken runtimeOptions = configuration["runtimeOptions"];
-            JToken framework = runtimeOptions?["framework"];
-            if (framework != null)
+            var documentOptions = new JsonDocumentOptions
             {
-                return new[] {(framework["name"].Value<string>(), framework["version"].Value<string>())};
+                CommentHandling = JsonCommentHandling.Skip
+            };
+
+            using var configuration = JsonDocument.Parse(jsonString, documentOptions);
+
+            JsonElement rootElement = configuration.RootElement;
+
+            JsonElement runtimeOptionsElement = rootElement.GetProperty("runtimeOptions");
+
+            if (runtimeOptionsElement.TryGetProperty("framework", out JsonElement frameworkElement))
+            {
+                return new[] { (frameworkElement.GetProperty("name").GetString(), frameworkElement.GetProperty("version").GetString()) };
             }
 
-            JToken frameworks = runtimeOptions?["frameworks"];
-            if (frameworks != null)
+            if (runtimeOptionsElement.TryGetProperty("frameworks", out JsonElement frameworksElement))
             {
-                return frameworks.Select(x => (x["name"].Value<string>(), x["version"].Value<string>()));
+                return frameworksElement.EnumerateArray().Select(x => (x.GetProperty("name").GetString(), x.GetProperty("version").GetString())).ToList();
             }
 
             throw new InvalidOperationException($"Unable to read runtime configuration from {_runtimeConfigFile}.");

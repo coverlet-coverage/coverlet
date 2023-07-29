@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" />
-    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
