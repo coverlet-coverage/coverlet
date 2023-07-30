@@ -306,3 +306,6 @@ test/coverlet.integration.determisticbuild/*.txt
 test/coverlet.integration.determisticbuild/runsettings
 
 coverage.cobertura.xml
+
+cleanup-coverage-result.bat
+
