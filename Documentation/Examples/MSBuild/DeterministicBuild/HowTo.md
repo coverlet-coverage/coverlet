@@ -37,17 +37,17 @@ Add msbuild package version generated to `"..\Documentation\Examples\MSBuild\Det
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Include="xunit" Version="2.4.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
-    <PackageReference Include="coverlet.collector" Version="1.2.0" />
-    <!-- version comes from  coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.nupkg -->
-    <PackageReference Include="coverlet.msbuild" Version="2.9.0-preview.6.ga0e22ec622" >
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="xunit" Version="2.5.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0" />
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <!-- version comes from  coverlet.msbuild.6.0.1-preview.8.gcb9b802a5f.nupkg -->
+    <PackageReference Include="coverlet.msbuild" Version="coverlet.msbuild.6.0.1-preview.8.gcb9b802a5f.nupkg" >
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -65,7 +65,7 @@ Go to test project folder and run
 C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild (detbuilddocs -> origin)
 λ dotnet test /p:CollectCoverage=true /p:DeterministicSourcePaths=true
 Test run for C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\XUnitTestProject1.dll(.NETCoreApp,Version=v3.1)
-Microsoft (R) Test Execution Command Line Tool Version 16.5.0
+Microsoft (R) Test Execution Command Line Tool Version 17.5.0
 Copyright (c) Microsoft Corporation.  All rights reserved.
 
 Starting test execution, please wait...
