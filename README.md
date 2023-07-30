@@ -60,7 +60,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 * _You need to be running .NET Core SDK v2.2.401 or newer_
 * _You need to reference version 16.5.0 and above of Microsoft.NET.Test.Sdk_
 ```
-<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
 ```
 
 ### MSBuild Integration (suffers of possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))

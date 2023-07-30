@@ -304,3 +304,5 @@ __pycache__/
 DeterministicTest.props
 test/coverlet.integration.determisticbuild/*.txt
 test/coverlet.integration.determisticbuild/runsettings
+
+coverage.cobertura.xml

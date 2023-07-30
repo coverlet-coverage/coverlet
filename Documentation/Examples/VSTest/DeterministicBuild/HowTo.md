@@ -37,16 +37,16 @@ Add collectors package version generated to `"..\Documentation\Examples\VSTest\D
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Include="xunit" Version="2.4.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
-    <!-- version comes from coverlet.collector.1.3.0-preview.6.ga0e22ec622.snupkg -->
-    <PackageReference Include="coverlet.collector" Version="1.3.0-preview.6.ga0e22ec622" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="xunit" Version="2.5.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0" />
+    <!-- version comes from coverlet.coverlet.collector.6.0.1-preview.8.gcb9b802a5f.snupkg -->
+    <PackageReference Include="coverlet.collector.6.0.1-preview.8.gcb9b802a5f.nupkg" />
   </ItemGroup>
 
   <ItemGroup>
