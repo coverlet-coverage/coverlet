@@ -276,7 +276,7 @@ namespace Coverlet.Console
                     {
                         thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Line);
                     }
-                    else if (thresholdMode.Equals("branch", StringComparison.OrdinalIgnoreCase))
+                    else if (thresholdType.Equals("branch", StringComparison.OrdinalIgnoreCase))
                     {
                         thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Branch);
                     }
