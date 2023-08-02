@@ -136,7 +136,7 @@ namespace Coverlet.Console
                                                                LogLevel verbosity,
                                                                string[] formats,
                                                                string threshold,
-                                                               List<string> thresholdType,
+                                                               List<string> thresholdTypes,
                                                                ThresholdStatistic thresholdStat,
                                                                string[] excludeFilters,
                                                                string[] includeFilters,
