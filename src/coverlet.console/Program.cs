@@ -246,7 +246,7 @@ namespace Coverlet.Console
                     Core.Abstractions.IReporter reporter = new ReporterFactory(fmt).CreateReporter();
                     if (reporter == null)
                     {
-                        throw new Exception($"Specified output format '{fmt}' is not supported");
+                        throw new Exception($"Specified output format '{format}' is not supported");
                     }
 
                     if (reporter.OutputType == ReporterOutputType.Console)
