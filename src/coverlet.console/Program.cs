@@ -243,7 +243,7 @@ namespace Coverlet.Console
 
                 foreach (string format in formats)
                 {
-                    Core.Abstractions.IReporter reporter = new ReporterFactory(fmt).CreateReporter();
+                    IReporter reporter = new ReporterFactory(format).CreateReporter();
                     if (reporter == null)
                     {
                         throw new Exception($"Specified output format '{format}' is not supported");
