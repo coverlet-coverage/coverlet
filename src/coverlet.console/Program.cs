@@ -241,7 +241,7 @@ namespace Coverlet.Console
                     Directory.CreateDirectory(directory);
                 }
 
-                foreach (string fmt in formats)
+                foreach (string format in formats)
                 {
                     Core.Abstractions.IReporter reporter = new ReporterFactory(fmt).CreateReporter();
                     if (reporter == null)
