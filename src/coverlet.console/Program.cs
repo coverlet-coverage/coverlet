@@ -280,7 +280,7 @@ namespace Coverlet.Console
                     {
                         thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Branch);
                     }
-                    else if (thresholdMode.Equals("method", StringComparison.OrdinalIgnoreCase))
+                    else if (thresholdType.Equals("method", StringComparison.OrdinalIgnoreCase))
                     {
                         thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Method);
                     }
