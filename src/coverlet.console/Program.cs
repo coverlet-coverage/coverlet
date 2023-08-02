@@ -272,7 +272,7 @@ namespace Coverlet.Console
 
                 foreach (string thresholdMode in thresholdType)
                 {
-                    if (thresholdMode.Equals("line", StringComparison.OrdinalIgnoreCase))
+                    if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
                     {
                         thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Line);
                     }
