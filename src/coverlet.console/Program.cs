@@ -202,7 +202,7 @@ namespace Coverlet.Console
 
                 Process process = new();
                 process.StartInfo.FileName = target;
-                process.StartInfo.Arguments = targs != null ? targs : string.Empty;
+                process.StartInfo.Arguments = targs ?? string.Empty;
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.RedirectStandardError = true;
