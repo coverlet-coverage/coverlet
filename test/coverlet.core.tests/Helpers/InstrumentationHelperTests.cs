@@ -6,7 +6,6 @@ using System.IO;
 using Xunit;
 using System.Collections.Generic;
 using System.Linq;
-using Castle.Core.Internal;
 using Moq;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
