@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -7,20 +7,18 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Coverlet.Core.Helpers;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
-using Coverlet.Tests.Xunit.Extensions;
+using Coverlet.Core.Tests;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
+using Microsoft.VisualStudio.TestPlatform;
 using Mono.Cecil;
 using Moq;
 using Xunit;
-using Microsoft.Extensions.DependencyModel;
-using Microsoft.VisualStudio.TestPlatform;
-using Coverlet.Core.Tests;
 
 namespace Coverlet.Core.Instrumentation.Tests
 {
@@ -514,7 +512,7 @@ namespace Coverlet.Core.Instrumentation.Tests
 
             var instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_fsharp", new CoverageParameters(), loggerMock.Object, instrumentationHelper,
                 new FileSystem(), new SourceRootTranslator(Assembly.GetExecutingAssembly().Location, loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
-            
+
             Assert.True(instrumentationHelper.HasPdb(sample, out bool embedded));
             Assert.False(embedded);
             Assert.True(instrumenter.CanInstrument());
@@ -528,7 +526,7 @@ namespace Coverlet.Core.Instrumentation.Tests
             bool embeddedPdb;
             instrumentationHelper.Setup(x => x.HasPdb(It.IsAny<string>(), out embeddedPdb)).Returns(true);
 
-            var instrumenter = new Instrumenter(It.IsAny<string>(), It.IsAny<string>(), new CoverageParameters{ExcludeAssembliesWithoutSources = "None"},
+            var instrumenter = new Instrumenter(It.IsAny<string>(), It.IsAny<string>(), new CoverageParameters { ExcludeAssembliesWithoutSources = "None" },
                 loggerMock.Object, instrumentationHelper.Object, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new CecilSymbolHelper());
 
             Assert.True(instrumenter.CanInstrument());
@@ -551,10 +549,10 @@ namespace Coverlet.Core.Instrumentation.Tests
 namespace coverlet.tests.projectsample.excludedbyattribute{{
 public class SampleClass
 {{
-	public int SampleMethod()
-	{{
-		return new System.Random().Next();
-	}}
+    public int SampleMethod()
+    {{
+        return new System.Random().Next();
+    }}
 }}
 
 }}

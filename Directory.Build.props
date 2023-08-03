@@ -14,6 +14,7 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <LangVersion>preview</LangVersion>
     <NoWarn>$(NoWarn);NU5105;CS1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RestoreSources>
       https://api.nuget.org/v3/index.json;
     </RestoreSources>
@@ -24,8 +25,4 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.6.133" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="all" />
-  </ItemGroup>
 </Project>

@@ -34,6 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		DeterministicBuild.targets = DeterministicBuild.targets
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
+		Directory.Packages.props = Directory.Packages.props
 		global.json = global.json
 	EndProjectSection
 EndProject
@@ -65,9 +66,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsampl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.wpf6", "test\coverlet.tests.projectsample.wpf6\coverlet.tests.projectsample.wpf6.csproj", "{988A5FF0-4326-4F5B-9F05-CB165543A555}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.projectsample.aspmvcrazor", "test\coverlet.tests.projectsample.aspmvcrazor\coverlet.tests.projectsample.aspmvcrazor.csproj", "{6ACF69B1-C01F-44A4-8F8E-2501884238D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.aspmvcrazor", "test\coverlet.tests.projectsample.aspmvcrazor\coverlet.tests.projectsample.aspmvcrazor.csproj", "{6ACF69B1-C01F-44A4-8F8E-2501884238D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.projectsample.aspmvcrazor.tests", "test\coverlet.tests.projectsample.aspmvcrazor.tests\coverlet.tests.projectsample.aspmvcrazor.tests.csproj", "{F508CCDD-5BC8-4AB6-97B3-D37498813C41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.aspmvcrazor.tests", "test\coverlet.tests.projectsample.aspmvcrazor.tests\coverlet.tests.projectsample.aspmvcrazor.tests.csproj", "{F508CCDD-5BC8-4AB6-97B3-D37498813C41}"
 	ProjectSection(ProjectDependencies) = postProject
 		{31084026-D563-4B91-BE71-174C4270CCF4} = {31084026-D563-4B91-BE71-174C4270CCF4}
 		{6ACF69B1-C01F-44A4-8F8E-2501884238D4} = {6ACF69B1-C01F-44A4-8F8E-2501884238D4}
