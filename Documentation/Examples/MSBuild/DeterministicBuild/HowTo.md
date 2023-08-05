@@ -1,4 +1,4 @@
-﻿To run test we need to generates packages to reference in on test project.  
+﻿To run test we need to generates packages to reference in on test project.
 Run from repo root
 ```
 C:\git\coverlet
@@ -64,7 +64,7 @@ Go to test project folder and run
 ```
 C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild (detbuilddocs -> origin)
 λ dotnet test /p:CollectCoverage=true /p:DeterministicSourcePaths=true
-Test run for C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\XUnitTestProject1.dll(.NETCoreApp,Version=v3.1)
+Test run for C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\net6.0\XUnitTestProject1.dll(.NETCoreApp,Version=v6.0)
 Microsoft (R) Test Execution Command Line Tool Version 17.5.0
 Copyright (c) Microsoft Corporation.  All rights reserved.
 
@@ -94,8 +94,8 @@ Calculating coverage result...
 | Average | 100% | 100%   | 100%   |
 +---------+------+--------+--------+
 ```
-You should see on output folder the coverlet source root mapping file generated.  
+You should see on output folder the coverlet source root mapping file generated.
 This is the confirmation that you're running coverage on deterministic build.
 ```
-Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\CoverletSourceRootsMapping
+Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\net6.0\CoverletSourceRootsMapping
 ```
