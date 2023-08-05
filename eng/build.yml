@@ -29,6 +29,6 @@ steps:
 
 - template: publish-coverage-results.yml
   parameters:
-  reports: $(Build.SourcesDirectory)/**/coverage.opencover.xml
-  condition: and(succeeded(), eq(variables['_BuildConfig'], 'Debug'))
-  assemblyfilters: '-xunit*;+Coverlet.Core.*;+Coverlet.Collector.*'
+    reports: $(Build.SourcesDirectory)/**/coverage.opencover.xml
+    condition: and(succeeded(), eq(variables['_BuildConfig'], 'Debug'))
+    assemblyfilters: '-xunit*;+Coverlet.Core.*;+Coverlet.Collector.*'
