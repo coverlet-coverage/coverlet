@@ -36,7 +36,7 @@ steps:
   condition: always()
 
 - task: PublishPipelineArtifact@1
-  displayName:  Publish coverage logs
+  displayName: Publish coverage logs
   continueOnError: true
   condition: always()
   inputs:

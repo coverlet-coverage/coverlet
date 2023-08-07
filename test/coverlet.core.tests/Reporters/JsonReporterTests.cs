@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Coverlet.Core.Abstractions;
 using Moq;
+using System;
 using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
 {
+
   public class JsonReporterTests
   {
     private static readonly string s_resultModule = @"{
@@ -29,8 +30,10 @@ namespace Coverlet.Core.Reporters.Tests
     [Fact]
     public void TestReport()
     {
-      var result = new CoverageResult();
-      result.Identifier = Guid.NewGuid().ToString();
+      var result = new CoverageResult
+      {
+        Identifier = Guid.NewGuid().ToString()
+      };
 
       var lines = new Lines();
       lines.Add(1, 1);
@@ -51,7 +54,8 @@ namespace Coverlet.Core.Reporters.Tests
       result.Modules.Add("module", documents);
 
       var reporter = new JsonReporter();
-      Assert.Equal(s_resultModule, reporter.Report(result, new Mock<ISourceRootTranslator>().Object));
+      string moduleJson = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
+      Assert.Equal(s_resultModule, moduleJson, ignoreLineEndingDifferences: true);
     }
   }
 }

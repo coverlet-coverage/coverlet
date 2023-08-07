@@ -44,6 +44,7 @@
         We can check minimum supported package version here https://github.com/Microsoft/vstest/blob/master/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L34
      -->
     <PackageVersion Include="System.Reflection.Metadata" Version="1.6.0" />
+    <PackageVersion Include="System.Text.Json" Version="7.0.3" />
     <PackageVersion Include="Tmds.ExecFunction" Version="0.4.0" />
     <PackageVersion Include="xunit" Version="2.5.0" />
     <PackageVersion Include="xunit.assert" Version="2.5.0" />
