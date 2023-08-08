@@ -5,10 +5,10 @@
     <DevelopmentDependency>true</DevelopmentDependency>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <!-- 
-          suppress warning https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128 
-          If your package does not contain any lib/ or ref/ files and is not a meta-package, 
-          it likely does not have any dependencies that the package consumer needs. 
+    <!--
+          suppress warning https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128
+          If your package does not contain any lib/ or ref/ files and is not a meta-package,
+          it likely does not have any dependencies that the package consumer needs.
           If you are packing with NuGet's MSBuild Pack target, you can set <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking> in any PropertyGroup in your project file.
     -->
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
@@ -29,6 +29,8 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.</Description>
     <PackageTags>coverage testing unit-test lcov opencover quality</PackageTags>
+    <PackageReadmeFile>VSTestIntegration.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md</PackageReleaseNotes>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
@@ -39,6 +41,9 @@
   <ItemGroup>
     <None Update="build\**" Pack="true" PackagePath="" />
     <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\Documentation\VSTestIntegration.md" Link="VSTestIntegration.md" Pack="true" PackagePath="\">
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

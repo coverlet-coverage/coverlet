@@ -1,6 +1,7 @@
-﻿To run test we need to generates packages to reference in on test project.  
+﻿To run test we need to generates packages to reference in on test project.
 Run from repo root
-```
+
+```shell
 C:\git\coverlet
 λ dotnet pack
 Microsoft (R) Build Engine version 16.5.0+d4cbfca49 for .NET Core
@@ -32,7 +33,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.nupkg'.
   Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.snupkg'.
 ```
+
 Add collectors package version generated to `"..\Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\XUnitTestProject1.csproj"`
+
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -56,8 +59,10 @@ Add collectors package version generated to `"..\Documentation\Examples\VSTest\D
 </Project>
 
 ```
+
 Go to test project folder and run
-```
+
+```shell
 C:\git\coverlet\Documentation\Examples\VSTest\DeterministicBuild (detbuilddocs -> origin)
 λ dotnet test --collect:"XPlat Code Coverage" /p:DeterministicSourcePaths=true -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.DeterministicReport=true
 Test run for C:\git\coverlet\Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\XUnitTestProject1.dll(.NETCoreApp,Version=v6.0)
@@ -75,8 +80,10 @@ Total tests: 1
      Passed: 1
  Total time: 1,3472 Seconds
 ```
-You should see on output folder the coverlet source root mapping file generated.  
+
+You should see on output folder the coverlet source root mapping file generated.
 This is the confirmation that you're running coverage on deterministic build.
-```
+
+```text
 Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\bin\Debug\net6.0\CoverletSourceRootsMapping_XUnitTestProject1
 ```

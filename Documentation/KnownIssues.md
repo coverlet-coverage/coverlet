@@ -2,7 +2,7 @@
 
 ## VSTest stops process execution early
 
-*Affected drivers*: msbuild (`dotnet test`) , dotnet tool(if you're using ` --targetargs "test ... --no-build"`)
+*Affected drivers*: msbuild (`dotnet test`) , dotnet tool(if you're using `--targetargs "test ... --no-build"`)
 
 *Symptoms:*
 
@@ -12,7 +12,7 @@
 
   `warning : [coverlet] Hits file:'C:\Users\REDACTED\AppData\Local\Temp\testApp_ac32258b-fd4a-4bb4-824c-a79061e97c31' not found for module: 'testApp'`
 
-*  zero coverage result (often only on CI but not on local)
+* zero coverage result (often only on CI but not on local)
 
   ```bash
   Calculating coverage result...
@@ -37,7 +37,7 @@
   +---------+------+--------+--------+
   ```
 
-The issue is related to VSTest platform https://github.com/microsoft/vstest/issues/1900#issuecomment-457488472
+The issue is related to VSTest platform <https://github.com/microsoft/vstest/issues/1900#issuecomment-457488472>
 
 > However if testhost doesn't shut down within 100ms (as the execution is completed, we expect it to shutdown fast). vstest.console forcefully kills the process.
 
@@ -46,7 +46,7 @@ This happen also if there are other "piece of code" during testing that slow dow
 
 *Solution:*
 
-The only way to get around this issue is to use collectors integration https://github.com/coverlet-coverage/coverlet#vstest-integration-preferred-due-to-known-issue-supports-only-net-core-application. With the collector, we're injected in test host through a in-proc collector that communicates with the VSTest platform so we can signal when we end our work.
+The only way to get around this issue is to use collectors integration <https://github.com/coverlet-coverage/coverlet#vstest-integration-preferred-due-to-known-issue-supports-only-net-core-application>. With the collector, we're injected in test host through a in-proc collector that communicates with the VSTest platform so we can signal when we end our work.
 
 ## Upgrade `coverlet.collector` to version > 1.0.0
 
@@ -54,7 +54,7 @@ The only way to get around this issue is to use collectors integration https://g
 
 *Symptoms:* The same as "known issue 1".
 
-There is a bug inside the VSTest platform: https://github.com/microsoft/vstest/issues/2205.
+There is a bug inside the VSTest platform: <https://github.com/microsoft/vstest/issues/2205>.
 
 If you upgrade the collector package with a version greater than 1.0.0, in-proc collector won't be loaded so you could incur "known issue number 1" and get zero coverage result
 
@@ -62,36 +62,38 @@ If you upgrade the collector package with a version greater than 1.0.0, in-proc 
 
 1) Reference `Microsoft.NET.Test.Sdk` with version *greater than* 16.4.0
 
-```xml
-<ItemGroup>
-  ...
-  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-  ...
-</ItemGroup>
-```
-2) You can pass custom *coverage.runsettings* file like this
-```xml
-<?xml version="1.0" encoding="utf-8" ?>
-<RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="XPlat code coverage">
-        <Configuration>
-          <Format>cobertura</Format>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
-  <InProcDataCollectionRunSettings>
-    <InProcDataCollectors>
-      <InProcDataCollector assemblyQualifiedName="Coverlet.Collector.DataCollection.CoverletInProcDataCollector, coverlet.collector, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null"
-                     friendlyName="XPlat Code Coverage"
-                     enabled="True"
-                     codebase="coverlet.collector.dll" />
-    </InProcDataCollectors>
-  </InProcDataCollectionRunSettings>
-</RunSettings>
-```
+    ```xml
+    <ItemGroup>
+    ...
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    ...
+    </ItemGroup>
+    ```
+
+1) You can pass custom *coverage.runsettings* file like this
+
+    ```xml
+    <?xml version="1.0" encoding="utf-8" ?>
+    <RunSettings>
+    <DataCollectionRunSettings>
+        <DataCollectors>
+        <DataCollector friendlyName="XPlat code coverage">
+            <Configuration>
+            <Format>cobertura</Format>
+            </Configuration>
+        </DataCollector>
+        </DataCollectors>
+    </DataCollectionRunSettings>
+    <InProcDataCollectionRunSettings>
+        <InProcDataCollectors>
+        <InProcDataCollector assemblyQualifiedName="Coverlet.Collector.DataCollection.CoverletInProcDataCollector, coverlet.collector, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null"
+                        friendlyName="XPlat Code Coverage"
+                        enabled="True"
+                        codebase="coverlet.collector.dll" />
+        </InProcDataCollectors>
+    </InProcDataCollectionRunSettings>
+    </RunSettings>
+    ```
 
 And pass it to command line
 
@@ -103,11 +105,11 @@ dotnet test --settings coverage.runsettings
 
 *Affected drivers*: all drivers that support `/p:UseSourceLink=true`
 
-*Symptoms:* some tool like SonarSource doesn't work well see https://github.com/coverlet-coverage/coverlet/issues/482
+*Symptoms:* some tool like SonarSource doesn't work well see <https://github.com/coverlet-coverage/coverlet/issues/482>
 
 `Nerdbank.GitVersioning` generates a version file on the fly but this file is not part of user solution and it's not commited to repo so the generated remote source file reference does not exit, i.e.
 
-```
+```text
 ...
 <File uid="1" fullPath="https://raw.githubusercontent.com/iron9light/HOCON.Json/654d4ea8ec524f72027e2b2d324aad9acf80b710/src/Hocon.Json/obj/Release/netstandard2.0/Hocon.Json.Version.cs" />
 ...
@@ -125,7 +127,7 @@ dotnet test --settings coverage.runsettings
 
 *Symptoms:* during build/instrumentation you may get an exception like:
 
-```
+```text
 [coverlet] Unable to instrument module: ..\UnitTests\bin\Debug\netcoreapp2.1\Core.Messaging.dll because : Failed to resolve assembly: 'Microsoft.Azure.ServiceBus, Version=3.4.0.0, Culture=neutral, PublicKeyToken=7e34167dcc6d6d8c' [..\UnitTests.csproj]
 ```
 
@@ -148,13 +150,13 @@ or by adding the property `<CopyLocalLockFileAssemblies>` to the project file
 
 ```
 
-NB. This **DOESN'T ALWAYS WORK**, for example in case of the shared framework https://github.com/dotnet/cli/issues/12705#issuecomment-536686785
+NB. This **DOESN'T ALWAYS WORK**, for example in case of the shared framework <https://github.com/dotnet/cli/issues/12705#issuecomment-536686785>
 
 We can do nothing at the moment as this is a build behaviour out of our control.
 
-For .NET runtime version >= 3.0 the new default behavior is to copy all assets to the build output (CopyLocalLockFileAssemblies=true) https://github.com/dotnet/cli/issues/12705#issuecomment-535150372, unfortunately the issue could still arise. 
+For .NET runtime version >= 3.0 the new default behavior is to copy all assets to the build output (CopyLocalLockFileAssemblies=true) <https://github.com/dotnet/cli/issues/12705#issuecomment-535150372>, unfortunately the issue could still arise.
 
-In this case the only workaround at the moment is to *manually copy* missing dlls to the output folder: https://github.com/coverlet-coverage/coverlet/issues/560#issue-496440052 
+In this case the only workaround at the moment is to *manually copy* missing dlls to the output folder: <https://github.com/coverlet-coverage/coverlet/issues/560#issue-496440052>
 
 > The only reliable way to work around this problem is to drop the DLL in the unit tests project's bin\Release\netcoreapp2.2 directory.
 
@@ -164,7 +166,7 @@ In this case the only workaround at the moment is to *manually copy* missing dll
 
 *Symptoms:* Running coverage on .NET Framework runtime(i.e. .NET 4.6.1) and get error like:
 
-```
+```text
 Failed   Tests.MinMax.Min_AsyncSelector_Int32_4
 Error Message:
  System.TypeInitializationException : The type initializer for 'Tests.AsyncEnumerableTests' threw an exception.
@@ -184,7 +186,7 @@ NB. Workaround doesn't work if test method itself explicitly creates an appdomai
 
 *Symptoms:* You are getting following result when running Coverlet within CI/CD pipeline:
 
-```
+```text
 +--------+------+--------+--------+
 | Module | Line | Branch | Method |
 +--------+------+--------+--------+
@@ -229,5 +231,5 @@ C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\3.2.0\build\coverlet.msbuild.
 The XML code coverage report is too large for the coverlet to parse.
 
 *Potential Solutions:*
-* Reduce noise from auto generated code, for example excluding your EntityFrameworkCore Migrations namespace or automatically generated typed Http Clients. See [Excluding From Coverage](./MSBuildIntegration.md#excluding-from-coverage) for more information on ignoring namespaces from code coverage. 
 
+* Reduce noise from auto generated code, for example excluding your EntityFrameworkCore Migrations namespace or automatically generated typed Http Clients. See [Excluding From Coverage](./MSBuildIntegration.md#excluding-from-coverage) for more information on ignoring namespaces from code coverage.

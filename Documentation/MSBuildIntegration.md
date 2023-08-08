@@ -4,7 +4,8 @@ In this mode, Coverlet doesn't require any additional setup other than including
 
 If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
 
-To achieve same behavior above using **powershell** you need to use the verbatim argument marker `--%` like this: 
+To achieve same behavior above using **powershell** you need to use the verbatim argument marker `--%` like this:
+
 ```powershell
 dotnet test /p:CollectCoverage=true --% /p:CoverletOutputFormat=\"opencover,lcov\"
 ```
@@ -103,7 +104,7 @@ The above command will automatically fail the build if the line, branch or metho
 dotnet test /p:CollectCoverage=true /p:Threshold=80 /p:ThresholdType=line
 ```
 
-You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`. 
+You can specify multiple values for `ThresholdType` by separating them with commas. Valid values include `line`, `branch` and `method`.
 You can do the same for `Threshold` as well.
 
 ```bash
@@ -137,8 +138,9 @@ dotnet test /p:CollectCoverage=true /p:ExcludeByAttribute="Obsolete,GeneratedCod
 ### Source Files
 
 You can also ignore specific source files from code coverage using the `ExcludeByFile` property
- - Use single or multiple paths (separate by comma)
- - Use file path or directory path with globbing (e.g `dir1/*.cs`)
+
+* Use single or multiple paths (separate by comma)
+* Use file path or directory path with globbing (e.g `dir1/*.cs`)
 
 ```bash
 dotnet test /p:CollectCoverage=true /p:ExcludeByFile=\"**/dir1/class1.cs,**/dir2/*.cs,**/dir3/**/*.cs\"
@@ -151,15 +153,17 @@ Coverlet gives the ability to have fine grained control over what gets excluded 
 Syntax: `/p:Exclude=[Assembly-Filter]Type-Filter`
 
 Wildcards
-- `*` => matches zero or more characters
-- `?` => the prefixed character is optional
+
+* `*` => matches zero or more characters
+* `?` => the prefixed character is optional
 
 Examples
- - `/p:Exclude="[*]*"` => Excludes all types in all assemblies (nothing is instrumented)
- - `/p:Exclude="[coverlet.*]Coverlet.Core.Coverage"` => Excludes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
- - `/p:Exclude="[*]Coverlet.Core.Instrumentation.*"` => Excludes all types belonging to `Coverlet.Core.Instrumentation` namespace in any assembly
- - `/p:Exclude="[coverlet.*.tests?]*"` => Excludes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
- - `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"` => Excludes assemblies matching `coverlet.*` and excludes all types belonging to the `Coverlet.Core` namespace in any assembly
+
+* `/p:Exclude="[*]*"` => Excludes all types in all assemblies (nothing is instrumented)
+* `/p:Exclude="[coverlet.*]Coverlet.Core.Coverage"` => Excludes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
+* `/p:Exclude="[*]Coverlet.Core.Instrumentation.*"` => Excludes all types belonging to `Coverlet.Core.Instrumentation` namespace in any assembly
+* `/p:Exclude="[coverlet.*.tests?]*"` => Excludes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
+* `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"` => Excludes assemblies matching `coverlet.*` and excludes all types belonging to the `Coverlet.Core` namespace in any assembly
 
 ```bash
 dotnet test /p:CollectCoverage=true /p:Exclude="[coverlet.*]Coverlet.Core.Coverage"
@@ -168,20 +172,21 @@ dotnet test /p:CollectCoverage=true /p:Exclude="[coverlet.*]Coverlet.Core.Covera
 Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `Include` property.
 
 Examples
- - `/p:Include="[*]*"` => Includes all types in all assemblies (everything is instrumented)
- - `/p:Include="[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
-  - `/p:Include="[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
+
+* `/p:Include="[*]*"` => Includes all types in all assemblies (everything is instrumented)
+* `/p:Include="[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
+* `/p:Include="[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
 
 Both `Exclude` and `Include` properties can be used together but `Exclude` takes precedence. You can specify multiple filter expressions by separting them with a comma (`,`).
 
 You can also include coverage of the test assembly itself by setting `/p:IncludeTestAssembly` to `true`.
 
-### Skip auto-implemented properties  
+### Skip auto-implemented properties
 
-Neither track nor record auto-implemented properties.  
+Neither track nor record auto-implemented properties.
 Syntax:  `/p:SkipAutoProps=true`
 
-### Instrument module wihtout local sources file.  
+### Instrument module wihtout local sources file
 
 Syntax:  `/p:InstrumentModulesWithoutLocalSources=true`
 
@@ -200,7 +205,7 @@ To exclude or include multiple assemblies when using Powershell scripts or creat
 
 Azure DevOps builds do not require double quotes to be unescaped:
 
-```
+```shell
 dotnet test --configuration $(buildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/ /p:Exclude="[MyAppName.DebugHost]*%2c[MyAppNamet.WebHost]*%2c[MyAppName.App]*"
 ```
 
@@ -223,16 +228,17 @@ Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debu
 
 ## Deterministic build
 
-Take a look at [documentation](DeterministicBuild.md) for further informations.  
-To generate deterministc report the parameter is:
-```
+Take a look at [documentation](DeterministicBuild.md) for further information.
+To generate deterministic report the parameter is:
+
+```shell
 /p:DeterministicReport=true
 ```
 
 ## Exclude assemblies without sources from coverage
 
 The heuristic coverlet uses to determine if an assembly is a third-party dependency is based on the matching of the assembly`s source documents and the corresponding source files.
-This parameter has three different values to control the automatic assembly exclusion. 
+This parameter has three different values to control the automatic assembly exclusion.
 
 | Parameter | Description |
 |-----------|-------------|
@@ -241,6 +247,7 @@ This parameter has three different values to control the automatic assembly excl
 | None | No assembly is excluded. |
 
 Here is an example of how to specifiy the parameter:
-```
+
+```shell
 /p:ExcludeAssembliesWithoutSources="MissingAny"
 ```

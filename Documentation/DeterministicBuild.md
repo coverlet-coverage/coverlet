@@ -4,16 +4,17 @@ Support for deterministic builds is available **only** in the `msbuild` (`/p:Col
 
 From a coverage perspective, deterministic builds create some challenges because coverage tools usually need access to complete source file metadata (ie. local path) during instrumentation and report generation. These files are reported inside the `.pdb` files, where debugging information is stored.
 
-In local (non-CI) builds, metadata emitted to pdbs are not "deterministic", which means that source files are reported with their full paths. For example, when we build the same project on different machines we'll have different paths emitted inside pdbs, hence, builds are "non deterministic".  
+In local (non-CI) builds, metadata emitted to pdbs are not "deterministic", which means that source files are reported with their full paths. For example, when we build the same project on different machines we'll have different paths emitted inside pdbs, hence, builds are "non deterministic".
 
 As explained above, to improve the level of security of generated artifacts (for instance, DLLs inside the NuGet package), we need to apply some signature (signing with certificate) and validate before usage to avoid possible security issues like tampering.
 
 Finally, thanks to deterministic CI builds (with the `ContinuousIntegrationBuild` property set to `true`) plus signature we can validate artifacts and be sure that the binary was built from specific sources (because there is no hard-coded variable metadata, like paths from different build machines).
 
-# Deterministic report
+## Deterministic report
 
-Coverlet supports also deterministic reports(for now only for cobertura coverage format).  
+Coverlet supports also deterministic reports(for now only for cobertura coverage format).
 If you include `DeterministicReport` parameters for `msbuild` and `collectors` integrations resulting report will be like:
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <coverage line-rate="0.8571" branch-rate="0.5" version="1.9" timestamp="1612702997" lines-covered="6" lines-valid="7" branches-covered="1" branches-valid="2">
@@ -25,8 +26,8 @@ If you include `DeterministicReport` parameters for `msbuild` and `collectors` i
           <methods>
 ...
 ```
-As you can see we have empty `<sources />` element and the `filename` start with well known deterministic fragment `/_/...`
 
+As you can see we have empty `<sources />` element and the `filename` start with well known deterministic fragment `/_/...`
 **Deterministic build is supported without any workaround since version 3.1.100 of .NET Core SDK**
 
 ## Workaround only for .NET Core SDK < 3.1.100
