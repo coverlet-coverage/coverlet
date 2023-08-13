@@ -51,7 +51,7 @@ namespace Coverlet.Core.Reporters.Tests
       result.Modules.Add("module", documents);
 
       var reporter = new JsonReporter();
-      Assert.Equal(s_resultModule, reporter.Report(result, new Mock<ISourceRootTranslator>().Object));
+      Assert.Equal(s_resultModule, reporter.Report(result, new Mock<ISourceRootTranslator>().Object), ignoreLineEndingDifferences: true);
     }
   }
 }
