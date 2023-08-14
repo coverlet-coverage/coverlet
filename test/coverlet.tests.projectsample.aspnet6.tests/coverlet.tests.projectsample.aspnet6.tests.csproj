@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
     <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,5 +17,5 @@
     <ProjectReference Include="..\coverlet.tests.projectsample.aspnet6\coverlet.tests.projectsample.aspnet6.csproj" />
   </ItemGroup>
 
- 
+
 </Project>

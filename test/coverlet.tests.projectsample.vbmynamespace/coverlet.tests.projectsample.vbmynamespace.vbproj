@@ -3,6 +3,8 @@
   <PropertyGroup>
     <RootNamespace>coverlet.tests.projectsample.vbmynamespace</RootNamespace>
     <TargetFramework>net48</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
