@@ -104,6 +104,7 @@ namespace Coverlet.Integration.Tests
       commandProcess.StartInfo.RedirectStandardError = true;
       commandProcess.StartInfo.RedirectStandardOutput = true;
       commandProcess.StartInfo.UseShellExecute = false;
+      commandProcess.StartInfo.Environment["DOTNET_CLI_UI_LANGUAGE"] = "en";
       string eOut = "";
       commandProcess.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => { eOut += e.Data; });
       commandProcess.Start();
