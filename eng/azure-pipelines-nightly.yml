@@ -2,21 +2,13 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-- task: UseDotNet@2
-  inputs:
-    version: 6.0.415
-  displayName: Install .NET Core SDK 6.0.415
-
-- task: UseDotNet@2
-  inputs:
-    version: 7.0.402
-  displayName: Install .NET Core SDK 7.0.402
+- template: build.yml
+  parameters:
+    additionalPackOptions: '/p:PublicRelease=false'
+    runTests: false
 
 - task: NuGetAuthenticate@0
   displayName: Authenticate with NuGet feeds
-
-- script: dotnet pack -c Release /p:PublicRelease=false
-  displayName: Create NuGet packages
 
 - task: NuGetCommand@2
   inputs:

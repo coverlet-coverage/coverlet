@@ -1,13 +1,19 @@
+parameters:
+  - name: additionalPackOptions
+    default: ''
+  - name: runTests
+    default: true
+
 steps:
 - task: UseDotNet@2
   inputs:
     version: 6.0.415
-  displayName: Install .NET Core SDK 6.0.415
+  displayName: Install .NET Core SDK for projects
 
 - task: UseDotNet@2
   inputs:
-    version: 7.0.402
-  displayName: Install .NET Core SDK 7.0.402
+    useGlobalJson: true
+  displayName: Install .NET Core SDK 7.0 for additional tests
 
 - script: dotnet restore
   displayName: Restore packages
@@ -15,11 +21,12 @@ steps:
 - script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.binlog
   displayName: Build
 
-- script: dotnet pack -c $(BuildConfiguration) --no-restore
+- script: dotnet pack -c $(BuildConfiguration) --no-restore ${{ parameters.additionalPackOptions }}
   displayName: Pack
 
 - task: DotNetCoreCLI@2
   displayName: Run tests with coverage
+  enabled: ${{ parameters.runTests }}
   inputs:
     command: test
     projects: |
