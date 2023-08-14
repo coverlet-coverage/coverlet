@@ -34,7 +34,7 @@ steps:
          **/coverlet.core.tests.csproj
          **/coverlet.integration.tests.csproj
          **/coverlet.msbuild.tasks.tests.csproj
-    arguments: -c $(BuildConfiguration) --no-build -bl:test.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(Configuration)\coverlet.test.diag.log;tracelevel=verbose"
+    arguments: -c $(BuildConfiguration) --no-build -bl:test.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(Configuration)\coverlet.test.diag.log;tracelevel=verbose" -- RunConfiguration.TreatNoTestsAsError=true
     testRunTitle: $(Agent.JobName)
 
 - template: publish-coverlet-result-files.yml
