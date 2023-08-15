@@ -30,7 +30,10 @@
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.netframework\coverlet.tests.projectsample.netframework.csproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.vbmynamespace\coverlet.tests.projectsample.vbmynamespace.vbproj" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
+      <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.vbmynamespace\coverlet.tests.projectsample.vbmynamespace.vbproj" />
   </ItemGroup>
 
   <ItemGroup>
