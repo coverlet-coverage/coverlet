@@ -8,22 +8,17 @@ steps:
       New-Item -ItemType Directory "$(Build.SourcesDirectory)/artifacts/TestLogs/"
       function Copy-FileKeepPath {
       param (
-          $filter,$FileToCopy,$des,$startIndex
+          $Filter,$FileToCopy,$Destination,$StartIndex
           )
-      Get-ChildItem -Path $FileToCopy -Filter $filter -Recurse -File | ForEach-Object {
+      Get-ChildItem -Path $FileToCopy -Filter $Filter -Recurse -File | ForEach-Object {
           $fileName = $_.FullName
-          #Remove the first part to ignore from the path.
-          $newdes=Join-Path -Path $des -ChildPath $fileName.Substring($startIndex)
-          $folder=Split-Path -Path $newdes -Parent
+          $newDestination=Join-Path -Path $Destination -ChildPath $fileName.Substring($StartIndex)
+          $folder=Split-Path -Path $newDestination -Parent
           $err=0
-
-          #check if folder exists"
           $void=Get-Item $folder -ErrorVariable err  -ErrorAction SilentlyContinue
           if($err.Count -ne 0){
-            #create when it doesn't
             $void=New-Item -Path $folder -ItemType Directory -Force -Verbose
           }
-
           $void=Copy-Item -Path $fileName -destination $newdes -Recurse -Container -Force -Verbose
           }
       }

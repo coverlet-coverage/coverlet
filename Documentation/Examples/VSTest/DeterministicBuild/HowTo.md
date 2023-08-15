@@ -24,14 +24,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   coverlet.core -> C:\git\coverlet\src\coverlet.core\bin\Debug\netstandard2.0\coverlet.core.dll
   coverlet.collector -> C:\git\coverlet\src\coverlet.collector\bin\Debug\netcoreapp2.0\coverlet.collector.dll
   coverlet.msbuild.tasks -> C:\git\coverlet\src\coverlet.msbuild.tasks\bin\Debug\netstandard2.0\coverlet.msbuild.tasks.dll
-  coverlet.console -> C:\git\coverlet\src\coverlet.console\bin\Debug\netcoreapp2.2\coverlet.console.dll
-  coverlet.console -> C:\git\coverlet\src\coverlet.console\bin\Debug\netcoreapp2.2\coverlet.console.dll
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.1.3.0-preview.6.ga0e22ec622.nupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.console.1.7.2-preview.6.ga0e22ec622.nupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.console.1.7.2-preview.6.ga0e22ec622.snupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.1.3.0-preview.6.ga0e22ec622.snupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.nupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.snupkg'.
+  coverlet.console -> C:\git\coverlet\src\coverlet.console\bin\Debug\net6.0\coverlet.console.dll
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.6.0.1-preview.6.g918cd179e0.nupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.6.0.1-preview.6.g918cd179e0.snupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.6.0.1-preview.6.g918cd179e0.nupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.6.0.1-preview.6.g918cd179e0.snupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.console.6.0.1-preview.6.g918cd179e0.nupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.console.6.0.1-preview.6.g918cd179e0.snupkg'.
 ```
 
 Add collectors package version generated to `"..\Documentation\Examples\VSTest\DeterministicBuild\XUnitTestProject1\XUnitTestProject1.csproj"`

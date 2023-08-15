@@ -92,14 +92,14 @@ This is the steps to release new packages to nuget.org
     ```shell
     dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
     ...
-    coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\netcoreapp2.2\coverlet.console.dll
-    coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\netcoreapp2.2\publish\
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.2.8.1.nupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.2.8.1.snupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.1.7.1.nupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.1.7.1.snupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.1.2.1.nupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.1.2.1.snupkg'.
+    coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\net6.0\coverlet.console.dll
+    coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\net6.0\publish\
+    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.6.0.1-preview.6.g918cd179e0.nupkg'.
+    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.6.0.1-preview.6.g918cd179e0.snupkg'.
+    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.6.0.1-preview.6.g918cd179e0.nupkg'.
+    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.6.0.1-preview.6.g918cd179e0.snupkg'.
+    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.6.0.1-preview.6.g918cd179e0.nupkg'.
+    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.6.0.1-preview.6.g918cd179e0.snupkg'.
     ```
 
 4. Sign the packages using SignClient tool <https://www.nuget.org/packages/SignClient>
