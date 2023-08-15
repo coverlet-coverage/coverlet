@@ -4,7 +4,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <NoWarn>$(NoWarn);CS8002</NoWarn>
+    <NoWarn>$(NoWarn);CS8002;NU1008</NoWarn>
     <MSBuildWarningsAsMessages>NU1702</MSBuildWarningsAsMessages>
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
     <PreserveCompilationContext>true</PreserveCompilationContext>

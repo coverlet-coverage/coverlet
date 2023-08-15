@@ -4,23 +4,13 @@ pool:
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 6.0.408
-  displayName: Install .NET Core SDK 6.0.408
+    version: 6.0.413
+  displayName: Install .NET Core SDK 6.0.413
 
 - task: UseDotNet@2
   inputs:
-    version: 7.0.203
-  displayName: Install .NET Core SDK 7.0.203
-
-- task: UseDotNet@2
-  inputs:
-    version: 6.0.408
-  displayName: Install .NET Core SDK 6.0.408
-
-- task: UseDotNet@2
-  inputs:
-    version: 7.0.203
-  displayName: Install .NET Core SDK 7.0.203
+    version: 7.0.400
+  displayName: Install .NET Core SDK 7.0.400
 
 - task: NuGetAuthenticate@0
   displayName: Authenticate with NuGet feeds
