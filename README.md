@@ -14,15 +14,15 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 **Check the [changelog](Documentation/Changelog.md) to understand if the documented feature you want to use has been officially released.**
 
 # Main contents
-* [QuickStart](#Quick-Start)
-* [How It Works](#How-It-Works)
+* [QuickStart](#quick-start)
+* [How It Works](#how-it-works)
 * [Drivers features differences](Documentation/DriversFeatures.md)
-* [Deterministic build support](#Deterministic-build-support)
-* [Known Issues](#Known-Issues)
-* [Consume nightly build](#Consume-nightly-build)
+* [Deterministic build support](#deterministic-build-support)
+* [Known Issues](#known-issues)
+* [Consume nightly build](#consume-nightly-build)
 * [Feature samples](Documentation/Examples.md)
-* [Cake Add-In](#Cake-Add-In)
-* [Visual Studio Add-In](#Visual-Studio-Add-In)
+* [Cake Add-In](#cake-add-in)
+* [Visual Studio Add-In](#visual-studio-add-in)
 * [Changelog](Documentation/Changelog.md)
 * [Roadmap](Documentation/Roadmap.md)
 
@@ -170,8 +170,9 @@ Author and owner
 
 Co-maintainers
 
+* [David Müller](https://github.com/daveMueller)  
+* [Bert](https://github.com/Bertk)  
 * [Peter Liljenberg](https://github.com/petli)
-* [David Müller](https://github.com/daveMueller)
 * [Marco Rossignoli](https://github.com/MarcoRossignoli)
 
 ## Code of Conduct
