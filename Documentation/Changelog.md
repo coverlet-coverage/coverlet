@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+-Fix broken links in documentation [#1514](https://github.com/coverlet-coverage/coverlet/issues/1514)
 -Fix problem with coverage for .net5 WPF application [#1221](https://github.com/coverlet-coverage/coverlet/issues/1221) by https://github.com/lg2de
 -Fix unable to instrument module for Microsoft.AspNetCore.Mvc.Razor [#1459](https://github.com/coverlet-coverage/coverlet/issues/1459) by https://github.com/lg2de
+
+### Improvements 
+-Use System.CommandLine instead of McMaster.Extensions.CommandLineUtils [#1474](https://github.com/coverlet-coverage/coverlet/issues/1474) by https://github.com/Bertk
 
 ## Release date 2023-05-21
 ### Packages  
