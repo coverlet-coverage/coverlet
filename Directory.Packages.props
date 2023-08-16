@@ -15,6 +15,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="7.0.0" />
+    <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.5.0" />
@@ -33,8 +34,10 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="NuGet.Packaging" Version="6.6.1" />
     <PackageVersion Include="ReportGenerator.Core" Version="5.1.23" />
+    <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.4" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
     <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
     <!--
