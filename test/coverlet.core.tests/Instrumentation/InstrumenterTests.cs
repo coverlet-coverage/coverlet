@@ -778,7 +778,7 @@ public class SampleClass
       instrumenterTest.Directory.Delete(true);
     }
 
-    [ConditionalFact]
+    [Fact]
     public void Instrumenter_MethodsWithoutReferenceToSource_AreSkipped()
     {
       var loggerMock = new Mock<ILogger>();
