@@ -779,8 +779,6 @@ public class SampleClass
     }
 
     [ConditionalFact]
-    [SkipOnOS(OS.Linux, "not supported")]
-    [SkipOnOS(OS.MacOS, "not supported")]
     public void Instrumenter_MethodsWithoutReferenceToSource_AreSkipped()
     {
       var loggerMock = new Mock<ILogger>();
