@@ -42,9 +42,11 @@ Options:
 ```
 
 NB. For a [multiple value] options you have to specify values multiple times i.e.
-```
+
+```shell
 --exclude-by-attribute 'Obsolete' --exclude-by-attribute 'GeneratedCode' --exclude-by-attribute 'CompilerGenerated'
 ```
+
 For `--merge-with` [check the sample](Examples.md).
 
 ## Code Coverage
@@ -61,7 +63,7 @@ After the above command is run, a `coverage.json` file containing the results wi
 
 _Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dll` isn't rebuilt_
 
-## Code Coverage for integration tests and end-to-end tests.
+## Code Coverage for integration tests and end-to-end tests
 
 Sometimes, there are tests that doesn't use regular unit test frameworks like xunit. You may find yourself in a situation where your tests are driven by a custom executable/script, which when run, could do anything from making API calls to driving Selenium.
 
@@ -188,8 +190,9 @@ coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-att
 ### Source Files
 
 You can also ignore specific source files from code coverage using the `--exclude-by-file` option
- - Can be specified multiple times
- - Use file path or directory path with globbing (e.g `dir1/*.cs`)
+
+* Can be specified multiple times
+* Use file path or directory path with globbing (e.g `dir1/*.cs`)
 
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude-by-file "**/dir1/class1.cs"
@@ -202,15 +205,17 @@ Coverlet gives the ability to have fine grained control over what gets excluded 
 Syntax: `--exclude '[Assembly-Filter]Type-Filter'`
 
 Wildcards
-- `*` => matches zero or more characters
-- `?` => the prefixed character is optional
+
+* `*` => matches zero or more characters
+* `?` => the prefixed character is optional
 
 Examples
- - `--exclude "[*]*"` => Excludes all types in all assemblies (nothing is instrumented)
- - `--exclude "[coverlet.*]Coverlet.Core.Coverage"` => Excludes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
- - `--exclude "[*]Coverlet.Core.Instrumentation.*"` => Excludes all types belonging to `Coverlet.Core.Instrumentation` namespace in any assembly
- - `--exclude "[coverlet.*.tests?]*"` => Excludes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
- - `--exclude "[coverlet.*]*" --exclude "[*]Coverlet.Core*"` => Excludes assemblies matching `coverlet.*` and excludes all types belonging to the `Coverlet.Core` namespace in any assembly
+
+* `--exclude "[*]*"` => Excludes all types in all assemblies (nothing is instrumented)
+* `--exclude "[coverlet.*]Coverlet.Core.Coverage"` => Excludes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
+* `--exclude "[*]Coverlet.Core.Instrumentation.*"` => Excludes all types belonging to `Coverlet.Core.Instrumentation` namespace in any assembly
+* `--exclude "[coverlet.*.tests?]*"` => Excludes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
+* `--exclude "[coverlet.*]*" --exclude "[*]Coverlet.Core*"` => Excludes assemblies matching `coverlet.*` and excludes all types belonging to the `Coverlet.Core` namespace in any assembly
 
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude "[coverlet.*]Coverlet.Core.Coverage"
@@ -219,9 +224,10 @@ coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --exclude "[cove
 Coverlet goes a step in the other direction by also letting you explicitly set what can be included using the `--include` option.
 
 Examples
- - `--include "[*]*"` => Includes all types in all assemblies (everything is instrumented)
- - `--include "[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
-  - `--include "[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
+
+* `--include "[*]*"` => Includes all types in all assemblies (everything is instrumented)
+* `--include "[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
+* `--include "[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
 
 Both `--exclude` and `--include` options can be used together but `--exclude` takes precedence. You can specify the `--exclude` and `--include` options multiple times to allow for multiple filter expressions.
 

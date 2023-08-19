@@ -1,0 +1,35 @@
+steps:
+- task: Powershell@2
+  displayName: Prepare coverage files to Upload
+  inputs:
+    targetType: inline
+    pwsh: true
+    script: |
+      New-Item -ItemType Directory "$(Build.SourcesDirectory)/artifacts/TestLogs/"
+      function Copy-FileKeepPath {
+      param (
+          $Filter,$FileToCopy,$Destination,$StartIndex
+          )
+      Get-ChildItem -Path $FileToCopy -Filter $Filter -Recurse -File | ForEach-Object {
+          $fileName = $_.FullName
+          $newDestination=Join-Path -Path $Destination -ChildPath $fileName.Substring($StartIndex)
+          $folder=Split-Path -Path $newDestination -Parent
+          if (!(Test-Path -Path $folder)) {New-Item $folder -Type Directory -Force -Verbose}
+          Copy-Item -Path $fileName -Destination $newDestination -Recurse -Force -Verbose
+          }
+      }
+      $logfiles = "coverage.opencover.xml", "coverage.cobertura.xml", "coverage.json", "log.txt", "log.datacollector.*.txt", "log.host.*.txt"
+      foreach ($logfile in $logfiles ) {
+      Copy-FileKeepPath -FileToCopy "$(Build.SourcesDirectory)/test/*" -des "$(Build.SourcesDirectory)/artifacts/TestLogs/" -filter $logfile -startIndex "$(Build.SourcesDirectory)/test/coverlet.integration.tests/bin/".Length
+      }
+
+  continueOnError: true
+  condition: always()
+
+- task: PublishPipelineArtifact@1
+  displayName:  Publish coverage logs
+  continueOnError: true
+  condition: always()
+  inputs:
+    path: artifacts/TestLogs
+    artifactName: TestLogs_$(Agent.Os)_$(BuildConfiguration)

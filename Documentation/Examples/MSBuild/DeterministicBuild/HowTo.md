@@ -1,6 +1,7 @@
-﻿To run test we need to generates packages to reference in on test project.  
+﻿To run test we need to generates packages to reference in on test project.
 Run from repo root
-```
+
+```shell
 C:\git\coverlet
 λ dotnet pack
 Microsoft (R) Build Engine version 16.5.0+d4cbfca49 for .NET Core
@@ -23,31 +24,31 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   coverlet.core -> C:\git\coverlet\src\coverlet.core\bin\Debug\netstandard2.0\coverlet.core.dll
   coverlet.collector -> C:\git\coverlet\src\coverlet.collector\bin\Debug\netcoreapp2.0\coverlet.collector.dll
   coverlet.msbuild.tasks -> C:\git\coverlet\src\coverlet.msbuild.tasks\bin\Debug\netstandard2.0\coverlet.msbuild.tasks.dll
-  coverlet.console -> C:\git\coverlet\src\coverlet.console\bin\Debug\netcoreapp2.2\coverlet.console.dll
-  coverlet.console -> C:\git\coverlet\src\coverlet.console\bin\Debug\netcoreapp2.2\coverlet.console.dll
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.1.3.0-preview.6.ga0e22ec622.nupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.console.1.7.2-preview.6.ga0e22ec622.nupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.console.1.7.2-preview.6.ga0e22ec622.snupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.1.3.0-preview.6.ga0e22ec622.snupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.nupkg'.
-  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.snupkg'.
+  coverlet.console -> C:\git\coverlet\src\coverlet.console\bin\Debug\net6.0\coverlet.console.dll
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.6.0.1-preview.6.g918cd179e0.nupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.6.0.1-preview.6.g918cd179e0.snupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.6.0.1-preview.6.g918cd179e0.nupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.msbuild.6.0.1-preview.6.g918cd179e0.snupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.console.6.0.1-preview.6.g918cd179e0.nupkg'.
+  Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.console.6.0.1-preview.6.g918cd179e0.snupkg'.
 ```
+
 Add msbuild package version generated to `"..\Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\XUnitTestProject1.csproj"`
+
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Include="xunit" Version="2.4.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
-    <PackageReference Include="coverlet.collector" Version="1.2.0" />
-    <!-- version comes from  coverlet.msbuild.2.9.0-preview.6.ga0e22ec622.nupkg -->
-    <PackageReference Include="coverlet.msbuild" Version="2.9.0-preview.6.ga0e22ec622" >
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="xunit" Version="2.5.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0" />
+    <!-- version comes from  coverlet.msbuild.6.0.1-preview.8.gcb9b802a5f.nupkg -->
+    <PackageReference Include="coverlet.msbuild" Version="coverlet.msbuild.6.0.1-preview.8.gcb9b802a5f.nupkg" >
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -58,14 +59,15 @@ Add msbuild package version generated to `"..\Documentation\Examples\MSBuild\Det
   </ItemGroup>
 
 </Project>
+```
 
-```
 Go to test project folder and run
-```
+
+```shell
 C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild (detbuilddocs -> origin)
 λ dotnet test /p:CollectCoverage=true /p:DeterministicSourcePaths=true
-Test run for C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\XUnitTestProject1.dll(.NETCoreApp,Version=v3.1)
-Microsoft (R) Test Execution Command Line Tool Version 16.5.0
+Test run for C:\git\coverlet\Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\net6.0\XUnitTestProject1.dll(.NETCoreApp,Version=v6.0)
+Microsoft (R) Test Execution Command Line Tool Version 17.5.0
 Copyright (c) Microsoft Corporation.  All rights reserved.
 
 Starting test execution, please wait...
@@ -94,8 +96,10 @@ Calculating coverage result...
 | Average | 100% | 100%   | 100%   |
 +---------+------+--------+--------+
 ```
-You should see on output folder the coverlet source root mapping file generated.  
+
+You should see on output folder the coverlet source root mapping file generated.
 This is the confirmation that you're running coverage on deterministic build.
-```
-Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\netcoreapp3.1\CoverletSourceRootsMapping
+
+```text
+Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\net6.0\CoverletSourceRootsMapping
 ```

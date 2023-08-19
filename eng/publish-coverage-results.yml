@@ -1,0 +1,32 @@
+# File: publish-coverage-results.yml
+# uses reportgenerator task to create a code coverage report and aggregates available cobertura XML files. The results are publishes as a build artifact.
+
+parameters:
+  condition: 'succeeded()'
+  reports: ''
+  assemblyfilters: '-xunit*'
+  breakBuild: false
+
+steps:
+- task: reportgenerator@5
+  displayName: ReportGenerator
+  condition: ${{parameters.condition}}
+  inputs:
+    reports: ${{parameters.reports}}
+    targetdir: $(Build.SourcesDirectory)/artifacts/CoverageReport
+    reporttypes: Html;HtmlInline_AzurePipelines_Dark;Cobertura
+    verbosity: 'Verbose'
+    assemblyfilters: ${{parameters.assemblyfilters}}
+
+- publish: '$(Build.SourcesDirectory)/artifacts/CoverageReport'
+  displayName: 'Publish CoverageReport Artifact'
+  artifact: CoverageResults_$(Agent.Os)_$(BuildConfiguration)
+  condition: ${{parameters.condition}}
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage'
+  condition: ${{parameters.condition}}
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageReport/Cobertura.xml'
+    failIfCoverageEmpty: ${{parameters.breakBuild}}
