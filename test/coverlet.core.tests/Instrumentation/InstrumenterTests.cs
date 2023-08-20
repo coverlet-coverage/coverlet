@@ -807,5 +807,31 @@ public class SampleClass
 
       directory.Delete(true);
     }
+    [Fact]
+    public void RuntimeConfigurationReaderSingleFrameworkCheck()
+    {
+      var reader = new RuntimeConfigurationReader(@"TestAssets/single.framework.runtimeconfig.json");
+
+      IEnumerable<(string Name, string Version)> referencedFrameworks = reader.GetFrameworks();
+
+      Assert.Single(referencedFrameworks);
+      Assert.Collection(referencedFrameworks, item => Assert.Equal("Microsoft.NETCore.App", item.Name));
+      Assert.Collection(referencedFrameworks, item => Assert.Equal("6.0.0", item.Version));
+
+    }
+
+    [Fact]
+    public void RuntimeConfigurationReaderMultipleFrameworkCheck()
+    {
+      var reader = new RuntimeConfigurationReader(@"TestAssets/multiple.frameworks.runtimeconfig.json");
+
+      (string Name, string Version)[] referencedFrameworks = reader.GetFrameworks().ToArray();
+
+      Assert.Equal(2, referencedFrameworks.Length);
+      Assert.Equal("Microsoft.NETCore.App", referencedFrameworks[0].Name);
+      Assert.Equal("6.0.0", referencedFrameworks[0].Version);
+      Assert.Equal("Microsoft.AspNetCore.App", referencedFrameworks[1].Name);
+      Assert.Equal("6.0.0", referencedFrameworks[1].Version);
+    }
   }
 }
