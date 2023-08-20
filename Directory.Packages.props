@@ -46,6 +46,7 @@
         We can check minimum supported package version here https://github.com/Microsoft/vstest/blob/master/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L34
      -->
     <PackageVersion Include="System.Reflection.Metadata" Version="1.6.0" />
+    <PackageVersion Include="System.Text.Json" Version="7.0.3" />
     <!-- Coverlet.Core.Tests executed in Visual Studio will fail with Tmds.ExecFunction version > 0.4.0 => use "dotnet test"
     System.TypeInitializationException : The type initializer for 'Tmds.Utils.ExecFunction' threw an exception.
     System.NotSupportedException : Application is running as testhost, unable to determine parent 'dotnet' process.
