@@ -10,7 +10,8 @@ parameters:
 
 steps:
 - task: Powershell@2
-  displayName: Prepare coverage files to Upload
+  displayName: ReportGenerator
+  condition: ${{parameters.condition}}
   inputs:
     targetType: inline
     pwsh: true
