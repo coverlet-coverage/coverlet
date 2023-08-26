@@ -5,18 +5,28 @@ parameters:
   condition: 'succeeded()'
   reports: ''
   assemblyfilters: '-xunit*'
+  classfilters: ''
   breakBuild: false
 
 steps:
-- task: reportgenerator@5
-  displayName: ReportGenerator
-  condition: ${{parameters.condition}}
+- task: Powershell@2
+  displayName: Prepare coverage files to Upload
   inputs:
-    reports: ${{parameters.reports}}
-    targetdir: $(Build.SourcesDirectory)/artifacts/CoverageReport
-    reporttypes: Html;HtmlInline_AzurePipelines_Dark;Cobertura
-    verbosity: 'Verbose'
-    assemblyfilters: ${{parameters.assemblyfilters}}
+    targetType: inline
+    pwsh: true
+    script: |
+      dotnet tool restore
+      dotnet reportgenerator -reports:"${{parameters.reports}}" -targetdir:"$(Build.SourcesDirectory)/artifacts/CoverageReport" -reporttypes:"Html;HtmlInline_AzurePipelines_Dark;Cobertura" -assemblyfilters:"${{parameters.assemblyfilters}}" -classfilters:"${{parameters.classfilters}}" -verbosity:Verbose
+
+# - task: reportgenerator@5
+#   displayName: ReportGenerator
+#   condition: ${{parameters.condition}}
+#   inputs:
+#     reports: ${{parameters.reports}}
+#     targetdir: $(Build.SourcesDirectory)/artifacts/CoverageReport
+#     reporttypes: Html;HtmlInline_AzurePipelines_Dark;Cobertura
+#     verbosity: 'Verbose'
+#     assemblyfilters: ${{parameters.assemblyfilters}}
 
 - publish: '$(Build.SourcesDirectory)/artifacts/CoverageReport'
   displayName: 'Publish CoverageReport Artifact'
