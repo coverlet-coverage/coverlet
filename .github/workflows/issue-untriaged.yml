@@ -1,0 +1,25 @@
+# current list of labels: untriaged|duplicate|invalid|bug|enhancement|feature-request|documentation|question|wontfix|Known issue|up-for-grabs|in progress|with repo|needs repo|tracking-external-issue
+# https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Roadmap.md
+
+name: Label issues
+on:
+  issues:
+    types:
+      - reopened
+      - opened
+jobs:
+  label_issues:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["untriaged"]
+            })
+

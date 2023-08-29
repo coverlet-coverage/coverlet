@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Reflection;
@@ -6,3 +6,4 @@ using System.Runtime.CompilerServices;
 
 [assembly: AssemblyKeyFile("coverlet.msbuild.tasks.snk")]
 [assembly: InternalsVisibleTo("coverlet.core.tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100757cf9291d78a82e5bb58a827a3c46c2f959318327ad30d1b52e918321ffbd847fb21565b8576d2a3a24562a93e86c77a298b564a0f1b98f63d7a1441a3a8bcc206da3ed09d5dacc76e122a109a9d3ac608e21a054d667a2bae98510a1f0f653c0e6f58f42b4b3934f6012f5ec4a09b3dfd3e14d437ede1424bdb722aead64ad")]
+[assembly: InternalsVisibleTo("coverlet.msbuild.tasks.tests, PublicKey=002400000480000094000000060200000024000052534131000400000100010071b1583d63637a225f3f640252fee7130f0f3f2127d75025c1c3ee2d6dfc79a4950919268e0784d7ff54b0eadd8e4762e3e150da422e20e091eb0811d9d84e1779d5b95e349d5428aebb16e82e081bdf805926c5a9eb2094aaed9d36442de024264976a8835c7d6923047cf2f745e8f0ded2332f8980acd390f725224d976ed8")]

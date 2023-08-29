@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
+using Coverlet.Core;
 using Coverlet.Core.Abstractions;
-using Coverlet.MSbuild.Tasks;
+using Coverlet.Core.Reporters;
 using Moq;
 using Xunit;
 
-namespace Coverlet.Core.Reporters.Tests
+namespace Coverlet.MSbuild.Tasks.Reporters.Tests
 {
     public class Reporters
     {
