@@ -4,13 +4,14 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <NoWarn>$(NoWarn);CS8002;NU1008</NoWarn>
-    <MSBuildWarningsAsMessages>NU1702</MSBuildWarningsAsMessages>
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+    <MSBuildWarningsAsMessages>NU1702;NU1504;NU1008</MSBuildWarningsAsMessages>
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
     <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
+    <!--<PackageReference Include="envdte" />-->
     <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />

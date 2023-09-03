@@ -12,9 +12,18 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Build.Framework">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Utilities.Core">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Locator" />
     <PackageReference Include="Moq" />
     <PackageReference Include="ReportGenerator.Core" />
     <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.assemblyfixture" />
     <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -24,5 +33,14 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestAssets\InstrumenterState.ItemSpec.data1.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestAssets\InstrumenterState.ItemSpec.data2.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
