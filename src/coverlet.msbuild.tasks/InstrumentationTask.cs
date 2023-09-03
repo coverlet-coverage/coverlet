@@ -84,7 +84,7 @@ namespace Coverlet.MSbuild.Tasks
             serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
             serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
 
-            ServiceProvider = serviceCollection.BuildServiceProvider();
+            BaseTask.ServiceProvider = serviceCollection.BuildServiceProvider();
 
             try
             {
