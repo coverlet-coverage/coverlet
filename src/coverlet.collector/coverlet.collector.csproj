@@ -36,7 +36,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" />
-    <PackageReference Include="NuGet.Frameworks" />
   </ItemGroup>
 
   <ItemGroup>

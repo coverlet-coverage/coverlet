@@ -10,17 +10,11 @@ namespace Coverlet.Core
 {
   internal class BranchInfo
   {
-    [System.Text.Json.Serialization.JsonInclude]
     public int Line { get; set; }
-    [System.Text.Json.Serialization.JsonInclude]
     public int Offset { get; set; }
-    [System.Text.Json.Serialization.JsonInclude]
     public int EndOffset { get; set; }
-    [System.Text.Json.Serialization.JsonInclude]
     public int Path { get; set; }
-    [System.Text.Json.Serialization.JsonInclude]
     public uint Ordinal { get; set; }
-    [System.Text.Json.Serialization.JsonInclude]
     public int Hits { get; set; }
   }
   internal class Lines : SortedDictionary<int, int> { }
@@ -33,9 +27,7 @@ namespace Coverlet.Core
       Lines = new Lines();
       Branches = new Branches();
     }
-    [System.Text.Json.Serialization.JsonInclude]
     public Lines Lines;
-    [System.Text.Json.Serialization.JsonInclude]
     public Branches Branches;
   }
   internal class Methods : Dictionary<string, Method> { }
