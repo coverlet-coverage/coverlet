@@ -1,6 +1,6 @@
 steps:
 - task: Powershell@2
-  displayName: Prepare coverage files to Upload
+  displayName: Prepare log files to Upload
   inputs:
     targetType: inline
     pwsh: true
@@ -26,8 +26,15 @@ steps:
   continueOnError: true
   condition: always()
 
+- task: CopyFiles@2
+  displayName: Copy trx files
+  inputs:
+    SourceFolder: '$(Agent.TempDirectory)'
+    Contents: '**/*.trx'
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
+
 - task: PublishPipelineArtifact@1
-  displayName: Publish coverage logs
+  displayName: Publish Coverlet logs
   continueOnError: true
   condition: always()
   inputs:
