@@ -11,9 +11,9 @@
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Mono.Cecil" />
-    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
 </Project>

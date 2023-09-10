@@ -2,7 +2,7 @@ trigger:
   branches:
     include: ["master", "*_validate"]
   paths:
-    exclude: [".github", "doc", "*.md"]
+    exclude: [".github", "Documentation", "*.md"]
 
 jobs:
 - job: Windows
