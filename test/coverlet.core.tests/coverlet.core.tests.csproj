@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
+  <!--<Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />-->
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -65,5 +65,5 @@
     <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) OR $([MSBuild]::IsOSPlatform('Linux'))" Command="cp -r $(RepoRoot)test/coverlet.tests.projectsample.excludedbyattribute/$(OutDir). $(TargetDir)TestAssets" />
   </Target>
 
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />
+  <!--<Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />-->
 </Project>

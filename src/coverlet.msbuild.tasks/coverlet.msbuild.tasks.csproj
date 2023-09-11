@@ -44,10 +44,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\coverlet.console\ConsoleTables\ConsoleTable.cs" Link="ConsoleTables\ConsoleTable.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="coverlet.msbuild.props" />
     <Content Include="coverlet.msbuild.targets" />
 
