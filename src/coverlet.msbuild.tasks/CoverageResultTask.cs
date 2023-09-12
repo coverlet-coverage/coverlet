@@ -18,247 +18,248 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Coverlet.MSbuild.Tasks
 {
-    public class CoverageResultTask : BaseTask
+  public class CoverageResultTask : BaseTask
+  {
+    private readonly MSBuildLogger _logger;
+
+    [Required]
+    public string Output { get; set; }
+
+    [Required]
+    public string OutputFormat { get; set; }
+
+    [Required]
+    public string Threshold { get; set; }
+
+    [Required]
+    public string ThresholdType { get; set; }
+
+    [Required]
+    public string ThresholdStat { get; set; }
+
+    [Required]
+    public ITaskItem InstrumenterState { get; set; }
+
+    public string CoverletMultiTargetFrameworksCurrentTFM { get; set; }
+
+    [Output]
+    public ITaskItem[] ReportItems { get; set; }
+
+    public CoverageResultTask()
     {
-        private readonly MSBuildLogger _logger;
-
-        [Required]
-        public string Output { get; set; }
-
-        [Required]
-        public string OutputFormat { get; set; }
-
-        [Required]
-        public string Threshold { get; set; }
-
-        [Required]
-        public string ThresholdType { get; set; }
-
-        [Required]
-        public string ThresholdStat { get; set; }
-
-        [Required]
-        public ITaskItem InstrumenterState { get; set; }
-
-        public string CoverletMultiTargetFrameworksCurrentTFM { get; set; }
-
-        [Output]
-        public ITaskItem[] ReportItems { get; set; }
-
-        public CoverageResultTask()
-        {
-            _logger = new MSBuildLogger(Log);
-        }
-
-        public override bool Execute()
-        {
-            try
-            {
-                Console.WriteLine("\nCalculating coverage result...");
-
-                IFileSystem fileSystem = ServiceProvider.GetService<IFileSystem>();
-                if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
-                {
-                    _logger.LogError("Result of instrumentation task not found");
-                    return false;
-                }
-
-                Coverage coverage = null;
-                using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
-                {
-                    IInstrumentationHelper instrumentationHelper = ServiceProvider.GetService<IInstrumentationHelper>();
-                    // Task.Log is teared down after a task and thus the new MSBuildLogger must be passed to the InstrumentationHelper
-                    // https://github.com/microsoft/msbuild/issues/5153
-                    instrumentationHelper.SetLogger(_logger);
-                    coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), _logger, ServiceProvider.GetService<IInstrumentationHelper>(), fileSystem, ServiceProvider.GetService<ISourceRootTranslator>());
-                }
-
-                try
-                {
-                    fileSystem.Delete(InstrumenterState.ItemSpec);
-                }
-                catch (Exception ex)
-                {
-                    // We don't want to block coverage for I/O errors
-                    _logger.LogWarning($"Exception during instrument state deletion, file name '{InstrumenterState.ItemSpec}' exception message '{ex.Message}'");
-                }
-
-                CoverageResult result = coverage.GetCoverageResult();
-
-                string directory = Path.GetDirectoryName(Output);
-                if (directory == string.Empty)
-                {
-                    directory = Directory.GetCurrentDirectory();
-                }
-                else if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                string[] formats = OutputFormat.Split(',');
-                var coverageReportPaths = new List<ITaskItem>(formats.Length);
-                ISourceRootTranslator sourceRootTranslator = ServiceProvider.GetService<ISourceRootTranslator>();
-                foreach (string format in formats)
-                {
-                    IReporter reporter = new ReporterFactory(format).CreateReporter();
-                    if (reporter == null)
-                    {
-                        throw new Exception($"Specified output format '{format}' is not supported");
-                    }
-
-                    if (reporter.OutputType == ReporterOutputType.Console)
-                    {
-                        // Output to console
-                        Console.WriteLine("  Outputting results to console");
-                        Console.WriteLine(reporter.Report(result, sourceRootTranslator));
-                    }
-                    else
-                    {
-                        ReportWriter writer = new(CoverletMultiTargetFrameworksCurrentTFM,
-                                                                directory,
-                                                                Output,
-                                                                reporter,
-                                                                fileSystem,
-                                                                ServiceProvider.GetService<IConsole>(),
-                                                                result,
-                                                                sourceRootTranslator);
-                        string path = writer.WriteReport();
-                        var metadata = new Dictionary<string, string> { ["Format"] = format };
-                        coverageReportPaths.Add(new TaskItem(path, metadata));
-                    }
-                }
-
-                ReportItems = coverageReportPaths.ToArray();
-
-                var thresholdTypeFlagQueue = new Queue<ThresholdTypeFlags>();
-
-                foreach (string thresholdType in ThresholdType.Split(',').Select(t => t.Trim()))
-                {
-                    if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
-                    {
-                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Line);
-                    }
-                    else if (thresholdType.Equals("branch", StringComparison.OrdinalIgnoreCase))
-                    {
-                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Branch);
-                    }
-                    else if (thresholdType.Equals("method", StringComparison.OrdinalIgnoreCase))
-                    {
-                        thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Method);
-                    }
-                }
-
-                var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>();
-                if (Threshold.Contains(','))
-                {
-                    IEnumerable<string> thresholdValues = Threshold.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
-                    if (thresholdValues.Count() != thresholdTypeFlagQueue.Count)
-                    {
-                        throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
-                    }
-
-                    foreach (string threshold in thresholdValues)
-                    {
-                        if (double.TryParse(threshold, out double value))
-                        {
-                            thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = value;
-                        }
-                        else
-                        {
-                            throw new Exception($"Invalid threshold value must be numeric");
-                        }
-                    }
-                }
-                else
-                {
-                    double thresholdValue = double.Parse(Threshold);
-
-                    while (thresholdTypeFlagQueue.Any())
-                    {
-                        thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = thresholdValue;
-                    }
-                }
-
-                ThresholdStatistic thresholdStat = ThresholdStatistic.Minimum;
-                if (ThresholdStat.Equals("average", StringComparison.OrdinalIgnoreCase))
-                {
-                    thresholdStat = ThresholdStatistic.Average;
-                }
-                else if (ThresholdStat.Equals("total", StringComparison.OrdinalIgnoreCase))
-                {
-                    thresholdStat = ThresholdStatistic.Total;
-                }
-
-                var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-                var summary = new CoverageSummary();
-
-                CoverageDetails linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
-                CoverageDetails branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
-                CoverageDetails methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
-
-                double totalLinePercent = linePercentCalculation.Percent;
-                double totalBranchPercent = branchPercentCalculation.Percent;
-                double totalMethodPercent = methodPercentCalculation.Percent;
-
-                double averageLinePercent = linePercentCalculation.AverageModulePercent;
-                double averageBranchPercent = branchPercentCalculation.AverageModulePercent;
-                double averageMethodPercent = methodPercentCalculation.AverageModulePercent;
-
-                foreach (KeyValuePair<string, Documents> module in result.Modules)
-                {
-                    double linePercent = summary.CalculateLineCoverage(module.Value).Percent;
-                    double branchPercent = summary.CalculateBranchCoverage(module.Value).Percent;
-                    double methodPercent = summary.CalculateMethodCoverage(module.Value).Percent;
-
-                    coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
-                }
-
-                Console.WriteLine();
-                Console.WriteLine(coverageTable.ToStringAlternative());
-
-                coverageTable.Columns.Clear();
-                coverageTable.Rows.Clear();
-
-                coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
-                coverageTable.AddRow("Total", $"{InvariantFormat(totalLinePercent)}%", $"{InvariantFormat(totalBranchPercent)}%", $"{InvariantFormat(totalMethodPercent)}%");
-                coverageTable.AddRow("Average", $"{InvariantFormat(averageLinePercent)}%", $"{InvariantFormat(averageBranchPercent)}%", $"{InvariantFormat(averageMethodPercent)}%");
-
-                Console.WriteLine(coverageTable.ToStringAlternative());
-
-                ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStat);
-                if (thresholdTypeFlags != ThresholdTypeFlags.None)
-                {
-                    var exceptionMessageBuilder = new StringBuilder();
-                    if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
-                    {
-                        exceptionMessageBuilder.AppendLine(
-                            $"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line]}");
-                    }
-
-                    if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
-                    {
-                        exceptionMessageBuilder.AppendLine(
-                            $"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Branch]}");
-                    }
-
-                    if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
-                    {
-                        exceptionMessageBuilder.AppendLine(
-                            $"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
-                    }
-
-                    throw new Exception(exceptionMessageBuilder.ToString());
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex);
-                return false;
-            }
-
-            return true;
-        }
-
-        private static string InvariantFormat(double value) => value.ToString(CultureInfo.InvariantCulture);
+      _logger = new MSBuildLogger(Log);
     }
+
+    public override bool Execute()
+    {
+      try
+      {
+        Log.LogMessage(MessageImportance.High, "\nCalculating coverage result...");
+
+        IFileSystem fileSystem = ServiceProvider.GetService<IFileSystem>();
+        if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
+        {
+          Log.LogError("Result of instrumentation task not found");
+          return false;
+        }
+
+        Coverage coverage = null;
+        using (Stream instrumenterStateStream = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open))
+        {
+          IInstrumentationHelper instrumentationHelper = ServiceProvider.GetService<IInstrumentationHelper>();
+          // Task.Log is teared down after a task and thus the new MSBuildLogger must be passed to the InstrumentationHelper
+          // https://github.com/microsoft/msbuild/issues/5153
+          instrumentationHelper.SetLogger(_logger);
+          coverage = new Coverage(CoveragePrepareResult.Deserialize(instrumenterStateStream), _logger, ServiceProvider.GetService<IInstrumentationHelper>(), fileSystem, ServiceProvider.GetService<ISourceRootTranslator>());
+        }
+
+        try
+        {
+          fileSystem.Delete(InstrumenterState.ItemSpec);
+        }
+        catch (Exception ex)
+        {
+          // We don't want to block coverage for I/O errors
+          Log.LogWarning($"Exception during instrument state deletion, file name '{InstrumenterState.ItemSpec}'");
+          Log.LogWarningFromException(ex, true);
+        }
+
+        CoverageResult result = coverage.GetCoverageResult();
+
+        string directory = Path.GetDirectoryName(Output);
+        if (directory == string.Empty)
+        {
+          directory = Directory.GetCurrentDirectory();
+        }
+        else if (!Directory.Exists(directory))
+        {
+          Directory.CreateDirectory(directory);
+        }
+
+        string[] formats = OutputFormat.Split(',');
+        var coverageReportPaths = new List<ITaskItem>(formats.Length);
+        ISourceRootTranslator sourceRootTranslator = ServiceProvider.GetService<ISourceRootTranslator>();
+        foreach (string format in formats)
+        {
+          IReporter reporter = new ReporterFactory(format).CreateReporter();
+          if (reporter == null)
+          {
+            throw new Exception($"Specified output format '{format}' is not supported");
+          }
+
+          if (reporter.OutputType == ReporterOutputType.Console)
+          {
+            // Output to TaskLoggingHelper
+            Log.LogMessage(MessageImportance.High, "  Outputting results to console");
+            Log.LogMessage(MessageImportance.High, reporter.Report(result, sourceRootTranslator));
+          }
+          else
+          {
+            ReportWriter writer = new(CoverletMultiTargetFrameworksCurrentTFM,
+                                                    directory,
+                                                    Output,
+                                                    reporter,
+                                                    fileSystem,
+                                                    new MSBuildLogger(Log),
+                                                    result,
+                                                    sourceRootTranslator);
+            string path = writer.WriteReport();
+            var metadata = new Dictionary<string, string> { ["Format"] = format };
+            coverageReportPaths.Add(new TaskItem(path, metadata));
+          }
+        }
+
+        ReportItems = coverageReportPaths.ToArray();
+
+        var thresholdTypeFlagQueue = new Queue<ThresholdTypeFlags>();
+
+        foreach (string thresholdType in ThresholdType.Split(',').Select(t => t.Trim()))
+        {
+          if (thresholdType.Equals("line", StringComparison.OrdinalIgnoreCase))
+          {
+            thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Line);
+          }
+          else if (thresholdType.Equals("branch", StringComparison.OrdinalIgnoreCase))
+          {
+            thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Branch);
+          }
+          else if (thresholdType.Equals("method", StringComparison.OrdinalIgnoreCase))
+          {
+            thresholdTypeFlagQueue.Enqueue(ThresholdTypeFlags.Method);
+          }
+        }
+
+        var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>();
+        if (Threshold.Contains(','))
+        {
+          IEnumerable<string> thresholdValues = Threshold.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
+          if (thresholdValues.Count() != thresholdTypeFlagQueue.Count)
+          {
+            throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
+          }
+
+          foreach (string threshold in thresholdValues)
+          {
+            if (double.TryParse(threshold, out double value))
+            {
+              thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = value;
+            }
+            else
+            {
+              throw new Exception($"Invalid threshold value must be numeric");
+            }
+          }
+        }
+        else
+        {
+          double thresholdValue = double.Parse(Threshold);
+
+          while (thresholdTypeFlagQueue.Any())
+          {
+            thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = thresholdValue;
+          }
+        }
+
+        ThresholdStatistic thresholdStat = ThresholdStatistic.Minimum;
+        if (ThresholdStat.Equals("average", StringComparison.OrdinalIgnoreCase))
+        {
+          thresholdStat = ThresholdStatistic.Average;
+        }
+        else if (ThresholdStat.Equals("total", StringComparison.OrdinalIgnoreCase))
+        {
+          thresholdStat = ThresholdStatistic.Total;
+        }
+
+        var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
+        var summary = new CoverageSummary();
+
+        CoverageDetails linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
+        CoverageDetails branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
+        CoverageDetails methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
+
+        double totalLinePercent = linePercentCalculation.Percent;
+        double totalBranchPercent = branchPercentCalculation.Percent;
+        double totalMethodPercent = methodPercentCalculation.Percent;
+
+        double averageLinePercent = linePercentCalculation.AverageModulePercent;
+        double averageBranchPercent = branchPercentCalculation.AverageModulePercent;
+        double averageMethodPercent = methodPercentCalculation.AverageModulePercent;
+
+        foreach (KeyValuePair<string, Documents> module in result.Modules)
+        {
+          double linePercent = summary.CalculateLineCoverage(module.Value).Percent;
+          double branchPercent = summary.CalculateBranchCoverage(module.Value).Percent;
+          double methodPercent = summary.CalculateMethodCoverage(module.Value).Percent;
+
+          coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine(coverageTable.ToStringAlternative());
+
+        coverageTable.Columns.Clear();
+        coverageTable.Rows.Clear();
+
+        coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
+        coverageTable.AddRow("Total", $"{InvariantFormat(totalLinePercent)}%", $"{InvariantFormat(totalBranchPercent)}%", $"{InvariantFormat(totalMethodPercent)}%");
+        coverageTable.AddRow("Average", $"{InvariantFormat(averageLinePercent)}%", $"{InvariantFormat(averageBranchPercent)}%", $"{InvariantFormat(averageMethodPercent)}%");
+
+        Console.WriteLine(coverageTable.ToStringAlternative());
+
+        ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStat);
+        if (thresholdTypeFlags != ThresholdTypeFlags.None)
+        {
+          var exceptionMessageBuilder = new StringBuilder();
+          if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
+          {
+            exceptionMessageBuilder.AppendLine(
+                $"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line]}");
+          }
+
+          if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
+          {
+            exceptionMessageBuilder.AppendLine(
+                $"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Branch]}");
+          }
+
+          if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
+          {
+            exceptionMessageBuilder.AppendLine(
+                $"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
+          }
+
+          throw new Exception(exceptionMessageBuilder.ToString());
+        }
+      }
+      catch (Exception ex)
+      {
+        Log.LogErrorFromException(ex, true);
+        return false;
+      }
+
+      return true;
+    }
+
+    private static string InvariantFormat(double value) => value.ToString(CultureInfo.InvariantCulture);
+  }
 }

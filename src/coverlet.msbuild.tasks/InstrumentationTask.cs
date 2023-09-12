@@ -74,7 +74,6 @@ namespace Coverlet.MSbuild.Tasks
             serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
             serviceCollection.AddTransient<IFileSystem, FileSystem>();
             serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
-            serviceCollection.AddTransient<IConsole, SystemConsole>();
             serviceCollection.AddTransient<ILogger, MSBuildLogger>(_ => _logger);
             serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
             // We cache resolutions
@@ -123,7 +122,7 @@ namespace Coverlet.MSbuild.Tasks
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex);
+                Log.LogErrorFromException(ex, true);
                 return false;
             }
 

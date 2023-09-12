@@ -1,16 +1,18 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using Moq;
 using Xunit;
 
 namespace Coverlet.MSbuild.Tasks.Reporters.Tests
 {
-  public class Reporters
+  public class Reporters 
   {
     // we use lcov with extension .info and cobertura with extension .cobertura.xml
     // to have all possible extension format
@@ -33,8 +35,7 @@ namespace Coverlet.MSbuild.Tasks.Reporters.Tests
     public void Msbuild_ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string coverletOutput, string reportFormat, string expectedFileName)
     {
       var fileSystem = new Mock<IFileSystem>();
-      var console = new Mock<IConsole>();
-
+      var logger = new Log();
       var reportWriter = new ReportWriter(
           coverletMultiTargetFrameworksCurrentTFM,
           // mimic code inside CoverageResultTask.cs
@@ -42,12 +43,47 @@ namespace Coverlet.MSbuild.Tasks.Reporters.Tests
           coverletOutput,
           new ReporterFactory(reportFormat).CreateReporter(),
           fileSystem.Object,
-          console.Object,
+          logger,
           new CoverageResult() { Modules = new Modules(), Parameters = new CoverageParameters() }, null);
 
       string path = reportWriter.WriteReport();
       // Path.Combine depends on OS so we can change only win side to avoid duplication
       Assert.Equal(path.Replace('/', Path.DirectorySeparatorChar), expectedFileName.Replace('/', Path.DirectorySeparatorChar));
+    }
+
+  }
+
+  internal class Log : Core.Abstractions.ILogger
+  {
+    internal SystemConsole _console;
+    public Log() {
+      _console = new SystemConsole();
+
+    }
+    
+    public void LogError(string message)
+    {
+      throw new NotImplementedException();
+    }
+
+    public void LogError(Exception exception)
+    {
+      throw new NotImplementedException();
+    }
+
+    public void LogInformation(string message, bool important = false)
+    {
+      _console.WriteLine(message);
+    }
+
+    public void LogVerbose(string message)
+    {
+      throw new NotImplementedException();
+    }
+
+    public void LogWarning(string message)
+    {
+      throw new NotImplementedException();
     }
   }
 }
