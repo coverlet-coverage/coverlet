@@ -16,7 +16,7 @@ Please include minimal steps to reproduce the problem if possible. E.g.: the sma
 **Expected behavior**
 Provide a description of the expected behavior.
 
-**actual-behavior**
+**Actual behavior**
 Provide a description of the actual behavior observed. If applicable please include any error messages, exception stacktraces or memory dumps.
 
 **Configuration (please complete the following information):**
