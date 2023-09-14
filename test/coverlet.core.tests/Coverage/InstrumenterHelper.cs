@@ -137,7 +137,7 @@ namespace Coverlet.Core.Tests
             // Flush tracker
             Type tracker = asm.GetTypes().Single(n => n.FullName.Contains("Coverlet.Core.Instrumentation.Tracker"));
 
-            // For debugging purpouse
+            // For debugging purpose
             // int[] hitsArray = (int[])tracker.GetField("HitsArray").GetValue(null);
             // string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
 
@@ -251,7 +251,7 @@ namespace Coverlet.Core.Tests
         }
     }
 
-    // We log to files for debugging pourpose, we can check if instrumentation is ok
+    // We log to files for debugging purpose, we can check if instrumentation is ok
     class Logger : ILogger
     {
         readonly string _logFile;

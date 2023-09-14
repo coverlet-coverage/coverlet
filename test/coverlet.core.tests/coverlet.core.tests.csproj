@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="envdte" />-->
+    <PackageReference Include="envdte" />
     <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
@@ -19,7 +19,7 @@
     <PackageReference Include="Moq" />
     <PackageReference Include="ReportGenerator.Core" />
     <PackageReference Include="System.Linq.Async"  />
-    <PackageReference Include="Tmds.ExecFunction" />
+    <PackageReference Include="Tmds.ExecFunction" PrivateAssets="all" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
