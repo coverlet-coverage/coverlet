@@ -4,6 +4,9 @@ trigger:
   paths:
     exclude: [".github", "Documentation", "*.md"]
 
+variables:
+  system.debug: 'true'
+
 jobs:
 - job: Windows
   displayName: Windows
