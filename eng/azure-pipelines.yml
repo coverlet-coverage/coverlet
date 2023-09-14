@@ -6,6 +6,7 @@ trigger:
 
 variables:
   system.debug: 'true'
+  EnableCoverage: 'false'
 
 jobs:
 - job: Windows
