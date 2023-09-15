@@ -32,7 +32,6 @@ namespace Coverlet.MSbuild.Tasks.Reporters.Tests
     public void Msbuild_ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string coverletOutput, string reportFormat, string expectedFileName)
     {
       var fileSystem = new Mock<IFileSystem>();
-      var console = new Mock<IConsole>();
 
       var reportWriter = new ReportWriter(
           coverletMultiTargetFrameworksCurrentTFM,
@@ -41,7 +40,6 @@ namespace Coverlet.MSbuild.Tasks.Reporters.Tests
           coverletOutput,
           new ReporterFactory(reportFormat).CreateReporter(),
           fileSystem.Object,
-          console.Object,
           new CoverageResult() { Modules = new Modules(), Parameters = new CoverageParameters() }, null);
 
       string path = reportWriter.WriteReport();

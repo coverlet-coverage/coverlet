@@ -123,8 +123,8 @@ namespace Coverlet.MSbuild.Tasks
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex);
-                return false;
+            _logger.LogError(ex);
+            return false;
             }
 
             return true;
