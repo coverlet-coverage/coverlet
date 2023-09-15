@@ -4,6 +4,10 @@ trigger:
   paths:
     exclude: [".github", "Documentation", "*.md"]
 
+variables:
+  system.debug: 'true'
+  EnableCoverage: 'false'
+
 jobs:
 - job: Windows
   displayName: Windows

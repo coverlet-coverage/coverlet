@@ -19,6 +19,7 @@ steps:
 
 - task: CopyFiles@2
   displayName: Copy trx files
+  condition: always()
   inputs:
     SourceFolder: '$(Agent.TempDirectory)'
     Contents: '**/*.trx'

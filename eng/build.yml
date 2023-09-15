@@ -1,13 +1,13 @@
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 6.0.413
-  displayName: Install .NET Core SDK 6.0.413
+    version: 6.0.414
+  displayName: Install .NET Core SDK 6.0.414
 
 - task: UseDotNet@2
   inputs:
-    version: 7.0.400
-  displayName: Install .NET Core SDK 7.0.400
+    version: 7.0.401
+  displayName: Install .NET Core SDK 7.0.401
 
 - script: dotnet restore
   displayName: Restore packages
@@ -22,14 +22,23 @@ steps:
   displayName: Run tests
   inputs:
     command: test
+    arguments: -c $(BuildConfiguration) --no-build 
+    testRunTitle: $(Agent.JobName)
+  condition: and(succeeded(), eq(variables['enableCoverage'], 'false'))
+
+- task: DotNetCoreCLI@2
+  displayName: Run tests with coverage
+  inputs:
+    command: test
     arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.collector]*%2c[coverlet.core]*%2c[coverlet.msbuild.tasks]*" /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*"
     testRunTitle: $(Agent.JobName)
+  condition: and(succeeded(), eq(variables['enableCoverage'], 'true'))
 
 - template: publish-coverlet-result-files.yml
 
 - template: publish-coverage-results.yml
   parameters:
     reports: $(Build.SourcesDirectory)/**/coverage.opencover.xml
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'), eq(variables['enableCoverage'], 'true'))
     assemblyfilters: '-xunit'
 
