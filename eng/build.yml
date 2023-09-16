@@ -24,7 +24,7 @@ steps:
     command: test
     arguments: -c $(BuildConfiguration) --no-build 
     testRunTitle: $(Agent.JobName)
-  condition: and(succeeded(), eq(variables['enableCoverage'], 'false'))
+  condition: and(succeeded(), ne(variables['enableCoverage'], 'true'))
 
 - task: DotNetCoreCLI@2
   displayName: Run tests with coverage

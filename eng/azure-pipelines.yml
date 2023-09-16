@@ -5,8 +5,8 @@ trigger:
     exclude: [".github", "Documentation", "*.md"]
 
 variables:
-  system.debug: 'true'
-  EnableCoverage: 'false'
+  system.debug: false
+  EnableCoverage: true
 
 jobs:
 - job: Windows
