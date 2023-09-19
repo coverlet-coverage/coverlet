@@ -80,8 +80,8 @@ namespace Coverlet.MSbuild.Tasks
         catch (Exception ex)
         {
           // We don't want to block coverage for I/O errors
-          Log.LogWarning($"Exception during instrument state deletion, file name '{InstrumenterState.ItemSpec}'");
-          Log.LogWarningFromException(ex, true);
+          _logger.LogInformation($"Exception during instrument state deletion, file name '{InstrumenterState.ItemSpec}'");
+          _logger.LogWarning(ex);
         }
 
         CoverageResult result = coverage.GetCoverageResult();

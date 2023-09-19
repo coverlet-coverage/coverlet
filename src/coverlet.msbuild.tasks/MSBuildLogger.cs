@@ -22,6 +22,8 @@ namespace Coverlet.MSbuild.Tasks
 
     public void LogWarning(string message) => _log.LogWarning($"{LogPrefix}{message}");
 
+    public void LogWarning(Exception exception) => _log.LogWarningFromException(exception, true);
+
     public void LogError(string message) => _log.LogError($"{LogPrefix}{message}");
 
     public void LogError(Exception exception) => _log.LogErrorFromException(exception, true);
