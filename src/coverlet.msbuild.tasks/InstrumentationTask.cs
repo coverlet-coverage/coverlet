@@ -116,8 +116,9 @@ namespace Coverlet.MSbuild.Tasks
                                                  ServiceProvider.GetService<ICecilSymbolHelper>());
 
                 CoveragePrepareResult prepareResult = coverage.PrepareModules();
-                InstrumenterState = new TaskItem(System.IO.Path.GetTempFileName());
-                using Stream instrumentedStateFile = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.Open, FileAccess.Write);
+                string randomPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.IO.Path.GetRandomFileName());
+                InstrumenterState = new TaskItem(randomPath);
+                using Stream instrumentedStateFile = fileSystem.NewFileStream(InstrumenterState.ItemSpec, FileMode.CreateNew, FileAccess.Write);
                 using Stream serializedState = CoveragePrepareResult.Serialize(prepareResult);
                 serializedState.CopyTo(instrumentedStateFile);
             }
