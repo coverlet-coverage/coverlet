@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Attributes;
 using Coverlet.Core.Enums;
@@ -825,7 +826,8 @@ namespace Coverlet.Core.Instrumentation
                     // the name is synthesized from the name of the excluded method.
                     // 
                     if (declaringType.FullName == excludedMethods.Item1.DeclaringType.FullName &&
-                        IsSynthesizedNameOf(definition.Name, excludedMethods.Item1.Name, excludedMethods.Item2))
+                        IsSynthesizedNameOf(definition.Name, excludedMethods.Item1.Name) &&
+                        ExcludedMethodReferencesGeneratedClass(definition, excludedMethods.Item1))
                     {
                         return true;
                     }
@@ -836,20 +838,26 @@ namespace Coverlet.Core.Instrumentation
             return false;
         }
 
+        internal bool ExcludedMethodReferencesGeneratedClass(IMemberDefinition generatedMethod, MethodDefinition excludedMethod)
+        {
+          return excludedMethod.Body.Instructions.Any(x =>
+            x.OpCode == OpCodes.Stfld && x.Operand is FieldReference methodReference && methodReference.FullName.Contains(generatedMethod.FullName));
+        }
+
         // Check if the name is synthesized by the compiler
         // Refer to https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs
         // to see how the compiler generate names for lambda, local function, yield or async/await expressions
-        internal bool IsSynthesizedNameOf(string name, string methodName, int methodOrdinal)
+        internal bool IsSynthesizedNameOf(string name, string methodName)
         {
-            return
-                // Lambda method
-                name.IndexOf($"<{methodName}>b__{methodOrdinal}") != -1 ||
-                // Lambda display class
-                name.IndexOf($"<>c__DisplayClass{methodOrdinal}_") != -1 ||
-                // State machine
-                name.IndexOf($"<{methodName}>d__{methodOrdinal}") != -1 ||
-                // Local function
-                (name.IndexOf($"<{methodName}>g__") != -1 && name.IndexOf($"|{methodOrdinal}_") != -1);
+          return
+            // Lambda method
+            Regex.IsMatch(name, $@"<{methodName}>b__(\d+)") ||
+            // Lambda display class
+            Regex.IsMatch(name, @"<>c__DisplayClass(\d+)_") ||
+            // State machine
+            Regex.IsMatch(name, $@"<{methodName}>d__(\d+)") ||
+            // Local function
+            Regex.IsMatch(name, $"<{methodName}>g__") && Regex.IsMatch(name, @"|(\d+)_");
         }
 
         private static IEnumerable<string> CollectLambdaMethodsInsideLocalFunction(MethodDefinition methodDefinition)
