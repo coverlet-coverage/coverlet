@@ -243,6 +243,9 @@ namespace Coverlet.Core.Instrumentation
                     _instrumentationHelper.IsTypeIncluded(_module, type.FullName, _parameters.IncludeFilters)
                     )
                 {
+                if(type.FullName.Contains("Coverlet.Core.Samples.Tests.MethodsWithExcludeFromCodeCoverageAttr/")){var foo = "";}
+
+
                     if (IsSynthesizedMemberToBeExcluded(type))
                     {
                         (_excludedCompilerGeneratedTypes ??= new List<string>()).Add(type.FullName);
@@ -824,7 +827,12 @@ namespace Coverlet.Core.Instrumentation
                 {
                     // Exclude this member if declaring type is the same of the excluded method and 
                     // the name is synthesized from the name of the excluded method.
-                    // 
+                    //
+                    var foo = declaringType.FullName == excludedMethods.Item1.DeclaringType.FullName &&
+                               IsSynthesizedNameOf(definition.Name, excludedMethods.Item1.Name);
+                    var boo = ExcludedMethodReferencesGeneratedClass(definition, excludedMethods.Item1);
+
+
                     if (declaringType.FullName == excludedMethods.Item1.DeclaringType.FullName &&
                         IsSynthesizedNameOf(definition.Name, excludedMethods.Item1.Name) &&
                         ExcludedMethodReferencesGeneratedClass(definition, excludedMethods.Item1))
