@@ -311,17 +311,17 @@ namespace Coverlet.Core.Tests
           string path = Path.GetTempFileName();
           try
           {
-            FunctionExecutor.RunInProcess(async (string[] pathSerialize) =>
+            FunctionExecutor.Run(async (string[] pathSerialize) =>
             {
               CoveragePrepareResult coveragePrepareResult =
                 await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(instance =>
                   {
-                    instance.TestLambda("");
-                    instance.TestLambda("", 1);
+                    instance.TestLambda(string.Empty);
+                    instance.TestLambda(string.Empty, 1);
                     foreach (dynamic _ in instance.TestYield("abc"));
                     foreach (dynamic _ in instance.TestYield("abc", 1));
-                    instance.TestLocalFunction("");
-                    instance.TestLocalFunction("", 1);
+                    instance.TestLocalFunction(string.Empty);
+                    instance.TestLocalFunction(string.Empty, 1);
                     ((Task)instance.TestAsyncAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
                     ((Task)instance.TestAsyncAwait(1)).ConfigureAwait(false).GetAwaiter().GetResult();
                     return Task.CompletedTask;
@@ -334,8 +334,8 @@ namespace Coverlet.Core.Tests
             TestInstrumentationHelper.GetCoverageResult(path)
               .GenerateReport(show: true)
               .Document("Instrumentation.ExcludeFromCoverage.cs")
-              .AssertNonInstrumentedLines(BuildConfiguration.Debug, 12, 13, 25, 26, 27, 28, 42, 53, 55, 56, 57, 58)
-              .AssertLinesCovered(BuildConfiguration.Debug, 18, 19, 33, 34, 35, 36, 47, 63, 66, 67, 68);
+              .AssertNonInstrumentedLines(BuildConfiguration.Debug, 14, 15, 27, 28, 29, 30, 44, 55, 57, 58, 59, 60)
+              .AssertLinesCovered(BuildConfiguration.Debug, 20, 21, 35, 36, 37, 38, 49, 65, 68, 69, 70);
           }
           finally
           {
@@ -349,17 +349,17 @@ namespace Coverlet.Core.Tests
           string path = Path.GetTempFileName();
           try
           {
-            FunctionExecutor.RunInProcess(async (string[] pathSerialize) =>
+            FunctionExecutor.Run(async (string[] pathSerialize) =>
             {
               CoveragePrepareResult coveragePrepareResult =
                 await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr2>(instance =>
                   {
-                    instance.TestLambda("");
-                    instance.TestLambda("", 1);
+                    instance.TestLambda(string.Empty);
+                    instance.TestLambda(string.Empty, 1);
                     foreach (dynamic _ in instance.TestYield("abc"));
                     foreach (dynamic _ in instance.TestYield("abc", 1));
-                    instance.TestLocalFunction("");
-                    instance.TestLocalFunction("", 1);
+                    instance.TestLocalFunction(string.Empty);
+                    instance.TestLocalFunction(string.Empty, 1);
                     ((Task)instance.TestAsyncAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
                     ((Task)instance.TestAsyncAwait(1)).ConfigureAwait(false).GetAwaiter().GetResult();
                     return Task.CompletedTask;
@@ -372,8 +372,8 @@ namespace Coverlet.Core.Tests
             TestInstrumentationHelper.GetCoverageResult(path)
               .GenerateReport(show: true)
               .Document("Instrumentation.ExcludeFromCoverage.cs")
-              .AssertNonInstrumentedLines(BuildConfiguration.Debug, 89, 90, 104, 105, 106, 107, 118, 134, 136, 137, 138, 139)
-              .AssertLinesCovered(BuildConfiguration.Debug, 82, 83, 95, 96, 97, 98, 112, 123, 126, 127, 128);
+              .AssertNonInstrumentedLines(BuildConfiguration.Debug, 91, 92, 106, 107, 108, 109, 120, 136, 138, 139, 140, 141)
+              .AssertLinesCovered(BuildConfiguration.Debug, 84, 85, 97, 98, 99, 100, 114, 125, 128, 129, 130);
           }
           finally
           {

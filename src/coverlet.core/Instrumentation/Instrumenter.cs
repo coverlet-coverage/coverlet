@@ -48,7 +48,7 @@ namespace Coverlet.Core.Instrumentation
         private MethodReference _customTrackerRecordHitMethod;
         private List<string> _excludedSourceFiles;
         private List<string> _branchesInCompiledGeneratedClass;
-        private List<(MethodDefinition, int)> _excludedMethods;
+        private List<MethodDefinition> _excludedMethods;
         private List<string> _excludedLambdaMethods;
         private List<string> _excludedCompilerGeneratedTypes;
         private ReachabilityHelper _reachabilityHelper;
@@ -469,9 +469,6 @@ namespace Coverlet.Core.Instrumentation
         {
             IEnumerable<MethodDefinition> methods = type.GetMethods();
 
-            // We keep ordinal index because it's the way used by compiler for generated types/methods to 
-            // avoid ambiguity
-            int ordinal = -1;
             foreach (MethodDefinition method in methods)
             {
                 MethodDefinition actualMethod = method;
@@ -491,8 +488,6 @@ namespace Coverlet.Core.Instrumentation
                     if (prop?.HasCustomAttributes == true)
                         customAttributes = customAttributes.Union(prop.CustomAttributes);
                 }
-
-                ordinal++;
 
                 if (IsMethodOfCompilerGeneratedClassOfAsyncStateMachineToBeExcluded(method))
                 {
@@ -516,7 +511,7 @@ namespace Coverlet.Core.Instrumentation
                 else
                 {
                     (_excludedLambdaMethods ??= new List<string>()).AddRange(CollectLambdaMethodsInsideLocalFunction(method));
-                    (_excludedMethods ??= new List<(MethodDefinition, int)>()).Add((method, ordinal));
+                    (_excludedMethods ??= new List<MethodDefinition>()).Add(method);
                 }
             }
 
@@ -821,19 +816,14 @@ namespace Coverlet.Core.Instrumentation
                 }
 
                 // Check methods members and compiler generated types
-                foreach ((MethodDefinition, int) excludedMethods in _excludedMethods)
+                foreach (MethodDefinition excludedMethod in _excludedMethods)
                 {
                     // Exclude this member if declaring type is the same of the excluded method and 
-                    // the name is synthesized from the name of the excluded method.
-                    //
-                    var foo = declaringType.FullName == excludedMethods.Item1.DeclaringType.FullName &&
-                               IsSynthesizedNameOf(definition.Name, excludedMethods.Item1.Name);
-                    var boo = ExcludedMethodReferencesGeneratedClass(definition, excludedMethods.Item1);
-
-
-                    if (declaringType.FullName == excludedMethods.Item1.DeclaringType.FullName &&
-                        IsSynthesizedNameOf(definition.Name, excludedMethods.Item1.Name) &&
-                        ExcludedMethodReferencesGeneratedClass(definition, excludedMethods.Item1))
+                    // the name is synthesized from the name of the excluded method and the excluded method
+                    // references the synthesized name
+                    if (declaringType.FullName == excludedMethod.DeclaringType.FullName &&
+                        IsSynthesizedNameOf(definition.Name, excludedMethod.Name) &&
+                        ExcludedMethodReferencesGeneratedClass(definition, excludedMethod))
                     {
                         return true;
                     }
