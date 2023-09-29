@@ -240,8 +240,8 @@ namespace Coverlet.Core.Tests
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.ExcludeFromCoverage.cs")
-        .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167)
-        .AssertLinesCovered(BuildConfiguration.Debug, 169);
+        .AssertNonInstrumentedLines(BuildConfiguration.Debug, 169)
+        .AssertLinesCovered(BuildConfiguration.Debug, 171);
       }
       finally
       {
@@ -269,8 +269,8 @@ namespace Coverlet.Core.Tests
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.ExcludeFromCoverage.cs")
-        .AssertNonInstrumentedLines(BuildConfiguration.Debug, 177)
-        .AssertLinesCovered(BuildConfiguration.Debug, 178, 181);
+        .AssertNonInstrumentedLines(BuildConfiguration.Debug, 179)
+        .AssertLinesCovered(BuildConfiguration.Debug, 180, 183);
       }
       finally
       {
