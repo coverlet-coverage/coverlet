@@ -35,8 +35,8 @@ namespace Coverlet.Core.Tests
             {
                 Process.Start("cmd", "/C " + Path.GetFullPath(Path.Combine(directory, "index.htm")));
             }
-
-            return coverageResult;
+            Process.Start("cmd", "/C " + Path.GetFullPath(Path.Combine(directory, "index.htm")));
+      return coverageResult;
         }
 
         public static bool IsPresent(this CoverageResult coverageResult, string docName)

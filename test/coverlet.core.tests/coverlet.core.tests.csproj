@@ -8,29 +8,30 @@
     <MSBuildWarningsAsMessages>NU1702</MSBuildWarningsAsMessages>
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
     <PreserveCompilationContext>true</PreserveCompilationContext>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-    <PackageReference Include="Moq" />
-    <PackageReference Include="ReportGenerator.Core" />
-    <PackageReference Include="System.Linq.Async"  />
-    <PackageReference Include="Tmds.ExecFunction" />
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.4" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+    <PackageReference Include="Moq" Version="4.18.4" />
+    <PackageReference Include="ReportGenerator.Core" Version="5.1.23" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    <PackageReference Include="Tmds.ExecFunction" Version="0.6.0" />
+    <PackageReference Include="xunit" Version="2.5.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj" />
-    
+
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.empty\coverlet.tests.projectsample.empty.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.fsharp\coverlet.tests.projectsample.fsharp.fsproj" />    
+    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.fsharp\coverlet.tests.projectsample.fsharp.fsproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.netframework\coverlet.tests.projectsample.netframework.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.vbmynamespace\coverlet.tests.projectsample.vbmynamespace.vbproj" />
   </ItemGroup>

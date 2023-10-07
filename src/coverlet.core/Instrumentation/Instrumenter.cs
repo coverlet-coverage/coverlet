@@ -512,6 +512,7 @@ namespace Coverlet.Core.Instrumentation
                 {
                     (_excludedLambdaMethods ??= new List<string>()).AddRange(CollectLambdaMethodsInsideLocalFunction(method));
                     (_excludedMethods ??= new List<MethodDefinition>()).Add(method);
+                    ExcludeSynthesizedTypes(method);
                 }
             }
 
@@ -821,11 +822,12 @@ namespace Coverlet.Core.Instrumentation
                     // Exclude this member if declaring type is the same of the excluded method and 
                     // the name is synthesized from the name of the excluded method and the excluded method
                     // references the synthesized name
+
                     if (declaringType.FullName == excludedMethod.DeclaringType.FullName &&
                         IsSynthesizedNameOf(definition.Name, excludedMethod.Name) &&
-                        ExcludedMethodReferencesGeneratedClass(definition, excludedMethod))
+                      ExcludedMethodReferencesGeneratedClass(definition, excludedMethod))
                     {
-                        return true;
+                      return true;
                     }
                 }
                 declaringType = declaringType.DeclaringType;
