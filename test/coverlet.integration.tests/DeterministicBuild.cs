@@ -149,7 +149,7 @@ namespace Coverlet.Integration.Tests
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
             string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", deterministicReport: true);
-            Assert.True(DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out standardError), standardOutput);
+            bool result = DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out standardError);
             if (!string.IsNullOrEmpty(standardError))
             {
               _output.WriteLine(standardError);
@@ -158,6 +158,7 @@ namespace Coverlet.Integration.Tests
             {
               _output.WriteLine(standardOutput);
             }
+            Assert.True(result);
             Assert.Contains("Passed!", standardOutput);
             AssertCoverage(standardOutput);
 
@@ -185,7 +186,7 @@ namespace Coverlet.Integration.Tests
             Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
             string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", sourceLink: true);
-            Assert.True(DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out standardError), standardOutput);
+            bool result = DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out standardError);
             if (!string.IsNullOrEmpty(standardError))
             {
               _output.WriteLine(standardError);
@@ -194,6 +195,7 @@ namespace Coverlet.Integration.Tests
             {
               _output.WriteLine(standardOutput);
             }
+            Assert.True(result);
             Assert.Contains("Passed!", standardOutput);
             AssertCoverage(standardOutput, checkDeterministicReport: false);
             Assert.Contains("raw.githubusercontent.com", File.ReadAllText(Directory.GetFiles(_testProjectPath, "coverage.cobertura.xml", SearchOption.AllDirectories).Single()));
