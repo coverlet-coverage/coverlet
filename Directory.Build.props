@@ -30,4 +30,9 @@
     <VSTestLogger Include="html%3BLogFileName=TestResults-$(TargetFramework)-$(MSBuildProjectName).html" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <VSTestResultsDirectory>$(RepoRoot)/artifacts/tests</VSTestResultsDirectory>
+    <VSTestLogger>@(VSTestLogger)</VSTestLogger>
+  </PropertyGroup>
+
 </Project>

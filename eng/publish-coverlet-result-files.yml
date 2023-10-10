@@ -4,8 +4,9 @@ steps:
   continueOnError: true
   condition: always()
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/test'
+    SourceFolder: '$(Build.SourcesDirectory)'
     Contents: |
+       **/*.trx
        **/*.html
        **/*.binlog
        **/coverage.opencover.xml
