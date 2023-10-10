@@ -4,7 +4,7 @@ steps:
   continueOnError: true
   condition: always()
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/artifacts'
+    SourceFolder: '$(Build.SourcesDirectory)/test'
     Contents: |
        **/*.trx
        **/*.html
