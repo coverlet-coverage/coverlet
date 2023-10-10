@@ -6,7 +6,6 @@ steps:
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)/test'
     Contents: |
-       **/*.trx
        **/*.html
        **/*.binlog
        **/coverage.opencover.xml
@@ -15,6 +14,13 @@ steps:
        **/log.txt
        **/log.datacollector.*.txt
        **/log.host.*.txt
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
+
+- task: CopyFiles@2
+  displayName: Copy trx files
+  inputs:
+    SourceFolder: '$(Agent.TempDirectory)'
+    Contents: '**/*.trx'
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: PublishPipelineArtifact@1
