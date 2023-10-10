@@ -24,6 +24,5 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
   </ItemGroup>
 </Project>
