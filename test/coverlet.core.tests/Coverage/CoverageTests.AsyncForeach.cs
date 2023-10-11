@@ -5,26 +5,27 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-  public partial class CoverageTests
-  {
-    [Fact]
-    public void AsyncForeach()
+    public partial class CoverageTests
     {
-      string path = Path.GetTempFileName();
-      try
-      {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        [Fact]
+        public void AsyncForeach()
         {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(async instance =>
-                  {
-              int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));
-              res += await (ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3));
-              res += await (ValueTask<int>)instance.SumEmpty();
-              await (ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3));
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(async instance =>
+                    {
+                        int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));
+                        res += await (ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3));
+                        res += await (ValueTask<int>)instance.SumEmpty();
+                        await (ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3));
 
             }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;

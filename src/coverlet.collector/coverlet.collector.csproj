@@ -38,6 +38,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" />
     <PackageReference Include="NuGet.Frameworks" />
+    <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
   <ItemGroup>

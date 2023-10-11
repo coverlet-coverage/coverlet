@@ -9,6 +9,11 @@ steps:
     version: 7.0.403
   displayName: Install .NET Core SDK 7.0.403
 
+- task: UseDotNet@2
+  inputs:
+    useGlobalJson: true
+  displayName: Install .NET Core SDK 8.0.100 RC
+
 - script: dotnet restore
   displayName: Restore packages
 

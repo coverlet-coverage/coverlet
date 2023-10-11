@@ -4,24 +4,25 @@
 using System.IO;
 using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-  public partial class CoverageTests
-  {
-    [Fact]
-    public void AwaitUsing()
+    public partial class CoverageTests
     {
-      string path = Path.GetTempFileName();
-      try
-      {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        [Fact]
+        public void AwaitUsing()
         {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AwaitUsing>(async instance =>
-                  {
-              await (ValueTask)instance.HasAwaitUsing();
-              await (Task)instance.Issue914_Repro();
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AwaitUsing>(async instance =>
+                    {
+                        await (ValueTask)instance.HasAwaitUsing();
+                        await (Task)instance.Issue914_Repro();
 
             }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
