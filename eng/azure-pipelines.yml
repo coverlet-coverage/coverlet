@@ -11,6 +11,8 @@ jobs:
 - job: Windows
   displayName: Windows
   continueOnError: 'true'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
   strategy:
     matrix:
       Debug:
@@ -24,7 +26,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect packages
     inputs:
-      SourceFolder: bin\$(BuildConfiguration)\Packages
+      SourceFolder: artifacts\package\$(BuildConfiguration)
       Contents: |
         *.nupkg
         *.snupkg
@@ -46,6 +48,8 @@ jobs:
 - job: macOS
   displayName: macOS
   continueOnError: 'true'
+  timeoutInMinutes: 10
+  cancelTimeoutInMinutes: 5
   strategy:
     matrix:
       Debug:
@@ -60,6 +64,8 @@ jobs:
 - job: Linux
   displayName: Linux
   continueOnError: 'true'
+  timeoutInMinutes: 10
+  cancelTimeoutInMinutes: 5
   strategy:
     matrix:
       Debug:

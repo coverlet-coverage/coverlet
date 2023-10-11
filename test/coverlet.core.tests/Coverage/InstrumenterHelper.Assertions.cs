@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Coverlet.Core.Instrumentation;
+using Coverlet.Tests.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,17 +10,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Coverlet.Core.Instrumentation;
 using Xunit.Sdk;
 
 namespace Coverlet.Core.Tests
 {
-  [Flags]
-  public enum BuildConfiguration
-  {
-    Debug = 1,
-    Release = 2
-  }
 
   static class TestInstrumentationAssert
   {
@@ -128,7 +123,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+      BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
       if ((buildConfiguration & configuration) != buildConfiguration)
       {
@@ -167,7 +162,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+      BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
       if ((buildConfiguration & configuration) != buildConfiguration)
       {
@@ -214,7 +209,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+      BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
       if ((buildConfiguration & configuration) != buildConfiguration)
       {
@@ -260,7 +255,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+      BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
       if ((buildConfiguration & configuration) != buildConfiguration)
       {
@@ -296,7 +291,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+      BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
       if ((buildConfiguration & configuration) != buildConfiguration)
       {
@@ -344,7 +339,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+      BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
       if ((buildConfiguration & configuration) != buildConfiguration)
       {
@@ -385,7 +380,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+      BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
       if ((buildConfiguration & configuration) != buildConfiguration)
       {
@@ -404,7 +399,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+      BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
       if ((buildConfiguration & configuration) != buildConfiguration)
       {
@@ -428,7 +423,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      BuildConfiguration buildConfiguration = GetAssemblyBuildConfiguration();
+      BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
       if ((buildConfiguration & configuration) != buildConfiguration)
       {
@@ -447,15 +442,5 @@ namespace Coverlet.Core.Tests
       return document;
     }
 
-    private static BuildConfiguration GetAssemblyBuildConfiguration()
-    {
-#if DEBUG
-      return BuildConfiguration.Debug;
-#endif
-#if RELEASE
-            return BuildConfiguration.Release;
-#endif
-      throw new NotSupportedException($"Build configuration not supported");
     }
-  }
 }
