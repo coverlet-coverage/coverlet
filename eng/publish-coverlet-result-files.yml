@@ -1,30 +1,21 @@
 steps:
-- task: Powershell@2
-  displayName: Prepare log files to Upload
-  inputs:
-    targetType: inline
-    pwsh: true
-    script: |
-      New-Item -ItemType Directory "$(Build.SourcesDirectory)/artifacts/TestLogs/"
-      function Copy-FileKeepPath {
-      param (
-          $Filter,$FileToCopy,$Destination,$StartIndex
-          )
-      Get-ChildItem -Path $FileToCopy -Filter $Filter -Recurse -File | ForEach-Object {
-          $fileName = $_.FullName
-          $newDestination=Join-Path -Path $Destination -ChildPath $fileName.Substring($StartIndex)
-          $folder=Split-Path -Path $newDestination -Parent
-          if (!(Test-Path -Path $folder)) {New-Item $folder -Type Directory -Force -Verbose}
-          Copy-Item -Path $fileName -Destination $newDestination -Recurse -Force -Verbose
-          }
-      }
-      $logfiles = "coverage.opencover.xml", "coverage.cobertura.xml", "coverage.json", "log.txt", "log.datacollector.*.txt", "log.host.*.txt"
-      foreach ($logfile in $logfiles ) {
-      Copy-FileKeepPath -FileToCopy "$(Build.SourcesDirectory)/test/*" -des "$(Build.SourcesDirectory)/artifacts/TestLogs/" -filter $logfile -startIndex "$(Build.SourcesDirectory)/test/coverlet.integration.tests/bin/".Length
-      }
-
+- task: CopyFiles@2
+  displayName: Copy tests results
   continueOnError: true
   condition: always()
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: |
+       **/*.trx
+       **/*.html
+       **/*.binlog
+       **/coverage.opencover.xml
+       **/coverage.cobertura.xml
+       **/coverage.json
+       **/log.txt
+       **/log.datacollector.*.txt
+       **/log.host.*.txt
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: CopyFiles@2
   displayName: Copy trx files

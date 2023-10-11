@@ -25,4 +25,14 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
 
+  <ItemGroup>
+    <VSTestLogger Include="trx%3BLogFileName=TestResults-$(TargetFramework)-$(MSBuildProjectName).trx" />
+    <VSTestLogger Include="html%3BLogFileName=TestResults-$(TargetFramework)-$(MSBuildProjectName).html" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <VSTestResultsDirectory>$(RepoRoot)/artifacts/tests</VSTestResultsDirectory>
+    <VSTestLogger>@(VSTestLogger)</VSTestLogger>
+  </PropertyGroup>
+
 </Project>

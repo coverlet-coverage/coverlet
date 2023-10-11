@@ -96,19 +96,27 @@ namespace Coverlet.Integration.Tests
         private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
         {
             Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}\nWorkingDirectory: {workingDirectory}");
-            var psi = new ProcessStartInfo(command, arguments);
-            psi.WorkingDirectory = workingDirectory;
-            psi.RedirectStandardError = true;
-            psi.RedirectStandardOutput = true;
-            Process commandProcess = Process.Start(psi)!;
+            // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?view=net-7.0&redirectedfrom=MSDN#System_Diagnostics_Process_StandardOutput
+            var commandProcess = new Process();
+            commandProcess.StartInfo.FileName = command;
+            commandProcess.StartInfo.Arguments = arguments;
+            commandProcess.StartInfo.WorkingDirectory = workingDirectory;
+            commandProcess.StartInfo.RedirectStandardError = true;
+            commandProcess.StartInfo.RedirectStandardOutput = true;
+            commandProcess.StartInfo.UseShellExecute = false;
+            string eOut = "";
+            commandProcess.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => { eOut += e.Data; });
+            commandProcess.Start();
+            // To avoid deadlocks, use an asynchronous read operation on at least one of the streams.
+            commandProcess.BeginErrorReadLine();
+            standardOutput = commandProcess.StandardOutput.ReadToEnd();
             if (!commandProcess.WaitForExit((int)TimeSpan.FromMinutes(5).TotalMilliseconds))
             {
-                throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
+              throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
             }
-            standardOutput = commandProcess.StandardOutput.ReadToEnd();
-            standardError = commandProcess.StandardError.ReadToEnd();
+            standardError = eOut;
             return commandProcess.ExitCode == 0;
-        }
+          }
 
         private protected bool DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
         {
@@ -192,7 +200,9 @@ namespace Coverlet.Integration.Tests
             string msbuildPkgVersion = GetPackageVersion("*msbuild*.nupkg");
             xml.Element("Project")!
                .Element("ItemGroup")!
-               .Add(new XElement("PackageReference", new XAttribute("Include", "coverlet.msbuild"), new XAttribute("Version", msbuildPkgVersion)));
+               .Add(new XElement("PackageReference", new XAttribute("Include", "coverlet.msbuild"), new XAttribute("Version", msbuildPkgVersion),
+                    new XElement("PrivateAssets", "all"),
+                    new XElement("IncludeAssets", "runtime; build; native; contentfiles; analyzers")));
             xml.Save(csproj);
         }
 
@@ -211,7 +221,9 @@ namespace Coverlet.Integration.Tests
             string msbuildPkgVersion = GetPackageVersion("*collector*.nupkg");
             xml.Element("Project")!
                .Element("ItemGroup")!
-               .Add(new XElement("PackageReference", new XAttribute("Include", "coverlet.collector"), new XAttribute("Version", msbuildPkgVersion)));
+               .Add(new XElement("PackageReference", new XAttribute("Include", "coverlet.collector"), new XAttribute("Version", msbuildPkgVersion),
+                    new XElement("PrivateAssets", "all"),
+                    new XElement("IncludeAssets", "runtime; build; native; contentfiles; analyzers")));
             xml.Save(csproj);
         }
 
