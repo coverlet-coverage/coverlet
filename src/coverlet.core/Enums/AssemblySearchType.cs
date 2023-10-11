@@ -3,10 +3,10 @@
 
 namespace Coverlet.Core.Enums
 {
-    internal enum AssemblySearchType
-    {
-        MissingAny,
-        MissingAll,
-        None
-    }
+  internal enum AssemblySearchType
+  {
+    MissingAny,
+    MissingAll,
+    None
+  }
 }

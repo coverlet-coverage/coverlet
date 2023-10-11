@@ -12,27 +12,27 @@ using Xunit;
 
 namespace coverlet.tests.projectsample.aspmvcrazor.tests
 {
-    public class ResolverTests
+  public class ResolverTests
+  {
+    [Fact]
+    public void TestInstrument_NetCoreSharedFrameworkResolver()
     {
-        [Fact]
-        public void TestInstrument_NetCoreSharedFrameworkResolver()
-        {
-            Assembly assembly = GetType().Assembly;
-            var mockLogger = new Mock<ILogger>();
-            var resolver = new NetCoreSharedFrameworkResolver(assembly.Location, mockLogger.Object);
-            var compilationLibrary = new CompilationLibrary(
-                "package",
-                "Microsoft.AspNetCore.Mvc.Razor",
-                "0.0.0.0",
-                "sha512-not-relevant",
-                Enumerable.Empty<string>(),
-                Enumerable.Empty<Dependency>(),
-                true);
+      Assembly assembly = GetType().Assembly;
+      var mockLogger = new Mock<ILogger>();
+      var resolver = new NetCoreSharedFrameworkResolver(assembly.Location, mockLogger.Object);
+      var compilationLibrary = new CompilationLibrary(
+          "package",
+          "Microsoft.AspNetCore.Mvc.Razor",
+          "0.0.0.0",
+          "sha512-not-relevant",
+          Enumerable.Empty<string>(),
+          Enumerable.Empty<Dependency>(),
+          true);
 
-            var assemblies = new List<string>();
-            Assert.True(resolver.TryResolveAssemblyPaths(compilationLibrary, assemblies),
-                "sample assembly shall be resolved");
-            Assert.NotEmpty(assemblies);
-        }
+      var assemblies = new List<string>();
+      Assert.True(resolver.TryResolveAssemblyPaths(compilationLibrary, assemblies),
+          "sample assembly shall be resolved");
+      Assert.NotEmpty(assemblies);
     }
+  }
 }

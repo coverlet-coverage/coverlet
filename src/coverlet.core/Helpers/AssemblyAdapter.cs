@@ -6,11 +6,11 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
-    internal class AssemblyAdapter : IAssemblyAdapter
+  internal class AssemblyAdapter : IAssemblyAdapter
+  {
+    public string GetAssemblyName(string assemblyPath)
     {
-        public string GetAssemblyName(string assemblyPath)
-        {
-            return AssemblyName.GetAssemblyName(assemblyPath).Name;
-        }
+      return AssemblyName.GetAssemblyName(assemblyPath).Name;
     }
+  }
 }

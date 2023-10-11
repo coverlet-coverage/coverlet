@@ -1,9 +1,8 @@
-using System;
-using Xunit;
+﻿using Xunit;
 
 namespace XUnitTestProject2
 {
-    public class UnitTest2
+  public class UnitTest2
     {
         [Fact]
         public void Test2()

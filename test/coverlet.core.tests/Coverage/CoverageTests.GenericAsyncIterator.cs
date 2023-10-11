@@ -26,15 +26,15 @@ namespace Coverlet.Core.Tests
                     return 0;
                 }, new string[] { path });
 
-                TestInstrumentationHelper.GetCoverageResult(path)
-                    .Document("Instrumentation.GenericAsyncIterator.cs")
-                    .AssertLinesCovered(BuildConfiguration.Debug, (13, 1), (14, 1), (20, 1), (21, 1), (22, 1))
-                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
-            }
-            finally
-            {
-                File.Delete(path);
-            }
-        }
+        TestInstrumentationHelper.GetCoverageResult(path)
+            .Document("Instrumentation.GenericAsyncIterator.cs")
+            .AssertLinesCovered(BuildConfiguration.Debug, (13, 1), (14, 1), (20, 1), (21, 1), (22, 1))
+            .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
     }
+  }
 }

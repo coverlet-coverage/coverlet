@@ -6,11 +6,11 @@ using Coverlet.Core.Helpers;
 
 namespace Coverlet.Core.Abstractions
 {
-    internal interface ISourceRootTranslator
-    {
-        bool AddMappingInCache(string originalFileName, string targetFileName);
-        string ResolveFilePath(string originalFileName);
-        string ResolveDeterministicPath(string originalFileName);
-        IReadOnlyList<SourceRootMapping> ResolvePathRoot(string pathRoot);
-    }
+  internal interface ISourceRootTranslator
+  {
+    bool AddMappingInCache(string originalFileName, string targetFileName);
+    string ResolveFilePath(string originalFileName);
+    string ResolveDeterministicPath(string originalFileName);
+    IReadOnlyList<SourceRootMapping> ResolvePathRoot(string pathRoot);
+  }
 }

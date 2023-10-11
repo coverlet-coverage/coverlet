@@ -6,13 +6,13 @@ using Coverlet.Core.Attributes;
 
 namespace Coverlet.Core.Extensions
 {
-    internal static class HelperExtensions
+  internal static class HelperExtensions
+  {
+    [ExcludeFromCoverage]
+    public static TRet Maybe<T, TRet>(this T value, Func<T, TRet> action, TRet defValue = default)
+        where T : class
     {
-        [ExcludeFromCoverage]
-        public static TRet Maybe<T, TRet>(this T value, Func<T, TRet> action, TRet defValue = default)
-            where T : class
-        {
-            return (value != null) ? action(value) : defValue;
-        }
+      return (value != null) ? action(value) : defValue;
     }
+  }
 }

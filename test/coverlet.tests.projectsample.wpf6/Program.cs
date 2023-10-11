@@ -5,5 +5,5 @@ namespace coverlet.tests.projectsample.wpf6;
 
 public static class Program
 {
-    public static void Main() { }
+  public static void Main() { }
 }

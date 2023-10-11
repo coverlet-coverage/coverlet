@@ -6,11 +6,11 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
-    internal class ProcessExitHandler : IProcessExitHandler
+  internal class ProcessExitHandler : IProcessExitHandler
+  {
+    public void Add(EventHandler handler)
     {
-        public void Add(EventHandler handler)
-        {
-            AppDomain.CurrentDomain.ProcessExit += handler;
-        }
+      AppDomain.CurrentDomain.ProcessExit += handler;
     }
+  }
 }

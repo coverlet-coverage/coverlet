@@ -16,14 +16,14 @@ namespace Coverlet.Core.Exceptions
           System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
-    [Serializable]
-    internal class CecilAssemblyResolutionException : CoverletException
-    {
-        public CecilAssemblyResolutionException() { }
-        public CecilAssemblyResolutionException(string message) : base(message) { }
-        public CecilAssemblyResolutionException(string message, System.Exception inner) : base(message, inner) { }
-        protected CecilAssemblyResolutionException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
-    }
+  [Serializable]
+  internal class CecilAssemblyResolutionException : CoverletException
+  {
+    public CecilAssemblyResolutionException() { }
+    public CecilAssemblyResolutionException(string message) : base(message) { }
+    public CecilAssemblyResolutionException(string message, System.Exception inner) : base(message, inner) { }
+    protected CecilAssemblyResolutionException(
+      System.Runtime.Serialization.SerializationInfo info,
+      System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+  }
 }

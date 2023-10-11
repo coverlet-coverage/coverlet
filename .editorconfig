@@ -13,6 +13,8 @@ indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
 
+file_header_template = Copyright (c) Toni Solarin-Sodara\nLicensed under the MIT license. See LICENSE file in the project root for full license information.
+
 # XML project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
 indent_size = 2

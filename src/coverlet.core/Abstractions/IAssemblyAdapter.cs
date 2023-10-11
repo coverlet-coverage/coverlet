@@ -3,8 +3,8 @@
 
 namespace Coverlet.Core.Abstractions
 {
-    internal interface IAssemblyAdapter
-    {
-        string GetAssemblyName(string assemblyPath);
-    }
+  internal interface IAssemblyAdapter
+  {
+    string GetAssemblyName(string assemblyPath);
+  }
 }

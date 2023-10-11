@@ -64,16 +64,16 @@ namespace Coverlet.Core.Tests
                     return 0;
                 }, new string[] { path });
 
-                CoverageResult res = TestInstrumentationHelper.GetCoverageResult(path);
-                res.Document("Instrumentation.CatchBlock.cs")
-                    .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 45, 59, 113, 127, 137, 138, 139, 153, 154, 155, 156, 175, 189, 199, 200, 201, 222, 223, 224, 225, 252, 266, 335, 349)
-                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 6)
-                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Release, 6);
-            }
-            finally
-            {
-                File.Delete(path);
-            }
-        }
+        CoverageResult res = TestInstrumentationHelper.GetCoverageResult(path);
+        res.Document("Instrumentation.CatchBlock.cs")
+            .AssertLinesCoveredAllBut(BuildConfiguration.Debug, 45, 59, 113, 127, 137, 138, 139, 153, 154, 155, 156, 175, 189, 199, 200, 201, 222, 223, 224, 225, 252, 266, 335, 349)
+            .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 6)
+            .ExpectedTotalNumberOfBranches(BuildConfiguration.Release, 6);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
     }
+  }
 }

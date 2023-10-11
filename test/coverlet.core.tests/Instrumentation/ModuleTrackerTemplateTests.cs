@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Coverlet.Core.Instrumentation;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Coverlet.Core.Instrumentation;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Instrumentation
