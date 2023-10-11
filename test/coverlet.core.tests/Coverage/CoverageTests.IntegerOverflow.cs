@@ -4,6 +4,7 @@
 using System.IO;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Instrumentation;
+using Coverlet.Tests.Utils;
 using Moq;
 using Xunit;
 

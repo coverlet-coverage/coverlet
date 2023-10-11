@@ -12,6 +12,7 @@ using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
 using Coverlet.Core.Tests;
+using Coverlet.Tests.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;

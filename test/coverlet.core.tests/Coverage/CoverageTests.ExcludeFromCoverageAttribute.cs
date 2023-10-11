@@ -9,23 +9,28 @@ using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
+using Coverlet.Tests.Utils;
+using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-  public partial class CoverageTests
-  {
-    [Fact]
-    public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
+    public partial class CoverageTests
     {
-      var partialMockFileSystem = new Mock<FileSystem>();
-      partialMockFileSystem.CallBase = true;
-      partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
-      {
-        return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-      });
-      var loggerMock = new Mock<ILogger>();
+
+    [ConditionalFact]
+    [SkipOnOS(OS.MacOS, "Windows path format only - Simplified output paths issue")]
+    [SkipOnOS(OS.Linux, "Windows path format only - Simplified output paths issue")]
+    public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
+        {
+            var partialMockFileSystem = new Mock<FileSystem>();
+            partialMockFileSystem.CallBase = true;
+            partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
+            {
+                return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            });
+            var loggerMock = new Mock<ILogger>();
 
       string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
 
@@ -54,18 +59,18 @@ namespace Coverlet.Core.Tests
       loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
     }
 
-    [Fact]
-    public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
-    {
-      string path = Path.GetTempFileName();
-      try
-      {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        [Fact]
+        public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
         {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
-                  {
-              await (Task<int>)instance.Test("test");
-            }, persistPrepareResultToFile: pathSerialize[0]);
+            string path = Path.GetTempFileName();
+            try
+            {
+                FunctionExecutor.Run(async (string[] pathSerialize) =>
+                {
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
+                    {
+                        await (Task<int>)instance.Test("test");
+                    }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 

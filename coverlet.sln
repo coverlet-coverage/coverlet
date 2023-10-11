@@ -31,7 +31,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		eng\azure-pipelines-nightly.yml = eng\azure-pipelines-nightly.yml
 		eng\azure-pipelines.yml = eng\azure-pipelines.yml
 		eng\build.yml = eng\build.yml
-		DeterministicBuild.targets = DeterministicBuild.targets
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		Directory.Packages.props = Directory.Packages.props
@@ -73,6 +72,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsampl
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.msbuild.tasks.tests", "test\coverlet.msbuild.tasks.tests\coverlet.msbuild.tasks.tests.csproj", "{351A034E-E642-4DB9-A21D-F71C8151C243}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.tests.utils", "test\coverlet.tests.utils\coverlet.tests.utils.csproj", "{0B109210-03CB-413F-888C-3023994AA384}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -164,10 +165,14 @@ Global
 		{F508CCDD-5BC8-4AB6-97B3-D37498813C41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F508CCDD-5BC8-4AB6-97B3-D37498813C41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F508CCDD-5BC8-4AB6-97B3-D37498813C41}.Release|Any CPU.Build.0 = Release|Any CPU
-		{351A034E-E642-4DB9-A21D-F71C8151C243}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{351A034E-E642-4DB9-A21D-F71C8151C243}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{351A034E-E642-4DB9-A21D-F71C8151C243}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{351A034E-E642-4DB9-A21D-F71C8151C243}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ABC2066-D1C5-4CAA-8867-9C5DC777CBF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ABC2066-D1C5-4CAA-8867-9C5DC777CBF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ABC2066-D1C5-4CAA-8867-9C5DC777CBF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ABC2066-D1C5-4CAA-8867-9C5DC777CBF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B109210-03CB-413F-888C-3023994AA384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B109210-03CB-413F-888C-3023994AA384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B109210-03CB-413F-888C-3023994AA384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B109210-03CB-413F-888C-3023994AA384}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -195,7 +200,7 @@ Global
 		{988A5FF0-4326-4F5B-9F05-CB165543A555} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{6ACF69B1-C01F-44A4-8F8E-2501884238D4} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F508CCDD-5BC8-4AB6-97B3-D37498813C41} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
-		{351A034E-E642-4DB9-A21D-F71C8151C243} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{0B109210-03CB-413F-888C-3023994AA384} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}

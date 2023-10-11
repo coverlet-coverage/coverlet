@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests

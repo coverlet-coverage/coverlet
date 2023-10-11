@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.Integration.Tests
@@ -48,7 +49,7 @@ namespace Coverlet.Integration.Tests
 
     public Collectors()
     {
-      _buildConfiguration = GetAssemblyBuildConfiguration().ToString();
+      _buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString();
     }
 
     protected string? TestSDKVersion { get; set; }
