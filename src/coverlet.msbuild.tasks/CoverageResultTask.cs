@@ -123,6 +123,7 @@ namespace Coverlet.MSbuild.Tasks
                                                     result,
                                                     sourceRootTranslator);
             string path = writer.WriteReport();
+            Log.LogMessage(MessageImportance.High, $" Generating report '{path}'");
             var metadata = new Dictionary<string, string> { ["Format"] = format };
             coverageReportPaths.Add(new TaskItem(path, metadata));
           }
