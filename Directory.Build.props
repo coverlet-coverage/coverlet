@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <VSTestResultsDirectory>$(RepoRoot)/artifacts/tests</VSTestResultsDirectory>
+    <VSTestResultsDirectory>$(RepoRoot)artifacts/tests</VSTestResultsDirectory>
     <VSTestLogger>@(VSTestLogger)</VSTestLogger>
   </PropertyGroup>
 
