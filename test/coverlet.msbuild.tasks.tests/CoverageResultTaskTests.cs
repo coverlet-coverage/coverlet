@@ -62,9 +62,7 @@ namespace coverlet.msbuild.tasks.tests
       bool success = coverageResultTask.Execute();
 
       // Assert
-      Assert.False(success);
-      Assert.True(coverageResultTask.Log.HasLoggedErrors);
-      // check error message "Result of instrumentation task not found"
+      Assert.Equal("Result of instrumentation task not found", _errors.FirstOrDefault()?.Message);
     }
 
     [Fact]
