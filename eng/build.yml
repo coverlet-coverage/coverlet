@@ -19,26 +19,18 @@ steps:
   displayName: Pack
 
 - task: DotNetCoreCLI@2
-  displayName: Run tests
-  inputs:
-    command: test
-    arguments: -c $(BuildConfiguration) --no-build 
-    testRunTitle: $(Agent.JobName)
-  condition: and(succeeded(), ne(variables['enableCoverage'], 'true'))
-
-- task: DotNetCoreCLI@2
   displayName: Run tests with coverage
   inputs:
     command: test
     arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.collector]*%2c[coverlet.core]*%2c[coverlet.msbuild.tasks]*" /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*"
     testRunTitle: $(Agent.JobName)
-  condition: and(succeeded(), eq(variables['enableCoverage'], 'true'))
+  condition: and(succeeded())
 
 - template: publish-coverlet-result-files.yml
 
 - template: publish-coverage-results.yml
   parameters:
     reports: $(Build.SourcesDirectory)/**/coverage.opencover.xml
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'), eq(variables['enableCoverage'], 'true'))
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
     assemblyfilters: '-xunit'
 
