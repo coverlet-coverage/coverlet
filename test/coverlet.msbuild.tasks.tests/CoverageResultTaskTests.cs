@@ -79,7 +79,6 @@ namespace coverlet.msbuild.tasks.tests
       serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
       serviceCollection.AddTransient<Coverlet.Core.Abstractions.ILogger, MSBuildLogger>(_ => new MSBuildLogger(log));
       serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
-      serviceCollection.AddTransient<IConsole, SystemConsole>();
       serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
       serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator("empty", serviceProvider.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(), mockFileSystem.Object, _mockAssemblyAdapter.Object));
       ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
