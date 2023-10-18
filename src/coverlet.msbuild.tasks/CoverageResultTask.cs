@@ -54,12 +54,12 @@ namespace Coverlet.MSbuild.Tasks
     {
       try
       {
-        Log.LogMessage(MessageImportance.High, "\nCalculating coverage result...");
+        _logger.LogInformation("\nCalculating coverage result...", true);
 
         IFileSystem fileSystem = ServiceProvider.GetService<IFileSystem>();
         if (InstrumenterState is null || !fileSystem.Exists(InstrumenterState.ItemSpec))
         {
-          Log.LogError("Result of instrumentation task not found");
+          _logger.LogError("Result of instrumentation task not found");
           return false;
         }
 
