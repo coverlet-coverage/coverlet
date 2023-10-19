@@ -8,6 +8,6 @@ namespace Coverlet.MSbuild.Tasks
 {
     public abstract class BaseTask : Task
     {
-        protected static IServiceProvider ServiceProvider { get; set; }
+        public static IServiceProvider ServiceProvider { get; protected internal set; }
     }
 }

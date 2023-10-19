@@ -6,7 +6,7 @@ using System;
 namespace Coverlet.Core.Exceptions
 {
     [Serializable]
-    internal class CoverletException : Exception
+    public class CoverletException : Exception
     {
         public CoverletException() { }
         public CoverletException(string message) : base(message) { }

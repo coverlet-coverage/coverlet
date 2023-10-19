@@ -5,13 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <GlobalPackageReference  Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
-    <GlobalPackageReference  Include="Nerdbank.GitVersioning" Version="3.6.133" />
+    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.6.133" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.5.0"/>
+    <PackageVersion Include="Microsoft.Build.Framework" Version="17.5.0"/>
+    <PackageVersion Include="Microsoft.Build.Locator" Version="1.5.5" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="2.10.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
@@ -54,9 +56,9 @@
     -->
     <PackageVersion Include="Tmds.ExecFunction" Version="0.6.0" />
     <PackageVersion Include="xunit" Version="2.5.0" />
+    <PackageVersion Include="xunit.assemblyfixture" Version="2.2.0" />
     <PackageVersion Include="xunit.assert" Version="2.5.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.0"/>
-
-
+    <PackageVersion Include="envdte" Version="17.7.37355" />
   </ItemGroup>
 </Project>

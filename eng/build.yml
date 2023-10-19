@@ -1,13 +1,13 @@
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 6.0.413
-  displayName: Install .NET Core SDK 6.0.413
+    version: 6.0.415
+  displayName: Install .NET Core SDK 6.0.415
 
 - task: UseDotNet@2
   inputs:
-    version: 7.0.400
-  displayName: Install .NET Core SDK 7.0.400
+    version: 7.0.402
+  displayName: Install .NET Core SDK 7.0.402
 
 - script: dotnet restore
   displayName: Restore packages
@@ -19,7 +19,7 @@ steps:
   displayName: Pack
 
 - task: DotNetCoreCLI@2
-  displayName: Run tests
+  displayName: Run tests with coverage
   inputs:
     command: test
     arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.collector]*%2c[coverlet.core]*%2c[coverlet.msbuild.tasks]*" /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*"

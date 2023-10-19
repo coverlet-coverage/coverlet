@@ -14,14 +14,13 @@ namespace Coverlet.MSbuild.Tasks
         private readonly string _output;
         private readonly IReporter _reporter;
         private readonly IFileSystem _fileSystem;
-        private readonly IConsole _console;
         private readonly ISourceRootTranslator _sourceRootTranslator;
         private readonly CoverageResult _result;
 
         public ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string directory, string output,
-                            IReporter reporter, IFileSystem fileSystem, IConsole console, CoverageResult result, ISourceRootTranslator sourceRootTranslator)
-            => (_coverletMultiTargetFrameworksCurrentTFM, _directory, _output, _reporter, _fileSystem, _console, _result, _sourceRootTranslator) =
-                (coverletMultiTargetFrameworksCurrentTFM, directory, output, reporter, fileSystem, console, result, sourceRootTranslator);
+                            IReporter reporter, IFileSystem fileSystem, CoverageResult result, ISourceRootTranslator sourceRootTranslator)
+            => (_coverletMultiTargetFrameworksCurrentTFM, _directory, _output, _reporter, _fileSystem, _result, _sourceRootTranslator) =
+                (coverletMultiTargetFrameworksCurrentTFM, directory, output, reporter, fileSystem, result, sourceRootTranslator);
 
         public string WriteReport()
         {
@@ -49,7 +48,6 @@ namespace Coverlet.MSbuild.Tasks
             }
 
             string report = Path.Combine(_directory, filename);
-            _console.WriteLine($"  Generating report '{report}'");
             _fileSystem.WriteAllText(report, _reporter.Report(_result, _sourceRootTranslator));
             return report;
         }
