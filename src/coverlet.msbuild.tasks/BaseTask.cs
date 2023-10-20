@@ -6,8 +6,8 @@ using Microsoft.Build.Utilities;
 
 namespace Coverlet.MSbuild.Tasks
 {
-    public abstract class BaseTask : Task
-    {
-        public static IServiceProvider ServiceProvider { get; protected internal set; }
-    }
+  public abstract class BaseTask : Task
+  {
+    public static IServiceProvider ServiceProvider { get; protected internal set; }
+  }
 }

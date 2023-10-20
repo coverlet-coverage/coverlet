@@ -7,20 +7,20 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.MSbuild.Tasks
 {
-    internal class ReportWriter
-    {
-        private readonly string _coverletMultiTargetFrameworksCurrentTFM;
-        private readonly string _directory;
-        private readonly string _output;
-        private readonly IReporter _reporter;
-        private readonly IFileSystem _fileSystem;
-        private readonly ISourceRootTranslator _sourceRootTranslator;
-        private readonly CoverageResult _result;
+  internal class ReportWriter
+  {
+    private readonly string _coverletMultiTargetFrameworksCurrentTFM;
+    private readonly string _directory;
+    private readonly string _output;
+    private readonly IReporter _reporter;
+    private readonly IFileSystem _fileSystem;
+    private readonly ISourceRootTranslator _sourceRootTranslator;
+    private readonly CoverageResult _result;
 
-        public ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string directory, string output,
-                            IReporter reporter, IFileSystem fileSystem, CoverageResult result, ISourceRootTranslator sourceRootTranslator)
-            => (_coverletMultiTargetFrameworksCurrentTFM, _directory, _output, _reporter, _fileSystem, _result, _sourceRootTranslator) =
-                (coverletMultiTargetFrameworksCurrentTFM, directory, output, reporter, fileSystem, result, sourceRootTranslator);
+    public ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string directory, string output,
+                        IReporter reporter, IFileSystem fileSystem, CoverageResult result, ISourceRootTranslator sourceRootTranslator)
+        => (_coverletMultiTargetFrameworksCurrentTFM, _directory, _output, _reporter, _fileSystem, _result, _sourceRootTranslator) =
+            (coverletMultiTargetFrameworksCurrentTFM, directory, output, reporter, fileSystem, result, sourceRootTranslator);
 
     public string WriteReport()
     {
@@ -47,9 +47,9 @@ namespace Coverlet.MSbuild.Tasks
         filename = $"{filename}{separatorPoint}{_coverletMultiTargetFrameworksCurrentTFM}.{_reporter.Extension}";
       }
 
-            string report = Path.Combine(_directory, filename);
-            _fileSystem.WriteAllText(report, _reporter.Report(_result, _sourceRootTranslator));
-            return report;
-        }
+      string report = Path.Combine(_directory, filename);
+      _fileSystem.WriteAllText(report, _reporter.Report(_result, _sourceRootTranslator));
+      return report;
     }
+  }
 }

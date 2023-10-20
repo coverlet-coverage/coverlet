@@ -5,8 +5,8 @@ using System.Windows.Controls;
 
 namespace coverlet.tests.projectsample.wpf6
 {
-  public class TestClass
-  {
-    public UserControl? Control { get; set; }
-  }
+    public class TestClass
+    {
+        public UserControl? Control { get; set; }
+    }
 }
