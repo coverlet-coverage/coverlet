@@ -12,10 +12,10 @@ steps:
 - script: dotnet restore
   displayName: Restore packages
 
-- script: dotnet build -c $(BuildConfiguration) --no-restore
+- script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.binlog
   displayName: Build
 
-- script: dotnet pack -c $(BuildConfiguration) --no-restore
+- script: dotnet pack -c $(BuildConfiguration) --no-restore  -bl:test.binlog
   displayName: Pack
 
 - task: DotNetCoreCLI@2

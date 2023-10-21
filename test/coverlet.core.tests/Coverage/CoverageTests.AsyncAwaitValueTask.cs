@@ -22,12 +22,12 @@ namespace Coverlet.Core.Tests
                     {
                         instance.SyncExecution();
 
-                        int res = await ((ValueTask<int>)instance.AsyncExecution(true)).ConfigureAwait(false);
-                        res = await ((ValueTask<int>)instance.AsyncExecution(1)).ConfigureAwait(false);
-                        res = await ((ValueTask<int>)instance.AsyncExecution(2)).ConfigureAwait(false);
-                        res = await ((ValueTask<int>)instance.AsyncExecution(3)).ConfigureAwait(false);
-                        res = await ((ValueTask<int>)instance.ConfigureAwait()).ConfigureAwait(false);
-                        res = ((Task<int>)instance.WrappingValueTaskAsTask()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        int res = await (ValueTask<int>)instance.AsyncExecution(true);
+                        res = await (ValueTask<int>)instance.AsyncExecution(1);
+                        res = await (ValueTask<int>)instance.AsyncExecution(2);
+                        res = await (ValueTask<int>)instance.AsyncExecution(3);
+                        res = await (ValueTask<int>)instance.ConfigureAwait();
+                        res = await (Task<int>)instance.WrappingValueTaskAsTask();
                     }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
                 }, new string[] { path });

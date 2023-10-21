@@ -24,7 +24,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-msbuild.binlog
+*.binlog
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -306,3 +306,4 @@ test/coverlet.integration.determisticbuild/*.txt
 test/coverlet.integration.determisticbuild/runsettings
 
 coverage.cobertura.xml
+coverage.opencover.xml

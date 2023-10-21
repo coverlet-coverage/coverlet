@@ -129,11 +129,15 @@ namespace Coverlet.Core.Tests.Instrumentation
         ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
         var unloadTask = Task.Run(() => ModuleTrackerTemplate.UnloadModule(null, null));
 
+#pragma warning disable xUnit1031 // Do not use blocking task operations in test method
         Assert.False(unloadTask.Wait(5));
+#pragma warning restore xUnit1031 // Do not use blocking task operations in test method
 
         WriteHitsFile(new[] { 0, 3, 2, 1 });
 
+#pragma warning disable xUnit1031 // Do not use blocking task operations in test method
         Assert.False(unloadTask.Wait(5));
+#pragma warning restore xUnit1031 // Do not use blocking task operations in test method
 
         mutex.ReleaseMutex();
         await unloadTask;

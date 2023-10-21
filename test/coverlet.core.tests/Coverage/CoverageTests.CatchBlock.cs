@@ -18,49 +18,48 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<CatchBlock>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<CatchBlock>(async instance =>
                     {
                         instance.Test();
                         instance.Test_Catch();
-                        ((Task)instance.TestAsync()).ConfigureAwait(false).GetAwaiter().GetResult();
-                        ((Task)instance.TestAsync_Catch()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        await (Task)instance.TestAsync();
+                        await(Task)instance.TestAsync_Catch();
 
                         instance.Test(true);
                         instance.Test_Catch(true);
-                        ((Task)instance.TestAsync(true)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        ((Task)instance.TestAsync_Catch(true)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        await (Task)instance.TestAsync(true);
+                        await (Task)instance.TestAsync_Catch(true);
 
                         instance.Test(false);
                         instance.Test_Catch(false);
-                        ((Task)instance.TestAsync(false)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        ((Task)instance.TestAsync_Catch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        await (Task)instance.TestAsync(false);
+                        await (Task)instance.TestAsync_Catch(false);
 
                         instance.Test_WithTypedCatch();
                         instance.Test_Catch_WithTypedCatch();
-                        ((Task)instance.TestAsync_WithTypedCatch()).ConfigureAwait(false).GetAwaiter().GetResult();
-                        ((Task)instance.TestAsync_Catch_WithTypedCatch()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        await (Task)instance.TestAsync_WithTypedCatch();
+                        await (Task)instance.TestAsync_Catch_WithTypedCatch();
 
                         instance.Test_WithTypedCatch(true);
                         instance.Test_Catch_WithTypedCatch(true);
-                        ((Task)instance.TestAsync_WithTypedCatch(true)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        ((Task)instance.TestAsync_Catch_WithTypedCatch(true)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        await (Task)instance.TestAsync_WithTypedCatch(true);
+                        await (Task)instance.TestAsync_Catch_WithTypedCatch(true);
 
                         instance.Test_WithTypedCatch(false);
                         instance.Test_Catch_WithTypedCatch(false);
-                        ((Task)instance.TestAsync_WithTypedCatch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        ((Task)instance.TestAsync_Catch_WithTypedCatch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        await (Task)instance.TestAsync_WithTypedCatch(false);
+                        await (Task)instance.TestAsync_Catch_WithTypedCatch(false);
 
                         instance.Test_WithNestedCatch(true);
                         instance.Test_Catch_WithNestedCatch(true);
-                        ((Task)instance.TestAsync_WithNestedCatch(true)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        ((Task)instance.TestAsync_Catch_WithNestedCatch(true)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        await (Task)instance.TestAsync_WithNestedCatch(true);
+                        await (Task)instance.TestAsync_Catch_WithNestedCatch(true);
 
                         instance.Test_WithNestedCatch(false);
                         instance.Test_Catch_WithNestedCatch(false);
-                        ((Task)instance.TestAsync_WithNestedCatch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
-                        ((Task)instance.TestAsync_Catch_WithNestedCatch(false)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        await (Task)instance.TestAsync_WithNestedCatch(false);
+                        await (Task)instance.TestAsync_Catch_WithNestedCatch(false);
 
-                        return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
                 }, new string[] { path });
