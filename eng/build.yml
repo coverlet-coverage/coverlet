@@ -32,4 +32,4 @@ steps:
     reports: $(Build.SourcesDirectory)/**/coverage.opencover.xml
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
     assemblyfilters: '-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*'
-    classfilters: '[coverlet.core.tests.samples.netstandard]*;[coverlet.tests.xunit.extensions]*'
+    classfilters: '-[coverlet.core.tests.samples.netstandard]*;-[coverlet.tests.xunit.extensions]*'
