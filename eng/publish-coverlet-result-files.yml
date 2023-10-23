@@ -30,7 +30,7 @@ steps:
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)'
     Contents: '**/*.binlog'
-    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs/BuildLogs'
 
 - task: PublishPipelineArtifact@1
   displayName: Publish Coverlet logs
