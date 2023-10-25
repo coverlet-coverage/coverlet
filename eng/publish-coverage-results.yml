@@ -16,18 +16,8 @@ steps:
     targetType: inline
     pwsh: true
     script: |
-      dotnet tool restore
+      dotnet tool restore --add-source https://api.nuget.org/v3/index.json
       dotnet reportgenerator -reports:"${{parameters.reports}}" -targetdir:"$(Build.SourcesDirectory)/artifacts/CoverageReport" -reporttypes:"Html;HtmlInline_AzurePipelines_Dark;Cobertura" -assemblyfilters:"${{parameters.assemblyfilters}}" -classfilters:"${{parameters.classfilters}}" -verbosity:Verbose
-
-# - task: reportgenerator@5
-#   displayName: ReportGenerator
-#   condition: ${{parameters.condition}}
-#   inputs:
-#     reports: ${{parameters.reports}}
-#     targetdir: $(Build.SourcesDirectory)/artifacts/CoverageReport
-#     reporttypes: Html;HtmlInline_AzurePipelines_Dark;Cobertura
-#     verbosity: 'Verbose'
-#     assemblyfilters: ${{parameters.assemblyfilters}}
 
 - publish: '$(Build.SourcesDirectory)/artifacts/CoverageReport'
   displayName: 'Publish CoverageReport Artifact'

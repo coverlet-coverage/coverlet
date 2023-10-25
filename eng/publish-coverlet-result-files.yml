@@ -8,7 +8,6 @@ steps:
     Contents: |
        **/*.trx
        **/*.html
-       **/*.binlog
        **/coverage.opencover.xml
        **/coverage.cobertura.xml
        **/coverage.json
@@ -24,6 +23,14 @@ steps:
     SourceFolder: '$(Agent.TempDirectory)'
     Contents: '**/*.trx'
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
+
+- task: CopyFiles@2
+  displayName: Copy binlog files
+  condition: always()
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**/*.binlog'
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs/BuildLogs'
 
 - task: PublishPipelineArtifact@1
   displayName: Publish Coverlet logs

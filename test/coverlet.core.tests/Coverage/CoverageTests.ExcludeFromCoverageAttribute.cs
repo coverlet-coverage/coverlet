@@ -62,10 +62,9 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
                     {
-                        ((Task<int>)instance.Test("test")).ConfigureAwait(false).GetAwaiter().GetResult();
-                        return Task.CompletedTask;
+                        await (Task<int>)instance.Test("test");
                     }, persistPrepareResultToFile: pathSerialize[0]);
 
                     return 0;
@@ -192,10 +191,9 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(async instance =>
                     {
-                        Assert.True(((Task<bool>)instance.EditTask(null, 10)).GetAwaiter().GetResult());
-                        return Task.CompletedTask;
+                        Assert.True(await((Task<bool>)instance.EditTask(null, 10)));
                     }, persistPrepareResultToFile: pathSerialize[0]);
 
                     return 0;

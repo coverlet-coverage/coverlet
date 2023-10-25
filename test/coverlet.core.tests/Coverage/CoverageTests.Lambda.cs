@@ -18,12 +18,10 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(async instance =>
                     {
                         instance.InvokeAnonymous_Test();
-                        ((Task<bool>)instance.InvokeAnonymousAsync_Test()).ConfigureAwait(false).GetAwaiter().GetResult();
-
-                        return Task.CompletedTask;
+                        await (Task<bool>)instance.InvokeAnonymousAsync_Test();
                     }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
                 }, new string[] { path });
@@ -53,10 +51,9 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_730>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_730>(async instance =>
                     {
-                        ((Task)instance.Invoke()).ConfigureAwait(false).GetAwaiter().GetResult();
-                        return Task.CompletedTask;
+                        await (Task)instance.Invoke();
                     },
                     persistPrepareResultToFile: pathSerialize[0]);
 
@@ -82,11 +79,10 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_760>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_760>(async instance =>
                     {
-                        ((Task)instance.If()).ConfigureAwait(false).GetAwaiter().GetResult();
-                        ((Task)instance.Foreach()).ConfigureAwait(false).GetAwaiter().GetResult();
-                        return Task.CompletedTask;
+                        await (Task)instance.If();
+                        await(Task)instance.Foreach();
                     },
                     persistPrepareResultToFile: pathSerialize[0]);
 

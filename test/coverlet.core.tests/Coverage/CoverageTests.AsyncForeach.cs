@@ -19,14 +19,13 @@ namespace Coverlet.Core.Tests
             {
                 FunctionExecutor.Run(async (string[] pathSerialize) =>
                 {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(instance =>
+                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(async instance =>
                     {
-                        int res = ((ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5))).GetAwaiter().GetResult();
-                        res += ((ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3))).GetAwaiter().GetResult();
-                        res += ((ValueTask<int>)instance.SumEmpty()).GetAwaiter().GetResult();
-                        ((ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3))).GetAwaiter().GetResult();
+                        int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));
+                        res += await (ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3));
+                        res += await (ValueTask<int>)instance.SumEmpty();
+                        await (ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3));
 
-                        return Task.CompletedTask;
                     }, persistPrepareResultToFile: pathSerialize[0]);
                     return 0;
                 }, new string[] { path });

@@ -12,7 +12,7 @@ steps:
 - script: dotnet restore
   displayName: Restore packages
 
-- script: dotnet build -c $(BuildConfiguration) --no-restore
+- script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.binlog
   displayName: Build
 
 - script: dotnet pack -c $(BuildConfiguration) --no-restore
@@ -22,7 +22,12 @@ steps:
   displayName: Run tests with coverage
   inputs:
     command: test
-    arguments: -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.collector]*%2c[coverlet.core]*%2c[coverlet.msbuild.tasks]*" /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*"
+    projects: |
+         **/coverlet.collector.tests.csproj
+         **/coverlet.core.tests.csproj
+         **/coverlet.integration.tests.csproj
+         **/coverlet.msbuild.tasks.tests.csproj
+    arguments: -c $(BuildConfiguration) --no-build -bl:test.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(Configuration)\coverlet.test.diag.log;tracelevel=verbose"
     testRunTitle: $(Agent.JobName)
 
 - template: publish-coverlet-result-files.yml
@@ -31,5 +36,5 @@ steps:
   parameters:
     reports: $(Build.SourcesDirectory)/**/coverage.opencover.xml
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
-    assemblyfilters: '-xunit'
-
+    assemblyfilters: '-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*'
+    classfilters: '-[coverlet.core.tests.samples.netstandard]*;-[coverlet.tests.xunit.extensions]*'
