@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+-Fix issues where ExcludeFromCodeCoverage ignored [#1431](https://github.com/coverlet-coverage/coverlet/issues/1431)
 -Fix issues with ExcludeFromCodeCoverage attribute [#1484](https://github.com/coverlet-coverage/coverlet/issues/1484)
 -Fix broken links in documentation [#1514](https://github.com/coverlet-coverage/coverlet/issues/1514)
 -Fix problem with coverage for .net5 WPF application [#1221](https://github.com/coverlet-coverage/coverlet/issues/1221) by https://github.com/lg2de
