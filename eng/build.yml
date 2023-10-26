@@ -46,8 +46,6 @@ steps:
     dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.core.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.core.test.diag.log;tracelevel=verbose"
     dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.integration.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.integration.test.diag.log;tracelevel=verbose"
     dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.msbuild.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.msbuild.test.diag.log;tracelevel=verbose"
-
-
   displayName: Run tests with coverage
 
 - task: PublishTestResults@2
@@ -61,10 +59,10 @@ steps:
   - script: |
       dotnet vstest "$(Build.SourcesDirectory)\artifacts\publish\coverlet.core.tests\debug\coverlet.core.tests.dll" --collect:"XPlat Code Coverage" --Diag:"$(Build.SourcesDirectory)\artifacts\log\$(Configuration)\coverlet.core.vstest.diag.log;tracelevel=verbose"  -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
     displayName: run with vstest
-- ${{ else }}:
-  - script: |
-      dotnet vstest "$(Build.SourcesDirectory)/artifacts/publish/coverlet.core.tests/debug/coverlet.core.tests.dll" --collect:"XPlat Code Coverage" --Diag:"$(Build.SourcesDirectory)/artifacts/log\$(Configuration)/coverlet.core.vstest.diag.log;tracelevel=verbose"  -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
-    displayName: run with vstest
+# - ${{ else }}:
+#   - script: |
+#       dotnet vstest "$(Build.SourcesDirectory)/artifacts/publish/coverlet.core.tests/debug/coverlet.core.tests.dll" --collect:"XPlat Code Coverage" --Diag:"$(Build.SourcesDirectory)/artifacts/log\$(Configuration)/coverlet.core.vstest.diag.log;tracelevel=verbose"  -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+#     displayName: run with vstest
 
 - template: publish-coverlet-result-files.yml
 
