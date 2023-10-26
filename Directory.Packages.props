@@ -60,5 +60,8 @@
     <PackageVersion Include="xunit.assert" Version="2.5.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3"/>
     <PackageVersion Include="envdte" Version="17.7.37355" />
+
+    <PackageVersion Include="System.Memory" Version="4.5.5" />
+    <PackageVersion Include="System.Buffers" Version="4.5.1" />
   </ItemGroup>
 </Project>
