@@ -315,7 +315,7 @@ namespace Coverlet.Core.Tests
             FunctionExecutor.Run(async (string[] pathSerialize) =>
             {
               CoveragePrepareResult coveragePrepareResult =
-                await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(instance =>
+                await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
                   {
                     instance.TestLambda(string.Empty);
                     instance.TestLambda(string.Empty, 1);
@@ -323,9 +323,8 @@ namespace Coverlet.Core.Tests
                     foreach (dynamic _ in instance.TestYield("abc", 1)) ;
                     instance.TestLocalFunction(string.Empty);
                     instance.TestLocalFunction(string.Empty, 1);
-                    ((Task)instance.TestAsyncAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
-                    ((Task)instance.TestAsyncAwait(1)).ConfigureAwait(false).GetAwaiter().GetResult();
-                    return Task.CompletedTask;
+                    await (Task)instance.TestAsyncAwait();
+                    await (Task)instance.TestAsyncAwait(1);
                   },
                   persistPrepareResultToFile: pathSerialize[0]);
 
@@ -353,7 +352,7 @@ namespace Coverlet.Core.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult =
-            await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr2>(instance =>
+            await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr2>(async instance =>
               {
                 instance.TestLambda(string.Empty);
                 instance.TestLambda(string.Empty, 1);
@@ -361,9 +360,8 @@ namespace Coverlet.Core.Tests
                 foreach (dynamic _ in instance.TestYield("abc", 1)) ;
                 instance.TestLocalFunction(string.Empty);
                 instance.TestLocalFunction(string.Empty, 1);
-                ((Task)instance.TestAsyncAwait()).ConfigureAwait(false).GetAwaiter().GetResult();
-                ((Task)instance.TestAsyncAwait(1)).ConfigureAwait(false).GetAwaiter().GetResult();
-                return Task.CompletedTask;
+                await (Task)instance.TestAsyncAwait();
+                await (Task)instance.TestAsyncAwait(1);
               },
               persistPrepareResultToFile: pathSerialize[0]);
 
