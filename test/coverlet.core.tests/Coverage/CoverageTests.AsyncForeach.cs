@@ -10,22 +10,22 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    public partial class CoverageTests
+  public partial class CoverageTests
+  {
+    [Fact]
+    public void AsyncForeach()
     {
-        [Fact]
-        public void AsyncForeach()
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(async instance =>
-                    {
-                        int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));
-                        res += await (ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3));
-                        res += await (ValueTask<int>)instance.SumEmpty();
-                        await (ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3));
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(async instance =>
+                  {
+              int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));
+              res += await (ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3));
+              res += await (ValueTask<int>)instance.SumEmpty();
+              await (ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3));
 
             }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;

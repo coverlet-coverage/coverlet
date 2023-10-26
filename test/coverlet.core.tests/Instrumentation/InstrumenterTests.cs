@@ -614,7 +614,7 @@ public class SampleClass
       if (expectedExcludes) { loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>())); }
     }
 
-    [Fact(Skip ="Fails with net8.0 rc2 ")]
+    [Fact(Skip = "Fails with net8.0 rc2 ")]
     public void TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext()
     {
       var netstandardResolver = new NetstandardAwareAssemblyResolver(Assembly.GetExecutingAssembly().Location, _mockLogger.Object);

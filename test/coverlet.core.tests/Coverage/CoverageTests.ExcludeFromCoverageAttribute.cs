@@ -16,21 +16,21 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    public partial class CoverageTests
-    {
+  public partial class CoverageTests
+  {
 
     [ConditionalFact]
     [SkipOnOS(OS.MacOS, "Windows path format only - Simplified output paths issue")]
     [SkipOnOS(OS.Linux, "Windows path format only - Simplified output paths issue")]
     public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
-        {
-            var partialMockFileSystem = new Mock<FileSystem>();
-            partialMockFileSystem.CallBase = true;
-            partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
-            {
-                return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            });
-            var loggerMock = new Mock<ILogger>();
+    {
+      var partialMockFileSystem = new Mock<FileSystem>();
+      partialMockFileSystem.CallBase = true;
+      partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
+      {
+        return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+      });
+      var loggerMock = new Mock<ILogger>();
 
       string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
 
@@ -59,18 +59,18 @@ namespace Coverlet.Core.Tests
       loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
     }
 
-        [Fact]
-        public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
+    [Fact]
+    public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
-                    {
-                        await (Task<int>)instance.Test("test");
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
+                  {
+              await (Task<int>)instance.Test("test");
+            }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -198,8 +198,8 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(async instance =>
                   {
-              Assert.True(await ((Task<bool>)instance.EditTask(null, 10)));
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                    Assert.True(await ((Task<bool>)instance.EditTask(null, 10)));
+                  }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, new string[] { path });

@@ -22,21 +22,21 @@ namespace Coverlet.Tests.Utils
     private static readonly string s_rel4Parents = s_rel3Parents + s_relParent;
     public static BuildConfiguration GetAssemblyBuildConfiguration()
     {
-  #if DEBUG
+#if DEBUG
       return BuildConfiguration.Debug;
-  #endif
-  #if RELEASE
+#endif
+#if RELEASE
               return BuildConfiguration.Release;
-  #endif
+#endif
       throw new NotSupportedException($"Build configuration not supported");
     }
 
-    public static string GetTestProjectPath( string directoryName )
+    public static string GetTestProjectPath(string directoryName)
     {
       return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel4Parents)), "test", directoryName);
     }
 
-    public static string GetTestBinaryPath( string directoryName )
+    public static string GetTestBinaryPath(string directoryName)
     {
       return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel2Parents)), directoryName);
     }
