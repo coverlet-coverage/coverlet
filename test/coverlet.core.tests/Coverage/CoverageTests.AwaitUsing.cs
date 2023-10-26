@@ -8,24 +8,24 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    public partial class CoverageTests
+  public partial class CoverageTests
+  {
+    [Fact]
+    public void AwaitUsing()
     {
-        [Fact]
-        public void AwaitUsing()
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AwaitUsing>(async instance =>
-                    {
-                        await (ValueTask)instance.HasAwaitUsing();
-                        await (Task)instance.Issue914_Repro();
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AwaitUsing>(async instance =>
+                  {
+              await (ValueTask)instance.HasAwaitUsing();
+              await (Task)instance.Issue914_Repro();
 
-                    }, persistPrepareResultToFile: pathSerialize[0]);
-                    return 0;
-                }, new string[] { path });
+            }, persistPrepareResultToFile: pathSerialize[0]);
+          return 0;
+        }, new string[] { path });
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AwaitUsing.cs")

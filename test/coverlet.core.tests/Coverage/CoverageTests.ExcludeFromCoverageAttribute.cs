@@ -54,18 +54,18 @@ namespace Coverlet.Core.Tests
       loggerMock.Verify(l => l.LogVerbose(It.IsAny<string>()));
     }
 
-        [Fact]
-        public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
+    [Fact]
+    public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
-                    {
-                        await (Task<int>)instance.Test("test");
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
+                  {
+              await (Task<int>)instance.Test("test");
+            }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -183,18 +183,18 @@ namespace Coverlet.Core.Tests
       }
     }
 
-        [Fact]
-        public void ExcludeFromCodeCoverage_Issue809()
+    [Fact]
+    public void ExcludeFromCodeCoverage_Issue809()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(async instance =>
-                    {
-                        Assert.True(await((Task<bool>)instance.EditTask(null, 10)));
-                    }, persistPrepareResultToFile: pathSerialize[0]);
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(async instance =>
+                  {
+              Assert.True(await ((Task<bool>)instance.EditTask(null, 10)));
+            }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, new string[] { path });

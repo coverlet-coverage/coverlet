@@ -10,30 +10,30 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    public partial class CoverageTests
+  public partial class CoverageTests
+  {
+    [Fact]
+    public void AsyncAwait()
     {
-        [Fact]
-        public void AsyncAwait()
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwait>(async instance =>
-                    {
-                        instance.SyncExecution();
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwait>(async instance =>
+                  {
+              instance.SyncExecution();
 
-                        int res = await (Task<int>)instance.AsyncExecution(true);
-                        res = await (Task<int>)instance.AsyncExecution(1);
-                        res = await (Task<int>)instance.AsyncExecution(2);
-                        res = await (Task<int>)instance.AsyncExecution(3);
-                        res = await (Task<int>)instance.ContinuationCalled();
-                        res = await (Task<int>)instance.ConfigureAwait();
+              int res = await (Task<int>)instance.AsyncExecution(true);
+              res = await (Task<int>)instance.AsyncExecution(1);
+              res = await (Task<int>)instance.AsyncExecution(2);
+              res = await (Task<int>)instance.AsyncExecution(3);
+              res = await (Task<int>)instance.ContinuationCalled();
+              res = await (Task<int>)instance.ConfigureAwait();
 
-                    }, persistPrepareResultToFile: pathSerialize[0]);
-                    return 0;
-                }, new string[] { path });
+            }, persistPrepareResultToFile: pathSerialize[0]);
+          return 0;
+        }, new string[] { path });
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncAwait.cs")
@@ -68,19 +68,19 @@ namespace Coverlet.Core.Tests
       }
     }
 
-        [Fact]
-        public void AsyncAwait_Issue_669_1()
+    [Fact]
+    public void AsyncAwait_Issue_669_1()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_1>(async instance =>
-                    {
-                        await (Task)instance.Test();
-                    },
-                    persistPrepareResultToFile: pathSerialize[0]);
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_1>(async instance =>
+                  {
+              await (Task)instance.Test();
+            },
+                  persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, new string[] { path });
@@ -98,20 +98,20 @@ namespace Coverlet.Core.Tests
       }
     }
 
-        [Fact]
-        public void AsyncAwait_Issue_669_2()
+    [Fact]
+    public void AsyncAwait_Issue_669_2()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(async instance =>
-                    {
-                        await (ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest();
-                    },
-                    persistPrepareResultToFile: pathSerialize[0],
-                    assemblyLocation: Assembly.GetExecutingAssembly().Location);
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(async instance =>
+                  {
+              await (ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest();
+            },
+                  persistPrepareResultToFile: pathSerialize[0],
+                  assemblyLocation: Assembly.GetExecutingAssembly().Location);
 
           return 0;
         }, new string[] { path });
@@ -127,19 +127,19 @@ namespace Coverlet.Core.Tests
       }
     }
 
-        [Fact]
-        public void AsyncAwait_Issue_1177()
+    [Fact]
+    public void AsyncAwait_Issue_1177()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1177>(async instance =>
-                        {
-                            await (Task)instance.Test();
-                        },
-                        persistPrepareResultToFile: pathSerialize[0]);
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1177>(async instance =>
+                      {
+                  await (Task)instance.Test();
+                },
+                      persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, new string[] { path });
@@ -154,19 +154,19 @@ namespace Coverlet.Core.Tests
       }
     }
 
-        [Fact]
-        public void AsyncAwait_Issue_1233()
+    [Fact]
+    public void AsyncAwait_Issue_1233()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1233>(async instance =>
-                        {
-                            await (Task)instance.Test();
-                        },
-                        persistPrepareResultToFile: pathSerialize[0]);
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1233>(async instance =>
+                      {
+                  await (Task)instance.Test();
+                },
+                      persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, new string[] { path });
@@ -181,20 +181,20 @@ namespace Coverlet.Core.Tests
       }
     }
 
-        [Fact]
-        public void AsyncAwait_Issue_1275()
+    [Fact]
+    public void AsyncAwait_Issue_1275()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1275>(async instance =>
-                        {
-                            var cts = new CancellationTokenSource();
-                            await (Task)instance.Execute(cts.Token);
-                        },
-                        persistPrepareResultToFile: pathSerialize[0]);
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1275>(async instance =>
+                      {
+                  var cts = new CancellationTokenSource();
+                  await (Task)instance.Execute(cts.Token);
+                },
+                      persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, new string[] { path });

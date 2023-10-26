@@ -22,15 +22,15 @@ namespace Coverlet.Core.Tests
                   {
                     instance.SyncExecution();
 
-                        int res = await (ValueTask<int>)instance.AsyncExecution(true);
-                        res = await (ValueTask<int>)instance.AsyncExecution(1);
-                        res = await (ValueTask<int>)instance.AsyncExecution(2);
-                        res = await (ValueTask<int>)instance.AsyncExecution(3);
-                        res = await (ValueTask<int>)instance.ConfigureAwait();
-                        res = await (Task<int>)instance.WrappingValueTaskAsTask();
-                    }, persistPrepareResultToFile: pathSerialize[0]);
-                    return 0;
-                }, new string[] { path });
+                    int res = await (ValueTask<int>)instance.AsyncExecution(true);
+                    res = await (ValueTask<int>)instance.AsyncExecution(1);
+                    res = await (ValueTask<int>)instance.AsyncExecution(2);
+                    res = await (ValueTask<int>)instance.AsyncExecution(3);
+                    res = await (ValueTask<int>)instance.ConfigureAwait();
+                    res = await (Task<int>)instance.WrappingValueTaskAsTask();
+                  }, persistPrepareResultToFile: pathSerialize[0]);
+          return 0;
+        }, new string[] { path });
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncAwaitValueTask.cs")

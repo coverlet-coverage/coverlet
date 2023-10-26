@@ -39,7 +39,7 @@ namespace Coverlet.Collector.DataCollection
 
     public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper, ICountDownEvent countDownEvent)
     {
-      // Store input variabless
+      // Store input variables
       _dataSink = dataSink;
       _dataCollectionContext = dataCollectionContext;
       _logger = logger;

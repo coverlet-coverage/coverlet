@@ -154,12 +154,12 @@ namespace Coverlet.Core.Tests
       Assert.Equal(50, summary.CalculateLineCoverage(method.Value.Lines).Percent);
     }
 
-        [Fact]
-        public void TestCalculateLineCoverage_MultiModule()
-        {
-            var summary = new CoverageSummary();
-            Documents documentsFirstModule = _averageCalculationMultiModule["module"];
-            Documents documentsSecondModule = _averageCalculationMultiModule["additionalModule"];
+    [Fact]
+    public void TestCalculateLineCoverage_MultiModule()
+    {
+      var summary = new CoverageSummary();
+      Documents documentsFirstModule = _averageCalculationMultiModule["module"];
+      Documents documentsSecondModule = _averageCalculationMultiModule["additionalModule"];
 
       Assert.Equal(37.5, summary.CalculateLineCoverage(_averageCalculationMultiModule).AverageModulePercent);
       Assert.Equal(50, summary.CalculateLineCoverage(documentsFirstModule.First().Value).Percent);
@@ -186,12 +186,12 @@ namespace Coverlet.Core.Tests
       Assert.Equal(100, summary.CalculateBranchCoverage(method.Value.Branches).Percent);
     }
 
-        [Fact]
-        public void TestCalculateBranchCoverage_MultiModule()
-        {
-            var summary = new CoverageSummary();
-            Documents documentsFirstModule = _averageCalculationMultiModule["module"];
-            Documents documentsSecondModule = _averageCalculationMultiModule["additionalModule"];
+    [Fact]
+    public void TestCalculateBranchCoverage_MultiModule()
+    {
+      var summary = new CoverageSummary();
+      Documents documentsFirstModule = _averageCalculationMultiModule["module"];
+      Documents documentsSecondModule = _averageCalculationMultiModule["additionalModule"];
 
       Assert.Equal(83.33, summary.CalculateBranchCoverage(_averageCalculationMultiModule).AverageModulePercent);
       Assert.Equal(100, summary.CalculateBranchCoverage(documentsFirstModule.First().Value).Percent);
@@ -215,12 +215,12 @@ namespace Coverlet.Core.Tests
       Assert.Equal(100, summary.CalculateMethodCoverage(method.Value.Lines).Percent);
     }
 
-        [Fact]
-        public void TestCalculateMethodCoverage_MultiModule()
-        {
-            var summary = new CoverageSummary();
-            Documents documentsFirstModule = _averageCalculationMultiModule["module"];
-            Documents documentsSecondModule = _averageCalculationMultiModule["additionalModule"];
+    [Fact]
+    public void TestCalculateMethodCoverage_MultiModule()
+    {
+      var summary = new CoverageSummary();
+      Documents documentsFirstModule = _averageCalculationMultiModule["module"];
+      Documents documentsSecondModule = _averageCalculationMultiModule["additionalModule"];
 
       Assert.Equal(75, summary.CalculateMethodCoverage(_averageCalculationMultiModule).AverageModulePercent);
       Assert.Equal(100, summary.CalculateMethodCoverage(documentsFirstModule.First().Value).Percent);
