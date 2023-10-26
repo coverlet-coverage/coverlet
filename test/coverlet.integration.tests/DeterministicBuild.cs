@@ -40,39 +40,39 @@ namespace Coverlet.Integration.Tests
       deterministicTestProps.Save(Path.Combine(_testProjectPath, PropsFileName));
     }
 
-        private protected void AssertCoverage(string standardOutput = "", bool checkDeterministicReport = true)
+    private protected void AssertCoverage(string standardOutput = "", bool checkDeterministicReport = true)
+    {
+      if (_buildConfiguration == "Debug")
+      {
+        bool coverageChecked = false;
+        string reportFilePath = "";
+        foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput), "coverage.json", SearchOption.AllDirectories))
         {
-            if (_buildConfiguration == "Debug")
-            {
-                bool coverageChecked = false;
-                string reportFilePath = "";
-                foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput), "coverage.json", SearchOption.AllDirectories))
-                {
-                    Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
-                    if (document != null)
-                    {
-                        document.Class("Coverlet.Integration.DeterministicBuild.DeepThought")
-                            .Method("System.Int32 Coverlet.Integration.DeterministicBuild.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
-                            .AssertLinesCovered((6, 1), (7, 1), (8, 1));
-                        coverageChecked = true;
-                        reportFilePath = coverageFile;
-                    }
-                }
-                Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
-                File.Delete(reportFilePath);
-                Assert.False(File.Exists(reportFilePath));
-
-                if (checkDeterministicReport)
-                {
-                    // Verify deterministic report
-                    foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput), "coverage.cobertura.xml", SearchOption.AllDirectories))
-                    {
-                        Assert.Contains("/_/test/coverlet.integration.determisticbuild/DeepThought.cs", File.ReadAllText(coverageFile));
-                        File.Delete(coverageFile);
-                    }
-                }
-            }
+          Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
+          if (document != null)
+          {
+            document.Class("Coverlet.Integration.DeterministicBuild.DeepThought")
+                .Method("System.Int32 Coverlet.Integration.DeterministicBuild.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
+                .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+            coverageChecked = true;
+            reportFilePath = coverageFile;
+          }
         }
+        Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
+        File.Delete(reportFilePath);
+        Assert.False(File.Exists(reportFilePath));
+
+        if (checkDeterministicReport)
+        {
+          // Verify deterministic report
+          foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput), "coverage.cobertura.xml", SearchOption.AllDirectories))
+          {
+            Assert.Contains("/_/test/coverlet.integration.determisticbuild/DeepThought.cs", File.ReadAllText(coverageFile));
+            File.Delete(coverageFile);
+          }
+        }
+      }
+    }
 
     [Fact]
     public void Msbuild()
@@ -152,19 +152,19 @@ namespace Coverlet.Integration.Tests
       Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath), StringComparison.OrdinalIgnoreCase);
 
-            string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", deterministicReport: true);
-            bool result = DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out standardError);
-            if (!string.IsNullOrEmpty(standardError))
-            {
-              _output.WriteLine(standardError);
-            }
-            else
-            {
-              _output.WriteLine(standardOutput);
-            }
-            Assert.True(result);
-            Assert.Contains("Passed!", standardOutput);
-            AssertCoverage(standardOutput);
+      string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", deterministicReport: true);
+      bool result = DotnetCli($"test -c {_buildConfiguration} --no-build \"{_testProjectPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(_testProjectPath, "log.txt")}", out standardOutput, out standardError);
+      if (!string.IsNullOrEmpty(standardError))
+      {
+        _output.WriteLine(standardError);
+      }
+      else
+      {
+        _output.WriteLine(standardOutput);
+      }
+      Assert.True(result);
+      Assert.Contains("Passed!", standardOutput);
+      AssertCoverage(standardOutput);
 
       // Check out/in process collectors injection
       string dataCollectorLogContent = File.ReadAllText(Directory.GetFiles(_testProjectPath, "log.datacollector.*.txt").Single());
@@ -178,8 +178,8 @@ namespace Coverlet.Integration.Tests
       RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
     }
 
-        [Fact]
-        public void Collectors_SourceLink()
+    [Fact]
+    public void Collectors_SourceLink()
     {
       CreateDeterministicTestPropsFile();
       DotnetCli($"build -c {_buildConfiguration} /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
@@ -231,8 +231,8 @@ namespace Coverlet.Integration.Tests
     }
 
     public void Dispose()
-        {
-            File.Delete(Path.Combine(_testProjectPath, PropsFileName));
-        }
+    {
+      File.Delete(Path.Combine(_testProjectPath, PropsFileName));
     }
+  }
 }

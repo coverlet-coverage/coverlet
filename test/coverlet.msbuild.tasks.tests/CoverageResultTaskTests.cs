@@ -4,10 +4,10 @@
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.MSbuild.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Locator;
 using Microsoft.Build.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -87,7 +87,7 @@ namespace coverlet.msbuild.tasks.tests
 
 #pragma warning disable CS8604 // Possible null reference argument for parameter..
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-      var InstrumenterState = new TaskItem(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "TestAssets\\InstrumenterState.ItemSpec.data1.xml")) ;
+      var InstrumenterState = new TaskItem(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "TestAssets\\InstrumenterState.ItemSpec.data1.xml"));
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 #pragma warning restore C8S604 // Possible null reference argument for parameter.
 

@@ -1,4 +1,3 @@
 <Project>
-  <!-- Deterministic build workaround -->
-  <Import Project="$(MSBuildThisFileDirectory)DeterministicBuild.targets" />
+
 </Project>

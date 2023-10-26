@@ -14,5 +14,5 @@ namespace Coverlet.Core.Samples.Tests
         {
             return 0;
         }
-    }  
+    }
 }

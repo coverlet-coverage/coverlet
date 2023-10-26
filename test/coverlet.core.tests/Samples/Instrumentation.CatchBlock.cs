@@ -301,7 +301,7 @@ namespace Coverlet.Core.Samples.Tests
                 {
                     return int.Parse(str);
                 }
-                catch 
+                catch
                 {
                     await Task.Delay(0);
                     if (condition)
@@ -317,7 +317,7 @@ namespace Coverlet.Core.Samples.Tests
             }
             catch
             {
-                await Task.Delay(0); 
+                await Task.Delay(0);
                 throw;
             }
         }

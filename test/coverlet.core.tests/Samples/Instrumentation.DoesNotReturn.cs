@@ -175,7 +175,7 @@
                 Throws();
                 System.Console.WriteLine("Constant-2");     //unreachable
             }                                               //unreachable
-            catch (System.InvalidOperationException e) 
+            catch (System.InvalidOperationException e)
                 when (e.Message != null)
             {
                 System.Console.WriteLine("InCatch-1");

@@ -6,19 +6,19 @@ using Coverlet.Collector.Utilities.Interfaces;
 
 namespace Coverlet.Collector.Utilities
 {
+  /// <inheritdoc />
+  internal class FileHelper : IFileHelper
+  {
     /// <inheritdoc />
-    internal class FileHelper : IFileHelper
+    public bool Exists(string path)
     {
-        /// <inheritdoc />
-        public bool Exists(string path)
-        {
-            return File.Exists(path);
-        }
-
-        /// <inheritdoc />
-        public void WriteAllText(string path, string contents)
-        {
-            File.WriteAllText(path, contents);
-        }
+      return File.Exists(path);
     }
+
+    /// <inheritdoc />
+    public void WriteAllText(string path, string contents)
+    {
+      File.WriteAllText(path, contents);
+    }
+  }
 }

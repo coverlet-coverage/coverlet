@@ -9,32 +9,32 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    public partial class CoverageTests
+  public partial class CoverageTests
+  {
+    [Fact]
+    public void GenericAsyncIterator()
     {
-        [Fact]
-        public void GenericAsyncIterator()
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<GenericAsyncIterator<int>>(async instance =>
-                    {
-                        List<int> res = await (Task<List<int>>)instance.Issue1383();
-                    }, persistPrepareResultToFile: pathSerialize[0]);
-                    return 0;
-                }, new string[] { path });
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<GenericAsyncIterator<int>>(async instance =>
+                  {
+              List<int> res = await (Task<List<int>>)instance.Issue1383();
+            }, persistPrepareResultToFile: pathSerialize[0]);
+          return 0;
+        }, new string[] { path });
 
-                TestInstrumentationHelper.GetCoverageResult(path)
-                    .Document("Instrumentation.GenericAsyncIterator.cs")
-                    .AssertLinesCovered(BuildConfiguration.Debug, (13, 1), (14, 1), (20, 1), (21, 1), (22, 1))
-                    .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
-            }
-            finally
-            {
-                File.Delete(path);
-            }
-        }
+        TestInstrumentationHelper.GetCoverageResult(path)
+            .Document("Instrumentation.GenericAsyncIterator.cs")
+            .AssertLinesCovered(BuildConfiguration.Debug, (13, 1), (14, 1), (20, 1), (21, 1), (22, 1))
+            .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
     }
+  }
 }

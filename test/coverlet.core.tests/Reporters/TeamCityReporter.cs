@@ -8,21 +8,21 @@ using Xunit;
 
 namespace Coverlet.Core.Reporters.Tests
 {
-    public class TestCreateReporterTests
+  public class TestCreateReporterTests
+  {
+    private readonly CoverageResult _result;
+    private readonly TeamCityReporter _reporter;
+
+    public TestCreateReporterTests()
     {
-        private readonly CoverageResult _result;
-        private readonly TeamCityReporter _reporter;
+      _reporter = new TeamCityReporter();
+      _result = new CoverageResult();
+      _result.Parameters = new CoverageParameters();
+      _result.Identifier = Guid.NewGuid().ToString();
 
-        public TestCreateReporterTests()
-        {
-            _reporter = new TeamCityReporter();
-            _result = new CoverageResult();
-            _result.Parameters = new CoverageParameters();
-            _result.Identifier = Guid.NewGuid().ToString();
+      var lines = new Lines { { 1, 1 }, { 2, 0 } };
 
-            var lines = new Lines { { 1, 1 }, { 2, 0 } };
-
-            var branches = new Branches
+      var branches = new Branches
             {
                 new BranchInfo
                 {
@@ -53,81 +53,81 @@ namespace Coverlet.Core.Reporters.Tests
                 }
             };
 
-            var methods = new Methods();
-            string methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestReport()";
-            methods.Add(methodString, new Method());
-            methods[methodString].Lines = lines;
-            methods[methodString].Branches = branches;
+      var methods = new Methods();
+      string methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestReport()";
+      methods.Add(methodString, new Method());
+      methods[methodString].Lines = lines;
+      methods[methodString].Branches = branches;
 
-            var classes = new Classes { { "Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods } };
+      var classes = new Classes { { "Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods } };
 
-            var documents = new Documents { { "doc.cs", classes } };
+      var documents = new Documents { { "doc.cs", classes } };
 
-            _result.Modules = new Modules { { "module", documents } };
-        }
-
-        [Fact]
-        public void OutputType_IsConsoleOutputType()
-        {
-            // Assert
-            Assert.Equal(ReporterOutputType.Console, _reporter.OutputType);
-        }
-
-        [Fact]
-        public void Format_IsExpectedValue()
-        {
-            // Assert
-            Assert.Equal("teamcity", _reporter.Format);
-        }
-
-        [Fact]
-        public void Format_IsNull()
-        {
-            // Assert
-            Assert.Null(_reporter.Extension);
-        }
-
-        [Fact]
-        public void Report_ReturnsNonNullString()
-        {
-            // Act
-            string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
-
-            // Assert
-            Assert.False(string.IsNullOrWhiteSpace(output), "Output is not null or whitespace");
-        }
-
-        [Fact]
-        public void Report_ReportsLineCoverage()
-        {
-            // Act
-            string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
-
-            // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLCovered' value='1']", output);
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLTotal' value='2']", output);
-        }
-
-        [Fact]
-        public void Report_ReportsBranchCoverage()
-        {
-            // Act
-            string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
-
-            // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBCovered' value='1']", output);
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBTotal' value='3']", output);
-        }
-
-        [Fact]
-        public void Report_ReportsMethodCoverage()
-        {
-            // Act
-            string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
-
-            // Assert
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMCovered' value='1']", output);
-            Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMTotal' value='1']", output);
-        }
+      _result.Modules = new Modules { { "module", documents } };
     }
+
+    [Fact]
+    public void OutputType_IsConsoleOutputType()
+    {
+      // Assert
+      Assert.Equal(ReporterOutputType.Console, _reporter.OutputType);
+    }
+
+    [Fact]
+    public void Format_IsExpectedValue()
+    {
+      // Assert
+      Assert.Equal("teamcity", _reporter.Format);
+    }
+
+    [Fact]
+    public void Format_IsNull()
+    {
+      // Assert
+      Assert.Null(_reporter.Extension);
+    }
+
+    [Fact]
+    public void Report_ReturnsNonNullString()
+    {
+      // Act
+      string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
+
+      // Assert
+      Assert.False(string.IsNullOrWhiteSpace(output), "Output is not null or whitespace");
+    }
+
+    [Fact]
+    public void Report_ReportsLineCoverage()
+    {
+      // Act
+      string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
+
+      // Assert
+      Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLCovered' value='1']", output);
+      Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsLTotal' value='2']", output);
+    }
+
+    [Fact]
+    public void Report_ReportsBranchCoverage()
+    {
+      // Act
+      string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
+
+      // Assert
+      Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBCovered' value='1']", output);
+      Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsBTotal' value='3']", output);
+    }
+
+    [Fact]
+    public void Report_ReportsMethodCoverage()
+    {
+      // Act
+      string output = _reporter.Report(_result, new Mock<ISourceRootTranslator>().Object);
+
+      // Assert
+      Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMCovered' value='1']", output);
+      Assert.Contains("##teamcity[buildStatisticValue key='CodeCoverageAbsMTotal' value='1']", output);
+    }
+  }
 }

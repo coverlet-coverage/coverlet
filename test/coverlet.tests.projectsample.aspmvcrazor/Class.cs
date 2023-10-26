@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Mvc.Razor;
 
 namespace coverlet.tests.projectsample.aspmvcrazor
 {
-    public static class Class
+  public static class Class
+  {
+    public static IMvcBuilder AddLocalization(this IMvcBuilder mvcBuilder,
+        LanguageViewLocationExpanderFormat viewLocationExpanderFormat = LanguageViewLocationExpanderFormat.Suffix)
     {
-        public static IMvcBuilder AddLocalization(this IMvcBuilder mvcBuilder,
-            LanguageViewLocationExpanderFormat viewLocationExpanderFormat = LanguageViewLocationExpanderFormat.Suffix)
-        {
-            return mvcBuilder;
-        }
+      return mvcBuilder;
     }
+  }
 }

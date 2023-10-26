@@ -6,11 +6,11 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
-    public class SystemConsole : IConsole
+  public class SystemConsole : IConsole
+  {
+    public void WriteLine(string value)
     {
-        public void WriteLine(string value)
-        {
-            Console.WriteLine(value);
-        }
+      Console.WriteLine(value);
     }
+  }
 }
