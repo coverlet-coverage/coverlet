@@ -39,6 +39,13 @@ jobs:
       ArtifactName: Packages
       publishLocation: Container
     condition: eq(variables['BuildConfiguration'], 'Release')
+  - task: PublishBuildArtifacts@1
+    displayName: Publish tests artifacts
+    inputs:
+      PathtoPublish: $(Build.SourcesDirectory)\artifacts\publish
+      ArtifactName: PublishedTests
+      publishLocation: Container
+    condition: eq(variables['BuildConfiguration'], 'Debug')
   - template: CheckNugetStatus.yml
     parameters:
       sourcePath: '$(Build.SourcesDirectory)/src'

@@ -4,22 +4,22 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
+    <!--<GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />-->
     <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.6.133" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0-rc.1.23419.4" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.7.2" />
-    <PackageVersion Include="Microsoft.Build.Framework" Version="17.7.2" />
-    <PackageVersion Include="Microsoft.Build.Locator" Version="1.6.10" />
-    <!--<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0-2.final" />-->
-    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.0-rc.1.23419.4" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-rc.1.23419.4" />
-    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0-rc.1.23419.4" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0-rc.2.23479.6" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.5.0" />
+    <PackageVersion Include="Microsoft.Build.Framework" Version="17.5.0"/>
+    <PackageVersion Include="Microsoft.Build.Locator" Version="1.5.5" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.0-rc.2.23479.6" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-rc.2.23479.6" />
+    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0-rc.2.23479.6" />
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0-rc.1.23419.4" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0-release-23468-02" />
-    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.8.0-release-23468-02" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0-rc.2.23479.6" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0-preview-23503-02" />
+    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.9.0-preview-23503-02" />
     <!-- Microsoft.TestPlatform.ObjectModel has a dependency to NuGet.Frameworks with specific version -->
     <!-- https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L35-->
     <!-- wrong configuration will create "build\coverlet.msbuild.targets(72,5): error : Unable to read beyond the end of the stream."  -->
@@ -31,6 +31,7 @@
     -->
     <PackageVersion Include="NuGet.Frameworks" Version="6.6.1" />
     <PackageVersion Include="NuGet.Packaging" Version="6.5.0" />
+    <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.5" />
     <PackageVersion Include="Moq" Version="4.20.69" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
@@ -39,21 +40,15 @@
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.4" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
-    <PackageVersion Include="System.Collections.Immutable" Version="8.0.0-rc.1.23419.4" />
+    <PackageVersion Include="System.Collections.Immutable" Version="8.0.0-rc.2.23479.6" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
-    <!--
-        Do not change System.Reflection.Metadata version since we need to support VSTest DataCollectors. Goto https://www.nuget.org/packages/System.Reflection.Metadata to check versions.
-        We need to load assembly version 1.6.0 to properly work
-        We can check minimum supported package version here https://github.com/Microsoft/vstest/blob/master/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L34
-     -->
-    <PackageVersion Include="System.Reflection.Metadata" Version="1.6.0" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.0-rc.1.23419.4" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="8.0.0-rc.2.23479.6" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.0-rc.2.23479.6" />
     <PackageVersion Include="Tmds.ExecFunction" Version="0.6.0" />
     <PackageVersion Include="xunit" Version="2.5.3" />
     <PackageVersion Include="xunit.assemblyfixture" Version="2.2.0" />
     <PackageVersion Include="xunit.assert" Version="2.5.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3" />
-    <PackageVersion Include="envdte" Version="17.7.37355" />
     <PackageVersion Include="System.Buffers" Version="4.5.1" />
     <PackageVersion Include="System.Memory" Version="4.5.5" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />

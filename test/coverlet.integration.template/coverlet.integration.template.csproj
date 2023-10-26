@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net8.0;net7.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsamplelib.integration.template</AssemblyName>
     <IsTestProject>false</IsTestProject>
@@ -16,7 +16,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Collections.Immutable" Version="8.0.0-rc.1.23419.4" />
   </ItemGroup>
 
 </Project>

@@ -309,3 +309,5 @@ coverage.cobertura.xml
 coverage.opencover.xml
 coverage.*.cobertura.xml
 coverage.*.opencover.xml
+
+DefaultVersions.Generated.props

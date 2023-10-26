@@ -109,18 +109,18 @@ namespace Coverlet.Integration.Tests
       return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
     }
 
-    private protected void UpdateNugeConfigtWithLocalPackageFolder(string projectPath)
-    {
-      string nugetFile = Path.Combine(projectPath, "nuget.config");
-      if (!File.Exists(nugetFile))
-      {
-        throw new FileNotFoundException("Nuget.config not found", "nuget.config");
-      }
-      XDocument xml;
-      using (FileStream? nugetFileStream = File.OpenRead(nugetFile))
-      {
-        xml = XDocument.Load(nugetFileStream);
-      }
+        private protected void UpdateNugetConfigWithLocalPackageFolder(string projectPath)
+        {
+            string nugetFile = Path.Combine(projectPath, "nuget.config");
+            if (!File.Exists(nugetFile))
+            {
+                throw new FileNotFoundException("Nuget.config not found", "nuget.config");
+            }
+            XDocument xml;
+            using (FileStream? nugetFileStream = File.OpenRead(nugetFile))
+            {
+                xml = XDocument.Load(nugetFileStream);
+            }
 
             string localPackageFolder = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower());
 

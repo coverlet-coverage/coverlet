@@ -135,24 +135,24 @@ namespace Coverlet.Core.Helpers
         return _resolutionCacheFiles[originalFileName];
       }
 
-      foreach (KeyValuePair<string, List<SourceRootMapping>> mapping in _sourceRootMapping)
-      {
-        if (originalFileName.StartsWith(mapping.Key))
-        {
-          foreach (SourceRootMapping srm in mapping.Value)
-          {
-            string pathToCheck;
-            if (_fileSystem.Exists(pathToCheck = Path.GetFullPath(originalFileName.Replace(mapping.Key, srm.OriginalPath))))
+            foreach (KeyValuePair<string, List<SourceRootMapping>> mapping in _sourceRootMapping)
             {
-              (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
-              _logger.LogVerbose($"Mapping resolved: '{FileSystem.EscapeFileName(originalFileName)}' -> '{FileSystem.EscapeFileName(pathToCheck)}'");
-              return pathToCheck;
+                if (originalFileName.StartsWith(mapping.Key))
+                {
+                    foreach (SourceRootMapping srm in mapping.Value)
+                    {
+                        string pathToCheck;
+                        if (_fileSystem.Exists(pathToCheck = Path.GetFullPath(originalFileName.Replace(mapping.Key, srm.OriginalPath))))
+                        {
+                            (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
+                            _logger.LogInformation($"Mapping resolved: '{FileSystem.EscapeFileName(originalFileName)}' -> '{FileSystem.EscapeFileName(pathToCheck)}'", true);
+                            return pathToCheck;
+                        }
+                    }
+                }
             }
-          }
+            return originalFileName;
         }
-      }
-      return originalFileName;
-    }
 
     public string ResolveDeterministicPath(string originalFileName)
     {

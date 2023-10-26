@@ -12,7 +12,7 @@ Finally, thanks to deterministic CI builds (with the `ContinuousIntegrationBuild
 
 ## Deterministic report
 
-Coverlet supports also deterministic reports(for now only for cobertura coverage format).
+Coverlet supports also deterministic reports(for now only for __Cobertura__ coverage format).
 If you include `DeterministicReport` parameters for `msbuild` and `collectors` integrations resulting report will be like:
 
 ```xml
