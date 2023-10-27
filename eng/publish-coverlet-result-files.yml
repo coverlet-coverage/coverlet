@@ -8,9 +8,9 @@ steps:
     Contents: |
        **/*.trx
        **/*.html
-       **/coverage.opencover.xml
-       **/coverage.cobertura.xml
-       **/coverage.json
+       **/*.opencover.xml
+       **/*.cobertura.xml
+       **/*.coverage.json
        **/log.txt
        **/log.datacollector.*.txt
        **/log.host.*.txt

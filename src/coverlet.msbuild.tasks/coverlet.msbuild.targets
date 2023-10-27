@@ -35,7 +35,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="InstrumentModules">
+  <Target Name="InstrumentModules" Condition="'$(TargetPath)' != ''">
     <Coverlet.MSbuild.Tasks.InstrumentationTask
       Path="$(TargetPath)"
       Include="$(Include)"
@@ -65,7 +65,7 @@
           DependsOnTargets="InstrumentModules"
           Condition="'$(VSTestNoBuild)' != 'true' and '$(CollectCoverage)' == 'true'" />
 
-  <Target Name="GenerateCoverageResult">
+  <Target Name="GenerateCoverageResult" Condition="'$(InstrumenterState)' != ''">
     <PropertyGroup>
       <_coverletMultiTargetFrameworksCurrentTFM Condition="'$(TargetFrameworks)' != ''" >$(TargetFramework)</_coverletMultiTargetFrameworksCurrentTFM>
     </PropertyGroup>
