@@ -22,8 +22,10 @@
       https://api.nuget.org/v3/index.json;
       $(RepoRoot)artifacts/package/debug
     </RestoreSources>
+    <!--<UsingMicrosoftArtifactsSdk>true</UsingMicrosoftArtifactsSdk>-->
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+    <CoverletVersion Condition="'$(CoverletVersion)'==''">6.0.0</CoverletVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
