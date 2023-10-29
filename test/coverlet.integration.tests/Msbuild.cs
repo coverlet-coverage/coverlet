@@ -44,7 +44,7 @@ namespace Coverlet.Integration.Tests
     {
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError), standardOutput);
-      Assert.Contains("Passed!", standardOutput);
+      Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput, StringComparison.Ordinal);
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "coverage.json")));
       AssertCoverage(clonedTemplateProject);
@@ -78,7 +78,7 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       Assert.False(clonedTemplateProject.IsMultipleTargetFramework());
       string framework = clonedTemplateProject.GetTargetFrameworks().Single();
-      Assert.True(DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError), standardOutput);
+      DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -97,7 +97,7 @@ namespace Coverlet.Integration.Tests
     public void TestMsbuild_CoverletOutput_Folder_FileNameWithDoubleExtension()
     {
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      Assert.True(DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError), standardOutput);
+      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
