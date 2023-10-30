@@ -2,7 +2,7 @@
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
     <MSBuildWarningsAsMessages>NU1702;NU1504;NU1008</MSBuildWarningsAsMessages>
