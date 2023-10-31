@@ -1,13 +1,19 @@
+parameters:
+  - name: additionalPackOptions
+    default: ''
+  - name: runTests
+    default: true
+
 steps:
 - task: UseDotNet@2
   inputs:
     version: 6.0.415
-  displayName: Install .NET Core SDK 6.0.415
+  displayName: Install .NET Core SDK for projects
 
 - task: UseDotNet@2
   inputs:
-    version: 7.0.402
-  displayName: Install .NET Core SDK 7.0.402
+    useGlobalJson: true
+  displayName: Install .NET Core SDK 7.0 for additional tests
 
 - script: dotnet restore
   displayName: Restore packages
@@ -15,11 +21,12 @@ steps:
 - script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.binlog
   displayName: Build
 
-- script: dotnet pack -c $(BuildConfiguration) --no-restore
+- script: dotnet pack -c $(BuildConfiguration) --no-restore ${{ parameters.additionalPackOptions }}
   displayName: Pack
 
 - task: DotNetCoreCLI@2
   displayName: Run tests with coverage
+  enabled: ${{ parameters.runTests }}
   inputs:
     command: test
     projects: |
@@ -27,7 +34,7 @@ steps:
          **/coverlet.core.tests.csproj
          **/coverlet.integration.tests.csproj
          **/coverlet.msbuild.tasks.tests.csproj
-    arguments: -c $(BuildConfiguration) --no-build -bl:test.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(Configuration)\coverlet.test.diag.log;tracelevel=verbose"
+    arguments: -c $(BuildConfiguration) --no-build -bl:test.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(Configuration)\coverlet.test.diag.log;tracelevel=verbose" -- RunConfiguration.TreatNoTestsAsError=true
     testRunTitle: $(Agent.JobName)
 
 - template: publish-coverlet-result-files.yml

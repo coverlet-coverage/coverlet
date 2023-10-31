@@ -104,6 +104,7 @@ namespace Coverlet.Integration.Tests
       commandProcess.StartInfo.RedirectStandardError = true;
       commandProcess.StartInfo.RedirectStandardOutput = true;
       commandProcess.StartInfo.UseShellExecute = false;
+      commandProcess.StartInfo.Environment["DOTNET_CLI_UI_LANGUAGE"] = "en";
       string eOut = "";
       commandProcess.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => { eOut += e.Data; });
       commandProcess.Start();
@@ -112,6 +113,11 @@ namespace Coverlet.Integration.Tests
       standardOutput = commandProcess.StandardOutput.ReadToEnd();
       if (!commandProcess.WaitForExit((int)TimeSpan.FromMinutes(5).TotalMilliseconds))
       {
+        Console.WriteLine("Standard output so far:");
+        Console.WriteLine(commandProcess.StandardOutput.ReadToEnd());
+        Console.WriteLine("Standard error so far:");
+        Console.WriteLine(commandProcess.StandardError.ReadToEnd());
+        Console.WriteLine("Standard output complete.");
         throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
       }
       standardError = eOut;
@@ -232,8 +238,8 @@ namespace Coverlet.Integration.Tests
       string runSettings =
 $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
   <RunSettings>
-    <DataCollectionRunSettings>  
-      <DataCollectors>  
+    <DataCollectionRunSettings>
+      <DataCollectors>
         <DataCollector friendlyName=""XPlat code coverage"" >
            <Configuration>
             <Format>json,cobertura</Format>
