@@ -1,0 +1,69 @@
+# File: CheckNugetStatus.yml
+# the template will write lists of outdated, deprecated or vulnerable nuget packages to build log for every C# project. If a deprecated or vulnerable package is detected, an error will be written to the build log.
+# Precondition: restore and build was executed before this template is used
+# Limitation:   dotnet SDK does not provide .NET framework MSBuild targets like "Microsoft.WebApplication.targets". This c# projects will be ignored and "An error occurred for <file name of C# project>" message is added in build log.
+
+parameters:
+  condition: 'succeeded()'
+  enableQualitySteps: true
+  sourcePath: ''
+  nugetConfig: ''
+  breakBuild: false
+
+steps:
+- task: NuGetAuthenticate@0
+  condition: ${{parameters.condition}}
+  enabled: ${{parameters.enableQualitySteps}}
+
+- task: PowerShell@2
+  displayName: 'Check nuget package status'
+  inputs:
+    targetType: 'inline'
+    pwsh: true
+    script: |
+        Write-Information -MessageData "sourcePath='${{parameters.sourcePath}}'" -InformationAction Continue
+        Write-Information -MessageData "nugetConfig='${{parameters.nugetConfig}}'" -InformationAction Continue
+        Write-Information -MessageData "#########################################" -InformationAction Continue
+        if (!(Test-Path "${{parameters.sourcePath}}" -PathType Container)) {
+          Write-Host "##vso[task.LogIssue type=error;]sourcePath does not exist."
+        }
+        $existsDeprecatedPackage = $false
+        $existsVulnerablePackage = $false
+
+        $projectFiles = Get-ChildItem -Path ${{parameters.sourcePath}} -Filter *.csproj -Recurse
+        foreach ($project in $projectFiles) {
+            try {
+            $outdatedList = dotnet list $project package --outdated --include-transitive --source https://api.nuget.org/v3/index.json
+            if ($LASTEXITCODE -gt 0)  {
+                Throw "The command exited with error code: $lastexitcode"
+            }
+            $outdatedList
+            $deprecatedList = dotnet list $project package --deprecated --include-transitive --source https://api.nuget.org/v3/index.json
+            if ($deprecatedList.Length -gt 5) {
+                $deprecatedList
+                $existsDeprecatedPackage = $true
+            } else {
+                $deprecatedList[4]
+            }
+            $vulnerableList = dotnet list $project package --vulnerable --source https://api.nuget.org/v3/index.json
+            if ($vulnerableList.Length -gt 5) {
+                $vulnerableList
+                $existsVulnerablePackage = $true
+            } else {
+                $vulnerableList[4]
+            }
+            } catch { "An error occurred for $($project.PSChildName)" }
+        }
+        if ( $existsDeprecatedPackage -or $existsVulnerablePackage) {
+            Write-Host "##vso[task.LogIssue type=error;]Detected nuget package: Deprecated = $existsDeprecatedPackage, Vulnerable =  $existsVulnerablePackage"
+            if ("${{parameters.breakBuild}}" -eq "true") {
+                exit 42
+            }
+        } else {
+            Write-Information -MessageData "Did not detected deprecated or vulnerable nuget package." -InformationAction Continue
+        }
+        exit 0
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+  condition: ${{parameters.condition}}
+  enabled: ${{parameters.enableQualitySteps}}
