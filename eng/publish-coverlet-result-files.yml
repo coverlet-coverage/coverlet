@@ -1,6 +1,6 @@
 steps:
 - task: CopyFiles@2
-  displayName: Copy tests results
+  displayName: Copy test results
   continueOnError: true
   condition: always()
   inputs:
@@ -25,11 +25,13 @@ steps:
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: CopyFiles@2
-  displayName: Copy binlog files
+  displayName: Copy log files
   condition: always()
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)'
-    Contents: '**/*.binlog'
+    Contents: |
+        **/*.diag.log
+        **/*.binlog
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs/BuildLogs'
 
 - task: PublishPipelineArtifact@1
