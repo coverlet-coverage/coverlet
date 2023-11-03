@@ -37,6 +37,11 @@ jobs:
       ArtifactName: Packages
       publishLocation: Container
     condition: eq(variables['BuildConfiguration'], 'Release')
+  - template: CheckNugetStatus.yml
+    parameters:
+      sourcePath: '$(Build.SourcesDirectory)/src'
+      breakBuild: false
+     # nugetConfig: '$(Build.SourcesDirectory)/nuget.config'
 
 - job: macOS
   displayName: macOS
