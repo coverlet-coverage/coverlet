@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+-Fix ExcludeFromCodeCoverage does not exclude F# task [#1547](https://github.com/coverlet-coverage/coverlet/issues/1547) 
 -Fix issues where ExcludeFromCodeCoverage ignored [#1431](https://github.com/coverlet-coverage/coverlet/issues/1431)
 -Fix issues with ExcludeFromCodeCoverage attribute [#1484](https://github.com/coverlet-coverage/coverlet/issues/1484)
 -Fix broken links in documentation [#1514](https://github.com/coverlet-coverage/coverlet/issues/1514)
