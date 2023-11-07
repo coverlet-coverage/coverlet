@@ -62,7 +62,8 @@ Total tests: 1
  Total time: 2,5451 Seconds
 ```
 
-You can change the position of files using standard `dotnet test` switch `[-r|--results-directory]`
+You can change the output directory using the standard `dotnet test` switch `--results-directory`
+
 >*NB: By design VSTest platform will create your file under a random named folder(guid string) so if you need stable path to load file to some gui report system(i.e. coveralls, codecov, reportgenerator etc..) that doesn't support glob patterns or hierarchical  search, you'll need to manually move resulting file to a predictable folder*
 
 ## Coverlet options supported by VSTest integration
