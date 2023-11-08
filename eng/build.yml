@@ -36,12 +36,6 @@ steps:
   displayName: Pack
 
 - script: |
-    dotnet publish -c $(BuildConfiguration) test/coverlet.core.tests/coverlet.core.tests.csproj
-    dotnet publish -c $(BuildConfiguration) test/coverlet.collector.tests/coverlet.collector.tests.csproj
-    dotnet publish -c $(BuildConfiguration) test/test/coverlet.integration.tests/coverlet.integration.tests.csproj
-    dotnet publish -c $(BuildConfiguration) test/coverlet.integration.determisticbuild/coverlet.integration.determisticbuild.csproj
-  displayName: Publish tests
-- script: |
     dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.collector.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.collector.test.diag.log;tracelevel=verbose"
     dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.core.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.core.test.diag.log;tracelevel=verbose"
     dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.integration.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.integration.test.diag.log;tracelevel=verbose"

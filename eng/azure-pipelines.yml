@@ -55,7 +55,7 @@ jobs:
 - job: macOS
   displayName: macOS
   continueOnError: 'true'
-  timeoutInMinutes: 10
+  timeoutInMinutes: 15
   cancelTimeoutInMinutes: 5
   strategy:
     matrix:
@@ -71,7 +71,7 @@ jobs:
 - job: Linux
   displayName: Linux
   continueOnError: 'true'
-  timeoutInMinutes: 10
+  timeoutInMinutes: 15
   cancelTimeoutInMinutes: 5
   strategy:
     matrix:
