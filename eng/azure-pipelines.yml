@@ -5,7 +5,7 @@ trigger:
     exclude: [".github", "Documentation", "*.md"]
 
 variables:
-  system.debug: false
+  system.debug: true
 
 jobs:
 - job: Windows
