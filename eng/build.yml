@@ -19,10 +19,10 @@ steps:
   displayName: Pack
 
 - script: |
-    dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.collector.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.collector.test.diag.log;tracelevel=verbose"
-    dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.core.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.core.test.diag.log;tracelevel=verbose"
-    dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.integration.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.integration.test.diag.log;tracelevel=verbose"
-    dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.msbuild.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.msbuild.test.diag.log;tracelevel=verbose"
+    dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.collector.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*%2c[testgen_]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.collector.test.diag.log;tracelevel=verbose"
+    dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.core.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*%2c[testgen_]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.core.test.diag.log;tracelevel=verbose"
+    dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.integration.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*%2c[testgen_]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.integration.test.diag.log;tracelevel=verbose"
+    dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.msbuild.binlog --results-directory:"$(Build.SourcesDirectory)\artifacts\Reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*%2c[testgen_]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$(Build.SourcesDirectory)\artifacts\log\$(buildConfiguration)\coverlet.msbuild.test.diag.log;tracelevel=verbose"
   displayName: Run tests with coverage
 
 - task: PublishTestResults@2
@@ -31,6 +31,7 @@ steps:
     testResultsFiles: '**/*.trx'
     mergeTestResults: false
     publishRunAttachments: true
+    failTaskOnFailedTests: true
 
 
 - template: publish-coverlet-result-files.yml
@@ -38,6 +39,6 @@ steps:
 - template: publish-coverage-results.yml
   parameters:
     reports: $(Build.SourcesDirectory)/**/*.opencover.xml
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'), eq(variables['agent.os'], 'Windows_NT'))
     assemblyfilters: '-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*'
     classfilters: '-[coverlet.core.tests.samples.netstandard]*;-[coverlet.tests.xunit.extensions]*'
