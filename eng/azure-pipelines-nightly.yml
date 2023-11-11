@@ -1,6 +1,9 @@
 pool:
   vmImage: 'windows-latest'
 
+#variables:
+# - group: 'code-signing'
+  
 steps:
 - task: UseDotNet@2
   inputs:
