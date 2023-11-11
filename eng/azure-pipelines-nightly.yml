@@ -17,6 +17,26 @@ steps:
 
 - script: dotnet pack -c Release /p:PublicRelease=false
   displayName: Create NuGet packages
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))
+
+- script: dotnet pack -c Release /p:PublicRelease=true
+  displayName: Create NuGet packages
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'))
+
+- pwsh: >
+    dotnet tool install --tool-path obj SignClient
+
+    obj/SignClient sign
+    --baseDirectory '$(Build.ArtifactStagingDirectory)/bin'
+    --input '**/*.nupkg'
+    --config '$(System.DefaultWorkingDirectory)/eng/signclient.json'
+    --user '$(codesign_username)'
+    --secret '$(codesign_secret)'
+    --name 'Coverlet'
+    --descriptionUrl 'https://github.com/coverlet-coverage/coverlet'
+  displayName: 🔏 Code sign
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual')))
+  enabled: false
 
 - task: NuGetCommand@2
   inputs:
