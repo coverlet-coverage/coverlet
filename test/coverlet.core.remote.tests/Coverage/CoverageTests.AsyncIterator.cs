@@ -19,10 +19,10 @@ namespace Coverlet.Core.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncIterator>(async instance =>
-                  {
-              int res = await (Task<int>)instance.Issue1104_Repro();
+          {
+            int res = await (Task<int>)instance.Issue1104_Repro();
 
-            }, persistPrepareResultToFile: pathSerialize[0]);
+          }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, new string[] { path });
 

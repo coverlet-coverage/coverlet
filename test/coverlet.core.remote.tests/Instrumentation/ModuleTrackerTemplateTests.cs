@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using coverlet.core.remote.tests;
 using Coverlet.Core.Instrumentation;
+using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Instrumentation

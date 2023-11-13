@@ -3,8 +3,8 @@
 
 using System.IO;
 using System.Threading.Tasks;
+using coverlet.core.remote.tests;
 using Coverlet.Core.Samples.Tests;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -22,21 +22,21 @@ namespace Coverlet.Core.Tests
         // Lambda will run in a custom process to avoid issue with statics and file locking
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-          // Run load and call a delegate passing class as dynamic to simplify method call
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                  // Run load and call a delegate passing class as dynamic to simplify method call
+                  CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                   {
-                    // We call method to trigger coverage hits
-                    instance.If(true);
+                      // We call method to trigger coverage hits
+                      instance.If(true);
 
-                    // For now we have only async Run helper
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
+                      // For now we have only async Run helper
+                      return Task.CompletedTask;
+            }, persistPrepareResultToFile: pathSerialize[0]);
 
-          // we return 0 if we return something different assert fail
-          return 0;
+                  // we return 0 if we return something different assert fail
+                  return 0;
         }, new string[] { path });
 
-        // We retrieve and load CoveragePrepareResult and run coverage calculation
+        // We retrive and load CoveragePrepareResult and run coverage calculation
         // Similar to msbuild coverage result task
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -67,9 +67,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                   {
-                    instance.Switch(1);
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
+              instance.Switch(1);
+              return Task.CompletedTask;
+            }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, new string[] { path });
 
@@ -97,9 +97,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                   {
-                    instance.SwitchCsharp8(int.MaxValue);
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
+              instance.SwitchCsharp8(int.MaxValue);
+              return Task.CompletedTask;
+            }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, new string[] { path });
 
@@ -126,16 +126,16 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                   {
-                    instance.SwitchCsharp8(int.MaxValue);
-                    instance.SwitchCsharp8(uint.MaxValue);
-                    instance.SwitchCsharp8(short.MaxValue);
-                    try
-                    {
-                      instance.SwitchCsharp8("");
-                    }
-                    catch { }
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
+              instance.SwitchCsharp8(int.MaxValue);
+              instance.SwitchCsharp8(uint.MaxValue);
+              instance.SwitchCsharp8(short.MaxValue);
+              try
+              {
+                instance.SwitchCsharp8("");
+              }
+              catch { }
+              return Task.CompletedTask;
+            }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, new string[] { path });
 

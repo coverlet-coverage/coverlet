@@ -1,0 +1,35 @@
+<!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. -->
+<Project>
+
+  <PropertyGroup>
+    <RemoteExecutorName>Microsoft.DotNet.RemoteExecutor</RemoteExecutorName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <RemoteHostAppConfigFile>$(OutDir)$(RemoteExecutorName).exe.config</RemoteHostAppConfigFile>
+  </PropertyGroup>
+
+  <Target Name="_CopyRemoteClientAppConfigFile"
+          AfterTargets="_CopyAppConfigFile"
+          Inputs="@(AppConfigWithTargetPath)"
+          Outputs="$(RemoteHostAppConfigFile)"
+          Condition="'@(AppConfigWithTargetPath)' != '' and '$(RemoteHostAppConfigFile)' != ''">
+    <Copy SourceFiles="@(AppConfigWithTargetPath)"
+          DestinationFiles="$(RemoteHostAppConfigFile)"
+          SkipUnchangedFiles="true"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+    
+    <ItemGroup>
+      <ResolvedFileToPublish Include="$(RemoteHostAppConfigFile)"
+                             RelativePath="$([System.IO.Path]::GetFileName('$(RemoteHostAppConfigFile)'))"
+                             CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+
+</Project>

@@ -19,10 +19,10 @@ namespace Coverlet.Core.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(async instance =>
-                  {
-              instance.InvokeAnonymous_Test();
-              await (Task<bool>)instance.InvokeAnonymousAsync_Test();
-            }, persistPrepareResultToFile: pathSerialize[0]);
+          {
+            instance.InvokeAnonymous_Test();
+            await (Task<bool>)instance.InvokeAnonymousAsync_Test();
+          }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, new string[] { path });
 
@@ -52,9 +52,9 @@ namespace Coverlet.Core.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_730>(async instance =>
-                  {
-              await (Task)instance.Invoke();
-            },
+          {
+            await (Task)instance.Invoke();
+          },
                   persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
@@ -80,10 +80,10 @@ namespace Coverlet.Core.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_760>(async instance =>
-                  {
-              await (Task)instance.If();
-              await (Task)instance.Foreach();
-            },
+          {
+            await (Task)instance.If();
+            await (Task)instance.Foreach();
+          },
                   persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
@@ -109,10 +109,10 @@ namespace Coverlet.Core.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1056>(instance =>
-                  {
-                    instance.T1();
-                    return Task.CompletedTask;
-                  },
+          {
+            instance.T1();
+            return Task.CompletedTask;
+          },
                   persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;

@@ -101,7 +101,8 @@ namespace Coverlet.Integration.Tests
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
-      } else
+      }
+      else
       {
         _output.WriteLine(standardOutput);
       }

@@ -22,11 +22,11 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                   {
-                    try { instance.NoBranches(); }
-                    catch (Exception) { }
-                    return Task.CompletedTask;
+              try { instance.NoBranches(); }
+              catch (Exception) { }
+              return Task.CompletedTask;
 
-                  }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+            }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
           return 0;
 
@@ -54,11 +54,11 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
-                        try { instance.If(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+                  try { instance.If(); }
+                  catch (Exception) { }
+                  return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0]);
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -86,11 +86,11 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
-                        try { instance.Switch(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+                  try { instance.Switch(); }
+                  catch (Exception) { }
+                  return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0]);
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -118,11 +118,11 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
-                        try { instance.Subtle(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+                  try { instance.Subtle(); }
+                  catch (Exception) { }
+                  return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0]);
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -150,11 +150,11 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
-                        try { instance.UnreachableBranch(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+                  try { instance.UnreachableBranch(); }
+                  catch (Exception) { }
+                  return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0]);
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -182,11 +182,11 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
-                        try { instance.CallsGenericMethodDoesNotReturn(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+                  try { instance.CallsGenericMethodDoesNotReturn(); }
+                  catch (Exception) { }
+                  return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+                }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
           return 0;
 
@@ -214,11 +214,11 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
-                        try { instance.CallsGenericClassDoesNotReturn(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+                  try { instance.CallsGenericClassDoesNotReturn(); }
+                  catch (Exception) { }
+                  return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+                }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
           return 0;
 
@@ -246,11 +246,11 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
-                        try { instance.WithLeave(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+                  try { instance.WithLeave(); }
+                  catch (Exception) { }
+                  return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+                }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
           return 0;
 
@@ -278,11 +278,11 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
-                        try { instance.FiltersAndFinallies(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+                  try { instance.FiltersAndFinallies(); }
+                  catch (Exception) { }
+                  return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+                }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
 
           return 0;
 
