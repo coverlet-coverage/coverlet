@@ -14,7 +14,7 @@
     <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
     <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutableVersion)"/>
-    <PackageReference Include="System.Text.Json" VersionOverride="6.0.8"/>
+    <PackageReference Include="System.Text.Json" VersionOverride="8.0.0"/>
   </ItemGroup>
 
 </Project>
