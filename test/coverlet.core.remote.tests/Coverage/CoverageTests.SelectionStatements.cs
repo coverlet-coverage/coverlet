@@ -36,7 +36,7 @@ namespace Coverlet.Core.Tests
                   return 0;
         }, new string[] { path });
 
-        // We retrive and load CoveragePrepareResult and run coverage calculation
+        // We retrieve and load CoveragePrepareResult and run coverage calculation
         // Similar to msbuild coverage result task
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 

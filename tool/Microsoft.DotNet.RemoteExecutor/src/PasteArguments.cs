@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.RemoteExecutor
         private const char Backslash = '\\';
 
         /// <summary>
-        /// Repastes a set of arguments into a linear string that parses back into the originals under pre- or post-2008 VC parsing rules.
+        /// Re-pastes a set of arguments into a linear string that parses back into the originals under pre- or post-2008 VC parsing rules.
         /// The rules for parsing the executable name (argv[0]) are special, so you must indicate whether the first argument actually is argv[0].
         /// </summary>
         public static string Paste(IEnumerable<string> arguments, bool pasteFirstArgumentUsingArgV0Rules)
