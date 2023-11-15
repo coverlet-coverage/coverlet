@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-
+using System.Text.RegularExpressions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Extensions;
 
@@ -243,6 +243,46 @@ namespace Coverlet.Core.Symbols
             // LambdaCacheField  https://github.com/dotnet/roslyn/blob/e704ca635bd6de70a0250e34c4567c7a28fa9f6d/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L31
             // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs#L145
             fd.Name.StartsWith("<>9_") &&
+            IsCompilerGenerated(fd))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    private static bool SkipDelegateCacheField(Instruction instruction)
+    {
+      /*
+          Delegate cached field pattern (e.g. method groups)
+
+          IL_0001: ldc.i4.1
+          IL_0002: newarr       [System.Runtime]System.Int32
+          IL_0007: dup
+          IL_0008: ldc.i4.0
+          IL_0009: ldc.i4.1
+          IL_000a: stelem.i4
+          IL_000b: ldsfld       class [System.Runtime]System.Func`2<int32, int32> Coverlet.Core.Samples.Tests.Issue_1447/'<>O'::'<0>__Map'
+          IL_0010: dup
+          IL_0011: brtrue.s     IL_0026 -> CHECK IF CACHED FIELD IS NULL OR JUMP TO DELEGATE USAGE
+
+          IL_0013: pop
+          IL_0014: ldnull
+          IL_0015: ldftn        int32 Coverlet.Core.Samples.Tests.Issue_1447::Map(int32)
+          IL_001b: newobj       instance void class [System.Runtime]System.Func`2<int32, int32>::.ctor(object, native int)
+          IL_0020: dup
+          IL_0021: stsfld       class [System.Runtime]System.Func`2<int32, int32> Coverlet.Core.Samples.Tests.Issue_1447/'<>O'::'<0>__Map'
+
+          (USE DELEGATE FIELD)
+          IL_0026: call         class [System.Runtime]System.Collections.Generic.IEnumerable`1<!!1> [System.Linq]System.Linq.Enumerable::Select<int32, int32>(class [System.Runtime] System.Collections.Generic.IEnumerable`1<!!0>, class [System.Runtime] System.Func`2<!!0, !!1>)
+       */
+
+      Instruction current = instruction.Previous;
+      for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
+      {
+        if (current.OpCode == OpCodes.Ldsfld && current.Operand is FieldDefinition fd &&
+            // https://github.com/dotnet/roslyn/blob/main/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs#L513
+            Regex.IsMatch(fd.Name, "^<\\d+>__") &&
             IsCompilerGenerated(fd))
         {
           return true;
@@ -984,7 +1024,7 @@ namespace Coverlet.Core.Symbols
             continue;
           }
 
-          if (SkipLambdaCachedField(instruction))
+          if (SkipLambdaCachedField(instruction) || SkipDelegateCacheField(instruction))
           {
             continue;
           }

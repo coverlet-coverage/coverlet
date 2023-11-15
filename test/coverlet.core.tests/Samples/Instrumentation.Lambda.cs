@@ -130,4 +130,19 @@ namespace Coverlet.Core.Samples.Tests
 
         public void WriteLine(string str) { }
     }
+
+    public class Issue_1447
+    {
+        public System.Collections.Generic.IEnumerable<int> Query1()
+        {
+            return new[] { 1 }.Select(Map);
+        }
+
+        public System.Collections.Generic.IEnumerable<int> Query2()
+        {
+            return new[] { 1 }.Select(Map);
+        }
+
+        private static int Map(int row) => row + 1;
+    }
 }
