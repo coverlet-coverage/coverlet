@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
     <PackageReference Include="Moq" Version="4.20.69" />
-    <PackageReference Include="ReportGenerator.Core" Version="5.1.26" />
+    <PackageReference Include="ReportGenerator.Core" Version="5.2.0" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="System.Reflection.Metadata" Version="8.0.0" />
     <PackageReference Include="Tmds.ExecFunction" Version="0.6.0" />

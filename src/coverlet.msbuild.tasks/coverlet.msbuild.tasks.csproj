@@ -61,6 +61,7 @@
     <None Include="..\..\Documentation\MSBuildIntegration.md" Link="MSBuildIntegration.md" Pack="true" PackagePath="\">
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </None>
+    <!--<None Include="$(ProjectDepsFilePath)" Pack="true" PackagePath="build\" />-->
   </ItemGroup>
 
   <Target Name="PackBuildOutputs" DependsOnTargets="ResolveProjectReferences;SatelliteDllsProjectOutputGroup;DebugSymbolsProjectOutputGroup;SatelliteDllsProjectOutputGroupDependencies;ResolveAssemblyReferences">

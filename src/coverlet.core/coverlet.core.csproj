@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="6.0.0"/>
     <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="6.0.0"/>
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="6.0.1"/>
@@ -14,7 +15,7 @@
     <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
     <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutableVersion)"/>
-    <PackageReference Include="System.Text.Json" VersionOverride="8.0.0"/>
+    <PackageReference Include="System.Text.Json" VersionOverride="6.0.9"/>
   </ItemGroup>
 
 </Project>
