@@ -50,9 +50,10 @@
      -->
     <!-- VSTest dependency versions -->
     <!-- https://github.com/microsoft/vstest/blob/fde8bf79d3f0f80e3548f873a56ffb4100c0ae49/eng/Versions.props#L22C1-L54C2 -->
+    <MicrosoftBuildUtilitiesCorePackageVersion>15.9.20</MicrosoftBuildUtilitiesCorePackageVersion>
+    <NuGetFrameworksVersion>6.5.0</NuGetFrameworksVersion>
     <SystemReflectionMetadataVersion>1.6.0</SystemReflectionMetadataVersion>
     <SystemCollectionsImmutableVersion>1.5.0</SystemCollectionsImmutableVersion>
-    <MicrosoftBuildUtilitiesCorePackageVersion>15.9.20</MicrosoftBuildUtilitiesCorePackageVersion>
   </PropertyGroup>
 
 </Project>

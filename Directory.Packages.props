@@ -9,10 +9,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.5.0" />
-    <PackageVersion Include="Microsoft.Build.Framework" Version="17.5.0" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.8.3" />
+    <PackageVersion Include="Microsoft.Build.Framework" Version="17.8.3" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="1.6.10" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0-3.final" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" />
@@ -29,9 +29,9 @@
          vstest 17.8 version
          NuGetFrameworksVersion is defined here https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/eng/Versions.props#L94C1-L94C1
     -->
-    <PackageVersion Include="NuGet.Frameworks" Version="6.6.1" />
-    <PackageVersion Include="NuGet.Packaging" Version="6.5.0" />
-    <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
+    <PackageVersion Include="NuGet.Frameworks" Version="6.8.0" />
+    <PackageVersion Include="NuGet.Packaging" Version="6.8.0" />
+    <PackageVersion Include="NuGet.Versioning" Version="6.8.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.5" />
     <PackageVersion Include="Moq" Version="4.20.69" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
