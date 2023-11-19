@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+-Fix ExcludeFromCodeCoverage does not exclude method in a partial class [#1548](https://github.com/coverlet-coverage/coverlet/issues/1548) 
+-Fix ExcludeFromCodeCoverage does not exclude F# task [#1547](https://github.com/coverlet-coverage/coverlet/issues/1547) 
+-Fix issues where ExcludeFromCodeCoverage ignored [#1431](https://github.com/coverlet-coverage/coverlet/issues/1431)
+-Fix issues with ExcludeFromCodeCoverage attribute [#1484](https://github.com/coverlet-coverage/coverlet/issues/1484)
 -Fix broken links in documentation [#1514](https://github.com/coverlet-coverage/coverlet/issues/1514)
 -Fix problem with coverage for .net5 WPF application [#1221](https://github.com/coverlet-coverage/coverlet/issues/1221) by https://github.com/lg2de
 -Fix unable to instrument module for Microsoft.AspNetCore.Mvc.Razor [#1459](https://github.com/coverlet-coverage/coverlet/issues/1459) by https://github.com/lg2de

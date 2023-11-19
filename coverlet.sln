@@ -74,6 +74,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsampl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.msbuild.tasks.tests", "test\coverlet.msbuild.tasks.tests\coverlet.msbuild.tasks.tests.csproj", "{351A034E-E642-4DB9-A21D-F71C8151C243}"
 EndProject
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "coverlet.tests.projectsample.vbmynamespace", "test\coverlet.tests.projectsample.vbmynamespace\coverlet.tests.projectsample.vbmynamespace.vbproj", "{03400776-1F9A-4326-B927-1CA9B64B42A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -168,6 +170,14 @@ Global
 		{351A034E-E642-4DB9-A21D-F71C8151C243}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{351A034E-E642-4DB9-A21D-F71C8151C243}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{351A034E-E642-4DB9-A21D-F71C8151C243}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ABC2066-D1C5-4CAA-8867-9C5DC777CBF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ABC2066-D1C5-4CAA-8867-9C5DC777CBF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ABC2066-D1C5-4CAA-8867-9C5DC777CBF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ABC2066-D1C5-4CAA-8867-9C5DC777CBF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03400776-1F9A-4326-B927-1CA9B64B42A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03400776-1F9A-4326-B927-1CA9B64B42A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03400776-1F9A-4326-B927-1CA9B64B42A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03400776-1F9A-4326-B927-1CA9B64B42A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -195,6 +205,7 @@ Global
 		{988A5FF0-4326-4F5B-9F05-CB165543A555} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{6ACF69B1-C01F-44A4-8F8E-2501884238D4} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F508CCDD-5BC8-4AB6-97B3-D37498813C41} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{03400776-1F9A-4326-B927-1CA9B64B42A1} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{351A034E-E642-4DB9-A21D-F71C8151C243} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
