@@ -37,11 +37,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="$(MicrosoftBuildUtilitiesCorePackageVersion)"/>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="$(MicrosoftBuildUtilitiesCorePackageVersion)" PrivateAssets="all" ExcludeAssets="Runtime" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,9 +49,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="coverlet.msbuild.props" />
-    <Content Include="coverlet.msbuild.targets" />
-
+    <Content Include="coverlet.msbuild.props" PackagePath="build\" />
+    <Content Include="coverlet.msbuild.targets" PackagePath="build\" />
+    <None Include="$(ProjectDepsFilePath)" Pack="true" PackagePath="build\" />
   </ItemGroup>
 
   <ItemGroup>

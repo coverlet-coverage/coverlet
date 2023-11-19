@@ -97,9 +97,9 @@ Calculating coverage result...
 +---------+------+--------+--------+
 ```
 
-You should see on output folder the coverlet source root mapping file generated.
+You should see on output folder the coverlet source root mapping file generated. The filename starts with 'CoverletSourceRootsMapping_'.
 This is the confirmation that you're running coverage on deterministic build.
 
 ```text
-Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\net6.0\CoverletSourceRootsMapping
+Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\net6.0\CoverletSourceRootsMapping_XUnitTestProject1
 ```
