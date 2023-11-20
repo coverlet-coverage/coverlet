@@ -21,45 +21,45 @@ namespace Coverlet.Integration.Tests
   {
     private static int s_folderSuffix;
 
-        private protected string GetPackageVersion(string filter)
-        {
-            string packagesPath = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower());
+    private protected string GetPackageVersion(string filter)
+    {
+      string packagesPath = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower());
 
-            if (!Directory.Exists(packagesPath))
-            {
-                throw new DirectoryNotFoundException($"Package directory '{packagesPath}' not found, run 'dotnet pack' on repository root");
-            }
+      if (!Directory.Exists(packagesPath))
+      {
+        throw new DirectoryNotFoundException($"Package directory '{packagesPath}' not found, run 'dotnet pack' on repository root");
+      }
 
-            var files = Directory.GetFiles(packagesPath, filter).ToList();
-            if (files.Count == 0)
-            {
-                throw new InvalidOperationException($"Could not find any package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was called.");
-            }
-            else if (files.Count > 1)
-            {
-                throw new InvalidOperationException($"Found more than one package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was only called once.");
-            }
-            else
-            {
-                using Stream pkg = File.OpenRead(files[0]);
-                using var reader = new PackageArchiveReader(pkg);
-                using Stream nuspecStream = reader.GetNuspec();
-                var manifest = Manifest.ReadFrom(nuspecStream, false);
+      var files = Directory.GetFiles(packagesPath, filter).ToList();
+      if (files.Count == 0)
+      {
+        throw new InvalidOperationException($"Could not find any package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was called.");
+      }
+      else if (files.Count > 1)
+      {
+        throw new InvalidOperationException($"Found more than one package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was only called once.");
+      }
+      else
+      {
+        using Stream pkg = File.OpenRead(files[0]);
+        using var reader = new PackageArchiveReader(pkg);
+        using Stream nuspecStream = reader.GetNuspec();
+        var manifest = Manifest.ReadFrom(nuspecStream, false);
 #pragma warning disable CS8603 // Possible null reference return.
-                return manifest.Metadata.Version.OriginalVersion;
+        return manifest.Metadata.Version.OriginalVersion;
 #pragma warning restore CS8603 // Possible null reference return.
       }
-        }
+    }
 
-        private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "17.5.0")
-        {
-            DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N")[..6]}{Interlocked.Increment(ref s_folderSuffix)}");
-            foreach (string file in (Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "*.cs")
-                    .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "*.csproj")
-                    .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "nuget.config")))))
-            {
-                File.Copy(file, Path.Combine(finalRoot.FullName, Path.GetFileName(file)));
-            }
+    private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "17.5.0")
+    {
+      DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N")[..6]}{Interlocked.Increment(ref s_folderSuffix)}");
+      foreach (string file in (Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "*.cs")
+              .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "*.csproj")
+              .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "nuget.config")))))
+      {
+        File.Copy(file, Path.Combine(finalRoot.FullName, Path.GetFileName(file)));
+      }
 
       // We need to prevent the inheritance of global props/targets for template project
       File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.props"),
@@ -109,7 +109,7 @@ namespace Coverlet.Integration.Tests
       return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
     }
 
-    private protected void UpdateNugeConfigtWithLocalPackageFolder(string projectPath)
+    private protected void UpdateNugetConfigWithLocalPackageFolder(string projectPath)
     {
       string nugetFile = Path.Combine(projectPath, "nuget.config");
       if (!File.Exists(nugetFile))
@@ -122,15 +122,15 @@ namespace Coverlet.Integration.Tests
         xml = XDocument.Load(nugetFileStream);
       }
 
-            string localPackageFolder = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower());
+      string localPackageFolder = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower());
 
-            xml.Element("configuration")!
-               .Element("packageSources")!
-               .Elements()
-               .ElementAt(0)
-               .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
-            xml.Save(nugetFile);
-        }
+      xml.Element("configuration")!
+         .Element("packageSources")!
+         .Elements()
+         .ElementAt(0)
+         .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
+      xml.Save(nugetFile);
+    }
 
     private void SetIsTestProjectTrue(string projectPath)
     {
@@ -240,22 +240,22 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
       return runsettingsPath;
     }
 
-        private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json", string standardOutput = "")
+    private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json", string standardOutput = "")
+    {
+      if (TestUtils.GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
+      {
+        bool coverageChecked = false;
+        foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
         {
-            if (TestUtils.GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
-            {
-                bool coverageChecked = false;
-                foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
-                {
-                    Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
-                    if (document != null)
-                    {
-                        document.Class("Coverlet.Integration.Template.DeepThought")
-                            .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
-                            .AssertLinesCovered((6, 1), (7, 1), (8, 1));
-                        coverageChecked = true;
-                    }
-                }
+          Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
+          if (document != null)
+          {
+            document.Class("Coverlet.Integration.Template.DeepThought")
+                .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
+                .AssertLinesCovered((6, 1), (7, 1), (8, 1));
+            coverageChecked = true;
+          }
+        }
 
         Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
       }

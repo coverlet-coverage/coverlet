@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Coverlet.Core.Instrumentation;
-using Coverlet.Tests.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Coverlet.Core.Instrumentation;
+using Coverlet.Tests.Utils;
 using Xunit.Sdk;
 
 namespace Coverlet.Core.Tests
@@ -442,5 +442,5 @@ namespace Coverlet.Core.Tests
       return document;
     }
 
-    }
+  }
 }

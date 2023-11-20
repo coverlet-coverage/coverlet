@@ -28,7 +28,7 @@ namespace Coverlet.Integration.Tests
     public void DotnetTool()
     {
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
-      UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+      UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
       DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
@@ -45,7 +45,7 @@ namespace Coverlet.Integration.Tests
     public void StandAlone()
     {
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
-      UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+      UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
       DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
@@ -64,7 +64,7 @@ namespace Coverlet.Integration.Tests
     public void StandAloneThreshold()
     {
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
-      UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+      UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
       DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
@@ -85,7 +85,7 @@ namespace Coverlet.Integration.Tests
     public void StandAloneThresholdLine()
     {
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
-      UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+      UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
       DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
@@ -106,7 +106,7 @@ namespace Coverlet.Integration.Tests
     public void StandAloneThresholdLineAndMethod()
     {
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
-      UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+      UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
       DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));

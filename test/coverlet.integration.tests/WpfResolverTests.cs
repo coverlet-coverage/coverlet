@@ -14,18 +14,18 @@ using Xunit;
 
 namespace Coverlet.Integration.Tests
 {
-    public class WpfResolverTests : BaseTest
+  public class WpfResolverTests : BaseTest
+  {
+    [ConditionalFact]
+    [SkipOnOS(OS.Linux, "WPF only runs on Windows")]
+    [SkipOnOS(OS.MacOS, "WPF only runs on Windows")]
+    public void TestInstrument_NetCoreSharedFrameworkResolver()
     {
-        [ConditionalFact]
-        [SkipOnOS(OS.Linux, "WPF only runs on Windows")]
-        [SkipOnOS(OS.MacOS, "WPF only runs on Windows")]
-        public void TestInstrument_NetCoreSharedFrameworkResolver()
-        {
-            string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower();
-            string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf6");
-            string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf6"), buildConfiguration);
-            Assert.True(DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
-            string assemblyLocation = Directory.GetFiles(testBinaryPath, "coverlet.tests.projectsample.wpf6.dll", SearchOption.AllDirectories).First();
+      string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower();
+      string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf8");
+      string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8"), buildConfiguration);
+      Assert.True(DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
+      string assemblyLocation = Directory.GetFiles(testBinaryPath, "coverlet.tests.projectsample.wpf8.dll", SearchOption.AllDirectories).First();
 
       var mockLogger = new Mock<ILogger>();
       var resolver = new NetCoreSharedFrameworkResolver(assemblyLocation, mockLogger.Object);

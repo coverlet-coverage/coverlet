@@ -21,7 +21,19 @@ steps:
   condition: always()
   inputs:
     SourceFolder: '$(Agent.TempDirectory)'
-    Contents: '**/*.trx'
+    Contents: |
+        **/*.trx
+        **/coverage.opencover.xml
+        **/coverage.cobertura.xml
+        **/coverage.json
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
+
+- task: CopyFiles@2
+  displayName: Copy binlog files
+  condition: always()
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**/*.binlog'
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: CopyFiles@2

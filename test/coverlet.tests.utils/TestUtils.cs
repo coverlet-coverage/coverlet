@@ -15,36 +15,51 @@ namespace Coverlet.Tests.Utils
   }
 
   static class TestUtils
-  { 
+  {
+    private static readonly string s_relParent = ".." + Path.DirectorySeparatorChar;
+    private static readonly string s_rel2Parents = s_relParent + s_relParent;
+    private static readonly string s_rel3Parents = s_rel2Parents + s_relParent;
+    private static readonly string s_rel4Parents = s_rel3Parents + s_relParent;
     public static BuildConfiguration GetAssemblyBuildConfiguration()
     {
-  #if DEBUG
+#if DEBUG
       return BuildConfiguration.Debug;
-  #endif
-  #if RELEASE
-              return BuildConfiguration.Release;
-  #endif
+#endif
+#if RELEASE
+      return BuildConfiguration.Release;
+#endif
       throw new NotSupportedException($"Build configuration not supported");
     }
 
-    public static string GetTestProjectPath( string directoryName )
+    public static string GetAssemblyTargetFramework()
     {
-      return Path.GetFullPath(Path.Join(AppContext.BaseDirectory, "../../../../test", directoryName));
+#if NET7_0
+      return "net7.0";
+#endif
+#if NET8_0
+      return "net8.0";
+#endif
+      throw new NotSupportedException($"Build configuration not supported");
     }
 
-    public static string GetTestBinaryPath( string directoryName )
+    public static string GetTestProjectPath(string directoryName)
     {
-      return Path.GetFullPath(Path.Join(AppContext.BaseDirectory, "../..", directoryName));
+      return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel4Parents)), "test", directoryName);
+    }
+
+    public static string GetTestBinaryPath(string directoryName)
+    {
+      return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel2Parents)), directoryName);
     }
 
     public static string GetPackagePath(string buildConfiguration)
     {
-      return Path.GetFullPath(Path.Join(AppContext.BaseDirectory, "../../../package", buildConfiguration));
+      return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel3Parents)), "package", buildConfiguration);
     }
 
     public static string GetTestResultsPath(string directoryName)
     {
-      return Path.GetFullPath(Path.Join(AppContext.BaseDirectory, "../../../tests", directoryName));
+      return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel3Parents)), "tests", directoryName);
     }
 
   }

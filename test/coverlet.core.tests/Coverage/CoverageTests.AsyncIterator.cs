@@ -9,19 +9,19 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-    public partial class CoverageTests
+  public partial class CoverageTests
+  {
+    [Fact]
+    public void AsyncIterator()
     {
-        [Fact]
-        public void AsyncIterator()
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] pathSerialize) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncIterator>(async instance =>
-                    {
-                        int res = await (Task<int>)instance.Issue1104_Repro();
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncIterator>(async instance =>
+                  {
+              int res = await (Task<int>)instance.Issue1104_Repro();
 
             }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;

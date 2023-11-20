@@ -48,6 +48,8 @@ namespace Coverlet.Core.Helpers
       string assemblyName = assemblyAdapter.GetAssemblyName(moduleTestPath);
       _mappingFileName = $"CoverletSourceRootsMapping_{assemblyName}";
 
+      _logger.LogInformation($"_mapping file name: '{_mappingFileName}'", true);
+
       _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath));
       _sourceToDeterministicPathMapping = LoadSourceToDeterministicPathMapping(_sourceRootMapping);
     }

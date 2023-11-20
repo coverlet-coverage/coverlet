@@ -12,7 +12,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     useGlobalJson: true
-  displayName: Install .NET Core SDK 8.0.100 RC
+  displayName: Install .NET Core SDK 8.0.100 RC2
 
 - script: dotnet restore
   displayName: Restore packages
@@ -38,6 +38,14 @@ steps:
     publishRunAttachments: true
     failTaskOnFailedTests: true
 
+- ${{ if eq(variables['Agent.OS'], 'Windows_NT') }}:
+  - script: |
+      dotnet vstest "$(Build.SourcesDirectory)\artifacts\publish\coverlet.core.tests\debug\coverlet.core.tests.dll" --collect:"XPlat Code Coverage" --Diag:"$(Build.SourcesDirectory)\artifacts\log\$(Configuration)\coverlet.core.vstest.diag.log;tracelevel=verbose"  -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+    displayName: run with vstest
+# - ${{ else }}:
+#   - script: |
+#       dotnet vstest "$(Build.SourcesDirectory)/artifacts/publish/coverlet.core.tests/debug/coverlet.core.tests.dll" --collect:"XPlat Code Coverage" --Diag:"$(Build.SourcesDirectory)/artifacts/log\$(Configuration)/coverlet.core.vstest.diag.log;tracelevel=verbose"  -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+#     displayName: run with vstest
 
 - template: publish-coverlet-result-files.yml
 

@@ -62,7 +62,7 @@ namespace Coverlet.Integration.Tests
       }
 
       ClonedTemplateProject clonedTemplateProject = CloneTemplateProject(testSDKVersion: TestSDKVersion);
-      UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+      UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       AddCoverletCollectosRef(clonedTemplateProject.ProjectRootPath!);
       return clonedTemplateProject;
     }
