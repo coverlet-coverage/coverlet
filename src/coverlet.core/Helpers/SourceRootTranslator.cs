@@ -48,6 +48,8 @@ namespace Coverlet.Core.Helpers
       string assemblyName = assemblyAdapter.GetAssemblyName(moduleTestPath);
       _mappingFileName = $"CoverletSourceRootsMapping_{assemblyName}";
 
+      _logger.LogInformation($"_mapping file name: '{_mappingFileName}'", true);
+
       _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath));
       _sourceToDeterministicPathMapping = LoadSourceToDeterministicPathMapping(_sourceRootMapping);
     }
@@ -145,7 +147,7 @@ namespace Coverlet.Core.Helpers
             if (_fileSystem.Exists(pathToCheck = Path.GetFullPath(originalFileName.Replace(mapping.Key, srm.OriginalPath))))
             {
               (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
-              _logger.LogVerbose($"Mapping resolved: '{FileSystem.EscapeFileName(originalFileName)}' -> '{FileSystem.EscapeFileName(pathToCheck)}'");
+              _logger.LogInformation($"Mapping resolved: '{FileSystem.EscapeFileName(originalFileName)}' -> '{FileSystem.EscapeFileName(pathToCheck)}'", true);
               return pathToCheck;
             }
           }

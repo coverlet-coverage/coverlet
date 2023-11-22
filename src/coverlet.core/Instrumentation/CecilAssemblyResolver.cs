@@ -11,6 +11,7 @@ using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Mono.Cecil;
+using NuGet.Versioning;
 
 
 namespace Coverlet.Core.Instrumentation
@@ -238,14 +239,15 @@ namespace Coverlet.Core.Instrumentation
       var reader = new RuntimeConfigurationReader(runtimeConfigFile);
       IEnumerable<(string Name, string Version)> referencedFrameworks = reader.GetFrameworks();
       string runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location);
-      string runtimeRootPath = Path.Combine(runtimePath!, "../..");
+      string runtimeRootPath = Path.GetFullPath(Path.Combine(runtimePath!, "..", ".."));
       foreach ((string frameworkName, string frameworkVersion) in referencedFrameworks)
       {
-        var majorVersion = string.Join(".", frameworkVersion.Split('.').Take(2)) + ".";
+        var semVersion = NuGetVersion.Parse(frameworkVersion);
         var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
+        string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
         var latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
-            .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
-        _aspNetSharedFrameworkDirs.Add(Path.Combine(directory.FullName, majorVersion + latestVersion));
+            .Select(x => semVersion.Patch).Max();
+        _aspNetSharedFrameworkDirs.Add(Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0]);
       }
 
       _logger.LogVerbose("NetCoreSharedFrameworkResolver search paths:");

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -13,8 +13,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\coverlet.core\coverlet.core.csproj" />
-    <ProjectReference Include="..\coverlet.tests.projectsample.aspnet6\coverlet.tests.projectsample.aspnet6.csproj" />
+    <ProjectReference Include="..\coverlet.tests.projectsample.aspnet8\coverlet.tests.projectsample.aspnet8.csproj" />
   </ItemGroup>
 
- 
+
 </Project>

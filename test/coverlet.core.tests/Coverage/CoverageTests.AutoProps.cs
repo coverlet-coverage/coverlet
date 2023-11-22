@@ -106,21 +106,21 @@ namespace Coverlet.Core.Tests
       }
     }
 
-        [Theory(Skip ="fails reason unknown (no session debug possible)")]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void SkipRecordWithProperties(bool skipAutoProps)
+    [Theory(Skip = "fails reason unknown (no session debug possible)")]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SkipRecordWithProperties(bool skipAutoProps)
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] parameters) =>
         {
-            string path = Path.GetTempFileName();
-            try
-            {
-                FunctionExecutor.Run(async (string[] parameters) =>
-                {
-                    CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithAutoRecordProperties>(instance =>
-                        {
-                          return Task.CompletedTask;
-                        },
-                        persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithAutoRecordProperties>(instance =>
+                      {
+                  return Task.CompletedTask;
+                },
+                      persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
         }, new string[] { path, skipAutoProps.ToString() });

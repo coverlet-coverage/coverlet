@@ -24,7 +24,7 @@ namespace Coverlet.Integration.Tests
     private ClonedTemplateProject PrepareTemplateProject()
     {
       ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
-      UpdateNugeConfigtWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+      UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       AddCoverletMsbuildRef(clonedTemplateProject.ProjectRootPath!);
       return clonedTemplateProject;
     }
@@ -142,7 +142,7 @@ namespace Coverlet.Integration.Tests
     public void Test_MultipleTargetFrameworkReport_NoCoverletOutput()
     {
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net6.0", "net7.0" };
+      string[] targetFrameworks = new string[] { "net6.0", "net7.0", "net8.0" };
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -168,7 +168,7 @@ namespace Coverlet.Integration.Tests
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder()
     {
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net6.0", "net7.0" };
+      string[] targetFrameworks = new string[] { "net6.0", "net7.0", "net8.0" };
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       bool result = DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -196,7 +196,7 @@ namespace Coverlet.Integration.Tests
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithoutExtension()
     {
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net6.0", "net7.0" };
+      string[] targetFrameworks = new string[] { "net6.0", "net7.0", "net8.0" };
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -222,11 +222,11 @@ namespace Coverlet.Integration.Tests
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension_SpecifyFramework()
     {
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net6.0", "net7.0" };
+      string[] targetFrameworks = new string[] { "net6.0", "net7.0", "net8.0" };
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       Assert.True(clonedTemplateProject.IsMultipleTargetFramework());
       string[] frameworks = clonedTemplateProject.GetTargetFrameworks();
-      Assert.Equal(2, frameworks.Length);
+      Assert.Equal(3, frameworks.Length);
       string framework = frameworks.FirstOrDefault()!;
       DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -259,7 +259,7 @@ namespace Coverlet.Integration.Tests
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension()
     {
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net6.0", "net7.0" };
+      string[] targetFrameworks = new string[] { "net6.0", "net7.0", "net8.0" };
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -285,7 +285,7 @@ namespace Coverlet.Integration.Tests
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithDoubleExtension()
     {
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net6.0", "net7.0" };
+      string[] targetFrameworks = new string[] { "net6.0", "net7.0", "net8.0" };
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))

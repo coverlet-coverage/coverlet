@@ -21,47 +21,47 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<CatchBlock>(async instance =>
                   {
-              instance.Test();
-              instance.Test_Catch();
-              await (Task)instance.TestAsync();
-              await (Task)instance.TestAsync_Catch();
+                    instance.Test();
+                    instance.Test_Catch();
+                    await (Task)instance.TestAsync();
+                    await (Task)instance.TestAsync_Catch();
 
-              instance.Test(true);
-              instance.Test_Catch(true);
-              await (Task)instance.TestAsync(true);
-              await (Task)instance.TestAsync_Catch(true);
+                    instance.Test(true);
+                    instance.Test_Catch(true);
+                    await (Task)instance.TestAsync(true);
+                    await (Task)instance.TestAsync_Catch(true);
 
-              instance.Test(false);
-              instance.Test_Catch(false);
-              await (Task)instance.TestAsync(false);
-              await (Task)instance.TestAsync_Catch(false);
+                    instance.Test(false);
+                    instance.Test_Catch(false);
+                    await (Task)instance.TestAsync(false);
+                    await (Task)instance.TestAsync_Catch(false);
 
-              instance.Test_WithTypedCatch();
-              instance.Test_Catch_WithTypedCatch();
-              await (Task)instance.TestAsync_WithTypedCatch();
-              await (Task)instance.TestAsync_Catch_WithTypedCatch();
+                    instance.Test_WithTypedCatch();
+                    instance.Test_Catch_WithTypedCatch();
+                    await (Task)instance.TestAsync_WithTypedCatch();
+                    await (Task)instance.TestAsync_Catch_WithTypedCatch();
 
-              instance.Test_WithTypedCatch(true);
-              instance.Test_Catch_WithTypedCatch(true);
-              await (Task)instance.TestAsync_WithTypedCatch(true);
-              await (Task)instance.TestAsync_Catch_WithTypedCatch(true);
+                    instance.Test_WithTypedCatch(true);
+                    instance.Test_Catch_WithTypedCatch(true);
+                    await (Task)instance.TestAsync_WithTypedCatch(true);
+                    await (Task)instance.TestAsync_Catch_WithTypedCatch(true);
 
-              instance.Test_WithTypedCatch(false);
-              instance.Test_Catch_WithTypedCatch(false);
-              await (Task)instance.TestAsync_WithTypedCatch(false);
-              await (Task)instance.TestAsync_Catch_WithTypedCatch(false);
+                    instance.Test_WithTypedCatch(false);
+                    instance.Test_Catch_WithTypedCatch(false);
+                    await (Task)instance.TestAsync_WithTypedCatch(false);
+                    await (Task)instance.TestAsync_Catch_WithTypedCatch(false);
 
-              instance.Test_WithNestedCatch(true);
-              instance.Test_Catch_WithNestedCatch(true);
-              await (Task)instance.TestAsync_WithNestedCatch(true);
-              await (Task)instance.TestAsync_Catch_WithNestedCatch(true);
+                    instance.Test_WithNestedCatch(true);
+                    instance.Test_Catch_WithNestedCatch(true);
+                    await (Task)instance.TestAsync_WithNestedCatch(true);
+                    await (Task)instance.TestAsync_Catch_WithNestedCatch(true);
 
-              instance.Test_WithNestedCatch(false);
-              instance.Test_Catch_WithNestedCatch(false);
-              await (Task)instance.TestAsync_WithNestedCatch(false);
-              await (Task)instance.TestAsync_Catch_WithNestedCatch(false);
+                    instance.Test_WithNestedCatch(false);
+                    instance.Test_Catch_WithNestedCatch(false);
+                    await (Task)instance.TestAsync_WithNestedCatch(false);
+                    await (Task)instance.TestAsync_Catch_WithNestedCatch(false);
 
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                  }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, new string[] { path });
 

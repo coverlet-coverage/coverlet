@@ -1,28 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- Import coverlet version-->
-  <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" />
+  <Import Project="$(RepoRoot)DefaultVersions.Generated.props" />
   
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsample.integration.determisticbuild</AssemblyName>
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      $(ArtifactsPath)/package/$(Configuration)
-    </RestoreSources>
+    <MSBuildWarningsAsMessages>NU1604</MSBuildWarningsAsMessages>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.msbuild" VersionOverride="$(coverletMsbuilVersion)">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="coverlet.msbuild" VersionOverride="$(CoverletVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="coverlet.collector" VersionOverride="$(coverletCollectorsVersion)">
+    <PackageReference Include="coverlet.collector" VersionOverride="$(CoverletVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.visualstudio" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" Version="2.6.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
 </Project>
