@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Linq;
+using Coverlet.Tests.Utils;
 using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,10 +13,12 @@ namespace Coverlet.Integration.Tests
   public class DotnetGlobalTools : BaseTest
   {
     private readonly ITestOutputHelper _output;
+    private readonly string _buildTargetFramework;
 
     public DotnetGlobalTools(ITestOutputHelper output)
     {
       _output = output;
+      _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
     }
     private string InstallTool(string projectPath)
     {
@@ -30,7 +33,7 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
-      DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
+      DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
       RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{clonedTemplateProject.ProjectRootPath}\"{Path.DirectorySeparatorChar}", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -47,7 +50,7 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
-      DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
+      DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
       RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --output \"{clonedTemplateProject.ProjectRootPath}\"{Path.DirectorySeparatorChar}", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -66,7 +69,7 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
-      DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
+      DotnetCli($"build -f  {_buildTargetFramework}  {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
       Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError));
       if (!string.IsNullOrEmpty(standardError))
@@ -87,7 +90,7 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
-      DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
+      DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
       Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError));
       if (!string.IsNullOrEmpty(standardError))
@@ -108,7 +111,7 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
-      DotnetCli($"build {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
+      DotnetCli($"build -f  {_buildTargetFramework}  {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
       Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --threshold-type method --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError));
       if (!string.IsNullOrEmpty(standardError))

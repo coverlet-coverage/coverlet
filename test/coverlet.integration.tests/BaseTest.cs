@@ -257,7 +257,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
           }
         }
 
-        Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
+        Assert.True(coverageChecked, $"Coverage check failed");
       }
     }
 
@@ -278,10 +278,21 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
         xml = XDocument.Load(csprojStream);
       }
 
-      xml.Element("Project")!
-        .Element("PropertyGroup")!
-        .Element("TargetFramework")!
-        .Remove();
+      if (xml.Descendants().FirstOrDefault(e => e.Name.LocalName == "TargetFramework") != null)
+      {
+        xml.Element("Project")!
+          .Element("PropertyGroup")!
+          .Element("TargetFramework")!
+          .Remove();
+      }
+
+      if (xml.Descendants().FirstOrDefault(e => e.Name.LocalName == "TargetFrameworks") != null) 
+      {
+        xml.Element("Project")!
+          .Element("PropertyGroup")!
+          .Element("TargetFrameworks")!
+          .Remove();
+      }
 
       XElement targetFrameworkElement;
 
