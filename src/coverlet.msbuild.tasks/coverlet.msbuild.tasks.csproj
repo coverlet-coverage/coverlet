@@ -18,6 +18,7 @@
     <EnablePackageValidation>true</EnablePackageValidation>
     <_GeneratedVersionFilePath>$(RepoRoot)DefaultVersions.Generated.props</_GeneratedVersionFilePath>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+    <NoWarn>$(NoWarn);NU5129</NoWarn>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
