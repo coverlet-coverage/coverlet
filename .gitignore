@@ -308,6 +308,7 @@ test/coverlet.integration.determisticbuild/runsettings
 coverage.xml
 coverage.cobertura.xml
 coverage.opencover.xml
+coverage.*.xml
 coverage.*.cobertura.xml
 coverage.*.opencover.xml
 

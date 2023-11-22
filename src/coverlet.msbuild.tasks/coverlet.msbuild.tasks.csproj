@@ -18,6 +18,7 @@
     <EnablePackageValidation>true</EnablePackageValidation>
     <GenerateDependencyFile>true</GenerateDependencyFile>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+    <NoWarn>$(NoWarn);NU5129</NoWarn>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
@@ -51,9 +52,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="coverlet.msbuild.props" PackagePath="build\" />
-    <Content Include="coverlet.msbuild.targets" PackagePath="build\" />
-    <None Include="$(ProjectDepsFilePath)" Pack="true" PackagePath="build\" />
+    <Content Include="coverlet.msbuild.props" Pack="true" PackagePath="build\" />
+    <Content Include="coverlet.msbuild.targets" Pack="true" PackagePath="build\" />
   </ItemGroup>
 
   <ItemGroup>
