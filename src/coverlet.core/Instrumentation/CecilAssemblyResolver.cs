@@ -246,7 +246,7 @@ namespace Coverlet.Core.Instrumentation
         var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
         string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
         var latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
-            .Select(x => semVersion.Patch).Max();
+            .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
         _aspNetSharedFrameworkDirs.Add(Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0]);
       }
 
