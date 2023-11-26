@@ -21,7 +21,7 @@ namespace Coverlet.Integration.Tests
     [SkipOnOS(OS.MacOS, "WPF only runs on Windows")]
     public void TestInstrument_NetCoreSharedFrameworkResolver()
     {
-      string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower();
+      string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant();
       string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf8");
       string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8"), buildConfiguration);
       Assert.True(DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));

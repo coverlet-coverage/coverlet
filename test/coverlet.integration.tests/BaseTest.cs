@@ -23,7 +23,7 @@ namespace Coverlet.Integration.Tests
 
     private protected string GetPackageVersion(string filter)
     {
-      string packagesPath = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower());
+      string packagesPath = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant());
 
       if (!Directory.Exists(packagesPath))
       {
@@ -122,7 +122,7 @@ namespace Coverlet.Integration.Tests
         xml = XDocument.Load(nugetFileStream);
       }
 
-      string localPackageFolder = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLower());
+      string localPackageFolder = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant());
 
       xml.Element("configuration")!
          .Element("packageSources")!

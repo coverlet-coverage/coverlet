@@ -86,7 +86,7 @@ namespace Coverlet.Integration.Tests
       }
     }
 
-    [Fact (Skip = "CoverletSourceRootsMapping_* file not found")]
+    [Fact]
     public void Msbuild()
     {
       string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
@@ -102,7 +102,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Build succeeded.", standardOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLower(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
@@ -131,7 +131,7 @@ namespace Coverlet.Integration.Tests
       RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
     }
 
-    [Fact(Skip = "CoverletSourceRootsMapping_* file not found")]
+    [Fact]
     public void Msbuild_SourceLink()
     {
       string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
@@ -147,7 +147,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Build succeeded.", standardOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLower(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
 
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.True(!string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)), "Empty CoverletSourceRootsMapping file");
@@ -178,7 +178,7 @@ namespace Coverlet.Integration.Tests
       RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
     }
 
-    [Fact(Skip = "CoverletSourceRootsMapping_* file not found")]
+    [Fact]
     public void Collectors()
     {
       string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
@@ -198,7 +198,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Build succeeded.", standardOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLower(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
 
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
@@ -235,7 +235,7 @@ namespace Coverlet.Integration.Tests
       RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
     }
 
-    [Fact(Skip = "CoverletSourceRootsMapping_* file not found")]
+    [Fact]
     public void Collectors_SourceLink()
     {
       string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
@@ -255,7 +255,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Build succeeded.", standardOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLower(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
 
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
