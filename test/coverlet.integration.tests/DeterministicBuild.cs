@@ -14,7 +14,6 @@ using Xunit.Abstractions;
 
 namespace Coverlet.Integration.Tests
 {
-  [Collection("Serial")]
   public class DeterministicBuild : BaseTest, IDisposable
   {
     private static readonly string s_projectName = "coverlet.integration.determisticbuild";
@@ -90,9 +89,10 @@ namespace Coverlet.Integration.Tests
     public void Msbuild()
     {
       string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
+      string logFilename = string.Concat(((ITest)_testMember!.GetValue(_output)!).DisplayName, ".binlog");
       CreateDeterministicTestPropsFile();
 
-      DotnetCli($"build -c {_buildConfiguration} -bl:msbuild.binlog /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
+      DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -125,19 +125,17 @@ namespace Coverlet.Integration.Tests
       Assert.True(File.Exists(testResultFile));
       AssertCoverage(standardOutput);
 
-      // Process exits hang on clean seem that process doesn't close, maybe some msbuild node reuse? btw manually tested
-      // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
-      // Assert.False(File.Exists(sourceRootMappingFilePath));
-      RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
+      CleanupBuildOutput();
     }
 
     [Fact]
     public void Msbuild_SourceLink()
     {
       string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
+      string logFilename = string.Concat(((ITest)_testMember!.GetValue(_output)!).DisplayName, ".binlog");
       CreateDeterministicTestPropsFile();
 
-      DotnetCli($"build -c {_buildConfiguration} -bl:msbuild.binlog --verbosity normal /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
+      DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -172,23 +170,21 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("raw.githubusercontent.com", File.ReadAllText(testResultFile));
       AssertCoverage(standardOutput, checkDeterministicReport: false);
 
-      // Process exits hang on clean seem that process doesn't close, maybe some msbuild node reuse? btw manually tested
-      // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
-      // Assert.False(File.Exists(sourceRootMappingFilePath));
-      RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
+      CleanupBuildOutput();
     }
 
     [Fact]
     public void Collectors()
     {
       string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
-      string testLogFilesPath = Path.Join(_testBinaryPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
+      string testLogFilesPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName, "log");
+      string logFilename = string.Concat(((ITest)_testMember!.GetValue(_output)!).DisplayName, ".binlog");
 
       CreateDeterministicTestPropsFile();
       DeleteLogFiles(testLogFilesPath);
       DeleteCoverageFiles(testResultPath);
 
-      DotnetCli($"build -c {_buildConfiguration} -bl --verbosity normal /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
+      DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -229,23 +225,21 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(Directory.GetFiles(testLogFilesPath, "log.host.*.txt").Single()));
       Assert.Contains("[coverlet]Mapping resolved", dataCollectorLogContent);
 
-      // Process exits hang on clean seem that process doesn't close, maybe some msbuild node reuse? btw manually tested
-      // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
-      // Assert.False(File.Exists(sourceRootMappingFilePath));
-      RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
+      CleanupBuildOutput();
     }
 
     [Fact]
     public void Collectors_SourceLink()
     {
       string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
-      string testLogFilesPath = Path.Join(_testBinaryPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName);
+      string testLogFilesPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).DisplayName, "log");
+      string logFilename = string.Concat(((ITest)_testMember!.GetValue(_output)!).DisplayName, ".binlog");
 
       CreateDeterministicTestPropsFile();
       DeleteLogFiles(testLogFilesPath);
       DeleteCoverageFiles(testResultPath);
 
-      DotnetCli($"build -c {_buildConfiguration} -bl --verbosity normal /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
+      DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -299,10 +293,7 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("[coverlet]Initialize CoverletInProcDataCollector", File.ReadAllText(Directory.GetFiles(testLogFilesPath, "log.host.*.txt").Single()));
       Assert.Contains("[coverlet]Mapping resolved", dataCollectorLogContent);
 
-      // Process exits hang on clean seem that process doesn't close, maybe some msbuild node reuse? btw manually tested
-      // DotnetCli("clean", out standardOutput, out standardError, _fixture.TestProjectPath);
-      // Assert.False(File.Exists(sourceRootMappingFilePath));
-      RunCommand("git", "clean -fdx", out _, out _, _testProjectPath);
+      CleanupBuildOutput();
     }
 
     private static void DeleteTestIntermediateFiles(string testResultsPath)
@@ -336,6 +327,19 @@ namespace Coverlet.Integration.Tests
       }
 
     }
+    private void CleanupBuildOutput()
+    {
+      if (Directory.Exists(_testBinaryPath))
+      {
+        Directory.Delete(_testBinaryPath, recursive: true);
+      }
+
+      string intermediateBuildOutput = _testBinaryPath.Replace("bin", "obj");
+      if (Directory.Exists(intermediateBuildOutput))
+      {
+        Directory.Delete(intermediateBuildOutput, recursive: true);
+      }
+    }
     private static void DeleteCoverageFiles(string directory)
     {
       if (Directory.Exists(directory))
@@ -367,9 +371,7 @@ namespace Coverlet.Integration.Tests
       string reportPath = "";
       if (standardOutput.Contains("coverage.json"))
       {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        reportPath = standardOutput.Split('\n').FirstOrDefault(line => line.Contains("coverage.json")).TrimStart();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+        reportPath = standardOutput.Split('\n').FirstOrDefault(line => line.Contains("coverage.json"))!.TrimStart();
         reportPath = reportPath[reportPath.IndexOf(Directory.GetDirectoryRoot(_testProjectPath))..];
         reportPath = reportPath[..reportPath.IndexOf("coverage.json")];
       }

@@ -59,7 +59,7 @@ namespace Coverlet.Tests.Utils
 
     public static string GetTestResultsPath(string directoryName)
     {
-      return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel3Parents)), "tests", directoryName);
+      return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel3Parents)), "testresults", directoryName);
     }
 
   }

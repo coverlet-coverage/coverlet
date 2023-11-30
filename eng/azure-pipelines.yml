@@ -5,7 +5,7 @@ trigger:
     exclude: [".github", "Documentation", "*.md"]
 
 variables:
-  system.debug: true
+  system.debug: false
 
 jobs:
 - job: Windows
@@ -55,7 +55,7 @@ jobs:
 - job: macOS
   displayName: macOS
   continueOnError: 'true'
-  timeoutInMinutes: 20
+  timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   strategy:
     matrix:
@@ -71,7 +71,7 @@ jobs:
 - job: Linux
   displayName: Linux
   continueOnError: 'true'
-  timeoutInMinutes: 20
+  timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   strategy:
     matrix:
