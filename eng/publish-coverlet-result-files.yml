@@ -11,6 +11,7 @@ steps:
        **/*.opencover.xml
        **/*.cobertura.xml
        **/*.coverage.json
+       **/*.diag.log
        **/log.txt
        **/log.datacollector.*.txt
        **/log.host.*.txt
@@ -35,16 +36,6 @@ steps:
     SourceFolder: '$(Build.SourcesDirectory)'
     Contents: '**/*.binlog'
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
-
-- task: CopyFiles@2
-  displayName: Copy log files
-  condition: always()
-  inputs:
-    SourceFolder: '$(Build.SourcesDirectory)'
-    Contents: |
-        **/*.diag.log
-        **/*.binlog
-    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs/BuildLogs'
 
 - task: PublishPipelineArtifact@1
   displayName: Publish Coverlet logs

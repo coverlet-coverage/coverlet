@@ -23,7 +23,7 @@ steps:
 - script: dotnet restore
   displayName: Restore packages
 
-- script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.binlog
+- script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.msbuild.binlog
   displayName: Build
 
 - script: dotnet pack -c $(BuildConfiguration) --no-restore
