@@ -18,7 +18,7 @@
     <EnablePackageValidation>true</EnablePackageValidation>
     <GenerateDependencyFile>true</GenerateDependencyFile>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
-    <NoWarn>$(NoWarn);NU5129;NU5127</NoWarn>
+    <NoWarn>$(NoWarn);NU5100;NU5129;NU5127</NoWarn>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
@@ -52,10 +52,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="coverlet.msbuild.props" >
+    <None Include="coverlet.msbuild.props" Pack="true" PackagePath="build\">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory >
     </None>
-    <None Include="coverlet.msbuild.targets" >
+    <None Include="buildMultiTargeting\coverlet.msbuild.props" Pack="true" PackagePath="buildMultiTargeting\">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="coverlet.msbuild.targets" Pack="true" PackagePath="build\">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
@@ -66,13 +69,11 @@
 
   <Target Name="PackBuildOutputs" DependsOnTargets="ResolveProjectReferences;SatelliteDllsProjectOutputGroup;DebugSymbolsProjectOutputGroup;SatelliteDllsProjectOutputGroupDependencies;ResolveAssemblyReferences">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="coverlet.msbuild.props" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="coverlet.msbuild.targets" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="$(ProjectDepsFilePath)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="build\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="tasks\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="$(ProjectDepsFilePath)" PackagePath="tasks\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="tasks\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="tasks\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="tasks\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubPath)" />
     </ItemGroup>
   </Target>
 
