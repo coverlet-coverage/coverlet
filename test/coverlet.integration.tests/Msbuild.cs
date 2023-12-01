@@ -136,7 +136,8 @@ namespace Coverlet.Integration.Tests
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
-      } else
+      }
+      else
       {
         _output.WriteLine(standardOutput);
       }
@@ -216,7 +217,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
-            Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
+      Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput, StringComparison.Ordinal);
 
       foreach (string targetFramework in targetFrameworks)

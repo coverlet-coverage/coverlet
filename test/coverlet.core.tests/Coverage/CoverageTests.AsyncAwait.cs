@@ -99,7 +99,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact (Skip= "Unhandled exception: System.InvalidOperationException: Sequence contains more than one matching element, InstrumenterHelper.cs:line 138 ")]
+    [Fact(Skip = "Unhandled exception: System.InvalidOperationException: Sequence contains more than one matching element, InstrumenterHelper.cs:line 138 ")]
     public void AsyncAwait_Issue_669_2()
     {
       string path = Path.GetTempFileName();

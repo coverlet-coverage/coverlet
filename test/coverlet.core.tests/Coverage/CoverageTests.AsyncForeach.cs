@@ -22,12 +22,12 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(async instance =>
                   {
-              int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));
-              res += await (ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3));
-              res += await (ValueTask<int>)instance.SumEmpty();
-              await (ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3));
+                    int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));
+                    res += await (ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3));
+                    res += await (ValueTask<int>)instance.SumEmpty();
+                    await (ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3));
 
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                  }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, new string[] { path });
 

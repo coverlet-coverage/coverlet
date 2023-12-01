@@ -69,7 +69,7 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
               {
-              await (Task<int>)instance.Test("test");
+                await (Task<int>)instance.Test("test");
               }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
@@ -109,9 +109,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_NestedStateMachines>(instance =>
                   {
-              instance.Test();
-              return Task.CompletedTask;
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                    instance.Test();
+                    return Task.CompletedTask;
+                  }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -140,9 +140,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_Issue670>(instance =>
                   {
-              instance.Test("test");
-              return Task.CompletedTask;
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                    instance.Test("test");
+                    return Task.CompletedTask;
+                  }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -199,7 +199,7 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(async instance =>
               {
-              Assert.True(await (Task<bool>)instance.EditTask(null, 10));
+                Assert.True(await (Task<bool>)instance.EditTask(null, 10));
               }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
@@ -292,9 +292,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue1302>(instance =>
                   {
-              instance.Run();
-              return Task.CompletedTask;
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                    instance.Run();
+                    return Task.CompletedTask;
+                  }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, new string[] { path });

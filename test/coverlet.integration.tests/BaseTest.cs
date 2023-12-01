@@ -286,7 +286,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
           .Remove();
       }
 
-      if (xml.Descendants().FirstOrDefault(e => e.Name.LocalName == "TargetFrameworks") != null) 
+      if (xml.Descendants().FirstOrDefault(e => e.Name.LocalName == "TargetFrameworks") != null)
       {
         xml.Element("Project")!
           .Element("PropertyGroup")!

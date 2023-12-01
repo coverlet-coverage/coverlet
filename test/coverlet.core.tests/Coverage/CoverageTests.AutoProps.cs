@@ -118,8 +118,8 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithAutoRecordProperties>(instance =>
                       {
-                  return Task.CompletedTask;
-                },
+                        return Task.CompletedTask;
+                      },
                       persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
