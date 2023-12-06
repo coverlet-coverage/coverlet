@@ -4,7 +4,7 @@ Run from repo root
 ```shell
 C:\git\coverlet
 λ dotnet pack
-Microsoft (R) Build Engine version 16.5.0+d4cbfca49 for .NET Core
+Microsoft (R) Build Engine version 17.7.4+3ebbd7c49 for .NET Core
 Copyright (C) Microsoft Corporation. All rights reserved.
 
   Restore completed in 73,36 ms for C:\git\coverlet\src\coverlet.core\coverlet.core.csproj.
@@ -97,8 +97,9 @@ Calculating coverage result...
 +---------+------+--------+--------+
 ```
 
-You should see on output folder the coverlet source root mapping file generated. The filename starts with 'CoverletSourceRootsMapping_'.
-This is the confirmation that you're running coverage on deterministic build.
+You should see on output folder the coverlet source root mapping file generated. The filename starts with 'CoverletSourceRootsMapping_'. Do not use `--no-build` option 
+This is the confirmation that you're running coverage on deterministic build e.g. `Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\net6.0\CoverletSourceRootsMapping_XUnitTestProject1`
+
 
 ```text
 Documentation\Examples\MSBuild\DeterministicBuild\XUnitTestProject1\bin\Debug\net6.0\CoverletSourceRootsMapping_XUnitTestProject1
