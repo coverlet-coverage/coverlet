@@ -1,9 +1,9 @@
 pool:
   vmImage: 'windows-latest'
 
-#variables:
-# - group: 'code-signing'
-  
+variables:
+- group: Sign Client Credentials # This is a variable group with secrets in it
+
 steps:
 - task: UseDotNet@2
   inputs:
@@ -26,18 +26,20 @@ steps:
   displayName: Create NuGet packages
   condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'))
 
-- pwsh: >
-    dotnet tool install --tool-path obj SignClient
-
-    obj/SignClient sign
-    --baseDirectory '$(Build.ArtifactStagingDirectory)/bin'
-    --input '**/*.nupkg'
-    --config '$(System.DefaultWorkingDirectory)/eng/signclient.json'
-    --user '$(codesign_username)'
-    --secret '$(codesign_secret)'
-    --name 'Coverlet'
-    --descriptionUrl 'https://github.com/coverlet-coverage/coverlet'
-  displayName: 🔏 Code sign
+- pwsh: |
+    dotnet tool install --tool-path . sign --version 0.9.1-beta.23530.1
+    .\sign code azure-key-vault `
+    "**/*.nupkg" `
+    --base-directory "$(Build.ArtifactStagingDirectory)/bin" `
+    --publisher-name 'Coverlet' `
+    --description "Cross platform code coverage for .NET" `
+    --description-url "https://github.com/coverlet-coverage/coverlet" `
+    --azure-key-vault-tenant-id "$(SignTenantId)" `
+    --azure-key-vault-client-id "$(SignClientId)" `
+    --azure-key-vault-client-secret '$(SignClientSecret)' `
+    --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+    --azure-key-vault-url "$(SignKeyVaultUrl)"
+  displayName: 🔏 Sign packages
   condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual')))
   enabled: false
 
