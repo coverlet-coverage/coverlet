@@ -48,6 +48,7 @@ namespace Coverlet.Console
       var useSourceLink = new Option<bool>("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.") { Arity = ArgumentArity.Zero };
       var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore };
       var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
+      var sourceMappingFile = new Option<string>("--source-mapping-file", "Specifies the path to a SourceRootsMappings file.") { Arity = ArgumentArity.ZeroOrOne };
 
       RootCommand rootCommand = new()
       {
@@ -71,7 +72,8 @@ namespace Coverlet.Console
         mergeWith,
         useSourceLink,
         doesNotReturnAttributes,
-        excludeAssembliesWithoutSources
+        excludeAssembliesWithoutSources,
+        sourceMappingFile
       };
 
       rootCommand.Description = "Cross platform .NET Core code coverage tool";
@@ -99,6 +101,7 @@ namespace Coverlet.Console
         bool useSourceLinkValue = context.ParseResult.GetValueForOption(useSourceLink);
         string[] doesNotReturnAttributesValue = context.ParseResult.GetValueForOption(doesNotReturnAttributes);
         string excludeAssembliesWithoutSourcesValue = context.ParseResult.GetValueForOption(excludeAssembliesWithoutSources);
+        string sourceMappingFileValue = context.ParseResult.GetValueForOption(sourceMappingFile);
 
         if (string.IsNullOrEmpty(moduleOrAppDirectoryValue) || string.IsNullOrWhiteSpace(moduleOrAppDirectoryValue))
           throw new ArgumentException("No test assembly or application directory specified.");
@@ -123,7 +126,8 @@ namespace Coverlet.Console
                       mergeWithValue,
                       useSourceLinkValue,
                       doesNotReturnAttributesValue,
-                      excludeAssembliesWithoutSourcesValue);
+                      excludeAssembliesWithoutSourcesValue,
+                      sourceMappingFileValue);
         context.ExitCode = taskStatus;
 
       });
@@ -149,7 +153,8 @@ namespace Coverlet.Console
                                                            string mergeWith,
                                                            bool useSourceLink,
                                                            string[] doesNotReturnAttributes,
-                                                           string excludeAssembliesWithoutSources
+                                                           string excludeAssembliesWithoutSources,
+                                                           string sourceMappingFile
              )
     {
 
@@ -160,7 +165,7 @@ namespace Coverlet.Console
       serviceCollection.AddTransient<ILogger, ConsoleLogger>();
       // We need to keep singleton/static semantics
       serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
-      serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(provider => new SourceRootTranslator(provider.GetRequiredService<ILogger>(), provider.GetRequiredService<IFileSystem>()));
+      serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(provider => new SourceRootTranslator(sourceMappingFile, provider.GetRequiredService<ILogger>(), provider.GetRequiredService<IFileSystem>()));
       serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
 
       ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
