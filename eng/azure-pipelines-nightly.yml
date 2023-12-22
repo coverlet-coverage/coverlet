@@ -12,7 +12,7 @@ steps:
     version: 7.0.403
   displayName: Install .NET Core SDK 7.0.403
 
-- task: NuGetAuthenticate@0
+- task: NuGetAuthenticate@1
   displayName: Authenticate with NuGet feeds
 
 - script: dotnet pack -c Release /p:PublicRelease=false

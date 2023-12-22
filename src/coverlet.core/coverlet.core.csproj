@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -13,9 +13,17 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="6.0.1"/>
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="NuGet.Versioning" />
+    <PackageReference Include="System.Text.Json" VersionOverride="6.0.9"/>
+  </ItemGroup>
+
+  <ItemGroup  Condition="'$(TargetFramework)' != 'netstandard2.0'">
+    <PackageReference Include="System.Reflection.Metadata" VersionOverride="6.0.0" />
+    <PackageReference Include="System.Collections.Immutable" VersionOverride="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup  Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
     <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutableVersion)"/>
-    <PackageReference Include="System.Text.Json" VersionOverride="6.0.9"/>
   </ItemGroup>
 
 </Project>

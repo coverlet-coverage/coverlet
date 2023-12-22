@@ -96,9 +96,11 @@ namespace Coverlet.Core.Helpers
           _logger.LogWarning($"Malformed mapping '{mappingRecord}'");
           continue;
         }
+#pragma warning disable IDE0057 // Use range operator
         string projectPath = mappingRecord.Substring(0, projectFileSeparatorIndex);
         string originalPath = mappingRecord.Substring(projectFileSeparatorIndex + 1, pathMappingSeparatorIndex - projectFileSeparatorIndex - 1);
         string mappedPath = mappingRecord.Substring(pathMappingSeparatorIndex + 1);
+#pragma warning restore IDE0057 // Use range operator
 
         if (!mapping.ContainsKey(mappedPath))
         {
