@@ -126,7 +126,7 @@ namespace Coverlet.Core.Tests
 
         if (skipAutoProps)
         {
-          TestInstrumentationHelper.GetCoverageResult(path).GenerateReport(show: true)
+          TestInstrumentationHelper.GetCoverageResult(path)
               .Document("Instrumentation.AutoProps.cs")
               .AssertNonInstrumentedLines(BuildConfiguration.Debug, 29, 29)
               .AssertNonInstrumentedLines(BuildConfiguration.Release, 29, 29)
@@ -178,7 +178,7 @@ namespace Coverlet.Core.Tests
         }
         else
         {
-          TestInstrumentationHelper.GetCoverageResult(path).GenerateReport(show:true)
+          TestInstrumentationHelper.GetCoverageResult(path)
             .Document("Instrumentation.AutoProps.cs")
             .AssertLinesCovered(BuildConfiguration.Debug, (39, 1), (41, 1), (44, 1), (45, 1), (46, 1))
             .AssertLinesCovered(BuildConfiguration.Release, (39, 1), (41, 1), (45, 1));
