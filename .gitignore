@@ -312,4 +312,4 @@ coverage.*.xml
 coverage.*.cobertura.xml
 coverage.*.opencover.xml
 
-DefaultVersions.Generated.props
+FolderProfile.pubxml
