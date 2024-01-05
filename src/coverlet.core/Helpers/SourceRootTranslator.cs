@@ -48,6 +48,8 @@ namespace Coverlet.Core.Helpers
       string assemblyName = assemblyAdapter.GetAssemblyName(moduleTestPath);
       _mappingFileName = $"CoverletSourceRootsMapping_{assemblyName}";
 
+      _logger.LogInformation($"_mapping file name: '{_mappingFileName}'", true);
+
       _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath));
       _sourceToDeterministicPathMapping = LoadSourceToDeterministicPathMapping(_sourceRootMapping);
     }
@@ -94,9 +96,11 @@ namespace Coverlet.Core.Helpers
           _logger.LogWarning($"Malformed mapping '{mappingRecord}'");
           continue;
         }
+#pragma warning disable IDE0057 // Use range operator
         string projectPath = mappingRecord.Substring(0, projectFileSeparatorIndex);
         string originalPath = mappingRecord.Substring(projectFileSeparatorIndex + 1, pathMappingSeparatorIndex - projectFileSeparatorIndex - 1);
         string mappedPath = mappingRecord.Substring(pathMappingSeparatorIndex + 1);
+#pragma warning restore IDE0057 // Use range operator
 
         if (!mapping.ContainsKey(mappedPath))
         {

@@ -11,6 +11,8 @@ jobs:
 - job: Windows
   displayName: Windows
   continueOnError: 'true'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
   strategy:
     matrix:
       Debug:
@@ -24,7 +26,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect packages
     inputs:
-      SourceFolder: bin\$(BuildConfiguration)\Packages
+      SourceFolder: artifacts\package\$(BuildConfiguration)
       Contents: |
         *.nupkg
         *.snupkg
@@ -37,6 +39,13 @@ jobs:
       ArtifactName: Packages
       publishLocation: Container
     condition: eq(variables['BuildConfiguration'], 'Release')
+  - task: PublishBuildArtifacts@1
+    displayName: Publish tests artifacts
+    inputs:
+      PathtoPublish: $(Build.SourcesDirectory)\artifacts\publish
+      ArtifactName: PublishedTests
+      publishLocation: Container
+    condition: eq(variables['BuildConfiguration'], 'Debug')
   - template: CheckNugetStatus.yml
     parameters:
       sourcePath: '$(Build.SourcesDirectory)/src'
@@ -46,6 +55,8 @@ jobs:
 - job: macOS
   displayName: macOS
   continueOnError: 'true'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
   strategy:
     matrix:
       Debug:
@@ -60,6 +71,8 @@ jobs:
 - job: Linux
   displayName: Linux
   continueOnError: 'true'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
   strategy:
     matrix:
       Debug:

@@ -158,11 +158,11 @@ For instance if you want to set the `Format` element as a runsettings option you
 dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
 ```
 
-Take a look here for further information:<https://github.com/microsoft/vstest-docs/blob/master/docs/RunSettingsArguments.md>
+Take a look here for further information:<https://github.com/microsoft/vstest/blob/main/docs/RunSettingsArguments.md>
 
 ## How it works
 
-Coverlet integration is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md).
+Coverlet integration is implemented with the help of [datacollectors](https://github.com/microsoft/vstest/blob/main/docs/extensions/datacollector.md).
 When we specify `--collect:"XPlat Code Coverage"` VSTest platform tries to load coverlet collectors inside `coverlet.collector.dll`
 
 1. Out-of-proc Datacollector: The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector is responsible for calling into Coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.

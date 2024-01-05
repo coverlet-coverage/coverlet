@@ -9,6 +9,8 @@ using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
+using Coverlet.Tests.Utils;
+using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
 
@@ -16,7 +18,10 @@ namespace Coverlet.Core.Tests
 {
   public partial class CoverageTests
   {
-    [Fact]
+
+    [ConditionalFact]
+    [SkipOnOS(OS.MacOS, "Windows path format only - Simplified output paths issue")]
+    [SkipOnOS(OS.Linux, "Windows path format only - Simplified output paths issue")]
     public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
     {
       var partialMockFileSystem = new Mock<FileSystem>();
@@ -63,9 +68,9 @@ namespace Coverlet.Core.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
-                  {
-              await (Task<int>)instance.Test("test");
-                  }, persistPrepareResultToFile: pathSerialize[0]);
+              {
+                await (Task<int>)instance.Test("test");
+              }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -104,9 +109,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_NestedStateMachines>(instance =>
                   {
-              instance.Test();
-              return Task.CompletedTask;
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                    instance.Test();
+                    return Task.CompletedTask;
+                  }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -135,9 +140,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_Issue670>(instance =>
                   {
-              instance.Test("test");
-              return Task.CompletedTask;
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                    instance.Test("test");
+                    return Task.CompletedTask;
+                  }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -193,9 +198,9 @@ namespace Coverlet.Core.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(async instance =>
-                  {
-              Assert.True(await (Task<bool>)instance.EditTask(null, 10));
-                  }, persistPrepareResultToFile: pathSerialize[0]);
+              {
+                Assert.True(await (Task<bool>)instance.EditTask(null, 10));
+              }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, new string[] { path });
@@ -287,9 +292,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue1302>(instance =>
                   {
-              instance.Run();
-              return Task.CompletedTask;
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                    instance.Run();
+                    return Task.CompletedTask;
+                  }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, new string[] { path });
