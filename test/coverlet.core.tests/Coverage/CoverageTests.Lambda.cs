@@ -4,6 +4,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -20,9 +21,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(async instance =>
                   {
-              instance.InvokeAnonymous_Test();
-              await (Task<bool>)instance.InvokeAnonymousAsync_Test();
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                    instance.InvokeAnonymous_Test();
+                    await (Task<bool>)instance.InvokeAnonymousAsync_Test();
+                  }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, new string[] { path });
 
@@ -53,8 +54,8 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_730>(async instance =>
                   {
-              await (Task)instance.Invoke();
-            },
+                    await (Task)instance.Invoke();
+                  },
                   persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
@@ -81,9 +82,9 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_760>(async instance =>
                   {
-              await (Task)instance.If();
-              await (Task)instance.Foreach();
-            },
+                    await (Task)instance.If();
+                    await (Task)instance.Foreach();
+                  },
                   persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;

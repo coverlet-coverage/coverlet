@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
 using Coverlet.Core;
+using Coverlet.Tests.Utils;
 using Newtonsoft.Json;
 using NuGet.Packaging;
 using Xunit;
@@ -15,35 +16,18 @@ using Xunit.Sdk;
 
 namespace Coverlet.Integration.Tests
 {
-  [Flags]
-  public enum BuildConfiguration
-  {
-    Debug = 1,
-    Release = 2
-  }
 
   public abstract class BaseTest
   {
     private static int s_folderSuffix;
 
-    protected BuildConfiguration GetAssemblyBuildConfiguration()
-    {
-#if DEBUG
-      return BuildConfiguration.Debug;
-#endif
-#if RELEASE
-            return BuildConfiguration.Release;
-#endif
-      throw new NotSupportedException($"Build configuration not supported");
-    }
-
     private protected string GetPackageVersion(string filter)
     {
-      string packagesPath = $"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages";
+      string packagesPath = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant());
 
       if (!Directory.Exists(packagesPath))
       {
-        throw new DirectoryNotFoundException("Package directory not found, run 'dotnet pack' on repository root");
+        throw new DirectoryNotFoundException($"Package directory '{packagesPath}' not found, run 'dotnet pack' on repository root");
       }
 
       var files = Directory.GetFiles(packagesPath, filter).ToList();
@@ -61,16 +45,18 @@ namespace Coverlet.Integration.Tests
         using var reader = new PackageArchiveReader(pkg);
         using Stream nuspecStream = reader.GetNuspec();
         var manifest = Manifest.ReadFrom(nuspecStream, false);
+#pragma warning disable CS8603 // Possible null reference return.
         return manifest.Metadata.Version.OriginalVersion;
+#pragma warning restore CS8603 // Possible null reference return.
       }
     }
 
     private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "17.5.0")
     {
       DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N")[..6]}{Interlocked.Increment(ref s_folderSuffix)}");
-      foreach (string file in (Directory.GetFiles($"../../../../coverlet.integration.template", "*.cs")
-              .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "*.csproj")
-              .Union(Directory.GetFiles($"../../../../coverlet.integration.template", "nuget.config")))))
+      foreach (string file in (Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "*.cs")
+              .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "*.csproj")
+              .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "nuget.config")))))
       {
         File.Copy(file, Path.Combine(finalRoot.FullName, Path.GetFileName(file)));
       }
@@ -123,7 +109,7 @@ namespace Coverlet.Integration.Tests
       return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
     }
 
-    private protected void UpdateNugeConfigtWithLocalPackageFolder(string projectPath)
+    private protected void UpdateNugetConfigWithLocalPackageFolder(string projectPath)
     {
       string nugetFile = Path.Combine(projectPath, "nuget.config");
       if (!File.Exists(nugetFile))
@@ -136,7 +122,8 @@ namespace Coverlet.Integration.Tests
         xml = XDocument.Load(nugetFileStream);
       }
 
-      string localPackageFolder = Path.GetFullPath($"../../../../../bin/{GetAssemblyBuildConfiguration()}/Packages");
+      string localPackageFolder = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant());
+
       xml.Element("configuration")!
          .Element("packageSources")!
          .Elements()
@@ -255,7 +242,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
 
     private protected void AssertCoverage(ClonedTemplateProject clonedTemplateProject, string filter = "coverage.json", string standardOutput = "")
     {
-      if (GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
+      if (TestUtils.GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
       {
         bool coverageChecked = false;
         foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
@@ -270,7 +257,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
           }
         }
 
-        Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
+        Assert.True(coverageChecked, $"Coverage check failed");
       }
     }
 
@@ -291,10 +278,21 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
         xml = XDocument.Load(csprojStream);
       }
 
-      xml.Element("Project")!
-        .Element("PropertyGroup")!
-        .Element("TargetFramework")!
-        .Remove();
+      if (xml.Descendants().FirstOrDefault(e => e.Name.LocalName == "TargetFramework") != null)
+      {
+        xml.Element("Project")!
+          .Element("PropertyGroup")!
+          .Element("TargetFramework")!
+          .Remove();
+      }
+
+      if (xml.Descendants().FirstOrDefault(e => e.Name.LocalName == "TargetFrameworks") != null)
+      {
+        xml.Element("Project")!
+          .Element("PropertyGroup")!
+          .Element("TargetFrameworks")!
+          .Remove();
+      }
 
       XElement targetFrameworkElement;
 

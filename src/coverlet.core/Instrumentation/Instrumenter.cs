@@ -464,7 +464,9 @@ namespace Coverlet.Core.Instrumentation
         MethodDefinition actualMethod = method;
         IEnumerable<CustomAttribute> customAttributes = method.CustomAttributes;
         if (_instrumentationHelper.IsLocalMethod(method.Name))
+#pragma warning disable IDE0057 // Use range operator
           actualMethod = methods.FirstOrDefault(m => m.Name == method.Name.Split('>')[0].Substring(1)) ?? method;
+#pragma warning restore IDE0057 // Use range operator
 
         if (actualMethod.IsGetter || actualMethod.IsSetter)
         {
@@ -914,7 +916,9 @@ namespace Coverlet.Core.Instrumentation
           {
             continue;
           }
+#pragma warning disable IDE0057 // Use range operator
           _matcher.AddInclude(Path.IsPathRooted(excludeRule) ? excludeRule.Substring(Path.GetPathRoot(excludeRule).Length) : excludeRule);
+#pragma warning restore IDE0057 // Use range operator
         }
       }
     }
@@ -925,7 +929,9 @@ namespace Coverlet.Core.Instrumentation
         return false;
 
       // We strip out drive because it doesn't work with globbing
+#pragma warning disable IDE0057 // Use range operator
       return _matcher.Match(Path.IsPathRooted(sourceFile) ? sourceFile.Substring(Path.GetPathRoot(sourceFile).Length) : sourceFile).HasMatches;
+#pragma warning restore IDE0057 // Use range operator
     }
   }
 }

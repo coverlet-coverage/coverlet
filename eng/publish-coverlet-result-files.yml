@@ -4,13 +4,14 @@ steps:
   continueOnError: true
   condition: always()
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)'
+    SourceFolder: '$(Build.SourcesDirectory)/artifacts'
     Contents: |
        **/*.trx
        **/*.html
        **/*.opencover.xml
        **/*.cobertura.xml
        **/*.coverage.json
+       **/*.diag.log
        **/log.txt
        **/log.datacollector.*.txt
        **/log.host.*.txt
@@ -21,18 +22,20 @@ steps:
   condition: always()
   inputs:
     SourceFolder: '$(Agent.TempDirectory)'
-    Contents: '**/*.trx'
+    Contents: |
+        **/*.trx
+        **/coverage.opencover.xml
+        **/coverage.cobertura.xml
+        **/coverage.json
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: CopyFiles@2
-  displayName: Copy log files
+  displayName: Copy binlog files
   condition: always()
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)'
-    Contents: |
-        **/*.diag.log
-        **/*.binlog
-    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs/BuildLogs'
+    Contents: '**/*.binlog'
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: PublishPipelineArtifact@1
   displayName: Publish Coverlet logs

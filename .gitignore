@@ -305,7 +305,11 @@ DeterministicTest.props
 test/coverlet.integration.determisticbuild/*.txt
 test/coverlet.integration.determisticbuild/runsettings
 
+coverage.xml
 coverage.cobertura.xml
 coverage.opencover.xml
+coverage.*.xml
 coverage.*.cobertura.xml
 coverage.*.opencover.xml
+
+FolderProfile.pubxml
