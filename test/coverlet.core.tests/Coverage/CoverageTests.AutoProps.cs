@@ -106,7 +106,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Theory(Skip = "fails reason unknown (no session debug possible)")]
+    [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public void SkipRecordWithProperties(bool skipAutoProps)
