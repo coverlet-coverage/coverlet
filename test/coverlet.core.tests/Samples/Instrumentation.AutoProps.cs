@@ -24,13 +24,27 @@ namespace Coverlet.Core.Samples.Tests
         public string RecordAutoPropsInit { get; set; } = string.Empty;
     }
 
-    public class ClassWithAutoRecordProperties
+    public class ClassWithRecordsAutoProperties
     {
-        record AutoRecordWithProperties(string Prop1, string Prop2);
+        record RecordWithPrimaryConstructor(string Prop1, string Prop2);
 
-        public ClassWithAutoRecordProperties()
+        public ClassWithRecordsAutoProperties()
         {
-            var record = new AutoRecordWithProperties(string.Empty, string.Empty);
+            var record = new RecordWithPrimaryConstructor(string.Empty, string.Empty);
         }
     }
+
+    public class ClassWithInheritingRecordsAndAutoProperties
+    {
+        record BaseRecord(int A);
+
+        record InheritedRecord(int A) : BaseRecord(A);
+
+        public ClassWithInheritingRecordsAndAutoProperties()
+        {
+            var record = new InheritedRecord(1);
+        }
+    }
+
+
 }

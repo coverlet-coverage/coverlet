@@ -470,7 +470,7 @@ namespace Coverlet.Core.Instrumentation
 
         if (actualMethod.IsGetter || actualMethod.IsSetter)
         {
-          if (_parameters.SkipAutoProps && actualMethod.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
+          if (_parameters.SkipAutoProps && IsCompilerGenerated(actualMethod))
           {
             continue;
           }
@@ -507,11 +507,16 @@ namespace Coverlet.Core.Instrumentation
       IEnumerable<MethodDefinition> ctors = type.GetConstructors();
       foreach (MethodDefinition ctor in ctors)
       {
-        if (!ctor.CustomAttributes.Any(IsExcludeAttribute))
+        if (!ctor.CustomAttributes.Any(IsExcludeAttribute) && !IsCompilerGenerated(ctor))
         {
           InstrumentMethod(ctor);
         }
       }
+    }
+
+    private static bool IsCompilerGenerated(IMemberDefinition member)
+    {
+      return member.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);
     }
 
     private void InstrumentMethod(MethodDefinition method)
@@ -679,7 +684,7 @@ namespace Coverlet.Core.Instrumentation
             }
         );
 
-        if (method.DeclaringType.CustomAttributes.Any(x => x.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
+        if (IsCompilerGenerated(method.DeclaringType))
         {
           if (_branchesInCompiledGeneratedClass == null)
           {
