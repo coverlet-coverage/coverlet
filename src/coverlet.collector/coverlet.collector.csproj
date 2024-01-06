@@ -86,14 +86,6 @@
     </None>
   </ItemGroup>
 
-  <!--<Target Name="PackBuildOutputs">
-    <ItemGroup>
-      <TfmSpecificPackageFile Include="$(TargetDir)\*.dll" PackagePath="build\netstandard2.0\" />
-      <TfmSpecificPackageFile Include="$(TargetDir)\*.pdb" PackagePath="build\netstandard2.0\" />
-      <TfmSpecificPackageFile Include="$(TargetDir)\*.deps.json" PackagePath="build\netstandard2.0\" />
-    </ItemGroup>
-  </Target>-->
-
   <Target Name="PackBuildOutputs">
     <ItemGroup>
       <TfmSpecificPackageFile Include="build\coverlet.collector.targets" PackagePath="build\$(TargetFramework)" />
