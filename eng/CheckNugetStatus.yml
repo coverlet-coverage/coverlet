@@ -11,7 +11,7 @@ parameters:
   breakBuild: false
 
 steps:
-- task: NuGetAuthenticate@0
+- task: NuGetAuthenticate@1
   condition: ${{parameters.condition}}
   enabled: ${{parameters.enableQualitySteps}}
 
