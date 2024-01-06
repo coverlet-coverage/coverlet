@@ -44,9 +44,12 @@ Add msbuild package version generated to `"..\Documentation\Examples\MSBuild\Det
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
-    <PackageReference Include="xunit" Version="2.5.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.6.5" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <!-- version comes from  coverlet.msbuild.6.0.1-preview.8.gcb9b802a5f.nupkg -->
     <PackageReference Include="coverlet.msbuild" Version="coverlet.msbuild.6.0.1-preview.8.gcb9b802a5f.nupkg" >
       <PrivateAssets>all</PrivateAssets>
