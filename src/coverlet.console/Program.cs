@@ -246,7 +246,7 @@ namespace Coverlet.Console
           IReporter reporter = new ReporterFactory(format).CreateReporter();
           if (reporter == null)
           {
-            throw new Exception($"Specified output format '{format}' is not supported");
+            throw new ArgumentException($"Specified output format '{format}' is not supported");
           }
 
           if (reporter.OutputType == ReporterOutputType.Console)
@@ -292,7 +292,7 @@ namespace Coverlet.Console
           IEnumerable<string> thresholdValues = threshold.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
           if (thresholdValues.Count() != thresholdTypeFlagQueue.Count)
           {
-            throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
+            throw new ArgumentException($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
           }
 
           foreach (string thresholdValue in thresholdValues)
@@ -303,7 +303,7 @@ namespace Coverlet.Console
             }
             else
             {
-              throw new Exception($"Invalid threshold value must be numeric");
+              throw new ArgumentException($"Invalid threshold value must be numeric");
             }
           }
         }
@@ -375,11 +375,10 @@ namespace Coverlet.Console
           {
             exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
           }
-          throw new Exception(exceptionMessageBuilder.ToString());
+          throw new InvalidOperationException(exceptionMessageBuilder.ToString());
         }
 
         return Task.FromResult(exitCode);
-
 
       }
 

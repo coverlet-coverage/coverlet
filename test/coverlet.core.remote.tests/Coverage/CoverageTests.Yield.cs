@@ -21,7 +21,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                   {
                     foreach (dynamic _ in instance.One()) ;
@@ -56,7 +56,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                   {
                     foreach (dynamic _ in instance.Two()) ;
@@ -90,7 +90,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                   {
                     foreach (dynamic _ in instance.OneWithSwitch(2)) ;
@@ -125,7 +125,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                   {
                     foreach (dynamic _ in instance.Three()) ;
@@ -159,7 +159,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                   {
                     foreach (dynamic _ in instance.Enumerable(new[] { "one", "two", "three", "four" })) ;

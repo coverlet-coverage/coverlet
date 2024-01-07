@@ -44,7 +44,7 @@ namespace coverlet.core.remote.tests
       var coveragePrepareResult = new CoveragePrepareResult
       {
         UseSourceLink = true,
-        Results = new[] { instrumenterResult },
+        Results = [instrumenterResult],
         Parameters = new CoverageParameters()
       };
 

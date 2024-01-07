@@ -23,7 +23,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                   {
                     try { instance.NoBranches(); }
@@ -58,7 +58,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
                         try { instance.If(); }
@@ -93,7 +93,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
                         try { instance.Switch(); }
@@ -127,7 +127,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
                         try { instance.Subtle(); }
@@ -162,7 +162,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
                         try { instance.UnreachableBranch(); }
@@ -197,7 +197,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
                         try { instance.CallsGenericMethodDoesNotReturn(); }
@@ -232,7 +232,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
                         try { instance.CallsGenericClassDoesNotReturn(); }
@@ -240,7 +240,6 @@ namespace coverlet.core.remote.tests
                         return Task.CompletedTask;
 
                       }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
-
 
         }, path, new RemoteInvokeOptions { RollForward = "Major" });
         using (h)
@@ -268,7 +267,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
                         try { instance.WithLeave(); }
@@ -303,7 +302,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
                         try { instance.FiltersAndFinallies(); }

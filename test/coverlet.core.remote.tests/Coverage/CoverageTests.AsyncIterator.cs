@@ -21,7 +21,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncIterator>(async instance =>
                   {
                     int res = await (Task<int>)instance.Issue1104_Repro();

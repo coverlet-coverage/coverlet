@@ -23,7 +23,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0, string arg1) =>
         {
-          string[] parameters = new string[] { arg0, arg1 };
+          string[] parameters = [arg0, arg1];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoProps>(instance =>
                   {
                     instance.AutoPropsNonInit = 10;
@@ -75,7 +75,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0, string arg1) =>
         {
-          string[] parameters = new string[] { arg0 , arg1};
+          string[] parameters = [arg0 , arg1];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordWithPropertyInit>(instance =>
                       {
                         instance.RecordAutoPropsNonInit = string.Empty;
@@ -126,7 +126,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0, string arg1) =>
         {
-          string[] parameters = new string[] { arg0, arg1};
+          string[] parameters = [arg0, arg1];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordWithPropertyInit>(instance =>
           {
             return Task.CompletedTask;
@@ -174,7 +174,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0, string arg1) =>
         {
-          string[] parameters = new string[] { arg0, arg1 };
+          string[] parameters = [arg0, arg1];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithInheritingRecordsAndAutoProperties>(instance =>
             {
               return Task.CompletedTask;

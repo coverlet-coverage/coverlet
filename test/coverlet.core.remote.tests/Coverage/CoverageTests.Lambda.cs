@@ -21,7 +21,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(async instance =>
                   {
                     instance.InvokeAnonymous_Test();
@@ -58,7 +58,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_730>(async instance =>
                   {
                     await (Task)instance.Invoke();
@@ -90,7 +90,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_760>(async instance =>
                   {
                     await (Task)instance.If();
@@ -123,7 +123,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1056>(instance =>
           {
             instance.T1();

@@ -50,7 +50,7 @@ namespace coverlet.core.remote.tests
       new string[0],
       new string[0],
       new string[0],
-      string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : new[] { sourceFileFilter },
+      string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : [sourceFileFilter],
       null,
       null)));
     }

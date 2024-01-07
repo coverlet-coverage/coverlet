@@ -22,7 +22,7 @@ namespace coverlet.core.remote.tests
       {
         RemoteInvokeHandle h = RemoteExecutor.Invoke(async (string arg0) =>
         {
-          string[] pathSerialize = new string[] { arg0 };
+          string[] pathSerialize = [arg0];
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(async instance =>
                   {
                     int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));

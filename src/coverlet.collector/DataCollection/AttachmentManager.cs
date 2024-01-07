@@ -74,6 +74,12 @@ namespace Coverlet.Collector.DataCollection
     /// </summary>
     public void Dispose()
     {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+    protected virtual void Dispose(bool disposing)
+    {
+      // Cleanup
       // Unregister events
       try
       {

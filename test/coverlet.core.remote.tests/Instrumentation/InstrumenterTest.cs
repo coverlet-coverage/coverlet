@@ -49,7 +49,7 @@ namespace coverlet.core.remote.tests.Instrumentation
       CoverageParameters parameters = new()
       {
         ExcludeAttributes = attributesToIgnore,
-        DoesNotReturnAttributes = new string[] { "DoesNotReturnAttribute" }
+        DoesNotReturnAttributes = ["DoesNotReturnAttribute"]
       };
       var instrumenter = new Instrumenter(module, identifier, parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
       return new InstrumenterTest
@@ -76,8 +76,7 @@ namespace coverlet.core.remote.tests.Instrumentation
     public void TestReachabilityHelper()
     {
       int[] allInstrumentableLines =
-          new[]
-          {
+          [
                     // Throws
                     7, 8,
                     // NoBranches
@@ -102,10 +101,9 @@ namespace coverlet.core.remote.tests.Instrumentation
                     147, 149, 150, 151, 152, 153, 154, 155, 156, 159, 161, 163, 166, 167, 168,
                     // FiltersAndFinallies
                     171, 173, 174, 175, 176, 177, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 192, 193, 194, 195, 196, 197
-          };
+          ];
       int[] notReachableLines =
-          new[]
-          {
+          [
                     // NoBranches
                     15, 16,
                     // If
@@ -124,7 +122,7 @@ namespace coverlet.core.remote.tests.Instrumentation
                     163, 164,
                     // FiltersAndFinallies
                     176, 177, 183, 184, 189, 190, 195, 196, 197
-          };
+          ];
 
       int[] expectedToBeInstrumented = allInstrumentableLines.Except(notReachableLines).ToArray();
 
