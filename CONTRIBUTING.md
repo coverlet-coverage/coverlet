@@ -4,8 +4,9 @@ Contributions are highly welcome, however, except for very small changes, kindly
 
 ## Requirements
 
-.NET SDK 2.2  https://dotnet.microsoft.com/download/dotnet-core/2.2  
-.NET SDK 3.1  https://dotnet.microsoft.com/download/dotnet-core/3.1
+[.NET SDK 6.0](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+[.NET SDK 7.0](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+[.NET SDK 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
 ## Building the Project
 

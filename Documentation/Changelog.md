@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+-Uncovered lines in .NET 8 for inheriting records [#1555](https://github.com/coverlet-coverage/coverlet/issues/1555)
+-Fix record constructors not covered when SkipAutoProps is true [#1561](https://github.com/coverlet-coverage/coverlet/issues/1561)
 -Fix .NET 7 Method Group branch coverage issue [#1447](https://github.com/coverlet-coverage/coverlet/issues/1447)
 -Fix ExcludeFromCodeCoverage does not exclude method in a partial class [#1548](https://github.com/coverlet-coverage/coverlet/issues/1548) 
 -Fix ExcludeFromCodeCoverage does not exclude F# task [#1547](https://github.com/coverlet-coverage/coverlet/issues/1547) 

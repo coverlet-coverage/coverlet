@@ -55,6 +55,8 @@ charset = utf-8-bom
 dotnet_sort_system_directives_first = true
 ## IDE0005: Using directive is unnecessary.
 dotnet_diagnostic.IDE0005.severity = warning
+## IDE0007 use 'var' instead of explicit type
+dotnet_diagnostic.IDE0007.severity = none
 # License header
 file_header_template = Copyright (c) Toni Solarin-Sodara\nLicensed under the MIT license. See LICENSE file in the project root for full license information.
 ## IDE0073: The file header is missing or not located at the top of the file

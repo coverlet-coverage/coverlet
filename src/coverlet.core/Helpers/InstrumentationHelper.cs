@@ -348,12 +348,14 @@ namespace Coverlet.Core.Helpers
 
       foreach (string filter in excludeFilters)
       {
+#pragma warning disable IDE0057 // Use range operator
         string typePattern = filter.Substring(filter.IndexOf(']') + 1);
 
         if (typePattern != "*")
           continue;
 
         string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+#pragma warning restore IDE0057 // Use range operator
         modulePattern = WildcardToRegex(modulePattern);
 
         var regex = new Regex(modulePattern);
@@ -376,7 +378,9 @@ namespace Coverlet.Core.Helpers
 
       foreach (string filter in includeFilters)
       {
+#pragma warning disable IDE0057 // Use range operator
         string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+#pragma warning restore IDE0057 // Use range operator
 
         if (modulePattern == "*")
           return true;
@@ -431,8 +435,10 @@ namespace Coverlet.Core.Helpers
 
       foreach (string filter in filters)
       {
+#pragma warning disable IDE0057 // Use range operator
         string typePattern = filter.Substring(filter.IndexOf(']') + 1);
         string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+#pragma warning restore IDE0057 // Use range operator
 
         typePattern = WildcardToRegex(typePattern);
         modulePattern = WildcardToRegex(modulePattern);

@@ -8,8 +8,8 @@ coverlet --help
 
 The current options are (output of `coverlet --help`):
 
-```bash
-Cross platform .NET Core code coverage tool 3.0.0.0
+```text
+Cross platform .NET Core code coverage tool 6.0.0.0
 
 Usage: coverlet [arguments] [options]
 

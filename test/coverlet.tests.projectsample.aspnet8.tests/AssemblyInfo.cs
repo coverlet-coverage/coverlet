@@ -3,4 +3,4 @@
 
 using System.Reflection;
 
-[assembly: AssemblyKeyFile("coverlet.tests.projectsample.aspnet6.tests.snk")]
+[assembly: AssemblyKeyFile("coverlet.tests.projectsample.aspnet8.tests.snk")]

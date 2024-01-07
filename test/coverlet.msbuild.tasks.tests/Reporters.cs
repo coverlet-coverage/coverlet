@@ -29,7 +29,7 @@ namespace Coverlet.MSbuild.Tasks.Reporters.Tests
     [InlineData("net472", "/folder/reportFolder/file.ext1.ext2", "cobertura", "/folder/reportFolder/file.ext1.net472.ext2")]
     [InlineData("netcoreapp2.2", "/folder/reportFolder/file", "cobertura", "/folder/reportFolder/file.netcoreapp2.2.cobertura.xml")]
     [InlineData("netcoreapp2.2", "file", "cobertura", "file.netcoreapp2.2.cobertura.xml")]
-    public void Msbuild_ReportWriter(string coverletMultiTargetFrameworksCurrentTFM, string coverletOutput, string reportFormat, string expectedFileName)
+    public void Msbuild_ReportWriter(string? coverletMultiTargetFrameworksCurrentTFM, string coverletOutput, string reportFormat, string expectedFileName)
     {
       var fileSystem = new Mock<IFileSystem>();
 

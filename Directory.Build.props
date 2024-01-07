@@ -2,22 +2,30 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <!-- enforce CamelCase case string-->
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <PackageOutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\Packages\</PackageOutputPath>
+    <!-- SourceLink Setup -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- Build properties -->
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
     <AnalysisLevel>preview</AnalysisLevel>
     <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <LangVersion>preview</LangVersion>
-    <NoWarn>$(NoWarn);NU5105;CS1591</NoWarn>
+    <NoWarn>$(NoWarn);NU1507;NU5105;CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RestoreSources>
       https://api.nuget.org/v3/index.json;
     </RestoreSources>
+    <!--<UsingMicrosoftArtifactsSdk>true</UsingMicrosoftArtifactsSdk>-->
+    <!-- https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output -->
+    <!-- C:\Program Files\dotnet\sdk\8.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.DefaultOutputPaths.targets -->
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+    <CoverletVersion Condition="'$(CoverletVersion)'==''">6.0.0</CoverletVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
@@ -31,7 +39,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <VSTestResultsDirectory>$(RepoRoot)artifacts/tests</VSTestResultsDirectory>
+    <VSTestResultsDirectory>$(RepoRoot)artifacts/testresults/$(Configuration.ToLowerInvariant())</VSTestResultsDirectory>
     <VSTestLogger>@(VSTestLogger)</VSTestLogger>
   </PropertyGroup>
 
@@ -42,9 +50,9 @@
      -->
     <!-- VSTest dependency versions -->
     <!-- https://github.com/microsoft/vstest/blob/fde8bf79d3f0f80e3548f873a56ffb4100c0ae49/eng/Versions.props#L22C1-L54C2 -->
+    <MicrosoftBuildUtilitiesCorePackageVersion>15.9.20</MicrosoftBuildUtilitiesCorePackageVersion>
     <SystemReflectionMetadataVersion>1.6.0</SystemReflectionMetadataVersion>
     <SystemCollectionsImmutableVersion>1.5.0</SystemCollectionsImmutableVersion>
-    <MicrosoftBuildUtilitiesCorePackageVersion>15.9.20</MicrosoftBuildUtilitiesCorePackageVersion>
   </PropertyGroup>
 
 </Project>
