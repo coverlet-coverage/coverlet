@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <!-- The assembly is used as both a library and an executable. -->
+    <OutputType>Exe</OutputType>
+    <Description>This package provides support for running tests out-of-process.</Description>
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
+    <IsPackable>false</IsPackable>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <RuntimeFrameworkVersion>6.0.25</RuntimeFrameworkVersion>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GenerateDependencyFile>true</GenerateDependencyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="3.1.456101" />
+     <!--https://github.com/microsoft/vstest/pull/4724/files => Microsoft.Diagnostics.NETCore.Client V0.2.452401-->
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.452401" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="build\$(MSBuildProjectName).targets" PackagePath="build\$(MSBuildProjectName).targets" Pack="true" />
+    <!--<None Include="$(RepoRoot)LICENSE.txt" PackagePath="LICENSE.txt" Pack="true" />
+    <None Include="$(RepoRoot)THIRD-PARTY-NOTICES.txt" PackagePath="THIRD-PARTY-NOTICES.txt" Pack="true" />-->
+  </ItemGroup>
+
+  <Target Name="PackBuildOutputs" DependsOnTargets="CopyFilesToOutputDirectory">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(ProjectDepsFilePath)" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" PackagePath="lib\$(TargetFramework)\" />
+      <TfmSpecificPackageFile Include="@(AppConfigWithTargetPath->'$(OutDir)%(TargetPath)')" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" PackagePath="lib\$(TargetFramework)\" />
+    </ItemGroup>
+  </Target>
+
+<Target Name="AddRuntimeDependenciesToContent"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+          BeforeTargets="GetCopyToOutputDirectoryItems"
+          DependsOnTargets="GenerateBuildDependencyFile;
+                            GenerateBuildRuntimeConfigurationFiles">
+    <ItemGroup>
+      <ContentWithTargetPath Include="$(ProjectDepsFilePath)" TargetPath="Microsoft.DotNet.RemoteExecutor.deps.json" CopyToOutputDirectory="PreserveNewest" />
+      <ContentWithTargetPath Include="$(ProjectRuntimeConfigFilePath)" TargetPath="Microsoft.DotNet.RemoteExecutor.runtimeconfig.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+</Project>

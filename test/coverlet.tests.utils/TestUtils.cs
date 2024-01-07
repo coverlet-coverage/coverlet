@@ -15,7 +15,7 @@ namespace Coverlet.Tests.Utils
   }
 
   static class TestUtils
-  {
+  { 
     private static readonly string s_relParent = ".." + Path.DirectorySeparatorChar;
     private static readonly string s_rel2Parents = s_relParent + s_relParent;
     private static readonly string s_rel3Parents = s_rel2Parents + s_relParent;

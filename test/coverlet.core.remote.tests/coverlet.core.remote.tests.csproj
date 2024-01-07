@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <!--<ImplicitUsings>enable</ImplicitUsings>-->
+    <!--<Nullable>enable</Nullable>-->
+
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);CS8002;NU1008</NoWarn>
+    <MSBuildWarningsAsMessages>NU1702</MSBuildWarningsAsMessages>
+
+    <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
+    <PreserveCompilationContext>true</PreserveCompilationContext>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.5" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="ReportGenerator.Core" Version="5.2.0" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    <PackageReference Include="xunit" Version="2.6.5" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj" />
+    <ProjectReference Include="..\coverlet.tests.utils\coverlet.tests.utils.csproj" />
+    <ProjectReference Include="$(RepoRoot)tool\Microsoft.DotNet.RemoteExecutor\src\Microsoft.DotNet.RemoteExecutor.csproj" />
+
+    <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestAssets\75d9f96508d74def860a568f426ea4a4.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestAssets\75d9f96508d74def860a568f426ea4a4.pdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestAssets\CoverletSourceRootsMappingTest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestAssets\multiple.frameworks.runtimeconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestAssets\single.framework.runtimeconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestAssets\System.Private.CoreLib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestAssets\System.Private.CoreLib.pdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="copy $(ArtifactsPath)\$(ArtifactsBinOutputName)\coverlet.tests.projectsample.excludedbyattribute\$(ArtifactsPivots) $(TargetDir)TestAssets /Y" />
+    <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) OR $([MSBuild]::IsOSPlatform('Linux'))" Command="cp -r $(ArtifactsPath)/$(ArtifactsBinOutputName)/coverlet.tests.projectsample.excludedbyattribute/$(ArtifactsPivots) $(TargetDir)TestAssets" />
+  </Target>
+
+</Project>
