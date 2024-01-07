@@ -971,12 +971,9 @@ namespace Coverlet.Core.Symbols
             continue;
           }
 
-          if (isMoveNextInsideAsyncStateMachineProlog)
+          if (isMoveNextInsideAsyncStateMachineProlog && (SkipMoveNextPrologueBranches(instruction) || SkipIsCompleteAwaiters(instruction)))
           {
-            if (SkipMoveNextPrologueBranches(instruction) || SkipIsCompleteAwaiters(instruction))
-            {
-              continue;
-            }
+            continue;
           }
 
           if (SkipExpressionBreakpointsBranches(instruction))
@@ -989,23 +986,17 @@ namespace Coverlet.Core.Symbols
             continue;
           }
 
-          if (isAsyncStateMachineMoveNext)
-          {
-            if (SkipGeneratedBranchesForExceptionHandlers(methodDefinition, instruction, instructions) ||
+          if (isAsyncStateMachineMoveNext && (SkipGeneratedBranchesForExceptionHandlers(methodDefinition, instruction, instructions) ||
                 SkipGeneratedBranchForExceptionRethrown(instructions, instruction) ||
                 SkipGeneratedBranchesForAwaitForeach(instructions, instruction) ||
-                SkipGeneratedBranchesForAwaitUsing(instructions, instruction))
-            {
-              continue;
-            }
+                SkipGeneratedBranchesForAwaitUsing(instructions, instruction)))
+          {
+            continue;
           }
 
-          if (isMoveNextInsideAsyncIterator)
+          if (isMoveNextInsideAsyncIterator && SkipGeneratedBranchesForAsyncIterator(instructions, instruction))
           {
-            if (SkipGeneratedBranchesForAsyncIterator(instructions, instruction))
-            {
-              continue;
-            }
+            continue;
           }
 
           if (SkipGeneratedBranchesForEnumeratorCancellationAttribute(instructions, instruction))
