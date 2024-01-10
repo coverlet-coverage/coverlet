@@ -9,8 +9,8 @@ steps:
 
 - task: UseDotNet@2
   inputs:
-    version: 7.0.403
-  displayName: Install .NET Core SDK 7.0.403
+    version: 8.0.101
+  displayName: Install .NET Core SDK 8.0.101
 
 - task: UseDotNet@2
   inputs:
@@ -34,7 +34,7 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: push
-    packagesToPush: $(Build.SourcesDirectory)\artifacts\package\release\*.nupkg
+    packagesToPush: $(Build.SourcesDirectory)\artifacts\package\release\*.snupkg
     nuGetFeedType: internal
     publishVstsFeed: coverlet/coverlet-nightly
   displayName: Publish NuGet symbol packages
