@@ -1,0 +1,46 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+template: |
+  # What's Changed
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+categories:
+  - title: 'Breaking'
+    label: 'breaking-change'
+  - title: 'New'
+    label: 'enhancement'
+  - title: 'Bug Fixes'
+    label: 'bug'
+  - title: 'Maintenance'
+    labels:
+    - 'maintenance'
+    - 'chore'
+  - title: 'Documentation'
+    label: 'documentation'
+  - title: 'Other changes'
+  - title: 'Dependency Updates'
+    label: 'dependencies'
+    collapse-after: 5
+
+version-resolver:
+  major:
+    labels:
+      - 'breaking-change'
+  minor:
+    labels:
+      - 'enhancement'
+  patch:
+    labels:
+      - 'bug'
+      - 'chore'
+      - 'maintenance'
+      - 'documentation'
+      - 'dependencies'
+      - 'security'
+  default: patch
+
+exclude-labels:
+  - 'skip-changelog'
