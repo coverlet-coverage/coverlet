@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <AssemblyTitle>coverlet.collector</AssemblyTitle>
     <DevelopmentDependency>true</DevelopmentDependency>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -14,7 +14,7 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
     <!-- Open issue https://github.com/NuGet/Home/issues/8941 -->
-    <NoWarn>$(NoWarn);NU5127</NoWarn>
+    <NoWarn>$(NoWarn);NU5127;NU5100</NoWarn>
     <EnablePackageValidation>true</EnablePackageValidation>
     <!-- disable transitive version update and use versions defined in coverlet.core -->
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
@@ -43,7 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="build\**" Pack="true" PackagePath="" />
     <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
     <None Include="..\..\Documentation\VSTestIntegration.md" Link="VSTestIntegration.md" Pack="true" PackagePath="\">
       <PackageCopyToOutput>true</PackageCopyToOutput>
@@ -81,11 +80,20 @@
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="build\coverlet.collector.targets" >
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <Target Name="PackBuildOutputs">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(TargetDir)\*.dll" PackagePath="build\netstandard2.0\" />
-      <TfmSpecificPackageFile Include="$(TargetDir)\*.pdb" PackagePath="build\netstandard2.0\" />
-      <TfmSpecificPackageFile Include="$(TargetDir)\*.deps.json" PackagePath="build\netstandard2.0\" />
+      <TfmSpecificPackageFile Include="build\coverlet.collector.targets" PackagePath="build\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="build\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="$(ProjectDepsFilePath)" PackagePath="build\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="build\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="build\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="build\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubPath)" />
     </ItemGroup>
   </Target>
 </Project>
