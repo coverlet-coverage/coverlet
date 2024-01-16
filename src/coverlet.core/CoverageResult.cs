@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Coverlet.Core.Enums;
 using Coverlet.Core.Instrumentation;
 
@@ -22,11 +23,13 @@ namespace Coverlet.Core
 
   internal class Method
   {
+    [JsonConstructor]
     internal Method()
     {
-      Lines = new Lines();
-      Branches = new Branches();
+      Lines = [];
+      Branches = [];
     }
+
     public Lines Lines;
     public Branches Branches;
   }
