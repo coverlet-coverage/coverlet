@@ -16,7 +16,7 @@ using Mono.Collections.Generic;
 
 namespace Coverlet.Core.Symbols
 {
-  internal class CecilSymbolHelper : ICecilSymbolHelper
+  public class CecilSymbolHelper : ICecilSymbolHelper
   {
     private const int StepOverLineCode = 0xFEEFEE;
     // Create single instance, we cannot collide because we use full method name as key

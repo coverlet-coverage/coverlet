@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Coverlet.Core.Abstractions
 {
-  internal interface IFileSystem
+  public interface IFileSystem
   {
     bool Exists(string path);
 

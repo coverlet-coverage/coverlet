@@ -16,7 +16,7 @@ using Coverlet.Core.Enums;
 
 namespace Coverlet.Core.Helpers
 {
-  internal class InstrumentationHelper : IInstrumentationHelper
+  public class InstrumentationHelper : IInstrumentationHelper
   {
     private const int RetryAttempts = 12;
     private readonly ConcurrentDictionary<string, string> _backupList = new();

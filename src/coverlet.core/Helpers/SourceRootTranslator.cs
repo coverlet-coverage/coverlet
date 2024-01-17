@@ -10,13 +10,13 @@ using Coverlet.Core.Abstractions;
 namespace Coverlet.Core.Helpers
 {
   [DebuggerDisplay("ProjectPath = {ProjectPath} OriginalPath = {OriginalPath}")]
-  internal class SourceRootMapping
+  public class SourceRootMapping
   {
     public string ProjectPath { get; set; }
     public string OriginalPath { get; set; }
   }
 
-  internal class SourceRootTranslator : ISourceRootTranslator
+  public class SourceRootTranslator : ISourceRootTranslator
   {
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;

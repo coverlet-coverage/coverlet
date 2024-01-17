@@ -6,7 +6,7 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
-  internal class AssemblyAdapter : IAssemblyAdapter
+  public class AssemblyAdapter : IAssemblyAdapter
   {
     public string GetAssemblyName(string assemblyPath)
     {

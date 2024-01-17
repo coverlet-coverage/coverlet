@@ -93,7 +93,7 @@ namespace Coverlet.Tests.RemoteExecutor
         }
     }
 
-    public sealed class RemoteInvokeHandle : IRemoteInvokeHandle
+    public class RemoteInvokeHandle : IRemoteInvokeHandle
     {
         const int FailWaitTimeoutMilliseconds = 60 * 1000;
         private readonly Process _process;
@@ -127,7 +127,7 @@ namespace Coverlet.Tests.RemoteExecutor
         }
     }
 
-    public sealed class RemoteExecutionException : XunitException
+    public class RemoteExecutionException : XunitException
     {
         public RemoteExecutionException(string stackTrace)
             : base("Remote process failed with an unhandled exception.", stackTrace)
