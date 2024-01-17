@@ -6,7 +6,7 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Helpers
 {
-  internal class FileSystem : IFileSystem
+  public class FileSystem : IFileSystem
   {
     // We need to partial mock this method on tests
     public virtual bool Exists(string path)

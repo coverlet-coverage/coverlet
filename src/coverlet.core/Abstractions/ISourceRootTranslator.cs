@@ -6,7 +6,7 @@ using Coverlet.Core.Helpers;
 
 namespace Coverlet.Core.Abstractions
 {
-  internal interface ISourceRootTranslator
+  public interface ISourceRootTranslator
   {
     bool AddMappingInCache(string originalFileName, string targetFileName);
     string ResolveFilePath(string originalFileName);

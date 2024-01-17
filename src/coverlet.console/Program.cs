@@ -385,7 +385,6 @@ namespace Coverlet.Console
 
         return Task.FromResult(exitCode);
 
-
       }
 
       catch (Win32Exception we) when (we.Source == "System.Diagnostics.Process")

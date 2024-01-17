@@ -7,7 +7,7 @@ using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
 {
-  internal class ReporterFactory
+  public class ReporterFactory
   {
     private readonly string _format;
     private readonly IReporter[] _reporters;

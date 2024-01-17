@@ -10,7 +10,7 @@ namespace Coverlet.Core.Helpers
 {
   // A slightly amended version of the code found here: https://stackoverflow.com/a/1563234/186184
   // This code allows for varying backoff strategies through the use of Func<TimeSpan>.
-  internal class RetryHelper : IRetryHelper
+  public class RetryHelper : IRetryHelper
   {
     /// <summary>
     /// Retry a void method.

@@ -5,7 +5,7 @@ using System;
 
 namespace Coverlet.Core.Abstractions
 {
-  internal interface ILogger
+  public interface ILogger
   {
     void LogVerbose(string message);
     void LogInformation(string message, bool important = false);

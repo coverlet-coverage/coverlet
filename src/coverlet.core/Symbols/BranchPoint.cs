@@ -10,7 +10,7 @@ namespace Coverlet.Core.Symbols
   /// a branch point
   /// </summary>
   [DebuggerDisplay("StartLine = {StartLine}")]
-  internal class BranchPoint
+  public class BranchPoint
   {
     /// <summary>
     /// Line of the branching instruction

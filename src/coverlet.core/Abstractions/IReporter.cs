@@ -3,7 +3,7 @@
 
 namespace Coverlet.Core.Abstractions
 {
-  internal interface IReporter
+  public interface IReporter
   {
     ReporterOutputType OutputType { get; }
     string Format { get; }
@@ -11,7 +11,7 @@ namespace Coverlet.Core.Abstractions
     string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator);
   }
 
-  internal enum ReporterOutputType
+  public enum ReporterOutputType
   {
     File,
     Console,

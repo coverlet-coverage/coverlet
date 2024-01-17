@@ -11,7 +11,7 @@ namespace Coverlet.Core.Instrumentation
 {
   [DebuggerDisplay("Number = {Number} Hits = {Hits} Class = {Class} Method = {Method}")]
   [DataContract]
-  internal class Line
+  public class Line
   {
     [DataMember]
     public int Number;
@@ -25,7 +25,7 @@ namespace Coverlet.Core.Instrumentation
 
   [DebuggerDisplay("Line = {Number} Offset = {Offset} EndOffset = {EndOffset} Path = {Path} Ordinal = {Ordinal} Hits = {Hits}")]
   [DataContract]
-  internal class Branch : Line
+  public class Branch : Line
   {
     [DataMember]
     public int Offset;
@@ -40,7 +40,7 @@ namespace Coverlet.Core.Instrumentation
   [DebuggerDisplay("line = {Line} Ordinal = {Ordinal}")]
   // Implements IEquatable because is used by dictionary key https://docs.microsoft.com/en-us/dotnet/api/system.iequatable-1?view=netcore-2.2#remarks
   [DataContract]
-  internal class BranchKey : IEquatable<BranchKey>
+  public class BranchKey : IEquatable<BranchKey>
   {
     public BranchKey(int line, int ordinal) => (Line, Ordinal) = (line, ordinal);
 
@@ -60,7 +60,7 @@ namespace Coverlet.Core.Instrumentation
   }
 
   [DataContract]
-  internal class Document
+  public class Document
   {
     public Document()
     {
@@ -81,7 +81,7 @@ namespace Coverlet.Core.Instrumentation
   [DebuggerDisplay("isBranch = {isBranch} docIndex = {docIndex} start = {start} end = {end}")]
   [DataContract]
   [SuppressMessage("Style", "IDE1006", Justification = "suppress casing error for API compatibility")]
-  internal class HitCandidate
+  public class HitCandidate
   {
     public HitCandidate(bool isBranch, int docIndex, int start, int end) => (this.isBranch, this.docIndex, this.start, this.end) = (isBranch, docIndex, start, end);
 
@@ -97,7 +97,7 @@ namespace Coverlet.Core.Instrumentation
   }
 
   [DataContract]
-  internal class InstrumenterResult
+  public class InstrumenterResult
   {
     public InstrumenterResult()
     {
