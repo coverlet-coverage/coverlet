@@ -15,7 +15,7 @@ using Coverlet.Core.Instrumentation;
 namespace Coverlet.Core
 {
   [DataContract]
-  internal class CoverageParameters
+  public class CoverageParameters
   {
     [DataMember]
     public string Module { get; set; }
@@ -47,7 +47,7 @@ namespace Coverlet.Core
     public string ExcludeAssembliesWithoutSources { get; set; }
   }
 
-  internal class Coverage
+  public class Coverage
   {
     private readonly string _moduleOrAppDirectory;
     private readonly ILogger _logger;
@@ -56,7 +56,7 @@ namespace Coverlet.Core
     private readonly ISourceRootTranslator _sourceRootTranslator;
     private readonly ICecilSymbolHelper _cecilSymbolHelper;
     private readonly List<InstrumenterResult> _results;
-    private readonly CoverageParameters _parameters;
+    public readonly CoverageParameters _parameters;
 
     public string Identifier { get; }
 

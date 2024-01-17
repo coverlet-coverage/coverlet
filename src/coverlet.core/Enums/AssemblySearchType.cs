@@ -3,7 +3,7 @@
 
 namespace Coverlet.Core.Enums
 {
-  internal enum AssemblySearchType
+  public enum AssemblySearchType
   {
     MissingAny,
     MissingAll,

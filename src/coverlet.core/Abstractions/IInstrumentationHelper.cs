@@ -5,7 +5,7 @@ using Coverlet.Core.Enums;
 
 namespace Coverlet.Core.Abstractions
 {
-  internal interface IInstrumentationHelper
+  public interface IInstrumentationHelper
   {
     void BackupOriginalModule(string module, string identifier);
     void DeleteHitsFile(string path);

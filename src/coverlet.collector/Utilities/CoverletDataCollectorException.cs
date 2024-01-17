@@ -5,7 +5,7 @@ using System;
 
 namespace Coverlet.Collector.Utilities
 {
-  internal class CoverletDataCollectorException : Exception
+  public class CoverletDataCollectorException : Exception
   {
     public CoverletDataCollectorException(string message) : base(message)
     {

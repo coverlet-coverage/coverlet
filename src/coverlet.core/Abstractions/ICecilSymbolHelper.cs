@@ -8,7 +8,7 @@ using Mono.Cecil.Cil;
 
 namespace Coverlet.Core.Abstractions
 {
-  internal interface ICecilSymbolHelper
+  public interface ICecilSymbolHelper
   {
     IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition);
     bool SkipNotCoverableInstruction(MethodDefinition methodDefinition, Instruction instruction);
