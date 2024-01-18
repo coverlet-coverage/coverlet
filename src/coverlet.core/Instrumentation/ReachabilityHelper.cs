@@ -37,7 +37,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
       => $"[IL_{StartOffset:x4}, IL_{EndOffset:x4}]";
     }
 
-    private class BasicBlock
+    private sealed class BasicBlock
     {
       /// <summary>
       /// Offset of the instruction that starts the block

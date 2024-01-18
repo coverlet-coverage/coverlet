@@ -1515,7 +1515,7 @@ namespace Coverlet.Core.Symbols
       return sp != null && sp.StartLine != StepOverLineCode;
     }
 
-    private class InstructionByOffsetComparer : IComparer<Instruction>
+    private sealed class InstructionByOffsetComparer : IComparer<Instruction>
     {
       public int Compare(Instruction x, Instruction y)
       {

@@ -849,7 +849,7 @@ namespace Coverlet.Core.Instrumentation
         return new CoreLibMetadataImporter(module);
       }
 
-      private class CoreLibMetadataImporter : IMetadataImporter
+      private sealed class CoreLibMetadataImporter : IMetadataImporter
       {
         private readonly ModuleDefinition _module;
         private readonly DefaultMetadataImporter _defaultMetadataImporter;
