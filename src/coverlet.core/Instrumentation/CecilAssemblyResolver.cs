@@ -218,7 +218,7 @@ namespace Coverlet.Core.Instrumentation
     }
   }
 
-  internal class NetCoreSharedFrameworkResolver : ICompilationAssemblyResolver
+  public class NetCoreSharedFrameworkResolver : ICompilationAssemblyResolver
   {
     private readonly List<string> _aspNetSharedFrameworkDirs = new();
     private readonly ILogger _logger;
