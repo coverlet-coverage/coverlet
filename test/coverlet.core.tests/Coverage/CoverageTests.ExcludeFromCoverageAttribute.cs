@@ -60,21 +60,16 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes()
+    public async Task ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypesAsync()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
-              {
-                await (Task<int>)instance.Test("test");
-              }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
+            {
+              await (Task<int>)instance.Test("test");
+            }, persistPrepareResultToFile: pathSerialize[0]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -100,22 +95,17 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes_NestedMembers()
+    public async Task ExcludeFromCodeCoverage_CompilerGeneratedMethodsAndTypes_NestedMembersAsync()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_NestedStateMachines>(instance =>
-                  {
-                    instance.Test();
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_NestedStateMachines>(instance =>
+                {
+                  instance.Test();
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path)
           .GenerateReport(show: true);
@@ -131,22 +121,17 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void ExcludeFromCodeCoverageCompilerGeneratedMethodsAndTypes_Issue670()
+    public async Task ExcludeFromCodeCoverageCompilerGeneratedMethodsAndTypes_Issue670Async()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_Issue670>(instance =>
-                  {
-                    instance.Test("test");
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_Issue670>(instance =>
+                {
+                  instance.Test("test");
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -161,21 +146,17 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void ExcludeFromCodeCoverageNextedTypes()
+    public async Task ExcludeFromCodeCoverageNextedTypesAsync()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ExcludeFromCoverageAttrFilterClass1>(instance =>
-                  {
-                    Assert.Equal(42, instance.Run());
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ExcludeFromCoverageAttrFilterClass1>(instance =>
+                {
+                  Assert.Equal(42, instance.Run());
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .GenerateReport(show: true)
@@ -190,20 +171,16 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void ExcludeFromCodeCoverage_Issue809()
+    public async Task ExcludeFromCodeCoverage_Issue809Async()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(async instance =>
-              {
-                Assert.True(await (Task<bool>)instance.EditTask(null, 10));
-              }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<TaskRepo_Issue809>(async instance =>
+            {
+              Assert.True(await (Task<bool>)instance.EditTask(null, 10));
+            }, persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.ExcludeFromCoverage.Issue809.cs")
@@ -225,22 +202,18 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void ExcludeFromCodeCoverageAutoGeneratedGetSet()
+    public async Task ExcludeFromCodeCoverageAutoGeneratedGetSetAsync()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoGeneneratedGetSet>(instance =>
-              {
-                instance.SetId(10);
-                Assert.Equal(10, instance.Id);
-                return Task.CompletedTask;
-              }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoGeneneratedGetSet>(instance =>
+            {
+              instance.SetId(10);
+              Assert.Equal(10, instance.Id);
+              return Task.CompletedTask;
+            }, persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.ExcludeFromCoverage.cs")
@@ -254,22 +227,18 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void ExcludeFromCodeCoverageAutoGeneratedGet()
+    public async Task ExcludeFromCodeCoverageAutoGeneratedGetAsync()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoGeneneratedGetOnly>(instance =>
-                  {
-                    instance.SetId(10);
-                    Assert.Equal(10, instance.Id);
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoGeneneratedGetOnly>(instance =>
+                {
+                  instance.SetId(10);
+                  Assert.Equal(10, instance.Id);
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.ExcludeFromCoverage.cs")
@@ -283,21 +252,17 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void ExcludeFromCodeCoverage_Issue1302()
+    public async Task ExcludeFromCodeCoverage_Issue1302Async()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue1302>(instance =>
-                  {
-                    instance.Run();
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue1302>(instance =>
+                {
+                  instance.Run();
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
             .Document("Instrumentation.ExcludeFromCoverage.Issue1302.cs")
@@ -310,29 +275,25 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void MethodsWithExcludeFromCodeCoverageAttr()
+    public async Task MethodsWithExcludeFromCodeCoverageAttrAsync()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult =
-            await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
-              {
-                instance.TestLambda(string.Empty);
-                instance.TestLambda(string.Empty, 1);
-                foreach (dynamic _ in instance.TestYield("abc")) ;
-                foreach (dynamic _ in instance.TestYield("abc", 1)) ;
-                instance.TestLocalFunction(string.Empty);
-                instance.TestLocalFunction(string.Empty, 1);
-                await (Task)instance.TestAsyncAwait();
-                await (Task)instance.TestAsyncAwait(1);
-              },
-              persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult =
+          await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr>(async instance =>
+            {
+              instance.TestLambda(string.Empty);
+              instance.TestLambda(string.Empty, 1);
+              foreach (dynamic _ in instance.TestYield("abc")) ;
+              foreach (dynamic _ in instance.TestYield("abc", 1)) ;
+              instance.TestLocalFunction(string.Empty);
+              instance.TestLocalFunction(string.Empty, 1);
+              await (Task)instance.TestAsyncAwait();
+              await (Task)instance.TestAsyncAwait(1);
+            },
+            persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
           .GenerateReport(show: true)
@@ -347,29 +308,25 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void MethodsWithExcludeFromCodeCoverageAttr2()
+    public async Task MethodsWithExcludeFromCodeCoverageAttr2Async()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult =
-            await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr2>(async instance =>
-              {
-                instance.TestLambda(string.Empty);
-                instance.TestLambda(string.Empty, 1);
-                foreach (dynamic _ in instance.TestYield("abc")) ;
-                foreach (dynamic _ in instance.TestYield("abc", 1)) ;
-                instance.TestLocalFunction(string.Empty);
-                instance.TestLocalFunction(string.Empty, 1);
-                await (Task)instance.TestAsyncAwait();
-                await (Task)instance.TestAsyncAwait(1);
-              },
-              persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult =
+          await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr2>(async instance =>
+            {
+              instance.TestLambda(string.Empty);
+              instance.TestLambda(string.Empty, 1);
+              foreach (dynamic _ in instance.TestYield("abc")) ;
+              foreach (dynamic _ in instance.TestYield("abc", 1)) ;
+              instance.TestLocalFunction(string.Empty);
+              instance.TestLocalFunction(string.Empty, 1);
+              await (Task)instance.TestAsyncAwait();
+              await (Task)instance.TestAsyncAwait(1);
+            },
+            persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
           .GenerateReport(show: true)
