@@ -5,37 +5,36 @@ using System.IO;
 using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.Utils;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-  public partial class CoverageTests : ExternalProcessExecutionTest
+  //[CollectionDefinition("Non-Parallel Collection", DisableParallelization = true)]
+  //public class NonParallelCollectionDefinitionClass
+  //{
+  //}
+
+  //[Collection("Non-Parallel Collection")]
+  public partial class CoverageTests
   {
     [Fact]
-    public void SelectionStatements_If()
+    public async Task SelectionStatements_IfAsync()
     {
       // We need to pass file name to remote process where it save instrumentation result
       // Similar to msbuild input/output
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        // Lambda will run in a custom process to avoid issue with statics and file locking
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          // Run load and call a delegate passing class as dynamic to simplify method call
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
-                  {
-                    // We call method to trigger coverage hits
-                    instance.If(true);
+        // Run load and call a delegate passing class as dynamic to simplify method call
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                {
+                  // We call method to trigger coverage hits
+                  instance.If(true);
 
-                    // For now we have only async Run helper
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-
-          // we return 0 if we return something different assert fail
-          return 0;
-        }, new string[] { path });
+                  // For now we have only async Run helper
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         // We retrieve and load CoveragePrepareResult and run coverage calculation
         // Similar to msbuild coverage result task
@@ -59,20 +58,17 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void SelectionStatements_Switch()
+    public async Task SelectionStatements_SwitchAsync()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
-                  {
-                    instance.Switch(1);
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                {
+                  instance.Switch(1);
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -89,20 +85,17 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void SelectionStatements_Switch_CSharp8_OneBranch()
+    public async Task SelectionStatements_Switch_CSharp8_OneBranchAsync()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
-                  {
-                    instance.SwitchCsharp8(int.MaxValue);
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                {
+                  instance.SwitchCsharp8(int.MaxValue);
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.SelectionStatements.cs")
@@ -118,27 +111,24 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void SelectionStatements_Switch_CSharp8_AllBranches()
+    public async Task SelectionStatements_Switch_CSharp8_AllBranchesAsync()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                {
+                  instance.SwitchCsharp8(int.MaxValue);
+                  instance.SwitchCsharp8(uint.MaxValue);
+                  instance.SwitchCsharp8(short.MaxValue);
+                  try
                   {
-                    instance.SwitchCsharp8(int.MaxValue);
-                    instance.SwitchCsharp8(uint.MaxValue);
-                    instance.SwitchCsharp8(short.MaxValue);
-                    try
-                    {
-                      instance.SwitchCsharp8("");
-                    }
-                    catch { }
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, new string[] { path });
+                    instance.SwitchCsharp8("");
+                  }
+                  catch { }
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.SelectionStatements.cs")
