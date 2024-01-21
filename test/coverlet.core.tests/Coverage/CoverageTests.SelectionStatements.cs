@@ -9,12 +9,6 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
-  //[CollectionDefinition("Non-Parallel Collection", DisableParallelization = true)]
-  //public class NonParallelCollectionDefinitionClass
-  //{
-  //}
-
-  //[Collection("Non-Parallel Collection")]
   public partial class CoverageTests
   {
     [Fact]

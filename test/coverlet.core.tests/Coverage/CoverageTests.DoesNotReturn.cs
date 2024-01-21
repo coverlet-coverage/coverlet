@@ -122,7 +122,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Hang due to System.Console.ReadKey()")]
+    [Fact(Skip = "Hang due to System.Console.ReadKey() - fails in Activator.CreateInstance")]
     public async Task UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrectAsync()
     {
       string path = Path.GetTempFileName();

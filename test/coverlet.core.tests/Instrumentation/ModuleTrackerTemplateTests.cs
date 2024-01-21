@@ -34,37 +34,26 @@ namespace Coverlet.Core.Tests.Instrumentation
     [Fact]
     public void HitsFileCorrectlyWritten()
     {
-      // FunctionExecutor.Run(() =>
-      // {
       using var ctx = new TrackerContext();
       ModuleTrackerTemplate.HitsArray = new[] { 1, 2, 0, 3 };
       ModuleTrackerTemplate.UnloadModule(null, null);
 
       int[] expectedHitsArray = new[] { 1, 2, 0, 3 };
       Assert.Equal(expectedHitsArray, ReadHitsFile());
-
-      // return s_success;
-      //});
     }
 
     [Fact]
     public void HitsFileWithDifferentNumberOfEntriesCausesExceptionOnUnload()
     {
-      //FunctionExecutor.Run(() =>
-      //{
       using var ctx = new TrackerContext();
       WriteHitsFile(new[] { 1, 2, 3 });
       ModuleTrackerTemplate.HitsArray = new[] { 1 };
       Assert.Throws<InvalidOperationException>(() => ModuleTrackerTemplate.UnloadModule(null, null));
-      //  return s_success;
-      //});
     }
 
     [Fact]
     public void HitsOnMultipleThreadsCorrectlyCounted()
     {
-      //FunctionExecutor.Run(() =>
-      //{
       var threads = new List<Thread>();
       using var ctx = new TrackerContext();
       ModuleTrackerTemplate.HitsArray = new[] { 0, 0, 0, 0 };
@@ -92,16 +81,11 @@ namespace Coverlet.Core.Tests.Instrumentation
           ModuleTrackerTemplate.RecordHit(i);
         }
       }
-
-      //  return s_success;
-      //});
     }
 
     [Fact]
     public void MultipleSequentialUnloadsHaveCorrectTotalData()
     {
-      //FunctionExecutor.Run(() =>
-      //{
       using var ctx = new TrackerContext();
       ModuleTrackerTemplate.HitsArray = new[] { 0, 3, 2, 1 };
       ModuleTrackerTemplate.UnloadModule(null, null);
@@ -111,16 +95,11 @@ namespace Coverlet.Core.Tests.Instrumentation
 
       int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
       Assert.Equal(expectedHitsArray, ReadHitsFile());
-
-      //  return s_success;
-      //});
     }
 
-    [Fact(Skip = "does not work without Tmds.ExecFunction")]
-    public void MutexBlocksMultipleWriters()
+    [Fact]
+    public async Task MutexBlocksMultipleWritersAsync()
     {
-      //FunctionExecutor.Run(async () =>
-      //{
       using var ctx = new TrackerContext();
       using var mutex = new Mutex(
             true, Path.GetFileNameWithoutExtension(ModuleTrackerTemplate.HitsFilePath) + "_Mutex", out bool createdNew);
@@ -140,14 +119,10 @@ namespace Coverlet.Core.Tests.Instrumentation
 #pragma warning restore xUnit1031 // Do not use blocking task operations in test method
 
       mutex.ReleaseMutex();
-      //await unloadTask;
+      await unloadTask;
 
       int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
       Assert.Equal(expectedHitsArray, ReadHitsFile());
-
-      //  return 0;
-      //});
-
     }
 
     private static void WriteHitsFile(int[] hitsArray)
