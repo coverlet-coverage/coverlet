@@ -102,18 +102,15 @@ This is the steps to release new packages to nuget.org
     Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.6.0.1-preview.6.g918cd179e0.snupkg'.
     ```
 
-4. Sign the packages using SignClient tool <https://www.nuget.org/packages/SignClient>
+4. Sign the packages using NuGetKeyVaultSignTool <https://www.nuget.org/packages/NuGetKeyVaultSignTool>
 
-    ```powershell
-    ❯ SignClient "Sign" `
-    >> --baseDirectory "REPO ROOT DIRECTORY\bin" `
-    >> --input "**/*.nupkg" `
-    >> --config "ROOT REPO DIRECTORY\eng\signclient.json" `
-    >> --user "USER" `
-    >> --secret "SECRET" `
-    >> --name "Coverlet" `
-    >> --description "Coverlet" `
-    >> --descriptionUrl "https://github.com/coverlet-coverage/coverlet"
+    ```
+    ❯ NuGetKeyVaultSignTool sign **/*.nupkg --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --timestamp-digest sha256 `
+    >> --azure-key-vault-url KEYVAULT-URL `
+    >> --azure-key-vault-client-id CLIENT-ID `
+    >> --azure-key-vault-tenant-id TENANT-ID `
+    >> --azure-key-vault-client-secret KEYVAULT-SECRET `
+    >> --azure-key-vault-certificate CERT-FRIENDLY-NAME
     ```
 
 5. Upload *.nupkg files to Nuget.org site. **Check all metadata(url links, deterministic build etc...) before "Submit"**
