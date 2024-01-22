@@ -12,7 +12,7 @@ namespace Coverlet.Core
     public CoverageDetails CalculateLineCoverage(Lines lines)
     {
       var details = new CoverageDetails();
-      details.Covered = lines.Where(l => l.Value > 0).Count();
+      details.Covered = lines.Count(l => l.Value > 0);
       details.Total = lines.Count;
       return details;
     }

@@ -1490,7 +1490,7 @@ namespace Coverlet.Core.Symbols
     private static Instruction FindClosestInstructionWithSequencePoint(MethodBody methodBody, Instruction instruction)
     {
       var sequencePointsInMethod = methodBody.Instructions.Where(i => HasValidSequencePoint(i, methodBody.Method)).ToList();
-      if (!sequencePointsInMethod.Any())
+      if (sequencePointsInMethod.Count == 0)
         return null;
       int idx = sequencePointsInMethod.BinarySearch(instruction, new InstructionByOffsetComparer());
       Instruction prev;

@@ -174,7 +174,7 @@ namespace Coverlet.MSbuild.Tasks
         {
           double thresholdValue = double.Parse(Threshold);
 
-          while (thresholdTypeFlagQueue.Any())
+          while (thresholdTypeFlagQueue.Count != 0)
           {
             thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = thresholdValue;
           }
