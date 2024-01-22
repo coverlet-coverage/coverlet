@@ -7,6 +7,7 @@ parameters:
   assemblyfilters: '-xunit*'
   classfilters: ''
   breakBuild: false
+  minimumLineCoverage: 75
 
 steps:
 - task: Powershell@2
@@ -17,7 +18,8 @@ steps:
     pwsh: true
     script: |
       dotnet tool restore --add-source https://api.nuget.org/v3/index.json
-      dotnet reportgenerator -reports:"${{parameters.reports}}" -targetdir:"$(Build.SourcesDirectory)/artifacts/CoverageReport" -reporttypes:"Html;HtmlInline_AzurePipelines_Dark;Cobertura" -assemblyfilters:"${{parameters.assemblyfilters}}" -classfilters:"${{parameters.classfilters}}" -verbosity:Verbose
+      dotnet tool list
+      dotnet reportgenerator -reports:"${{parameters.reports}}" -targetdir:"$(Build.SourcesDirectory)\artifacts\CoverageReport" -reporttypes:"Html;HtmlInline_AzurePipelines_Dark;Cobertura" -assemblyfilters:"${{parameters.assemblyfilters}}" -classfilters:"${{parameters.classfilters}}" -verbosity:Verbose --minimumCoverageThresholds:lineCoverage=${{parameters.minimumLineCoverage}}
 
 - publish: '$(Build.SourcesDirectory)/artifacts/CoverageReport'
   displayName: 'Publish CoverageReport Artifact'

@@ -60,12 +60,12 @@ If you upgrade the collector package with a version greater than 1.0.0, in-proc 
 
 *Solutions:*
 
-1) Reference `Microsoft.NET.Test.Sdk` with version *greater than* 17.5.0
+1) Reference `Microsoft.NET.Test.Sdk` with version *greater than* 17.7.0
 
     ```xml
     <ItemGroup>
     ...
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     ...
     </ItemGroup>
     ```

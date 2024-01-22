@@ -12,7 +12,7 @@ Finally, thanks to deterministic CI builds (with the `ContinuousIntegrationBuild
 
 ## Deterministic report
 
-Coverlet supports also deterministic reports(for now only for cobertura coverage format).
+Coverlet supports also deterministic reports(for now only for __Cobertura__ coverage format).
 If you include `DeterministicReport` parameters for `msbuild` and `collectors` integrations resulting report will be like:
 
 ```xml
@@ -28,42 +28,6 @@ If you include `DeterministicReport` parameters for `msbuild` and `collectors` i
 ```
 
 As you can see we have empty `<sources />` element and the `filename` start with well known deterministic fragment `/_/...`
-**Deterministic build is supported without any workaround since version 3.1.100 of .NET Core SDK**
-
-## Workaround only for .NET Core SDK < 3.1.100
-
-At the moment, deterministic build works thanks to the Roslyn compiler emitting deterministic metadata if `DeterministicSourcePaths` is enabled. Take a look [here](https://github.com/dotnet/sourcelink/tree/master/docs#deterministicsourcepaths) for more information.
-
-To allow Coverlet to correctly do its work, we need to provide information to translate deterministic paths to real local paths for every project referenced by the test project. The current workaround is to add at the root of your repo a `Directory.Build.targets` with a custom `target` that supports Coverlet resolution algorithm.
-
-```xml
-<!-- This target must be imported into Directory.Build.targets -->
-<!-- Workaround. Remove once we're on 3.1.300+
-https://github.com/dotnet/sourcelink/issues/572 -->
-<Project>
-  <PropertyGroup>
-    <TargetFrameworkMonikerAssemblyAttributesPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)','$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
-  </PropertyGroup>
-  <ItemGroup>
-    <EmbeddedFiles Include="$(GeneratedAssemblyInfoFile)"/>
-  </ItemGroup>
-  <ItemGroup>
-    <SourceRoot Include="$([MSBuild]::EnsureTrailingSlash($(NuGetPackageRoot)))" Condition="'$(NuGetPackageRoot)' != ''" />
-  </ItemGroup>
-
-  <Target Name="CoverletGetPathMap"
-          DependsOnTargets="InitializeSourceRootMappedPaths"
-          Returns="@(_LocalTopLevelSourceRoot)"
-          Condition="'$(DeterministicSourcePaths)' == 'true'">
-    <ItemGroup>
-      <_LocalTopLevelSourceRoot Include="@(SourceRoot)" Condition="'%(SourceRoot.NestedRoot)' == ''"/>
-    </ItemGroup>
-  </Target>
-</Project>
-
-```
-
-If you already have a `Directory.Build.targets` file on your repo root you can simply copy `DeterministicBuild.targets` (which can be found at the root of this repo) next to yours and import it in your targets file. This target will be used by Coverlet to generate, at build time, a file that contains mapping translation information, the file is named `CoverletSourceRootsMapping` and will be in the output folder of your project.
 
 You can follow our [step-by-step sample](Examples.md)
 

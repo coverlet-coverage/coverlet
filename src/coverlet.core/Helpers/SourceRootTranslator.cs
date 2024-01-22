@@ -22,7 +22,6 @@ namespace Coverlet.Core.Helpers
     private readonly IFileSystem _fileSystem;
     private readonly Dictionary<string, List<SourceRootMapping>> _sourceRootMapping;
     private readonly Dictionary<string, List<string>> _sourceToDeterministicPathMapping;
-    private readonly string _mappingFileName;
     private Dictionary<string, string> _resolutionCacheFiles;
 
     public SourceRootTranslator(ILogger logger, IFileSystem fileSystem)
@@ -30,6 +29,13 @@ namespace Coverlet.Core.Helpers
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
       _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
       _sourceRootMapping = new Dictionary<string, List<SourceRootMapping>>();
+    }
+
+    public SourceRootTranslator(string sourceMappingFile, ILogger logger, IFileSystem fileSystem)
+    {
+      _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+      _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+      _sourceRootMapping = LoadSourceRootMapping(sourceMappingFile);
     }
 
     public SourceRootTranslator(string moduleTestPath, ILogger logger, IFileSystem fileSystem, IAssemblyAdapter assemblyAdapter)
@@ -46,9 +52,11 @@ namespace Coverlet.Core.Helpers
       }
 
       string assemblyName = assemblyAdapter.GetAssemblyName(moduleTestPath);
-      _mappingFileName = $"CoverletSourceRootsMapping_{assemblyName}";
+      string mappingFileName = $"CoverletSourceRootsMapping_{assemblyName}";
 
-      _sourceRootMapping = LoadSourceRootMapping(Path.GetDirectoryName(moduleTestPath));
+      _logger.LogInformation($"_mapping file name: '{mappingFileName}'", true);
+
+      _sourceRootMapping = LoadSourceRootMapping(Path.Combine(Path.GetDirectoryName(moduleTestPath), mappingFileName));
       _sourceToDeterministicPathMapping = LoadSourceToDeterministicPathMapping(_sourceRootMapping);
     }
 
@@ -75,11 +83,10 @@ namespace Coverlet.Core.Helpers
       return sourceToDeterministicPathMapping;
     }
 
-    private Dictionary<string, List<SourceRootMapping>> LoadSourceRootMapping(string directory)
+    private Dictionary<string, List<SourceRootMapping>> LoadSourceRootMapping(string mappingFilePath)
     {
       var mapping = new Dictionary<string, List<SourceRootMapping>>();
 
-      string mappingFilePath = Path.Combine(directory, _mappingFileName);
       if (!_fileSystem.Exists(mappingFilePath))
       {
         return mapping;
@@ -94,9 +101,11 @@ namespace Coverlet.Core.Helpers
           _logger.LogWarning($"Malformed mapping '{mappingRecord}'");
           continue;
         }
+#pragma warning disable IDE0057 // Use range operator
         string projectPath = mappingRecord.Substring(0, projectFileSeparatorIndex);
         string originalPath = mappingRecord.Substring(projectFileSeparatorIndex + 1, pathMappingSeparatorIndex - projectFileSeparatorIndex - 1);
         string mappedPath = mappingRecord.Substring(pathMappingSeparatorIndex + 1);
+#pragma warning restore IDE0057 // Use range operator
 
         if (!mapping.ContainsKey(mappedPath))
         {

@@ -12,10 +12,15 @@ steps:
 
 - task: UseDotNet@2
   inputs:
-    version: 7.0.403
-  displayName: Install .NET Core SDK 7.0.403
+    version: 8.0.101
+  displayName: Install .NET Core SDK 8.0.101
 
-- task: NuGetAuthenticate@0
+- task: UseDotNet@2
+  inputs:
+    useGlobalJson: true
+  displayName: Install .NET Core SDK 8.0.100
+
+- task: NuGetAuthenticate@1
   displayName: Authenticate with NuGet feeds
 
 - script: dotnet pack -c Release /p:PublicRelease=false
@@ -46,7 +51,7 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: push
-    packagesToPush: $(Build.SourcesDirectory)/bin/Release/Packages/*.nupkg
+    packagesToPush: $(Build.SourcesDirectory)\artifacts\package\release\*.nupkg
     nuGetFeedType: internal
     publishVstsFeed: coverlet/coverlet-nightly
   displayName: Publish NuGet packages
@@ -54,7 +59,7 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: push
-    packagesToPush: $(Build.SourcesDirectory)/bin/Release/Packages/*.snupkg
+    packagesToPush: $(Build.SourcesDirectory)\artifacts\package\release\*.snupkg
     nuGetFeedType: internal
     publishVstsFeed: coverlet/coverlet-nightly
   displayName: Publish NuGet symbol packages

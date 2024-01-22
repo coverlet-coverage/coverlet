@@ -6,9 +6,12 @@ namespace Coverlet.Core.Samples.Tests
 {
     public class MethodsWithExcludeFromCodeCoverageAttr
     {
+        private string _fieldToInfluenceSynthesizedName;
+
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         public int TestLambda(string input)
         {
+            _fieldToInfluenceSynthesizedName = string.Empty;
             System.Func<string, int> lambdaFunc = s => s.Length;
             return lambdaFunc(input);
         }

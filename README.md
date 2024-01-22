@@ -13,7 +13,8 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 **Coverlet documentation reflect the current repository state of the features, not the released ones.**
 **Check the [changelog](Documentation/Changelog.md) to understand if the documented feature you want to use has been officially released.**
 
-# Main contents
+## Main contents
+
 * [QuickStart](#quick-start)
 * [How It Works](#how-it-works)
 * [Drivers features differences](Documentation/DriversFeatures.md)
@@ -38,13 +39,16 @@ Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visua
 
 ### VSTest Integration (preferred due to [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
-### Installation
+### Installation (coverlet.collector)
+
 ```bash
 dotnet add package coverlet.collector
 ```
-N.B. You **MUST** add package only to test projects and if you create xunit test projects (`dotnet new xunit`) you'll find the reference already present in `csproj` file because Coverlet is the default coverage tool for every .NET Core and >= .NET 5 applications, you've only to update to last version if needed.
 
-### Usage
+N.B. You **MUST** add package only to test projects and if you create xunit test projects (`dotnet new xunit`) you'll find the reference already present in `csproj` file because Coverlet is the default coverage tool for every .NET Core and >= .NET 6 applications, you've only to update to last version if needed. Do not add `coverlet.collector` and `coverlet.msbuild` package in a test project.
+
+### Usage (coverlet.collector)
+
 Coverlet is integrated into the Visual Studio Test Platform as a [data collector](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md). To get coverage simply run the following command:
 
 ```bash
@@ -55,22 +59,26 @@ After the above command is run, a `coverage.cobertura.xml` file containing the r
 
 See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
-#### Requirements
+#### Requirements (coverlet.collector)
+
 * _You need to be running .NET 6.0 SDK v6.0.316 or newer_
 * _You need to reference version 17.5.0 and above of Microsoft.NET.Test.Sdk_
-```
+
+```xml
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
 ```
 
 ### MSBuild Integration (suffers of possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
-### Installation
+### Installation (coverlet.msbuild)
+
 ```bash
 dotnet add package coverlet.msbuild
 ```
-N.B. You **MUST** add package only to test projects
 
-### Usage
+N.B. Typically you **MUST** add package only to test projects. Do not add `coverlet.msbuild` and `coverlet.collector` package in a test project.
+
+### Usage (coverlet.msbuild)
 
 Coverlet also integrates with the build system to run code coverage after tests. Enabling code coverage is as simple as setting the `CollectCoverage` property to `true`
 
@@ -82,18 +90,19 @@ After the above command is run, a `coverage.json` file containing the results wi
 
 See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 
-#### Requirements
+#### Requirements (coverlet.msbuild)
+
 Requires a runtime that support _.NET Standard 2.0 and above_
 
 ### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), suffers from possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
-### Installation
+### Installation (coverlet.console)
 
 ```bash
 dotnet tool install --global coverlet.console
 ```
 
-### Usage
+### Usage (coverlet.console)
 
 The `coverlet` tool is invoked by specifying the path to the assembly that contains the unit tests. You also need to specify the test runner and the arguments to pass to the test runner using the `--target` and `--targetargs` options respectively. The invocation of the test runner with the supplied arguments **must not** involve a recompilation of the unit test assembly or no coverage result will be generated.
 
@@ -107,11 +116,11 @@ _Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dl
 
 See [documentation](Documentation/GlobalTool.md) for advanced usage.
 
-#### Requirements
+#### Requirements (coverlet.console)
+
 .NET global tools rely on a .NET Core runtime installed on your machine https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong
 
 .NET Coverlet global tool requires _.NET Core 2.2 and above_
-
 
 ## How It Works
 
@@ -148,10 +157,12 @@ If you're using [Cake Build](https://cakebuild.net) for your build script you ca
 If you want to visualize coverlet output inside Visual Studio while you code, you can use the following addins depending on your platform.
 
 ### Windows
+
 If you're using Visual Studio on Windows, you can use the [Fine Code Coverage](https://marketplace.visualstudio.com/items?itemName=FortuneNgwenya.FineCodeCoverage) extension.
 Visualization is updated when you run unit tests inside Visual Studio.
 
 ### Mac OS
+
 If you're using Visual Studio for Mac, you can use the [VSMac-CodeCoverage](https://github.com/ademanuele/VSMac-CodeCoverage) extension.
 
 ## Consume nightly build

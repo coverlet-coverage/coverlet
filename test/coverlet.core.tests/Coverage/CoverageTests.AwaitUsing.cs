@@ -4,6 +4,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -20,10 +21,10 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AwaitUsing>(async instance =>
                   {
-              await (ValueTask)instance.HasAwaitUsing();
-              await (Task)instance.Issue914_Repro();
+                    await (ValueTask)instance.HasAwaitUsing();
+                    await (Task)instance.Issue914_Repro();
 
-            }, persistPrepareResultToFile: pathSerialize[0]);
+                  }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, new string[] { path });
 

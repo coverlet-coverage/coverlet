@@ -9,14 +9,15 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <Target Name="CopyCoverletDataCollectorFiles" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
-      <CoverletDataCollectorFiles Include="$(MSBuildThisFileDirectory)\*.*" />
+      <CoverletDataCollectorFiles Include="$(MSBuildThisFileDirectory)\**\*.*" />
       <CoverletDataCollectorFiles Remove="@(ResolvedFileToPublish->'$(MSBuildThisFileDirectory)%(Filename)%(Extension)')" />
     </ItemGroup>
     <Copy SourceFiles="@(CoverletDataCollectorFiles)" DestinationFolder="$(PublishDir)%(RecursiveDir)" />
-
   </Target>
+  
   <Target Name="SetXPlatDataCollectorPath" BeforeTargets="VSTest">
     <PropertyGroup>
       <VSTestTestAdapterPath>$(VSTestTestAdapterPath);$(MSBuildThisFileDirectory)</VSTestTestAdapterPath>

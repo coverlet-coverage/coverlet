@@ -32,18 +32,18 @@ Search inside with filter '[coverlet]'
 ## Coverlet Global Tool
 
 ```shell
-coverlet "C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\coverlet.core.tests.dll" --target "dotnet" --targetargs "test C:\git\coverlet\test\coverlet.core.tests --no-build" --verbosity detailed
+coverlet "C:\git\coverlet\test\coverlet.core.tests\bin\Debug\net6.0\coverlet.core.tests.dll" --target "dotnet" --targetargs "test C:\git\coverlet\test\coverlet.core.tests --no-build" --verbosity detailed
 ```
 
 Sample output
 
 ```text
 ...
-Instrumented module: 'C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\coverlet.core.dll'
-Instrumented module: 'C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\xunit.runner.reporters.netcoreapp10.dll'
-Instrumented module: 'C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\xunit.runner.utility.netcoreapp10.dll'
-Instrumented module: 'C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\xunit.runner.visualstudio.dotnetcore.testadapter.dll'
-Test run for C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\coverlet.core.tests.dll(.NETCoreApp,Version=v2.0)
+Instrumented module: 'C:\git\coverlet\test\coverlet.core.tests\bin\Debug\net6.0\coverlet.core.dll'
+Instrumented module: 'C:\git\coverlet\test\coverlet.core.tests\bin\Debug\net6.0\xunit.runner.reporters.netcoreapp10.dll'
+Instrumented module: 'C:\git\coverlet\test\coverlet.core.tests\bin\Debug\net6.0\xunit.runner.utility.netcoreapp10.dll'
+Instrumented module: 'C:\git\coverlet\test\coverlet.core.tests\bin\Debug\net6.0\xunit.runner.visualstudio.dotnetcore.testadapter.dll'
+Test run for C:\git\coverlet\test\coverlet.core.tests\bin\Debug\net6.0\coverlet.core.tests.dll(.NETCoreApp,Version=v2.0)
 Microsoft (R) Test Execution Command Line Tool Version 16.0.1
 Copyright (c) Microsoft Corporation.  All rights reserved.
 Starting test execution, please wait...
@@ -57,7 +57,7 @@ Test execution time: 4,6411 Seconds
 
 Calculating coverage result...
 Hits file:'C:\Users\Marco\AppData\Local\Temp\coverlet.core_703263e9-21f0-4d1c-9ce3-98ddeacecc01' not found for module: 'coverlet.core'
-  Generating report 'C:\git\coverlet\src\coverlet.console\bin\Debug\netcoreapp2.2\coverage.json'
+  Generating report 'C:\git\coverlet\src\coverlet.console\bin\Debug\net6.0\coverage.json'
 +--------------------------------------------------+--------+--------+--------+
 | Module                                           | Line   | Branch | Method |
 +--------------------------------------------------+--------+--------+--------+
@@ -101,14 +101,14 @@ You can "load" your local build using simple switch:
     Restore completed in 60.42 ms for D:\git\coverlet\test\coverlet.core.performancetest\coverlet.core.performancetest.csproj.
     Restore completed in 60.47 ms for D:\git\coverlet\test\coverlet.core.tests\coverlet.core.tests.csproj.
     Restore completed in 22.85 ms for D:\git\coverlet\test\coverlet.core.tests\coverlet.core.tests.csproj.
-    coverlet.testsubject -> D:\git\coverlet\test\coverlet.testsubject\bin\Debug\netcoreapp2.0\coverlet.testsubject.dll
+    coverlet.testsubject -> D:\git\coverlet\test\coverlet.testsubject\bin\Debug\net6.0\coverlet.testsubject.dll
     coverlet.core -> D:\git\coverlet\src\coverlet.core\bin\Debug\netstandard2.0\coverlet.core.dll
     coverlet.msbuild.tasks -> D:\git\coverlet\src\coverlet.msbuild.tasks\bin\Debug\netstandard2.0\coverlet.msbuild.tasks.dll
-    coverlet.collector -> D:\git\coverlet\src\coverlet.collector\bin\Debug\netcoreapp2.0\coverlet.collector.dll
-    coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Debug\netcoreapp2.2\coverlet.console.dll
-    coverlet.core.performancetest -> D:\git\coverlet\test\coverlet.core.performancetest\bin\Debug\netcoreapp2.0\coverlet.core.performancetest.dll
-    coverlet.core.tests -> D:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\coverlet.core.tests.dll
-    coverlet.collector.tests -> D:\git\coverlet\test\coverlet.collector.tests\bin\Debug\netcoreapp2.2\coverlet.collector.tests.dll
+    coverlet.collector -> D:\git\coverlet\src\coverlet.collector\bin\Debug\net6.0\coverlet.collector.dll
+    coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Debug\net6.0\coverlet.console.dll
+    coverlet.core.performancetest -> D:\git\coverlet\test\coverlet.core.performancetest\bin\Debug\net6.0\coverlet.core.performancetest.dll
+    coverlet.core.tests -> D:\git\coverlet\test\coverlet.core.tests\bin\Debug\net6.0\coverlet.core.tests.dll
+    coverlet.collector.tests -> D:\git\coverlet\test\coverlet.collector.tests\bin\Debug\net6.0\coverlet.collector.tests.dll
 
     Build succeeded.
         0 Warning(s)
@@ -172,15 +172,15 @@ To use/debug local collectors build we need to tell to our project to restore an
     <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.2</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
-        <PackageReference Include="xunit" Version="2.4.0" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
-        <PackageReference Include="coverlet.collector" Version="1.0.67" /> <-- My local package version
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+        <PackageReference Include="xunit" Version="2.6.5" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6" />
+        <PackageReference Include="coverlet.collector" Version="6.0.0" /> <-- My local package version -->
     </ItemGroup>
 
     <ItemGroup>

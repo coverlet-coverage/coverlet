@@ -11,6 +11,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.tests", "test\coverlet.core.tests\coverlet.core.tests.csproj", "{E7637CC6-43F7-461A-A0BF-3C14562419BD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F5B2C45B-274B-43D6-9565-8B50659CFE56} = {F5B2C45B-274B-43D6-9565-8B50659CFE56}
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA} = {FA73E423-9790-4F35-B018-3C4E3CA338BA}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.console", "src\coverlet.console\coverlet.console.csproj", "{F3DBE7C3-ABBB-4B8B-A6CB-A1D3D607163E}"
 EndProject
@@ -21,6 +25,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.collector", "src\coverlet.collector\coverlet.collector.csproj", "{F5B2C45B-274B-43D6-9565-8B50659CFE56}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.collector.tests", "test\coverlet.collector.tests\coverlet.collector.tests.csproj", "{5ED4FA81-8F8C-4211-BA88-7573BD63262E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA} = {FA73E423-9790-4F35-B018-3C4E3CA338BA}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.empty", "test\coverlet.tests.projectsample.empty\coverlet.tests.projectsample.empty.csproj", "{085A3AFB-C086-4E98-86F1-1B481446EC5E}"
 EndProject
@@ -31,7 +38,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		eng\azure-pipelines-nightly.yml = eng\azure-pipelines-nightly.yml
 		eng\azure-pipelines.yml = eng\azure-pipelines.yml
 		eng\build.yml = eng\build.yml
-		DeterministicBuild.targets = DeterministicBuild.targets
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		Directory.Packages.props = Directory.Packages.props
@@ -41,6 +47,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.excludedbyattribute", "test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj", "{D6B14F2F-9E7D-4D2C-BAC8-48834F853ED6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.integration.tests", "test\coverlet.integration.tests\coverlet.integration.tests.csproj", "{99B4059C-B25C-4B82-8117-A0E9DC9B0949}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F5B2C45B-274B-43D6-9565-8B50659CFE56} = {F5B2C45B-274B-43D6-9565-8B50659CFE56}
+		{FA73E423-9790-4F35-B018-3C4E3CA338BA} = {FA73E423-9790-4F35-B018-3C4E3CA338BA}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.integration.template", "test\coverlet.integration.template\coverlet.integration.template.csproj", "{F6FE7678-C662-43D3-AC6A-64F6AC5A5935}"
 EndProject
@@ -58,11 +68,11 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "coverlet.tests.projectsampl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.netframework", "test\coverlet.tests.projectsample.netframework\coverlet.tests.projectsample.netframework.csproj", "{E69D68C9-78ED-4076-A14B-D07295A4B2A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.aspnet6", "test\coverlet.tests.projectsample.aspnet6\coverlet.tests.projectsample.aspnet6.csproj", "{1C3CA3F8-DF8C-433F-8A56-69102D2BBDF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.aspnet8", "test\coverlet.tests.projectsample.aspnet8\coverlet.tests.projectsample.aspnet8.csproj", "{1C3CA3F8-DF8C-433F-8A56-69102D2BBDF6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.aspnet6.tests", "test\coverlet.tests.projectsample.aspnet6.tests\coverlet.tests.projectsample.aspnet6.tests.csproj", "{8EC065A4-7700-45E6-8B90-0182E3649DEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.aspnet8.tests", "test\coverlet.tests.projectsample.aspnet8.tests\coverlet.tests.projectsample.aspnet8.tests.csproj", "{8EC065A4-7700-45E6-8B90-0182E3649DEA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.wpf6", "test\coverlet.tests.projectsample.wpf6\coverlet.tests.projectsample.wpf6.csproj", "{988A5FF0-4326-4F5B-9F05-CB165543A555}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.wpf8", "test\coverlet.tests.projectsample.wpf8\coverlet.tests.projectsample.wpf8.csproj", "{988A5FF0-4326-4F5B-9F05-CB165543A555}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.aspmvcrazor", "test\coverlet.tests.projectsample.aspmvcrazor\coverlet.tests.projectsample.aspmvcrazor.csproj", "{6ACF69B1-C01F-44A4-8F8E-2501884238D4}"
 EndProject
@@ -73,6 +83,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsampl
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.msbuild.tasks.tests", "test\coverlet.msbuild.tasks.tests\coverlet.msbuild.tasks.tests.csproj", "{351A034E-E642-4DB9-A21D-F71C8151C243}"
+EndProject
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "coverlet.tests.projectsample.vbmynamespace", "test\coverlet.tests.projectsample.vbmynamespace\coverlet.tests.projectsample.vbmynamespace.vbproj", "{03400776-1F9A-4326-B927-1CA9B64B42A1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.utils", "test\coverlet.tests.utils\coverlet.tests.utils.csproj", "{0B109210-03CB-413F-888C-3023994AA384}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -168,6 +182,14 @@ Global
 		{351A034E-E642-4DB9-A21D-F71C8151C243}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{351A034E-E642-4DB9-A21D-F71C8151C243}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{351A034E-E642-4DB9-A21D-F71C8151C243}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03400776-1F9A-4326-B927-1CA9B64B42A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03400776-1F9A-4326-B927-1CA9B64B42A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03400776-1F9A-4326-B927-1CA9B64B42A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03400776-1F9A-4326-B927-1CA9B64B42A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B109210-03CB-413F-888C-3023994AA384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B109210-03CB-413F-888C-3023994AA384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B109210-03CB-413F-888C-3023994AA384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B109210-03CB-413F-888C-3023994AA384}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -196,6 +218,8 @@ Global
 		{6ACF69B1-C01F-44A4-8F8E-2501884238D4} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F508CCDD-5BC8-4AB6-97B3-D37498813C41} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{351A034E-E642-4DB9-A21D-F71C8151C243} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{03400776-1F9A-4326-B927-1CA9B64B42A1} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{0B109210-03CB-413F-888C-3023994AA384} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}

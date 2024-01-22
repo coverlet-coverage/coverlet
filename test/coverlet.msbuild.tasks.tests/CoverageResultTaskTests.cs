@@ -49,7 +49,7 @@ namespace coverlet.msbuild.tasks.tests
 
       var coverageResultTask = new CoverageResultTask
       {
-        OutputFormat = "opencover",
+        OutputFormat = "cobertura",
         Output = "coverageDir",
         Threshold = "50",
         ThresholdType = "total",
@@ -93,7 +93,7 @@ namespace coverlet.msbuild.tasks.tests
 
       var coverageResultTask = new CoverageResultTask
       {
-        OutputFormat = "opencover",
+        OutputFormat = "cobertura",
         Output = "coverageDir",
         Threshold = "50",
         ThresholdType = "total",
@@ -109,7 +109,7 @@ namespace coverlet.msbuild.tasks.tests
       Assert.True(success);
       Assert.False(coverageResultTask.Log.HasLoggedErrors);
 
-      Assert.Contains("coverageDir.opencover.xml", coverageResultTask.ReportItems[0].ItemSpec);
+      Assert.Contains("coverageDir.cobertura.xml", coverageResultTask.ReportItems[0].ItemSpec);
       Assert.Equal(16, coverageResultTask.ReportItems[0].MetadataCount);
 
     }

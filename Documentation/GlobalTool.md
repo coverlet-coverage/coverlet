@@ -8,8 +8,8 @@ coverlet --help
 
 The current options are (output of `coverlet --help`):
 
-```bash
-Cross platform .NET Core code coverage tool 3.0.0.0
+```text
+Cross platform .NET Core code coverage tool 6.0.0.0
 
 Usage: coverlet [arguments] [options]
 
@@ -37,6 +37,7 @@ Options:
   --use-source-link                     Specifies whether to use SourceLink URIs in place of file system paths.
   --does-not-return-attribute           Attributes that mark methods that do not return.
   --exclude-assemblies-without-sources  Specifies behaviour of heuristic to ignore assemblies with missing source documents.
+  --use-mapping-file                    Specifies the path to a SourceRootsMappings file.
   --version                             Show version information
   -?, -h, --help                        Show help and usage information
 ```
@@ -236,6 +237,18 @@ You can also include coverage of the test assembly itself by specifying the `--i
 ## SourceLink
 
 Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `--use-source-link` flag, Coverlet will generate results that contain the URL to the source files in your source control instead of local file paths.
+
+## Path Mappings
+
+Coverlet has the ability to map the paths contained inside the debug sources into a local path where the source is currently located using the option `--source-mapping-file`. This is useful if the source was built using a deterministic build which sets the path to `/_/` or if it was built on a different host where the source is located in a different path.
+
+The value for `--source-mapping-file` should be a file with each line being in the format `|path to map to=path in debug symbol`. For example to map the local checkout of a project `C:\git\coverlet` to project that was built with `<Deterministic>true</Deterministic>` which sets the sources to `/_/*` the following line must be in the mapping file.
+
+```
+|C:\git\coverlet\=/_/
+```
+
+During coverage collection, Coverlet will translate any path that starts with `/_/` to `C:\git\coverlet\` allowing the collector to find the source file.
 
 ## Exit Codes
 
