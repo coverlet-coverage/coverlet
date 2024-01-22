@@ -55,7 +55,7 @@ namespace Coverlet.Core.Instrumentation
       try
       {
         // To be sure to load information of "real" runtime netstandard implementation
-        s_netStandardAssembly = System.Reflection.Assembly.LoadFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll"));
+        s_netStandardAssembly = System.Reflection.Assembly.Load(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll"));
         System.Reflection.AssemblyName name = s_netStandardAssembly.GetName();
         s_name = name.Name;
         s_publicKeyToken = name.GetPublicKeyToken();
