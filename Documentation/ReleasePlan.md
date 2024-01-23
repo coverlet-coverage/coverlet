@@ -112,13 +112,13 @@ This is the steps to release new packages to nuget.org
 
 1. Sign nuget packages using sign <https://www.nuget.org/packages/sign>
 
-```shell
-> sign code azure-key-vault **/*.nupkg --base-directory [ROOT-DIRECTORY]\artifacts\package\release\ --file-digest sha256 --description Coverlet --description-url https://github.com/coverlet-coverage/coverlet
->> --azure-key-vault-url [KEYVAULT-URL]
->> --azure-key-vault-client-id [CLIENT-ID]
->> --azure-key-vault-tenant-id [TENANT-ID]
->> --azure-key-vault-client-secret [KEYVAULT-SECRET]
->> --azure-key-vault-certificate [CERT-FRIENDLY-NAME]
+```powershell
+sign code azure-key-vault **/*.nupkg --base-directory [ROOT-DIRECTORY]\artifacts\package\release\ --file-digest sha256 --description Coverlet --description-url https://github.com/coverlet-coverage/coverlet `
+ --azure-key-vault-url [KEYVAULT-URL] `
+ --azure-key-vault-client-id [CLIENT-ID] `
+ --azure-key-vault-tenant-id [TENANT-ID] `
+ --azure-key-vault-client-secret [KEYVAULT-SECRET] `
+ --azure-key-vault-certificate [CERT-FRIENDLY-NAME]
 ```
 
 1. Upload *.nupkg files to Nuget.org site. **Check all metadata(url links, deterministic build etc...) before "Submit"**
