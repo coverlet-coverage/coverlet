@@ -110,7 +110,7 @@ This is the steps to release new packages to nuget.org
   ...
   ```
 
-1. Sign nuget packages using sign <https://github.com/dotnet/sign>
+1. Sign nuget packages using sign <https://www.nuget.org/packages/sign>
 
 ```shell
 > sign code azure-key-vault **/*.nupkg --base-directory [ROOT-DIRECTORY]\artifacts\package\release\ --file-digest sha256 --description Coverlet --description-url https://github.com/coverlet-coverage/coverlet
