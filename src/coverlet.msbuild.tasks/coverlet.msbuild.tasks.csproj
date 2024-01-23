@@ -67,7 +67,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PackBuildOutputs" DependsOnTargets="ResolveProjectReferences;SatelliteDllsProjectOutputGroup;DebugSymbolsProjectOutputGroup;SatelliteDllsProjectOutputGroupDependencies;ResolveAssemblyReferences">
+  <Target Name="PackBuildOutputs">
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="tasks\$(TargetFramework)" />
       <TfmSpecificPackageFile Include="$(ProjectDepsFilePath)" PackagePath="tasks\$(TargetFramework)" />

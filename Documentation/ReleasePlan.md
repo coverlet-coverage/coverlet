@@ -103,7 +103,7 @@ This is the steps to release new packages to nuget.org
   ...
   ```
 
-1. Sign binary files for nuget packages
+1. Sign binary files for nuget packages using AzureSignTool <https://www.nuget.org/packages/AzureSignTool>
 
 ```shell
 > AzureSignTool.exe sign --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --timestamp-digest sha256 `
@@ -127,7 +127,7 @@ This is the steps to release new packages to nuget.org
 ```shell
   dotnet pack --no-build -c release /p:TF_BUILD=true /p:PublicRelease=true src\coverlet.console
   dotnet pack --no-build -c release /p:TF_BUILD=true /p:PublicRelease=true src\coverlet.collector
-  dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true src\coverlet.msbuild.tasks
+  dotnet pack --no-build -c release /p:TF_BUILD=true /p:PublicRelease=true src\coverlet.msbuild.tasks
 ```
 
 1. Sign the packages using NuGetKeyVaultSignTool <https://www.nuget.org/packages/NuGetKeyVaultSignTool>
