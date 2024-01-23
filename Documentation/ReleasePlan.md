@@ -90,7 +90,7 @@ This is the steps to release new packages to nuget.org
 1. From new cloned, aligned and versions updated repo root run build command
 
   ```shell
-  dotnet build -c release /p:TF_BUILD=true /p:PublicRelease=true
+  dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
   ...
   coverlet.core -> C:\GitHub\coverlet\artifacts\bin\coverlet.core\release_netstandard2.0\coverlet.core.dll
   coverlet.core -> C:\GitHub\coverlet\artifacts\bin\coverlet.core\release_net6.0\coverlet.core.dll
@@ -101,45 +101,25 @@ This is the steps to release new packages to nuget.org
   coverlet.console -> C:\GitHub\coverlet\artifacts\bin\coverlet.console\release\coverlet.console.dll
   coverlet.console -> C:\GitHub\coverlet\artifacts\bin\coverlet.console\release\coverlet.console.exe
   ...
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.6.0.1.nupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.6.0.1.snupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.6.0.1.nupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.6.0.1.snupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.6.0.1.nupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.6.0.1.snupkg'.
+  ...
   ```
 
-1. Sign binary files for nuget packages using AzureSignTool <https://www.nuget.org/packages/AzureSignTool>
+1. Sign nuget packages using sign <https://github.com/dotnet/sign>
 
 ```shell
-> AzureSignTool.exe sign --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --timestamp-digest sha256 `
->> --azure-key-vault-url KEYVAULT-URL `
->> --azure-key-vault-client-id CLIENT-ID `
->> --azure-key-vault-tenant-id TENANT-ID `
->> --azure-key-vault-client-secret KEYVAULT-SECRET `
->> --azure-key-vault-certificate CERT-FRIENDLY-NAME `
->> artifacts\bin\coverlet.console\release\coverlet.console.dll `
->> artifacts\bin\coverlet.console\release\coverlet.console.exe `
->> artifacts\bin\coverlet.core\release_net6.0\coverlet.core.dll `
->> artifacts\bin\coverlet.core\release_netstandard2.0\coverlet.core.dll `
->> artifacts\bin\coverlet.collector\release_net6.0\coverlet.collector.dll `
->> artifacts\bin\coverlet.collector\release_netstandard2.0\coverlet.collector.dll `
->> artifacts\bin\coverlet.msbuild.tasks\release_net6.0\coverlet.msbuild.tasks.dll `
->> artifacts\bin\coverlet.msbuild.tasks\release_netstandard2.0\coverlet.msbuild.tasks.dll
+> sign code azure-key-vault **/*.nupkg --base-directory [ROOT-DIRECTORY]\artifacts\package\release\ --file-digest sha256 --description Coverlet --description-url https://github.com/coverlet-coverage/coverlet
+>> --azure-key-vault-url [KEYVAULT-URL]
+>> --azure-key-vault-client-id [CLIENT-ID]
+>> --azure-key-vault-tenant-id [TENANT-ID]
+>> --azure-key-vault-client-secret [KEYVAULT-SECRET]
+>> --azure-key-vault-certificate [CERT-FRIENDLY-NAME]
 ```
-
-1. Run pack command for signed binaries
-
-```shell
-  dotnet pack --no-build -c release /p:TF_BUILD=true /p:PublicRelease=true src\coverlet.console
-  dotnet pack --no-build -c release /p:TF_BUILD=true /p:PublicRelease=true src\coverlet.collector
-  dotnet pack --no-build -c release /p:TF_BUILD=true /p:PublicRelease=true src\coverlet.msbuild.tasks
-```
-
-1. Sign the packages using NuGetKeyVaultSignTool <https://www.nuget.org/packages/NuGetKeyVaultSignTool>
-
-    ```shell
-    ❯ NuGetKeyVaultSignTool sign **/*.nupkg --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --timestamp-digest sha256 `
-    >> --azure-key-vault-url KEYVAULT-URL `
-    >> --azure-key-vault-client-id CLIENT-ID `
-    >> --azure-key-vault-tenant-id TENANT-ID `
-    >> --azure-key-vault-client-secret KEYVAULT-SECRET `
-    >> --azure-key-vault-certificate CERT-FRIENDLY-NAME
-    ```
 
 1. Upload *.nupkg files to Nuget.org site. **Check all metadata(url links, deterministic build etc...) before "Submit"**
 
