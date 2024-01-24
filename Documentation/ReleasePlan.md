@@ -85,37 +85,45 @@ This is the steps to release new packages to nuget.org
 
     Do a PR and merge to master.
 
-2. Clone repo, **remember to build packages from master and not from your fork or metadata links will point to your forked repo.** . Run `git log -5` from repo root to verify last commit.
+1. Clone repo, **remember to build packages from master and not from your fork or metadata links will point to your forked repo.** . Run `git log -5` from repo root to verify last commit.
 
-3. From new cloned, aligned and versions updated repo root run pack command
+1. From new cloned, aligned and versions updated repo root run build command
 
-    ```shell
-    dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
-    ...
-    coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\net6.0\coverlet.console.dll
-    coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Release\net6.0\publish\
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.6.0.1-preview.6.g918cd179e0.nupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.collector.6.0.1-preview.6.g918cd179e0.snupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.6.0.1-preview.6.g918cd179e0.nupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.msbuild.6.0.1-preview.6.g918cd179e0.snupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.6.0.1-preview.6.g918cd179e0.nupkg'.
-    Successfully created package 'D:\git\coverlet\bin\Release\Packages\coverlet.console.6.0.1-preview.6.g918cd179e0.snupkg'.
-    ```
+  ```shell
+  dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
+  ...
+  coverlet.core -> C:\GitHub\coverlet\artifacts\bin\coverlet.core\release_netstandard2.0\coverlet.core.dll
+  coverlet.core -> C:\GitHub\coverlet\artifacts\bin\coverlet.core\release_net6.0\coverlet.core.dll
+  coverlet.collector -> C:\GitHub\coverlet\artifacts\bin\coverlet.collector\release_netstandard2.0\coverlet.collector.dll
+  coverlet.collector -> C:\GitHub\coverlet\artifacts\bin\coverlet.collector\release_net6.0\coverlet.collector.dll
+  coverlet.msbuild.tasks -> C:\GitHub\coverlet\artifacts\bin\coverlet.msbuild.tasks\release_netstandard2.0\coverlet.msbuild.tasks.dll
+  coverlet.msbuild.tasks -> C:\GitHub\coverlet\artifacts\bin\coverlet.msbuild.tasks\release_net6.0\coverlet.msbuild.tasks.dll
+  coverlet.console -> C:\GitHub\coverlet\artifacts\bin\coverlet.console\release\coverlet.console.dll
+  coverlet.console -> C:\GitHub\coverlet\artifacts\bin\coverlet.console\release\coverlet.console.exe
+  ...
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.6.0.1.nupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.6.0.1.snupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.6.0.1.nupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.6.0.1.snupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.6.0.1.nupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.6.0.1.snupkg'.
+  ...
+  ```
 
-4. Sign the packages using NuGetKeyVaultSignTool <https://www.nuget.org/packages/NuGetKeyVaultSignTool>
+1. Sign nuget packages using sign <https://www.nuget.org/packages/sign>
 
-    ```
-    ❯ NuGetKeyVaultSignTool sign **/*.nupkg --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --timestamp-digest sha256 `
-    >> --azure-key-vault-url KEYVAULT-URL `
-    >> --azure-key-vault-client-id CLIENT-ID `
-    >> --azure-key-vault-tenant-id TENANT-ID `
-    >> --azure-key-vault-client-secret KEYVAULT-SECRET `
-    >> --azure-key-vault-certificate CERT-FRIENDLY-NAME
-    ```
+```powershell
+sign code azure-key-vault **/*.nupkg --base-directory [ROOT-DIRECTORY]\artifacts\package\release\ --file-digest sha256 --description Coverlet --description-url https://github.com/coverlet-coverage/coverlet `
+ --azure-key-vault-url [KEYVAULT-URL] `
+ --azure-key-vault-client-id [CLIENT-ID] `
+ --azure-key-vault-tenant-id [TENANT-ID] `
+ --azure-key-vault-client-secret [KEYVAULT-SECRET] `
+ --azure-key-vault-certificate [CERT-FRIENDLY-NAME]
+```
 
-5. Upload *.nupkg files to Nuget.org site. **Check all metadata(url links, deterministic build etc...) before "Submit"**
+1. Upload *.nupkg files to Nuget.org site. **Check all metadata(url links, deterministic build etc...) before "Submit"**
 
-6. **On your fork**:
+1. **On your fork**:
     * Align to master
     * Bump version by one (fix part) and re-add `-preview.{height}`
     * Create release on repo <https://github.com/coverlet-coverage/coverlet/releases>
