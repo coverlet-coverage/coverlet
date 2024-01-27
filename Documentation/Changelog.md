@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix unable to instrument module for Microsoft.AspNetCore.Mvc.Razor [#1459](https://github.com/coverlet-coverage/coverlet/issues/1459) by https://github.com/lg2de
 
 ### Improvements
+- Extended exclude by attribute feature to work with fully qualified name [#1589](https://github.com/coverlet-coverage/coverlet/issues/1589)
 - Use System.CommandLine instead of McMaster.Extensions.CommandLineUtils [#1474](https://github.com/coverlet-coverage/coverlet/issues/1474) by https://github.com/Bertk
 - Fix deadlog in Coverlet.Integration.Tests.BaseTest [#1541](https://github.com/coverlet-coverage/coverlet/pull/1541) by https://github.com/Bertk
 - Add coverlet.msbuild.tasks unit tests [#1534](https://github.com/coverlet-coverage/coverlet/pull/1534) by https://github.com/Bertk
