@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
@@ -69,7 +68,8 @@ namespace Coverlet.Core.Reporters.Tests
 
         Assert.NotEmpty(report);
 
-        var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+        TextReader tr = new StringReader(report);
+        var doc = XDocument.Load(tr);
 
         IEnumerable<XAttribute> matchingRateAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate"));
         IEnumerable<string> rateParentNodeNames = matchingRateAttributes.Select(attr => attr.Parent.Name.LocalName);
@@ -151,7 +151,9 @@ namespace Coverlet.Core.Reporters.Tests
 
       Assert.NotEmpty(report);
 
-      var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+      TextReader tr = new StringReader(report);
+      var doc = XDocument.Load(tr);
+
       var methodAttrs = doc.Descendants()
           .Where(o => o.Name.LocalName == "method")
           .Attributes()
@@ -220,7 +222,8 @@ namespace Coverlet.Core.Reporters.Tests
       var reporter = new CoberturaReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
-      var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+      TextReader tr = new StringReader(report);
+      var doc = XDocument.Load(tr);
 
       var basePaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
       var relativePaths = doc.Element("coverage").Element("packages").Element("package")
@@ -262,7 +265,9 @@ namespace Coverlet.Core.Reporters.Tests
       var reporter = new CoberturaReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
-      var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+      TextReader tr = new StringReader(report);
+      var doc = XDocument.Load(tr);
+
       string fileName = doc.Element("coverage").Element("packages").Element("package").Element("classes").Elements()
           .Select(e => e.Attribute("filename").Value).Single();
 

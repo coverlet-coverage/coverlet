@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
 using Moq;
@@ -27,7 +26,8 @@ namespace Coverlet.Core.Reporters.Tests
       var reporter = new OpenCoverReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
       Assert.NotEmpty(report);
-      var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+      TextReader tr = new StringReader(report);
+      var doc = XDocument.Load(tr);
       Assert.Empty(doc.Descendants().Attributes("sequenceCoverage").Where(v => v.Value != "33.33"));
       Assert.Empty(doc.Descendants().Attributes("branchCoverage").Where(v => v.Value != "25"));
       Assert.Empty(doc.Descendants().Attributes("nPathComplexity").Where(v => v.Value != "4"));
