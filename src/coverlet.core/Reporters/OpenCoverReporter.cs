@@ -253,7 +253,6 @@ namespace Coverlet.Core.Reporters
       xml.Save(streamWriter);
 
       return Encoding.UTF8.GetString(stream.ToArray());
-
     }
   }
 }

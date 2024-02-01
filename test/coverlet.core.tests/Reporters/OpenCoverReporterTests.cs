@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
 using Moq;
@@ -26,8 +27,7 @@ namespace Coverlet.Core.Reporters.Tests
       var reporter = new OpenCoverReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
       Assert.NotEmpty(report);
-      TextReader tr = new StringReader(report);
-      var doc = XDocument.Load(tr);
+      var doc = XDocument.Load(new StringReader(report));
       Assert.Empty(doc.Descendants().Attributes("sequenceCoverage").Where(v => v.Value != "33.33"));
       Assert.Empty(doc.Descendants().Attributes("branchCoverage").Where(v => v.Value != "25"));
       Assert.Empty(doc.Descendants().Attributes("nPathComplexity").Where(v => v.Value != "4"));
@@ -75,6 +75,22 @@ namespace Coverlet.Core.Reporters.Tests
 
       // Line 4: Three branches, two covered (bec = 3, bev = 2)
       Assert.Contains(@"<SequencePoint vc=""1"" uspid=""4"" ordinal=""3"" sl=""4"" sc=""1"" el=""4"" ec=""2"" bec=""3"" bev=""2"" fileid=""1"" />", xml);
+    }
+
+    [Fact]
+    public void OpenCoverTestReportDoesNotContainBom()
+    {
+      var result = new CoverageResult
+      {
+        Identifier = Guid.NewGuid().ToString(),
+        Modules = new Modules { { "Coverlet.Core.Reporters.Tests", CreateBranchCoverageDocuments() } },
+        Parameters = new CoverageParameters()
+      };
+
+      string report = new OpenCoverReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      byte[] preamble = Encoding.UTF8.GetBytes(report)[..3];
+      Assert.NotEqual(Encoding.UTF8.GetPreamble(), preamble);
     }
 
     private static Documents CreateFirstDocuments()

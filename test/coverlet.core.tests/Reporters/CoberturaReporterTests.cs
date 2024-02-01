@@ -169,8 +169,7 @@ namespace Coverlet.Core.Reporters.Tests
 
       Assert.NotEmpty(report);
 
-      TextReader tr = new StringReader(report);
-      var doc = XDocument.Load(tr);
+      var doc = XDocument.Load(new StringReader(report));
 
       var methodAttrs = doc.Descendants()
           .Where(o => o.Name.LocalName == "method")
@@ -240,8 +239,7 @@ namespace Coverlet.Core.Reporters.Tests
       var reporter = new CoberturaReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
-      TextReader tr = new StringReader(report);
-      var doc = XDocument.Load(tr);
+      var doc = XDocument.Load(new StringReader(report));
 
       var basePaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
       var relativePaths = doc.Element("coverage").Element("packages").Element("package")
@@ -283,8 +281,7 @@ namespace Coverlet.Core.Reporters.Tests
       var reporter = new CoberturaReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
-      TextReader tr = new StringReader(report);
-      var doc = XDocument.Load(tr);
+      var doc = XDocument.Load(new StringReader(report));
 
       string fileName = doc.Element("coverage").Element("packages").Element("package").Element("classes").Elements()
           .Select(e => e.Attribute("filename").Value).Single();

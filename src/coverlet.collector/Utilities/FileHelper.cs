@@ -18,7 +18,6 @@ namespace Coverlet.Collector.Utilities
     /// <inheritdoc />
     public void WriteAllText(string path, string contents)
     {
-
       File.WriteAllText(path, contents);
     }
   }
