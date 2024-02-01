@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
 
@@ -249,15 +248,11 @@ namespace Coverlet.Core.Reporters
       coverage.Add(modules);
       xml.Add(coverage);
 
-      StringBuilder sb = new StringBuilder();
-      XmlWriterSettings settings = new XmlWriterSettings();
-      settings.Encoding = Encoding.UTF8;
-      using (XmlWriter writer = XmlWriter.Create(sb, settings))
-      {
-        xml.Save(writer);
-      }
+      using var stream = new MemoryStream();
+      using var streamWriter = new StreamWriter(stream, new UTF8Encoding(false));
+      xml.Save(streamWriter);
 
-      return sb.ToString();
+      return Encoding.UTF8.GetString(stream.ToArray());
 
     }
   }

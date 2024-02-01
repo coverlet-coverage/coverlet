@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
@@ -68,8 +69,7 @@ namespace Coverlet.Core.Reporters.Tests
 
         Assert.NotEmpty(report);
 
-        TextReader tr = new StringReader(report);
-        var doc = XDocument.Load(tr);
+        var doc = XDocument.Load(new StringReader(report));
 
         IEnumerable<XAttribute> matchingRateAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate"));
         IEnumerable<string> rateParentNodeNames = matchingRateAttributes.Select(attr => attr.Parent.Name.LocalName);
@@ -99,6 +99,24 @@ namespace Coverlet.Core.Reporters.Tests
       {
         Thread.CurrentThread.CurrentCulture = currentCulture;
       }
+    }
+
+    [Fact]
+    public void CoberturaTestReportDoesNotContainBom()
+    {
+      var result = new CoverageResult { Parameters = new CoverageParameters(), Identifier = Guid.NewGuid().ToString() };
+      var documents = new Documents();
+      var classes = new Classes { { "Class", new Methods() } };
+
+      documents.Add(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? @"C:\doc.cs" : @"/doc.cs", classes);
+
+      result.Modules = new Modules { { "Module", documents } };
+
+      var reporter = new CoberturaReporter();
+      string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      byte[] preamble = Encoding.UTF8.GetBytes(report)[..3];
+      Assert.NotEqual(Encoding.UTF8.GetPreamble(), preamble);
     }
 
     [Theory]

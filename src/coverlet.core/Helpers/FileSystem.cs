@@ -16,8 +16,7 @@ namespace Coverlet.Core.Helpers
 
     public void WriteAllText(string path, string contents)
     {
-      var utf8WithoutBom = new System.Text.UTF8Encoding(false);
-      File.WriteAllText(path, contents, utf8WithoutBom);
+      File.WriteAllText(path, contents);
     }
 
     public string ReadAllText(string path)

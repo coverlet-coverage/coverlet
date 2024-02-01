@@ -18,8 +18,8 @@ namespace Coverlet.Collector.Utilities
     /// <inheritdoc />
     public void WriteAllText(string path, string contents)
     {
-      var utf8WithoutBom = new System.Text.UTF8Encoding(false);
-      File.WriteAllText(path, contents, utf8WithoutBom);
+
+      File.WriteAllText(path, contents);
     }
   }
 }
