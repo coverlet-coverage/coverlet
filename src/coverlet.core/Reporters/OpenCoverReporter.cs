@@ -248,8 +248,9 @@ namespace Coverlet.Core.Reporters
       coverage.Add(modules);
       xml.Add(coverage);
 
-      var stream = new MemoryStream();
-      xml.Save(stream);
+      using var stream = new MemoryStream();
+      using var streamWriter = new StreamWriter(stream, new UTF8Encoding(false));
+      xml.Save(streamWriter);
 
       return Encoding.UTF8.GetString(stream.ToArray());
     }

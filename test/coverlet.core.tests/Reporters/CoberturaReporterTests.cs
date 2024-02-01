@@ -69,7 +69,7 @@ namespace Coverlet.Core.Reporters.Tests
 
         Assert.NotEmpty(report);
 
-        var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+        var doc = XDocument.Load(new StringReader(report));
 
         IEnumerable<XAttribute> matchingRateAttributes = doc.Descendants().Attributes().Where(attr => attr.Name.LocalName.EndsWith("-rate"));
         IEnumerable<string> rateParentNodeNames = matchingRateAttributes.Select(attr => attr.Parent.Name.LocalName);
@@ -99,6 +99,24 @@ namespace Coverlet.Core.Reporters.Tests
       {
         Thread.CurrentThread.CurrentCulture = currentCulture;
       }
+    }
+
+    [Fact]
+    public void CoberturaTestReportDoesNotContainBom()
+    {
+      var result = new CoverageResult { Parameters = new CoverageParameters(), Identifier = Guid.NewGuid().ToString() };
+      var documents = new Documents();
+      var classes = new Classes { { "Class", new Methods() } };
+
+      documents.Add(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? @"C:\doc.cs" : @"/doc.cs", classes);
+
+      result.Modules = new Modules { { "Module", documents } };
+
+      var reporter = new CoberturaReporter();
+      string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      byte[] preamble = Encoding.UTF8.GetBytes(report)[..3];
+      Assert.NotEqual(Encoding.UTF8.GetPreamble(), preamble);
     }
 
     [Theory]
@@ -151,7 +169,8 @@ namespace Coverlet.Core.Reporters.Tests
 
       Assert.NotEmpty(report);
 
-      var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+      var doc = XDocument.Load(new StringReader(report));
+
       var methodAttrs = doc.Descendants()
           .Where(o => o.Name.LocalName == "method")
           .Attributes()
@@ -220,7 +239,7 @@ namespace Coverlet.Core.Reporters.Tests
       var reporter = new CoberturaReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
-      var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+      var doc = XDocument.Load(new StringReader(report));
 
       var basePaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
       var relativePaths = doc.Element("coverage").Element("packages").Element("package")
@@ -262,7 +281,8 @@ namespace Coverlet.Core.Reporters.Tests
       var reporter = new CoberturaReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
 
-      var doc = XDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(report)));
+      var doc = XDocument.Load(new StringReader(report));
+
       string fileName = doc.Element("coverage").Element("packages").Element("package").Element("classes").Elements()
           .Select(e => e.Attribute("filename").Value).Single();
 
