@@ -8,29 +8,27 @@
     <MSBuildWarningsAsMessages>NU1702;NU1504;NU1008;NU1604</MSBuildWarningsAsMessages>
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
     <PreserveCompilationContext>true</PreserveCompilationContext>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.5" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Moq" Version="4.20.69" />
-    <PackageReference Include="ReportGenerator.Core" Version="5.2.0" />
-    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-    <PackageReference Include="System.Reflection.Metadata" Version="8.0.0" />
-    <PackageReference Include="Tmds.ExecFunction" Version="0.6.0" />
-    <PackageReference Include="xunit" Version="2.6.5" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="ReportGenerator.Core" />
+    <PackageReference Include="System.Linq.Async" />
+    <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" >
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
-    <PackageReference Include="System.Buffers" Version="4.5.1" />
-    <PackageReference Include="System.Memory" Version="4.5.5" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Buffers" />
+    <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
 
   <ItemGroup>

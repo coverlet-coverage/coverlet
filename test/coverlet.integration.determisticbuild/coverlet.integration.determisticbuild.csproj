@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" />
   
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsample.integration.determisticbuild</AssemblyName>
     <MSBuildWarningsAsMessages>NU1604</MSBuildWarningsAsMessages>
