@@ -4,7 +4,6 @@
 using System;
 using System.ComponentModel;
 using System.IO;
-using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
@@ -109,8 +108,7 @@ namespace Coverlet.Collector.DataCollection
       }
       catch (Exception ex)
       {
-        string errorMessage = string.Format(Resources.FailedToSaveCoverageReport, CoverletConstants.DataCollectorName, reportFileName, _reportDirectory);
-        throw new CoverletDataCollectorException(errorMessage, ex);
+        throw new CoverletDataCollectorException($"{CoverletConstants.DataCollectorName}: Failed to save coverage report '{reportFileName}' in directory '{_reportDirectory}'", ex);
       }
     }
 
@@ -168,8 +166,7 @@ namespace Coverlet.Collector.DataCollection
       }
       catch (Exception ex)
       {
-        string errorMessage = string.Format(Resources.FailedToCleanupReportDirectory, CoverletConstants.DataCollectorName, _reportDirectory);
-        throw new CoverletDataCollectorException(errorMessage, ex);
+        throw new CoverletDataCollectorException($"{CoverletConstants.DataCollectorName}: Failed to cleanup report directory: '{_reportDirectory}'", ex);
       }
     }
   }

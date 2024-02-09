@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Instrumentation;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
@@ -76,8 +75,7 @@ namespace Coverlet.Collector.DataCollection
           if (_enableExceptionLog)
           {
             _eqtTrace.Error("{0}: Failed to unload module with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
-            string errorMessage = string.Format(Resources.FailedToUnloadModule, CoverletConstants.InProcDataCollectorName);
-            throw new CoverletDataCollectorException(errorMessage, ex);
+            throw new CoverletDataCollectorException($"{CoverletConstants.InProcDataCollectorName}: Failed to unload module", ex);
           }
         }
       }

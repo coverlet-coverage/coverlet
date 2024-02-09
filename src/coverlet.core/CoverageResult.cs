@@ -24,7 +24,7 @@ namespace Coverlet.Core
   internal class Method
   {
     [JsonConstructor]
-    public Method()
+    internal Method()
     {
       Lines = [];
       Branches = [];

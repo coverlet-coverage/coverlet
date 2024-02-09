@@ -50,6 +50,15 @@ To specify a directory where all results will be written to (especially if using
 dotnet test /p:CollectCoverage=true /p:CoverletOutput='./results/'
 ```
 
+_Note: escape characters might produce some unexpected results._
+
+|status| msbuild parameter |
+|---|---|
+|:heavy_check_mark:|`/p:CoverletOutput="C:/GitHub/coverlet/artifacts/Reports/coverlet.core/"`|
+|:heavy_check_mark:|`/p:CoverletOutput="C:\\GitHub\\coverlet\\artifacts\\Reports\\coverlet.core\\"`|
+|:heavy_check_mark:|`/p:CoverletOutput="C:\GitHub\coverlet\artifacts\Reports\coverlet.core\\"`|
+|:x:|`/p:CoverletOutput="C:\GitHub\coverlet\artifacts\Reports\coverlet.core\"`|
+
 The Coverlet MSBuild task sets the `CoverletReport` MSBuild item so that you can easily use the produced coverage reports. For example, using [ReportGenerator](https://github.com/danielpalme/ReportGenerator#usage--command-line-parameters) to generate an html coverage report.
 
 ```xml

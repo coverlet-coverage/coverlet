@@ -1,0 +1,43 @@
+{
+  "coverletsamplelib.integration.template.dll": {
+    "C:\\GitHub\\coverlet\\artifacts\\bin\\coverlet.integration.tests\\debug_net7.0\\01021711\\Program.cs": {
+      "HelloWorld.Program": {
+        "System.Void HelloWorld.Program::Main(System.String[])": {
+          "Lines": {
+            "10": 1,
+            "11": 1,
+            "12": 1,
+            "13": 1,
+            "14": 1
+          },
+          "Branches": []
+        }
+      }
+    },
+    "C:\\GitHub\\coverlet\\artifacts\\bin\\coverlet.integration.tests\\debug_net7.0\\01021711\\DeepThought.cs": {
+      "Coverlet.Integration.Template.DeepThought": {
+        "System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()": {
+          "Lines": {
+            "6": 1,
+            "7": 1,
+            "8": 1
+          },
+          "Branches": []
+        }
+      }
+    },
+    "C:\\GitHub\\coverlet\\artifacts\\bin\\coverlet.integration.tests\\debug_net7.0\\01021711\\TemplateTest.cs": {
+      "Coverlet.Integration.Template.TemplateTest": {
+        "System.Void Coverlet.Integration.Template.TemplateTest::Answer()": {
+          "Lines": {
+            "9": 0,
+            "10": 0,
+            "11": 0,
+            "12": 0
+          },
+          "Branches": []
+        }
+      }
+    }
+  }
+}

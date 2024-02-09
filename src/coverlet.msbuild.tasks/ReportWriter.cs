@@ -10,7 +10,7 @@ namespace Coverlet.MSbuild.Tasks
   internal class ReportWriter
   {
     private readonly string _coverletMultiTargetFrameworksCurrentTFM;
-    private readonly string _directory;
+    private string _directory;
     private readonly string _output;
     private readonly IReporter _reporter;
     private readonly IFileSystem _fileSystem;
@@ -30,9 +30,10 @@ namespace Coverlet.MSbuild.Tasks
 
       if (filename == string.Empty)
       {
-        // empty filename for instance only directory is passed to CoverletOutput c:\reportpath
-        // c:\reportpath\coverage.reportedextension
+        // empty filename for instance only directory is passed to CoverletOutput 'c:/reportpath/'
+        // note: use always '/' and not backslash => 'c:\reportpath\coverage.cobertura.xml'
         filename = $"coverage.{_coverletMultiTargetFrameworksCurrentTFM}{separatorPoint}{_reporter.Extension}";
+        _directory = Path.GetFullPath(_output);
       }
       else if (Path.HasExtension(filename))
       {
@@ -49,6 +50,7 @@ namespace Coverlet.MSbuild.Tasks
 
       string report = Path.Combine(_directory, filename);
       _fileSystem.WriteAllText(report, _reporter.Report(_result, _sourceRootTranslator));
+
       return report;
     }
   }
