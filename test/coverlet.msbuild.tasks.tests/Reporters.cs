@@ -43,10 +43,10 @@ namespace Coverlet.MSbuild.Tasks.Reporters.Tests
           new CoverageResult() { Modules = new Modules(), Parameters = new CoverageParameters() }, null);
 
       string path = reportWriter.WriteReport();
-      //remove drive for windows
+      //remove drive for windows paths
       if (path.Contains(':'))
       {
-        path = path.Substring(2);
+        path = path[2..];
       }
       // Path.Combine depends on OS so we can change only win side to avoid duplication
       Assert.Equal(path.Replace('/', Path.DirectorySeparatorChar), expectedFileName.Replace('/', Path.DirectorySeparatorChar));
