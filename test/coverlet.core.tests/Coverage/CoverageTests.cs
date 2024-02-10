@@ -20,6 +20,16 @@ namespace Coverlet.Core.Tests
   public partial class CoverageTests
   {
     private readonly Mock<ILogger> _mockLogger = new();
+    readonly JsonSerializerOptions _options = new()
+    {
+      Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+      IncludeFields = true,
+      WriteIndented = true,
+      Converters =
+        {
+          new BranchDictionaryConverterFactory()
+        }
+    };
 
     [Fact]
     public void TestCoverage()
@@ -92,18 +102,7 @@ namespace Coverlet.Core.Tests
                                   new SourceRootTranslator(module, _mockLogger.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
-      var options = new JsonSerializerOptions()
-      {
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        IncludeFields = true,
-        WriteIndented = true,
-        Converters =
-        {
-          new BranchDictionaryConverterFactory()
-        }
-      };
-
-      string result = JsonSerializer.Serialize(coverage.GetCoverageResult(), options);
+      string result = JsonSerializer.Serialize(coverage.GetCoverageResult(), _options);
 
       Assert.Contains("coverlet.core.tests.dll", result);
 
@@ -142,7 +141,7 @@ namespace Coverlet.Core.Tests
       var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
-      string result = JsonSerializer.Serialize(coverage.GetCoverageResult());
+      string result = JsonSerializer.Serialize(coverage.GetCoverageResult(), _options);
 
       Assert.Contains("DeepThought.cs", result);
 
@@ -183,7 +182,7 @@ namespace Coverlet.Core.Tests
       var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
-      string result = JsonSerializer.Serialize(coverage.GetCoverageResult());
+      string result = JsonSerializer.Serialize(coverage.GetCoverageResult(), _options);
 
       _mockLogger.Verify(l => l.LogInformation(It.Is<string>(v => v.Equals("MergeWith: file 'FileDoesNotExist.json' does not exist.")), It.IsAny<bool>()), Times.Once);
 
