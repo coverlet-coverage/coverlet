@@ -34,8 +34,8 @@
     <PackageVersion Include="NuGet.Packaging" Version="6.8.0" />
     <PackageVersion Include="NuGet.Versioning" Version="6.8.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.5" />
-    <PackageVersion Include="Moq" Version="4.20.69" />
-    <PackageVersion Include="ReportGenerator.Core" Version="5.2.0" />
+    <PackageVersion Include="Moq" Version="4.20.70" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.2.1" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.4" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
@@ -46,9 +46,9 @@
     <PackageVersion Include="System.Reflection.Metadata" Version="8.0.0" />
     <PackageVersion Include="System.Text.Json" Version="8.0.1" />
     <PackageVersion Include="Tmds.ExecFunction" Version="0.7.1" />
-    <PackageVersion Include="xunit" Version="2.6.5" />
+    <PackageVersion Include="xunit" Version="2.6.6" />
     <PackageVersion Include="xunit.assemblyfixture" Version="2.2.0" />
-    <PackageVersion Include="xunit.assert" Version="2.6.5" />
+    <PackageVersion Include="xunit.assert" Version="2.6.6" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.6" />
     <PackageVersion Include="System.Buffers" Version="4.5.1" />
     <PackageVersion Include="System.Memory" Version="4.5.5" />
