@@ -33,6 +33,7 @@ namespace Coverlet.MSbuild.Tasks
         // empty filename for instance only directory is passed to CoverletOutput 'c:/reportpath/'
         // note: use always '/' and not backslash => 'c:\reportpath\coverage.cobertura.xml'
         filename = $"coverage.{_coverletMultiTargetFrameworksCurrentTFM}{separatorPoint}{_reporter.Extension}";
+        // sanitize path for information message
         _directory = Path.GetFullPath(_output);
       }
       else if (Path.HasExtension(filename))

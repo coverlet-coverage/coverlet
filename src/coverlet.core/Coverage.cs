@@ -65,7 +65,6 @@ namespace Coverlet.Core
       PropertyNameCaseInsensitive = true,
       DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
       IncludeFields = true,
-      //NumberHandling = JsonNumberHandling.AllowReadingFromString,
       WriteIndented = true
     };
 
