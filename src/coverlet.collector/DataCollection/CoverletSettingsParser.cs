@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 
 namespace Coverlet.Collector.DataCollection
@@ -72,8 +71,7 @@ namespace Coverlet.Collector.DataCollection
       // Validate if at least one source present.
       if (testModules == null || !testModules.Any())
       {
-        string errorMessage = string.Format(Resources.NoTestModulesFound, CoverletConstants.DataCollectorName);
-        throw new CoverletDataCollectorException(errorMessage);
+        throw new CoverletDataCollectorException($"{CoverletConstants.DataCollectorName}: No test modules found");
       }
 
       // Note:

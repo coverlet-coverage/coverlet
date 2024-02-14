@@ -60,6 +60,14 @@ namespace Coverlet.Core
 
     public string Identifier { get; }
 
+    readonly JsonSerializerOptions _options = new()
+    {
+      PropertyNameCaseInsensitive = true,
+      DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+      IncludeFields = true,
+      WriteIndented = true
+    };
+
     public Coverage(string moduleOrDirectory,
         CoverageParameters parameters,
         ILogger logger,
@@ -311,10 +319,17 @@ namespace Coverlet.Core
 
       var coverageResult = new CoverageResult { Identifier = Identifier, Modules = modules, InstrumentedResults = _results, Parameters = _parameters };
 
-      if (!string.IsNullOrEmpty(_parameters.MergeWith) && !string.IsNullOrWhiteSpace(_parameters.MergeWith) && _fileSystem.Exists(_parameters.MergeWith))
+      if (!string.IsNullOrEmpty(_parameters.MergeWith) && !string.IsNullOrWhiteSpace(_parameters.MergeWith))
       {
-        string json = _fileSystem.ReadAllText(_parameters.MergeWith);
-        coverageResult.Merge(JsonSerializer.Deserialize<Modules>(json));
+        if (_fileSystem.Exists(_parameters.MergeWith))
+        {
+          _logger.LogInformation($"MergeWith: '{_parameters.MergeWith}'.");
+          string json = _fileSystem.ReadAllText(_parameters.MergeWith);
+          coverageResult.Merge(JsonSerializer.Deserialize<Modules>(json, _options));
+        } else
+        {
+          _logger.LogInformation($"MergeWith: file '{_parameters.MergeWith}' does not exist.");
+        }
       }
 
       return coverageResult;

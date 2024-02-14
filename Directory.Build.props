@@ -53,6 +53,25 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>15.9.20</MicrosoftBuildUtilitiesCorePackageVersion>
     <SystemReflectionMetadataVersion>1.6.0</SystemReflectionMetadataVersion>
     <SystemCollectionsImmutableVersion>1.5.0</SystemCollectionsImmutableVersion>
+
+    <!-- some additional information about dependency management limitations for MSBuild tasks (coverlet.msbuild.tasks)
+       - msBuild task with dependencies https://natemcmaster.com/blog/2017/11/11/msbuild-task-with-dependencies/
+       - Aligning versions with MSBuild
+       - If you need a dependency that is also used in MSBuild itself, you have to align with the version MSBuild uses.
+       - This includes System.Reflection.Metadata, System.Collections.Immutable, NuGet, Newtonsoft.Json, and others.
+       - See example: dependencies.props (https://github.com/aspnet/BuildTools/blob/1f3f14382764e06b7e691e5ee89d12a280249284/build/dependencies.props#L19-L29)"
+
+       .NET 8.0.3xx (MSBuild) core-sdk-tasks version details https://github.com/dotnet/installer/blob/release/8.0.3xx/src/core-sdk-tasks/core-sdk-tasks.csproj
+
+       ALIGN PACKAGE VERSIONS of coverlet.core with coverlet.collector (vstest) and coverlet.msbuild.tasks (.NET SDK MSBuild)
+
+       e.g. candidates for version conflicts:
+            <MicrosoftBuildTaskVersion>15.7.179</MicrosoftBuildTaskVersion>
+            <MicrosoftBuildTaskUtilitiesCoreVersion>15.7.179</MicrosoftBuildTaskUtilitiesCoreVersion>
+            <NuGetBuildTasksPackageVersion>6.9.0-rc.86</NuGetBuildTasksPackageVersion>
+            <MicrosoftBuildTaskSystemReflectionMetaData>1.4.2</MicrosoftBuildTaskSystemReflectionMetaData> 
+            <MicrosoftBuildTaskSystemCollectionImmutable>1.5.0</MicrosoftBuildTaskSystemCollectionImmutable>  >= 1.3.1
+    -->       
   </PropertyGroup>
 
 </Project>

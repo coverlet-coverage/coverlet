@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using coverlet.collector.Resources;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core;
@@ -68,8 +67,7 @@ namespace Coverlet.Collector.DataCollection
       }
       catch (Exception ex)
       {
-        string errorMessage = string.Format(Resources.InstrumentationException, CoverletConstants.DataCollectorName);
-        throw new CoverletDataCollectorException(errorMessage, ex);
+        throw new CoverletDataCollectorException($"{CoverletConstants.DataCollectorName}: Failed to instrument modules", ex);
       }
     }
 
@@ -96,8 +94,7 @@ namespace Coverlet.Collector.DataCollection
       }
       catch (Exception ex)
       {
-        string errorMessage = string.Format(Resources.CoverageResultException, CoverletConstants.DataCollectorName);
-        throw new CoverletDataCollectorException(errorMessage, ex);
+        throw new CoverletDataCollectorException($"{CoverletConstants.DataCollectorName}: Failed to get coverage result", ex);
       }
     }
 
@@ -114,8 +111,7 @@ namespace Coverlet.Collector.DataCollection
       }
       catch (Exception ex)
       {
-        string errorMessage = string.Format(Resources.CoverageReportException, CoverletConstants.DataCollectorName);
-        throw new CoverletDataCollectorException(errorMessage, ex);
+        throw new CoverletDataCollectorException($"{CoverletConstants.DataCollectorName}: Failed to get coverage report", ex);
       }
     }
   }

@@ -30,8 +30,8 @@ namespace Coverlet.MSbuild.Tasks
 
       if (filename == string.Empty)
       {
-        // empty filename for instance only directory is passed to CoverletOutput c:\reportpath
-        // c:\reportpath\coverage.reportedextension
+        // empty filename for instance only directory is passed to CoverletOutput 'c:/reportpath/'
+        // note: use always '/' and not backslash => 'c:\reportpath\coverage.cobertura.xml'
         filename = $"coverage.{_coverletMultiTargetFrameworksCurrentTFM}{separatorPoint}{_reporter.Extension}";
       }
       else if (Path.HasExtension(filename))
@@ -47,8 +47,9 @@ namespace Coverlet.MSbuild.Tasks
         filename = $"{filename}{separatorPoint}{_coverletMultiTargetFrameworksCurrentTFM}.{_reporter.Extension}";
       }
 
-      string report = Path.Combine(_directory, filename);
+      string report = Path.Combine(Path.GetFullPath(_directory), filename);
       _fileSystem.WriteAllText(report, _reporter.Report(_result, _sourceRootTranslator));
+
       return report;
     }
   }
