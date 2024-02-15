@@ -774,7 +774,8 @@ namespace Coverlet.Core.Instrumentation
 
     private bool IsExcludeAttribute(CustomAttribute customAttribute)
     {
-      return Array.IndexOf(_excludedAttributes, customAttribute.AttributeType.Name) != -1;
+      return Array.IndexOf(_excludedAttributes, customAttribute.AttributeType.Name) != -1 ||
+             Array.IndexOf(_excludedAttributes, customAttribute.AttributeType.FullName) != -1;
     }
 
     private static MethodBody GetMethodBody(MethodDefinition method)

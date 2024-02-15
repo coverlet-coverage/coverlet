@@ -100,6 +100,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 |:-------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Format                   | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.                                 |
 | Exclude                  | Exclude from code coverage analysing using filter expressions.                                                                                                  |
+| ExcludeByAttribute       | Exclude a method, an entire class or assembly from code coverage decorated by an attribute.    |
 | ExcludeByFile            | Ignore specific source files from code coverage.                                                                                                                |
 | Include                  | Explicitly set what to include in code coverage analysis using filter expressions.                                                                              |
 | IncludeDirectory         | Explicitly set which directories to include in code coverage analysis.                                                                                          |
