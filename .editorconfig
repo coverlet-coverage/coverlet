@@ -147,7 +147,7 @@ end_of_line = crlf
 csharp_using_directive_placement = outside_namespace:silent
 # var preferences - use keywords instead of BCL types, and permit var only when the type is clear
 csharp_style_var_for_built_in_types = false:warning
-csharp_style_var_when_type_is_apparent = true:warning
+csharp_style_var_when_type_is_apparent = false:warning
 csharp_style_var_elsewhere = false:warning
 # Expression-bodied members
 csharp_style_expression_bodied_methods = false:silent
@@ -175,6 +175,8 @@ csharp_prefer_simple_default_expression = true:warning
 dotnet_diagnostic.IDE0034.severity = warning
 csharp_style_pattern_local_over_anonymous_function = true:suggestion
 csharp_style_inlined_variable_declaration = true:warning
+## IDE0057: Use range operator
+csharp_style_prefer_range_operator = true:suggestion
 ###############################
 # C# Formatting Rules         #
 ###############################
