@@ -89,7 +89,7 @@ namespace Coverlet.MSbuild.Tasks
       {
         IFileSystem fileSystem = ServiceProvider.GetService<IFileSystem>();
 
-        var parameters = new CoverageParameters
+        CoverageParameters parameters = new()
         {
           IncludeFilters = Include?.Split(','),
           IncludeDirectories = IncludeDirectory?.Split(','),
@@ -106,7 +106,7 @@ namespace Coverlet.MSbuild.Tasks
           DoesNotReturnAttributes = DoesNotReturnAttribute?.Split(',')
         };
 
-        var coverage = new Coverage(Path,
+        Coverage coverage = new(Path,
                                          parameters,
                                          _logger,
                                          ServiceProvider.GetService<IInstrumentationHelper>(),

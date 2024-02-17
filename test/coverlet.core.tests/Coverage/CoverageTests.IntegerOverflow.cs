@@ -15,7 +15,7 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void CoverageResult_NegativeLineCoverage_TranslatedToMaxValueOfInt32()
     {
-      var instrumenterResult = new InstrumenterResult
+      InstrumenterResult instrumenterResult = new()
       {
         HitsFilePath = "HitsFilePath",
         SourceLink = "SourceLink",
@@ -24,7 +24,7 @@ namespace Coverlet.Core.Tests
 
       instrumenterResult.HitCandidates.Add(new HitCandidate(false, 0, 1, 1));
 
-      var document = new Document
+      Document document = new()
       {
         Index = 0,
         Path = "Path0"
@@ -40,25 +40,25 @@ namespace Coverlet.Core.Tests
 
       instrumenterResult.Documents.Add("document", document);
 
-      var coveragePrepareResult = new CoveragePrepareResult
+      CoveragePrepareResult coveragePrepareResult = new()
       {
         UseSourceLink = true,
-        Results = new[] { instrumenterResult },
+        Results = [instrumenterResult],
         Parameters = new CoverageParameters()
       };
 
       Stream memoryStream = new MemoryStream();
-      var binaryWriter = new BinaryWriter(memoryStream);
+      BinaryWriter binaryWriter = new(memoryStream);
       binaryWriter.Write(1);
       binaryWriter.Write(-1);
       memoryStream.Position = 0;
 
-      var fileSystemMock = new Mock<IFileSystem>();
+      Mock<IFileSystem> fileSystemMock = new();
       fileSystemMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
       fileSystemMock.Setup(x => x.NewFileStream(It.IsAny<string>(), FileMode.Open, FileAccess.Read))
           .Returns(memoryStream);
 
-      var coverage = new Coverage(coveragePrepareResult, new Mock<ILogger>().Object, new Mock<IInstrumentationHelper>().Object,
+      Coverage coverage = new(coveragePrepareResult, new Mock<ILogger>().Object, new Mock<IInstrumentationHelper>().Object,
           fileSystemMock.Object, new Mock<ISourceRootTranslator>().Object);
 
       CoverageResult coverageResult = coverage.GetCoverageResult();

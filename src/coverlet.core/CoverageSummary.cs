@@ -11,15 +11,17 @@ namespace Coverlet.Core
   {
     public CoverageDetails CalculateLineCoverage(Lines lines)
     {
-      var details = new CoverageDetails();
-      details.Covered = lines.Where(l => l.Value > 0).Count();
-      details.Total = lines.Count;
+      CoverageDetails details = new()
+      {
+        Covered = lines.Count(l => l.Value > 0),
+        Total = lines.Count
+      };
       return details;
     }
 
     public CoverageDetails CalculateLineCoverage(Methods methods)
     {
-      var details = new CoverageDetails();
+      CoverageDetails details = new();
       foreach (KeyValuePair<string, Method> method in methods)
       {
         CoverageDetails methodCoverage = CalculateLineCoverage(method.Value.Lines);
@@ -31,7 +33,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateLineCoverage(Classes classes)
     {
-      var details = new CoverageDetails();
+      CoverageDetails details = new();
       foreach (KeyValuePair<string, Methods> @class in classes)
       {
         CoverageDetails classCoverage = CalculateLineCoverage(@class.Value);
@@ -43,7 +45,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateLineCoverage(Documents documents)
     {
-      var details = new CoverageDetails();
+      CoverageDetails details = new();
       foreach (KeyValuePair<string, Classes> document in documents)
       {
         CoverageDetails documentCoverage = CalculateLineCoverage(document.Value);
@@ -55,7 +57,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateLineCoverage(Modules modules)
     {
-      var details = new CoverageDetails { Modules = modules };
+      CoverageDetails details = new() { Modules = modules };
       double accumPercent = 0.0D;
 
       if (modules.Count == 0)
@@ -74,9 +76,11 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateBranchCoverage(IList<BranchInfo> branches)
     {
-      var details = new CoverageDetails();
-      details.Covered = branches.Count(bi => bi.Hits > 0);
-      details.Total = branches.Count;
+      CoverageDetails details = new()
+      {
+        Covered = branches.Count(bi => bi.Hits > 0),
+        Total = branches.Count
+      };
       return details;
     }
 
@@ -88,7 +92,7 @@ namespace Coverlet.Core
         return 0;
       }
 
-      var paths = new Dictionary<int, int>();
+      Dictionary<int, int> paths = [];
       foreach (BranchInfo branch in branches)
       {
         if (!paths.TryGetValue(branch.Offset, out int count))
@@ -156,7 +160,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateBranchCoverage(Methods methods)
     {
-      var details = new CoverageDetails();
+      CoverageDetails details = new();
       foreach (KeyValuePair<string, Method> method in methods)
       {
         CoverageDetails methodCoverage = CalculateBranchCoverage(method.Value.Branches);
@@ -168,7 +172,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateBranchCoverage(Classes classes)
     {
-      var details = new CoverageDetails();
+      CoverageDetails details = new();
       foreach (KeyValuePair<string, Methods> @class in classes)
       {
         CoverageDetails classCoverage = CalculateBranchCoverage(@class.Value);
@@ -180,7 +184,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateBranchCoverage(Documents documents)
     {
-      var details = new CoverageDetails();
+      CoverageDetails details = new();
       foreach (KeyValuePair<string, Classes> document in documents)
       {
         CoverageDetails documentCoverage = CalculateBranchCoverage(document.Value);
@@ -192,7 +196,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateBranchCoverage(Modules modules)
     {
-      var details = new CoverageDetails { Modules = modules };
+      CoverageDetails details = new() { Modules = modules };
       double accumPercent = 0.0D;
 
       if (modules.Count == 0)
@@ -211,15 +215,17 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateMethodCoverage(Lines lines)
     {
-      var details = new CoverageDetails();
-      details.Covered = lines.Any(l => l.Value > 0) ? 1 : 0;
-      details.Total = 1;
+      CoverageDetails details = new()
+      {
+        Covered = lines.Any(l => l.Value > 0) ? 1 : 0,
+        Total = 1
+      };
       return details;
     }
 
     public CoverageDetails CalculateMethodCoverage(Methods methods)
     {
-      var details = new CoverageDetails();
+      CoverageDetails details = new();
       IEnumerable<KeyValuePair<string, Method>> methodsWithLines = methods.Where(m => m.Value.Lines.Count > 0);
       foreach (KeyValuePair<string, Method> method in methodsWithLines)
       {
@@ -232,7 +238,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateMethodCoverage(Classes classes)
     {
-      var details = new CoverageDetails();
+      CoverageDetails details = new();
       foreach (KeyValuePair<string, Methods> @class in classes)
       {
         CoverageDetails classCoverage = CalculateMethodCoverage(@class.Value);
@@ -244,7 +250,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateMethodCoverage(Documents documents)
     {
-      var details = new CoverageDetails();
+      CoverageDetails details = new();
       foreach (KeyValuePair<string, Classes> document in documents)
       {
         CoverageDetails documentCoverage = CalculateMethodCoverage(document.Value);
@@ -256,7 +262,7 @@ namespace Coverlet.Core
 
     public CoverageDetails CalculateMethodCoverage(Modules modules)
     {
-      var details = new CoverageDetails { Modules = modules };
+      CoverageDetails details = new() { Modules = modules };
       double accumPercent = 0.0D;
 
       if (modules.Count == 0)

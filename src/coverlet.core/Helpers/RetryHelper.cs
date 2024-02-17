@@ -42,7 +42,7 @@ namespace Coverlet.Core.Helpers
         Func<TimeSpan> backoffStrategy,
         int maxAttemptCount = 3)
     {
-      var exceptions = new List<Exception>();
+      List<Exception> exceptions = [];
 
       for (int attempted = 0; attempted < maxAttemptCount; attempted++)
       {

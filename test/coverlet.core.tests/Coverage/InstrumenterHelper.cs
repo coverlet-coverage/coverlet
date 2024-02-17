@@ -31,7 +31,7 @@ namespace Coverlet.Core.Tests
     /// </summary>
     public static void GenerateHtmlReport(CoverageResult coverageResult, IReporter reporter = null, string sourceFileFilter = "", [CallerMemberName] string directory = "")
     {
-      var defaultReporter = new JsonReporter();
+      JsonReporter defaultReporter = new();
       reporter ??= new CoberturaReporter();
       DirectoryInfo dir = Directory.CreateDirectory(directory);
       dir.Delete(true);
@@ -50,7 +50,7 @@ namespace Coverlet.Core.Tests
       new string[0],
       new string[0],
       new string[0],
-      string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : new[] { sourceFileFilter },
+      string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : [sourceFileFilter],
       null,
       null)));
     }
@@ -58,15 +58,15 @@ namespace Coverlet.Core.Tests
     public static CoverageResult GetCoverageResult(string filePath)
     {
       SetTestContainer();
-      using var result = new FileStream(filePath, FileMode.Open);
-      var logger = new Mock<ILogger>();
+      using FileStream result = new(filePath, FileMode.Open);
+      Mock<ILogger> logger = new();
       logger.Setup(l => l.LogVerbose(It.IsAny<string>())).Callback((string message) =>
       {
         Assert.DoesNotContain("not found for module: ", message);
       });
       s_processWideContainer.GetRequiredService<IInstrumentationHelper>().SetLogger(logger.Object);
-      var coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
-      var coverage = new Coverage(coveragePrepareResultLoaded, logger.Object, s_processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
+      CoveragePrepareResult coveragePrepareResultLoaded = CoveragePrepareResult.Deserialize(result);
+      Coverage coverage = new(coveragePrepareResultLoaded, logger.Object, s_processWideContainer.GetService<IInstrumentationHelper>(), new FileSystem(), new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
       return coverage.GetCoverageResult();
     }
 
@@ -96,23 +96,23 @@ namespace Coverlet.Core.Tests
       string sourceRootTranslatorModulePath = assemblyLocation ?? newPath;
       SetTestContainer(sourceRootTranslatorModulePath, disableRestoreModules);
 
-      static string[] defaultFilters(string _) => Array.Empty<string>();
+      static string[] defaultFilters(string _) => [];
 
-      var parameters = new CoverageParameters
+      CoverageParameters parameters = new()
       {
         IncludeFilters = (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
           new string[]
           {
                     $"[{Path.GetFileNameWithoutExtension(fileName)}*]{GetTypeFullName<T>()}*"
           }).ToArray(),
-        IncludeDirectories = Array.Empty<string>(),
+        IncludeDirectories = [],
         ExcludeFilters = (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)).Concat(new string[]
           {
                     "[xunit.*]*",
                     "[coverlet.*]*"
           }).ToArray(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = true,
         SingleHit = false,
         MergeWith = string.Empty,
@@ -122,14 +122,14 @@ namespace Coverlet.Core.Tests
       };
 
       // Instrument module
-      var coverage = new Coverage(newPath, parameters, new Logger(logFile),
+      Coverage coverage = new(newPath, parameters, new Logger(logFile),
       s_processWideContainer.GetService<IInstrumentationHelper>(), s_processWideContainer.GetService<IFileSystem>(), s_processWideContainer.GetService<ISourceRootTranslator>(), s_processWideContainer.GetService<ICecilSymbolHelper>());
       CoveragePrepareResult prepareResult = coverage.PrepareModules();
 
       Assert.Single(prepareResult.Results);
 
       // Load new assembly
-      var asm = Assembly.LoadFile(newPath);
+      Assembly asm = Assembly.LoadFile(newPath);
 
       // Instance type and call method
       await callMethod(Activator.CreateInstance(asm.GetType(typeof(T).FullName)));
@@ -144,10 +144,10 @@ namespace Coverlet.Core.Tests
       // string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
 
       // Void UnloadModule(System.Object, System.EventArgs)
-      tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, new object[2] { null, null });
+      tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, [null, null]);
 
       // Persist CoveragePrepareResult
-      using (var fs = new FileStream(persistPrepareResultToFile, FileMode.Open))
+      using (FileStream fs = new(persistPrepareResultToFile, FileMode.Open))
       {
         await CoveragePrepareResult.Serialize(prepareResult).CopyToAsync(fs);
       }
@@ -159,7 +159,7 @@ namespace Coverlet.Core.Tests
     {
       LazyInitializer.EnsureInitialized(ref s_processWideContainer, () =>
       {
-        var serviceCollection = new ServiceCollection();
+        ServiceCollection serviceCollection = new();
         serviceCollection.AddTransient<IRetryHelper, CustomRetryHelper>();
         serviceCollection.AddTransient<IProcessExitHandler, CustomProcessExitHandler>();
         serviceCollection.AddTransient<IFileSystem, FileSystem>();
@@ -215,7 +215,7 @@ namespace Coverlet.Core.Tests
   {
     public T Do<T>(Func<T> action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3)
     {
-      var exceptions = new List<Exception>();
+      List<Exception> exceptions = new();
       for (int attempted = 0; attempted < maxAttemptCount; attempted++)
       {
         try

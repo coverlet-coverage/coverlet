@@ -29,9 +29,9 @@ namespace Coverlet.MSbuild.Tasks.Reporters.Tests
     [InlineData("netcoreapp2.2", "/folder/reportFolder/file", "cobertura", "/folder/reportFolder/file.netcoreapp2.2.cobertura.xml")]
     public void Msbuild_ReportWriter(string? coverletMultiTargetFrameworksCurrentTFM, string coverletOutput, string reportFormat, string expectedFileName)
     {
-      var fileSystem = new Mock<IFileSystem>();
+      Mock<IFileSystem> fileSystem = new();
 
-      var reportWriter = new ReportWriter(
+      ReportWriter reportWriter = new(
           coverletMultiTargetFrameworksCurrentTFM,
           // mimic code inside CoverageResultTask.cs
           Path.GetDirectoryName(coverletOutput),

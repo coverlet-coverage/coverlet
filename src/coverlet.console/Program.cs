@@ -27,28 +27,28 @@ namespace Coverlet.Console
   {
     static int Main(string[] args)
     {
-      var moduleOrAppDirectory = new Argument<string>("path", "Path to the test assembly or application directory.");
-      var target = new Option<string>(new[] { "--target", "-t" }, "Path to the test runner application.") { Arity = ArgumentArity.ZeroOrOne, IsRequired = true };
-      var targs = new Option<string>(new[] { "--targetargs", "-a" }, "Arguments to be passed to the test runner.") { Arity = ArgumentArity.ZeroOrOne };
-      var output = new Option<string>(new[] { "--output", "-o" }, "Output of the generated coverage report") { Arity = ArgumentArity.ZeroOrOne };
-      var verbosity = new Option<LogLevel>(new[] { "--verbosity", "-v" }, () => LogLevel.Normal, "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.") { Arity = ArgumentArity.ZeroOrOne };
-      var formats = new Option<string[]>(new[] { "--format", "-f" }, () => new[] { "json" }, "Format of the generated coverage report.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var threshold = new Option<string>("--threshold", "Exits with error if the coverage % is below value.") { Arity = ArgumentArity.ZeroOrOne };
-      var thresholdTypes = new Option<List<string>>("--threshold-type", () => new List<string>(new string[] { "line", "branch", "method" }), "Coverage type to apply the threshold to.").FromAmong("line", "branch", "method");
-      var thresholdStat = new Option<ThresholdStatistic>("--threshold-stat", () => ThresholdStatistic.Minimum, "Coverage statistic used to enforce the threshold value.") { Arity = ArgumentArity.ZeroOrMore };
-      var excludeFilters = new Option<string[]>("--exclude", "Filter expressions to exclude specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var includeFilters = new Option<string[]>("--include", "Filter expressions to include only specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var excludedSourceFiles = new Option<string[]>("--exclude-by-file", "Glob patterns specifying source files to exclude.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var includeDirectories = new Option<string[]>("--include-directory", "Include directories containing additional assemblies to be instrumented.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var excludeAttributes = new Option<string[]>("--exclude-by-attribute", "Attributes to exclude from code coverage.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var includeTestAssembly = new Option<bool>("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.") { Arity = ArgumentArity.Zero };
-      var singleHit = new Option<bool>("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location") { Arity = ArgumentArity.Zero };
-      var skipAutoProp = new Option<bool>("--skipautoprops", "Neither track nor record auto-implemented properties.") { Arity = ArgumentArity.Zero };
-      var mergeWith = new Option<string>("--merge-with", "Path to existing coverage result to merge.") { Arity = ArgumentArity.ZeroOrOne };
-      var useSourceLink = new Option<bool>("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.") { Arity = ArgumentArity.Zero };
-      var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
-      var sourceMappingFile = new Option<string>("--source-mapping-file", "Specifies the path to a SourceRootsMappings file.") { Arity = ArgumentArity.ZeroOrOne };
+      Argument<string> moduleOrAppDirectory = new("path", "Path to the test assembly or application directory.");
+      Option<string> target = new(["--target", "-t"], "Path to the test runner application.") { Arity = ArgumentArity.ZeroOrOne, IsRequired = true };
+      Option<string> targs = new(["--targetargs", "-a"], "Arguments to be passed to the test runner.") { Arity = ArgumentArity.ZeroOrOne };
+      Option<string> output = new(["--output", "-o"], "Output of the generated coverage report") { Arity = ArgumentArity.ZeroOrOne };
+      Option<LogLevel> verbosity = new(["--verbosity", "-v"], () => LogLevel.Normal, "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.") { Arity = ArgumentArity.ZeroOrOne };
+      Option<string[]> formats = new(["--format", "-f"], () =>new[]{" json "}, "Format of the generated coverage report.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string> threshold = new("--threshold", "Exits with error if the coverage % is below value.") { Arity = ArgumentArity.ZeroOrOne };
+      Option<List<string>> thresholdTypes = new Option<List<string>>("--threshold-type", () => new List<string[]>("line", "branch", "method"), "Coverage type to apply the threshold to.").FromAmong("line", "branch", "method");
+      Option<ThresholdStatistic> thresholdStat = new("--threshold-stat", () => ThresholdStatistic.Minimum, "Coverage statistic used to enforce the threshold value.") { Arity = ArgumentArity.ZeroOrMore };
+      Option<string[]> excludeFilters = new("--exclude", "Filter expressions to exclude specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string[]> includeFilters = new("--include", "Filter expressions to include only specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string[]> excludedSourceFiles = new("--exclude-by-file", "Glob patterns specifying source files to exclude.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string[]> includeDirectories = new("--include-directory", "Include directories containing additional assemblies to be instrumented.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string[]> excludeAttributes = new("--exclude-by-attribute", "Attributes to exclude from code coverage.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<bool> includeTestAssembly = new("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.") { Arity = ArgumentArity.Zero };
+      Option<bool> singleHit = new("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location") { Arity = ArgumentArity.Zero };
+      Option<bool> skipAutoProp = new("--skipautoprops", "Neither track nor record auto-implemented properties.") { Arity = ArgumentArity.Zero };
+      Option<string> mergeWith = new("--merge-with", "Path to existing coverage result to merge.") { Arity = ArgumentArity.ZeroOrOne };
+      Option<bool> useSourceLink = new("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.") { Arity = ArgumentArity.Zero };
+      Option<string[]> doesNotReturnAttributes = new("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string> excludeAssembliesWithoutSources = new("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
+      Option<string> sourceMappingFile = new("--source-mapping-file", "Specifies the path to a SourceRootsMappings file.") { Arity = ArgumentArity.ZeroOrOne };
 
       RootCommand rootCommand = new()
       {
@@ -106,7 +106,7 @@ namespace Coverlet.Console
         if (string.IsNullOrEmpty(moduleOrAppDirectoryValue) || string.IsNullOrWhiteSpace(moduleOrAppDirectoryValue))
           throw new ArgumentException("No test assembly or application directory specified.");
 
-        var taskStatus = await HandleCommand(moduleOrAppDirectoryValue,
+        int taskStatus = await HandleCommand(moduleOrAppDirectoryValue,
                       targetValue,
                       targsValue,
                       outputValue,
@@ -170,7 +170,7 @@ namespace Coverlet.Console
 
       ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
-      var logger = (ConsoleLogger)serviceProvider.GetService<ILogger>();
+      ConsoleLogger logger = (ConsoleLogger)serviceProvider.GetService<ILogger>();
       IFileSystem fileSystem = serviceProvider.GetService<IFileSystem>();
 
       // Adjust log level based on user input.
@@ -249,10 +249,8 @@ namespace Coverlet.Console
         foreach (string format in formats)
         {
           IReporter reporter = new ReporterFactory(format).CreateReporter();
-          if (reporter == null)
-          {
-            throw new Exception($"Specified output format '{format}' is not supported");
-          }
+
+          ArgumentException.ThrowIfNullOrEmpty(format, $"Specified output format '{format}' is not supported");
 
           if (reporter.OutputType == ReporterOutputType.Console)
           {
@@ -273,7 +271,7 @@ namespace Coverlet.Console
           }
         }
 
-        var thresholdTypeFlagQueue = new Queue<ThresholdTypeFlags>();
+        Queue<ThresholdTypeFlags> thresholdTypeFlagQueue = new();
 
         foreach (string thresholdType in thresholdTypes)
         {
@@ -291,13 +289,13 @@ namespace Coverlet.Console
           }
         }
 
-        var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>();
+        Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = [];
         if (!string.IsNullOrEmpty(threshold) && threshold.Contains(','))
         {
           IEnumerable<string> thresholdValues = threshold.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
           if (thresholdValues.Count() != thresholdTypeFlagQueue.Count)
           {
-            throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
+            throw new ArgumentException($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
           }
 
           foreach (string thresholdValue in thresholdValues)
@@ -308,7 +306,7 @@ namespace Coverlet.Console
             }
             else
             {
-              throw new Exception($"Invalid threshold value must be numeric");
+              throw new ArgumentException($"Invalid threshold value must be numeric");
             }
           }
         }
@@ -322,8 +320,8 @@ namespace Coverlet.Console
           }
         }
 
-        var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-        var summary = new CoverageSummary();
+        ConsoleTable coverageTable = new("Module", "Line", "Branch", "Method");
+        CoverageSummary summary = new();
 
         CoverageDetails linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
         CoverageDetails branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
@@ -351,7 +349,7 @@ namespace Coverlet.Console
         coverageTable.Columns.Clear();
         coverageTable.Rows.Clear();
 
-        coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
+        coverageTable.AddColumn(["", "Line", "Branch", "Method"]);
         coverageTable.AddRow("Total", $"{InvariantFormat(totalLinePercent)}%", $"{InvariantFormat(totalBranchPercent)}%", $"{InvariantFormat(totalMethodPercent)}%");
         coverageTable.AddRow("Average", $"{InvariantFormat(averageLinePercent)}%", $"{InvariantFormat(averageBranchPercent)}%", $"{InvariantFormat(averageMethodPercent)}%");
 
@@ -365,7 +363,7 @@ namespace Coverlet.Console
         if (thresholdTypeFlags != ThresholdTypeFlags.None)
         {
           exitCode += (int)CommandExitCodes.CoverageBelowThreshold;
-          var exceptionMessageBuilder = new StringBuilder();
+          StringBuilder exceptionMessageBuilder = new();
           if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
           {
             exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line]}");
@@ -380,11 +378,10 @@ namespace Coverlet.Console
           {
             exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
           }
-          throw new Exception(exceptionMessageBuilder.ToString());
+          throw new InvalidOperationException(exceptionMessageBuilder.ToString());
         }
 
         return Task.FromResult(exitCode);
-
 
       }
 

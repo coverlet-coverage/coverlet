@@ -28,7 +28,7 @@ namespace Coverlet.Core.Helpers
     {
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
       _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-      _sourceRootMapping = new Dictionary<string, List<SourceRootMapping>>();
+      _sourceRootMapping = [];
     }
 
     public SourceRootTranslator(string sourceMappingFile, ILogger logger, IFileSystem fileSystem)
@@ -67,14 +67,14 @@ namespace Coverlet.Core.Helpers
         throw new ArgumentNullException(nameof(sourceRootMapping));
       }
 
-      var sourceToDeterministicPathMapping = new Dictionary<string, List<string>>();
+      Dictionary<string, List<string>> sourceToDeterministicPathMapping = [];
       foreach (KeyValuePair<string, List<SourceRootMapping>> sourceRootMappingEntry in sourceRootMapping)
       {
         foreach (SourceRootMapping originalPath in sourceRootMappingEntry.Value)
         {
           if (!sourceToDeterministicPathMapping.ContainsKey(originalPath.OriginalPath))
           {
-            sourceToDeterministicPathMapping.Add(originalPath.OriginalPath, new List<string>());
+            sourceToDeterministicPathMapping.Add(originalPath.OriginalPath, []);
           }
           sourceToDeterministicPathMapping[originalPath.OriginalPath].Add(sourceRootMappingEntry.Key);
         }
@@ -85,7 +85,7 @@ namespace Coverlet.Core.Helpers
 
     private Dictionary<string, List<SourceRootMapping>> LoadSourceRootMapping(string mappingFilePath)
     {
-      var mapping = new Dictionary<string, List<SourceRootMapping>>();
+      Dictionary<string, List<SourceRootMapping>> mapping = [];
 
       if (!_fileSystem.Exists(mappingFilePath))
       {
@@ -101,15 +101,14 @@ namespace Coverlet.Core.Helpers
           _logger.LogWarning($"Malformed mapping '{mappingRecord}'");
           continue;
         }
-#pragma warning disable IDE0057 // Use range operator
+
         string projectPath = mappingRecord.Substring(0, projectFileSeparatorIndex);
         string originalPath = mappingRecord.Substring(projectFileSeparatorIndex + 1, pathMappingSeparatorIndex - projectFileSeparatorIndex - 1);
         string mappedPath = mappingRecord.Substring(pathMappingSeparatorIndex + 1);
-#pragma warning restore IDE0057 // Use range operator
 
         if (!mapping.ContainsKey(mappedPath))
         {
-          mapping.Add(mappedPath, new List<SourceRootMapping>());
+          mapping.Add(mappedPath, []);
         }
 
         foreach (string path in originalPath.Split(';'))
@@ -128,7 +127,7 @@ namespace Coverlet.Core.Helpers
         return false;
       }
 
-         (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, targetFileName);
+         (_resolutionCacheFiles ??= []).Add(originalFileName, targetFileName);
       return true;
     }
 
@@ -153,7 +152,7 @@ namespace Coverlet.Core.Helpers
             string pathToCheck;
             if (_fileSystem.Exists(pathToCheck = Path.GetFullPath(originalFileName.Replace(mapping.Key, srm.OriginalPath))))
             {
-              (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
+              (_resolutionCacheFiles ??= []).Add(originalFileName, pathToCheck);
               _logger.LogVerbose($"Mapping resolved: '{FileSystem.EscapeFileName(originalFileName)}' -> '{FileSystem.EscapeFileName(pathToCheck)}'");
               return pathToCheck;
             }

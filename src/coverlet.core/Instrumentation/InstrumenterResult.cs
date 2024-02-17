@@ -64,8 +64,8 @@ namespace Coverlet.Core.Instrumentation
   {
     public Document()
     {
-      Lines = new Dictionary<int, Line>();
-      Branches = new Dictionary<BranchKey, Branch>();
+      Lines = [];
+      Branches = [];
     }
 
     [DataMember]
@@ -101,8 +101,8 @@ namespace Coverlet.Core.Instrumentation
   {
     public InstrumenterResult()
     {
-      Documents = new Dictionary<string, Document>();
-      HitCandidates = new List<HitCandidate>();
+      Documents = [];
+      HitCandidates = [];
     }
 
     [DataMember]

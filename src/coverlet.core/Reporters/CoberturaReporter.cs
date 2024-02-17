@@ -23,42 +23,42 @@ namespace Coverlet.Core.Reporters
 
     public string Report(CoverageResult result, ISourceRootTranslator sourceRootTranslator)
     {
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
 
       CoverageDetails lineCoverage = summary.CalculateLineCoverage(result.Modules);
       CoverageDetails branchCoverage = summary.CalculateBranchCoverage(result.Modules);
 
-      var xml = new XDocument();
-      var coverage = new XElement("coverage");
+      XDocument xml = new();
+      XElement coverage = new("coverage");
       coverage.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(result.Modules).Percent / 100).ToString(CultureInfo.InvariantCulture)));
       coverage.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(result.Modules).Percent / 100).ToString(CultureInfo.InvariantCulture)));
       coverage.Add(new XAttribute("version", "1.9"));
       coverage.Add(new XAttribute("timestamp", (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds));
 
-      var sources = new XElement("sources");
+      XElement sources = new("sources");
 
-      var absolutePaths = new List<string>();
+      List<string> absolutePaths = [];
       if (!result.Parameters.DeterministicReport)
       {
         absolutePaths = GetBasePaths(result.Modules, result.Parameters.UseSourceLink).ToList();
         absolutePaths.ForEach(x => sources.Add(new XElement("source", x)));
       }
 
-      var packages = new XElement("packages");
+      XElement packages = new("packages");
       foreach (KeyValuePair<string, Documents> module in result.Modules)
       {
-        var package = new XElement("package");
+        XElement package = new("package");
         package.Add(new XAttribute("name", Path.GetFileNameWithoutExtension(module.Key)));
         package.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(module.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
         package.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(module.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
         package.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(module.Value)));
 
-        var classes = new XElement("classes");
+        XElement classes = new("classes");
         foreach (KeyValuePair<string, Classes> document in module.Value)
         {
           foreach (KeyValuePair<string, Methods> cls in document.Value)
           {
-            var @class = new XElement("class");
+            XElement @class = new("class");
             @class.Add(new XAttribute("name", cls.Key));
             string fileName;
             if (!result.Parameters.DeterministicReport)
@@ -74,8 +74,8 @@ namespace Coverlet.Core.Reporters
             @class.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(cls.Value).Percent / 100).ToString(CultureInfo.InvariantCulture)));
             @class.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(cls.Value)));
 
-            var classLines = new XElement("lines");
-            var methods = new XElement("methods");
+            XElement classLines = new("lines");
+            XElement methods = new("methods");
 
             foreach (KeyValuePair<string, Method> meth in cls.Value)
             {
@@ -83,32 +83,32 @@ namespace Coverlet.Core.Reporters
               if (meth.Value.Lines.Count == 0)
                 continue;
 
-              var method = new XElement("method");
+              XElement method = new("method");
               method.Add(new XAttribute("name", meth.Key.Split(':').Last().Split('(').First()));
               method.Add(new XAttribute("signature", "(" + meth.Key.Split(':').Last().Split('(').Last()));
               method.Add(new XAttribute("line-rate", (summary.CalculateLineCoverage(meth.Value.Lines).Percent / 100).ToString(CultureInfo.InvariantCulture)));
               method.Add(new XAttribute("branch-rate", (summary.CalculateBranchCoverage(meth.Value.Branches).Percent / 100).ToString(CultureInfo.InvariantCulture)));
               method.Add(new XAttribute("complexity", summary.CalculateCyclomaticComplexity(meth.Value.Branches)));
 
-              var lines = new XElement("lines");
+              XElement lines = new("lines");
               foreach (KeyValuePair<int, int> ln in meth.Value.Lines)
               {
                 bool isBranchPoint = meth.Value.Branches.Any(b => b.Line == ln.Key);
-                var line = new XElement("line");
+                XElement line = new("line");
                 line.Add(new XAttribute("number", ln.Key.ToString()));
                 line.Add(new XAttribute("hits", ln.Value.ToString()));
                 line.Add(new XAttribute("branch", isBranchPoint.ToString()));
 
                 if (isBranchPoint)
                 {
-                  var branches = meth.Value.Branches.Where(b => b.Line == ln.Key).ToList();
+                  List<BranchInfo> branches = meth.Value.Branches.Where(b => b.Line == ln.Key).ToList();
                   CoverageDetails branchInfoCoverage = summary.CalculateBranchCoverage(branches);
                   line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent.ToString(CultureInfo.InvariantCulture)}% ({branchInfoCoverage.Covered.ToString(CultureInfo.InvariantCulture)}/{branchInfoCoverage.Total.ToString(CultureInfo.InvariantCulture)})"));
-                  var conditions = new XElement("conditions");
-                  var byOffset = branches.GroupBy(b => b.Offset).ToDictionary(b => b.Key, b => b.ToList());
+                  XElement conditions = new("conditions");
+                  Dictionary<int, List<BranchInfo>> byOffset = branches.GroupBy(b => b.Offset).ToDictionary(b => b.Key, b => b.ToList());
                   foreach (KeyValuePair<int, List<BranchInfo>> entry in byOffset)
                   {
-                    var condition = new XElement("condition");
+                    XElement condition = new("condition");
                     condition.Add(new XAttribute("number", entry.Key));
                     condition.Add(new XAttribute("type", entry.Value.Count > 2 ? "switch" : "jump")); // Just guessing here
                     condition.Add(new XAttribute("coverage", $"{summary.CalculateBranchCoverage(entry.Value).Percent.ToString(CultureInfo.InvariantCulture)}%"));
@@ -145,8 +145,8 @@ namespace Coverlet.Core.Reporters
       coverage.Add(packages);
       xml.Add(coverage);
 
-      using var stream = new MemoryStream();
-      using var streamWriter = new StreamWriter(stream, new UTF8Encoding(false));
+      using MemoryStream stream = new();
+      using StreamWriter streamWriter = new(stream, new UTF8Encoding(false));
       xml.Save(streamWriter);
 
       return Encoding.UTF8.GetString(stream.ToArray());
@@ -184,14 +184,13 @@ namespace Coverlet.Core.Reporters
 
       return modules.Values.SelectMany(k => k.Keys).GroupBy(Directory.GetDirectoryRoot).Select(group =>
       {
-        var splittedPaths = group.Select(absolutePath => absolutePath.Split(Path.DirectorySeparatorChar))
-                                       .OrderBy(absolutePath => absolutePath.Length).ToList();
+        List<string[]> splittedPaths = [.. group.Select(absolutePath => absolutePath.Split(Path.DirectorySeparatorChar)).OrderBy(absolutePath => absolutePath.Length)];
         if (splittedPaths.Count == 1)
         {
           return group.Key;
         }
 
-        var basePathFragments = new List<string>();
+        List<string> basePathFragments = [];
         bool stopSearch = false;
         splittedPaths[0].Select((value, index) => (value, index)).ToList().ForEach(fragmentIndexPair =>
               {
@@ -224,9 +223,7 @@ namespace Coverlet.Core.Reporters
       {
         if (path.StartsWith(basePath))
         {
-#pragma warning disable IDE0057 // Use range operator
           return path.Substring(basePath.Length);
-#pragma warning restore IDE0057 // Use range operator
         }
       }
       return path;

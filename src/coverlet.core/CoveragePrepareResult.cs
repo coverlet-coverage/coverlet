@@ -33,7 +33,7 @@ namespace Coverlet.Core
 
     public static Stream Serialize(CoveragePrepareResult instrumentState)
     {
-      var ms = new MemoryStream();
+      MemoryStream ms = new();
       new DataContractSerializer(typeof(CoveragePrepareResult)).WriteObject(ms, instrumentState);
       ms.Position = 0;
       return ms;

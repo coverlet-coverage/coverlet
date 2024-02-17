@@ -30,7 +30,7 @@ namespace Coverlet.Collector.Tests
     {
       _mockDataCollectionSink = new Mock<DataCollectionSink>();
       _mockDataCollectionLogger = new Mock<DataCollectionLogger>();
-      var testcase = new TestCase { Id = Guid.NewGuid() };
+      TestCase testcase = new() { Id = Guid.NewGuid() };
       _dataCollectionContext = new DataCollectionContext(testcase);
       _testPlatformLogger = new TestPlatformLogger(_mockDataCollectionLogger.Object, _dataCollectionContext);
       _eqtTrace = new TestPlatformEqtTrace();
@@ -94,9 +94,9 @@ namespace Coverlet.Collector.Tests
     [Fact]
     public void OnDisposeAttachmentManagerShouldCleanUpReportDirectory()
     {
-      var mockDirectoryHelper = new Mock<IDirectoryHelper>();
+      Mock<IDirectoryHelper> mockDirectoryHelper = new();
       mockDirectoryHelper.Setup(x => x.Exists(It.Is<string>(y => y.Contains(@"E:\temp")))).Returns(true);
-      using (var attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger, _eqtTrace, @"E:\temp", _mockFileHelper.Object, mockDirectoryHelper.Object, _mockCountDownEvent.Object))
+      using (AttachmentManager attachmentManager = new(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger, _eqtTrace, @"E:\temp", _mockFileHelper.Object, mockDirectoryHelper.Object, _mockCountDownEvent.Object))
       {
         _mockDataCollectionSink.Raise(x => x.SendFileCompleted += null, new AsyncCompletedEventArgs(null, false, null));
       }
@@ -107,10 +107,10 @@ namespace Coverlet.Collector.Tests
     [Fact]
     public void OnDisposeAttachmentManagerShouldThrowCoverletDataCollectorExceptionIfUnableToCleanUpReportDirectory()
     {
-      var mockDirectoryHelper = new Mock<IDirectoryHelper>();
+      Mock<IDirectoryHelper> mockDirectoryHelper = new();
       mockDirectoryHelper.Setup(x => x.Exists(It.Is<string>(y => y.Contains(@"E:\temp")))).Returns(true);
       mockDirectoryHelper.Setup(x => x.Delete(It.Is<string>(y => y.Contains(@"E:\temp")), true)).Throws(new FileNotFoundException());
-      using (var attachmentManager = new AttachmentManager(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger, _eqtTrace, @"E:\temp", _mockFileHelper.Object, mockDirectoryHelper.Object, _mockCountDownEvent.Object))
+      using (AttachmentManager attachmentManager = new(_mockDataCollectionSink.Object, _dataCollectionContext, _testPlatformLogger, _eqtTrace, @"E:\temp", _mockFileHelper.Object, mockDirectoryHelper.Object, _mockCountDownEvent.Object))
       {
         _mockDataCollectionSink.Raise(x => x.SendFileCompleted += null, new AsyncCompletedEventArgs(null, false, null));
       }

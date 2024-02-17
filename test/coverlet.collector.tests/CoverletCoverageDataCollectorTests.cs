@@ -42,7 +42,7 @@ namespace Coverlet.Collector.Tests
       _mockLogger = new Mock<DataCollectionLogger>();
       _configurationElement = null;
 
-      var testcase = new TestCase { Id = Guid.NewGuid() };
+      TestCase testcase = new() { Id = Guid.NewGuid() };
       _dataCollectionContext = new DataCollectionContext(testcase);
       _context = new DataCollectionEnvironmentContext(_dataCollectionContext);
       _mockCoverageWrapper = new Mock<ICoverageWrapper>();
@@ -58,7 +58,7 @@ namespace Coverlet.Collector.Tests
       Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
       {
         IServiceCollection serviceCollection = new ServiceCollection();
-        var fileSystem = new Mock<IFileSystem>();
+        Mock<IFileSystem> fileSystem = new();
         fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "abc.dll");
         serviceCollection.AddTransient(_ => fileSystem.Object);
 
@@ -77,9 +77,10 @@ namespace Coverlet.Collector.Tests
               _mockDataCollectionSink.Object,
               _mockLogger.Object,
               _context);
-      IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
-
-      sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
+      IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>
+      {
+        { "TestSources", new List<string> { "abc.dll" } }
+      };
 
       _mockDataCollectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
 
@@ -92,7 +93,7 @@ namespace Coverlet.Collector.Tests
       Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
       {
         IServiceCollection serviceCollection = new ServiceCollection();
-        var fileSystem = new Mock<IFileSystem>();
+        Mock<IFileSystem> fileSystem = new();
         fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "abc.dll");
         serviceCollection.AddTransient(_ => fileSystem.Object);
 
@@ -119,7 +120,7 @@ namespace Coverlet.Collector.Tests
                                     new Mock<ILogger>().Object,
                                     new Mock<ISourceRootTranslator>().Object);
 
-      var parameters = new CoverageParameters
+      CoverageParameters parameters = new()
       {
         IncludeFilters = null,
         IncludeDirectories = null,
@@ -131,7 +132,7 @@ namespace Coverlet.Collector.Tests
         UseSourceLink = true
       };
 
-      var coverage = new Coverage("abc.dll", parameters, It.IsAny<ILogger>(), instrumentationHelper, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new Mock<ICecilSymbolHelper>().Object);
+      Coverage coverage = new("abc.dll", parameters, It.IsAny<ILogger>(), instrumentationHelper, new Mock<IFileSystem>().Object, new Mock<ISourceRootTranslator>().Object, new Mock<ICecilSymbolHelper>().Object);
 
       sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
       _mockCoverageWrapper.Setup(x => x.CreateCoverage(It.IsAny<CoverletSettings>(), It.IsAny<ILogger>(), It.IsAny<IInstrumentationHelper>(), It.IsAny<IFileSystem>(), It.IsAny<ISourceRootTranslator>(), It.IsAny<ICecilSymbolHelper>())).Returns(coverage);
@@ -173,8 +174,10 @@ namespace Coverlet.Collector.Tests
       File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
       File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-      IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
-      sessionStartProperties.Add("TestSources", new List<string> { Path.Combine(directory.FullName, Path.GetFileName(module)) });
+      IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>
+      {
+        { "TestSources", new List<string> { Path.Combine(directory.FullName, Path.GetFileName(module)) } }
+      };
 
       _mockDataCollectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
       _mockDataCollectionEvents.Raise(x => x.SessionEnd += null, new SessionEndEventArgs());
@@ -193,7 +196,7 @@ namespace Coverlet.Collector.Tests
       Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
       {
         IServiceCollection serviceCollection = new ServiceCollection();
-        var fileSystem = new Mock<IFileSystem>();
+        Mock<IFileSystem> fileSystem = new();
         fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "Test");
         serviceCollection.AddTransient(_ => fileSystem.Object);
 
@@ -209,7 +212,7 @@ namespace Coverlet.Collector.Tests
       _coverletCoverageDataCollector = new CoverletCoverageCollector(new TestPlatformEqtTrace(), new CoverageWrapper(), _mockCountDownEventFactory.Object, serviceCollectionFactory);
 
       IList<IReporter> reporters = formats.Split(',').Select(f => new ReporterFactory(f).CreateReporter()).Where(x => x != null).ToList();
-      var mockDataCollectionSink = new Mock<DataCollectionSink>();
+      Mock<DataCollectionSink> mockDataCollectionSink = new();
       mockDataCollectionSink.Setup(m => m.SendFileAsync(It.IsAny<FileTransferInformation>())).Callback<FileTransferInformation>(fti =>
       {
         reporters.Remove(reporters.First(x =>
@@ -217,7 +220,7 @@ namespace Coverlet.Collector.Tests
               );
       });
 
-      var doc = new XmlDocument();
+      XmlDocument doc = new();
       XmlElement root = doc.CreateElement("Configuration");
       XmlElement element = doc.CreateElement("Format");
       element.AppendChild(doc.CreateTextNode(formats));
@@ -232,7 +235,7 @@ namespace Coverlet.Collector.Tests
           _mockLogger.Object,
           _context);
 
-      var sessionStartProperties = new Dictionary<string, object> { { "TestSources", new List<string> { "Test" } } };
+      Dictionary<string, object> sessionStartProperties = new() { { "TestSources", new List<string> { "Test" } } };
 
       _mockDataCollectionEvents.Raise(x => x.SessionStart += null, new SessionStartEventArgs(sessionStartProperties));
       _mockDataCollectionEvents.Raise(x => x.SessionEnd += null, new SessionEndEventArgs());
@@ -247,7 +250,7 @@ namespace Coverlet.Collector.Tests
       Func<TestPlatformEqtTrace, TestPlatformLogger, string, IServiceCollection> serviceCollectionFactory = (TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, string testModule) =>
       {
         IServiceCollection serviceCollection = new ServiceCollection();
-        var fileSystem = new Mock<IFileSystem>();
+        Mock<IFileSystem> fileSystem = new();
         fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns((string testLib) => testLib == "abc.dll");
         serviceCollection.AddTransient(_ => fileSystem.Object);
 
@@ -267,9 +270,10 @@ namespace Coverlet.Collector.Tests
               _mockDataCollectionSink.Object,
               _mockLogger.Object,
               _context);
-      IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>();
-
-      sessionStartProperties.Add("TestSources", new List<string> { "abc.dll" });
+      IDictionary<string, object> sessionStartProperties = new Dictionary<string, object>
+      {
+        { "TestSources", new List<string> { "abc.dll" } }
+      };
 
       _mockCoverageWrapper.Setup(x => x.PrepareModules(It.IsAny<Coverage>())).Throws(new FileNotFoundException());
 

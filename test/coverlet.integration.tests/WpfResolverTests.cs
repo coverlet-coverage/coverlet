@@ -27,9 +27,9 @@ namespace Coverlet.Integration.Tests
       Assert.True(DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
       string assemblyLocation = Directory.GetFiles(testBinaryPath, "coverlet.tests.projectsample.wpf8.dll", SearchOption.AllDirectories).First();
 
-      var mockLogger = new Mock<ILogger>();
-      var resolver = new NetCoreSharedFrameworkResolver(assemblyLocation, mockLogger.Object);
-      var compilationLibrary = new CompilationLibrary(
+      Mock<ILogger> mockLogger = new();
+      NetCoreSharedFrameworkResolver resolver = new(assemblyLocation, mockLogger.Object);
+      CompilationLibrary compilationLibrary = new(
           "package",
           "System.Drawing",
           "0.0.0.0",
@@ -38,7 +38,7 @@ namespace Coverlet.Integration.Tests
           Enumerable.Empty<Dependency>(),
           true);
 
-      var assemblies = new List<string>();
+      List<string> assemblies = new();
       Assert.True(resolver.TryResolveAssemblyPaths(compilationLibrary, assemblies),
           "sample assembly shall be resolved");
       Assert.NotEmpty(assemblies);

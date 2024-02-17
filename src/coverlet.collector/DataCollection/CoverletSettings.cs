@@ -88,7 +88,7 @@ namespace Coverlet.Collector.DataCollection
 
     public override string ToString()
     {
-      var builder = new StringBuilder();
+      StringBuilder builder = new();
 
       builder.AppendFormat("TestModule: '{0}', ", TestModule);
       builder.AppendFormat("IncludeFilters: '{0}', ", string.Join(",", IncludeFilters ?? Enumerable.Empty<string>()));

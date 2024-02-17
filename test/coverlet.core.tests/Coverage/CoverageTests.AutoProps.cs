@@ -32,7 +32,7 @@ namespace Coverlet.Core.Tests
                   persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
-        }, new string[] { path, skipAutoProps.ToString() });
+        }, [path, skipAutoProps.ToString()]);
 
         if (skipAutoProps)
         {
@@ -80,7 +80,7 @@ namespace Coverlet.Core.Tests
                   persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
-        }, new string[] { path, skipAutoProps.ToString() });
+        }, [path, skipAutoProps.ToString()]);
 
         if (skipAutoProps)
         {
@@ -123,7 +123,7 @@ namespace Coverlet.Core.Tests
                       persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
-        }, new string[] { path, skipAutoProps.ToString() });
+        }, [path, skipAutoProps.ToString()]);
 
         if (skipAutoProps)
         {
@@ -165,7 +165,7 @@ namespace Coverlet.Core.Tests
             persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
-        }, new string[] { path, skipAutoProps.ToString() });
+        }, [path, skipAutoProps.ToString()]);
 
         if (skipAutoProps)
         {

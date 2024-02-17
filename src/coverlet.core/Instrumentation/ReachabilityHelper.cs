@@ -582,11 +582,11 @@ namespace Coverlet.Core.Instrumentation.Reachability
     /// </summary>
     private static void DetermineHeadReachability(ImmutableArray<BasicBlock> blocks)
     {
-      var blockLookup = blocks.ToImmutableDictionary(b => b.StartOffset);
+      ImmutableDictionary<int, BasicBlock> blockLookup = blocks.ToImmutableDictionary(b => b.StartOffset);
 
       BasicBlock headBlock = blockLookup[0];
 
-      var knownLive = ImmutableStack.Create(headBlock);
+      ImmutableStack<BasicBlock> knownLive = ImmutableStack.Create(headBlock);
 
       while (!knownLive.IsEmpty)
       {
@@ -633,7 +633,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
     {
       // every branch-like instruction starts or stops a block
       ILookup<int, BranchInstruction> branchInstrLocs = branches.ToLookup(i => i.Offset);
-      var branchInstrOffsets = branchInstrLocs.Select(k => k.Key).ToImmutableHashSet();
+      ImmutableHashSet<int> branchInstrOffsets = branchInstrLocs.Select(k => k.Key).ToImmutableHashSet();
 
       // every target that might be branched to starts or stops a block
       ImmutableHashSet<int>.Builder branchTargetOffsetsBuilder = ImmutableHashSet.CreateBuilder<int>();

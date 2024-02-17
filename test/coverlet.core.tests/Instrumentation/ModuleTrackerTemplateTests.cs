@@ -36,11 +36,11 @@ namespace Coverlet.Core.Tests.Instrumentation
     {
       FunctionExecutor.Run(() =>
       {
-        using var ctx = new TrackerContext();
-        ModuleTrackerTemplate.HitsArray = new[] { 1, 2, 0, 3 };
+        using TrackerContext ctx = new();
+        ModuleTrackerTemplate.HitsArray = [1, 2, 0, 3];
         ModuleTrackerTemplate.UnloadModule(null, null);
 
-        int[] expectedHitsArray = new[] { 1, 2, 0, 3 };
+        int[] expectedHitsArray = [1, 2, 0, 3];
         Assert.Equal(expectedHitsArray, ReadHitsFile());
 
         return s_success;
@@ -52,9 +52,9 @@ namespace Coverlet.Core.Tests.Instrumentation
     {
       FunctionExecutor.Run(() =>
       {
-        using var ctx = new TrackerContext();
-        WriteHitsFile(new[] { 1, 2, 3 });
-        ModuleTrackerTemplate.HitsArray = new[] { 1 };
+        using TrackerContext ctx = new();
+        WriteHitsFile([1, 2, 3]);
+        ModuleTrackerTemplate.HitsArray = [1];
         Assert.Throws<InvalidOperationException>(() => ModuleTrackerTemplate.UnloadModule(null, null));
         return s_success;
       });
@@ -65,12 +65,12 @@ namespace Coverlet.Core.Tests.Instrumentation
     {
       FunctionExecutor.Run(() =>
       {
-        var threads = new List<Thread>();
-        using var ctx = new TrackerContext();
-        ModuleTrackerTemplate.HitsArray = new[] { 0, 0, 0, 0 };
+        List<Thread> threads = new();
+        using TrackerContext ctx = new();
+        ModuleTrackerTemplate.HitsArray = [0, 0, 0, 0];
         for (int i = 0; i < ModuleTrackerTemplate.HitsArray.Length; ++i)
         {
-          var t = new Thread(HitIndex);
+          Thread t = new(HitIndex);
           threads.Add(t);
           t.Start(i);
         }
@@ -81,7 +81,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         }
 
         ModuleTrackerTemplate.UnloadModule(null, null);
-        int[] expectedHitsArray = new[] { 4, 3, 2, 1 };
+        int[] expectedHitsArray = [4, 3, 2, 1];
         Assert.Equal(expectedHitsArray, ReadHitsFile());
 
         static void HitIndex(object index)
@@ -102,14 +102,14 @@ namespace Coverlet.Core.Tests.Instrumentation
     {
       FunctionExecutor.Run(() =>
       {
-        using var ctx = new TrackerContext();
-        ModuleTrackerTemplate.HitsArray = new[] { 0, 3, 2, 1 };
+        using TrackerContext ctx = new();
+        ModuleTrackerTemplate.HitsArray = [0, 3, 2, 1];
         ModuleTrackerTemplate.UnloadModule(null, null);
 
-        ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
+        ModuleTrackerTemplate.HitsArray = [0, 1, 2, 3];
         ModuleTrackerTemplate.UnloadModule(null, null);
 
-        int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
+        int[] expectedHitsArray = [0, 4, 4, 4];
         Assert.Equal(expectedHitsArray, ReadHitsFile());
 
         return s_success;
@@ -121,19 +121,19 @@ namespace Coverlet.Core.Tests.Instrumentation
     {
       FunctionExecutor.Run(async () =>
       {
-        using var ctx = new TrackerContext();
-        using var mutex = new Mutex(
+        using TrackerContext ctx = new();
+        using Mutex mutex = new(
               true, Path.GetFileNameWithoutExtension(ModuleTrackerTemplate.HitsFilePath) + "_Mutex", out bool createdNew);
         Assert.True(createdNew);
 
-        ModuleTrackerTemplate.HitsArray = new[] { 0, 1, 2, 3 };
-        var unloadTask = Task.Run(() => ModuleTrackerTemplate.UnloadModule(null, null));
+        ModuleTrackerTemplate.HitsArray = [0, 1, 2, 3];
+        Task unloadTask = Task.Run(() => ModuleTrackerTemplate.UnloadModule(null, null));
 
 #pragma warning disable xUnit1031 // Do not use blocking task operations in test method
         Assert.False(unloadTask.Wait(5));
 #pragma warning restore xUnit1031 // Do not use blocking task operations in test method
 
-        WriteHitsFile(new[] { 0, 3, 2, 1 });
+        WriteHitsFile([0, 3, 2, 1]);
 
 #pragma warning disable xUnit1031 // Do not use blocking task operations in test method
         Assert.False(unloadTask.Wait(5));
@@ -142,7 +142,7 @@ namespace Coverlet.Core.Tests.Instrumentation
         mutex.ReleaseMutex();
         await unloadTask;
 
-        int[] expectedHitsArray = new[] { 0, 4, 4, 4 };
+        int[] expectedHitsArray = [0, 4, 4, 4];
         Assert.Equal(expectedHitsArray, ReadHitsFile());
 
         return 0;
@@ -152,8 +152,8 @@ namespace Coverlet.Core.Tests.Instrumentation
 
     private static void WriteHitsFile(int[] hitsArray)
     {
-      using var fs = new FileStream(ModuleTrackerTemplate.HitsFilePath, FileMode.Create);
-      using var bw = new BinaryWriter(fs);
+      using FileStream fs = new(ModuleTrackerTemplate.HitsFilePath, FileMode.Create);
+      using BinaryWriter bw = new(fs);
       bw.Write(hitsArray.Length);
       foreach (int hitCount in hitsArray)
       {
@@ -163,8 +163,8 @@ namespace Coverlet.Core.Tests.Instrumentation
 
     private static int[] ReadHitsFile()
     {
-      using var fs = new FileStream(ModuleTrackerTemplate.HitsFilePath, FileMode.Open);
-      using var br = new BinaryReader(fs);
+      using FileStream fs = new(ModuleTrackerTemplate.HitsFilePath, FileMode.Open);
+      using BinaryReader br = new(fs);
       int[] hitsArray = new int[br.ReadInt32()];
       for (int i = 0; i < hitsArray.Length; ++i)
       {

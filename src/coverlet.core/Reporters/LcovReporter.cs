@@ -23,8 +23,8 @@ namespace Coverlet.Core.Reporters
         throw new NotSupportedException("Deterministic report not supported by lcov reporter");
       }
 
-      var summary = new CoverageSummary();
-      var lcov = new List<string>();
+      CoverageSummary summary = new();
+      List<string> lcov = [];
 
       foreach (KeyValuePair<string, Documents> module in result.Modules)
       {

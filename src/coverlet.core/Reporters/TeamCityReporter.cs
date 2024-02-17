@@ -24,13 +24,13 @@ namespace Coverlet.Core.Reporters
       }
 
       // Calculate coverage
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
       CoverageDetails overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
       CoverageDetails overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
       CoverageDetails overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
 
       // Report coverage
-      var stringBuilder = new StringBuilder();
+      StringBuilder stringBuilder = new();
       OutputLineCoverage(overallLineCoverage, stringBuilder);
       OutputBranchCoverage(overallBranchCoverage, stringBuilder);
       OutputMethodCoverage(overallMethodCoverage, stringBuilder);

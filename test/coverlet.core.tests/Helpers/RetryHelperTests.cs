@@ -16,7 +16,7 @@ namespace Coverlet.Core.Helpers.Tests
         return TimeSpan.FromMilliseconds(1);
       };
 
-      var target = new RetryTarget();
+      RetryTarget target = new();
       try
       {
         new RetryHelper().Retry(() => target.TargetActionThrows(), retryStrategy, 7);
@@ -33,12 +33,12 @@ namespace Coverlet.Core.Helpers.Tests
       int currentSleep = 6;
       Func<TimeSpan> retryStrategy = () =>
       {
-        var sleep = TimeSpan.FromMilliseconds(currentSleep);
+        TimeSpan sleep = TimeSpan.FromMilliseconds(currentSleep);
         currentSleep *= 2;
         return sleep;
       };
 
-      var target = new RetryTarget();
+      RetryTarget target = new();
       try
       {
         new RetryHelper().Retry(() => target.TargetActionThrows(), retryStrategy, 3);
@@ -58,7 +58,7 @@ namespace Coverlet.Core.Helpers.Tests
         return TimeSpan.FromMilliseconds(1);
       };
 
-      var target = new RetryTarget();
+      RetryTarget target = new();
       new RetryHelper().Retry(() => target.TargetActionThrows5Times(), retryStrategy, 20);
       Assert.Equal(6, target.Calls);
     }

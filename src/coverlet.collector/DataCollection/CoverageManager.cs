@@ -28,7 +28,7 @@ namespace Coverlet.Collector.DataCollection
         : this(settings,
         settings.ReportFormats.Select(format =>
         {
-          var reporterFactory = new ReporterFactory(format);
+          ReporterFactory reporterFactory = new(format);
           if (!reporterFactory.IsValidFormat())
           {
             eqtTrace.Warning($"Invalid report format '{format}'");

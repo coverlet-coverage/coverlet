@@ -17,17 +17,17 @@ namespace Coverlet.Core.Reporters.Tests
     [Fact]
     public void TestReport()
     {
-      var result = new CoverageResult();
+      CoverageResult result = new();
       result.Parameters = new CoverageParameters();
       result.Identifier = Guid.NewGuid().ToString();
 
       result.Modules = new Modules();
       result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
 
-      var reporter = new OpenCoverReporter();
+      OpenCoverReporter reporter = new();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
       Assert.NotEmpty(report);
-      var doc = XDocument.Load(new StringReader(report));
+      XDocument doc = XDocument.Load(new StringReader(report));
       Assert.Empty(doc.Descendants().Attributes("sequenceCoverage").Where(v => v.Value != "33.33"));
       Assert.Empty(doc.Descendants().Attributes("branchCoverage").Where(v => v.Value != "25"));
       Assert.Empty(doc.Descendants().Attributes("nPathComplexity").Where(v => v.Value != "4"));
@@ -36,7 +36,7 @@ namespace Coverlet.Core.Reporters.Tests
     [Fact]
     public void TestFilesHaveUniqueIdsOverMultipleModules()
     {
-      var result = new CoverageResult();
+      CoverageResult result = new();
       result.Parameters = new CoverageParameters();
       result.Identifier = Guid.NewGuid().ToString();
 
@@ -44,7 +44,7 @@ namespace Coverlet.Core.Reporters.Tests
       result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
       result.Modules.Add("Some.Other.Module", CreateSecondDocuments());
 
-      var reporter = new OpenCoverReporter();
+      OpenCoverReporter reporter = new();
       string xml = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
       Assert.NotEqual(string.Empty, xml);
 
@@ -55,7 +55,7 @@ namespace Coverlet.Core.Reporters.Tests
     [Fact]
     public void TestLineBranchCoverage()
     {
-      var result = new CoverageResult
+      CoverageResult result = new()
       {
         Identifier = Guid.NewGuid().ToString(),
         Modules = new Modules { { "Coverlet.Core.Reporters.Tests", CreateBranchCoverageDocuments() } },
@@ -80,7 +80,7 @@ namespace Coverlet.Core.Reporters.Tests
     [Fact]
     public void OpenCoverTestReportDoesNotContainBom()
     {
-      var result = new CoverageResult
+      CoverageResult result = new()
       {
         Identifier = Guid.NewGuid().ToString(),
         Modules = new Modules { { "Coverlet.Core.Reporters.Tests", CreateBranchCoverageDocuments() } },
@@ -95,27 +95,27 @@ namespace Coverlet.Core.Reporters.Tests
 
     private static Documents CreateFirstDocuments()
     {
-      var lines = new Lines();
+      Lines lines = new();
       lines.Add(1, 1);
       lines.Add(2, 0);
       lines.Add(3, 0);
 
-      var branches = new Branches();
+      Branches branches = new();
       branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 });
       branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 23, EndOffset = 27, Path = 1, Ordinal = 2 });
       branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 41, Path = 0, Ordinal = 3 });
       branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 44, Path = 1, Ordinal = 4 });
 
-      var methods = new Methods();
+      Methods methods = new();
       string methodString = "System.Void Coverlet.Core.Reporters.Tests.OpenCoverReporterTests.TestReport()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
-      var classes = new Classes();
+      Classes classes = new();
       classes.Add("Coverlet.Core.Reporters.Tests.OpenCoverReporterTests", methods);
 
-      var documents = new Documents();
+      Documents documents = new();
       documents.Add("doc.cs", classes);
 
       return documents;
@@ -123,19 +123,19 @@ namespace Coverlet.Core.Reporters.Tests
 
     private static Documents CreateSecondDocuments()
     {
-      var lines = new Lines();
+      Lines lines = new();
       lines.Add(1, 1);
       lines.Add(2, 0);
 
-      var methods = new Methods();
+      Methods methods = new();
       string methodString = "System.Void Some.Other.Module.TestClass.TestMethod()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
 
-      var classes2 = new Classes();
+      Classes classes2 = new();
       classes2.Add("Some.Other.Module.TestClass", methods);
 
-      var documents = new Documents();
+      Documents documents = new();
       documents.Add("TestClass.cs", classes2);
 
       return documents;
@@ -143,16 +143,16 @@ namespace Coverlet.Core.Reporters.Tests
 
     private static Documents CreateBranchCoverageDocuments()
     {
-      var lines = new Lines
-            {
+      Lines lines = new()
+      {
                 {1, 1},
                 {2, 1},
                 {3, 1},
                 {4, 1},
             };
 
-      var branches = new Branches
-            {
+      Branches branches = new()
+      {
                 // Two branches, no coverage
                 new BranchInfo {Line = 1, Hits = 0, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1},
                 new BranchInfo {Line = 1, Hits = 0, Offset = 23, EndOffset = 27, Path = 1, Ordinal = 2},
@@ -172,8 +172,8 @@ namespace Coverlet.Core.Reporters.Tests
             };
 
       const string methodString = "System.Void Coverlet.Core.Reporters.Tests.OpenCoverReporterTests.TestReport()";
-      var methods = new Methods
-            {
+      Methods methods = new()
+      {
                 {methodString, new Method { Lines = lines, Branches = branches}}
             };
 

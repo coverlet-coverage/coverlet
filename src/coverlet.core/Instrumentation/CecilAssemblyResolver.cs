@@ -171,8 +171,8 @@ namespace Coverlet.Core.Instrumentation
         throw new AssemblyResolutionException(name);
       }
 
-      using var contextJsonReader = new DependencyContextJsonReader();
-      var libraries = new Dictionary<string, Lazy<AssemblyDefinition>>();
+      using DependencyContextJsonReader contextJsonReader = new();
+      Dictionary<string, Lazy<AssemblyDefinition>> libraries = [];
 
       foreach (string fileName in Directory.GetFiles(Path.GetDirectoryName(_modulePath), "*.deps.json"))
       {
@@ -220,7 +220,7 @@ namespace Coverlet.Core.Instrumentation
 
   internal class NetCoreSharedFrameworkResolver : ICompilationAssemblyResolver
   {
-    private readonly List<string> _aspNetSharedFrameworkDirs = new();
+    private readonly List<string> _aspNetSharedFrameworkDirs = [];
     private readonly ILogger _logger;
 
     public NetCoreSharedFrameworkResolver(string modulePath, ILogger logger)
@@ -235,19 +235,17 @@ namespace Coverlet.Core.Instrumentation
         return;
       }
 
-      var reader = new RuntimeConfigurationReader(runtimeConfigFile);
+      RuntimeConfigurationReader reader = new(runtimeConfigFile);
       IEnumerable<(string Name, string Version)> referencedFrameworks = reader.GetFrameworks();
       string runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location);
       string runtimeRootPath = Path.GetFullPath(Path.Combine(runtimePath!, "..", ".."));
       foreach ((string frameworkName, string frameworkVersion) in referencedFrameworks)
       {
-        var semVersion = NuGetVersion.Parse(frameworkVersion);
-        var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
+        NuGetVersion semVersion = NuGetVersion.Parse(frameworkVersion);
+        DirectoryInfo directory = new(Path.Combine(runtimeRootPath, frameworkName));
         string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
-#pragma warning disable IDE0057 // Use range operator
         uint latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
             .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
-#pragma warning restore IDE0057 // Use range operator
         _aspNetSharedFrameworkDirs.Add(Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0]);
       }
 
@@ -298,12 +296,12 @@ namespace Coverlet.Core.Instrumentation
     {
       string jsonString = File.ReadAllText(_runtimeConfigFile);
 
-      var documentOptions = new JsonDocumentOptions
+      JsonDocumentOptions documentOptions = new()
       {
         CommentHandling = JsonCommentHandling.Skip
       };
 
-      using var configuration = JsonDocument.Parse(jsonString, documentOptions);
+      using JsonDocument configuration = JsonDocument.Parse(jsonString, documentOptions);
 
       JsonElement rootElement = configuration.RootElement;
 

@@ -26,7 +26,7 @@ namespace Coverlet.Core.Tests
 
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AwaitUsing.cs")

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Instrumentation;
@@ -18,18 +17,18 @@ namespace coverlet.tests.projectsample.aspmvcrazor.tests
     public void TestInstrument_NetCoreSharedFrameworkResolver()
     {
       Assembly assembly = GetType().Assembly;
-      var mockLogger = new Mock<ILogger>();
-      var resolver = new NetCoreSharedFrameworkResolver(assembly.Location, mockLogger.Object);
-      var compilationLibrary = new CompilationLibrary(
+      Mock<ILogger> mockLogger = new();
+      NetCoreSharedFrameworkResolver resolver = new(assembly.Location, mockLogger.Object);
+      CompilationLibrary compilationLibrary = new(
           "package",
           "Microsoft.AspNetCore.Mvc.Razor",
           "0.0.0.0",
           "sha512-not-relevant",
-          Enumerable.Empty<string>(),
-          Enumerable.Empty<Dependency>(),
+          [],
+          [],
           true);
 
-      var assemblies = new List<string>();
+      List<string> assemblies = [];
       Assert.True(resolver.TryResolveAssemblyPaths(compilationLibrary, assemblies),
           "sample assembly shall be resolved");
       Assert.NotEmpty(assemblies);

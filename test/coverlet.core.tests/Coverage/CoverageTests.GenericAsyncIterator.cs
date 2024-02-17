@@ -25,7 +25,7 @@ namespace Coverlet.Core.Tests
                     List<int> res = await (Task<List<int>>)instance.Issue1383();
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
             .Document("Instrumentation.GenericAsyncIterator.cs")

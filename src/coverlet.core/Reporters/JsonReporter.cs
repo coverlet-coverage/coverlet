@@ -17,7 +17,7 @@ namespace Coverlet.Core.Reporters
 
     public string Report(CoverageResult result, ISourceRootTranslator _)
     {
-      var options = new JsonSerializerOptions
+      JsonSerializerOptions options = new()
       {
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         IncludeFields = true,

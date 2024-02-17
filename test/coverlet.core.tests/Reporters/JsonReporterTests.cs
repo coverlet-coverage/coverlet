@@ -30,30 +30,30 @@ namespace Coverlet.Core.Reporters.Tests
     [Fact]
     public void TestReport()
     {
-      var result = new CoverageResult
+      CoverageResult result = new()
       {
         Identifier = Guid.NewGuid().ToString()
       };
 
-      var lines = new Lines();
+      Lines lines = new();
       lines.Add(1, 1);
       lines.Add(2, 0);
 
-      var methods = new Methods();
+      Methods methods = new();
       string methodString = "System.Void Coverlet.Core.Reporters.Tests.JsonReporterTests.TestReport()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
 
-      var classes = new Classes();
+      Classes classes = new();
       classes.Add("Coverlet.Core.Reporters.Tests.JsonReporterTests", methods);
 
-      var documents = new Documents();
+      Documents documents = new();
       documents.Add("doc.cs", classes);
 
       result.Modules = new Modules();
       result.Modules.Add("module", documents);
 
-      var reporter = new JsonReporter();
+      JsonReporter reporter = new();
       Assert.Equal(s_resultModule, reporter.Report(result, new Mock<ISourceRootTranslator>().Object), ignoreLineEndingDifferences: true);
     }
   }

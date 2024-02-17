@@ -23,7 +23,9 @@ namespace Coverlet.Integration.Tests
     private string InstallTool(string projectPath)
     {
       _ = DotnetCli($"tool install coverlet.console --version {GetPackageVersion("*console*.nupkg")} --tool-path \"{Path.Combine(projectPath, "coverletTool")}\"", out string standardOutput, out _, projectPath);
-      Assert.Contains("was successfully installed.", standardOutput);
+      string[] expectedMessage = ["was successfully installed" , "Skipping NuGet package signature verification"];
+      Assert.Contains(standardOutput.Split('.')[0], expectedMessage);
+
       return Path.Combine(projectPath, "coverletTool", "coverlet");
     }
 

@@ -155,7 +155,7 @@ namespace Coverlet.Core.Instrumentation
         }
       }
 
-      _result.BranchesInCompiledGeneratedClass = _branchesInCompiledGeneratedClass == null ? Array.Empty<string>() : _branchesInCompiledGeneratedClass.ToArray();
+      _result.BranchesInCompiledGeneratedClass = _branchesInCompiledGeneratedClass == null ? [] : [.. _branchesInCompiledGeneratedClass];
 
       return _result;
     }
@@ -187,15 +187,15 @@ namespace Coverlet.Core.Instrumentation
     private void CreateReachabilityHelper()
     {
       using Stream stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read);
-      using var resolver = new NetstandardAwareAssemblyResolver(_module, _logger);
+      using NetstandardAwareAssemblyResolver resolver = new(_module, _logger);
       resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
-      var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
+      ReaderParameters parameters = new() { ReadSymbols = true, AssemblyResolver = resolver };
       if (_isCoreLibrary)
       {
         parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
       }
 
-      using var module = ModuleDefinition.ReadModule(stream, parameters);
+      using ModuleDefinition module = ModuleDefinition.ReadModule(stream, parameters);
       _reachabilityHelper = ReachabilityHelper.CreateForModule(module, _doesNotReturnAttributes, _logger);
     }
 
@@ -204,15 +204,15 @@ namespace Coverlet.Core.Instrumentation
       CreateReachabilityHelper();
 
       using Stream stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite);
-      using var resolver = new NetstandardAwareAssemblyResolver(_module, _logger);
+      using NetstandardAwareAssemblyResolver resolver = new(_module, _logger);
       resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
-      var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
+      ReaderParameters parameters = new() { ReadSymbols = true, AssemblyResolver = resolver };
       if (_isCoreLibrary)
       {
         parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
       }
 
-      using var module = ModuleDefinition.ReadModule(stream, parameters);
+      using ModuleDefinition module = ModuleDefinition.ReadModule(stream, parameters);
       foreach (CustomAttribute customAttribute in module.Assembly.CustomAttributes)
       {
         if (IsExcludeAttribute(customAttribute))
@@ -278,24 +278,24 @@ namespace Coverlet.Core.Instrumentation
         // the UnloadModule method of the custom tracker type. This avoids loops between the static
         // initialization of the custom tracker and the static initialization of the hosting AppDomain
         // (which for the core library case will be instrumented code).
-        var eventArgsType = new TypeReference(nameof(System), nameof(EventArgs), module, module.TypeSystem.CoreLibrary);
-        var customTrackerUnloadModule = new MethodReference(nameof(ModuleTrackerTemplate.UnloadModule), module.TypeSystem.Void, _customTrackerTypeDef);
+        TypeReference eventArgsType = new(nameof(System), nameof(EventArgs), module, module.TypeSystem.CoreLibrary);
+        MethodReference customTrackerUnloadModule = new(nameof(ModuleTrackerTemplate.UnloadModule), module.TypeSystem.Void, _customTrackerTypeDef);
         customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(module.TypeSystem.Object));
         customTrackerUnloadModule.Parameters.Add(new ParameterDefinition(eventArgsType));
 
-        var appContextType = new TypeReference(nameof(System), nameof(AppContext), module, module.TypeSystem.CoreLibrary);
+        TypeReference appContextType = new(nameof(System), nameof(AppContext), module, module.TypeSystem.CoreLibrary);
         MethodDefinition onProcessExitMethod = new MethodReference("OnProcessExit", module.TypeSystem.Void, appContextType).Resolve();
         ILProcessor onProcessExitIl = onProcessExitMethod.Body.GetILProcessor();
 
         // Put the OnProcessExit body inside try/finally to ensure the call to the UnloadModule.
         Instruction lastInst = onProcessExitMethod.Body.Instructions.Last();
-        var firstNullParam = Instruction.Create(OpCodes.Ldnull);
-        var secondNullParam = Instruction.Create(OpCodes.Ldnull);
-        var callUnload = Instruction.Create(OpCodes.Call, customTrackerUnloadModule);
+        Instruction firstNullParam = Instruction.Create(OpCodes.Ldnull);
+        Instruction secondNullParam = Instruction.Create(OpCodes.Ldnull);
+        Instruction callUnload = Instruction.Create(OpCodes.Call, customTrackerUnloadModule);
         onProcessExitIl.InsertAfter(lastInst, firstNullParam);
         onProcessExitIl.InsertAfter(firstNullParam, secondNullParam);
         onProcessExitIl.InsertAfter(secondNullParam, callUnload);
-        var endFinally = Instruction.Create(OpCodes.Endfinally);
+        Instruction endFinally = Instruction.Create(OpCodes.Endfinally);
         onProcessExitIl.InsertAfter(callUnload, endFinally);
         Instruction ret = onProcessExitIl.Create(OpCodes.Ret);
         Instruction leaveAfterFinally = onProcessExitIl.Create(OpCodes.Leave, ret);
@@ -311,7 +311,7 @@ namespace Coverlet.Core.Instrumentation
             onProcessExitIl.InsertAfter(prevInst, leaveBodyInstAfterFinally);
           }
         }
-        var handler = new ExceptionHandler(ExceptionHandlerType.Finally)
+        ExceptionHandler handler = new(ExceptionHandlerType.Finally)
         {
           TryStart = onProcessExitIl.Body.Instructions.First(),
           TryEnd = firstNullParam,
@@ -327,19 +327,22 @@ namespace Coverlet.Core.Instrumentation
 
     private void AddCustomModuleTrackerToModule(ModuleDefinition module)
     {
-      using (var coverletInstrumentationAssembly = AssemblyDefinition.ReadAssembly(typeof(ModuleTrackerTemplate).Assembly.Location))
+      using (AssemblyDefinition coverletInstrumentationAssembly = AssemblyDefinition.ReadAssembly(typeof(ModuleTrackerTemplate).Assembly.Location))
       {
         TypeDefinition moduleTrackerTemplate = coverletInstrumentationAssembly.MainModule.GetType(
             "Coverlet.Core.Instrumentation", nameof(ModuleTrackerTemplate));
 
         _customTrackerTypeDef = new TypeDefinition(
-            "Coverlet.Core.Instrumentation.Tracker", Path.GetFileNameWithoutExtension(module.Name) + "_" + _identifier, moduleTrackerTemplate.Attributes);
-
-        _customTrackerTypeDef.BaseType = module.TypeSystem.Object;
+            "Coverlet.Core.Instrumentation.Tracker", Path.GetFileNameWithoutExtension(module.Name) + "_" + _identifier, moduleTrackerTemplate.Attributes)
+        {
+          BaseType = module.TypeSystem.Object
+        };
         foreach (FieldDefinition fieldDef in moduleTrackerTemplate.Fields)
         {
-          var fieldClone = new FieldDefinition(fieldDef.Name, fieldDef.Attributes, fieldDef.FieldType);
-          fieldClone.FieldType = module.ImportReference(fieldDef.FieldType);
+          FieldDefinition fieldClone = new(fieldDef.Name, fieldDef.Attributes, fieldDef.FieldType)
+          {
+            FieldType = module.ImportReference(fieldDef.FieldType)
+          };
 
           _customTrackerTypeDef.Fields.Add(fieldClone);
 
@@ -355,7 +358,7 @@ namespace Coverlet.Core.Instrumentation
 
         foreach (MethodDefinition methodDef in moduleTrackerTemplate.Methods)
         {
-          var methodOnCustomType = new MethodDefinition(methodDef.Name, methodDef.Attributes, methodDef.ReturnType);
+          MethodDefinition methodOnCustomType = new(methodDef.Name, methodDef.Attributes, methodDef.ReturnType);
 
           foreach (ParameterDefinition parameter in methodDef.Parameters)
           {
@@ -385,7 +388,7 @@ namespace Coverlet.Core.Instrumentation
               else
               {
                 // Move to the custom type
-                var updatedMethodReference = new MethodReference(methodReference.Name, methodReference.ReturnType, _customTrackerTypeDef);
+                MethodReference updatedMethodReference = new(methodReference.Name, methodReference.ReturnType, _customTrackerTypeDef);
                 foreach (ParameterDefinition parameter in methodReference.Parameters)
                   updatedMethodReference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, module.ImportReference(parameter.ParameterType)));
 
@@ -464,9 +467,9 @@ namespace Coverlet.Core.Instrumentation
         MethodDefinition actualMethod = method;
         IEnumerable<CustomAttribute> customAttributes = method.CustomAttributes;
         if (_instrumentationHelper.IsLocalMethod(method.Name))
-#pragma warning disable IDE0057 // Use range operator
+        { 
           actualMethod = methods.FirstOrDefault(m => m.Name == method.Name.Split('>')[0].Substring(1)) ?? method;
-#pragma warning restore IDE0057 // Use range operator
+        }
 
         if (actualMethod.IsGetter || actualMethod.IsSetter)
         {
@@ -497,8 +500,8 @@ namespace Coverlet.Core.Instrumentation
         }
         else
         {
-          (_excludedLambdaMethods ??= new List<string>()).AddRange(CollectLambdaMethodsInsideLocalFunction(method));
-          _excludedMethodSections ??= new List<(SequencePoint firstSequencePoint, SequencePoint lastSequencePoint)>();
+          (_excludedLambdaMethods ??= []).AddRange(CollectLambdaMethodsInsideLocalFunction(method));
+          _excludedMethodSections ??= [];
           AnalyzeCompileGeneratedTypesForExcludedMethod(method);
           CacheExcludedMethodSection(method);
         }
@@ -527,7 +530,7 @@ namespace Coverlet.Core.Instrumentation
 
       if (!string.IsNullOrEmpty(sourceFile) && _excludedFilesHelper.Exclude(sourceFile))
       {
-        if (!(_excludedSourceFiles ??= new List<string>()).Contains(sourceFile))
+        if (!(_excludedSourceFiles ??= []).Contains(sourceFile))
         {
           _excludedSourceFiles.Add(sourceFile);
         }
@@ -642,8 +645,11 @@ namespace Coverlet.Core.Instrumentation
     {
       if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(sequencePoint.Document.Url), out Document document))
       {
-        document = new Document { Path = _sourceRootTranslator.ResolveFilePath(sequencePoint.Document.Url) };
-        document.Index = _result.Documents.Count;
+        document = new Document
+        {
+          Path = _sourceRootTranslator.ResolveFilePath(sequencePoint.Document.Url),
+          Index = _result.Documents.Count
+        };
         _result.Documents.Add(document.Path, document);
       }
 
@@ -662,12 +668,15 @@ namespace Coverlet.Core.Instrumentation
     {
       if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(branchPoint.Document), out Document document))
       {
-        document = new Document { Path = _sourceRootTranslator.ResolveFilePath(branchPoint.Document) };
-        document.Index = _result.Documents.Count;
+        document = new Document
+        {
+          Path = _sourceRootTranslator.ResolveFilePath(branchPoint.Document),
+          Index = _result.Documents.Count
+        };
         _result.Documents.Add(document.Path, document);
       }
 
-      var key = new BranchKey(branchPoint.StartLine, (int)branchPoint.Ordinal);
+      BranchKey key = new(branchPoint.StartLine, (int)branchPoint.Ordinal);
       if (!document.Branches.ContainsKey(key))
       {
         document.Branches.Add(
@@ -688,7 +697,7 @@ namespace Coverlet.Core.Instrumentation
         {
           if (_branchesInCompiledGeneratedClass == null)
           {
-            _branchesInCompiledGeneratedClass = new List<string>();
+            _branchesInCompiledGeneratedClass = [];
           }
 
           if (!_branchesInCompiledGeneratedClass.Contains(method.FullName))
@@ -726,8 +735,8 @@ namespace Coverlet.Core.Instrumentation
         _customTrackerRecordHitMethod.Parameters.Add(new ParameterDefinition("hitLocationIndex", ParameterAttributes.None, method.Module.TypeSystem.Int32));
       }
 
-      var indxInstr = Instruction.Create(OpCodes.Ldc_I4, hitEntryIndex);
-      var callInstr = Instruction.Create(OpCodes.Call, _customTrackerRecordHitMethod);
+      Instruction indxInstr = Instruction.Create(OpCodes.Ldc_I4, hitEntryIndex);
+      Instruction callInstr = Instruction.Create(OpCodes.Call, _customTrackerRecordHitMethod);
 
       processor.InsertBefore(instruction, callInstr);
       processor.InsertBefore(callInstr, indxInstr);
@@ -922,9 +931,7 @@ namespace Coverlet.Core.Instrumentation
           {
             continue;
           }
-#pragma warning disable IDE0057 // Use range operator
           _matcher.AddInclude(Path.IsPathRooted(excludeRule) ? excludeRule.Substring(Path.GetPathRoot(excludeRule).Length) : excludeRule);
-#pragma warning restore IDE0057 // Use range operator
         }
       }
     }
@@ -935,9 +942,7 @@ namespace Coverlet.Core.Instrumentation
         return false;
 
       // We strip out drive because it doesn't work with globbing
-#pragma warning disable IDE0057 // Use range operator
       return _matcher.Match(Path.IsPathRooted(sourceFile) ? sourceFile.Substring(Path.GetPathRoot(sourceFile).Length) : sourceFile).HasMatches;
-#pragma warning restore IDE0057 // Use range operator
     }
   }
 }

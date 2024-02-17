@@ -38,7 +38,7 @@ namespace Coverlet.Collector.Tests
     [Fact]
     public void ParseShouldSelectFirstTestModuleFromTestModulesList()
     {
-      var testModules = new List<string> { "module1.dll", "module2.dll", "module3.dll" };
+      List<string> testModules = ["module1.dll", "module2.dll", "module3.dll"];
 
       CoverletSettings coverletSettings = _coverletSettingsParser.Parse(null, testModules);
 
@@ -65,8 +65,8 @@ namespace Coverlet.Collector.Tests
         string excludeAttributes,
         string doesNotReturnAttributes)
     {
-      var testModules = new List<string> { "abc.dll" };
-      var doc = new XmlDocument();
+      List<string> testModules = ["abc.dll"];
+      XmlDocument doc = new();
       XmlElement configElement = doc.CreateElement("Configuration");
       CreateCoverletNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName, includeFilters);
       CreateCoverletNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName, excludeFilters);
@@ -110,8 +110,8 @@ namespace Coverlet.Collector.Tests
     [Fact]
     public void ParseShouldCorrectlyParseConfigurationElementWithNullInnerText()
     {
-      var testModules = new List<string> { "abc.dll" };
-      var doc = new XmlDocument();
+      List<string> testModules = ["abc.dll"];
+      XmlDocument doc = new();
       XmlElement configElement = doc.CreateElement("Configuration");
       CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.IncludeFiltersElementName);
       CreateCoverletNullInnerTextNodes(doc, configElement, CoverletConstants.ExcludeFiltersElementName);
@@ -132,8 +132,8 @@ namespace Coverlet.Collector.Tests
     [Fact]
     public void ParseShouldCorrectlyParseConfigurationElementWithNullElements()
     {
-      var testModules = new List<string> { "abc.dll" };
-      var doc = new XmlDocument();
+      List<string> testModules = ["abc.dll"];
+      XmlDocument doc = new();
       XmlElement configElement = doc.CreateElement("Configuration");
 
       CoverletSettings coverletSettings = _coverletSettingsParser.Parse(configElement, testModules);
@@ -161,8 +161,8 @@ namespace Coverlet.Collector.Tests
     [InlineData(",json,\t,\r\n,cobertura", 2, new[] { "json", "cobertura" })]
     public void ParseShouldCorrectlyParseMultipleFormats(string formats, int formatsCount, string[] expectedReportFormats)
     {
-      var testModules = new List<string> { "abc.dll" };
-      var doc = new XmlDocument();
+      List<string> testModules = ["abc.dll"];
+      XmlDocument doc = new();
       XmlElement configElement = doc.CreateElement("Configuration");
       CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
 
@@ -177,9 +177,9 @@ namespace Coverlet.Collector.Tests
     [InlineData("")]
     public void ParseShouldUseDefaultFormatWhenNoFormatSpecified(string formats)
     {
-      var testModules = new List<string> { "abc.dll" };
+      List<string> testModules = ["abc.dll"];
       string defaultFormat = CoverletConstants.DefaultReportFormat;
-      var doc = new XmlDocument();
+      XmlDocument doc = new();
       XmlElement configElement = doc.CreateElement("Configuration");
       CreateCoverletNodes(doc, configElement, CoverletConstants.ReportFormatElementName, formats);
 

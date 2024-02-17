@@ -30,7 +30,7 @@ namespace Coverlet.Integration.Tests
         throw new DirectoryNotFoundException($"Package directory '{packagesPath}' not found, run 'dotnet pack' on repository root");
       }
 
-      var files = Directory.GetFiles(packagesPath, filter).ToList();
+      System.Collections.Generic.List<string> files = [.. Directory.GetFiles(packagesPath, filter)];
       if (files.Count == 0)
       {
         throw new InvalidOperationException($"Could not find any package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was called.");
@@ -42,9 +42,9 @@ namespace Coverlet.Integration.Tests
       else
       {
         using Stream pkg = File.OpenRead(files[0]);
-        using var reader = new PackageArchiveReader(pkg);
+        using PackageArchiveReader reader = new(pkg);
         using Stream nuspecStream = reader.GetNuspec();
-        var manifest = Manifest.ReadFrom(nuspecStream, false);
+        Manifest manifest = Manifest.ReadFrom(nuspecStream, false);
 #pragma warning disable CS8603 // Possible null reference return.
         return manifest.Metadata.Version.OriginalVersion;
 #pragma warning restore CS8603 // Possible null reference return.
@@ -83,7 +83,7 @@ namespace Coverlet.Integration.Tests
     {
       Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}\nWorkingDirectory: {workingDirectory}");
       // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?view=net-7.0&redirectedfrom=MSDN#System_Diagnostics_Process_StandardOutput
-      var commandProcess = new Process();
+      Process commandProcess = new();
       commandProcess.StartInfo.FileName = command;
       commandProcess.StartInfo.Arguments = arguments;
       commandProcess.StartInfo.WorkingDirectory = workingDirectory;
@@ -311,10 +311,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
 
     private protected void PinSDK(ClonedTemplateProject project, string sdkVersion)
     {
-      if (project is null)
-      {
-        throw new ArgumentNullException(nameof(project));
-      }
+      ArgumentNullException.ThrowIfNull(project);
 
       if (string.IsNullOrEmpty(sdkVersion))
       {
@@ -355,19 +352,17 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
     public bool IsMultipleTargetFramework()
     {
       using FileStream? csprojStream = File.OpenRead(ProjectFileNamePath);
-      var xml = XDocument.Load(csprojStream);
+      XDocument xml = XDocument.Load(csprojStream);
       return xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFramework") == null;
     }
 
     public string[] GetTargetFrameworks()
     {
       using FileStream? csprojStream = File.OpenRead(ProjectFileNamePath);
-      var xml = XDocument.Load(csprojStream);
+      XDocument xml = XDocument.Load(csprojStream);
       XElement element = xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFramework") ?? xml.Element("Project")!.Element("PropertyGroup")!.Element("TargetFrameworks")!;
-      if (element is null)
-      {
-        throw new ArgumentNullException("No 'TargetFramework' neither 'TargetFrameworks' found in csproj file");
-      }
+
+      ArgumentNullException.ThrowIfNull(element, "No 'TargetFramework' neither 'TargetFrameworks' found in csproj file");
       return element.Value.Split(";");
     }
 

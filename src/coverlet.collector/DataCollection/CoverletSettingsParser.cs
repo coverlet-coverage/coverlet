@@ -29,7 +29,7 @@ namespace Coverlet.Collector.DataCollection
     /// <returns>Coverlet settings</returns>
     public CoverletSettings Parse(XmlElement configurationElement, IEnumerable<string> testModules)
     {
-      var coverletSettings = new CoverletSettings
+      CoverletSettings coverletSettings = new()
       {
         TestModule = ParseTestModule(testModules)
       };
@@ -87,7 +87,7 @@ namespace Coverlet.Collector.DataCollection
     /// <returns>Report formats</returns>
     private static string[] ParseReportFormats(XmlElement configurationElement)
     {
-      string[] formats = Array.Empty<string>();
+      string[] formats = [];
       if (configurationElement != null)
       {
         XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
@@ -126,7 +126,7 @@ namespace Coverlet.Collector.DataCollection
     /// <returns>Filters to exclude</returns>
     private static string[] ParseExcludeFilters(XmlElement configurationElement)
     {
-      var excludeFilters = new List<string> { CoverletConstants.DefaultExcludeFilter };
+      List<string> excludeFilters = new() { CoverletConstants.DefaultExcludeFilter };
 
       if (configurationElement != null)
       {

@@ -31,7 +31,7 @@ namespace Coverlet.Core.Tests
                     res = await (Task<int>)instance.WrappingValueTaskAsTask();
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncAwaitValueTask.cs")

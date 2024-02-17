@@ -104,7 +104,7 @@ namespace Coverlet.Collector.DataCollection
       {
         if (_enableExceptionLog)
         {
-          var exceptionString = new StringBuilder();
+          StringBuilder exceptionString = new();
           exceptionString.AppendFormat("{0}: Failed to get Instrumentation class for assembly '{1}' with error: {2}",
               CoverletConstants.InProcDataCollectorName, assembly, ex);
           exceptionString.AppendLine();

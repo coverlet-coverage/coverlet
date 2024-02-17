@@ -27,11 +27,11 @@ namespace Coverlet.Core.Tests
                     catch (Exception) { }
                     return Task.CompletedTask;
 
-                  }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+                  }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -63,7 +63,7 @@ namespace Coverlet.Core.Tests
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -95,7 +95,7 @@ namespace Coverlet.Core.Tests
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -127,7 +127,7 @@ namespace Coverlet.Core.Tests
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -159,7 +159,7 @@ namespace Coverlet.Core.Tests
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -187,11 +187,11 @@ namespace Coverlet.Core.Tests
                         catch (Exception) { }
                         return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -219,11 +219,11 @@ namespace Coverlet.Core.Tests
                         catch (Exception) { }
                         return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -251,11 +251,11 @@ namespace Coverlet.Core.Tests
                         catch (Exception) { }
                         return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -283,11 +283,11 @@ namespace Coverlet.Core.Tests
                         catch (Exception) { }
                         return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => new string[] { "DoesNotReturnAttribute" });
+                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 

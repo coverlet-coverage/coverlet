@@ -11,14 +11,14 @@ namespace Coverlet.Core.Instrumentation.Tests
     [Fact]
     public void TestEnsureDocumentsPropertyNotNull()
     {
-      var result = new InstrumenterResult();
+      InstrumenterResult result = new();
       Assert.NotNull(result.Documents);
     }
 
     [Fact]
     public void TestEnsureLinesAndBranchesPropertyNotNull()
     {
-      var document = new Document();
+      Document document = new();
       Assert.NotNull(document.Lines);
       Assert.NotNull(document.Branches);
     }
@@ -26,13 +26,13 @@ namespace Coverlet.Core.Instrumentation.Tests
     [Fact]
     public void CoveragePrepareResult_SerializationRoundTrip()
     {
-      var cpr = new CoveragePrepareResult();
+      CoveragePrepareResult cpr = new();
       cpr.Identifier = "Identifier";
       cpr.MergeWith = "MergeWith";
       cpr.ModuleOrDirectory = "Module";
       cpr.UseSourceLink = true;
 
-      var ir = new InstrumenterResult();
+      InstrumenterResult ir = new();
       ir.HitsFilePath = "HitsFilePath";
       ir.Module = "Module";
       ir.ModulePath = "ModulePath";
@@ -41,7 +41,7 @@ namespace Coverlet.Core.Instrumentation.Tests
       ir.HitCandidates.Add(new HitCandidate(true, 1, 2, 3));
       ir.HitCandidates.Add(new HitCandidate(false, 4, 5, 6));
 
-      var doc = new Document()
+      Document doc = new()
       {
         Index = 0,
         Path = "Path0"
@@ -66,7 +66,7 @@ namespace Coverlet.Core.Instrumentation.Tests
         Path = 0
       });
 
-      var doc2 = new Document()
+      Document doc2 = new()
       {
         Index = 1,
         Path = "Path1"
@@ -93,9 +93,9 @@ namespace Coverlet.Core.Instrumentation.Tests
 
       ir.Documents.Add("key", doc);
       ir.Documents.Add("key2", doc2);
-      cpr.Results = new InstrumenterResult[] { ir };
+      cpr.Results = [ir];
 
-      var roundTrip = CoveragePrepareResult.Deserialize(CoveragePrepareResult.Serialize(cpr));
+      CoveragePrepareResult roundTrip = CoveragePrepareResult.Deserialize(CoveragePrepareResult.Serialize(cpr));
 
       Assert.Equal(cpr.Identifier, roundTrip.Identifier);
       Assert.Equal(cpr.MergeWith, roundTrip.MergeWith);

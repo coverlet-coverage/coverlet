@@ -13,17 +13,17 @@ namespace Coverlet.Core.Tests
 
     public CoverageResultTests()
     {
-      var lines = new Lines();
+      Lines lines = new();
       lines.Add(1, 1);
       lines.Add(2, 1);
       lines.Add(3, 1);
-      var branches = new Branches();
+      Branches branches = new();
       branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
       branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 });
       branches.Add(new BranchInfo { Line = 2, Hits = 0, Offset = 1, Path = 0, Ordinal = 1 });
 
       // System.Void Coverlet.Core.Tests.CoverageResultTests::CoverageResultTests - 3/3 100% line 2/3 66.7% branch coverage
-      var methods = new Methods();
+      Methods methods = new();
       string methodString = "System.Void Coverlet.Core.Tests.CoverageResultTests::CoverageResultTests()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
@@ -38,13 +38,13 @@ namespace Coverlet.Core.Tests
                 {2, 0},
             };
 
-      var classes = new Classes();
+      Classes classes = new();
       classes.Add("Coverlet.Core.Tests.CoverageResultTests", methods);
       // Methods  - 1/2 (50%)
       // Lines    - 3/5 (60%)
       // Branches - 2/3 (66.67%)
 
-      var documents = new Documents();
+      Documents documents = new();
       documents.Add("doc.cs", classes);
 
       _modules = new Modules();
@@ -54,11 +54,11 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestGetThresholdTypesBelowThresholdLine()
     {
-      var result = new CoverageResult();
+      CoverageResult result = new();
       result.Modules = _modules;
 
-      var summary = new CoverageSummary();
-      var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
+      CoverageSummary summary = new();
+      Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new()
             {
                 {  ThresholdTypeFlags.Line, 90 },
                 {  ThresholdTypeFlags.Method, 10 },
@@ -74,11 +74,11 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestGetThresholdTypesBelowThresholdMethod()
     {
-      var result = new CoverageResult();
+      CoverageResult result = new();
       result.Modules = _modules;
 
-      var summary = new CoverageSummary();
-      var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
+      CoverageSummary summary = new();
+      Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new()
             {
                 {  ThresholdTypeFlags.Line, 50 },
                 {  ThresholdTypeFlags.Method, 75 },
@@ -94,11 +94,11 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestGetThresholdTypesBelowThresholdBranch()
     {
-      var result = new CoverageResult();
+      CoverageResult result = new();
       result.Modules = _modules;
 
-      var summary = new CoverageSummary();
-      var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
+      CoverageSummary summary = new();
+      Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new()
             {
                 {  ThresholdTypeFlags.Line, 50 },
                 {  ThresholdTypeFlags.Method, 50 },
@@ -114,11 +114,11 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestGetThresholdTypesBelowThresholdAllGood()
     {
-      var result = new CoverageResult();
+      CoverageResult result = new();
       result.Modules = _modules;
 
-      var summary = new CoverageSummary();
-      var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
+      CoverageSummary summary = new();
+      Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new()
             {
                 {  ThresholdTypeFlags.Line, 50 },
                 {  ThresholdTypeFlags.Method, 50 },
@@ -134,11 +134,11 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestGetThresholdTypesBelowThresholdAllFail()
     {
-      var result = new CoverageResult();
+      CoverageResult result = new();
       result.Modules = _modules;
 
-      var summary = new CoverageSummary();
-      var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
+      CoverageSummary summary = new();
+      Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new()
             {
                 {  ThresholdTypeFlags.Line, 100 },
                 {  ThresholdTypeFlags.Method, 100 },
@@ -155,11 +155,11 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestGetThresholdTypesBelowThresholdWhenNoModuleInstrumented()
     {
-      var result = new CoverageResult();
+      CoverageResult result = new();
       result.Modules = new Modules();
 
-      var summary = new CoverageSummary();
-      var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()
+      CoverageSummary summary = new();
+      Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues = new()
             {
                 {  ThresholdTypeFlags.Line, 80 },
                 {  ThresholdTypeFlags.Method, 80 },

@@ -83,7 +83,7 @@ namespace Coverlet.Core.Instrumentation
     {
       // The same module can be unloaded multiple times in the same process via different app domains.
       // Use a global mutex to ensure no concurrent access.
-      using var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew);
+      using Mutex mutex = new(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew);
       if (!createdNew)
       {
         mutex.WaitOne();
@@ -102,8 +102,8 @@ namespace Coverlet.Core.Instrumentation
           bool failedToCreateNewHitsFile = false;
           try
           {
-            using var fs = new FileStream(HitsFilePath, FileMode.CreateNew);
-            using var bw = new BinaryWriter(fs);
+            using FileStream fs = new(HitsFilePath, FileMode.CreateNew);
+            using BinaryWriter bw = new(fs);
             bw.Write(hitsArray.Length);
             foreach (int hitCount in hitsArray)
             {
@@ -120,9 +120,9 @@ namespace Coverlet.Core.Instrumentation
           {
             // Update the number of hits by adding value on disk with the ones on memory.
             // This path should be triggered only in the case of multiple AppDomain unloads.
-            using var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-            using var br = new BinaryReader(fs);
-            using var bw = new BinaryWriter(fs);
+            using FileStream fs = new(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            using BinaryReader br = new(fs);
+            using BinaryWriter bw = new(fs);
             int hitsLength = br.ReadInt32();
             WriteLog($"Current hits found '{hitsLength}'");
 
@@ -167,14 +167,14 @@ namespace Coverlet.Core.Instrumentation
     {
       if (s_enableLog)
       {
-        var currentAssembly = Assembly.GetExecutingAssembly();
-        var location = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(currentAssembly.Location), "TrackersHitsLog"));
+        Assembly currentAssembly = Assembly.GetExecutingAssembly();
+        DirectoryInfo location = new(Path.Combine(Path.GetDirectoryName(currentAssembly.Location), "TrackersHitsLog"));
         location.Create();
         string logFile = Path.Combine(location.FullName, $"{Path.GetFileName(currentAssembly.Location)}_{DateTime.UtcNow.Ticks}_{s_sessionId}.txt");
-        using (var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-        using (var log = new FileStream(logFile, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
-        using (var logWriter = new StreamWriter(log))
-        using (var br = new BinaryReader(fs))
+        using (FileStream fs = new(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+        using (FileStream log = new(logFile, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
+        using (StreamWriter logWriter = new(log))
+        using (BinaryReader br = new(fs))
         {
           int hitsLength = br.ReadInt32();
           for (int i = 0; i < hitsLength; ++i)

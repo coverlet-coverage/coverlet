@@ -20,10 +20,10 @@ namespace Coverlet.Core.Reporters.Tests
       _result.Parameters = new CoverageParameters();
       _result.Identifier = Guid.NewGuid().ToString();
 
-      var lines = new Lines { { 1, 1 }, { 2, 0 } };
+      Lines lines = new() { { 1, 1 }, { 2, 0 } };
 
-      var branches = new Branches
-            {
+      Branches branches = new()
+      {
                 new BranchInfo
                 {
                     Line = 1,
@@ -53,15 +53,15 @@ namespace Coverlet.Core.Reporters.Tests
                 }
             };
 
-      var methods = new Methods();
+      Methods methods = new();
       string methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestReport()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
-      var classes = new Classes { { "Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods } };
+      Classes classes = new() { { "Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods } };
 
-      var documents = new Documents { { "doc.cs", classes } };
+      Documents documents = new() { { "doc.cs", classes } };
 
       _result.Modules = new Modules { { "module", documents } };
     }

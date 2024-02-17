@@ -78,7 +78,7 @@ namespace Coverlet.Core.Tests
 
     public static Document Method(this Document document, string methodName)
     {
-      var methodDoc = new Document { Path = document.Path, Index = document.Index };
+      Document methodDoc = new() { Path = document.Path, Index = document.Index };
 
       if (!document.Lines.Any() && !document.Branches.Any())
       {
@@ -147,7 +147,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentNullException(nameof(document));
       }
 
-      var builder = new StringBuilder();
+      StringBuilder builder = new();
       foreach (KeyValuePair<BranchKey, Branch> branch in document.Branches)
       {
         builder.AppendLine($"({branch.Value.Number}, {branch.Value.Ordinal}, {branch.Value.Hits}),");
@@ -169,7 +169,7 @@ namespace Coverlet.Core.Tests
         return document;
       }
 
-      var branchesToCover = new List<string>(lines.Select(b => $"[line {b.line} ordinal {b.ordinal}]"));
+      List<string> branchesToCover = new(lines.Select(b => $"[line {b.line} ordinal {b.ordinal}]"));
       foreach (KeyValuePair<BranchKey, Branch> branch in document.Branches)
       {
         foreach ((int lineToCheck, int ordinalToCheck, int expectedHits) in lines)
@@ -267,7 +267,7 @@ namespace Coverlet.Core.Tests
         throw new ArgumentException("to cannot be lower than from");
       }
 
-      var lines = new List<int>();
+      List<int> lines = new();
       foreach (KeyValuePair<int, Line> line in document.Lines)
       {
         if (line.Value.Number >= from && line.Value.Number <= to && line.Value.Hits > 0)
@@ -298,7 +298,7 @@ namespace Coverlet.Core.Tests
         return document;
       }
 
-      var linesToCover = new List<int>(lines.Select(l => l.line));
+      List<int> linesToCover = new(lines.Select(l => l.line));
       foreach (KeyValuePair<int, Line> line in document.Lines)
       {
         foreach ((int lineToCheck, int expectedHits) in lines)
@@ -346,7 +346,7 @@ namespace Coverlet.Core.Tests
         return document;
       }
 
-      var linesToCover = new List<int>(lines);
+      List<int> linesToCover = new(lines);
       foreach (KeyValuePair<int, Line> line in document.Lines)
       {
         foreach (int lineToCheck in lines)
@@ -430,7 +430,7 @@ namespace Coverlet.Core.Tests
         return document;
       }
 
-      var instrumentedLines = document.Lines.Select(l => l.Value.Number).ToHashSet();
+      HashSet<int> instrumentedLines = document.Lines.Select(l => l.Value.Number).ToHashSet();
 
       IEnumerable<int> missing = lines.Where(l => !instrumentedLines.Contains(l));
 

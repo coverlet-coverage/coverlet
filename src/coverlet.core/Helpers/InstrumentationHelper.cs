@@ -49,11 +49,11 @@ namespace Coverlet.Core.Helpers
         moduleDirectory = Directory.GetCurrentDirectory();
       }
 
-      var dirs = new List<string>()
-            {
+      List<string> dirs =
+            [
                 // Add the test assembly's directory.
                 moduleDirectory
-            };
+            ];
 
       // Prepare all the directories we probe for modules.
       foreach (string directory in directories)
@@ -73,7 +73,7 @@ namespace Coverlet.Core.Helpers
       }
 
       // The module's name must be unique.
-      var uniqueModules = new HashSet<string>();
+      HashSet<string> uniqueModules = [];
 
       if (!includeTestAssembly && !isAppDirectory)
         uniqueModules.Add(Path.GetFileName(moduleOrAppDirectory));
@@ -87,7 +87,7 @@ namespace Coverlet.Core.Helpers
     {
       embedded = false;
       using Stream moduleStream = _fileSystem.OpenRead(module);
-      using var peReader = new PEReader(moduleStream);
+      using PEReader peReader = new(moduleStream);
       foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
       {
         if (entry.Type == DebugDirectoryEntryType.CodeView)
@@ -128,7 +128,7 @@ namespace Coverlet.Core.Helpers
     public bool EmbeddedPortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources)
     {
       using Stream moduleStream = _fileSystem.OpenRead(module);
-      using var peReader = new PEReader(moduleStream);
+      using PEReader peReader = new(moduleStream);
       foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
       {
         if (entry.Type == DebugDirectoryEntryType.EmbeddedPortablePdb)
@@ -151,14 +151,14 @@ namespace Coverlet.Core.Helpers
     public bool PortablePdbHasLocalSource(string module, AssemblySearchType excludeAssembliesWithoutSources)
     {
       using Stream moduleStream = _fileSystem.OpenRead(module);
-      using var peReader = new PEReader(moduleStream);
+      using PEReader peReader = new(moduleStream);
       foreach (DebugDirectoryEntry entry in peReader.ReadDebugDirectory())
       {
         if (entry.Type == DebugDirectoryEntryType.CodeView)
         {
           CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
           using Stream pdbStream = _fileSystem.OpenRead(_sourceRootTranslator.ResolveFilePath(codeViewData.Path));
-          using var metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
+          using MetadataReaderProvider metadataReaderProvider = MetadataReaderProvider.FromPortablePdbStream(pdbStream);
           MetadataReader metadataReader = null;
           try
           {
@@ -226,7 +226,7 @@ namespace Coverlet.Core.Helpers
     private (bool allDocumentsMatch, string notFoundDocument) MatchDocumentsWithSourcesMissingAny(
         MetadataReader metadataReader)
     {
-      var documentSourceMap = DocumentSourceMap(metadataReader).ToList();
+      List<(string documentName, bool documentExists)> documentSourceMap = DocumentSourceMap(metadataReader).ToList();
 
       if (documentSourceMap.Any(x => !x.documentExists))
         return (false, documentSourceMap.FirstOrDefault(x => !x.documentExists).documentName);
@@ -350,14 +350,12 @@ namespace Coverlet.Core.Helpers
 
       foreach (string filter in excludeFilters)
       {
-#pragma warning disable IDE0057 // Use range operator
         string typePattern = filter.Substring(filter.IndexOf(']') + 1);
 
         if (typePattern != "*")
           continue;
 
         string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
-#pragma warning restore IDE0057 // Use range operator
         modulePattern = WildcardToRegex(modulePattern);
 
         var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10));
@@ -380,9 +378,7 @@ namespace Coverlet.Core.Helpers
 
       foreach (string filter in includeFilters)
       {
-#pragma warning disable IDE0057 // Use range operator
         string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
-#pragma warning restore IDE0057 // Use range operator
 
         if (modulePattern == "*")
           return true;
@@ -437,10 +433,8 @@ namespace Coverlet.Core.Helpers
 
       foreach (string filter in filters)
       {
-#pragma warning disable IDE0057 // Use range operator
         string typePattern = filter.Substring(filter.IndexOf(']') + 1);
         string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
-#pragma warning restore IDE0057 // Use range operator
 
         typePattern = WildcardToRegex(typePattern);
         modulePattern = WildcardToRegex(modulePattern);
@@ -464,7 +458,7 @@ namespace Coverlet.Core.Helpers
     {
       TimeSpan retryStrategy()
       {
-        var sleep = TimeSpan.FromMilliseconds(initialSleepSeconds);
+        TimeSpan sleep = TimeSpan.FromMilliseconds(initialSleepSeconds);
         initialSleepSeconds *= 2;
         return sleep;
       }

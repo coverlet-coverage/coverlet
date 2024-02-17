@@ -441,7 +441,7 @@ namespace Coverlet.Core.Symbols
       */
       if (!_compilerGeneratedBranchesToExclude.ContainsKey(methodDefinition.FullName))
       {
-        var detectedBranches = new List<int>();
+        List<int> detectedBranches = [];
         Collection<ExceptionHandler> handlers = methodDefinition.Body.ExceptionHandlers;
 
         int numberOfCatchBlocks = 1;
@@ -475,7 +475,7 @@ namespace Coverlet.Core.Symbols
           }
         }
 
-        _compilerGeneratedBranchesToExclude.TryAdd(methodDefinition.FullName, detectedBranches.ToArray());
+        _compilerGeneratedBranchesToExclude.TryAdd(methodDefinition.FullName, [.. detectedBranches]);
       }
 
       return _compilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
@@ -974,14 +974,14 @@ namespace Coverlet.Core.Symbols
 
     public IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
     {
-      var list = new List<BranchPoint>();
+      List<BranchPoint> list = [];
       if (methodDefinition is null)
       {
         return list;
       }
 
       uint ordinal = 0;
-      var instructions = methodDefinition.Body.Instructions.ToList();
+      List<Instruction> instructions = [.. methodDefinition.Body.Instructions];
 
       bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
       bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
@@ -1101,7 +1101,7 @@ namespace Coverlet.Core.Symbols
       List<int> pathOffsetList = GetBranchPath(@else);
 
       // add Path 0
-      var path0 = new BranchPoint
+      BranchPoint path0 = new()
       {
         StartLine = branchingInstructionLine,
         Document = document,
@@ -1111,7 +1111,7 @@ namespace Coverlet.Core.Symbols
         OffsetPoints =
               pathOffsetList.Count > 1
                   ? pathOffsetList.GetRange(0, pathOffsetList.Count - 1)
-                  : new List<int>(),
+                  : [],
         EndOffset = pathOffsetList.Last()
       };
 
@@ -1142,7 +1142,7 @@ namespace Coverlet.Core.Symbols
       List<int> pathOffsetList1 = GetBranchPath(@then);
 
       // Add path 1
-      var path1 = new BranchPoint
+      BranchPoint path1 = new()
       {
         StartLine = branchingInstructionLine,
         Document = document,
@@ -1152,31 +1152,31 @@ namespace Coverlet.Core.Symbols
         OffsetPoints =
               pathOffsetList1.Count > 1
                   ? pathOffsetList1.GetRange(0, pathOffsetList1.Count - 1)
-                  : new List<int>(),
+                  : [],
         EndOffset = pathOffsetList1.Last()
       };
 
       // only add branch if branch does not match a known sequence 
       // e.g. auto generated field assignment
       // or encapsulates at least one sequence point
-      int[] offsets = new[]
-      {
+      int[] offsets =
+            [
                 path0.Offset,
                 path0.EndOffset,
                 path1.Offset,
                 path1.EndOffset
-            };
+            ];
 
-      Code[][] ignoreSequences = new[]
-      {
+      Code[][] ignoreSequences =
+            [
                 // we may need other samples
                 new[] {Code.Brtrue_S, Code.Pop, Code.Ldsfld, Code.Ldftn, Code.Newobj, Code.Dup, Code.Stsfld, Code.Newobj}, // CachedAnonymousMethodDelegate field allocation 
-            };
+            ];
 
       int bs = offsets.Min();
       int be = offsets.Max();
 
-      var range = instructions.Where(i => (i.Offset >= bs) && (i.Offset <= be)).ToList();
+      List<Instruction> range = instructions.Where(i => (i.Offset >= bs) && (i.Offset <= be)).ToList();
 
       bool match = ignoreSequences
           .Where(ignoreSequence => range.Count >= ignoreSequence.Length)
@@ -1210,7 +1210,7 @@ namespace Coverlet.Core.Symbols
             OffsetPoints =
                   pathOffsetList1.Count > 1
                       ? pathOffsetList1.GetRange(0, pathOffsetList1.Count - 1)
-                      : new List<int>(),
+                      : [],
             EndOffset = pathOffsetList1.Last()
           }));
       pathCounter = counter;
@@ -1343,7 +1343,7 @@ namespace Coverlet.Core.Symbols
       {
         if (!_sequencePointOffsetToSkip.ContainsKey(methodDefinition.FullName))
         {
-          _sequencePointOffsetToSkip.TryAdd(methodDefinition.FullName, new List<int>());
+          _sequencePointOffsetToSkip.TryAdd(methodDefinition.FullName, []);
         }
         _sequencePointOffsetToSkip[methodDefinition.FullName].Add(instruction.Offset);
         _sequencePointOffsetToSkip[methodDefinition.FullName].Add(instruction.Next.Offset);
@@ -1414,7 +1414,7 @@ namespace Coverlet.Core.Symbols
         return false;
 
       // a generated filter block will have no sequence points in its range
-      var handlers = methodDefinition.Body.ExceptionHandlers
+      List<ExceptionHandler> handlers = methodDefinition.Body.ExceptionHandlers
           .Where(e => e.HandlerType == ExceptionHandlerType.Filter)
           .ToList();
 
@@ -1443,7 +1443,7 @@ namespace Coverlet.Core.Symbols
         return false;
 
       // a generated finally block will have no sequence points in its range
-      var handlers = methodDefinition.Body.ExceptionHandlers
+      List<ExceptionHandler> handlers = methodDefinition.Body.ExceptionHandlers
           .Where(e => e.HandlerType == ExceptionHandlerType.Finally)
           .ToList();
 
@@ -1464,7 +1464,7 @@ namespace Coverlet.Core.Symbols
 
     private static List<int> GetBranchPath(Instruction instruction)
     {
-      var offsetList = new List<int>();
+      List<int> offsetList = [];
 
       if (instruction != null)
       {
@@ -1489,8 +1489,8 @@ namespace Coverlet.Core.Symbols
 
     private static Instruction FindClosestInstructionWithSequencePoint(MethodBody methodBody, Instruction instruction)
     {
-      var sequencePointsInMethod = methodBody.Instructions.Where(i => HasValidSequencePoint(i, methodBody.Method)).ToList();
-      if (!sequencePointsInMethod.Any())
+      List<Instruction> sequencePointsInMethod = methodBody.Instructions.Where(i => HasValidSequencePoint(i, methodBody.Method)).ToList();
+      if (sequencePointsInMethod.Count == 0)
         return null;
       int idx = sequencePointsInMethod.BinarySearch(instruction, new InstructionByOffsetComparer());
       Instruction prev;

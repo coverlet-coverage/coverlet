@@ -128,7 +128,7 @@ namespace Coverlet.Collector.DataCollection
       {
         // Get coverlet settings
         IEnumerable<string> testModules = GetTestModules(sessionStartEventArgs);
-        var coverletSettingsParser = new CoverletSettingsParser(_eqtTrace);
+        CoverletSettingsParser coverletSettingsParser = new(_eqtTrace);
         CoverletSettings coverletSettings = coverletSettingsParser.Parse(_configurationElement, testModules);
 
         // Build services container
@@ -166,7 +166,7 @@ namespace Coverlet.Collector.DataCollection
         if (coverageReports != null && coverageReports.Any())
         {
           // Send result attachments to test platform.
-          using var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30)));
+          using AttachmentManager attachmentManager = new(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30)));
           foreach ((string report, string fileName) in coverageReports)
           {
             attachmentManager.SendCoverageReport(report, fileName);
@@ -198,7 +198,7 @@ namespace Coverlet.Collector.DataCollection
         {
           _eqtTrace.Info("{0}: TestModules: '{1}'",
               CoverletConstants.DataCollectorName,
-              string.Join(",", testModules ?? Enumerable.Empty<string>()));
+              string.Join(",", testModules ?? []));
         }
         return testModules;
       }

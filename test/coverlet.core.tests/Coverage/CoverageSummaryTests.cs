@@ -21,29 +21,29 @@ namespace Coverlet.Core.Tests
 
     private void SetupDataForArithmeticPrecision()
     {
-      var lines = new Lines();
+      Lines lines = new();
       lines.Add(1, 1);
       for (int i = 2; i <= 6; i++)
       {
         lines.Add(i, 0);
       }
-      var branches = new Branches();
+      Branches branches = new();
       branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
       for (int i = 2; i <= 6; i++)
       {
         branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = (uint)i });
       }
 
-      var methods = new Methods();
+      Methods methods = new();
       string methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
-      var classes = new Classes();
+      Classes classes = new();
       classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
 
-      var documents = new Documents();
+      Documents documents = new();
       documents.Add("doc.cs", classes);
 
       _moduleArithmeticPrecision = new Modules();
@@ -52,23 +52,23 @@ namespace Coverlet.Core.Tests
 
     private void SetupDataSingleModule()
     {
-      var lines = new Lines();
+      Lines lines = new();
       lines.Add(1, 1);
       lines.Add(2, 0);
-      var branches = new Branches();
+      Branches branches = new();
       branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
       branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 });
 
-      var methods = new Methods();
+      Methods methods = new();
       string methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
-      var classes = new Classes();
+      Classes classes = new();
       classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
 
-      var documents = new Documents();
+      Documents documents = new();
       documents.Add("doc.cs", classes);
 
       _averageCalculationSingleModule = new Modules();
@@ -77,25 +77,25 @@ namespace Coverlet.Core.Tests
 
     private void SetupDataMultipleModule()
     {
-      var lines = new Lines
-            {
+      Lines lines = new()
+      {
                 { 1, 1 }, // covered
                 { 2, 0 }, // not covered
                 { 3, 0 } // not covered
             };
 
-      var branches = new Branches
-            {
+      Branches branches = new()
+      {
                 new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 }, // covered
                 new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 }, // covered
                 new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2 } // not covered
             };
 
-      var methods = new Methods();
-      string[] methodString = {
+      Methods methods = new();
+      string[] methodString = [
                 "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()", // covered
                 "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestAdditionalCalculateSummary()" // not covered
-            };
+            ];
       methods.Add(methodString[0], new Method());
       methods[methodString[0]].Lines = lines;
       methods[methodString[0]].Branches = branches;
@@ -106,13 +106,13 @@ namespace Coverlet.Core.Tests
                 { 1, 0 } // not covered
             };
 
-      var classes = new Classes
-            {
+      Classes classes = new()
+      {
                 { "Coverlet.Core.Tests.CoverageSummaryTests", methods }
             };
 
-      var documents = new Documents
-            {
+      Documents documents = new()
+      {
                 { "doc.cs", classes }
             };
 
@@ -126,8 +126,8 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestCalculateLineCoverage_NoModules()
     {
-      var summary = new CoverageSummary();
-      var modules = new Modules();
+      CoverageSummary summary = new();
+      Modules modules = new();
 
       Assert.Equal(0, summary.CalculateLineCoverage(modules).Percent);
       Assert.Equal(0, summary.CalculateLineCoverage(modules).AverageModulePercent);
@@ -140,7 +140,7 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestCalculateLineCoverage_SingleModule()
     {
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
 
       System.Collections.Generic.KeyValuePair<string, Documents> module = _averageCalculationSingleModule.First();
       System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();
@@ -157,7 +157,7 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestCalculateLineCoverage_MultiModule()
     {
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
       Documents documentsFirstModule = _averageCalculationMultiModule["module"];
       Documents documentsSecondModule = _averageCalculationMultiModule["additionalModule"];
 
@@ -172,7 +172,7 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestCalculateBranchCoverage_SingleModule()
     {
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
 
       System.Collections.Generic.KeyValuePair<string, Documents> module = _averageCalculationSingleModule.First();
       System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();
@@ -189,7 +189,7 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestCalculateBranchCoverage_MultiModule()
     {
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
       Documents documentsFirstModule = _averageCalculationMultiModule["module"];
       Documents documentsSecondModule = _averageCalculationMultiModule["additionalModule"];
 
@@ -201,7 +201,7 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestCalculateMethodCoverage_SingleModule()
     {
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
 
       System.Collections.Generic.KeyValuePair<string, Documents> module = _averageCalculationSingleModule.First();
       System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();
@@ -218,7 +218,7 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestCalculateMethodCoverage_MultiModule()
     {
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
       Documents documentsFirstModule = _averageCalculationMultiModule["module"];
       Documents documentsSecondModule = _averageCalculationMultiModule["additionalModule"];
 
@@ -230,7 +230,7 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestCalculateLineCoveragePercentage_ArithmeticPrecisionCheck()
     {
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
 
       System.Collections.Generic.KeyValuePair<string, Documents> module = _moduleArithmeticPrecision.First();
       System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();
@@ -247,7 +247,7 @@ namespace Coverlet.Core.Tests
     [Fact]
     public void TestCalculateBranchCoveragePercentage_ArithmeticPrecisionCheck()
     {
-      var summary = new CoverageSummary();
+      CoverageSummary summary = new();
 
       System.Collections.Generic.KeyValuePair<string, Documents> module = _moduleArithmeticPrecision.First();
       System.Collections.Generic.KeyValuePair<string, Classes> document = module.Value.First();

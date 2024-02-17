@@ -26,11 +26,11 @@ namespace Coverlet.Core.Reporters
         throw new NotSupportedException("Deterministic report not supported by openCover reporter");
       }
 
-      var summary = new CoverageSummary();
-      var xml = new XDocument();
-      var coverage = new XElement("CoverageSession");
-      var coverageSummary = new XElement("Summary");
-      var modules = new XElement("Modules");
+      CoverageSummary summary = new();
+      XDocument xml = new();
+      XElement coverage = new("CoverageSession");
+      XElement coverageSummary = new("Summary");
+      XElement modules = new("Modules");
 
       int numClasses = 0, numMethods = 0;
       int visitedClasses = 0, visitedMethods = 0;
@@ -39,35 +39,35 @@ namespace Coverlet.Core.Reporters
 
       foreach (System.Collections.Generic.KeyValuePair<string, Documents> mod in result.Modules)
       {
-        var module = new XElement("Module");
+        XElement module = new("Module");
         module.Add(new XAttribute("hash", Guid.NewGuid().ToString().ToUpper()));
 
-        var path = new XElement("ModulePath", mod.Key);
-        var time = new XElement("ModuleTime", DateTime.UtcNow.ToString("yyyy-MM-ddThh:mm:ss"));
-        var name = new XElement("ModuleName", Path.GetFileNameWithoutExtension(mod.Key));
+        XElement path = new("ModulePath", mod.Key);
+        XElement time = new("ModuleTime", DateTime.UtcNow.ToString("yyyy-MM-ddThh:mm:ss"));
+        XElement name = new("ModuleName", Path.GetFileNameWithoutExtension(mod.Key));
 
         module.Add(path);
         module.Add(time);
         module.Add(name);
 
-        var files = new XElement("Files");
-        var classes = new XElement("Classes");
+        XElement files = new("Files");
+        XElement classes = new("Classes");
 
         foreach (System.Collections.Generic.KeyValuePair<string, Classes> doc in mod.Value)
         {
-          var file = new XElement("File");
+          XElement file = new("File");
           file.Add(new XAttribute("uid", i.ToString()));
           file.Add(new XAttribute("fullPath", doc.Key));
           files.Add(file);
 
           foreach (System.Collections.Generic.KeyValuePair<string, Methods> cls in doc.Value)
           {
-            var @class = new XElement("Class");
-            var classSummary = new XElement("Summary");
+            XElement @class = new("Class");
+            XElement classSummary = new("Summary");
 
-            var className = new XElement("FullName", cls.Key);
+            XElement className = new("FullName", cls.Key);
 
-            var methods = new XElement("Methods");
+            XElement methods = new("Methods");
             int j = 0;
             bool classVisited = false;
 
@@ -82,7 +82,7 @@ namespace Coverlet.Core.Reporters
               int methCyclomaticComplexity = summary.CalculateCyclomaticComplexity(meth.Value.Branches);
               int methNpathComplexity = summary.CalculateNpathComplexity(meth.Value.Branches);
 
-              var method = new XElement("Method");
+              XElement method = new("Method");
 
               method.Add(new XAttribute("cyclomaticComplexity", methCyclomaticComplexity.ToString()));
               method.Add(new XAttribute("nPathComplexity", methCyclomaticComplexity.ToString()));
@@ -93,12 +93,12 @@ namespace Coverlet.Core.Reporters
               method.Add(new XAttribute("isSetter", meth.Key.Contains("set_").ToString()));
               method.Add(new XAttribute("isStatic", (!meth.Key.Contains("get_") || !meth.Key.Contains("set_")).ToString()));
 
-              var methodName = new XElement("Name", meth.Key);
+              XElement methodName = new("Name", meth.Key);
 
-              var fileRef = new XElement("FileRef");
+              XElement fileRef = new("FileRef");
               fileRef.Add(new XAttribute("uid", i.ToString()));
 
-              var methodPoint = new XElement("MethodPoint");
+              XElement methodPoint = new("MethodPoint");
               methodPoint.Add(new XAttribute("vc", methLineCoverage.Covered.ToString()));
               methodPoint.Add(new XAttribute("uspid", "0"));
               methodPoint.Add(new XAttribute(XName.Get("type", "xsi"), "SequencePoint"));
@@ -113,9 +113,9 @@ namespace Coverlet.Core.Reporters
               methodPoint.Add(new XAttribute("fileid", i.ToString()));
 
               // They're really just lines
-              var sequencePoints = new XElement("SequencePoints");
-              var branchPoints = new XElement("BranchPoints");
-              var methodSummary = new XElement("Summary");
+              XElement sequencePoints = new("SequencePoints");
+              XElement branchPoints = new("BranchPoints");
+              XElement methodSummary = new("Summary");
               int k = 0;
               int kBr = 0;
               bool methodVisited = false;
@@ -125,7 +125,7 @@ namespace Coverlet.Core.Reporters
                 BranchInfo[] lineBranches = meth.Value.Branches.Where(branchInfo => branchInfo.Line == lines.Key).ToArray();
                 CoverageDetails branchCoverage = summary.CalculateBranchCoverage(lineBranches);
 
-                var sequencePoint = new XElement("SequencePoint");
+                XElement sequencePoint = new("SequencePoint");
                 sequencePoint.Add(new XAttribute("vc", lines.Value.ToString()));
                 sequencePoint.Add(new XAttribute("uspid", lines.Key.ToString()));
                 sequencePoint.Add(new XAttribute("ordinal", k.ToString()));
@@ -149,7 +149,7 @@ namespace Coverlet.Core.Reporters
 
               foreach (BranchInfo branche in meth.Value.Branches)
               {
-                var branchPoint = new XElement("BranchPoint");
+                XElement branchPoint = new("BranchPoint");
                 branchPoint.Add(new XAttribute("vc", branche.Hits.ToString()));
                 branchPoint.Add(new XAttribute("uspid", branche.Line.ToString()));
                 branchPoint.Add(new XAttribute("ordinal", branche.Ordinal.ToString()));
@@ -248,8 +248,8 @@ namespace Coverlet.Core.Reporters
       coverage.Add(modules);
       xml.Add(coverage);
 
-      using var stream = new MemoryStream();
-      using var streamWriter = new StreamWriter(stream, new UTF8Encoding(false));
+      using MemoryStream stream = new();
+      using StreamWriter streamWriter = new(stream, new UTF8Encoding(false));
       xml.Save(streamWriter);
 
       return Encoding.UTF8.GetString(stream.ToArray());

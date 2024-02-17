@@ -77,7 +77,7 @@ namespace Coverlet.Core
         ICecilSymbolHelper cecilSymbolHelper)
     {
       _moduleOrAppDirectory = moduleOrDirectory;
-      parameters.IncludeDirectories ??= Array.Empty<string>();
+      parameters.IncludeDirectories ??= [];
       _logger = logger;
       _instrumentationHelper = instrumentationHelper;
       _parameters = parameters;
@@ -85,7 +85,7 @@ namespace Coverlet.Core
       _sourceRootTranslator = sourceRootTranslator;
       _cecilSymbolHelper = cecilSymbolHelper;
       Identifier = Guid.NewGuid().ToString();
-      _results = new List<InstrumenterResult>();
+      _results = [];
     }
 
     public Coverage(CoveragePrepareResult prepareResult,
@@ -108,9 +108,9 @@ namespace Coverlet.Core
     {
       string[] modules = _instrumentationHelper.GetCoverableModules(_moduleOrAppDirectory, _parameters.IncludeDirectories, _parameters.IncludeTestAssembly);
 
-      Array.ForEach(_parameters.ExcludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded module filter '{filter}'"));
-      Array.ForEach(_parameters.IncludeFilters ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Included module filter '{filter}'"));
-      Array.ForEach(_parameters.ExcludedSourceFiles ?? Array.Empty<string>(), filter => _logger.LogVerbose($"Excluded source files filter '{FileSystem.EscapeFileName(filter)}'"));
+      Array.ForEach(_parameters.ExcludeFilters ?? [], filter => _logger.LogVerbose($"Excluded module filter '{filter}'"));
+      Array.ForEach(_parameters.IncludeFilters ?? [], filter => _logger.LogVerbose($"Included module filter '{filter}'"));
+      Array.ForEach(_parameters.ExcludedSourceFiles ?? [], filter => _logger.LogVerbose($"Excluded source files filter '{FileSystem.EscapeFileName(filter)}'"));
 
       _parameters.ExcludeFilters = _parameters.ExcludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
       _parameters.IncludeFilters = _parameters.IncludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
@@ -124,7 +124,7 @@ namespace Coverlet.Core
           continue;
         }
 
-        var instrumenter = new Instrumenter(module,
+        Instrumenter instrumenter = new(module,
                                             Identifier,
                                             _parameters,
                                             _logger,
@@ -160,7 +160,7 @@ namespace Coverlet.Core
         Identifier = Identifier,
         ModuleOrDirectory = _moduleOrAppDirectory,
         Parameters = _parameters,
-        Results = _results.ToArray()
+        Results = [.. _results]
       };
     }
 
@@ -168,10 +168,10 @@ namespace Coverlet.Core
     {
       CalculateCoverage();
 
-      var modules = new Modules();
+      Modules modules = [];
       foreach (InstrumenterResult result in _results)
       {
-        var documents = new Documents();
+        Documents documents = [];
         foreach (Document doc in result.Documents.Values)
         {
           // Construct Line Results
@@ -193,15 +193,15 @@ namespace Coverlet.Core
               }
               else
               {
-                documents[doc.Path].Add(line.Class, new Methods());
+                documents[doc.Path].Add(line.Class, []);
                 documents[doc.Path][line.Class].Add(line.Method, new Method());
                 documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
               }
             }
             else
             {
-              documents.Add(doc.Path, new Classes());
-              documents[doc.Path].Add(line.Class, new Methods());
+              documents.Add(doc.Path, []);
+              documents[doc.Path].Add(line.Class, []);
               documents[doc.Path][line.Class].Add(line.Method, new Method());
               documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
             }
@@ -230,7 +230,7 @@ namespace Coverlet.Core
               }
               else
               {
-                documents[doc.Path].Add(branch.Class, new Methods());
+                documents[doc.Path].Add(branch.Class, []);
                 documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                 documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
                 { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
@@ -239,8 +239,8 @@ namespace Coverlet.Core
             }
             else
             {
-              documents.Add(doc.Path, new Classes());
-              documents[doc.Path].Add(branch.Class, new Methods());
+              documents.Add(doc.Path, []);
+              documents[doc.Path].Add(branch.Class, []);
               documents[doc.Path][branch.Class].Add(branch.Method, new Method());
               documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
               { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
@@ -288,7 +288,7 @@ namespace Coverlet.Core
 
                   if (compileGeneratedClassToRemove is null)
                   {
-                    compileGeneratedClassToRemove = new List<string>();
+                    compileGeneratedClassToRemove = [];
                   }
 
                   if (!compileGeneratedClassToRemove.Contains(@class.Key))
@@ -317,7 +317,7 @@ namespace Coverlet.Core
         }
       }
 
-      var coverageResult = new CoverageResult { Identifier = Identifier, Modules = modules, InstrumentedResults = _results, Parameters = _parameters };
+      CoverageResult coverageResult = new() { Identifier = Identifier, Modules = modules, InstrumentedResults = _results, Parameters = _parameters };
 
       if (!string.IsNullOrEmpty(_parameters.MergeWith) && !string.IsNullOrWhiteSpace(_parameters.MergeWith))
       {
@@ -384,7 +384,7 @@ namespace Coverlet.Core
           continue;
         }
 
-        var documents = result.Documents.Values.ToList();
+        List<Document> documents = [.. result.Documents.Values];
         if (_parameters.UseSourceLink && result.SourceLink != null)
         {
           JsonNode jObject = JsonNode.Parse(result.SourceLink)["documents"];
@@ -415,16 +415,16 @@ namespace Coverlet.Core
                      i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);
                      i++)
                 {
-                  (hitCandidate.AccountedByNestedInstrumentation ??= new HashSet<int>()).Add(i);
+                  (hitCandidate.AccountedByNestedInstrumentation ??= []).Add(i);
                 }
               }
             }
           }
         }
 
-        var documentsList = result.Documents.Values.ToList();
+        List<Document> documentsList = [.. result.Documents.Values];
         using (Stream fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open, FileAccess.Read))
-        using (var br = new BinaryReader(fs))
+        using (BinaryReader br = new(fs))
         {
           int hitCandidatesCount = br.ReadInt32();
 
@@ -495,10 +495,8 @@ namespace Coverlet.Core
         string key = sourceLinkDocument.Key;
         if (Path.GetFileName(key) != "*") continue;
 
-#pragma warning disable IDE0057 // Use range operator
         IReadOnlyList<SourceRootMapping> rootMapping = _sourceRootTranslator.ResolvePathRoot(key.Substring(0, key.Length - 1));
-#pragma warning restore IDE0057 // Use range operator
-        foreach (string keyMapping in rootMapping is null ? new List<string>() { key } : new List<string>(rootMapping.Select(m => m.OriginalPath)))
+        foreach (string keyMapping in rootMapping is null ? [key] : new List<string>(rootMapping.Select(m => m.OriginalPath)))
         {
           string directoryDocument = Path.GetDirectoryName(document);
           string sourceLinkRoot = Path.GetDirectoryName(keyMapping);
@@ -510,9 +508,7 @@ namespace Coverlet.Core
             if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
               continue;
 
-#pragma warning disable IDE0057 // Use range operator
             relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
-#pragma warning restore IDE0057 // Use range operator
           }
 
           if (relativePathOfBestMatch.Length == 0)

@@ -30,7 +30,7 @@ namespace coverlet.msbuild.tasks.tests
     public CoverageResultTaskTests()
     {
       _buildEngine = new Mock<IBuildEngine>();
-      _errors = new List<BuildErrorEventArgs>();
+      _errors = [];
       _mockAssemblyAdapter = new Mock<IAssemblyAdapter>();
       _mockAssemblyAdapter.Setup(x => x.GetAssemblyName(It.IsAny<string>())).Returns("abc");
     }
@@ -47,16 +47,16 @@ namespace coverlet.msbuild.tasks.tests
 
       _buildEngine.Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>())).Callback<BuildErrorEventArgs>(e => _errors.Add(e));
 
-      var coverageResultTask = new CoverageResultTask
+      CoverageResultTask coverageResultTask = new()
       {
         OutputFormat = "cobertura",
         Output = "coverageDir",
         Threshold = "50",
         ThresholdType = "total",
         ThresholdStat = "total",
-        InstrumenterState = null
+        InstrumenterState = null,
+        BuildEngine = _buildEngine.Object
       };
-      coverageResultTask.BuildEngine = _buildEngine.Object;
 
       // Act
       bool success = coverageResultTask.Execute();
@@ -69,10 +69,10 @@ namespace coverlet.msbuild.tasks.tests
     public void Execute_StateUnderTest_WithInstrumentationState_Fake()
     {
       // Arrange
-      var mockFileSystem = new Mock<IFileSystem>();
+      Mock<IFileSystem> mockFileSystem = new();
       mockFileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
       mockFileSystem.Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()));
-      var log = new TaskLoggingHelper(_buildEngine.Object, "CoverageResultTask");
+      TaskLoggingHelper log = new(_buildEngine.Object, "CoverageResultTask");
 
       IServiceCollection serviceCollection = new ServiceCollection();
       serviceCollection.AddTransient<IFileSystem, FileSystem>();
@@ -86,21 +86,19 @@ namespace coverlet.msbuild.tasks.tests
       _buildEngine.Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>())).Callback<BuildErrorEventArgs>(e => _errors.Add(e));
 
 #pragma warning disable CS8604 // Possible null reference argument for parameter..
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-      var InstrumenterState = new TaskItem(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "TestAssets\\InstrumenterState.ItemSpec.data1.xml"));
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+      TaskItem InstrumenterState = new(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "TestAssets\\InstrumenterState.ItemSpec.data1.xml"));
 #pragma warning restore C8S604 // Possible null reference argument for parameter.
 
-      var coverageResultTask = new CoverageResultTask
+      CoverageResultTask coverageResultTask = new()
       {
         OutputFormat = "cobertura",
         Output = "coverageDir",
         Threshold = "50",
         ThresholdType = "total",
         ThresholdStat = "total",
-        InstrumenterState = InstrumenterState
+        InstrumenterState = InstrumenterState,
+        BuildEngine = _buildEngine.Object
       };
-      coverageResultTask.BuildEngine = _buildEngine.Object;
 
       // Act
       bool success = coverageResultTask.Execute();

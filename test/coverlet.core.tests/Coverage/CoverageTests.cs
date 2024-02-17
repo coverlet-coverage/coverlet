@@ -43,24 +43,24 @@ namespace Coverlet.Core.Tests
       File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
       // TODO: Find a way to mimick hits
-      var instrumentationHelper =
-          new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+      InstrumentationHelper instrumentationHelper =
+          new(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                     new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
-      var parameters = new CoverageParameters
+      CoverageParameters parameters = new()
       {
-        IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = Array.Empty<string>(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = ["[coverlet.tests.projectsample.excludedbyattribute*]*"],
+        IncludeDirectories = [],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = false,
         SingleHit = false,
         MergeWith = string.Empty,
         UseSourceLink = false
       };
 
-      var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
+      Coverage coverage = new(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
       CoverageResult result = coverage.GetCoverageResult();
@@ -81,24 +81,24 @@ namespace Coverlet.Core.Tests
       File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
       File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-      var instrumentationHelper =
-          new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+      InstrumentationHelper instrumentationHelper =
+          new(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                     new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
-      var parameters = new CoverageParameters
+      CoverageParameters parameters = new()
       {
-        IncludeFilters = Array.Empty<string>(),
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = Array.Empty<string>(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = [],
+        IncludeDirectories = [],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = true,
         SingleHit = false,
         MergeWith = string.Empty,
         UseSourceLink = false
       };
 
-      var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(),
+      Coverage coverage = new(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(),
                                   new SourceRootTranslator(module, _mockLogger.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
@@ -121,24 +121,24 @@ namespace Coverlet.Core.Tests
       File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
       // TODO: Find a way to mimick hits
-      var instrumentationHelper =
-          new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+      InstrumentationHelper instrumentationHelper =
+          new(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                     new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
-      var parameters = new CoverageParameters
+      CoverageParameters parameters = new()
       {
-        IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = Array.Empty<string>(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = ["[coverlet.tests.projectsample.excludedbyattribute*]*"],
+        IncludeDirectories = [],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = false,
         SingleHit = false,
         MergeWith = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "MergeWith.coverage.json").First(),
         UseSourceLink = false
       };
 
-      var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
+      Coverage coverage = new(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
       string result = JsonSerializer.Serialize(coverage.GetCoverageResult(), _options);
@@ -162,24 +162,24 @@ namespace Coverlet.Core.Tests
       File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
       // TODO: Find a way to mimick hits
-      var instrumentationHelper =
-          new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+      InstrumentationHelper instrumentationHelper =
+          new(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                     new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
-      var parameters = new CoverageParameters
+      CoverageParameters parameters = new()
       {
-        IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = Array.Empty<string>(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = ["[coverlet.tests.projectsample.excludedbyattribute*]*"],
+        IncludeDirectories = [],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = false,
         SingleHit = false,
         MergeWith = "FileDoesNotExist.json",
         UseSourceLink = false
       };
 
-      var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
+      Coverage coverage = new(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
       string result = JsonSerializer.Serialize(coverage.GetCoverageResult(), _options);
@@ -204,7 +204,7 @@ public class BranchDictionaryConverterFactory : JsonConverterFactory
     Type valueType = genericArgs[1];
 
     JsonConverter converter = (JsonConverter)Activator.CreateInstance(
-        typeof(BranchDictionaryConverter<,>).MakeGenericType(new Type[] { keyType, valueType }));
+        typeof(BranchDictionaryConverter<,>).MakeGenericType([keyType, valueType]));
 
     return converter;
   }
