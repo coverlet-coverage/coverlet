@@ -68,13 +68,6 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
 ```
 
-Using coverlet with older .NET SDK requires additional package reference in test projects
-
-```xml
-<PackageReference Include="System.Text.Json" Version="8.0.2" />
-<PackageReference Include="System.Reflection.Metadata" Version="8.0.0" />
-```
-
 ### MSBuild Integration (suffers of possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation (coverlet.msbuild)
