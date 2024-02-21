@@ -61,11 +61,18 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
 #### Requirements (coverlet.collector)
 
-* _You need to be running .NET 6.0 SDK v6.0.316 or newer_
-* _You need to reference version 17.5.0 and above of Microsoft.NET.Test.Sdk_
+* _You need to be running .NET 8.0 SDK v8.0.201 or newer_
+* _You need to reference version 17.8.0 and above of Microsoft.NET.Test.SDK_
 
 ```xml
-<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+```
+
+Using coverlet with older .NET SDK requires additional package reference in test projects
+
+```xml
+<PackageReference Include="System.Text.Json" Version="8.0.2" />
+<PackageReference Include="System.Reflection.Metadata" Version="8.0.0" />
 ```
 
 ### MSBuild Integration (suffers of possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
