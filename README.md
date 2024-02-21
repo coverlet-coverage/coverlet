@@ -62,7 +62,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 #### Requirements (coverlet.collector)
 
 * _You need to be running .NET 8.0 SDK v8.0.201 or newer_
-* _You need to reference version 17.8.0 and above of Microsoft.NET.Test.SDK_
+* _You need to reference version 17.8.0 and above of `Microsoft.NET.Test.Sdk`_
 
 ```xml
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
