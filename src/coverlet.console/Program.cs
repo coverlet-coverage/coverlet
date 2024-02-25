@@ -32,21 +32,21 @@ namespace Coverlet.Console
       var targs = new Option<string>(new[] { "--targetargs", "-a" }, "Arguments to be passed to the test runner.") { Arity = ArgumentArity.ZeroOrOne };
       var output = new Option<string>(new[] { "--output", "-o" }, "Output of the generated coverage report") { Arity = ArgumentArity.ZeroOrOne };
       var verbosity = new Option<LogLevel>(new[] { "--verbosity", "-v" }, () => LogLevel.Normal, "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.") { Arity = ArgumentArity.ZeroOrOne };
-      var formats = new Option<string[]>(new[] { "--format", "-f" }, () => new[] { "json" }, "Format of the generated coverage report.") { Arity = ArgumentArity.ZeroOrMore };
+      var formats = new Option<string[]>(new[] { "--format", "-f" }, () => new[] { "json" }, "Format of the generated coverage report.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var threshold = new Option<string>("--threshold", "Exits with error if the coverage % is below value.") { Arity = ArgumentArity.ZeroOrOne };
       var thresholdTypes = new Option<List<string>>("--threshold-type", () => new List<string>(new string[] { "line", "branch", "method" }), "Coverage type to apply the threshold to.").FromAmong("line", "branch", "method");
       var thresholdStat = new Option<ThresholdStatistic>("--threshold-stat", () => ThresholdStatistic.Minimum, "Coverage statistic used to enforce the threshold value.") { Arity = ArgumentArity.ZeroOrMore };
-      var excludeFilters = new Option<string[]>("--exclude", "Filter expressions to exclude specific modules and types.") { Arity = ArgumentArity.ZeroOrMore };
-      var includeFilters = new Option<string[]>("--include", "Filter expressions to include only specific modules and types.") { Arity = ArgumentArity.ZeroOrMore };
-      var excludedSourceFiles = new Option<string[]>("--exclude-by-file", "Glob patterns specifying source files to exclude.") { Arity = ArgumentArity.ZeroOrMore };
-      var includeDirectories = new Option<string[]>("--include-directory", "Include directories containing additional assemblies to be instrumented.") { Arity = ArgumentArity.ZeroOrMore };
-      var excludeAttributes = new Option<string[]>("--exclude-by-attribute", "Attributes to exclude from code coverage.") { Arity = ArgumentArity.ZeroOrMore };
+      var excludeFilters = new Option<string[]>("--exclude", "Filter expressions to exclude specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      var includeFilters = new Option<string[]>("--include", "Filter expressions to include only specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      var excludedSourceFiles = new Option<string[]>("--exclude-by-file", "Glob patterns specifying source files to exclude.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      var includeDirectories = new Option<string[]>("--include-directory", "Include directories containing additional assemblies to be instrumented.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      var excludeAttributes = new Option<string[]>("--exclude-by-attribute", "Attributes to exclude from code coverage.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var includeTestAssembly = new Option<bool>("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.") { Arity = ArgumentArity.Zero };
       var singleHit = new Option<bool>("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location") { Arity = ArgumentArity.Zero };
       var skipAutoProp = new Option<bool>("--skipautoprops", "Neither track nor record auto-implemented properties.") { Arity = ArgumentArity.Zero };
       var mergeWith = new Option<string>("--merge-with", "Path to existing coverage result to merge.") { Arity = ArgumentArity.ZeroOrOne };
       var useSourceLink = new Option<bool>("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.") { Arity = ArgumentArity.Zero };
-      var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore };
+      var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
       var sourceMappingFile = new Option<string>("--source-mapping-file", "Specifies the path to a SourceRootsMappings file.") { Arity = ArgumentArity.ZeroOrOne };
 
