@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+- Exception when multiple exclude-by-attribute filters specified [#1624](https://github.com/coverlet-coverage/coverlet/issues/1624)
+
+### Improvements
+- More concise options to specify multiple parameters in coverlet.console [#1624](https://github.com/coverlet-coverage/coverlet/issues/1624)
+
+## Release date 2024-02-19
+### Packages
+coverlet.msbuild 6.0.1
+coverlet.console 6.0.1
+coverlet.collector 6.0.1
+
+### Fixed
 - Uncovered lines in .NET 8 for inheriting records [#1555](https://github.com/coverlet-coverage/coverlet/issues/1555)
 - Fix record constructors not covered when SkipAutoProps is true [#1561](https://github.com/coverlet-coverage/coverlet/issues/1561)
 - Fix .NET 7 Method Group branch coverage issue [#1447](https://github.com/coverlet-coverage/coverlet/issues/1447)
