@@ -250,7 +250,10 @@ namespace Coverlet.Console
         {
           IReporter reporter = new ReporterFactory(format).CreateReporter();
 
-          ArgumentException.ThrowIfNullOrEmpty(format, $"Specified output format '{format}' is not supported");
+          if (reporter == null)
+          {
+            throw new Exception($"Specified output format '{format}' is not supported");
+          }
 
           if (reporter.OutputType == ReporterOutputType.Console)
           {
