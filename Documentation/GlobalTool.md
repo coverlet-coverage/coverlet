@@ -42,10 +42,16 @@ Options:
   -?, -h, --help                        Show help and usage information
 ```
 
-NB. For a [multiple value] options you have to specify values multiple times i.e.
+NB. For [multiple value] options you can either specify values multiple times i.e.
 
 ```shell
 --exclude-by-attribute 'Obsolete' --exclude-by-attribute 'GeneratedCode' --exclude-by-attribute 'CompilerGenerated'
+```
+
+or pass the multiple values as space separated sequence, i.e.
+
+```shell
+--exclude-by-attribute "Obsolete" "GeneratedCode" "CompilerGenerated"
 ```
 
 For `--merge-with` [check the sample](Examples.md).

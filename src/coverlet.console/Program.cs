@@ -40,7 +40,7 @@ namespace Coverlet.Console
       var includeFilters = new Option<string[]>("--include", "Filter expressions to include only specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var excludedSourceFiles = new Option<string[]>("--exclude-by-file", "Glob patterns specifying source files to exclude.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var includeDirectories = new Option<string[]>("--include-directory", "Include directories containing additional assemblies to be instrumented.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var excludeAttributes = new Option<string[]>("--exclude-by-attribute", "Attributes to exclude from code coverage.") { Arity = ArgumentArity.ZeroOrOne, AllowMultipleArgumentsPerToken = true };
+      var excludeAttributes = new Option<string[]>("--exclude-by-attribute", "Attributes to exclude from code coverage.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var includeTestAssembly = new Option<bool>("--include-test-assembly", "Specifies whether to report code coverage of the test assembly.") { Arity = ArgumentArity.Zero };
       var singleHit = new Option<bool>("--single-hit", "Specifies whether to limit code coverage hit reporting to a single hit for each location") { Arity = ArgumentArity.Zero };
       var skipAutoProp = new Option<bool>("--skipautoprops", "Neither track nor record auto-implemented properties.") { Arity = ArgumentArity.Zero };
