@@ -333,7 +333,7 @@ namespace Coverlet.Core.Helpers
       if (filter.EndsWith("]"))
         return false;
 
-      if (new Regex(@"[^\w*]", s_regexOptions, TimeSpan.FromSeconds(1)).IsMatch(filter.Replace(".", "").Replace("?", "").Replace("[", "").Replace("]", "")))
+      if (new Regex(@"[^\w*]", s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(filter.Replace(".", "").Replace("?", "").Replace("[", "").Replace("]", "")))
         return false;
 
       return true;
@@ -360,7 +360,7 @@ namespace Coverlet.Core.Helpers
 #pragma warning restore IDE0057 // Use range operator
         modulePattern = WildcardToRegex(modulePattern);
 
-        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(1));
+        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10));
 
         if (regex.IsMatch(module))
           return true;
@@ -389,7 +389,7 @@ namespace Coverlet.Core.Helpers
 
         modulePattern = WildcardToRegex(modulePattern);
 
-        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(1));
+        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10));
 
         if (regex.IsMatch(module))
           return true;
