@@ -445,7 +445,7 @@ namespace Coverlet.Core.Helpers
         typePattern = WildcardToRegex(typePattern);
         modulePattern = WildcardToRegex(modulePattern);
 
-        if (new Regex(typePattern, s_regexOptions, TimeSpan.FromSeconds(1)).IsMatch(type) && new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(module))
+        if (new Regex(typePattern, s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(type) && new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(module))
           return true;
       }
 
