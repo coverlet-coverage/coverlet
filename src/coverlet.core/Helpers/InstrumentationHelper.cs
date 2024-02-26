@@ -24,6 +24,8 @@ namespace Coverlet.Core.Helpers
     private readonly IFileSystem _fileSystem;
     private readonly ISourceRootTranslator _sourceRootTranslator;
     private ILogger _logger;
+    private static readonly RegexOptions s_regexOptions =
+      RegexOptions.Multiline | RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
     public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger, ISourceRootTranslator sourceRootTranslator)
     {
@@ -331,7 +333,7 @@ namespace Coverlet.Core.Helpers
       if (filter.EndsWith("]"))
         return false;
 
-      if (new Regex(@"[^\w*]").IsMatch(filter.Replace(".", "").Replace("?", "").Replace("[", "").Replace("]", "")))
+      if (new Regex(@"[^\w*]", s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(filter.Replace(".", "").Replace("?", "").Replace("[", "").Replace("]", "")))
         return false;
 
       return true;
@@ -358,7 +360,7 @@ namespace Coverlet.Core.Helpers
 #pragma warning restore IDE0057 // Use range operator
         modulePattern = WildcardToRegex(modulePattern);
 
-        var regex = new Regex(modulePattern);
+        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10));
 
         if (regex.IsMatch(module))
           return true;
@@ -387,7 +389,7 @@ namespace Coverlet.Core.Helpers
 
         modulePattern = WildcardToRegex(modulePattern);
 
-        var regex = new Regex(modulePattern);
+        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10));
 
         if (regex.IsMatch(module))
           return true;
@@ -421,7 +423,7 @@ namespace Coverlet.Core.Helpers
     }
 
     public bool IsLocalMethod(string method)
-        => new Regex(WildcardToRegex("<*>*__*|*")).IsMatch(method);
+        => new Regex(WildcardToRegex("<*>*__*|*"), s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(method);
 
     public void SetLogger(ILogger logger)
     {
@@ -443,7 +445,7 @@ namespace Coverlet.Core.Helpers
         typePattern = WildcardToRegex(typePattern);
         modulePattern = WildcardToRegex(modulePattern);
 
-        if (new Regex(typePattern).IsMatch(type) && new Regex(modulePattern).IsMatch(module))
+        if (new Regex(typePattern, s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(type) && new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(module))
           return true;
       }
 
