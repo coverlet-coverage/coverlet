@@ -423,7 +423,7 @@ namespace Coverlet.Core.Helpers
     }
 
     public bool IsLocalMethod(string method)
-        => new Regex(WildcardToRegex("<*>*__*|*"), s_regexOptions, TimeSpan.FromSeconds(1)).IsMatch(method);
+        => new Regex(WildcardToRegex("<*>*__*|*"), s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(method);
 
     public void SetLogger(ILogger logger)
     {
@@ -445,7 +445,7 @@ namespace Coverlet.Core.Helpers
         typePattern = WildcardToRegex(typePattern);
         modulePattern = WildcardToRegex(modulePattern);
 
-        if (new Regex(typePattern, s_regexOptions, TimeSpan.FromSeconds(1)).IsMatch(type) && new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(1)).IsMatch(module))
+        if (new Regex(typePattern, s_regexOptions, TimeSpan.FromSeconds(1)).IsMatch(type) && new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(module))
           return true;
       }
 
