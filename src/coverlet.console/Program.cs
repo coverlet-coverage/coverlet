@@ -35,7 +35,7 @@ namespace Coverlet.Console
       var formats = new Option<string[]>(new[] { "--format", "-f" }, () => new[] { "json" }, "Format of the generated coverage report.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var threshold = new Option<string>("--threshold", "Exits with error if the coverage % is below value.") { Arity = ArgumentArity.ZeroOrOne };
       var thresholdTypes = new Option<List<string>>("--threshold-type", () => new List<string>(new string[] { "line", "branch", "method" }), "Coverage type to apply the threshold to.").FromAmong("line", "branch", "method");
-      var thresholdStat = new Option<ThresholdStatistic>("--threshold-stat", () => ThresholdStatistic.Minimum, "Coverage statistic used to enforce the threshold value.") { Arity = ArgumentArity.ZeroOrMore };
+      var thresholdStat = new Option<ThresholdStatistic>("--threshold-stat", () => ThresholdStatistic.Minimum, "Coverage statistic used to enforce the threshold value.") { Arity = ArgumentArity.ZeroOrOne };
       var excludeFilters = new Option<string[]>("--exclude", "Filter expressions to exclude specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var includeFilters = new Option<string[]>("--include", "Filter expressions to include only specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var excludedSourceFiles = new Option<string[]>("--exclude-by-file", "Glob patterns specifying source files to exclude.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
