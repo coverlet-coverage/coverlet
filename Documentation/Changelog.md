@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+- Type initializer errors after updating from 6.0.0 to 6.0.1 [#1629](https://github.com/coverlet-coverage/coverlet/issues/1629)
 - Exception when multiple exclude-by-attribute filters specified [#1624](https://github.com/coverlet-coverage/coverlet/issues/1624)
 
 ### Improvements
