@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text.Json;
-using System.Text.Json.Nodes;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
@@ -60,13 +60,13 @@ namespace Coverlet.Core
 
     public string Identifier { get; }
 
-    readonly JsonSerializerOptions _options = new()
-    {
-      PropertyNameCaseInsensitive = true,
-      DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-      IncludeFields = true,
-      WriteIndented = true
-    };
+    //readonly JsonSerializerOptions _options = new()
+    //{
+    //  PropertyNameCaseInsensitive = true,
+    //  DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+    //  IncludeFields = true,
+    //  WriteIndented = true
+    //};
 
     public Coverage(string moduleOrDirectory,
         CoverageParameters parameters,
@@ -325,7 +325,7 @@ namespace Coverlet.Core
         {
           _logger.LogInformation($"MergeWith: '{_parameters.MergeWith}'.");
           string json = _fileSystem.ReadAllText(_parameters.MergeWith);
-          coverageResult.Merge(JsonSerializer.Deserialize<Modules>(json, _options));
+          coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
         } else
         {
           _logger.LogInformation($"MergeWith: file '{_parameters.MergeWith}' does not exist.");
@@ -387,8 +387,8 @@ namespace Coverlet.Core
         var documents = result.Documents.Values.ToList();
         if (_parameters.UseSourceLink && result.SourceLink != null)
         {
-          JsonNode jObject = JsonNode.Parse(result.SourceLink)["documents"];
-          Dictionary<string, string> sourceLinkDocuments = JsonSerializer.Deserialize<Dictionary<string, string>>(jObject.ToString());
+          JToken jObject = JObject.Parse(result.SourceLink)["documents"];
+          Dictionary<string, string> sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
           foreach (Document document in documents)
           {
             document.Path = GetSourceLinkUrl(sourceLinkDocuments, document.Path);
