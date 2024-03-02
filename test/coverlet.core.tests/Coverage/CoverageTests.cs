@@ -19,16 +19,6 @@ namespace Coverlet.Core.Tests
   public partial class CoverageTests
   {
     private readonly Mock<ILogger> _mockLogger = new();
-    //readonly JsonSerializerOptions _options = new()
-    //{
-    //  Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-    //  IncludeFields = true,
-    //  WriteIndented = true,
-    //  Converters =
-    //    {
-    //      //new BranchDictionaryConverterFactory()
-    //    }
-    //};
 
     [Fact]
     public void TestCoverage()
