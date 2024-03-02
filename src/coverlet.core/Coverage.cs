@@ -60,14 +60,6 @@ namespace Coverlet.Core
 
     public string Identifier { get; }
 
-    //readonly JsonSerializerOptions _options = new()
-    //{
-    //  PropertyNameCaseInsensitive = true,
-    //  DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-    //  IncludeFields = true,
-    //  WriteIndented = true
-    //};
-
     public Coverage(string moduleOrDirectory,
         CoverageParameters parameters,
         ILogger logger,

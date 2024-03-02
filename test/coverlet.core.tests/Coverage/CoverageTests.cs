@@ -6,8 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
@@ -21,16 +19,16 @@ namespace Coverlet.Core.Tests
   public partial class CoverageTests
   {
     private readonly Mock<ILogger> _mockLogger = new();
-    readonly JsonSerializerOptions _options = new()
-    {
-      Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-      IncludeFields = true,
-      WriteIndented = true,
-      Converters =
-        {
-          //new BranchDictionaryConverterFactory()
-        }
-    };
+    //readonly JsonSerializerOptions _options = new()
+    //{
+    //  Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    //  IncludeFields = true,
+    //  WriteIndented = true,
+    //  Converters =
+    //    {
+    //      //new BranchDictionaryConverterFactory()
+    //    }
+    //};
 
     [Fact]
     public void TestCoverage()
@@ -194,11 +192,11 @@ namespace Coverlet.Core.Tests
 
 public class BranchDictionaryConverter: JsonConverter
 {
-  public override void WriteJson(JsonWriter writer, object? value, Newtonsoft.Json.JsonSerializer serializer)
+  public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
   {
     Type type = value.GetType();
-    IEnumerable keys = (IEnumerable)type.GetProperty("Keys").GetValue(value, null);
-    IEnumerable values = (IEnumerable)type.GetProperty("Values").GetValue(value, null);
+    var keys = (IEnumerable)type.GetProperty("Keys")?.GetValue(value, null);
+    var values = (IEnumerable)type.GetProperty("Values")?.GetValue(value, null);
     IEnumerator valueEnumerator = values.GetEnumerator();
 
     writer.WriteStartArray();
@@ -214,7 +212,7 @@ public class BranchDictionaryConverter: JsonConverter
     writer.WriteEndArray();
   }
 
-  public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, Newtonsoft.Json.JsonSerializer serializer)
+  public override object ReadJson(JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
   {
     throw new NotImplementedException();
   }
