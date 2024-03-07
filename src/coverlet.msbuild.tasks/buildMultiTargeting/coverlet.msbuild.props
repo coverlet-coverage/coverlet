@@ -1,4 +1,0 @@
-<!-- buildMultiTargeting/coverlet.msbuild.props -->
-<Project>
-  <Import Project="..\build\coverlet.msbuild.props" />
-</Project>
