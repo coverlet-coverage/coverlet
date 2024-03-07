@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+- Threshold-stat triggers error [#1634](https://github.com/coverlet-coverage/coverlet/issues/1634)
 - Exception when multiple exclude-by-attribute filters specified [#1624](https://github.com/coverlet-coverage/coverlet/issues/1624)
 
 ### Improvements
