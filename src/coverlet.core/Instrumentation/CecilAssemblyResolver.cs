@@ -5,12 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Mono.Cecil;
+using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
 
 namespace Coverlet.Core.Instrumentation
@@ -298,25 +298,24 @@ namespace Coverlet.Core.Instrumentation
     {
       string jsonString = File.ReadAllText(_runtimeConfigFile);
 
-      var documentOptions = new JsonDocumentOptions
+      var jsonLoadSettings = new JsonLoadSettings()
       {
-        CommentHandling = JsonCommentHandling.Skip
+        CommentHandling = CommentHandling.Ignore
       };
 
-      using var configuration = JsonDocument.Parse(jsonString, documentOptions);
+      var configuration = JObject.Parse(jsonString, jsonLoadSettings);
 
-      JsonElement rootElement = configuration.RootElement;
+      JToken rootElement = configuration.Root;
+      JToken runtimeOptionsElement = rootElement["runtimeOptions"];
 
-      JsonElement runtimeOptionsElement = rootElement.GetProperty("runtimeOptions");
-
-      if (runtimeOptionsElement.TryGetProperty("framework", out JsonElement frameworkElement))
+      if (runtimeOptionsElement?["framework"] != null)
       {
-        return new[] { (frameworkElement.GetProperty("name").GetString(), frameworkElement.GetProperty("version").GetString()) };
+        return new[] { (runtimeOptionsElement["framework"]["name"]?.Value<string>(), runtimeOptionsElement["framework"]["version"]?.Value<string>()) };
       }
 
-      if (runtimeOptionsElement.TryGetProperty("frameworks", out JsonElement frameworksElement))
+      if (runtimeOptionsElement?["frameworks"] != null)
       {
-        return frameworksElement.EnumerateArray().Select(x => (x.GetProperty("name").GetString(), x.GetProperty("version").GetString())).ToList();
+        return runtimeOptionsElement["frameworks"].Select(x => (x["name"]?.Value<string>(), x["version"]?.Value<string>())).ToList();
       }
 
       throw new InvalidOperationException($"Unable to read runtime configuration from {_runtimeConfigFile}.");
