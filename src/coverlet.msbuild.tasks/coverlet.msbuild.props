@@ -19,7 +19,6 @@
     <ExcludeAssembliesWithoutSources Condition="$(ExcludeAssembliesWithoutSources) == ''"></ExcludeAssembliesWithoutSources>
   </PropertyGroup>
   <PropertyGroup>
-    <CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tasks\net6.0\</CoverletToolsPath>
-    <CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\</CoverletToolsPath>
+    <CoverletToolsPath Condition=" '$(CoverletToolsPath)' == '' ">$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\</CoverletToolsPath>
   </PropertyGroup>
 </Project>

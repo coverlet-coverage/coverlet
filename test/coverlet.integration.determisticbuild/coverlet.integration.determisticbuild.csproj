@@ -12,7 +12,6 @@
       https://api.nuget.org/v3/index.json;
       $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
     </RestoreSources>
-    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
