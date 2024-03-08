@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="6.0.1"/>
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="NuGet.Versioning" />
-    <PackageReference Include="System.Text.Json" VersionOverride="6.0.9"/>
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup  Condition="'$(TargetFramework)' != 'netstandard2.0'">
