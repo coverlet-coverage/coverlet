@@ -2,7 +2,7 @@
 
 ## Versioning strategy
 
-Coverlet is versioned with Semantic Versioning [6.0.0](https://semver.org/#semantic-versioning-200) that states:
+Coverlet is versioned with Semantic Versioning [2.0.0](https://semver.org/#semantic-versioning-200) that states:
 
 ```text
 Given a version number MAJOR.MINOR.PATCH, increment the:
