@@ -360,7 +360,7 @@ namespace Coverlet.Core.Helpers
             IEnumerable<string> regexPatterns = validIncludeFilters.Select(x =>
                 $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
             string pattern = string.Join("|", regexPatterns);
-            IEnumerable<Match> matches = Regex.Matches(regexInput, pattern).Cast<Match>();
+            IEnumerable<Match> matches = Regex.Matches(regexInput, pattern, RegexOptions.IgnoreCase).Cast<Match>();
 
             // Select only the modules that match the include filters
             regexInput = string.Join(
@@ -378,7 +378,7 @@ namespace Coverlet.Core.Helpers
             IEnumerable<string> regexPatterns = validExcludeFilters.Select(x =>
                 $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
             string pattern = string.Join("|", regexPatterns);
-            IEnumerable<Match> matches = Regex.Matches(regexInput, pattern).Cast<Match>();
+            IEnumerable<Match> matches = Regex.Matches(regexInput, pattern, RegexOptions.IgnoreCase).Cast<Match>();
             excludedModules = matches.Where(x => x.Success).Select(x => x.Groups[0].Value).ToImmutableHashSet();
         }
 
