@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,7 @@ using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
+using Document = System.Reflection.Metadata.Document;
 
 namespace Coverlet.Core.Helpers
 {
@@ -339,63 +341,51 @@ namespace Coverlet.Core.Helpers
       return true;
     }
 
-    public bool IsModuleExcluded(string module, string[] excludeFilters)
+    public IEnumerable<string> SelectModules(IEnumerable<string> modules, string[] includeFilters, string[] excludeFilters)
     {
-      if (excludeFilters == null || excludeFilters.Length == 0)
-        return false;
+        char escapeSymbol = '!';
+        ILookup<string, string> modulesLookup = modules
+            .Where(x => x != null)
+            .ToLookup(x => $"{escapeSymbol}{Path.GetFileNameWithoutExtension(x)}{escapeSymbol}");
 
-      module = Path.GetFileNameWithoutExtension(module);
-      if (module == null)
-        return false;
+        string regexInput = string.Join(Environment.NewLine, modulesLookup.Select(x => x.Key));
 
-      foreach (string filter in excludeFilters)
-      {
-#pragma warning disable IDE0057 // Use range operator
-        string typePattern = filter.Substring(filter.IndexOf(']') + 1);
+        string[] validIncludeFilters = (includeFilters ?? Array.Empty<string>())
+            .Where(IsValidFilterExpression)
+            .Where(x => x.EndsWith("*"))
+            .ToArray();
 
-        if (typePattern != "*")
-          continue;
+        if (validIncludeFilters.Any())
+        {
+            IEnumerable<string> regexPatterns = validIncludeFilters.Select(x =>
+                $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+            string pattern = string.Join("|", regexPatterns);
+            IEnumerable<Match> matches = Regex.Matches(regexInput, pattern).Cast<Match>();
 
-        string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
-#pragma warning restore IDE0057 // Use range operator
-        modulePattern = WildcardToRegex(modulePattern);
+            // Select only the modules that match the include filters
+            regexInput = string.Join(
+                Environment.NewLine,
+                matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
+        }
 
-        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10));
+        string[] validExcludeFilters = (excludeFilters ?? Array.Empty<string>())
+            .Where(IsValidFilterExpression)
+            .Where(x => x.EndsWith("*"))
+            .ToArray();
+        ImmutableHashSet<string> excludedModules = ImmutableHashSet<string>.Empty;
+        if (validExcludeFilters.Any())
+        {
+            IEnumerable<string> regexPatterns = validExcludeFilters.Select(x =>
+                $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+            string pattern = string.Join("|", regexPatterns);
+            IEnumerable<Match> matches = Regex.Matches(regexInput, pattern).Cast<Match>();
+            excludedModules = matches.Where(x => x.Success).Select(x => x.Groups[0].Value).ToImmutableHashSet();
+        }
 
-        if (regex.IsMatch(module))
-          return true;
-      }
-
-      return false;
-    }
-
-    public bool IsModuleIncluded(string module, string[] includeFilters)
-    {
-      if (includeFilters == null || includeFilters.Length == 0)
-        return true;
-
-      module = Path.GetFileNameWithoutExtension(module);
-      if (module == null)
-        return false;
-
-      foreach (string filter in includeFilters)
-      {
-#pragma warning disable IDE0057 // Use range operator
-        string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
-#pragma warning restore IDE0057 // Use range operator
-
-        if (modulePattern == "*")
-          return true;
-
-        modulePattern = WildcardToRegex(modulePattern);
-
-        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10));
-
-        if (regex.IsMatch(module))
-          return true;
-      }
-
-      return false;
+        return regexInput
+            .Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
+            .Where(x=>!excludedModules.Contains(x))
+            .SelectMany(x=>modulesLookup[x]);
     }
 
     public bool IsTypeExcluded(string module, string type, string[] excludeFilters)
