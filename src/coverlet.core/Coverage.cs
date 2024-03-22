@@ -107,15 +107,14 @@ namespace Coverlet.Core
       _parameters.ExcludeFilters = _parameters.ExcludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
       _parameters.IncludeFilters = _parameters.IncludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
-      foreach (string module in modules)
+      IReadOnlyList<string> validModules = _instrumentationHelper.SelectModules(modules, _parameters.IncludeFilters, _parameters.ExcludeFilters).ToList();
+      foreach (var excludedModule in modules.Except(validModules))
       {
-        if (_instrumentationHelper.IsModuleExcluded(module, _parameters.ExcludeFilters) ||
-            !_instrumentationHelper.IsModuleIncluded(module, _parameters.IncludeFilters))
-        {
-          _logger.LogVerbose($"Excluded module: '{module}'");
-          continue;
-        }
+        _logger.LogVerbose($"Excluded module: '{excludedModule}'");
+      }
 
+      foreach (string module in validModules)
+      {
         var instrumenter = new Instrumenter(module,
                                             Identifier,
                                             _parameters,

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Coverlet.Core.Enums;
 
 namespace Coverlet.Core.Abstractions
@@ -11,8 +12,7 @@ namespace Coverlet.Core.Abstractions
     void DeleteHitsFile(string path);
     string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly);
     bool HasPdb(string module, out bool embedded);
-    bool IsModuleExcluded(string module, string[] excludeFilters);
-    bool IsModuleIncluded(string module, string[] includeFilters);
+    IEnumerable<string> SelectModules(IEnumerable<string> modules, string[] includeFilters, string[] excludeFilters);
     bool IsValidFilterExpression(string filter);
     bool IsTypeExcluded(string module, string type, string[] excludeFilters);
     bool IsTypeIncluded(string module, string type, string[] includeFilters);

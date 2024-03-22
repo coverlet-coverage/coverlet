@@ -138,19 +138,12 @@ namespace Coverlet.Core.Helpers.Tests
     }
 
     [Fact]
-    public void TestIsModuleExcludedWithoutFilter()
+    public void TestSelectModulesWithoutIncludeAndExcludedFilters()
     {
-      bool result = _instrumentationHelper.IsModuleExcluded("Module.dll", new string[0]);
+      string[] modules = new [] {"Module.dll"};
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, new string[0], new string[0]);
 
-      Assert.False(result);
-    }
-
-    [Fact]
-    public void TestIsModuleIncludedWithoutFilter()
-    {
-      bool result = _instrumentationHelper.IsModuleIncluded("Module.dll", new string[0]);
-
-      Assert.True(result);
+      Assert.Equal(modules, result);
     }
 
     [Theory]
@@ -158,41 +151,41 @@ namespace Coverlet.Core.Helpers.Tests
     [InlineData("[Mismatch]*")]
     public void TestIsModuleExcludedWithSingleMismatchFilter(string filter)
     {
-      bool result = _instrumentationHelper.IsModuleExcluded("Module.dll", new[] { filter });
+      string[] modules = new [] {"Module.dll"};
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, new string[0], new[] {filter});
 
-      Assert.False(result);
+      Assert.Equal(modules, result);
     }
 
     [Fact]
     public void TestIsModuleIncludedWithSingleMismatchFilter()
     {
-      bool result = _instrumentationHelper.IsModuleIncluded("Module.dll", new[] { "[Mismatch]*" });
+      string[] modules = new [] {"Module.dll"};
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, new[] { "[Mismatch]*" }, new string[0]);
 
-      Assert.False(result);
+      Assert.Empty(result);
     }
 
     [Theory]
     [MemberData(nameof(ValidModuleFilterData))]
     public void TestIsModuleExcludedAndIncludedWithFilter(string filter)
     {
-      bool result = _instrumentationHelper.IsModuleExcluded("Module.dll", new[] { filter });
-      Assert.True(result);
+      string[] modules = new [] {"Module.dll"};
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, new[] { filter }, new[] { filter });
 
-      result = _instrumentationHelper.IsModuleIncluded("Module.dll", new[] { filter });
-      Assert.True(result);
+      Assert.Empty(result);
     }
 
     [Theory]
     [MemberData(nameof(ValidModuleFilterData))]
     public void TestIsModuleExcludedAndIncludedWithMatchingAndMismatchingFilter(string filter)
     {
-      string[] filters = new[] { "[Mismatch]*", filter, "[Mismatch]*" };
+      string[] modules = new[] {"Module.dll"};
+      string[] filters = new[] {"[Mismatch]*", filter, "[Mismatch]*"};
 
-      bool result = _instrumentationHelper.IsModuleExcluded("Module.dll", filters);
-      Assert.True(result);
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, filters, filters);
 
-      result = _instrumentationHelper.IsModuleIncluded("Module.dll", filters);
-      Assert.True(result);
+      Assert.Empty(result);
     }
 
     [Fact]
