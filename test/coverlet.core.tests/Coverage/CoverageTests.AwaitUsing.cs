@@ -23,6 +23,7 @@ namespace Coverlet.Core.Tests
                   {
                     await (ValueTask)instance.HasAwaitUsing();
                     await (Task)instance.Issue914_Repro();
+                    await (Task)instance.Issue1490_Repro<string>();
 
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
@@ -39,8 +40,10 @@ namespace Coverlet.Core.Tests
                             (28, 1), (29, 1), (30, 1),
                             // Issue914_Repro_Example2()
                             (34, 1), (35, 1), (36, 1), (37, 1),
+                            // Issue1490_Repro<T>()
+                            (40, 1), (41, 1), (42, 1), (43, 1),
                             // MyTransaction.DisposeAsync()
-                            (43, 2), (44, 2), (45, 2)
+                            (48, 3), (49, 3), (50, 3)
                             )
         .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 0);
       }

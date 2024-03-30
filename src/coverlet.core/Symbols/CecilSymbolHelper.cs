@@ -45,6 +45,22 @@ namespace Coverlet.Core.Symbols
       return fieldDefinition.DeclaringType.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);
     }
 
+    private static bool IsCompilerGeneratedField(Instruction instruction, out FieldDefinition field)
+    {
+      switch (instruction.Operand)
+      {
+        case FieldDefinition fieldDefinition when IsCompilerGenerated(fieldDefinition):
+          field = fieldDefinition;
+          return true;
+        case FieldReference fieldReference when IsCompilerGenerated(fieldReference.Resolve()):
+          field = fieldReference.Resolve();
+          return true;
+        default:
+          field = null;
+          return false;
+      }
+    }
+
     private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
     {
       if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
@@ -537,11 +553,9 @@ namespace Coverlet.Core.Symbols
             (instructions[currentIndex - 2].OpCode == OpCodes.Ldarg ||
              instructions[currentIndex - 2].OpCode == OpCodes.Ldarg_0) &&
             instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
-            (
-                (instructions[currentIndex - 1].Operand is FieldDefinition field && IsCompilerGenerated(field) && field.FieldType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator")) ||
-                (instructions[currentIndex - 1].Operand is FieldReference fieldRef && IsCompilerGenerated(fieldRef.Resolve()) && fieldRef.FieldType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator"))
-            )
-        )
+            IsCompilerGeneratedField(instructions[currentIndex - 1], out FieldDefinition field) &&
+            field.FieldType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator")
+           )
         {
           return true;
         }
@@ -582,10 +596,8 @@ namespace Coverlet.Core.Symbols
         for (int i = currentIndex - 1; i >= minFieldIndex; --i)
         {
           if (instructions[i].OpCode == OpCodes.Ldfld &&
-              (
-                  (instructions[i].Operand is FieldDefinition field && IsCompilerGenerated(field) && field.FieldType.FullName == "System.Object") ||
-                  (instructions[i].Operand is FieldReference fieldRef && IsCompilerGenerated(fieldRef.Resolve()) && fieldRef.FieldType.FullName == "System.Object")
-              ))
+              IsCompilerGeneratedField(instructions[i], out FieldDefinition field) &&
+              field.FieldType.FullName == "System.Object")
           {
             // We expect the call to GetResult() to be no more than four
             // instructions before the loading of the field's value.
@@ -708,16 +720,16 @@ namespace Coverlet.Core.Symbols
 
         bool isFollowedByDisposeAsync = false;
 
-        if (instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
-            instructions[currentIndex - 1].Operand is FieldDefinition field &&
-            IsCompilerGenerated(field))
+        if (instructions[currentIndex - 1].OpCode == OpCodes.Ldfld)
         {
+          if(! IsCompilerGeneratedField(instructions[currentIndex - 1], out FieldDefinition field)) return false;
+
           int maxReloadFieldIndex = Math.Min(currentIndex + 2, instructions.Count - 2);
 
           for (int i = currentIndex + 1; i <= maxReloadFieldIndex; ++i)
           {
             if (instructions[i].OpCode == OpCodes.Ldfld &&
-                instructions[i].Operand is FieldDefinition reloadedField &&
+                IsCompilerGeneratedField(instructions[i], out FieldDefinition reloadedField) &&
                 field.Equals(reloadedField) &&
                 instructions[i + 1].OpCode == OpCodes.Callvirt &&
                 instructions[i + 1].Operand is MethodReference method &&
@@ -758,8 +770,8 @@ namespace Coverlet.Core.Symbols
             if ((instructions[i].OpCode == OpCodes.Leave ||
                  instructions[i].OpCode == OpCodes.Leave_S) &&
                 instructions[i - 1].OpCode == OpCodes.Stfld &&
-                instructions[i - 1].Operand is FieldDefinition storeField &&
-                IsCompilerGenerated(storeField))
+                IsCompilerGeneratedField(instructions[i - 1], out FieldDefinition _)
+                )
             {
               return true;
             }
@@ -811,9 +823,7 @@ namespace Coverlet.Core.Symbols
 
           for (int i = currentIndex - 2; i >= minLoadFieldIndex; --i)
           {
-            if (instructions[i].OpCode == OpCodes.Ldfld &&
-                instructions[i].Operand is FieldDefinition loadedField &&
-                IsCompilerGenerated(loadedField))
+            if (instructions[i].OpCode == OpCodes.Ldfld && IsCompilerGeneratedField(instructions[i], out FieldDefinition _))
             {
               int minRethrowIndex = Math.Max(0, i - 4);
 
@@ -918,10 +928,8 @@ namespace Coverlet.Core.Symbols
 
         if (currentIndex >= 2 &&
             instructions[currentIndex - 1].OpCode == OpCodes.Ldfld &&
-            (
-                (instructions[currentIndex - 1].Operand is FieldDefinition field && IsCompilerGenerated(field) && field.FullName.EndsWith("__disposeMode")) ||
-                (instructions[currentIndex - 1].Operand is FieldReference fieldRef && IsCompilerGenerated(fieldRef.Resolve()) && fieldRef.FullName.EndsWith("__disposeMode"))
-            ) &&
+            IsCompilerGeneratedField(instructions[currentIndex - 1], out FieldDefinition field) &&
+            field.FullName.EndsWith("__disposeMode") &&
             (instructions[currentIndex - 2].OpCode == OpCodes.Ldarg ||
              instructions[currentIndex - 2].OpCode == OpCodes.Ldarg_0))
         {
