@@ -1,5 +1,6 @@
+
 <Project>
-  <Import Project="$(RepoRoot)/Directory.Build.targets" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.targets', '$(MSBuildThisFileDirectory)../'))" />
   <Choose>
     <!-- This condition tests whether coverlet.msbuild.props has been imported by the project -->
     <When Condition=" '$(ThresholdType)' != '' ">
