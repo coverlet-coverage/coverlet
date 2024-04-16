@@ -14,7 +14,6 @@ using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
-using Document = System.Reflection.Metadata.Document;
 
 namespace Coverlet.Core.Helpers
 {
@@ -343,49 +342,58 @@ namespace Coverlet.Core.Helpers
 
     public IEnumerable<string> SelectModules(IEnumerable<string> modules, string[] includeFilters, string[] excludeFilters)
     {
-        char escapeSymbol = '!';
-        ILookup<string, string> modulesLookup = modules
-            .Where(x => x != null)
-            .ToLookup(x => $"{escapeSymbol}{Path.GetFileNameWithoutExtension(x)}{escapeSymbol}");
+      const char escapeSymbol = '!';
+      ILookup<string, string> modulesLookup = modules.Where(x => x != null)
+          .ToLookup(x => $"{escapeSymbol}{Path.GetFileNameWithoutExtension(x)}{escapeSymbol}");
 
-        string regexInput = string.Join(Environment.NewLine, modulesLookup.Select(x => x.Key));
+      string moduleKeys = string.Join(Environment.NewLine, modulesLookup.Select(x => x.Key));
+      string includedModuleKeys = GetModuleKeysForIncludeFilters(includeFilters, escapeSymbol, moduleKeys);
+      string excludedModuleKeys = GetModuleKeysForExcludeFilters(excludeFilters, escapeSymbol, includedModuleKeys);
 
-        string[] validIncludeFilters = (includeFilters ?? Array.Empty<string>())
-            .Where(IsValidFilterExpression)
-            .Where(x => x.EndsWith("*"))
-            .ToArray();
+      IEnumerable<string> moduleKeysToInclude = includedModuleKeys
+          .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+          .Except(excludedModuleKeys.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
 
-        if (validIncludeFilters.Any())
-        {
-            IEnumerable<string> regexPatterns = validIncludeFilters.Select(x =>
-                $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
-            string pattern = string.Join("|", regexPatterns);
-            IEnumerable<Match> matches = Regex.Matches(regexInput, pattern, RegexOptions.IgnoreCase).Cast<Match>();
+       return moduleKeysToInclude.SelectMany(x => modulesLookup[x]);
+    }
 
-            // Select only the modules that match the include filters
-            regexInput = string.Join(
-                Environment.NewLine,
-                matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
-        }
+    private string GetModuleKeysForIncludeFilters(IEnumerable<string> filters, char escapeSymbol, string moduleKeys)
+    {
+      string[] validFilters = GetValidFilters(filters);
 
-        string[] validExcludeFilters = (excludeFilters ?? Array.Empty<string>())
-            .Where(IsValidFilterExpression)
-            .Where(x => x.EndsWith("*"))
-            .ToArray();
-        ImmutableHashSet<string> excludedModules = ImmutableHashSet<string>.Empty;
-        if (validExcludeFilters.Any())
-        {
-            IEnumerable<string> regexPatterns = validExcludeFilters.Select(x =>
-                $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
-            string pattern = string.Join("|", regexPatterns);
-            IEnumerable<Match> matches = Regex.Matches(regexInput, pattern, RegexOptions.IgnoreCase).Cast<Match>();
-            excludedModules = matches.Where(x => x.Success).Select(x => x.Groups[0].Value).ToImmutableHashSet();
-        }
+      return !validFilters.Any() ? moduleKeys : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+    }
 
-        return regexInput
-            .Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
-            .Where(x=>!excludedModules.Contains(x))
-            .SelectMany(x=>modulesLookup[x]);
+    private string GetModuleKeysForExcludeFilters(IEnumerable<string> filters, char escapeSymbol, string moduleKeys)
+    {
+      string[] validFilters = GetValidFilters(filters);
+
+      return !validFilters.Any() ? string.Empty : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+    }
+
+    private static string GetModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
+    {
+      string pattern = CreateRegexPattern(validFilters, escapeSymbol);
+      IEnumerable<Match> matches = Regex.Matches(moduleKeys, pattern, RegexOptions.IgnoreCase).Cast<Match>();
+
+      return string.Join(
+        Environment.NewLine,
+        matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
+    }
+
+    private string[] GetValidFilters(IEnumerable<string> filters)
+    {
+      return (filters ?? Array.Empty<string>())
+          .Where(IsValidFilterExpression)
+          .Where(x => x.EndsWith("*"))
+          .ToArray();
+    }
+
+    private static string CreateRegexPattern(IEnumerable<string> filters, char escapeSymbol)
+    {
+      IEnumerable<string> regexPatterns = filters.Select(x =>
+          $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+      return string.Join("|", regexPatterns);
     }
 
     public bool IsTypeExcluded(string module, string type, string[] excludeFilters)

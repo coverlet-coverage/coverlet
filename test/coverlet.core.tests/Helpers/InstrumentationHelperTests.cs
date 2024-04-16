@@ -124,6 +124,10 @@ namespace Coverlet.Core.Helpers.Tests
       Assert.False(_instrumentationHelper.IsValidFilterExpression("[-]*"));
       Assert.False(_instrumentationHelper.IsValidFilterExpression("*"));
       Assert.False(_instrumentationHelper.IsValidFilterExpression("]["));
+      Assert.False(_instrumentationHelper.IsValidFilterExpression("["));
+      Assert.False(_instrumentationHelper.IsValidFilterExpression("[assembly][*"));
+      Assert.False(_instrumentationHelper.IsValidFilterExpression("[assembly]*]"));
+      Assert.False(_instrumentationHelper.IsValidFilterExpression("[]"));
       Assert.False(_instrumentationHelper.IsValidFilterExpression(null));
     }
 
@@ -296,6 +300,14 @@ namespace Coverlet.Core.Helpers.Tests
 
       newDir.Delete(true);
       newDir2.Delete(true);
+    }
+
+    [Theory]
+    [InlineData("<TestMethod>g__LocalFunction|0_0", true)]
+    [InlineData("TestMethod", false)]
+    public void InstrumentationHelper_IsLocalMethod_ReturnsExpectedResult(string method, bool result)
+    {
+      Assert.Equal(_instrumentationHelper.IsLocalMethod(method), result);
     }
 
     public static IEnumerable<object[]> ValidModuleFilterData =>
