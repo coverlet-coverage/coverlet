@@ -36,6 +36,11 @@ namespace Coverlet.Core.Samples.Tests
             await transaction.DisposeAsync();
         }
 
+        async public Task<T> Issue1490_Repro<T>()
+        {
+            await using var transaction = new MyTransaction();
+            return default(T);
+        }
 
         private class MyTransaction : IAsyncDisposable
         {
