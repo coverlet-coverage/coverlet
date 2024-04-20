@@ -339,63 +339,60 @@ namespace Coverlet.Core.Helpers
       return true;
     }
 
-    public bool IsModuleExcluded(string module, string[] excludeFilters)
+    public IEnumerable<string> SelectModules(IEnumerable<string> modules, string[] includeFilters, string[] excludeFilters)
     {
-      if (excludeFilters == null || excludeFilters.Length == 0)
-        return false;
+      const char escapeSymbol = '!';
+      ILookup<string, string> modulesLookup = modules.Where(x => x != null)
+          .ToLookup(x => $"{escapeSymbol}{Path.GetFileNameWithoutExtension(x)}{escapeSymbol}");
 
-      module = Path.GetFileNameWithoutExtension(module);
-      if (module == null)
-        return false;
+      string moduleKeys = string.Join(Environment.NewLine, modulesLookup.Select(x => x.Key));
+      string includedModuleKeys = GetModuleKeysForIncludeFilters(includeFilters, escapeSymbol, moduleKeys);
+      string excludedModuleKeys = GetModuleKeysForExcludeFilters(excludeFilters, escapeSymbol, includedModuleKeys);
 
-      foreach (string filter in excludeFilters)
-      {
-#pragma warning disable IDE0057 // Use range operator
-        string typePattern = filter.Substring(filter.IndexOf(']') + 1);
+      IEnumerable<string> moduleKeysToInclude = includedModuleKeys
+          .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+          .Except(excludedModuleKeys.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
 
-        if (typePattern != "*")
-          continue;
-
-        string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
-#pragma warning restore IDE0057 // Use range operator
-        modulePattern = WildcardToRegex(modulePattern);
-
-        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10));
-
-        if (regex.IsMatch(module))
-          return true;
-      }
-
-      return false;
+       return moduleKeysToInclude.SelectMany(x => modulesLookup[x]);
     }
 
-    public bool IsModuleIncluded(string module, string[] includeFilters)
+    private string GetModuleKeysForIncludeFilters(IEnumerable<string> filters, char escapeSymbol, string moduleKeys)
     {
-      if (includeFilters == null || includeFilters.Length == 0)
-        return true;
+      string[] validFilters = GetValidFilters(filters);
 
-      module = Path.GetFileNameWithoutExtension(module);
-      if (module == null)
-        return false;
+      return !validFilters.Any() ? moduleKeys : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+    }
 
-      foreach (string filter in includeFilters)
-      {
-#pragma warning disable IDE0057 // Use range operator
-        string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
-#pragma warning restore IDE0057 // Use range operator
+    private string GetModuleKeysForExcludeFilters(IEnumerable<string> filters, char escapeSymbol, string moduleKeys)
+    {
+      string[] validFilters = GetValidFilters(filters);
 
-        if (modulePattern == "*")
-          return true;
+      return !validFilters.Any() ? string.Empty : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+    }
 
-        modulePattern = WildcardToRegex(modulePattern);
+    private static string GetModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
+    {
+      string pattern = CreateRegexPattern(validFilters, escapeSymbol);
+      IEnumerable<Match> matches = Regex.Matches(moduleKeys, pattern, RegexOptions.IgnoreCase).Cast<Match>();
 
-        var regex = new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10));
+      return string.Join(
+        Environment.NewLine,
+        matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
+    }
 
-        if (regex.IsMatch(module))
-          return true;
-      }
+    private string[] GetValidFilters(IEnumerable<string> filters)
+    {
+      return (filters ?? Array.Empty<string>())
+          .Where(IsValidFilterExpression)
+          .Where(x => x.EndsWith("*"))
+          .ToArray();
+    }
 
-      return false;
+    private static string CreateRegexPattern(IEnumerable<string> filters, char escapeSymbol)
+    {
+      IEnumerable<string> regexPatterns = filters.Select(x =>
+          $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+      return string.Join("|", regexPatterns);
     }
 
     public bool IsTypeExcluded(string module, string type, string[] excludeFilters)
