@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+- Fix slow modules filtering process [#1646](https://github.com/coverlet-coverage/coverlet/issues/1646) by https://github.com/BlackGad
 - Fix incorrect coverage await using in generic method [#1490](https://github.com/coverlet-coverage/coverlet/issues/1490)
 
 ## Release date 2024-03-13
