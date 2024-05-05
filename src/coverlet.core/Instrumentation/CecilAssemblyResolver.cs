@@ -76,9 +76,9 @@ namespace Coverlet.Core.Instrumentation
       // runtime folders are different
       _compositeResolver = new Lazy<CompositeCompilationAssemblyResolver>(() => new CompositeCompilationAssemblyResolver(new ICompilationAssemblyResolver[]
       {
+                new NetCoreSharedFrameworkResolver(modulePath, _logger),
                 new AppBaseCompilationAssemblyResolver(),
                 new PackageCompilationAssemblyResolver(),
-                new NetCoreSharedFrameworkResolver(modulePath, _logger),
                 new ReferenceAssemblyPathResolver(),
       }), true);
     }

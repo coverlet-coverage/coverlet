@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+- Fix Unable to instrument module - NET 8 [#1631](https://github.com/coverlet-coverage/coverlet/issues/1631)
 - Fix slow modules filtering process [#1646](https://github.com/coverlet-coverage/coverlet/issues/1646) by https://github.com/BlackGad
 - Fix incorrect coverage await using in generic method [#1490](https://github.com/coverlet-coverage/coverlet/issues/1490)
 
