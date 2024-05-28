@@ -62,7 +62,7 @@ namespace Coverlet.Console
         verbosity,
         formats,
         threshold,
-        //thresholdTypes,
+        thresholdTypes,
         thresholdStat,
         excludeFilters,
         includeFilters,
@@ -82,8 +82,6 @@ namespace Coverlet.Console
       rootCommand.Add(new VersionOption());
 
       ParseResult parseResult = CliParser.Parse(rootCommand, args);
-
-      CliConfiguration config = new (rootCommand);
 
       rootCommand.SetAction(async (context) =>
       {
@@ -138,6 +136,9 @@ namespace Coverlet.Console
         //context.ExitCode = taskStatus;
 
       });
+
+      CliConfiguration config = new(rootCommand);
+
       await config.InvokeAsync(args).ConfigureAwait(false); 
     }
     private static Task<int> HandleCommand(string moduleOrAppDirectory,
