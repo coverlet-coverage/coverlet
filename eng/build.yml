@@ -25,6 +25,8 @@ steps:
 
 - script: dotnet restore --configfile NuGet.config
   displayName: Restore packages
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
 - script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.msbuild.binlog
   displayName: Build
