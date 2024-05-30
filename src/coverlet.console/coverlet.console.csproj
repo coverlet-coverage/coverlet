@@ -22,9 +22,11 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
- 
+
   <ItemGroup>
     <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="System.CommandLine.Generator" />
+<!--    <PackageReference Include="Microsoft.CodeAnalysis.Common" />-->
   </ItemGroup>
 
   <ItemGroup>

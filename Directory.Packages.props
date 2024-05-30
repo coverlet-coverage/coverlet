@@ -13,6 +13,7 @@
     <PackageVersion Include="Microsoft.Build.Framework" Version="17.8.3" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="1.6.10" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.8.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" />
@@ -38,7 +39,8 @@
     <PackageVersion Include="ReportGenerator.Core" Version="5.2.1" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.4" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.24209.3" />
+    <PackageVersion Include="System.CommandLine.Generator" Version="2.0.0-beta4.23307.1" />
     <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
