@@ -35,7 +35,7 @@
     <PackageVersion Include="NuGet.Versioning" Version="6.8.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.5" />
     <PackageVersion Include="Moq" Version="4.20.70" />
-    <PackageVersion Include="ReportGenerator.Core" Version="5.2.1" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.3.6" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.4" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
