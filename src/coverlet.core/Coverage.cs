@@ -137,12 +137,20 @@ namespace Coverlet.Core
               _results.Add(result);
               _logger.LogVerbose($"Instrumented module: '{module}'");
             }
+            else
+            {
+              _logger.LogVerbose($"Skipped module: '{module}'");
+            }
           }
           catch (Exception ex)
           {
             _logger.LogWarning($"Unable to instrument module: {module}\n{ex}");
             _instrumentationHelper.RestoreOriginalModule(module, Identifier);
           }
+        }
+        else
+        {
+          _logger.LogVerbose($"Unable to instrument module: '{module}'");
         }
       }
 
