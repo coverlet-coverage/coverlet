@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace coverlet.collector.ArtifactPostProcessor
 {
@@ -40,7 +41,12 @@ namespace coverlet.collector.ArtifactPostProcessor
     public Task<ICollection<AttachmentSet>> ProcessAttachmentSetsAsync(XmlElement configurationElement, ICollection<AttachmentSet> attachments, IProgress<int> progressReporter,
       IMessageLogger logger, CancellationToken cancellationToken)
     {
-      AttachDebugger();
+      if(attachments.Count <= 1)
+      {
+        return Task.FromResult(attachments);
+      }
+
+      System.Diagnostics.Debugger.Launch();
 
       foreach (AttachmentSet attachmentSet in attachments)
       {
@@ -59,16 +65,11 @@ namespace coverlet.collector.ArtifactPostProcessor
       string filePath = Path.Combine(reportDirectory, report.fileName);
       File.WriteAllText(filePath, report.report);
 
-      return Task.FromResult(new List<AttachmentSet> {new(new Uri(filePath), report.fileName) } as ICollection<AttachmentSet>);
+      attachments = new[] { new AttachmentSet(new Uri(filePath), report.fileName) }.Concat(attachments).ToList();
+      return Task.FromResult(attachments);
     }
 
     public bool SupportsIncrementalProcessing => true;
-
-    private void AttachDebugger()
-    {
-      Debugger.Launch();
-      Debugger.Break();
-    }
 
     private (string report, string fileName) GetCoverageReport(CoverageResult coverageResult)
     {
