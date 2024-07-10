@@ -36,6 +36,7 @@ namespace Coverlet.Console
       var threshold = new Option<string>("--threshold", "Exits with error if the coverage % is below value.") { Arity = ArgumentArity.ZeroOrOne };
       var thresholdTypes = new Option<List<string>>("--threshold-type", () => new List<string>(new string[] { "line", "branch", "method" }), "Coverage type to apply the threshold to.").FromAmong("line", "branch", "method");
       var thresholdStat = new Option<ThresholdStatistic>("--threshold-stat", () => ThresholdStatistic.Minimum, "Coverage statistic used to enforce the threshold value.") { Arity = ArgumentArity.ZeroOrOne };
+      var thresholdAct = new Option<ThresholdAction>("--threshold-act", () => ThresholdAction.Fail, "The action to take when coverage is below the threshold value. Defaults to failing the build.") { Arity = ArgumentArity.ZeroOrOne };
       var excludeFilters = new Option<string[]>("--exclude", "Filter expressions to exclude specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var includeFilters = new Option<string[]>("--include", "Filter expressions to include only specific modules and types.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var excludedSourceFiles = new Option<string[]>("--exclude-by-file", "Glob patterns specifying source files to exclude.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
@@ -61,6 +62,7 @@ namespace Coverlet.Console
         threshold,
         thresholdTypes,
         thresholdStat,
+        thresholdAct,
         excludeFilters,
         includeFilters,
         excludedSourceFiles,
@@ -89,6 +91,7 @@ namespace Coverlet.Console
         string thresholdValue = context.ParseResult.GetValueForOption(threshold);
         List<string> thresholdTypesValue = context.ParseResult.GetValueForOption(thresholdTypes);
         ThresholdStatistic thresholdStatValue = context.ParseResult.GetValueForOption(thresholdStat);
+        ThresholdAction thresholdActValue = context.ParseResult.GetValueForOption(thresholdAct);
         string[] excludeFiltersValue = context.ParseResult.GetValueForOption(excludeFilters);
         string[] includeFiltersValue = context.ParseResult.GetValueForOption(includeFilters);
         string[] excludedSourceFilesValue = context.ParseResult.GetValueForOption(excludedSourceFiles);
@@ -115,6 +118,7 @@ namespace Coverlet.Console
                       thresholdValue,
                       thresholdTypesValue,
                       thresholdStatValue,
+                      thresholdActValue,
                       excludeFiltersValue,
                       includeFiltersValue,
                       excludedSourceFilesValue,
@@ -142,6 +146,7 @@ namespace Coverlet.Console
                                                            string threshold,
                                                            List<string> thresholdTypes,
                                                            ThresholdStatistic thresholdStat,
+                                                           ThresholdAction thresholdAct,
                                                            string[] excludeFilters,
                                                            string[] includeFilters,
                                                            string[] excludedSourceFiles,
@@ -380,12 +385,21 @@ namespace Coverlet.Console
           {
             exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
           }
-          throw new Exception(exceptionMessageBuilder.ToString());
+
+          switch (thresholdAct)
+          {
+            case ThresholdAction.Warning:
+              logger.LogWarning(exceptionMessageBuilder.ToString());
+              break;
+            case ThresholdAction.Fail:
+              exitCode += (int)CommandExitCodes.CoverageBelowThreshold;
+              throw new Exception(exceptionMessageBuilder.ToString());
+            default:
+              throw new ArgumentOutOfRangeException(nameof(thresholdAct), thresholdAct, "Unhandled threshold action");
+          }
         }
 
         return Task.FromResult(exitCode);
-
-
       }
 
       catch (Win32Exception we) when (we.Source == "System.Diagnostics.Process")
