@@ -22,6 +22,7 @@ namespace coverlet.collector.ArtifactPostProcessor
 {
   public class CoverletCoveragePostProcessor : IDataCollectorAttachmentProcessor
   {
+    private string _resultsDirectory;
     private readonly CoverageResult _coverageResult = new();
 
     public CoverletCoveragePostProcessor()
@@ -37,29 +38,37 @@ namespace coverlet.collector.ArtifactPostProcessor
       return new[] { uri };
     }
 
-    public Task<ICollection<AttachmentSet>> ProcessAttachmentSetsAsync(XmlElement configurationElement, ICollection<AttachmentSet> attachments, IProgress<int> progressReporter,
+    public Task<ICollection<AttachmentSet>> ProcessAttachmentSetsAsync(XmlElement configurationElement,
+      ICollection<AttachmentSet> attachments, IProgress<int> progressReporter,
       IMessageLogger logger, CancellationToken cancellationToken)
     {
-      AttachDebugger();
+
+
+      if (attachments.Count > 1)
+      {
+        AttachDebugger();
+      }
 
       foreach (AttachmentSet attachmentSet in attachments)
       {
-        foreach (UriDataAttachment uriAttachment in attachmentSet.Attachments)
+        foreach (UriDataAttachment uriAttachment in
+                 attachmentSet.Attachments) // check if the already merged report should be added here
         {
+          _resultsDirectory ??=
+            Directory.GetParent(uriAttachment.Uri.LocalPath)!.FullName; //null-forgiving operator needs to change
+
           string json = File.ReadAllText(uriAttachment.Uri.LocalPath);
 
-          _coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
+          _coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json)); // is it possible to only use json here?
         }
       }
 
       (string report, string fileName) report = GetCoverageReport(_coverageResult);
-      string reportDirectory = Path.Combine(Path.GetTempPath(), new Guid().ToString());
 
-      Directory.CreateDirectory(reportDirectory);
-      string filePath = Path.Combine(reportDirectory, report.fileName);
+      string filePath = Path.Combine(_resultsDirectory, report.fileName);
       File.WriteAllText(filePath, report.report);
 
-      return Task.FromResult(new List<AttachmentSet> {new(new Uri(filePath), report.fileName) } as ICollection<AttachmentSet>);
+      return Task.FromResult(attachments);
     }
 
     public bool SupportsIncrementalProcessing => true;
@@ -72,16 +81,20 @@ namespace coverlet.collector.ArtifactPostProcessor
 
     private (string report, string fileName) GetCoverageReport(CoverageResult coverageResult)
     {
-      var reporterFactory = new ReporterFactory("json");
+      var reporterFactory =
+        new ReporterFactory("json"); // the last merged file should be in the format the user specified
       IReporter reporter = reporterFactory.CreateReporter();
 
       try
       {
-        return (reporter.Report(coverageResult, new DummySourceRootTranslator()), Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension));
+        // check if we need the sourceRootTranslator here 
+        return (reporter.Report(coverageResult, new DummySourceRootTranslator()),
+          Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension));
       }
       catch (Exception ex)
       {
-        throw new CoverletDataCollectorException($"{CoverletConstants.DataCollectorName}: Failed to get coverage report", ex);
+        throw new CoverletDataCollectorException(
+          $"{CoverletConstants.DataCollectorName}: Failed to get coverage report", ex);
       }
     }
   }
