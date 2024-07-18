@@ -57,9 +57,9 @@ namespace Coverlet.Core
     private readonly ICecilSymbolHelper _cecilSymbolHelper;
     private readonly List<InstrumenterResult> _results;
     private readonly CoverageParameters _parameters;
+    private readonly List<string> _unloadedModules;
 
     public string Identifier { get; }
-    private List<string> unloadedModules { get; set; }
 
     public Coverage(string moduleOrDirectory,
         CoverageParameters parameters,
@@ -79,7 +79,7 @@ namespace Coverlet.Core
       _cecilSymbolHelper = cecilSymbolHelper;
       Identifier = Guid.NewGuid().ToString();
       _results = new List<InstrumenterResult>();
-      unloadedModules = new List<string>();
+      _unloadedModules = new List<string>();
     }
 
     public Coverage(CoveragePrepareResult prepareResult,
@@ -96,6 +96,7 @@ namespace Coverlet.Core
       _instrumentationHelper = instrumentationHelper;
       _fileSystem = fileSystem;
       _sourceRootTranslator = sourceRootTranslator;
+      _unloadedModules = new List<string>();
     }
 
     public CoveragePrepareResult PrepareModules()
@@ -243,7 +244,7 @@ namespace Coverlet.Core
         }
 
         modules.Add(Path.GetFileName(result.ModulePath), documents);
-        if (!unloadedModules.Contains(result.ModulePath))
+        if (!_unloadedModules.Contains(result.ModulePath))
         {
           UnloadModule(result.ModulePath);
         }
@@ -337,7 +338,7 @@ namespace Coverlet.Core
     /// <param name="modulePath"></param>
     public void UnloadModule(string modulePath)
     {
-      unloadedModules.Add(modulePath);
+      _unloadedModules.Add(modulePath);
       _instrumentationHelper.RestoreOriginalModule(modulePath, Identifier);
     }
 
