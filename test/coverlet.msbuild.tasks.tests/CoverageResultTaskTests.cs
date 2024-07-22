@@ -98,6 +98,7 @@ namespace coverlet.msbuild.tasks.tests
         Threshold = "50",
         ThresholdType = "total",
         ThresholdStat = "total",
+        ThresholdAct = "fail",
         InstrumenterState = InstrumenterState
       };
       coverageResultTask.BuildEngine = _buildEngine.Object;
