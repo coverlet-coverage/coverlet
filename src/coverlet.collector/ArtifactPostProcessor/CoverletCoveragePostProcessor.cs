@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -17,81 +17,122 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Newtonsoft.Json;
-using System.Linq;
 
 namespace coverlet.collector.ArtifactPostProcessor
 {
   public class CoverletCoveragePostProcessor : IDataCollectorAttachmentProcessor
   {
-    private string _resultsDirectory;
     private readonly CoverageResult _coverageResult = new();
+    private ReportFormatParser _reportFormatParser;
+    private IMessageLogger _logger;
 
     public CoverletCoveragePostProcessor()
     {
       _coverageResult.Modules = new Modules();
     }
 
-#pragma warning disable CS8632
-    public IEnumerable<Uri>? GetExtensionUris()
-#pragma warning restore CS8632
-    {
-      var uri = new Uri(CoverletConstants.DefaultUri);
-      return new[] { uri };
-    }
+    public bool SupportsIncrementalProcessing => true;
+
+    public IEnumerable<Uri> GetExtensionUris() => new[] { new Uri(CoverletConstants.DefaultUri) };
 
     public Task<ICollection<AttachmentSet>> ProcessAttachmentSetsAsync(XmlElement configurationElement,
       ICollection<AttachmentSet> attachments, IProgress<int> progressReporter,
       IMessageLogger logger, CancellationToken cancellationToken)
     {
-
+      _reportFormatParser ??= new ReportFormatParser();
+      _logger = logger;
 
       if (attachments.Count > 1)
       {
-        AttachDebugger();
+        System.Diagnostics.Debugger.Launch();
       }
+
+      // think about what configuration is mandatory and how to exit if not there
+      string[] formats = _reportFormatParser.ParseReportFormats(configurationElement);
+      string mergeDirectory = ParseMergeDirectory(configurationElement);
+      IReporter reporter = CreateReporter(formats);
+      string fileName = Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension);
+
+      if (mergeDirectory == null) return Task.FromResult(attachments);
 
       foreach (AttachmentSet attachmentSet in attachments)
       {
-        foreach (UriDataAttachment uriAttachment in
-                 attachmentSet.Attachments) // check if the already merged report should be added here
+        foreach (UriDataAttachment uriAttachment in attachmentSet.Attachments)
         {
-          _resultsDirectory ??=
-            Directory.GetParent(uriAttachment.Uri.LocalPath)!.FullName; //null-forgiving operator needs to change
-
-          string json = File.ReadAllText(uriAttachment.Uri.LocalPath);
-
-          _coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json)); // is it possible to only use json here?
+          MergeWithCoverageResult(uriAttachment.Uri.LocalPath);
         }
       }
 
-      (string report, string fileName) report = GetCoverageReport(_coverageResult);
+      Directory.CreateDirectory(mergeDirectory);
+      string filePath = Path.Combine(mergeDirectory, fileName);
 
-      string filePath = Path.Combine(_resultsDirectory, report.fileName);
-      File.WriteAllText(filePath, report.report);
+      MergeIntermediateResultWhenExist(filePath);
 
-      // attachments = new[] { new AttachmentSet(new Uri(filePath), report.fileName) }.Concat(attachments).ToList();
+      string report = GetCoverageReport(_coverageResult, reporter);
+
+      File.WriteAllText(filePath, report);
+
       return Task.FromResult(attachments);
     }
 
-    public bool SupportsIncrementalProcessing => true;
-
-    private (string report, string fileName) GetCoverageReport(CoverageResult coverageResult)
+    private void MergeIntermediateResultWhenExist(string filePath)
     {
-      var reporterFactory =
-        new ReporterFactory("json"); // the last merged file should be in the format the user specified
-      IReporter reporter = reporterFactory.CreateReporter();
+      if (File.Exists(filePath))
+      {
+        MergeWithCoverageResult(filePath);
+      }
+    }
 
+    private void MergeWithCoverageResult(string filePath)
+    {
+      string json = File.ReadAllText(filePath);
+      _coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
+// think about merging reports with different format -> e.g. reportgenerator core
+// or maybe we can deserialize different reports into Modules???
+// or always create additionally the specified format and overwrite intermediate results
+    }
+
+    private string GetCoverageReport(CoverageResult coverageResult, IReporter reporter)
+    {
       try
       {
         // check if we need the sourceRootTranslator here 
-        return (reporter.Report(coverageResult, new DummySourceRootTranslator()),
-          Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension));
+        return reporter.Report(coverageResult, new DummySourceRootTranslator());
       }
       catch (Exception ex)
       {
         throw new CoverletDataCollectorException(
           $"{CoverletConstants.DataCollectorName}: Failed to get coverage report", ex);
       }
+    }
+
+    private IReporter CreateReporter(IEnumerable<string> formats)
+    {
+      IEnumerable<IReporter> reporters = formats.Select(format =>
+      {
+        var reporterFactory = new ReporterFactory(format);
+        if (!reporterFactory.IsValidFormat())
+        {
+          _logger.SendMessage(TestMessageLevel.Warning, $"Invalid report format '{format}'");
+          return null;
+        }
+        return reporterFactory.CreateReporter();
+      }).Where(r => r != null);
+
+      // if we want to consider the case where multiple reporters are specified, the first one should be taken
+      IReporter reporter = reporters.FirstOrDefault();
+
+      // current prototype only with json format
+      var reporterFactory = new ReporterFactory("json");
+      reporter = reporterFactory.CreateReporter();
+
+      return reporter;
+    }
+
+    private static string ParseMergeDirectory(XmlElement configurationElement)
+    {
+      XmlElement mergeWithElement = configurationElement[CoverletConstants.MergeDirectory];
+      return mergeWithElement?.InnerText;
     }
   }
 }
