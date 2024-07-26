@@ -39,43 +39,40 @@ namespace coverlet.collector.ArtifactPostProcessor
       _coverageResult.Modules ??= new Modules();
       _logger = logger;
 
-      if (attachments.Count > 1)
-      {
-        System.Diagnostics.Debugger.Launch();
-      }
-
-      // think about what configuration is mandatory and how to exit if not there
       string[] formats = _reportFormatParser.ParseReportFormats(configurationElement);
       string mergeDirectory = ParseMergeDirectory(configurationElement);
-      // validate that json reports where created otherwise we cannot merge them
-      IList<IReporter> reporters = CreateReporter(formats).ToList();
 
-      // add more validation logic here, e.g.  for specified json reports
-      if (mergeDirectory == null) return Task.FromResult(attachments);
+      if (mergeDirectory == null || !formats.Contains("json"))
+        return Task.FromResult(attachments);
+
+      IList<IReporter> reporters = CreateReporters(formats).ToList();
 
       MergeExistingJsonReports(attachments, mergeDirectory);
-
       WriteCoverageReports(reporters, mergeDirectory, _coverageResult);
 
       return Task.FromResult(attachments);
     }
 
-    private void MergeExistingJsonReports(ICollection<AttachmentSet> attachments, string mergeDirectory)
+    private void MergeExistingJsonReports(IEnumerable<AttachmentSet> attachments, string mergeDirectory)
     {
       string jsonFileName = Path.ChangeExtension(CoverletConstants.DefaultFileName, "json");
 
       foreach (AttachmentSet attachmentSet in attachments)
       {
-        foreach (UriDataAttachment uriAttachment in attachmentSet.Attachments)
-        {
-          MergeWithCoverageResult(uriAttachment.Uri.LocalPath, _coverageResult);
-        }
+        attachmentSet.Attachments.Where(IsFileWithJsonExt).ToList().ForEach(x =>
+          MergeWithCoverageResult(x.Uri.LocalPath, _coverageResult)
+        );
       }
 
       Directory.CreateDirectory(mergeDirectory);
       string jsonFilePath = Path.Combine(mergeDirectory, jsonFileName);
 
       MergeIntermediateResultWhenExist(jsonFilePath, _coverageResult);
+    }
+
+    private static bool IsFileWithJsonExt(UriDataAttachment x)
+    {
+      return x.Uri.IsFile && Path.GetExtension(x.Uri.AbsolutePath).Equals(".json");
     }
 
     private void WriteCoverageReports(IEnumerable<IReporter> reporters, string directory, CoverageResult coverageResult)
@@ -100,9 +97,6 @@ namespace coverlet.collector.ArtifactPostProcessor
     {
       string json = File.ReadAllText(filePath);
       coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
-// think about merging reports with different format -> e.g. reportgenerator core
-// or maybe we can deserialize different reports into Modules???
-// or always create additionally the specified format and overwrite intermediate results
     }
 
     private string GetCoverageReport(CoverageResult coverageResult, IReporter reporter)
@@ -119,7 +113,7 @@ namespace coverlet.collector.ArtifactPostProcessor
       }
     }
 
-    private IEnumerable<IReporter> CreateReporter(IEnumerable<string> formats)
+    private IEnumerable<IReporter> CreateReporters(IEnumerable<string> formats)
     {
       IEnumerable<IReporter> reporters = formats.Select(format =>
       {
