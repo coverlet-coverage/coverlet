@@ -334,7 +334,7 @@ namespace Coverlet.Core
 
     /// <summary>
     /// Invoke the unloading of modules and restoration of the original assembly files, made public to allow unloading
-    /// of instrumentation is testing using parallelization
+    /// of instrumentation in large scale testing utilising parallelization
     /// </summary>
     /// <param name="modulePath"></param>
     public void UnloadModule(string modulePath)
