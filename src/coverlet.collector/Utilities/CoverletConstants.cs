@@ -8,7 +8,7 @@ namespace Coverlet.Collector.Utilities
     public const string FriendlyName = "XPlat code coverage";
     public const string DefaultUri = @"datacollector://Microsoft/CoverletCodeCoverage/1.0";
     public const string DataCollectorName = "CoverletCoverageDataCollector";
-    public const string DefaultReportFormat = "json";
+    public const string DefaultReportFormat = "cobertura";
     public const string DefaultFileName = "coverage";
     public const string IncludeFiltersElementName = "Include";
     public const string IncludeDirectoriesElementName = "IncludeDirectory";
