@@ -57,7 +57,6 @@ namespace Coverlet.Core
     private readonly ICecilSymbolHelper _cecilSymbolHelper;
     private readonly List<InstrumenterResult> _results;
     private readonly CoverageParameters _parameters;
-    private readonly List<string> _unloadedModules;
 
     public string Identifier { get; }
 
@@ -79,7 +78,6 @@ namespace Coverlet.Core
       _cecilSymbolHelper = cecilSymbolHelper;
       Identifier = Guid.NewGuid().ToString();
       _results = new List<InstrumenterResult>();
-      _unloadedModules = new List<string>();
     }
 
     public Coverage(CoveragePrepareResult prepareResult,
@@ -96,7 +94,6 @@ namespace Coverlet.Core
       _instrumentationHelper = instrumentationHelper;
       _fileSystem = fileSystem;
       _sourceRootTranslator = sourceRootTranslator;
-      _unloadedModules = new List<string>();
     }
 
     public CoveragePrepareResult PrepareModules()
@@ -244,10 +241,7 @@ namespace Coverlet.Core
         }
 
         modules.Add(Path.GetFileName(result.ModulePath), documents);
-        if (!_unloadedModules.Contains(result.ModulePath))
-        {
-          UnloadModule(result.ModulePath);
-        }
+        UnloadModule(result.ModulePath);
       }
 
       // In case of anonymous delegate compiler generate a custom class and passes it as type.method delegate.
@@ -342,7 +336,6 @@ namespace Coverlet.Core
       try
       {
         _instrumentationHelper.RestoreOriginalModule(modulePath, Identifier);
-        _unloadedModules.Add(modulePath);
       }
       catch (Exception e)
       {
