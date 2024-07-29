@@ -39,5 +39,12 @@ namespace Coverlet.Collector.Utilities.Interfaces
     /// <param name="coverage"></param>
     void PrepareModules(Coverage coverage);
 
+    /// <summary>
+    /// Unload module in the specified path
+    /// </summary>
+    /// <param name="coverage"></param>
+    /// <param name="modulePath"> path of the module to be unloaded</param>
+    void UnloadModule(Coverage coverage, string modulePath);
+
   }
 }
