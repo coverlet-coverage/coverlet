@@ -111,7 +111,7 @@ namespace Coverlet.Core
       _parameters.IncludeFilters = _parameters.IncludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
       IReadOnlyList<string> validModules = _instrumentationHelper.SelectModules(modules, _parameters.IncludeFilters, _parameters.ExcludeFilters).ToList();
-      foreach (var excludedModule in modules.Except(validModules))
+      foreach (string excludedModule in modules.Except(validModules))
       {
         _logger.LogVerbose($"Excluded module: '{excludedModule}'");
       }
@@ -337,10 +337,20 @@ namespace Coverlet.Core
     /// of instrumentation in large scale testing utilising parallelization
     /// </summary>
     /// <param name="modulePath"></param>
-    public void UnloadModule(string modulePath)
+    public int UnloadModule(string modulePath)
     {
-      _unloadedModules.Add(modulePath);
-      _instrumentationHelper.RestoreOriginalModule(modulePath, Identifier);
+      try
+      {
+        _instrumentationHelper.RestoreOriginalModule(modulePath, Identifier);
+        _unloadedModules.Add(modulePath);
+      }
+      catch (Exception e)
+      {
+        _logger.LogVerbose($"{e.InnerException} occured, module unloading aborted.");
+        return -1;
+      }
+
+      return 0;
     }
 
     private bool BranchInCompilerGeneratedClass(string methodName)
