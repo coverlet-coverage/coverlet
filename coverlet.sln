@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
+# 17
 VisualStudioVersion = 17.2.32208.508
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}"
@@ -87,6 +87,8 @@ EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "coverlet.tests.projectsample.vbmynamespace", "test\coverlet.tests.projectsample.vbmynamespace\coverlet.tests.projectsample.vbmynamespace.vbproj", "{03400776-1F9A-4326-B927-1CA9B64B42A1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.utils", "test\coverlet.tests.utils\coverlet.tests.utils.csproj", "{0B109210-03CB-413F-888C-3023994AA384}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.msbuild.benchmark.tests", "test\coverlet.msbuild.benchmark.tests\coverlet.msbuild.benchmark.tests.csproj", "{7A4F413A-019F-42D8-814C-8B4FF2EA6090}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -190,6 +192,10 @@ Global
 		{0B109210-03CB-413F-888C-3023994AA384}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B109210-03CB-413F-888C-3023994AA384}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B109210-03CB-413F-888C-3023994AA384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A4F413A-019F-42D8-814C-8B4FF2EA6090}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A4F413A-019F-42D8-814C-8B4FF2EA6090}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A4F413A-019F-42D8-814C-8B4FF2EA6090}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A4F413A-019F-42D8-814C-8B4FF2EA6090}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -220,6 +226,7 @@ Global
 		{351A034E-E642-4DB9-A21D-F71C8151C243} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{03400776-1F9A-4326-B927-1CA9B64B42A1} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{0B109210-03CB-413F-888C-3023994AA384} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{7A4F413A-019F-42D8-814C-8B4FF2EA6090} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}

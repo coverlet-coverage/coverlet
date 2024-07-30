@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyOriginatorKeyFile>coverlet.msbuild.benchmark.tests.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>False</DelaySign>
+  </PropertyGroup>
+
+    <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+
+    <ProjectReference Include="..\..\src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj" />
+    <ProjectReference Include="..\coverlet.msbuild.tasks.tests\coverlet.msbuild.tasks.tests.csproj" />
+  </ItemGroup>
+
+</Project>
