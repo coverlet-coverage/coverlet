@@ -3,7 +3,7 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 
-namespace coverlet.msbuild.benchmark.tests
+namespace coverlet.core.benchmark.tests
 {
     public class Program
     {
@@ -14,7 +14,7 @@ namespace coverlet.msbuild.benchmark.tests
                .MediumRun
                .WithLaunchCount(1)
                .WithToolchain(InProcessNoEmitToolchain.Instance));
-        var summary = BenchmarkRunner.Run<MSBuildTaskBenchmarks>(config, args);
+        var summary = BenchmarkRunner.Run<CoreBenchmarks>(config, args);
 
             // Use this to select benchmarks from the console:
             // var summaries = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
