@@ -1,20 +1,18 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-//using Coverlet.Core.Abstractions;
-//using Coverlet.Core.Helpers;
 using Coverlet.MSbuild.Tasks;
 
-using BenchmarkDotNet.Attributes;
+
 using Microsoft.Build.Framework;
 using Moq;
 using Microsoft.Build.Locator;
-//using System.IO;
-using Xunit;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+using BenchmarkDotNet.Attributes;
+using Xunit;
 
 namespace coverlet.msbuild.benchmark.tests
 {
