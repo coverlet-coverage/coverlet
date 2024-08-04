@@ -5,19 +5,26 @@ using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 
 namespace coverlet.core.benchmark.tests
 {
-    public class Program
+  public class Program
+  {
+
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            var config = DefaultConfig.Instance
+
+
+      var config = DefaultConfig.Instance
+             .WithOptions(ConfigOptions.JoinSummary)
              .AddJob(Job
-               .MediumRun
+               .ShortRun
                .WithLaunchCount(1)
                .WithToolchain(InProcessNoEmitToolchain.Instance));
-        var summary = BenchmarkRunner.Run<CoreBenchmarks>(config, args);
+      var summary = BenchmarkRunner.Run(new[]{
+            BenchmarkConverter.TypeToBenchmarks( typeof(CoverageBenchmarks), config),
+            BenchmarkConverter.TypeToBenchmarks( typeof(InstrumenterBenchmarks), config)
+            });
 
-            // Use this to select benchmarks from the console:
-            // var summaries = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
-        }
+      // Use this to select benchmarks from the console:
+      //var summaries = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
     }
+  }
 }

@@ -25,14 +25,14 @@ namespace coverlet.msbuild.benchmark.tests
   }
 
   [MemoryDiagnoser]
-  public class MSBuildTaskBenchmarks : IAssemblyFixture<MSBuildFixture>
+  public class CoverageResultTaskBenchmarks : IAssemblyFixture<MSBuildFixture>
   {
     private readonly Mock<IBuildEngine> _buildEngine;
     CoverageResultTask? _coverageResultTask;
     private readonly List<BuildErrorEventArgs> _errors;
     private readonly Mock<IAssemblyAdapter> _mockAssemblyAdapter;
 
-    public MSBuildTaskBenchmarks()
+    public CoverageResultTaskBenchmarks()
     {
       _buildEngine = new Mock<IBuildEngine>();
       _errors = new List<BuildErrorEventArgs>();
@@ -40,7 +40,7 @@ namespace coverlet.msbuild.benchmark.tests
       _mockAssemblyAdapter.Setup(x => x.GetAssemblyName(It.IsAny<string>())).Returns("abc");
     }
 
-    [GlobalSetup(Target = nameof(CoverageResultTaskBenchmarkSingle))]
+    [GlobalSetup(Target = nameof(CoverageResultTaskBenchmark))]
     public void CoverageResultTaskSingleSetup()
     {
       var mockFileSystem = new Mock<IFileSystem>();
@@ -93,7 +93,7 @@ namespace coverlet.msbuild.benchmark.tests
     //}
 
     [Benchmark]
-    public void CoverageResultTaskBenchmarkSingle()
+    public void CoverageResultTaskBenchmark()
     {
       bool success = _coverageResultTask!.Execute();
     }

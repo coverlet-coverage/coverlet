@@ -9,6 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
+    <PackageVersion Include="BenchmarkDotNet.TestAdapter" Version="0.13.12" />
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.12"/>
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.10.4" />

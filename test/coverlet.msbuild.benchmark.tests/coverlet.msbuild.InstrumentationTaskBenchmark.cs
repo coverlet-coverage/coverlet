@@ -50,13 +50,13 @@ namespace coverlet.msbuild.benchmark.tests
     [Benchmark]
     public void InstrumentationTaskBenchmarkSingle()
     {
-      //instrumentationTask.SaveLogicalProject(new StringWriter());
+      _instrumentationTask!.Execute();
     }
 
     [Benchmark]
     public void InstrumentationTaskBenchmarkInitialTargetsOuterAndInner()
     {
-      //instrumentationTask.SaveLogicalProject(new StringWriter());
+      _instrumentationTask!.Execute();
     }
   }
 }
