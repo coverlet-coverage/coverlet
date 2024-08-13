@@ -108,7 +108,7 @@ namespace Coverlet.Core
       _parameters.IncludeFilters = _parameters.IncludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
       IReadOnlyList<string> validModules = _instrumentationHelper.SelectModules(modules, _parameters.IncludeFilters, _parameters.ExcludeFilters).ToList();
-      foreach (string excludedModule in modules.Except(validModules))
+      foreach (var excludedModule in modules.Except(validModules))
       {
         _logger.LogVerbose($"Excluded module: '{excludedModule}'");
       }
