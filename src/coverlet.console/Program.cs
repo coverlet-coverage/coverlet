@@ -49,7 +49,7 @@ namespace Coverlet.Console
       var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
       var sourceMappingFile = new Option<string>("--source-mapping-file", "Specifies the path to a SourceRootsMappings file.") { Arity = ArgumentArity.ZeroOrOne };
-      var unloadCoverletModuleOnly = new Option<bool>("--unload-coverlet-module-only", "Specifies Whether or not coverlet will generate a report"){ Arity = ArgumentArity.ZeroOrOne };
+      var unloadCoverletFromModulesOnly = new Option<bool>("--unload-coverlet-from-modules-only", "Specifies Whether or not coverlet will only unload after unit tests are finished"){ Arity = ArgumentArity.ZeroOrOne };
 
       RootCommand rootCommand = new()
       {
@@ -75,7 +75,7 @@ namespace Coverlet.Console
         doesNotReturnAttributes,
         excludeAssembliesWithoutSources,
         sourceMappingFile,
-        unloadCoverletModuleOnly
+        unloadCoverletFromModulesOnly
       };
 
       rootCommand.Description = "Cross platform .NET Core code coverage tool";
@@ -104,7 +104,7 @@ namespace Coverlet.Console
         string[] doesNotReturnAttributesValue = context.ParseResult.GetValueForOption(doesNotReturnAttributes);
         string excludeAssembliesWithoutSourcesValue = context.ParseResult.GetValueForOption(excludeAssembliesWithoutSources);
         string sourceMappingFileValue = context.ParseResult.GetValueForOption(sourceMappingFile);
-        bool unloadCoverletModuleOnlyBool = context.ParseResult.GetValueForOption(unloadCoverletModuleOnly);
+        bool unloadCoverletFromModulesOnlyBool = context.ParseResult.GetValueForOption(unloadCoverletFromModulesOnly);
 
         if (string.IsNullOrEmpty(moduleOrAppDirectoryValue) || string.IsNullOrWhiteSpace(moduleOrAppDirectoryValue))
           throw new ArgumentException("No test assembly or application directory specified.");
@@ -131,7 +131,7 @@ namespace Coverlet.Console
                       doesNotReturnAttributesValue,
                       excludeAssembliesWithoutSourcesValue,
                       sourceMappingFileValue,
-                      unloadCoverletModuleOnlyBool);
+                      unloadCoverletFromModulesOnlyBool);
         context.ExitCode = taskStatus;
 
       });
@@ -159,7 +159,7 @@ namespace Coverlet.Console
                                                            string[] doesNotReturnAttributes,
                                                            string excludeAssembliesWithoutSources,
                                                            string sourceMappingFile,
-                                                           bool unloadCoverletModuleOnly
+                                                           bool unloadCoverletFromModulesOnly
              )
     {
 
@@ -237,9 +237,9 @@ namespace Coverlet.Console
 
         string dOutput = output != null ? output : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
 
-        if (unloadCoverletModuleOnly)
+        if (unloadCoverletFromModulesOnly)
         {
-          int unloadModuleExitCode = coverage.UnloadModule(moduleOrAppDirectory);
+          int unloadModuleExitCode = coverage.UnloadModule();
           return Task.FromResult(unloadModuleExitCode);
         }
 

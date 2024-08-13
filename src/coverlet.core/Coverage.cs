@@ -327,11 +327,38 @@ namespace Coverlet.Core
     }
 
     /// <summary>
+    /// unloads all modules that were instrumented
+    /// </summary>
+    /// <returns> exit code of module unloading </returns>
+    public int UnloadModule()
+    {
+      string[] modules = _instrumentationHelper.GetCoverableModules(_moduleOrAppDirectory,
+        _parameters.IncludeDirectories, _parameters.IncludeTestAssembly);
+
+      IReadOnlyList<string> validModules = _instrumentationHelper
+        .SelectModules(modules, _parameters.IncludeFilters, _parameters.ExcludeFilters).ToList();
+      foreach (string modulePath in validModules) {
+        try
+        {
+          _instrumentationHelper.RestoreOriginalModule(modulePath, Identifier);
+        }
+        catch (Exception e)
+        {
+          _logger.LogVerbose($"{e.InnerException} occured, module unloading aborted.");
+          return -1;
+        }
+      }
+
+      return 0;
+  }
+
+    /// <summary>
     /// Invoke the unloading of modules and restoration of the original assembly files, made public to allow unloading
     /// of instrumentation in large scale testing utilising parallelization
     /// </summary>
     /// <param name="modulePath"></param>
-    public int UnloadModule(string modulePath)
+    /// <returns> exist code of unloading modules </returns>
+    public void UnloadModule(string modulePath)
     {
       try
       {
@@ -340,10 +367,7 @@ namespace Coverlet.Core
       catch (Exception e)
       {
         _logger.LogVerbose($"{e.InnerException} occured, module unloading aborted.");
-        return -1;
       }
-
-      return 0;
     }
 
     private bool BranchInCompilerGeneratedClass(string methodName)
