@@ -49,7 +49,6 @@ namespace Coverlet.Console
       var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
       var sourceMappingFile = new Option<string>("--source-mapping-file", "Specifies the path to a SourceRootsMappings file.") { Arity = ArgumentArity.ZeroOrOne };
-      var unloadCoverletFromModulesOnly = new Option<bool>("---only-unload-modules", "Specifies Whether or not coverlet will only unload after unit tests are finished and skip coverage calculation"){ Arity = ArgumentArity.ZeroOrOne };
 
       RootCommand rootCommand = new()
       {
@@ -74,8 +73,7 @@ namespace Coverlet.Console
         useSourceLink,
         doesNotReturnAttributes,
         excludeAssembliesWithoutSources,
-        sourceMappingFile,
-        unloadCoverletFromModulesOnly
+        sourceMappingFile
       };
 
       rootCommand.Description = "Cross platform .NET Core code coverage tool";
@@ -104,7 +102,6 @@ namespace Coverlet.Console
         string[] doesNotReturnAttributesValue = context.ParseResult.GetValueForOption(doesNotReturnAttributes);
         string excludeAssembliesWithoutSourcesValue = context.ParseResult.GetValueForOption(excludeAssembliesWithoutSources);
         string sourceMappingFileValue = context.ParseResult.GetValueForOption(sourceMappingFile);
-        bool unloadCoverletFromModulesOnlyBool = context.ParseResult.GetValueForOption(unloadCoverletFromModulesOnly);
 
         if (string.IsNullOrEmpty(moduleOrAppDirectoryValue) || string.IsNullOrWhiteSpace(moduleOrAppDirectoryValue))
           throw new ArgumentException("No test assembly or application directory specified.");
@@ -130,8 +127,7 @@ namespace Coverlet.Console
                       useSourceLinkValue,
                       doesNotReturnAttributesValue,
                       excludeAssembliesWithoutSourcesValue,
-                      sourceMappingFileValue,
-                      unloadCoverletFromModulesOnlyBool);
+                      sourceMappingFileValue);
         context.ExitCode = taskStatus;
 
       });
@@ -158,8 +154,7 @@ namespace Coverlet.Console
                                                            bool useSourceLink,
                                                            string[] doesNotReturnAttributes,
                                                            string excludeAssembliesWithoutSources,
-                                                           string sourceMappingFile,
-                                                           bool unloadCoverletFromModulesOnly
+                                                           string sourceMappingFile
              )
     {
 
@@ -236,12 +231,6 @@ namespace Coverlet.Console
         process.WaitForExit();
 
         string dOutput = output != null ? output : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
-
-        if (unloadCoverletFromModulesOnly)
-        {
-          int unloadModuleExitCode = coverage.UnloadModules();
-          return Task.FromResult(unloadModuleExitCode);
-        }
 
         logger.LogInformation("\nCalculating coverage result...");
 
@@ -395,6 +384,7 @@ namespace Coverlet.Console
         }
 
         return Task.FromResult(exitCode);
+
 
       }
 
