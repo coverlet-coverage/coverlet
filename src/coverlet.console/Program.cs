@@ -239,7 +239,7 @@ namespace Coverlet.Console
 
         if (unloadCoverletFromModulesOnly)
         {
-          int unloadModuleExitCode = coverage.UnloadModule();
+          int unloadModuleExitCode = coverage.UnloadModules();
           return Task.FromResult(unloadModuleExitCode);
         }
 

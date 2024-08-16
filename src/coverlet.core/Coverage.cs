@@ -330,17 +330,19 @@ namespace Coverlet.Core
     /// unloads all modules that were instrumented
     /// </summary>
     /// <returns> exit code of module unloading </returns>
-    public int UnloadModule()
+    public int UnloadModules()
     {
       string[] modules = _instrumentationHelper.GetCoverableModules(_moduleOrAppDirectory,
         _parameters.IncludeDirectories, _parameters.IncludeTestAssembly);
 
-      IReadOnlyList<string> validModules = _instrumentationHelper
-        .SelectModules(modules, _parameters.IncludeFilters, _parameters.ExcludeFilters).ToList();
-      foreach (string modulePath in validModules) {
+      var validModules = _instrumentationHelper
+        .SelectModules(modules, _parameters.IncludeFilters, _parameters.ExcludeFilters);
+      var validModulesAsList = validModules.ToList();
+      foreach (string modulePath in validModulesAsList) {
         try
         {
           _instrumentationHelper.RestoreOriginalModule(modulePath, Identifier);
+          _logger.LogVerbose("All Modules unloaded.");
         }
         catch (Exception e)
         {
@@ -353,8 +355,7 @@ namespace Coverlet.Core
   }
 
     /// <summary>
-    /// Invoke the unloading of modules and restoration of the original assembly files, made public to allow unloading
-    /// of instrumentation in large scale testing utilising parallelization
+    /// Invoke the unloading of modules and restoration of the original assembly files
     /// </summary>
     /// <param name="modulePath"></param>
     /// <returns> exist code of unloading modules </returns>
@@ -363,6 +364,7 @@ namespace Coverlet.Core
       try
       {
         _instrumentationHelper.RestoreOriginalModule(modulePath, Identifier);
+        _logger.LogVerbose($"Module at {modulePath} is unloaded.");
       }
       catch (Exception e)
       {
