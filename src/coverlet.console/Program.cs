@@ -49,7 +49,7 @@ namespace Coverlet.Console
       var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
       var sourceMappingFile = new Option<string>("--source-mapping-file", "Specifies the path to a SourceRootsMappings file.") { Arity = ArgumentArity.ZeroOrOne };
-      var unloadCoverletFromModulesOnly = new Option<bool>("--unload-coverlet-from-modules-only", "Specifies Whether or not coverlet will only unload after unit tests are finished"){ Arity = ArgumentArity.ZeroOrOne };
+      var unloadCoverletFromModulesOnly = new Option<bool>("---only-unload-modules", "Specifies Whether or not coverlet will only unload after unit tests are finished and skip coverage calculation"){ Arity = ArgumentArity.ZeroOrOne };
 
       RootCommand rootCommand = new()
       {
