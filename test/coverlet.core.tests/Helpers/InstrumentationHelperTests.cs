@@ -112,23 +112,29 @@ namespace Coverlet.Core.Helpers.Tests
       Assert.True(File.Exists(backupPath));
     }
 
-    [Fact]
-    public void TestIsValidFilterExpression()
+    [Theory]
+    [InlineData("[*]*")]
+    [InlineData("[*]*core")]
+    [InlineData("[assembly]*")]
+    [InlineData("[*]type")]
+    [InlineData("[assembly]type")]
+    [InlineData("[coverlet.*.tests?]*")]
+    [InlineData("[*]Coverlet.Core*")]
+    [InlineData("[coverlet.*]*")]
+    public void TestIsValidFilterExpression(string pattern)
     {
-      Assert.True(_instrumentationHelper.IsValidFilterExpression("[*]*"));
-      Assert.True(_instrumentationHelper.IsValidFilterExpression("[*]*core"));
-      Assert.True(_instrumentationHelper.IsValidFilterExpression("[assembly]*"));
-      Assert.True(_instrumentationHelper.IsValidFilterExpression("[*]type"));
-      Assert.True(_instrumentationHelper.IsValidFilterExpression("[assembly]type"));
-      Assert.False(_instrumentationHelper.IsValidFilterExpression("[*]"));
-      Assert.False(_instrumentationHelper.IsValidFilterExpression("[-]*"));
-      Assert.False(_instrumentationHelper.IsValidFilterExpression("*"));
-      Assert.False(_instrumentationHelper.IsValidFilterExpression("]["));
-      Assert.False(_instrumentationHelper.IsValidFilterExpression("["));
-      Assert.False(_instrumentationHelper.IsValidFilterExpression("[assembly][*"));
-      Assert.False(_instrumentationHelper.IsValidFilterExpression("[assembly]*]"));
-      Assert.False(_instrumentationHelper.IsValidFilterExpression("[]"));
-      Assert.False(_instrumentationHelper.IsValidFilterExpression(null));
+      Assert.True(_instrumentationHelper.IsValidFilterExpression(pattern));
+    }
+
+    [Theory]
+    [InlineData("[*]")]
+    [InlineData("[-]*")]
+    [InlineData("*")]
+    [InlineData("][")]
+    [InlineData(null)]
+    public void TestInValidFilterExpression(string pattern)
+    {
+      Assert.False(_instrumentationHelper.IsValidFilterExpression(pattern));
     }
 
     [Fact]
