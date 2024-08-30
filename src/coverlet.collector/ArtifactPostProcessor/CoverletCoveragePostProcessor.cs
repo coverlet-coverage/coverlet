@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace coverlet.collector.ArtifactPostProcessor
 {
@@ -39,40 +40,43 @@ namespace coverlet.collector.ArtifactPostProcessor
       _coverageResult.Modules ??= new Modules();
       _logger = logger;
 
-      string[] formats = _reportFormatParser.ParseReportFormats(configurationElement);
-      string mergeDirectory = ParseMergeDirectory(configurationElement);
+      //Debugger.Launch();
+      //Debugger.Break();
 
-      if (mergeDirectory == null || !formats.Contains("json"))
-        return Task.FromResult(attachments);
+      string[] formats = _reportFormatParser.ParseReportFormats(configurationElement);
+      bool deterministic = _reportFormatParser.ParseDeterministicReport(configurationElement);
+      bool useSourceLink = _reportFormatParser.ParseUseSourceLink(configurationElement);
+
+      if (!formats.Contains("json")) return Task.FromResult(attachments);
 
       IList<IReporter> reporters = CreateReporters(formats).ToList();
 
-      MergeExistingJsonReports(attachments, mergeDirectory);
-      WriteCoverageReports(reporters, mergeDirectory, _coverageResult);
+      if (attachments.Count > 1)
+      {
+        _coverageResult.Parameters = new CoverageParameters() {DeterministicReport = deterministic, UseSourceLink = useSourceLink };
+        var attachmentDirectories = attachments.SelectMany(x => x.Attachments.Where(IsFileWithJsonExt).Select(y => Path.GetDirectoryName(y.Uri.LocalPath))).ToList();
+        MergeExistingJsonReports(attachments);
+        WriteCoverageReports(reporters, attachmentDirectories.First(), _coverageResult);
+        RemoveObsoleteReports(attachmentDirectories);
+        attachments = new List<AttachmentSet> { attachments.First() };
+      }
 
       return Task.FromResult(attachments);
     }
 
-    private void MergeExistingJsonReports(IEnumerable<AttachmentSet> attachments, string mergeDirectory)
+    private void RemoveObsoleteReports(List<string> attachmentDirectories)
     {
-      string jsonFileName = Path.ChangeExtension(CoverletConstants.DefaultFileName, "json");
+      attachmentDirectories.Skip(1).ToList().ForEach(x => Directory.Delete(x, true));
+    }
 
+    private void MergeExistingJsonReports(IEnumerable<AttachmentSet> attachments)
+    {
       foreach (AttachmentSet attachmentSet in attachments)
       {
         attachmentSet.Attachments.Where(IsFileWithJsonExt).ToList().ForEach(x =>
           MergeWithCoverageResult(x.Uri.LocalPath, _coverageResult)
         );
       }
-
-      Directory.CreateDirectory(mergeDirectory);
-      string jsonFilePath = Path.Combine(mergeDirectory, jsonFileName);
-
-      MergeIntermediateResultWhenExist(jsonFilePath, _coverageResult);
-    }
-
-    private static bool IsFileWithJsonExt(UriDataAttachment x)
-    {
-      return x.Uri.IsFile && Path.GetExtension(x.Uri.AbsolutePath).Equals(".json");
     }
 
     private void WriteCoverageReports(IEnumerable<IReporter> reporters, string directory, CoverageResult coverageResult)
@@ -85,12 +89,9 @@ namespace coverlet.collector.ArtifactPostProcessor
       }
     }
 
-    private void MergeIntermediateResultWhenExist(string filePath, CoverageResult coverageResult)
+    private static bool IsFileWithJsonExt(UriDataAttachment x)
     {
-      if (File.Exists(filePath))
-      {
-        MergeWithCoverageResult(filePath, coverageResult);
-      }
+      return x.Uri.IsFile && Path.GetExtension(x.Uri.AbsolutePath).Equals(".json");
     }
 
     private void MergeWithCoverageResult(string filePath, CoverageResult coverageResult)
@@ -127,12 +128,6 @@ namespace coverlet.collector.ArtifactPostProcessor
       }).Where(r => r != null);
 
       return reporters;
-    }
-
-    private static string ParseMergeDirectory(XmlElement configurationElement)
-    {
-      XmlElement mergeWithElement = configurationElement[CoverletConstants.MergeDirectory];
-      return mergeWithElement?.InnerText;
     }
   }
 }

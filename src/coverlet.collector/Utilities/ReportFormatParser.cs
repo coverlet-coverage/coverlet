@@ -25,5 +25,19 @@ namespace Coverlet.Collector.Utilities
     {
       return element?.InnerText?.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).ToArray();
     }
+
+    internal bool ParseUseSourceLink(XmlElement configurationElement)
+    {
+      XmlElement useSourceLinkElement = configurationElement[CoverletConstants.UseSourceLinkElementName];
+      bool.TryParse(useSourceLinkElement?.InnerText, out bool useSourceLink);
+      return useSourceLink;
+    }
+
+    internal bool ParseDeterministicReport(XmlElement configurationElement)
+    {
+      XmlElement deterministicReportElement = configurationElement[CoverletConstants.DeterministicReport];
+      bool.TryParse(deterministicReportElement?.InnerText, out bool deterministicReport);
+      return deterministicReport;
+    }
   }
 }
