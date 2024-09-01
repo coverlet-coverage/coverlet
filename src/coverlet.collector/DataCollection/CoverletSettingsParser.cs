@@ -50,6 +50,7 @@ namespace Coverlet.Collector.DataCollection
         coverletSettings.DoesNotReturnAttributes = ParseDoesNotReturnAttributes(configurationElement);
         coverletSettings.DeterministicReport = ParseDeterministicReport(configurationElement);
         coverletSettings.ExcludeAssembliesWithoutSources = ParseExcludeAssembliesWithoutSources(configurationElement);
+        coverletSettings.ReportMerging = _reportFormatParser.ParseReportMerging(configurationElement);
       }
 
       coverletSettings.ReportFormats = _reportFormatParser.ParseReportFormats(configurationElement);

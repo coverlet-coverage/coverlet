@@ -26,22 +26,30 @@ namespace Coverlet.Collector.DataCollection
     public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper,
                            IInstrumentationHelper instrumentationHelper, IFileSystem fileSystem, ISourceRootTranslator sourceRootTranslator, ICecilSymbolHelper cecilSymbolHelper)
         : this(settings,
-        settings.ReportFormats.Select(format =>
-        {
-          var reporterFactory = new ReporterFactory(format);
-          if (!reporterFactory.IsValidFormat())
-          {
-            eqtTrace.Warning($"Invalid report format '{format}'");
-            return null;
-          }
-          else
-          {
-            return reporterFactory.CreateReporter();
-          }
-        }).Where(r => r != null).ToArray(),
+        CreateReporters(settings, eqtTrace),
         new CoverletLogger(eqtTrace, logger),
         coverageWrapper, instrumentationHelper, fileSystem, sourceRootTranslator, cecilSymbolHelper)
     {
+    }
+
+    private static IReporter[] CreateReporters(CoverletSettings settings, TestPlatformEqtTrace eqtTrace)
+    {
+      if (settings.ReportMerging && ! settings.ReportFormats.Contains("json"))
+        settings.ReportFormats = settings.ReportFormats.Append("json").ToArray();
+
+      return settings.ReportFormats.Select(format =>
+      {
+        var reporterFactory = new ReporterFactory(format);
+        if (!reporterFactory.IsValidFormat())
+        {
+          eqtTrace.Warning($"Invalid report format '{format}'");
+          return null;
+        }
+        else
+        {
+          return reporterFactory.CreateReporter();
+        }
+      }).Where(r => r != null).ToArray();
     }
 
     public CoverageManager(CoverletSettings settings, IReporter[] reporters, ILogger logger, ICoverageWrapper coverageWrapper,

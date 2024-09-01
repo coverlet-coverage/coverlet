@@ -17,7 +17,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Newtonsoft.Json;
-using System.Diagnostics;
 
 namespace coverlet.collector.ArtifactPostProcessor
 {
@@ -40,14 +39,12 @@ namespace coverlet.collector.ArtifactPostProcessor
       _coverageResult.Modules ??= new Modules();
       _logger = logger;
 
-      //Debugger.Launch();
-      //Debugger.Break();
-
       string[] formats = _reportFormatParser.ParseReportFormats(configurationElement);
       bool deterministic = _reportFormatParser.ParseDeterministicReport(configurationElement);
       bool useSourceLink = _reportFormatParser.ParseUseSourceLink(configurationElement);
+      bool reportMerging = _reportFormatParser.ParseReportMerging(configurationElement);
 
-      if (!formats.Contains("json")) return Task.FromResult(attachments);
+      if (!reportMerging) return Task.FromResult(attachments);
 
       IList<IReporter> reporters = CreateReporters(formats).ToList();
 
@@ -57,16 +54,22 @@ namespace coverlet.collector.ArtifactPostProcessor
         var attachmentDirectories = attachments.SelectMany(x => x.Attachments.Where(IsFileWithJsonExt).Select(y => Path.GetDirectoryName(y.Uri.LocalPath))).ToList();
         MergeExistingJsonReports(attachments);
         WriteCoverageReports(reporters, attachmentDirectories.First(), _coverageResult);
-        RemoveObsoleteReports(attachmentDirectories);
+        RemoveObsoleteReports(attachmentDirectories, formats);
         attachments = new List<AttachmentSet> { attachments.First() };
       }
 
       return Task.FromResult(attachments);
     }
 
-    private void RemoveObsoleteReports(List<string> attachmentDirectories)
+    // proper documentation for the whole feature
+    // integration tests? maybe in coverlet.integration.tests.Collectors?
+    // double check that new parameter is only useable for collectors
+    private void RemoveObsoleteReports(List<string> attachmentDirectories, string[] formats)
     {
       attachmentDirectories.Skip(1).ToList().ForEach(x => Directory.Delete(x, true));
+      if (!formats.Contains("json"))
+        Directory.GetFiles(attachmentDirectories.First())
+          .Where(x => Path.GetExtension(x).Equals(".json")).ToList().ForEach(File.Delete);
     }
 
     private void MergeExistingJsonReports(IEnumerable<AttachmentSet> attachments)

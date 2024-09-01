@@ -39,5 +39,12 @@ namespace Coverlet.Collector.Utilities
       bool.TryParse(deterministicReportElement?.InnerText, out bool deterministicReport);
       return deterministicReport;
     }
+
+    internal bool ParseReportMerging(XmlElement configurationElement)
+    {
+      XmlElement mergeWithElement = configurationElement[CoverletConstants.ReportMerging];
+      bool.TryParse(mergeWithElement?.InnerText, out bool mergeWith);
+      return mergeWith;
+    }
   }
 }
