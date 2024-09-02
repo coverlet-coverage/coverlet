@@ -51,10 +51,14 @@ namespace coverlet.collector.ArtifactPostProcessor
       if (attachments.Count > 1)
       {
         _coverageResult.Parameters = new CoverageParameters() {DeterministicReport = deterministic, UseSourceLink = useSourceLink };
-        var attachmentDirectories = attachments.SelectMany(x => x.Attachments.Where(IsFileWithJsonExt).Select(y => Path.GetDirectoryName(y.Uri.LocalPath))).ToList();
+        
+        var fileAttachments = attachments.SelectMany(x => x.Attachments.Where(IsFileWithJsonExt)).ToList();
+        string mergeFilePath = fileAttachments.First().Uri.LocalPath;
+
         MergeExistingJsonReports(attachments);
-        WriteCoverageReports(reporters, attachmentDirectories.First(), _coverageResult);
-        RemoveObsoleteReports(attachmentDirectories, formats);
+        WriteCoverageReports(reporters, mergeFilePath, _coverageResult);
+        RemoveObsoleteReports(fileAttachments);
+
         attachments = new List<AttachmentSet> { attachments.First() };
       }
 
@@ -64,12 +68,9 @@ namespace coverlet.collector.ArtifactPostProcessor
     // proper documentation for the whole feature
     // integration tests? maybe in coverlet.integration.tests.Collectors?
     // double check that new parameter is only useable for collectors
-    private void RemoveObsoleteReports(List<string> attachmentDirectories, string[] formats)
+    private void RemoveObsoleteReports(List<UriDataAttachment> fileAttachments)
     {
-      attachmentDirectories.Skip(1).ToList().ForEach(x => Directory.Delete(x, true));
-      if (!formats.Contains("json"))
-        Directory.GetFiles(attachmentDirectories.First())
-          .Where(x => Path.GetExtension(x).Equals(".json")).ToList().ForEach(File.Delete);
+      fileAttachments.ForEach(x => File.Delete(x.Uri.LocalPath));
     }
 
     private void MergeExistingJsonReports(IEnumerable<AttachmentSet> attachments)
