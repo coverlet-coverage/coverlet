@@ -25,7 +25,7 @@ namespace Coverlet.Core.Helpers
     private readonly ISourceRootTranslator _sourceRootTranslator;
     private ILogger _logger;
     private static readonly RegexOptions s_regexOptions =
-      RegexOptions.Multiline | RegexOptions.Compiled | RegexOptions.IgnoreCase;
+      RegexOptions.Multiline | RegexOptions.Compiled;
 
     public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger, ISourceRootTranslator sourceRootTranslator)
     {
@@ -420,7 +420,7 @@ namespace Coverlet.Core.Helpers
     }
 
     public bool IsLocalMethod(string method)
-        => new Regex(WildcardToRegex("<*>*__*|*"), s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(method);
+        => Regex.IsMatch(method, WildcardToRegex("<*>*__*|*"));
 
     public void SetLogger(ILogger logger)
     {
@@ -442,7 +442,7 @@ namespace Coverlet.Core.Helpers
         typePattern = WildcardToRegex(typePattern);
         modulePattern = WildcardToRegex(modulePattern);
 
-        if (new Regex(typePattern, s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(type) && new Regex(modulePattern, s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(module))
+        if (Regex.IsMatch(type, typePattern) && Regex.IsMatch(module, modulePattern))
           return true;
       }
 

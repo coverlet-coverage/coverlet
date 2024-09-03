@@ -3,6 +3,6 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
   <PropertyGroup>
     <IsTestProject>true</IsTestProject>
-    <NoWarn>$(NoWarn);NU1301</NoWarn>
+    <NoWarn>$(NoWarn);NU1301;IDE0007</NoWarn>
   </PropertyGroup>
 </Project>

@@ -315,3 +315,4 @@ coverage.*.cobertura.xml
 coverage.*.opencover.xml
 
 FolderProfile.pubxml
+/NuGet.config
