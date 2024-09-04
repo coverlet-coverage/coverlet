@@ -315,6 +315,7 @@ coverage.*.cobertura.xml
 coverage.*.opencover.xml
 
 FolderProfile.pubxml
+BenchmarkDotNet.Artifacts/
 /NuGet.config
 nuget.config
 *.dmp
