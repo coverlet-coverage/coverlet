@@ -27,8 +27,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Buffers" />
-    <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
 
