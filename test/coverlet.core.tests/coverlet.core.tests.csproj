@@ -13,11 +13,11 @@
   <ItemGroup>
     <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Moq" />
-    <PackageReference Include="ReportGenerator.Core" />
+    <PackageReference Include="ReportGenerator.Core" VersionOverride="5.0.4"/>
     <PackageReference Include="System.Linq.Async" />
     <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="Tmds.ExecFunction" />

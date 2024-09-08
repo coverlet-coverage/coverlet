@@ -5,9 +5,10 @@
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.6.133" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.6.143" />
   </ItemGroup>
   <ItemGroup>
+    <PackageVersion Include="DotNetConfig" Version="1.2.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.8.3" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="17.8.3" />
@@ -30,11 +31,11 @@
          NuGetFrameworksVersion is defined here https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/eng/Versions.props#L94C1-L94C1
     -->
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="NuGet.Frameworks" Version="6.8.0" />
-    <PackageVersion Include="NuGet.Packaging" Version="6.8.0" />
-    <PackageVersion Include="NuGet.Versioning" Version="6.8.0" />
+    <PackageVersion Include="NuGet.Frameworks" Version="6.11.0" />
+    <PackageVersion Include="NuGet.Packaging" Version="6.8.1" />
+    <PackageVersion Include="NuGet.Versioning" Version="6.11.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
-    <PackageVersion Include="Moq" Version="4.20.70" />
+    <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="ReportGenerator.Core" Version="5.2.1" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.4" />
@@ -42,13 +43,14 @@
     <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+    <PackageVersion Include="System.IO.Pipelines" Version="8.0.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
     <PackageVersion Include="System.Reflection.Metadata" Version="8.0.0" />
     <PackageVersion Include="Tmds.ExecFunction" Version="0.8.0" />
-    <PackageVersion Include="xunit" Version="2.6.6" />
+    <PackageVersion Include="xunit" Version="2.9.0" />
     <PackageVersion Include="xunit.assemblyfixture" Version="2.2.0" />
-    <PackageVersion Include="xunit.assert" Version="2.6.6" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.6" />
+    <PackageVersion Include="xunit.assert" Version="2.9.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="6.0.4" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageVersion Include="System.Text.Json" Version="8.0.4" />
