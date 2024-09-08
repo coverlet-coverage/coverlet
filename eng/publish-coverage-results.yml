@@ -26,7 +26,7 @@ steps:
   artifact: CoverageResults_$(Agent.Os)_$(BuildConfiguration)
   condition: ${{parameters.condition}}
 
-- task: PublishCodeCoverageResults@1
+- task: PublishCodeCoverageResults@2
   displayName: 'Publish code coverage'
   condition: ${{parameters.condition}}
   inputs:

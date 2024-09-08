@@ -70,7 +70,17 @@ You can change the output directory using the standard `dotnet test` switch `--r
 
 :warning:At the moment VSTest integration **doesn't support all features** of msbuild and .NET tool, for instance show result on console, report merging and threshold validation.
 We're working to fill the gaps.
->*PS: if you don't have any other way to merge reports(for instance your report generator doesn't support multi coverage file) you can for the moment exploit a trick reported by one of our contributor Daniel Paz(@p4p3) <https://github.com/tonerdo/coverlet/pull/225#issuecomment-573896446>*
+
+> [!TIP]
+> *Some alternative solutions to merge coverage files*
+>
+> * use _dotnet-coverage_ tool and merge multiple coverage files
+>
+>   `dotnet-coverage merge artifacts/coverage/**/coverage.cobertura.xml -f cobertura -o artifacts/coverage/coverage.xml`*
+>
+> * use _dotnet-reportgenerator-globaltool_ to create a HTML report and a merged coverage file
+>
+>   `reportgenerator -reports:"**/*.cobertura.xml" -targetdir:"artifacts\reports.cobertura" -reporttypes:"HtmlInline_AzurePipelines_Dark;Cobertura"`
 
 ### Default option (if you don't specify a runsettings file)
 
