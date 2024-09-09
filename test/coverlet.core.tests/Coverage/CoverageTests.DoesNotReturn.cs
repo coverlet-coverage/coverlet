@@ -45,7 +45,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Hang due to System.Console.ReadKey()")]
+    [Fact]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -77,7 +77,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Hang due to System.Console.ReadKey()")]
+    [Fact]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -109,7 +109,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Hang due to System.Console.ReadKey()")]
+    [Fact]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -141,7 +141,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Hang due to System.Console.ReadKey()")]
+    [Fact]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
