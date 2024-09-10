@@ -86,6 +86,11 @@ namespace Coverlet.Collector.DataCollection
     /// </summary>
     public string ExcludeAssembliesWithoutSources { get; set; }
 
+    /// <summary>
+    /// Report merging flag
+    /// </summary>
+    public bool ReportMerging { get; set; }
+
     public override string ToString()
     {
       var builder = new StringBuilder();
@@ -104,6 +109,7 @@ namespace Coverlet.Collector.DataCollection
       builder.AppendFormat("DoesNotReturnAttributes: '{0}'", string.Join(",", DoesNotReturnAttributes ?? Enumerable.Empty<string>()));
       builder.AppendFormat("DeterministicReport: '{0}'", DeterministicReport);
       builder.AppendFormat("ExcludeAssembliesWithoutSources: '{0}'", ExcludeAssembliesWithoutSources);
+      builder.AppendFormat("ReportMerging: '{0}'", ReportMerging);
 
       return builder.ToString();
     }
