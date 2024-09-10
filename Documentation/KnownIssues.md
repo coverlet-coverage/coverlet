@@ -183,7 +183,7 @@ Stack Trace:
 
 *Solution:* Looks like this is caused by xUnit's app domains. For `dotnet test`, it can be disabled with the following argument: `-- RunConfiguration.DisableAppDomain=true`
 
-## Code coverage returns NaN%
+## Code coverage returns NaN
 
 *Symptoms:* You are getting following result when running Coverlet within CI/CD pipeline:
 
@@ -234,3 +234,18 @@ The XML code coverage report is too large for the coverlet to parse.
 *Potential Solutions:*
 
 * Reduce noise from auto generated code, for example excluding your EntityFrameworkCore Migrations namespace or automatically generated typed Http Clients. See [Excluding From Coverage](./MSBuildIntegration.md#excluding-from-coverage) for more information on ignoring namespaces from code coverage.
+
+## BadImageFormatException .NET Framework 4.7.x, 4.8.x
+
+*Symptoms:*
+
+```text
+BadImageFormatException during MetadataReaderProvider.FromPortablePdbStream in InstrumentationHelper.PortablePdbHasLocalSource, unable to check if the module has got local source.
+```
+
+*Solutions:*
+
+Change [DebugType](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype) from `full` to `portable`.
+
+>[!IMPORTANT]
+>NET Core introduces a new symbol file (PDB) format - portable PDBs. Unlike traditional PDBs which are Windows-only, portable PDBs can be created and read on all platforms.
