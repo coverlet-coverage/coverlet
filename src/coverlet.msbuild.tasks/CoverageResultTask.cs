@@ -38,6 +38,9 @@ namespace Coverlet.MSbuild.Tasks
     public string ThresholdStat { get; set; }
 
     [Required]
+    public string ThresholdAct { get; set; }
+
+    [Required]
     public ITaskItem InstrumenterState { get; set; }
 
     public string CoverletMultiTargetFrameworksCurrentTFM { get; set; }
@@ -190,6 +193,16 @@ namespace Coverlet.MSbuild.Tasks
           thresholdStat = ThresholdStatistic.Total;
         }
 
+        ThresholdAction thresholdAct = ThresholdAction.Fail;
+        if (ThresholdAct.Equals("fail", StringComparison.OrdinalIgnoreCase))
+        {
+          thresholdAct = ThresholdAction.Fail;
+        }
+        else if (ThresholdAct.Equals("warning", StringComparison.OrdinalIgnoreCase))
+        {
+          thresholdAct = ThresholdAction.Warning;
+        }
+
         var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
         var summary = new CoverageSummary();
 
@@ -248,7 +261,16 @@ namespace Coverlet.MSbuild.Tasks
                 $"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
           }
 
-          throw new Exception(exceptionMessageBuilder.ToString());
+          switch (thresholdAct)
+          {
+            case ThresholdAction.Warning:
+              _logger.LogWarning(exceptionMessageBuilder.ToString());
+              break;
+            case ThresholdAction.Fail:
+              throw new Exception(exceptionMessageBuilder.ToString());
+            default:
+              throw new ArgumentOutOfRangeException(nameof(thresholdAct), thresholdAct, "Unhandled threshold action");
+          }
         }
       }
       catch (Exception ex)
