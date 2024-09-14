@@ -241,7 +241,7 @@ namespace Coverlet.Core
         }
 
         modules.Add(Path.GetFileName(result.ModulePath), documents);
-        _instrumentationHelper.RestoreOriginalModule(result.ModulePath, Identifier);
+        UnloadModule(result.ModulePath);
       }
 
       // In case of anonymous delegate compiler generate a custom class and passes it as type.method delegate.
@@ -324,6 +324,52 @@ namespace Coverlet.Core
       }
 
       return coverageResult;
+    }
+
+    /// <summary>
+    /// unloads all modules that were instrumented
+    /// </summary>
+    /// <returns> exit code of module unloading </returns>
+    public int UnloadModules()
+    {
+      string[] modules = _instrumentationHelper.GetCoverableModules(_moduleOrAppDirectory,
+        _parameters.IncludeDirectories, _parameters.IncludeTestAssembly);
+
+      var validModules = _instrumentationHelper
+        .SelectModules(modules, _parameters.IncludeFilters, _parameters.ExcludeFilters);
+      var validModulesAsList = validModules.ToList();
+      foreach (string modulePath in validModulesAsList) {
+        try
+        {
+          _instrumentationHelper.RestoreOriginalModule(modulePath, Identifier);
+          _logger.LogVerbose("All Modules unloaded.");
+        }
+        catch (Exception e)
+        {
+          _logger.LogVerbose($"{e.InnerException} occured, module unloading aborted.");
+          return -1;
+        }
+      }
+
+      return 0;
+  }
+
+    /// <summary>
+    /// Invoke the unloading of modules and restoration of the original assembly files
+    /// </summary>
+    /// <param name="modulePath"></param>
+    /// <returns> exist code of unloading modules </returns>
+    public void UnloadModule(string modulePath)
+    {
+      try
+      {
+        _instrumentationHelper.RestoreOriginalModule(modulePath, Identifier);
+        _logger.LogVerbose($"Module at {modulePath} is unloaded.");
+      }
+      catch (Exception e)
+      {
+        _logger.LogVerbose($"{e.InnerException} occured, module unloading aborted.");
+      }
     }
 
     private bool BranchInCompilerGeneratedClass(string methodName)
