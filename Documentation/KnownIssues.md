@@ -249,3 +249,26 @@ Change [DebugType](https://learn.microsoft.com/en-us/dotnet/csharp/language-refe
 
 >[!IMPORTANT]
 >NET Core introduces a new symbol file (PDB) format - portable PDBs. Unlike traditional PDBs which are Windows-only, portable PDBs can be created and read on all platforms.
+
+## CoverletCoverageDataCollector: Failed to instrument modules
+
+*Affected drivers*: VSTest integration `dotnet test --collect:"XPlat Code Coverage"`
+
+*Symptoms:*
+
+```text
+Data collector 'XPlat code coverage' message: [coverlet]Coverlet.Collector.Utilities.CoverletDataCollectorException: CoverletCoverageDataCollector: Failed to instrument modules
+ ---> System.AggregateException: One or more errors occurred. (The process cannot access the file XXX\ABC.pdb
+ ---> System.IO.IOException: The process cannot access the file 'XXX\ABC.pdb' because it is being used by another process.
+   at System.IO.FileSystem.CopyFile(String sourceFullPath, String destFullPath, Boolean overwrite)
+   at Coverlet.Core.Helpers.FileSystem.Copy(String sourceFileName, String destFileName, Boolean overwrite) in /_/src/coverlet.core/Helpers/FileSystem.cs:line 35
+   at Coverlet.Core.Helpers.InstrumentationHelper.<>c__DisplayClass16_0.<RestoreOriginalModule>b__1() in /_/src/coverlet.core/Helpers/InstrumentationHelper.cs:line 277
+   at Coverlet.Core.Helpers.RetryHelper.<>c__DisplayClass0_0.<Retry>b__0() in /_/src/coverlet.core/Helpers/RetryHelper.cs:line 28
+   at Coverlet.Core.Helpers.RetryHelper.Do[T](Func`1 action, Func`1 backoffStrategy, Int32 maxAttemptCount) in /_/src/coverlet.core/Helpers/RetryHelper.cs:line 55
+   --- End of inner exception stack trace ---
+   ...
+   ```
+
+   *Solutions:*
+
+   use VSTest setting [-maxcpucount:1](https://learn.microsoft.com/en-us/visualstudio/msbuild/building-multiple-projects-in-parallel-with-msbuild?view=vs-2022#-maxcpucount-switch) which limits "worker processes".
