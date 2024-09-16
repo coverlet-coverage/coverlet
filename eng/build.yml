@@ -45,6 +45,7 @@ steps:
     mergeTestResults: false
     publishRunAttachments: true
     failTaskOnFailedTests: true
+  condition:  succeededOrFailed()
 
 - template: publish-coverlet-result-files.yml
 

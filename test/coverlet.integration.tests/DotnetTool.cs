@@ -4,7 +4,6 @@
 using System.IO;
 using System.Linq;
 using Coverlet.Tests.Utils;
-using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -33,9 +32,10 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+      string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{clonedTemplateProject.ProjectRootPath}\"{Path.DirectorySeparatorChar}", out standardOutput, out standardError);
+      RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{outputPath}\"", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -50,75 +50,92 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+      string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --output \"{clonedTemplateProject.ProjectRootPath}\"{Path.DirectorySeparatorChar}", out standardOutput, out standardError);
+      RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --output \"{outputPath}\"", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
       }
       Assert.Contains("Hello World!", standardOutput);
+      Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
     }
 
-    [ConditionalFact]
-    [SkipOnOS(OS.Linux)]
-    [SkipOnOS(OS.MacOS)]
+    [Fact]
     public void StandAloneThreshold()
     {
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+      string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f  {_buildTargetFramework}  {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError));
+      Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --output \"{outputPath}\"", out standardOutput, out standardError));
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
       }
+      else
+      {
+        // make standard output available in trx file
+        _output.WriteLine(standardOutput);
+      }
       Assert.Contains("Hello World!", standardOutput);
+      Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.Contains("The minimum method coverage is below the specified 80", standardOutput);
     }
 
-    [ConditionalFact]
-    [SkipOnOS(OS.Linux)]
-    [SkipOnOS(OS.MacOS)]
+    [Fact]
     public void StandAloneThresholdLine()
     {
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+      string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError));
+      Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --output \"{outputPath}\"", out standardOutput, out standardError));
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
       }
+      else
+      {
+        // make standard output available in trx file
+        _output.WriteLine(standardOutput);
+      }
       Assert.Contains("Hello World!", standardOutput);
+      Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.DoesNotContain("The minimum method coverage is below the specified 80", standardOutput);
     }
 
-    [ConditionalFact]
-    [SkipOnOS(OS.Linux)]
-    [SkipOnOS(OS.MacOS)]
+    [Fact]
     public void StandAloneThresholdLineAndMethod()
     {
       using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
       string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+      string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f  {_buildTargetFramework}  {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --threshold-type method --output \"{clonedTemplateProject.ProjectRootPath}\"\\", out standardOutput, out standardError));
+      Assert.False(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --threshold-type method --output \"{outputPath}\"", out standardOutput, out standardError));
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
       }
+      else
+      {
+        // make standard output available in trx file
+        _output.WriteLine(standardOutput);
+      }
       Assert.Contains("Hello World!", standardOutput);
+      Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.Contains("The minimum method coverage is below the specified 80", standardOutput);

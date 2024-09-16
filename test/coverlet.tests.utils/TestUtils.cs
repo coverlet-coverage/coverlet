@@ -33,6 +33,9 @@ namespace Coverlet.Tests.Utils
 
     public static string GetAssemblyTargetFramework()
     {
+#if NET6_0
+      return "net6.0";
+#endif
 #if NET7_0
       return "net7.0";
 #endif
