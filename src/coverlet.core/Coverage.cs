@@ -108,7 +108,7 @@ namespace Coverlet.Core
       _parameters.IncludeFilters = _parameters.IncludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
       IReadOnlyList<string> validModules = _instrumentationHelper.SelectModules(modules, _parameters.IncludeFilters, _parameters.ExcludeFilters).ToList();
-      foreach (var excludedModule in modules.Except(validModules))
+      foreach (string excludedModule in modules.Except(validModules))
       {
         _logger.LogVerbose($"Excluded module: '{excludedModule}'");
       }
@@ -365,16 +365,6 @@ namespace Coverlet.Core
     {
       foreach (InstrumenterResult result in _results)
       {
-        if (!_fileSystem.Exists(result.HitsFilePath))
-        {
-          // Hits file could be missed mainly for two reason
-          // 1) Issue during module Unload()
-          // 2) Instrumented module is never loaded or used so we don't have any hit to register and
-          //    module tracker is never used
-          _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
-          continue;
-        }
-
         var documents = result.Documents.Values.ToList();
         if (_parameters.UseSourceLink && result.SourceLink != null)
         {
@@ -384,6 +374,16 @@ namespace Coverlet.Core
           {
             document.Path = GetSourceLinkUrl(sourceLinkDocuments, document.Path);
           }
+        }
+
+        if (!_fileSystem.Exists(result.HitsFilePath))
+        {
+          // Hits file could be missed mainly for two reason
+          // 1) Issue during module Unload()
+          // 2) Instrumented module is never loaded or used so we don't have any hit to register and
+          //    module tracker is never used
+          _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
+          continue;
         }
 
         // Calculate lines to skip for every hits start/end candidate
