@@ -51,7 +51,7 @@ namespace Coverlet.Integration.Tests
     {
       string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant();
       string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf8.selfcontained");
-      string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8.selfcontained"), buildConfiguration);
+      string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8.selfcontained"), $"{buildConfiguration}_win-x64");
       Assert.True(DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
       string assemblyLocation = Directory.GetFiles(testBinaryPath, "coverlet.tests.projectsample.wpf8.selfcontained.dll", SearchOption.AllDirectories).First();
 
