@@ -24,7 +24,7 @@
   <ItemGroup  Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="6.0.0"/>
     <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutableVersion)"/>
-    <PackageReference Include="System.Text.Json" VersionOverride="6.0.9" />
+    <PackageReference Include="System.Text.Json" VersionOverride="6.0.10" />
     <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
   </ItemGroup>
 
