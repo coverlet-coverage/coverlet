@@ -33,7 +33,7 @@
     <PackageVersion Include="NuGet.Frameworks" Version="6.8.0" />
     <PackageVersion Include="NuGet.Packaging" Version="6.8.0" />
     <PackageVersion Include="NuGet.Versioning" Version="6.8.0" />
-    <PackageVersion Include="Mono.Cecil" Version="0.11.5" />
+    <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Moq" Version="4.20.70" />
     <PackageVersion Include="ReportGenerator.Core" Version="5.2.1" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
