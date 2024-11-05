@@ -15,7 +15,7 @@
     <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <LangVersion>preview</LangVersion>
-    <NoWarn>$(NoWarn);NU1507;NU5105;CS1591</NoWarn>
+    <NoWarn>$(NoWarn);NU1507;NU5105;CS1591;IDE0007</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RestoreSources>
       https://api.nuget.org/v3/index.json;
