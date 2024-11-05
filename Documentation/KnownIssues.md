@@ -269,6 +269,15 @@ Data collector 'XPlat code coverage' message: [coverlet]Coverlet.Collector.Utili
    ...
    ```
 
+   >[!Note]
+   >This is not an coverlet issue but running tests in parallel without proper separation of test case resources
+   >>
+   >>**dotnet vstest cli option**
+   >>
+   >>--Parallel
+   >>
+   >> Run tests in parallel. By default, all available cores on the machine are available for use. Specify an explicit number of cores by setting the MaxCpuCount property under the RunConfiguration node in the runsettings file.
+
    *Solutions:*
 
    use VSTest setting [-maxcpucount:1](https://learn.microsoft.com/en-us/visualstudio/msbuild/building-multiple-projects-in-parallel-with-msbuild?view=vs-2022#-maxcpucount-switch) which limits "worker processes".
