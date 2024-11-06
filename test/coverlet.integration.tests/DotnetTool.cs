@@ -21,8 +21,9 @@ namespace Coverlet.Integration.Tests
     }
     private string InstallTool(string projectPath)
     {
-      _ = DotnetCli($"tool install coverlet.console --version {GetPackageVersion("*console*.nupkg")} --tool-path \"{Path.Combine(projectPath, "coverletTool")}\"", out string standardOutput, out _, projectPath);
+      _ = DotnetCli($"tool install coverlet.console --version {GetPackageVersion("*console*.nupkg")} --tool-path \"{Path.Combine(projectPath, "coverletTool")}\"", out string standardOutput, out string standardError, projectPath);
       Assert.Contains("was successfully installed.", standardOutput);
+      Assert.Contains("", standardError);
       return Path.Combine(projectPath, "coverletTool", "coverlet");
     }
 

@@ -16,15 +16,24 @@
     <PackageTags>coverage;testing;unit-test;lcov;opencover;quality</PackageTags>
     <PackageReadmeFile>GlobalTool.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/coverlet-coverage/coverlet</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json
+    </RestoreSources>
   </PropertyGroup>
- 
+
   <ItemGroup>
     <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="System.CommandLine.Generator" />
+<!--    <PackageReference Include="Microsoft.CodeAnalysis.Common" />-->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="6.0.4" />
+    <PackageReference Include="System.Text.RegularExpressions" VersionOverride="4.3.1" />
+    <PackageReference Include="System.Net.Http" VersionOverride="4.3.4" />
+    <PackageReference Include="System.Formats.Asn1" VersionOverride="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
