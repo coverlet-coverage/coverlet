@@ -36,9 +36,6 @@ namespace Coverlet.Tests.Utils
 #if NET6_0
       return "net6.0";
 #endif
-#if NET7_0
-      return "net7.0";
-#endif
 #if NET8_0
       return "net8.0";
 #endif
