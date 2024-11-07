@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.Utils;
+using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -45,7 +46,9 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Hang due to System.Console.ReadKey()")]
+    [Fact]
+    [SkipOnOS(OS.MacOS, "Hang due to System.Console.ReadKey()")]
+    [SkipOnOS(OS.Linux, "Hang due to System.Console.ReadKey()")]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -77,7 +80,9 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Hang due to System.Console.ReadKey()")]
+    [Fact]
+    [SkipOnOS(OS.MacOS, "Hang due to System.Console.ReadKey()")]
+    [SkipOnOS(OS.Linux, "Hang due to System.Console.ReadKey()")]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -109,7 +114,9 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Hang due to System.Console.ReadKey()")]
+    [Fact]
+    [SkipOnOS(OS.MacOS, "Hang due to System.Console.ReadKey()")]
+    [SkipOnOS(OS.Linux, "Hang due to System.Console.ReadKey()")]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -141,7 +148,9 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Hang due to System.Console.ReadKey()")]
+    [Fact]
+    [SkipOnOS(OS.MacOS, "Hang due to System.Console.ReadKey()")]
+    [SkipOnOS(OS.Linux, "Hang due to System.Console.ReadKey()")]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
