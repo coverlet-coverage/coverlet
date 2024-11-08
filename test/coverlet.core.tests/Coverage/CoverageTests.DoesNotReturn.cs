@@ -6,7 +6,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.Utils;
-using Coverlet.Tests.Xunit.Extensions;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -46,9 +45,6 @@ namespace Coverlet.Core.Tests
       }
     }
 
-
-    [SkipOnOS(OS.MacOS, "Hang due to System.Console.ReadKey()")]
-    [SkipOnOS(OS.Linux, "Hang due to System.Console.ReadKey()")]
     [Fact]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
@@ -73,7 +69,6 @@ namespace Coverlet.Core.Tests
 
         result.Document("Instrumentation.DoesNotReturn.cs")
             .AssertInstrumentLines(BuildConfiguration.Debug, 7, 8, 19, 20, 22, 23, 24, 25, 29, 30, 26, 27);
-            //.AssertNonInstrumentedLines(BuildConfiguration.Debug, 26, 27);
       }
       finally
       {
@@ -82,8 +77,6 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    [SkipOnOS(OS.MacOS, "Hang due to System.Console.ReadKey()")]
-    [SkipOnOS(OS.Linux, "Hang due to System.Console.ReadKey()")]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -107,7 +100,6 @@ namespace Coverlet.Core.Tests
 
         result.Document("Instrumentation.DoesNotReturn.cs")
             .AssertInstrumentLines(BuildConfiguration.Debug, 7, 8, 33, 34, 36, 39, 40, 44, 45, 49, 50, 52, 53, 55, 56, 58, 59, 61, 62, 64, 65, 68, 69, 41, 42);
-            //.AssertNonInstrumentedLines(BuildConfiguration.Debug, 41, 42);
       }
       finally
       {
@@ -116,8 +108,6 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    [SkipOnOS(OS.MacOS, "Hang due to System.Console.ReadKey()")]
-    [SkipOnOS(OS.Linux, "Hang due to System.Console.ReadKey()")]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -141,7 +131,6 @@ namespace Coverlet.Core.Tests
 
         result.Document("Instrumentation.DoesNotReturn.cs")
             .AssertInstrumentLines(BuildConfiguration.Debug, 7, 8, 72, 73, 75, 78, 82, 83, 86, 87, 91, 92, 95, 101, 102, 103, 79, 80, 88, 96, 98, 99);
-            //.AssertNonInstrumentedLines(BuildConfiguration.Debug, 79, 80, 88, 96, 98, 99);
       }
       finally
       {
@@ -150,8 +139,6 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    [SkipOnOS(OS.MacOS, "Hang due to System.Console.ReadKey()")]
-    [SkipOnOS(OS.Linux, "Hang due to System.Console.ReadKey()")]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -175,7 +162,6 @@ namespace Coverlet.Core.Tests
 
         result.Document("Instrumentation.DoesNotReturn.cs")
             .AssertInstrumentLines(BuildConfiguration.Debug, 7, 8, 106, 107, 108, 110, 111, 112, 113, 114);
-            //.AssertNonInstrumentedLines(BuildConfiguration.Debug, 110, 111, 112, 113, 114);
       }
       finally
       {
@@ -280,7 +266,7 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void FiltersAndFinallies_DoesNotReturnAttribute_InstrumentsCorrect()
+    public void FiltersAndFinally_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
       try
@@ -289,7 +275,7 @@ namespace Coverlet.Core.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
                       {
-                        try { instance.FiltersAndFinallies(); }
+                        try { instance.FiltersAndFinally(); }
                         catch (Exception) { }
                         return Task.CompletedTask;
 
