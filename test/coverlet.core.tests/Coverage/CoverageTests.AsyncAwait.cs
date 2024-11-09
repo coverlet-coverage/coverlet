@@ -9,6 +9,7 @@ using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.Utils;
 using Xunit;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 namespace Coverlet.Core.Tests
 {
   public partial class CoverageTests
