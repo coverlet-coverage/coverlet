@@ -15,11 +15,11 @@ namespace Coverlet.Core.Samples.Tests
     public class Tasks_Issue809
     {
         public int TaskId { get; set; }
-        public string TaskDeatails { get; set; }
+        public string TaskDetails { get; set; }
         public System.DateTime StartDate { get; set; }
         public System.DateTime EndDate { get; set; }
         public int ParentTaskId { get; set; }
-        public int Priortiy { get; set; }
+        public int Priority { get; set; }
         public int Status { get; set; }
 
         public ParentTask_Issue809 ParentTask { get; set; }
@@ -72,16 +72,16 @@ namespace Coverlet.Core.Samples.Tests
             }
 
             if (searchMsg.PriorityFrom > 0)
-                criteriaPredicate = criteriaPredicate.Or(tsk => tsk.Priortiy >= searchMsg.PriorityFrom);
+                criteriaPredicate = criteriaPredicate.Or(tsk => tsk.Priority >= searchMsg.PriorityFrom);
             if (searchMsg.PriorityTo > 0)
-                criteriaPredicate = criteriaPredicate.Or(tsk => tsk.Priortiy <= searchMsg.PriorityTo);
+                criteriaPredicate = criteriaPredicate.Or(tsk => tsk.Priority <= searchMsg.PriorityTo);
             if (searchMsg.FromDate > System.DateTime.MinValue)
                 criteriaPredicate = criteriaPredicate.And(tsk => tsk.StartDate == searchMsg.FromDate);
             if (searchMsg.ToDate > System.DateTime.MinValue)
                 criteriaPredicate = criteriaPredicate.And(tsk => tsk.EndDate == searchMsg.ToDate);
             if (!string.IsNullOrWhiteSpace(searchMsg.TaskDescription))
                 criteriaPredicate = criteriaPredicate.And(tsk =>
-                tsk.TaskDeatails.CompareTo(searchMsg.TaskDescription) == 0);
+                tsk.TaskDetails.CompareTo(searchMsg.TaskDescription) == 0);
 
             var anyTaskQuery = from taskEntity in taskContext.Tasks.Where(criteriaPredicate.Compile())
                                select taskEntity;
@@ -107,7 +107,7 @@ namespace Coverlet.Core.Samples.Tests
                 criteriaPredicate = criteriaPredicate.Or(tsk => tsk.TaskId == searchMsg.TaskId);
             if (!string.IsNullOrWhiteSpace(searchMsg.TaskDescription))
                 criteriaPredicate = criteriaPredicate.Or(tsk =>
-                tsk.TaskDeatails.CompareTo(searchMsg.TaskDescription) == 0);
+                tsk.TaskDetails.CompareTo(searchMsg.TaskDescription) == 0);
             if (searchMsg.ParentTaskId > 0)
             {
                 var parentTask = taskContext.ParentTasks.FirstOrDefault(
@@ -118,9 +118,9 @@ namespace Coverlet.Core.Samples.Tests
             }
 
             if (searchMsg.PriorityFrom > 0)
-                criteriaPredicate = criteriaPredicate.Or(tsk => tsk.Priortiy >= searchMsg.PriorityFrom);
+                criteriaPredicate = criteriaPredicate.Or(tsk => tsk.Priority >= searchMsg.PriorityFrom);
             if (searchMsg.PriorityTo > 0)
-                criteriaPredicate = criteriaPredicate.Or(tsk => tsk.Priortiy <= searchMsg.PriorityTo);
+                criteriaPredicate = criteriaPredicate.Or(tsk => tsk.Priority <= searchMsg.PriorityTo);
             if (searchMsg.FromDate > System.DateTime.MinValue)
                 criteriaPredicate = criteriaPredicate.Or(tsk => tsk.StartDate == searchMsg.FromDate);
             if (searchMsg.ToDate > System.DateTime.MinValue)
@@ -201,9 +201,9 @@ namespace Coverlet.Core.Samples.Tests
             var parentTask = taskContext.ParentTasks.FirstOrDefault(parTsk =>
                                                             parTsk.Parent_Task == task.ParentTaskId);
             if ((parentTask != default) &&
-                (parentTask.ParentTaskDescription.CompareTo(task.TaskDeatails) != 0))
+                (parentTask.ParentTaskDescription.CompareTo(task.TaskDetails) != 0))
             {
-                parentTask.ParentTaskDescription = task.TaskDeatails;
+                parentTask.ParentTaskDescription = task.TaskDetails;
                 taskContext.Update(parentTask);
                 var recordsAffected = await taskContext.SaveChangesAsync();
                 return (recordsAffected > 0) ? true : false;
@@ -226,7 +226,7 @@ namespace Coverlet.Core.Samples.Tests
                     parentTask = new ParentTask_Issue809
                     {
                         Parent_Task = parTaskFromTaskEntity.TaskId,
-                        ParentTaskDescription = parTaskFromTaskEntity.TaskDeatails
+                        ParentTaskDescription = parTaskFromTaskEntity.TaskDetails
                     };
                     taskContext.ParentTasks.Add(parentTask);
                     await taskContext.SaveChangesAsync();
