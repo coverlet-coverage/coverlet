@@ -4,8 +4,8 @@ pool:
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 6.0.416
-  displayName: Install .NET Core SDK 6.0.416
+    version: 6.0.428
+  displayName: Install .NET Core SDK 6.0.428
 
 - task: UseDotNet@2
   inputs:
