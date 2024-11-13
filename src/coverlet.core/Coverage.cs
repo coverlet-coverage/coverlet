@@ -108,7 +108,7 @@ namespace Coverlet.Core
       _parameters.IncludeFilters = _parameters.IncludeFilters?.Where(f => _instrumentationHelper.IsValidFilterExpression(f)).ToArray();
 
       IReadOnlyList<string> validModules = _instrumentationHelper.SelectModules(modules, _parameters.IncludeFilters, _parameters.ExcludeFilters).ToList();
-      foreach (var excludedModule in modules.Except(validModules))
+      foreach (string excludedModule in modules.Except(validModules))
       {
         _logger.LogVerbose($"Excluded module: '{excludedModule}'");
       }
@@ -255,7 +255,7 @@ namespace Coverlet.Core
         {
           foreach (KeyValuePair<string, Methods> @class in document.Value)
           {
-            // We fix only lamda generated class
+            // We fix only lambda generated class
             // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L18
             if (!@class.Key.Contains("<>c"))
             {
