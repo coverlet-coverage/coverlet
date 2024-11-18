@@ -318,6 +318,11 @@ namespace Coverlet.Core.Instrumentation
         return runtimeOptionsElement["frameworks"].Select(x => (x["name"]?.Value<string>(), x["version"]?.Value<string>())).ToList();
       }
 
+      if (runtimeOptionsElement?["includedFrameworks"] != null)
+      {
+        return runtimeOptionsElement["includedFrameworks"].Select(x => (x["name"]?.Value<string>(), x["version"]?.Value<string>())).ToList();
+      }
+
       throw new InvalidOperationException($"Unable to read runtime configuration from {_runtimeConfigFile}.");
     }
   }
