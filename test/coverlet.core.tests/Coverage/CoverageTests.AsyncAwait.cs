@@ -9,6 +9,7 @@ using Coverlet.Core.Samples.Tests;
 using Coverlet.Tests.Utils;
 using Xunit;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 namespace Coverlet.Core.Tests
 {
   public partial class CoverageTests
@@ -99,7 +100,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact(Skip = "Unhandled exception: System.InvalidOperationException: Sequence contains more than one matching element, InstrumenterHelper.cs:line 138 ")]
+    [Fact]
     public void AsyncAwait_Issue_669_2()
     {
       string path = Path.GetTempFileName();
