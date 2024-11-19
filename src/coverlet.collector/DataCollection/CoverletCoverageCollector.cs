@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml;
+using coverlet.collector.ArtifactPostProcessor;
 using Coverlet.Collector.Utilities;
 using Coverlet.Collector.Utilities.Interfaces;
 using Coverlet.Core.Abstractions;
@@ -21,6 +22,7 @@ namespace Coverlet.Collector.DataCollection
   /// </summary>
   [DataCollectorTypeUri(CoverletConstants.DefaultUri)]
   [DataCollectorFriendlyName(CoverletConstants.FriendlyName)]
+  [DataCollectorAttachmentProcessor(typeof(CoverletCoveragePostProcessor))]
   public class CoverletCoverageCollector : DataCollector
   {
     private readonly TestPlatformEqtTrace _eqtTrace;
