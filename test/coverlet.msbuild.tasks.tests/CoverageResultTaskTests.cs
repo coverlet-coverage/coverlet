@@ -21,7 +21,7 @@ namespace coverlet.msbuild.tasks.tests
       MSBuildLocator.RegisterDefaults();
     }
   }
-  public class CoverageResultTaskTests : IAssemblyFixture<MSBuildFixture>
+  public class CoverageResultTaskTests //: IAssemblyFixture<MSBuildFixture>
   {
     private readonly Mock<IBuildEngine> _buildEngine;
     private readonly List<BuildErrorEventArgs> _errors;

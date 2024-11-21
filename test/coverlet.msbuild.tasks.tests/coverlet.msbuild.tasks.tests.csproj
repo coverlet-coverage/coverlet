@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
@@ -21,8 +21,8 @@
     <PackageReference Include="Microsoft.Build.Locator" />
     <PackageReference Include="Moq" />
     <PackageReference Include="ReportGenerator.Core" />
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.assemblyfixture" />
+    <PackageReference Include="xunit.v3" />
+    <!--<PackageReference Include="xunit.assemblyfixture" />-->
     <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

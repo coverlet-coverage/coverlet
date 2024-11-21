@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using Coverlet.Tests.Utils;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Coverlet.Integration.Tests
 {

@@ -10,7 +10,6 @@ using Coverlet.Core;
 using Coverlet.Tests.Utils;
 using Newtonsoft.Json;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Coverlet.Integration.Tests
 {

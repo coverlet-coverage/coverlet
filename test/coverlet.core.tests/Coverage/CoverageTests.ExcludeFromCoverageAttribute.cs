@@ -19,9 +19,9 @@ namespace Coverlet.Core.Tests
   public partial class CoverageTests
   {
 
-    [ConditionalFact]
-    [SkipOnOS(OS.MacOS, "Windows path format only - Simplified output paths issue")]
-    [SkipOnOS(OS.Linux, "Windows path format only - Simplified output paths issue")]
+    [Fact]
+    [SupportedOS(SupportedOS.Windows)]
+
     public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
     {
       var partialMockFileSystem = new Mock<FileSystem>();
@@ -210,13 +210,13 @@ namespace Coverlet.Core.Tests
 
         // public async Task<bool> EditTask(Tasks_Issue809 tasks, int val)
         .AssertNonInstrumentedLines(BuildConfiguration.Debug, 153, 162)
-        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 170) -> Shoud be not covered, issue with lambda
+        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 170) -> Should be not covered, issue with lambda
         .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 197)
 
         // public List<Tasks_Issue809> GetAllTasks()
-        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 266) -> Shoud be not covered, issue with lambda
+        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 266) -> Should be not covered, issue with lambda
         .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 264);
-        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 269, 275) -> Shoud be not covered, issue with lambda
+        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 269, 275) -> Should be not covered, issue with lambda
       }
       finally
       {

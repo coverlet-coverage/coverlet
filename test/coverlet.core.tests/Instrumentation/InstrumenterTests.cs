@@ -292,14 +292,14 @@ namespace Coverlet.Core.Instrumentation.Tests
       // We create dummy netstandard.dll
       var compilation = CSharpCompilation.Create(
           "netstandard",
-          new[] { CSharpSyntaxTree.ParseText("") },
+          new[] { CSharpSyntaxTree.ParseText("", cancellationToken: TestContext.Current.CancellationToken) },
           new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location) },
           new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
       Assembly newAssemlby;
       using (var dllStream = new MemoryStream())
       {
-        EmitResult emitResult = compilation.Emit(dllStream);
+        EmitResult emitResult = compilation.Emit(dllStream, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(emitResult.Success);
         newAssemlby = Assembly.Load(dllStream.ToArray());
         // remove if exists
@@ -551,7 +551,7 @@ namespace Coverlet.Core.Instrumentation.Tests
     {
       string EmitAssemblyToInstrument(string outputFolder)
       {
-        SyntaxTree attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
+        SyntaxTree attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}", cancellationToken: TestContext.Current.CancellationToken);
         SyntaxTree instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
 [assembly:{attributeName}]
 namespace coverlet.tests.projectsample.excludedbyattribute{{
@@ -564,7 +564,7 @@ public class SampleClass
 }}
 
 }}
-");
+", cancellationToken: TestContext.Current.CancellationToken);
         CSharpCompilation compilation = CSharpCompilation.Create(attributeName, new List<SyntaxTree>
                 {
                     attributeClassSyntaxTree,instrumentableClassSyntaxTree
@@ -580,7 +580,7 @@ public class SampleClass
         {
           bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
           var emitOptions = new EmitOptions(pdbFilePath: pdbPath);
-          EmitResult emitResult = compilation.Emit(outputStream, pdbStream, options: isWindows ? emitOptions : emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb));
+          EmitResult emitResult = compilation.Emit(outputStream, pdbStream, options: isWindows ? emitOptions : emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb), cancellationToken: TestContext.Current.CancellationToken);
           if (!emitResult.Success)
           {
             string message = "Failure to dynamically create dll";
@@ -658,7 +658,7 @@ public class SampleClass
                     140, 141, 142, 143, 144,
                     // WithLeave
                     147, 149, 150, 151, 152, 153, 154, 155, 156, 159, 161, 163, 166, 167, 168,
-                    // FiltersAndFinallies
+                    // FiltersAndFinally
                     171, 173, 174, 175, 176, 177, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 192, 193, 194, 195, 196, 197
           };
       int[] notReachableLines =

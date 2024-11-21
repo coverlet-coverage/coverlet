@@ -11,9 +11,8 @@ namespace Coverlet.Core.Helpers.Tests
 {
   public class SourceRootTranslatorTests
   {
-    [ConditionalFact]
-    [SkipOnOS(OS.Linux, "Windows path format only")]
-    [SkipOnOS(OS.MacOS, "Windows path format only")]
+    [Fact]
+    [SupportedOS(SupportedOS.Windows)]
     public void Translate_Success()
     {
       string fileToTranslate = "/_/src/coverlet.core/obj/Debug/netstandard2.0/coverlet.core.pdb";
@@ -32,9 +31,8 @@ namespace Coverlet.Core.Helpers.Tests
       Assert.Equal(@"C:\git\coverlet\src\coverlet.core\obj\Debug\netstandard2.0\coverlet.core.pdb", translator.ResolveFilePath(fileToTranslate));
     }
 
-    [ConditionalFact]
-    [SkipOnOS(OS.Linux, "Windows path format only")]
-    [SkipOnOS(OS.MacOS, "Windows path format only")]
+    [Fact]
+    [SupportedOS(SupportedOS.Windows)]
     public void TranslatePathRoot_Success()
     {
       var logger = new Mock<ILogger>();
@@ -51,9 +49,8 @@ namespace Coverlet.Core.Helpers.Tests
       Assert.Equal(@"C:\git\coverlet\", translator.ResolvePathRoot("/_/")[0].OriginalPath);
     }
 
-    [ConditionalFact]
-    [SkipOnOS(OS.Linux, "Windows path format only")]
-    [SkipOnOS(OS.MacOS, "Windows path format only")]
+    [Fact]
+    [SupportedOS(SupportedOS.Windows)]
     public void TranslateWithDirectFile_Success()
     {
       var logger = new Mock<ILogger>();
