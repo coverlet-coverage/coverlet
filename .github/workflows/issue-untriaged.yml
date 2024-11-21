@@ -7,6 +7,10 @@ on:
     types:
       - reopened
       - opened
+
+permissions:
+  contents: read
+
 jobs:
   label_issues:
     runs-on: ubuntu-latest
