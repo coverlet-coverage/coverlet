@@ -4,13 +4,13 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
 using Coverlet.Tests.Utils;
-using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
 
@@ -20,10 +20,9 @@ namespace Coverlet.Core.Tests
   {
 
     [Fact]
-    [SupportedOS(SupportedOS.Windows)]
-
     public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
     {
+      Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       var partialMockFileSystem = new Mock<FileSystem>();
       partialMockFileSystem.CallBase = true;
       partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>

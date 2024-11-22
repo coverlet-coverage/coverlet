@@ -37,7 +37,6 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj" />
 
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.empty\coverlet.tests.projectsample.empty.csproj" />

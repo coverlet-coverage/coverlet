@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Runtime.InteropServices;
 using Coverlet.Core.Abstractions;
-using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
 
@@ -12,9 +12,9 @@ namespace Coverlet.Core.Helpers.Tests
   public class SourceRootTranslatorTests
   {
     [Fact]
-    [SupportedOS(SupportedOS.Windows)]
     public void Translate_Success()
     {
+      Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       string fileToTranslate = "/_/src/coverlet.core/obj/Debug/netstandard2.0/coverlet.core.pdb";
       var logger = new Mock<ILogger>();
       var assemblyAdapter = new Mock<IAssemblyAdapter>();
@@ -32,9 +32,9 @@ namespace Coverlet.Core.Helpers.Tests
     }
 
     [Fact]
-    [SupportedOS(SupportedOS.Windows)]
     public void TranslatePathRoot_Success()
     {
+      Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       var logger = new Mock<ILogger>();
       var assemblyAdapter = new Mock<IAssemblyAdapter>();
       assemblyAdapter.Setup(x => x.GetAssemblyName(It.IsAny<string>())).Returns("testLib");
@@ -50,9 +50,9 @@ namespace Coverlet.Core.Helpers.Tests
     }
 
     [Fact]
-    [SupportedOS(SupportedOS.Windows)]
     public void TranslateWithDirectFile_Success()
     {
+      Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       var logger = new Mock<ILogger>();
       var assemblyAdapter = new Mock<IAssemblyAdapter>();
       assemblyAdapter.Setup(x => x.GetAssemblyName(It.IsAny<string>())).Returns("testLib");
