@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="NuGet.Packaging" Version="6.6.2" />
     <PackageReference Include="xunit.v3" Version="0.6.0-pre.7" />
@@ -23,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\coverlet.console\coverlet.console.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
   </ItemGroup>
 
