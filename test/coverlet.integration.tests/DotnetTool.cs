@@ -54,7 +54,7 @@ namespace Coverlet.Integration.Tests
       string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --output \"{outputPath}\"", out standardOutput, out standardError);
+      int result = RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --output \"{outputPath}\"", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -73,7 +73,7 @@ namespace Coverlet.Integration.Tests
       string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f  {_buildTargetFramework}  {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      Assert.True(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --output \"{outputPath}\"", out standardOutput, out standardError));
+      int result = RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --output \"{outputPath}\"", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -86,6 +86,7 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
+      Assert.Equal(2, result); // CoverageBelowThreshold = 2,
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.Contains("The minimum method coverage is below the specified 80", standardOutput);
     }
@@ -99,7 +100,7 @@ namespace Coverlet.Integration.Tests
       string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      Assert.True(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --output \"{outputPath}\"", out standardOutput, out standardError));
+      int result = RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --output \"{outputPath}\"", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -112,6 +113,7 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
+      Assert.Equal(2, result); // CoverageBelowThreshold = 2,
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.DoesNotContain("The minimum method coverage is below the specified 80", standardOutput);
     }
@@ -125,7 +127,7 @@ namespace Coverlet.Integration.Tests
       string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f  {_buildTargetFramework}  {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      Assert.True(RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --threshold-type method --output \"{outputPath}\"", out standardOutput, out standardError));
+      int result = RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --threshold-type method --output \"{outputPath}\"", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -138,6 +140,7 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
+      Assert.Equal(2, result); // CoverageBelowThreshold = 2,
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.Contains("The minimum method coverage is below the specified 80", standardOutput);
     }

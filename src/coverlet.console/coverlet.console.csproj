@@ -30,10 +30,9 @@
     <PackageReference Include="System.CommandLine" />
     <PackageReference Include="System.CommandLine.Generator" />
 <!--    <PackageReference Include="Microsoft.CodeAnalysis.Common" />-->
-    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="6.0.5" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="System.Text.RegularExpressions" VersionOverride="4.3.1" />
     <PackageReference Include="System.Net.Http" VersionOverride="4.3.4" />
-    <PackageReference Include="System.Formats.Asn1" VersionOverride="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
