@@ -79,7 +79,7 @@ namespace Coverlet.Integration.Tests
       return new ClonedTemplateProject(finalRoot.FullName, cleanupOnDispose);
     }
 
-    private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
+    private protected int RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
     {
       Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}\nWorkingDirectory: {workingDirectory}");
       // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?view=net-7.0&redirectedfrom=MSDN#System_Diagnostics_Process_StandardOutput
@@ -101,10 +101,10 @@ namespace Coverlet.Integration.Tests
         throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
       }
       standardError = eOut;
-      return commandProcess.ExitCode == 0;
+      return commandProcess.ExitCode;
     }
 
-    private protected bool DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
+    private protected int DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
     {
       return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
     }
@@ -129,6 +129,12 @@ namespace Coverlet.Integration.Tests
          .Elements()
          .ElementAt(0)
          .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
+      xml.Element("configuration")!
+         .Element("packageSourceMapping")!
+         .Elements()
+         .ElementAt(0)
+         .AddAfterSelf(new XElement("packageSource", new XAttribute("key", "localCoverletPackages"),
+             new XElement("package", new XAttribute("pattern", "coverlet.*"))));
       xml.Save(nugetFile);
     }
 
