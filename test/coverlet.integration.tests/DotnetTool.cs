@@ -36,13 +36,14 @@ namespace Coverlet.Integration.Tests
       string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
       DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{outputPath}\"", out standardOutput, out standardError);
+      int result = RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{outputPath}\"", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
       }
       Assert.Contains("Passed!", standardOutput);
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
+      Assert.Equal((int)CommandExitCodes.Success, result);
     }
 
     [Fact]
@@ -62,6 +63,7 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
+      Assert.Equal((int)CommandExitCodes.Success, result);
     }
 
     [Fact]
@@ -86,7 +88,7 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
-      Assert.Equal(2, result); // CoverageBelowThreshold = 2,
+      Assert.Equal((int)CommandExitCodes.CoverageBelowThreshold, result);
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.Contains("The minimum method coverage is below the specified 80", standardOutput);
     }
@@ -113,7 +115,7 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
-      Assert.Equal(2, result); // CoverageBelowThreshold = 2,
+      Assert.Equal((int)CommandExitCodes.CoverageBelowThreshold, result);
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.DoesNotContain("The minimum method coverage is below the specified 80", standardOutput);
     }
@@ -140,7 +142,7 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
-      Assert.Equal(2, result); // CoverageBelowThreshold = 2,
+      Assert.Equal((int)CommandExitCodes.CoverageBelowThreshold, result);
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.Contains("The minimum method coverage is below the specified 80", standardOutput);
     }
