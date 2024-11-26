@@ -15,7 +15,7 @@ steps:
     New-Item -ItemType Directory -Path artifacts/package/release -Force
   displayName: create folder artifacts/package/$(BuildConfiguration)
 
-- script: dotnet restore
+- script: dotnet restore --configfile nuget.config
   displayName: Restore packages
 
 - script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.msbuild.binlog
