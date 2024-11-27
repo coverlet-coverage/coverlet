@@ -86,7 +86,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
-      Assert.Equal(0, result); Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
+      Assert.Equal(0, result);
+      Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.{_buildTargetFramework}.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));

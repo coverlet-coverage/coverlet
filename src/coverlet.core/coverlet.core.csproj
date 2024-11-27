@@ -20,8 +20,8 @@
 
   <ItemGroup  Condition="'$(TargetFramework)' != 'netstandard2.0'">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
-    <PackageReference Include="System.Reflection.Metadata" VersionOverride="6.0.0" />
-    <PackageReference Include="System.Collections.Immutable" VersionOverride="6.0.0" />
+    <PackageReference Include="System.Reflection.Metadata" VersionOverride="6.0.2" />
+    <PackageReference Include="System.Collections.Immutable" VersionOverride="6.0.1" />
   </ItemGroup>
 
   <ItemGroup  Condition="'$(TargetFramework)' == 'netstandard2.0'">

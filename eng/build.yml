@@ -15,18 +15,18 @@ steps:
     New-Item -ItemType Directory -Path artifacts/package/release -Force
   displayName: create folder artifacts/package/$(BuildConfiguration)
 
-#- script: dotnet restore --configfile nuget.config
-#  displayName: Restore packages
+- script: dotnet restore
+  displayName: Restore packages
 
-- task: NuGetAuthenticate@1
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet restore'
-  inputs:
-    command: restore
-    projects: 'coverlet.sln'
-    feedsToUse: config
-    nugetConfigPath: nuget.config
-    noCache: true
+#- task: NuGetAuthenticate@1
+#- task: DotNetCoreCLI@2
+#  displayName: 'dotnet restore'
+#  inputs:
+#    command: restore
+#    projects: 'coverlet.sln'
+#    feedsToUse: config
+#    nugetConfigPath: nuget.config
+#    noCache: true
 
 - script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.msbuild.binlog
   displayName: Build
