@@ -255,7 +255,7 @@ namespace Coverlet.Core
         {
           foreach (KeyValuePair<string, Methods> @class in document.Value)
           {
-            // We fix only lambda generated class
+            // We fix only lamda generated class
             // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L18
             if (!@class.Key.Contains("<>c"))
             {
