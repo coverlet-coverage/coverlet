@@ -27,7 +27,7 @@ namespace Coverlet.Integration.Tests
     {
       ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
       UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
-      AddCoverletMsbuildRef(clonedTemplateProject.ProjectRootPath!);
+      AddCoverletMsbuildRef(clonedTemplateProject.ProjectFileName, clonedTemplateProject.ProjectRootPath!);
       return clonedTemplateProject;
     }
 

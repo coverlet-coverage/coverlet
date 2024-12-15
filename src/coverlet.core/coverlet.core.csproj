@@ -15,16 +15,8 @@
     <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.Text.Json" VersionOverride="6.0.11" />
-  </ItemGroup>
-
-  <ItemGroup  Condition="'$(TargetFramework)' != 'netstandard2.0'">
-    <PackageReference Include="System.Reflection.Metadata" VersionOverride="6.0.2" />
-    <PackageReference Include="System.Collections.Immutable" VersionOverride="6.0.1" />
-  </ItemGroup>
-
-  <ItemGroup  Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
-    <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutableVersion)"/>
+    <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutableVersion)" />
   </ItemGroup>
 
 </Project>

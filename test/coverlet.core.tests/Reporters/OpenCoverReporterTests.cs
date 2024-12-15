@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
@@ -28,9 +27,9 @@ namespace Coverlet.Core.Reporters.Tests
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
       Assert.NotEmpty(report);
       var doc = XDocument.Load(new StringReader(report));
-      Assert.Empty(doc.Descendants().Attributes("sequenceCoverage").Where(v => v.Value != "33.33"));
-      Assert.Empty(doc.Descendants().Attributes("branchCoverage").Where(v => v.Value != "25"));
-      Assert.Empty(doc.Descendants().Attributes("nPathComplexity").Where(v => v.Value != "4"));
+      Assert.DoesNotContain(doc.Descendants().Attributes("sequenceCoverage"), v => v.Value != "33.33");
+      Assert.DoesNotContain(doc.Descendants().Attributes("branchCoverage"), v => v.Value != "25");
+      Assert.DoesNotContain(doc.Descendants().Attributes("nPathComplexity"), v => v.Value != "4");
     }
 
     [Fact]

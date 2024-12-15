@@ -21,11 +21,12 @@ namespace Coverlet.Integration.Tests
     [SkipOnOS(OS.MacOS, "WPF only runs on Windows")]
     public void TestInstrument_NetCoreSharedFrameworkResolver()
     {
+      string projectName = "coverlet.tests.projectsample.wpf.net8.0";
       string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant();
-      string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf8");
-      string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8"), buildConfiguration);
+      string wpfProjectPath = TestUtils.GetTestProjectPath(projectName);
+      string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath(projectName), buildConfiguration);
       Assert.True(DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
-      string assemblyLocation = Directory.GetFiles(testBinaryPath, "coverlet.tests.projectsample.wpf8.dll", SearchOption.AllDirectories).First();
+      string assemblyLocation = Directory.GetFiles(testBinaryPath, projectName + ".dll", SearchOption.AllDirectories).First();
 
       var mockLogger = new Mock<ILogger>();
       var resolver = new NetCoreSharedFrameworkResolver(assemblyLocation, mockLogger.Object);
