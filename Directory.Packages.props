@@ -13,6 +13,7 @@
     <PackageVersion Include="Microsoft.Build.Framework" Version="17.8.3" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="1.7.8" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    <!-- Microsoft.Extensions.DependencyModel has dependency to System.Text.Json -->
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" />
@@ -20,8 +21,8 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.12.0" />
-    <!-- Microsoft.TestPlatform.ObjectModel has a dependency to NuGet.Frameworks with specific version -->
-    <!-- https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L35-->
+    <!-- Microsoft.TestPlatform.ObjectModel has a dependency to NuGet.Frameworks (actual <NuGetFrameworksVersion>6.5.0</NuGetFrameworksVersion>) with specific version -->
+    <!-- https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L35 -->
     <!-- wrong configuration will create "build\coverlet.msbuild.targets(72,5): error : Unable to read beyond the end of the stream."  -->
     <!--
          vstest 17.5 version /scripts/build/TestPlatform.Dependencies.props
@@ -54,7 +55,6 @@
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="6.0.5" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 </Project>
