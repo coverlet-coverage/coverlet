@@ -353,7 +353,7 @@ namespace Coverlet.Core.Helpers
           .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
           .Except(excludedModuleKeys.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
 
-       return moduleKeysToInclude.SelectMany(x => modulesLookup[x]);
+      return moduleKeysToInclude.SelectMany(x => modulesLookup[x]);
     }
 
     private string GetModuleKeysForIncludeFilters(IEnumerable<string> filters, char escapeSymbol, string moduleKeys)
@@ -391,7 +391,9 @@ namespace Coverlet.Core.Helpers
     private static string CreateRegexPattern(IEnumerable<string> filters, char escapeSymbol)
     {
       IEnumerable<string> regexPatterns = filters.Select(x =>
+#pragma warning disable IDE0057 // Use range operator
           $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+#pragma warning restore IDE0057 // Use range operator
       return string.Join("|", regexPatterns);
     }
 

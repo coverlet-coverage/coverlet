@@ -51,12 +51,18 @@ namespace Coverlet.Integration.Tests
       }
     }
 
-    private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "17.5.0")
+    private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "17.12.0")
     {
+      return CloneTemplateProjectByName("coverlet.integration.template", cleanupOnDispose, testSDKVersion);
+    }
+
+    private protected ClonedTemplateProject CloneTemplateProjectByName(string projectName, bool cleanupOnDispose = true, string testSDKVersion = "17.12.0")
+    {
+
       DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N")[..6]}{Interlocked.Increment(ref s_folderSuffix)}");
-      foreach (string file in (Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "*.cs")
-              .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "*.csproj")
-              .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "nuget.config")))))
+      foreach (string file in (Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath(projectName)), "*.cs")
+              .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath(projectName)), "*.csproj")
+              .Union(Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath(projectName)), "nuget.config")))))
       {
         File.Copy(file, Path.Combine(finalRoot.FullName, Path.GetFileName(file)));
       }
@@ -65,6 +71,9 @@ namespace Coverlet.Integration.Tests
       File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.props"),
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project>
+  <PropertyGroup>
+    <RepoRoot>..\..\..\..\..\</RepoRoot>
+  </PropertyGroup>
 </Project>");
 
       File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.targets"),
@@ -72,11 +81,11 @@ namespace Coverlet.Integration.Tests
 <Project>
 </Project>");
 
-      AddMicrosoftNETTestSdkRef(finalRoot.FullName, testSDKVersion);
+      AddMicrosoftNETTestSdkRef(projectName + ".csproj", finalRoot.FullName, testSDKVersion);
 
-      SetIsTestProjectTrue(finalRoot.FullName);
+      SetIsTestProjectTrue(projectName, finalRoot.FullName);
 
-      return new ClonedTemplateProject(finalRoot.FullName, cleanupOnDispose);
+      return new ClonedTemplateProject(projectName, finalRoot.FullName, cleanupOnDispose);
     }
 
     private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
@@ -132,12 +141,13 @@ namespace Coverlet.Integration.Tests
       xml.Save(nugetFile);
     }
 
-    private void SetIsTestProjectTrue(string projectPath)
+    private void SetIsTestProjectTrue(string projectName, string projectPath)
     {
-      string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
+      string csprojName = projectName + ".csproj";
+      string csproj = Path.Combine(projectPath, csprojName);
       if (!File.Exists(csproj))
       {
-        throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+        throw new FileNotFoundException(String.Format($"{projectName} not found"), projectName);
       }
       XDocument xml;
       using (FileStream? csprojStream = File.OpenRead(csproj))
@@ -152,12 +162,12 @@ namespace Coverlet.Integration.Tests
       xml.Save(csproj);
     }
 
-    private protected void AddMicrosoftNETTestSdkRef(string projectPath, string version)
+    private protected void AddMicrosoftNETTestSdkRef(string projectFileName, string projectPath, string version)
     {
-      string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
+      string csproj = Path.Combine(projectPath, projectFileName);
       if (!File.Exists(csproj))
       {
-        throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+        throw new FileNotFoundException(String.Format($"{projectFileName} not found"), projectFileName);
       }
       XDocument xml;
       using (FileStream? csprojStream = File.OpenRead(csproj))
@@ -172,12 +182,12 @@ namespace Coverlet.Integration.Tests
       xml.Save(csproj);
     }
 
-    private protected void AddCoverletMsbuildRef(string projectPath)
+    private protected void AddCoverletMsbuildRef(string projectFileName, string projectPath)
     {
-      string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
+      string csproj = Path.Combine(projectPath, projectFileName);
       if (!File.Exists(csproj))
       {
-        throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+        throw new FileNotFoundException(String.Format($"{projectFileName} not found"), projectFileName);
       }
       XDocument xml;
       using (FileStream? csprojStream = File.OpenRead(csproj))
@@ -193,12 +203,12 @@ namespace Coverlet.Integration.Tests
       xml.Save(csproj);
     }
 
-    private protected void AddCoverletCollectosRef(string projectPath)
+    private protected void AddCoverletCollectorRef(string projectFileName, string projectPath)
     {
-      string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
+      string csproj = Path.Combine(projectPath, projectFileName);
       if (!File.Exists(csproj))
       {
-        throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+        throw new FileNotFoundException(String.Format($"{projectFileName} not found"), projectFileName);
       }
       XDocument xml;
       using (FileStream? csprojStream = File.OpenRead(csproj))
@@ -270,7 +280,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
 
       if (!File.Exists(project.ProjectFileNamePath))
       {
-        throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+        throw new FileNotFoundException(String.Format($"{project.ProjectFileName} not found"), project.ProjectFileName);
       }
       XDocument xml;
       using (FileStream? csprojStream = File.OpenRead(project.ProjectFileNamePath))
@@ -323,7 +333,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
 
       if (!File.Exists(project.ProjectFileNamePath))
       {
-        throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+        throw new FileNotFoundException(string.Format($"{project.ProjectFileName} not found"), project.ProjectFileName);
       }
 
       if (project.ProjectRootPath is null || !Directory.Exists(project.ProjectRootPath))
@@ -340,14 +350,25 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
     public string ProjectRootPath { get; private set; }
     public bool CleanupOnDispose { get; private set; }
 
+    public string ProjectName { get; private set; }
+
     // We need to have a different asm name to avoid issue with collectors, we filter [coverlet.*]* by default
     // https://github.com/tonerdo/coverlet/pull/410#discussion_r284526728
     public static string AssemblyName { get; } = "coverletsamplelib.integration.template";
-    public static string ProjectFileName { get; } = "coverlet.integration.template.csproj";
-    public string ProjectFileNamePath => Path.Combine(ProjectRootPath, "coverlet.integration.template.csproj");
+    public string ProjectFileName { get; private set; }
+    public string ProjectFileNamePath => Path.Combine(ProjectRootPath, ProjectFileName!);
 
+    public ClonedTemplateProject(string projectName, string? projectRootPath, bool cleanupOnDispose)
+    {
+      ProjectName = projectName;
+      ProjectFileName = projectName + ".csproj";
+      ProjectRootPath = (projectRootPath ?? throw new ArgumentNullException(nameof(projectRootPath)));
+      CleanupOnDispose = cleanupOnDispose;
+    }
     public ClonedTemplateProject(string? projectRootPath, bool cleanupOnDispose)
     {
+      ProjectName = "coverlet.integration.template";
+      ProjectFileName = "coverlet.integration.template.csproj";
       ProjectRootPath = (projectRootPath ?? throw new ArgumentNullException(nameof(projectRootPath)));
       CleanupOnDispose = cleanupOnDispose;
     }

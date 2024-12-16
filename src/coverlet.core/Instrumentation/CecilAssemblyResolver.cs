@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Coverlet.Core.Abstractions;
-using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Mono.Cecil;
@@ -214,7 +213,7 @@ namespace Coverlet.Core.Instrumentation
         return asm.Value;
       }
 
-      throw new CecilAssemblyResolutionException($"AssemblyResolutionException for '{name}'. Try to add <PreserveCompilationContext>true</PreserveCompilationContext> to test projects </PropertyGroup> or pass '/p:CopyLocalLockFileAssemblies=true' option to the 'dotnet test' command-line", new AssemblyResolutionException(name));
+      throw new ApplicationException($"AssemblyResolutionException for '{name}'. Try to add <PreserveCompilationContext>true</PreserveCompilationContext> to test projects </PropertyGroup> or pass '/p:CopyLocalLockFileAssemblies=true' option to the 'dotnet test' command-line", new AssemblyResolutionException(name));
     }
   }
 
