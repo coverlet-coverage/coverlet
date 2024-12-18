@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+- Fix RuntimeConfigurationReader to support self-contained builds [#1705](https://github.com/coverlet-coverage/coverlet/pull/1705) by https://github.com/pfeigl
+- Fix inconsistent filenames with UseSourceLink after .NET 8 [#1679](https://github.com/coverlet-coverage/coverlet/issues/1679)
+- Fix hanging tests [#989](https://github.com/coverlet-coverage/coverlet/issues/989)
+- Fix coverlet instrumentation becomes slow after installing dotnet sdk 8.0.200 [#1620](https://github.com/coverlet-coverage/coverlet/issues/1620)
+- Fix upgrading v6.0.1 to v6.0.2 increases instrumentation time [#1649](https://github.com/coverlet-coverage/coverlet/issues/1649)
 - Fix Unable to instrument module - NET 8 [#1631](https://github.com/coverlet-coverage/coverlet/issues/1631)
 - Fix slow modules filtering process [#1646](https://github.com/coverlet-coverage/coverlet/issues/1646) by https://github.com/BlackGad
 - Fix incorrect coverage await using in generic method [#1490](https://github.com/coverlet-coverage/coverlet/issues/1490)
+
+### Improvements
+- Cache the regex used in InstrumentationHelper [#1693](https://github.com/coverlet-coverage/coverlet/issues/1693)
+- Enable dotnetTool integration tests for linux [#660](https://github.com/coverlet-coverage/coverlet/issues/660)
 
 ## Release date 2024-03-13
 ### Packages
