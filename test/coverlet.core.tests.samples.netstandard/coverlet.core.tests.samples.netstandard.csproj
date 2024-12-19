@@ -4,6 +4,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
