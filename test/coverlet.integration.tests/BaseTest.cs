@@ -193,7 +193,7 @@ namespace Coverlet.Integration.Tests
       xml.Save(csproj);
     }
 
-    private protected void AddCoverletCollectosRef(string projectPath)
+    private protected void AddCoverletCollectorsRef(string projectPath)
     {
       string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
       if (!File.Exists(csproj))
