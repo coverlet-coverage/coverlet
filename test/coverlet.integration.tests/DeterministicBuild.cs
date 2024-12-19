@@ -10,7 +10,6 @@ using Coverlet.Core;
 using Coverlet.Tests.Utils;
 using Newtonsoft.Json;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Coverlet.Integration.Tests
 {
@@ -88,8 +87,8 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Msbuild()
     {
-      string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).TestDisplayName);
-      string logFilename = string.Concat(((ITest)_testMember!.GetValue(_output)!).TestDisplayName, ".binlog");
+      string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
+      string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
       CreateDeterministicTestPropsFile();
 
       DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
@@ -131,8 +130,8 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Msbuild_SourceLink()
     {
-      string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).TestDisplayName);
-      string logFilename = string.Concat(((ITest)_testMember!.GetValue(_output)!).TestDisplayName, ".binlog");
+      string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
+      string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
       CreateDeterministicTestPropsFile();
 
       DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string standardOutput, out string standardError, _testProjectPath);
@@ -176,9 +175,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Collectors()
     {
-      string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).TestDisplayName);
-      string testLogFilesPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).TestDisplayName, "log");
-      string logFilename = string.Concat(((ITest)_testMember!.GetValue(_output)!).TestDisplayName, ".binlog");
+      string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
+      string testLogFilesPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}", "log");
+      string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
 
       CreateDeterministicTestPropsFile();
       DeleteLogFiles(testLogFilesPath);
@@ -231,9 +230,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Collectors_SourceLink()
     {
-      string testResultPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).TestDisplayName);
-      string testLogFilesPath = Path.Join(_testResultsPath, ((ITest)_testMember!.GetValue(_output)!).TestDisplayName, "log");
-      string logFilename = string.Concat(((ITest)_testMember!.GetValue(_output)!).TestDisplayName, ".binlog");
+      string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
+      string testLogFilesPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}", "log");
+      string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
 
       CreateDeterministicTestPropsFile();
       DeleteLogFiles(testLogFilesPath);
