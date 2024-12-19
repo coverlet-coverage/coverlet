@@ -4,13 +4,13 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
 using Coverlet.Tests.Utils;
-using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
 
@@ -19,11 +19,10 @@ namespace Coverlet.Core.Tests
   public partial class CoverageTests
   {
 
-    [ConditionalFact]
-    [SkipOnOS(OS.MacOS, "Windows path format only - Simplified output paths issue")]
-    [SkipOnOS(OS.Linux, "Windows path format only - Simplified output paths issue")]
+    [Fact]
     public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
     {
+      Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       var partialMockFileSystem = new Mock<FileSystem>();
       partialMockFileSystem.CallBase = true;
       partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
@@ -210,13 +209,13 @@ namespace Coverlet.Core.Tests
 
         // public async Task<bool> EditTask(Tasks_Issue809 tasks, int val)
         .AssertNonInstrumentedLines(BuildConfiguration.Debug, 153, 162)
-        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 170) -> Shoud be not covered, issue with lambda
+        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 170) -> Should be not covered, issue with lambda
         .AssertNonInstrumentedLines(BuildConfiguration.Debug, 167, 197)
 
         // public List<Tasks_Issue809> GetAllTasks()
-        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 266) -> Shoud be not covered, issue with lambda
+        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 266) -> Should be not covered, issue with lambda
         .AssertNonInstrumentedLines(BuildConfiguration.Debug, 263, 264);
-        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 269, 275) -> Shoud be not covered, issue with lambda
+        // .AssertNonInstrumentedLines(BuildConfiguration.Debug, 269, 275) -> Should be not covered, issue with lambda
       }
       finally
       {
