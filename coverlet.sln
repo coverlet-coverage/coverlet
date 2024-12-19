@@ -88,6 +88,8 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "coverlet.tests.projectsampl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.utils", "test\coverlet.tests.utils\coverlet.tests.utils.csproj", "{0B109210-03CB-413F-888C-3023994AA384}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsample.wpf8.selfcontained", "test\coverlet.tests.projectsample.wpf8.selfcontained\coverlet.tests.projectsample.wpf8.selfcontained.csproj", "{71004336-9896-4AE5-8367-B29BB1680542}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -190,6 +192,10 @@ Global
 		{0B109210-03CB-413F-888C-3023994AA384}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B109210-03CB-413F-888C-3023994AA384}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B109210-03CB-413F-888C-3023994AA384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71004336-9896-4AE5-8367-B29BB1680542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71004336-9896-4AE5-8367-B29BB1680542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71004336-9896-4AE5-8367-B29BB1680542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71004336-9896-4AE5-8367-B29BB1680542}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -220,6 +226,7 @@ Global
 		{351A034E-E642-4DB9-A21D-F71C8151C243} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{03400776-1F9A-4326-B927-1CA9B64B42A1} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{0B109210-03CB-413F-888C-3023994AA384} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{71004336-9896-4AE5-8367-B29BB1680542} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}

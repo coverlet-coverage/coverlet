@@ -1,0 +1,8 @@
+# top-most EditorConfig file
+# We don't want to import other EditorConfig files and we want
+# to ensure no rules are enabled for these asset source files.
+root = true
+
+[*.cs]
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = none

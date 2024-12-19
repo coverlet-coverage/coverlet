@@ -85,7 +85,7 @@
                 case 'C':
                     System.Console.WriteLine("In-Constant-3");
                     Throws();
-                    goto alwayUnreachable;                      // unreachable
+                    goto alwaysUnreachable;                      // unreachable
 
                 case 'D':
                     System.Console.WriteLine("In-Constant-4");
@@ -95,7 +95,7 @@
             Throws();
             System.Console.WriteLine("Out-Constant-1");         // unreachable
 
-        alwayUnreachable:                                       // unreachable
+        alwaysUnreachable:                                       // unreachable
             System.Console.WriteLine("Out-Constant-2");         // unreachable
 
         subtlyReachable:
@@ -167,7 +167,7 @@
             System.Console.WriteLine("Constant-2");
         }
 
-        public void FiltersAndFinallies()
+        public void FiltersAndFinally()
         {
             try
             {
