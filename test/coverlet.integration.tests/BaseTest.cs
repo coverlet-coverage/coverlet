@@ -129,12 +129,6 @@ namespace Coverlet.Integration.Tests
          .Elements()
          .ElementAt(0)
          .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
-      xml.Element("configuration")!
-         .Element("packageSourceMapping")!
-         .Elements()
-         .ElementAt(0)
-         .AddAfterSelf(new XElement("packageSource", new XAttribute("key", "localCoverletPackages"),
-             new XElement("package", new XAttribute("pattern", "coverlet.*"))));
       xml.Save(nugetFile);
     }
 
