@@ -27,6 +27,7 @@ namespace Coverlet.Core.Tests.Instrumentation
     }
   }
 
+  [Collection("FunctionExecutor Test Collection")]
   public class ModuleTrackerTemplateTests : ExternalProcessExecutionTest
   {
     private static readonly Task<int> s_success = Task.FromResult(0);

@@ -160,7 +160,7 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void ExcludeFromCodeCoverageNextedTypes()
+    public void ExcludeFromCodeCoverageNestedTypes()
     {
       string path = Path.GetTempFileName();
       try
