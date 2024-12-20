@@ -11,8 +11,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
-    <PackageReference Include="Moq" Version="4.20.70" />
-    <PackageReference Include="NuGet.Packaging" Version="6.6.2" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="NuGet.Packaging" Version="6.11.1" />
     <PackageReference Include="xunit.v3" Version="1.0.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
