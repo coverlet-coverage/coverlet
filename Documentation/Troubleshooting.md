@@ -180,10 +180,10 @@ To use/debug local collectors build we need to tell to our project to restore an
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
       <PackageReference Include="xunit.v3" Version="1.0.0" />
       <PackageReference Include="xunit.runner.visualstudio" Version="3.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-        <PackageReference Include="coverlet.collector" Version="6.0.0" /> <-- My local package version -->
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="coverlet.collector" Version="6.0.0" /> <-- My local package version -->
     </ItemGroup>
 
     <ItemGroup>

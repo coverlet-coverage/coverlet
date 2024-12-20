@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
+    <!--<DisableMSBuildAssemblyCopyCheck>true</DisableMSBuildAssemblyCopyCheck>-->
   </PropertyGroup>
 
   <ItemGroup>

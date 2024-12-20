@@ -129,12 +129,6 @@ namespace Coverlet.Integration.Tests
          .Elements()
          .ElementAt(0)
          .AddAfterSelf(new XElement("add", new XAttribute("key", "localCoverletPackages"), new XAttribute("value", localPackageFolder)));
-      xml.Element("configuration")!
-         .Element("packageSourceMapping")!
-         .Elements()
-         .ElementAt(0)
-         .AddAfterSelf(new XElement("packageSource", new XAttribute("key", "localCoverletPackages"),
-             new XElement("package", new XAttribute("pattern", "coverlet.*"))));
       xml.Save(nugetFile);
     }
 
@@ -199,7 +193,7 @@ namespace Coverlet.Integration.Tests
       xml.Save(csproj);
     }
 
-    private protected void AddCoverletCollectosRef(string projectPath)
+    private protected void AddCoverletCollectorsRef(string projectPath)
     {
       string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
       if (!File.Exists(csproj))

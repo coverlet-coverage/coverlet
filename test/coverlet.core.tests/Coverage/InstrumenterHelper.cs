@@ -253,7 +253,7 @@ namespace Coverlet.Core.Tests
     }
   }
 
-  // We log to files for debugging pourpose, we can check if instrumentation is ok
+  // We log to files for debugging purpose, we can check if instrumentation is ok
   class Logger : ILogger
   {
     readonly string _logFile;

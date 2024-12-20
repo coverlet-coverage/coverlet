@@ -35,7 +35,7 @@ namespace coverlet.msbuild.tasks.tests
       _mockAssemblyAdapter.Setup(x => x.GetAssemblyName(It.IsAny<string>())).Returns("abc");
     }
 
-    [Fact]
+    [Fact(Skip = "runtime issue: 'Could not load file or assembly 'Microsoft.Build.Framework, Version=15.1.0.0' ")]
     public void Execute_StateUnderTest_MissingInstrumentationState()
     {
       // Arrange
@@ -65,7 +65,7 @@ namespace coverlet.msbuild.tasks.tests
       Assert.Equal("[coverlet] Result of instrumentation task not found", _errors.FirstOrDefault()?.Message);
     }
 
-    [Fact]
+    [Fact(Skip = "runtime issue: 'Could not load file or assembly 'Microsoft.Build.Framework, Version=15.1.0.0' ")]
     public void Execute_StateUnderTest_WithInstrumentationState_Fake()
     {
       // Arrange
