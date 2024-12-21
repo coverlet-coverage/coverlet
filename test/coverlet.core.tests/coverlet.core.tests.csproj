@@ -21,7 +21,7 @@
     <PackageReference Include="ReportGenerator.Core" />
     <PackageReference Include="System.Linq.Async" />
     <PackageReference Include="System.Reflection.Metadata" />
-    <PackageReference Include="Tmds.ExecFunction" />
+    <!--<PackageReference Include="Tmds.ExecFunction" />-->
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>

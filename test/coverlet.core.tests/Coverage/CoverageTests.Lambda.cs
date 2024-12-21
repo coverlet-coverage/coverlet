@@ -12,20 +12,17 @@ namespace Coverlet.Core.Tests
   public partial class CoverageTests
   {
     [Fact]
-    public void Lambda_Issue343()
+    public async Task Lambda_Issue343()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(async instance =>
-                  {
-                    instance.InvokeAnonymous_Test();
-                    await (Task<bool>)instance.InvokeAnonymousAsync_Test();
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Lambda_Issue343>(async instance =>
+                {
+                  instance.InvokeAnonymous_Test();
+                  await (Task<bool>)instance.InvokeAnonymousAsync_Test();
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.Lambda.cs")
@@ -45,21 +42,17 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void AsyncAwait_Issue_730()
+    public async Task AsyncAwait_Issue_730()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_730>(async instance =>
-                  {
-                    await (Task)instance.Invoke();
-                  },
-                  persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_730>(async instance =>
+                {
+                  await (Task)instance.Invoke();
+                },
+                persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.Lambda.cs")
@@ -73,22 +66,18 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void Lambda_Issue760()
+    public async Task Lambda_Issue760()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_760>(async instance =>
-                  {
-                    await (Task)instance.If();
-                    await (Task)instance.Foreach();
-                  },
-                  persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_760>(async instance =>
+                {
+                  await (Task)instance.If();
+                  await (Task)instance.Foreach();
+                },
+                persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.Lambda.cs")
@@ -102,22 +91,18 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void Issue_1056()
+    public async Task Issue_1056()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1056>(instance =>
-                  {
-                    instance.T1();
-                    return Task.CompletedTask;
-                  },
-                  persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1056>(instance =>
+                {
+                  instance.T1();
+                  return Task.CompletedTask;
+                },
+                persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.Lambda.cs")
@@ -137,23 +122,19 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
-    public void Issue_1447()
+    public async Task Issue_1447()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1447>(instance =>
-            {
-              instance.Query1();
-              instance.Query2();
-              return Task.CompletedTask;
-            },
-            persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1447>(instance =>
+          {
+            instance.Query1();
+            instance.Query2();
+            return Task.CompletedTask;
+          },
+          persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path).GenerateReport(show: true)
           .Document("Instrumentation.Lambda.cs")
