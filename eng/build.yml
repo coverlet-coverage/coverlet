@@ -48,6 +48,6 @@ steps:
 - template: publish-coverage-results.yml
   parameters:
     reports: $(Build.SourcesDirectory)\**\*.opencover.xml
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'), eq(variables['agent.os'], 'Windows_NT'))
+    condition: and(succeededOrFailed(), eq(variables['BuildConfiguration'], 'Debug'), eq(variables['agent.os'], 'Windows_NT'))
     assemblyfilters: '-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverlet.tests.xunit.extensions;-coverletsamplelib.integration.template;-coverlet.tests.utils'
 
