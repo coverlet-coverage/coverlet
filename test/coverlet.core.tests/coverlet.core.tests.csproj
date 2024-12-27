@@ -11,6 +11,11 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
