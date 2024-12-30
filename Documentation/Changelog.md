@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Release date 2024-12-31
+### Packages
+coverlet.msbuild 6.0.3
+coverlet.console 6.0.3
+coverlet.collector 6.0.3
+
 ### Fixed
 - Fix RuntimeConfigurationReader to support self-contained builds [#1705](https://github.com/coverlet-coverage/coverlet/pull/1705) by https://github.com/pfeigl
 - Fix inconsistent filenames with UseSourceLink after .NET 8 [#1679](https://github.com/coverlet-coverage/coverlet/issues/1679)
