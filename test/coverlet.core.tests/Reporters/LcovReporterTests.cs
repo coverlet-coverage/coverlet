@@ -17,13 +17,17 @@ namespace Coverlet.Core.Reporters.Tests
       result.Parameters = new CoverageParameters();
       result.Identifier = Guid.NewGuid().ToString();
 
-      var lines = new Lines();
-      lines.Add(1, 1);
-      lines.Add(2, 0);
+      var lines = new Lines
+      {
+        { 1, 1 },
+        { 2, 0 }
+      };
 
-      var branches = new Branches();
-      branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 });
-      branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 23, EndOffset = 27, Path = 1, Ordinal = 2 });
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 23, EndOffset = 27, Path = 1, Ordinal = 2 }
+      };
 
       var methods = new Methods();
       string methodString = "System.Void Coverlet.Core.Reporters.Tests.LcovReporterTests.TestReport()";
@@ -31,13 +35,19 @@ namespace Coverlet.Core.Reporters.Tests
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
-      var classes = new Classes();
-      classes.Add("Coverlet.Core.Reporters.Tests.LcovReporterTests", methods);
+      var classes = new Classes
+      {
+        { "Coverlet.Core.Reporters.Tests.LcovReporterTests", methods }
+      };
 
-      var documents = new Documents();
-      documents.Add("doc.cs", classes);
-      result.Modules = new Modules();
-      result.Modules.Add("module", documents);
+      var documents = new Documents
+      {
+        { "doc.cs", classes }
+      };
+      result.Modules = new Modules
+      {
+        { "module", documents }
+      };
 
       var reporter = new LcovReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);

@@ -45,7 +45,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact]
+    [Fact(Skip = "xunit.v3 '(Explicit=true)' (System.Console.ReadKey, Instrumentation.DoesNotReturn.cs line 22) ")]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -76,7 +76,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact]
+    [Fact(Skip = "xunit.v3 '(Explicit=true)' (System.Console.ReadKey, Instrumentation.DoesNotReturn.cs line 36) ")]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -107,7 +107,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact]
+    [Fact(Skip = "xunit.v3 '(Explicit=true)' (System.Console.ReadKey, Instrumentation.DoesNotReturn.cs line 37) ")]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -138,7 +138,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact]
+    [Fact(Skip = "xunit.v3 '(Explicit=true)' (System.Console.ReadKey, Instrumentation.DoesNotReturn.cs line 107) ")]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
