@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Moq" />
-    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.assert" />
   </ItemGroup>
 

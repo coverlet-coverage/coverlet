@@ -13,19 +13,16 @@ namespace Coverlet.Core.Tests
   public partial class CoverageTests
   {
     [Fact]
-    public void GenericAsyncIterator()
+    public async Task GenericAsyncIterator()
     {
       string path = Path.GetTempFileName();
+      string[] pathSerialize = [path];
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<GenericAsyncIterator<int>>(async instance =>
-                  {
-                    List<int> res = await (Task<List<int>>)instance.Issue1383();
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, new string[] { path });
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<GenericAsyncIterator<int>>(async instance =>
+                {
+                  List<int> res = await (Task<List<int>>)instance.Issue1383();
+                }, persistPrepareResultToFile: pathSerialize[0]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
             .Document("Instrumentation.GenericAsyncIterator.cs")
