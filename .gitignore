@@ -316,3 +316,4 @@ coverage.*.opencover.xml
 
 FolderProfile.pubxml
 /NuGet.config
+*.dmp

@@ -11,6 +11,8 @@ using Xunit;
 
 namespace Coverlet.Core.Tests
 {
+  [CollectionDefinition("FunctionExecutor Test Collection", DisableParallelization = true)]
+  [Collection("FunctionExecutor Test Collection")]
   public partial class CoverageTests
   {
     [Fact]

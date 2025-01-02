@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
@@ -6,7 +6,15 @@
     <Nullable>enable</Nullable>
     <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
+    <!--<DisableMSBuildAssemblyCopyCheck>true</DisableMSBuildAssemblyCopyCheck>-->
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Xunit.CollectionBehaviorAttribute">
+      <_Parameter1>DisableTestParallelization = true</_Parameter1>
+      <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
@@ -21,8 +29,8 @@
     <PackageReference Include="Microsoft.Build.Locator" />
     <PackageReference Include="Moq" />
     <PackageReference Include="ReportGenerator.Core" />
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.assemblyfixture" />
+    <PackageReference Include="xunit.v3" />
+    <!--<PackageReference Include="xunit.assemblyfixture" />-->
     <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

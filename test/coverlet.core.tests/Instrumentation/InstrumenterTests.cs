@@ -292,23 +292,23 @@ namespace Coverlet.Core.Instrumentation.Tests
       // We create dummy netstandard.dll
       var compilation = CSharpCompilation.Create(
           "netstandard",
-          new[] { CSharpSyntaxTree.ParseText("") },
+          new[] { CSharpSyntaxTree.ParseText("", cancellationToken: TestContext.Current.CancellationToken) },
           new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location) },
           new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-      Assembly newAssemlby;
+      Assembly newAssembly;
       using (var dllStream = new MemoryStream())
       {
-        EmitResult emitResult = compilation.Emit(dllStream);
+        EmitResult emitResult = compilation.Emit(dllStream, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(emitResult.Success);
-        newAssemlby = Assembly.Load(dllStream.ToArray());
+        newAssembly = Assembly.Load(dllStream.ToArray());
         // remove if exists
         File.Delete("netstandard.dll");
         File.WriteAllBytes("netstandard.dll", dllStream.ToArray());
       }
 
-      var netstandardResolver = new NetstandardAwareAssemblyResolver(newAssemlby.Location, _mockLogger.Object);
-      AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse(newAssemlby.FullName));
+      var netstandardResolver = new NetstandardAwareAssemblyResolver(newAssembly.Location, _mockLogger.Object);
+      AssemblyDefinition resolved = netstandardResolver.Resolve(AssemblyNameReference.Parse(newAssembly.FullName));
 
       // We check if final netstandard.dll resolved is local folder one and not "official" netstandard.dll
       Assert.Equal(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "netstandard.dll"), Path.GetFullPath(resolved.MainModule.FileName));
@@ -398,19 +398,19 @@ namespace Coverlet.Core.Instrumentation.Tests
     [MemberData(nameof(TestInstrument_ExcludedFilesHelper_Data))]
     public void TestInstrument_ExcludedFilesHelper(string[] excludeFilterHelper, ValueTuple<string, bool, bool>[] result)
     {
-      var exludeFilterHelper = new ExcludedFilesHelper(excludeFilterHelper, new Mock<ILogger>().Object);
+      var exclude2FilterHelper = new ExcludedFilesHelper(excludeFilterHelper, new Mock<ILogger>().Object);
       foreach (ValueTuple<string, bool, bool> checkFile in result)
       {
         if (checkFile.Item3) // run test only on windows platform
         {
           if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
           {
-            Assert.Equal(checkFile.Item2, exludeFilterHelper.Exclude(checkFile.Item1));
+            Assert.Equal(checkFile.Item2, exclude2FilterHelper.Exclude(checkFile.Item1));
           }
         }
         else
         {
-          Assert.Equal(checkFile.Item2, exludeFilterHelper.Exclude(checkFile.Item1));
+          Assert.Equal(checkFile.Item2, exclude2FilterHelper.Exclude(checkFile.Item1));
         }
       }
     }
@@ -418,7 +418,7 @@ namespace Coverlet.Core.Instrumentation.Tests
     [Fact]
     public void SkipEmbeddedPdbWithoutLocalSource()
     {
-      string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.core.dll").First();
+      string xunitDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "xunit.v3.core.dll").First();
       var loggerMock = new Mock<ILogger>();
 
       var instrumentationHelper =
@@ -551,8 +551,8 @@ namespace Coverlet.Core.Instrumentation.Tests
     {
       string EmitAssemblyToInstrument(string outputFolder)
       {
-        SyntaxTree attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}");
-        SyntaxTree instrumentableClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
+        SyntaxTree attributeClassSyntaxTree = CSharpSyntaxTree.ParseText("[System.AttributeUsage(System.AttributeTargets.Assembly)]public class " + attributeName + ":System.Attribute{}", cancellationToken: TestContext.Current.CancellationToken);
+        SyntaxTree instrumentedClassSyntaxTree = CSharpSyntaxTree.ParseText($@"
 [assembly:{attributeName}]
 namespace coverlet.tests.projectsample.excludedbyattribute{{
 public class SampleClass
@@ -564,10 +564,10 @@ public class SampleClass
 }}
 
 }}
-");
+", cancellationToken: TestContext.Current.CancellationToken);
         CSharpCompilation compilation = CSharpCompilation.Create(attributeName, new List<SyntaxTree>
                 {
-                    attributeClassSyntaxTree,instrumentableClassSyntaxTree
+                    attributeClassSyntaxTree,instrumentedClassSyntaxTree
                 }).AddReferences(
             MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location)).
         WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, false));
@@ -580,7 +580,7 @@ public class SampleClass
         {
           bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
           var emitOptions = new EmitOptions(pdbFilePath: pdbPath);
-          EmitResult emitResult = compilation.Emit(outputStream, pdbStream, options: isWindows ? emitOptions : emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb));
+          EmitResult emitResult = compilation.Emit(outputStream, pdbStream, options: isWindows ? emitOptions : emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb), cancellationToken: TestContext.Current.CancellationToken);
           if (!emitResult.Success)
           {
             string message = "Failure to dynamically create dll";
@@ -612,9 +612,9 @@ public class SampleClass
       var instrumentationHelper =
               new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                         new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
-      CoverageParameters parametes = new();
-      parametes.ExcludeAttributes = excludedAttributes;
-      var instrumenter = new Instrumenter(excludedbyattributeDll, "_xunit_excludedbyattribute", parametes, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
+      CoverageParameters parameters = new();
+      parameters.ExcludeAttributes = excludedAttributes;
+      var instrumenter = new Instrumenter(excludedbyattributeDll, "_xunit_excludedbyattribute", parameters, loggerMock.Object, instrumentationHelper, partialMockFileSystem.Object, new SourceRootTranslator(loggerMock.Object, new FileSystem()), new CecilSymbolHelper());
 
       InstrumenterResult result = instrumenter.Instrument();
       Assert.Empty(result.Documents);
@@ -633,7 +633,7 @@ public class SampleClass
     [Fact]
     public void TestReachabilityHelper()
     {
-      int[] allInstrumentableLines =
+      int[] allInstrumentedLines =
           new[]
           {
                     // Throws
@@ -658,7 +658,7 @@ public class SampleClass
                     140, 141, 142, 143, 144,
                     // WithLeave
                     147, 149, 150, 151, 152, 153, 154, 155, 156, 159, 161, 163, 166, 167, 168,
-                    // FiltersAndFinallies
+                    // FiltersAndFinally
                     171, 173, 174, 175, 176, 177, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 192, 193, 194, 195, 196, 197
           };
       int[] notReachableLines =
@@ -680,11 +680,11 @@ public class SampleClass
                     143, 144,
                     // WithLeave
                     163, 164,
-                    // FiltersAndFinallies
+                    // FiltersAndFinally
                     176, 177, 183, 184, 189, 190, 195, 196, 197
           };
 
-      int[] expectedToBeInstrumented = allInstrumentableLines.Except(notReachableLines).ToArray();
+      int[] expectedToBeInstrumented = allInstrumentedLines.Except(notReachableLines).ToArray();
 
       InstrumenterTest instrumenterTest = CreateInstrumentor();
       InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();

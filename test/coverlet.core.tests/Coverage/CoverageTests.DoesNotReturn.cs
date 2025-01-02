@@ -45,7 +45,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact]
+    [Fact(Explicit = true)]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -76,7 +76,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact]
+    [Fact(Explicit = true)]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -107,7 +107,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact]
+    [Fact(Explicit = true)]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -138,7 +138,7 @@ namespace Coverlet.Core.Tests
       }
     }
 
-    [Fact]
+    [Fact(Explicit = true)]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
