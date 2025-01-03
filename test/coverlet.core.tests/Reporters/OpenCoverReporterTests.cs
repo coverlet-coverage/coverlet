@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
@@ -17,30 +16,34 @@ namespace Coverlet.Core.Reporters.Tests
     [Fact]
     public void TestReport()
     {
-      var result = new CoverageResult();
-      result.Parameters = new CoverageParameters();
-      result.Identifier = Guid.NewGuid().ToString();
+      var result = new CoverageResult
+      {
+        Parameters = new CoverageParameters(),
+        Identifier = Guid.NewGuid().ToString(),
 
-      result.Modules = new Modules();
+        Modules = []
+      };
       result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
 
       var reporter = new OpenCoverReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
       Assert.NotEmpty(report);
       var doc = XDocument.Load(new StringReader(report));
-      Assert.Empty(doc.Descendants().Attributes("sequenceCoverage").Where(v => v.Value != "33.33"));
-      Assert.Empty(doc.Descendants().Attributes("branchCoverage").Where(v => v.Value != "25"));
-      Assert.Empty(doc.Descendants().Attributes("nPathComplexity").Where(v => v.Value != "4"));
+      Assert.DoesNotContain(doc.Descendants().Attributes("sequenceCoverage"), v => v.Value != "33.33");
+      Assert.DoesNotContain(doc.Descendants().Attributes("branchCoverage"), v => v.Value != "25");
+      Assert.DoesNotContain(doc.Descendants().Attributes("nPathComplexity"), v => v.Value != "4");
     }
 
     [Fact]
     public void TestFilesHaveUniqueIdsOverMultipleModules()
     {
-      var result = new CoverageResult();
-      result.Parameters = new CoverageParameters();
-      result.Identifier = Guid.NewGuid().ToString();
+      var result = new CoverageResult
+      {
+        Parameters = new CoverageParameters(),
+        Identifier = Guid.NewGuid().ToString(),
 
-      result.Modules = new Modules();
+        Modules = []
+      };
       result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
       result.Modules.Add("Some.Other.Module", CreateSecondDocuments());
 
@@ -95,16 +98,20 @@ namespace Coverlet.Core.Reporters.Tests
 
     private static Documents CreateFirstDocuments()
     {
-      var lines = new Lines();
-      lines.Add(1, 1);
-      lines.Add(2, 0);
-      lines.Add(3, 0);
+      var lines = new Lines
+      {
+        { 1, 1 },
+        { 2, 0 },
+        { 3, 0 }
+      };
 
-      var branches = new Branches();
-      branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 });
-      branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 23, EndOffset = 27, Path = 1, Ordinal = 2 });
-      branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 41, Path = 0, Ordinal = 3 });
-      branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 44, Path = 1, Ordinal = 4 });
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 23, EndOffset = 24, Path = 0, Ordinal = 1 },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 23, EndOffset = 27, Path = 1, Ordinal = 2 },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 41, Path = 0, Ordinal = 3 },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 44, Path = 1, Ordinal = 4 }
+      };
 
       var methods = new Methods();
       string methodString = "System.Void Coverlet.Core.Reporters.Tests.OpenCoverReporterTests.TestReport()";
@@ -112,31 +119,41 @@ namespace Coverlet.Core.Reporters.Tests
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
-      var classes = new Classes();
-      classes.Add("Coverlet.Core.Reporters.Tests.OpenCoverReporterTests", methods);
+      var classes = new Classes
+      {
+        { "Coverlet.Core.Reporters.Tests.OpenCoverReporterTests", methods }
+      };
 
-      var documents = new Documents();
-      documents.Add("doc.cs", classes);
+      var documents = new Documents
+      {
+        { "doc.cs", classes }
+      };
 
       return documents;
     }
 
     private static Documents CreateSecondDocuments()
     {
-      var lines = new Lines();
-      lines.Add(1, 1);
-      lines.Add(2, 0);
+      var lines = new Lines
+      {
+        { 1, 1 },
+        { 2, 0 }
+      };
 
       var methods = new Methods();
       string methodString = "System.Void Some.Other.Module.TestClass.TestMethod()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
 
-      var classes2 = new Classes();
-      classes2.Add("Some.Other.Module.TestClass", methods);
+      var classes2 = new Classes
+      {
+        { "Some.Other.Module.TestClass", methods }
+      };
 
-      var documents = new Documents();
-      documents.Add("TestClass.cs", classes2);
+      var documents = new Documents
+      {
+        { "TestClass.cs", classes2 }
+      };
 
       return documents;
     }
