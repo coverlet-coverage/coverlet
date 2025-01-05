@@ -213,7 +213,7 @@ namespace Coverlet.Core.Tests
 
   class CustomRetryHelper : IRetryHelper
   {
-    public T Do<T>(Func<T> action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3)
+    public T Do<T>(Func<T> action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3, List<Type> handledExceptions = null)
     {
       var exceptions = new List<Exception>();
       for (int attempted = 0; attempted < maxAttemptCount; attempted++)
@@ -236,14 +236,21 @@ namespace Coverlet.Core.Tests
           }
           else
           {
-            exceptions.Add(ex);
+            if (handledExceptions == null || handledExceptions.Contains(ex.GetType()))
+            {
+              exceptions.Add(ex);
+            }
+            else
+            {
+              throw new AggregateException(exceptions);
+            }
           }
         }
       }
       throw new AggregateException(exceptions);
     }
 
-    public void Retry(Action action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3)
+    public void Retry(Action action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3, List<Type> handledExceptions = null)
     {
       Do<object>(() =>
       {
@@ -253,7 +260,7 @@ namespace Coverlet.Core.Tests
     }
   }
 
-  // We log to files for debugging pourpose, we can check if instrumentation is ok
+  // We log to files for debugging purpose, we can check if instrumentation is ok
   class Logger : ILogger
   {
     readonly string _logFile;

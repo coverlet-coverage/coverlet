@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

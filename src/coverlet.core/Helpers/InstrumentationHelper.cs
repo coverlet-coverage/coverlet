@@ -19,6 +19,7 @@ namespace Coverlet.Core.Helpers
   internal class InstrumentationHelper : IInstrumentationHelper
   {
     private const int RetryAttempts = 12;
+    private readonly List<Type> _retryExceptionList;
     private readonly ConcurrentDictionary<string, string> _backupList = new();
     private readonly IRetryHelper _retryHelper;
     private readonly IFileSystem _fileSystem;
@@ -34,6 +35,7 @@ namespace Coverlet.Core.Helpers
       _fileSystem = fileSystem;
       _logger = logger;
       _sourceRootTranslator = sourceRootTranslator;
+      _retryExceptionList = new List<Type> { typeof(IOException) };
     }
 
     public string[] GetCoverableModules(string moduleOrAppDirectory, string[] directories, bool includeTestAssembly)
@@ -269,7 +271,7 @@ namespace Coverlet.Core.Helpers
         _fileSystem.Copy(backupPath, module, true);
         _fileSystem.Delete(backupPath);
         _backupList.TryRemove(module, out string _);
-      }, retryStrategy, RetryAttempts);
+      }, retryStrategy, RetryAttempts, _retryExceptionList);
 
       _retryHelper.Retry(() =>
       {
@@ -280,7 +282,7 @@ namespace Coverlet.Core.Helpers
           _fileSystem.Delete(backupSymbolPath);
           _backupList.TryRemove(symbolFile, out string _);
         }
-      }, retryStrategy, RetryAttempts);
+      }, retryStrategy, RetryAttempts, _retryExceptionList);
     }
 
     public virtual void RestoreOriginalModules()
@@ -297,14 +299,14 @@ namespace Coverlet.Core.Helpers
           _fileSystem.Copy(backupPath, key, true);
           _fileSystem.Delete(backupPath);
           _backupList.TryRemove(key, out string _);
-        }, retryStrategy, RetryAttempts);
+        }, retryStrategy, RetryAttempts, _retryExceptionList);
       }
     }
 
     public void DeleteHitsFile(string path)
     {
       Func<TimeSpan> retryStrategy = CreateRetryStrategy();
-      _retryHelper.Retry(() => _fileSystem.Delete(path), retryStrategy, RetryAttempts);
+      _retryHelper.Retry(() => _fileSystem.Delete(path), retryStrategy, RetryAttempts, _retryExceptionList);
     }
 
     public bool IsValidFilterExpression(string filter)
@@ -353,7 +355,7 @@ namespace Coverlet.Core.Helpers
           .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
           .Except(excludedModuleKeys.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
 
-       return moduleKeysToInclude.SelectMany(x => modulesLookup[x]);
+      return moduleKeysToInclude.SelectMany(x => modulesLookup[x]);
     }
 
     private string GetModuleKeysForIncludeFilters(IEnumerable<string> filters, char escapeSymbol, string moduleKeys)

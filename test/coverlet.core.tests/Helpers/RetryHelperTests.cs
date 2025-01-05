@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace Coverlet.Core.Helpers.Tests
@@ -63,6 +65,44 @@ namespace Coverlet.Core.Helpers.Tests
       Assert.Equal(6, target.Calls);
     }
 
+    [Fact]
+    public void TestRetryHandlesNotIOException()
+    {
+      Func<TimeSpan> retryStrategy = () =>
+      {
+        return TimeSpan.FromMilliseconds(1);
+      };
+
+      var target = new RetryTarget();
+      try
+      {
+        new RetryHelper().Retry(() => target.TargetActionThrows(), retryStrategy, 7, new List<Type> { typeof(IOException) });
+      }
+      catch
+      {
+        Assert.Equal(1, target.Calls);
+      }
+    }
+
+    [Fact]
+    public void TestRetryHandlesForIOException()
+    {
+      Func<TimeSpan> retryStrategy = () =>
+      {
+        return TimeSpan.FromMilliseconds(1);
+      };
+
+      var target = new RetryTargetIOException();
+      try
+      {
+        new RetryHelper().Retry(() => target.TargetActionThrows(), retryStrategy, 7, new List<Type> { typeof(IOException) });
+      }
+      catch
+      {
+        Assert.Equal(7, target.Calls);
+      }
+    }
+
   }
 
   public class RetryTarget
@@ -72,6 +112,21 @@ namespace Coverlet.Core.Helpers.Tests
     {
       Calls++;
       throw new Exception("Simulating Failure");
+    }
+    public void TargetActionThrows5Times()
+    {
+      Calls++;
+      if (Calls < 6) throw new Exception("Simulating Failure");
+    }
+  }
+
+  public class RetryTargetIOException
+  {
+    public int Calls { get; set; }
+    public void TargetActionThrows()
+    {
+      Calls++;
+      throw new IOException("Simulating Failure");
     }
     public void TargetActionThrows5Times()
     {
