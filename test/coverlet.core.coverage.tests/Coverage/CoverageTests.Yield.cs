@@ -30,12 +30,12 @@ namespace Coverlet.CoreCoverage.Tests
                   }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
         result.Document("Instrumentation.Yield.cs")
-              .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<One>d__0::MoveNext()")
+              .Method("System.Boolean Coverlet.Core.CoverageSamples.Tests.Yield/<One>d__0::MoveNext()")
               .AssertLinesCovered((9, 1))
               .ExpectedTotalNumberOfBranches(0);
       }
@@ -60,12 +60,12 @@ namespace Coverlet.CoreCoverage.Tests
                     return Task.CompletedTask;
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
         result.Document("Instrumentation.Yield.cs")
-              .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<Two>d__1::MoveNext()")
+              .Method("System.Boolean Coverlet.Core.CoverageSamples.Tests.Yield/<Two>d__1::MoveNext()")
               .AssertLinesCovered((14, 1), (15, 1))
               .ExpectedTotalNumberOfBranches(0);
       }
@@ -91,12 +91,12 @@ namespace Coverlet.CoreCoverage.Tests
                   }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
         result.Document("Instrumentation.Yield.cs")
-              .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<OneWithSwitch>d__2::MoveNext()")
+              .Method("System.Boolean Coverlet.Core.CoverageSamples.Tests.Yield/<OneWithSwitch>d__2::MoveNext()")
               .AssertLinesCovered(BuildConfiguration.Debug, (21, 1), (30, 1), (31, 1), (37, 1))
               .ExpectedTotalNumberOfBranches(1);
       }
@@ -126,7 +126,7 @@ namespace Coverlet.CoreCoverage.Tests
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
         result.Document("Instrumentation.Yield.cs")
-              .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<Three>d__3::MoveNext()")
+              .Method("System.Boolean Coverlet.Core.CoverageSamples.Tests.Yield/<Three>d__3::MoveNext()")
               .AssertLinesCovered((42, 1), (43, 1), (44, 1))
               .ExpectedTotalNumberOfBranches(0);
       }
@@ -156,7 +156,7 @@ namespace Coverlet.CoreCoverage.Tests
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
         result.Document("Instrumentation.Yield.cs")
-              .Method("System.Boolean Coverlet.Core.Samples.Tests.Yield/<Enumerable>d__4::MoveNext()")
+              .Method("System.Boolean Coverlet.Core.CoverageSamples.Tests.Yield/<Enumerable>d__4::MoveNext()")
               .AssertLinesCovered(BuildConfiguration.Debug, (48, 1), (49, 1), (50, 4), (51, 5), (52, 1), (54, 4), (55, 4), (56, 4), (57, 1))
               .ExpectedTotalNumberOfBranches(1);
       }
