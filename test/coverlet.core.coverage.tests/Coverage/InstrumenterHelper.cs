@@ -50,7 +50,7 @@ namespace Coverlet.Core.Tests
       new string[0],
       new string[0],
       new string[0],
-      string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : new[] { sourceFileFilter },
+      string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : [sourceFileFilter],
       null,
       null)));
     }
@@ -144,7 +144,7 @@ namespace Coverlet.Core.Tests
       // string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
 
       // Void UnloadModule(System.Object, System.EventArgs)
-      tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, new object[2] { null, null });
+      tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, [null, null]);
 
       // Persist CoveragePrepareResult
       using (var fs = new FileStream(persistPrepareResultToFile, FileMode.Open))

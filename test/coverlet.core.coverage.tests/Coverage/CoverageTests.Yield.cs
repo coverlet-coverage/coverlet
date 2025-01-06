@@ -121,7 +121,7 @@ namespace Coverlet.CoreCoverage.Tests
                     return Task.CompletedTask;
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -136,6 +136,8 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
+    private static readonly string[] s_stringArray = ["one", "two", "three", "four"];
+
     [Fact]
     public void Yield_Enumerable()
     {
@@ -146,12 +148,12 @@ namespace Coverlet.CoreCoverage.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
                   {
-                    foreach (dynamic _ in instance.Enumerable(new[] { "one", "two", "three", "four" })) ;
+                    foreach (dynamic _ in instance.Enumerable(s_stringArray)) ;
 
                     return Task.CompletedTask;
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 

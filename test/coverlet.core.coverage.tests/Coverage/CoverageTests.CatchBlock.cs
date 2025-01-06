@@ -66,7 +66,7 @@ namespace Coverlet.CoreCoverage.Tests
 
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult res = TestInstrumentationHelper.GetCoverageResult(path);
         res.Document("Instrumentation.CatchBlock.cs")

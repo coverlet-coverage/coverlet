@@ -27,7 +27,7 @@ namespace Coverlet.CoreCoverage.Tests
                     await (Task<bool>)instance.InvokeAnonymousAsync_Test();
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.Lambda.cs")
@@ -61,7 +61,7 @@ namespace Coverlet.CoreCoverage.Tests
                   persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.Lambda.cs")
@@ -90,7 +90,7 @@ namespace Coverlet.CoreCoverage.Tests
                   persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.Lambda.cs")
@@ -119,7 +119,7 @@ namespace Coverlet.CoreCoverage.Tests
                   persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.Lambda.cs")
@@ -155,7 +155,7 @@ namespace Coverlet.CoreCoverage.Tests
             persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path).GenerateReport(show: true)
           .Document("Instrumentation.Lambda.cs")

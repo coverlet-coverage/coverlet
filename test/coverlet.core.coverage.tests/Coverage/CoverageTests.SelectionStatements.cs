@@ -37,7 +37,7 @@ namespace Coverlet.CoreCoverage.Tests
 
           // we return 0 if we return something different assert fail
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         // We retrieve and load CoveragePrepareResult and run coverage calculation
         // Similar to msbuild coverage result task
@@ -74,7 +74,7 @@ namespace Coverlet.CoreCoverage.Tests
                     return Task.CompletedTask;
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -104,7 +104,7 @@ namespace Coverlet.CoreCoverage.Tests
                     return Task.CompletedTask;
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.SelectionStatements.cs")
@@ -140,7 +140,7 @@ namespace Coverlet.CoreCoverage.Tests
                     return Task.CompletedTask;
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.SelectionStatements.cs")

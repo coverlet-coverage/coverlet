@@ -28,7 +28,7 @@ namespace Coverlet.CoreCoverage.Tests
 
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncIterator.cs")

@@ -29,7 +29,7 @@ namespace Coverlet.CoreCoverage.Tests
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -70,7 +70,7 @@ namespace Coverlet.CoreCoverage.Tests
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path)
           .GenerateReport(show: true);
@@ -101,7 +101,7 @@ namespace Coverlet.CoreCoverage.Tests
 
           return 0;
 
-        }, new string[] { path });
+        }, [path]);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -130,7 +130,7 @@ namespace Coverlet.CoreCoverage.Tests
                   }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .GenerateReport(show: true)
@@ -158,7 +158,7 @@ namespace Coverlet.CoreCoverage.Tests
               }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.ExcludeFromCoverage.Issue809.cs")
@@ -195,7 +195,7 @@ namespace Coverlet.CoreCoverage.Tests
               }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.ExcludeFromCoverage.cs")
@@ -224,7 +224,7 @@ namespace Coverlet.CoreCoverage.Tests
                   }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.ExcludeFromCoverage.cs")
@@ -252,7 +252,7 @@ namespace Coverlet.CoreCoverage.Tests
                   }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
             .Document("Instrumentation.ExcludeFromCoverage.Issue1302.cs")
@@ -287,7 +287,7 @@ namespace Coverlet.CoreCoverage.Tests
               persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
           .GenerateReport(show: true)
@@ -324,7 +324,7 @@ namespace Coverlet.CoreCoverage.Tests
               persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
           .GenerateReport(show: true)

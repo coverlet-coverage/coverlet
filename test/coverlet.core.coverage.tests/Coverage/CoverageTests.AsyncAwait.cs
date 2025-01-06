@@ -37,7 +37,7 @@ namespace Coverlet.CoreCoverage.Tests
 
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncAwait.cs")
@@ -87,7 +87,7 @@ namespace Coverlet.CoreCoverage.Tests
                   persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncAwait.cs")
@@ -118,7 +118,7 @@ namespace Coverlet.CoreCoverage.Tests
                   assemblyLocation: Assembly.GetExecutingAssembly().Location);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncAwait.cs")
@@ -146,7 +146,7 @@ namespace Coverlet.CoreCoverage.Tests
                       persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
         document.AssertLinesCovered(BuildConfiguration.Debug, (133, 1), (134, 1), (135, 1), (136, 1), (137, 1));
@@ -173,7 +173,7 @@ namespace Coverlet.CoreCoverage.Tests
                       persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
         document.AssertLinesCovered(BuildConfiguration.Debug, (150, 1));
@@ -201,7 +201,7 @@ namespace Coverlet.CoreCoverage.Tests
                       persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
-        }, new string[] { path });
+        }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
         document.AssertLinesCoveredFromTo(BuildConfiguration.Debug, 170, 176);
