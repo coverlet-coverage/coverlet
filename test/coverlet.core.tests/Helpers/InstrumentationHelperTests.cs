@@ -199,6 +199,18 @@ namespace Coverlet.Core.Helpers.Tests
     }
 
     [Fact]
+    public void TestIsModuleExcludedAndIncludedWithMatchingAndMismatchingFilter2()
+    {
+      string[] modules = new[] { "ClassLibrary1", "ClassLibrary1.Tests" };
+      string[] includeFilters = new[] { "[*]ClassLibrary1*" };
+      string[] excludeFilters = new[] { "[*]ClassLibrary1.Tests.*" };
+
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, includeFilters, excludeFilters);
+
+      Assert.Empty(result);
+    }
+
+    [Fact]
     public void TestIsTypeExcludedWithoutFilter()
     {
       bool result = _instrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new string[0]);
@@ -326,6 +338,7 @@ namespace Coverlet.Core.Helpers.Tests
                     new object[] { "[Mod*le*]*" },
                     new object[] { "[Module?]*" },
                     new object[] { "[ModuleX?]*" },
+                    new object[] { "[*]*" }
             };
 
     public static IEnumerable<object[]> ValidModuleAndNamespaceFilterData =>

@@ -367,7 +367,27 @@ namespace Coverlet.Core.Helpers
     {
       string[] validFilters = GetValidFilters(filters);
 
-      return !validFilters.Any() ? string.Empty : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+
+      //return !validFilters.Any() ? string.Empty : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+      return !validFilters.Any() ? string.Empty : GetExcludeModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+    }
+
+    private static string GetExcludeModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
+    {
+      string pattern = CreateRegexExcludePattern(validFilters, escapeSymbol);
+      IEnumerable<Match> matches = Regex.Matches(moduleKeys, pattern, RegexOptions.IgnoreCase).Cast<Match>();
+
+      return string.Join(
+        Environment.NewLine,
+        matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
+    }
+
+    private static string CreateRegexExcludePattern(IEnumerable<string> filters, char escapeSymbol)
+    {
+      var filteredFilters = filters.Where(filter => filter.Substring(filter.IndexOf(']') + 1) == "*") ;
+      IEnumerable<string> regexPatterns = filteredFilters.Select(x =>
+        $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+      return string.Join("|", regexPatterns);
     }
 
     private static string GetModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
