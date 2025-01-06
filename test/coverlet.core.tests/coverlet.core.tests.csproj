@@ -22,7 +22,6 @@
     <PackageReference Include="System.Linq.Async" />
     <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="System.Threading.Tasks.Extensions" />
-    <PackageReference Include="Tmds.ExecFunction" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
