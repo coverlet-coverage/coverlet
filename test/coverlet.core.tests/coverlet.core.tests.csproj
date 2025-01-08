@@ -3,6 +3,8 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
     <MSBuildWarningsAsMessages>NU1702;NU1504;NU1008;NU1604</MSBuildWarningsAsMessages>

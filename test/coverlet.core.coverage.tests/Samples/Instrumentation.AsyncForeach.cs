@@ -27,7 +27,6 @@ namespace Coverlet.Core.CoverageSamples.Tests
       return sum;
     }
 
-
     async public ValueTask<int> Sum(IAsyncEnumerable<int> ints)
     {
       int sum = 0;
@@ -39,7 +38,6 @@ namespace Coverlet.Core.CoverageSamples.Tests
 
       return sum;
     }
-
 
     async public ValueTask<int> SumEmpty()
     {

@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
@@ -32,12 +33,6 @@
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj" />
 
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
-    <!--- 
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.empty\coverlet.tests.projectsample.empty.csproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.fsharp\coverlet.tests.projectsample.fsharp.fsproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.netframework\coverlet.tests.projectsample.netframework.csproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.vbmynamespace\coverlet.tests.projectsample.vbmynamespace.vbproj" />-->
   </ItemGroup>
   
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />
