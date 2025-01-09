@@ -207,7 +207,19 @@ namespace Coverlet.Core.Helpers.Tests
 
       IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, includeFilters, excludeFilters);
 
-      Assert.Empty(result);
+      Assert.Equal(["ClassLibrary1", "ClassLibrary1.Tests"], result);
+    }
+
+    [Fact]
+    public void TestIsModuleExcludedAndIncludedWithMatchingAndMismatchingFilter3()
+    {
+      string[] modules = new[] { "A", "A.Tests", "B", "B.Test.SuperTest.cs" };
+      string[] includeFilters = new[] { "" };
+      string[] excludeFilters = new[] { "[A*]*" };
+
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, includeFilters, excludeFilters);
+
+      Assert.Equal(["B", "B.Test.SuperTest.cs"], result);
     }
 
     [Fact]

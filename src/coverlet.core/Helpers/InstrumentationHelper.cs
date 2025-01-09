@@ -360,16 +360,22 @@ namespace Coverlet.Core.Helpers
     {
       string[] validFilters = GetValidFilters(filters);
 
-      return !validFilters.Any() ? moduleKeys : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+      return !validFilters.Any() ? moduleKeys : GetIncludeModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
     }
 
     private string GetModuleKeysForExcludeFilters(IEnumerable<string> filters, char escapeSymbol, string moduleKeys)
     {
       string[] validFilters = GetValidFilters(filters);
 
-
-      //return !validFilters.Any() ? string.Empty : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
       return !validFilters.Any() ? string.Empty : GetExcludeModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+    }
+
+    private string[] GetValidFilters(IEnumerable<string> filters)
+    {
+      return (filters ?? Array.Empty<string>())
+        .Where(IsValidFilterExpression)
+        .Where(x => x.EndsWith("*"))
+        .ToArray();
     }
 
     private static string GetExcludeModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
@@ -384,15 +390,15 @@ namespace Coverlet.Core.Helpers
 
     private static string CreateRegexExcludePattern(IEnumerable<string> filters, char escapeSymbol)
     {
-      var filteredFilters = filters.Where(filter => filter.Substring(filter.IndexOf(']') + 1) == "*") ;
+      IEnumerable<string> filteredFilters = filters.Where(filter => filter.Substring(filter.IndexOf(']') + 1) == "*") ;
       IEnumerable<string> regexPatterns = filteredFilters.Select(x =>
         $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
       return string.Join("|", regexPatterns);
     }
 
-    private static string GetModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
+    private static string GetIncludeModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
     {
-      string pattern = CreateRegexPattern(validFilters, escapeSymbol);
+      string pattern = CreateRegexIncludePattern(validFilters, escapeSymbol);
       IEnumerable<Match> matches = Regex.Matches(moduleKeys, pattern, RegexOptions.IgnoreCase).Cast<Match>();
 
       return string.Join(
@@ -400,15 +406,7 @@ namespace Coverlet.Core.Helpers
         matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
     }
 
-    private string[] GetValidFilters(IEnumerable<string> filters)
-    {
-      return (filters ?? Array.Empty<string>())
-          .Where(IsValidFilterExpression)
-          .Where(x => x.EndsWith("*"))
-          .ToArray();
-    }
-
-    private static string CreateRegexPattern(IEnumerable<string> filters, char escapeSymbol)
+    private static string CreateRegexIncludePattern(IEnumerable<string> filters, char escapeSymbol)
     {
       IEnumerable<string> regexPatterns = filters.Select(x =>
           $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
