@@ -24,7 +24,6 @@
   </PropertyGroup>
  
   <ItemGroup>
-    <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
