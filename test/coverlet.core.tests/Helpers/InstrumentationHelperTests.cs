@@ -199,27 +199,27 @@ namespace Coverlet.Core.Helpers.Tests
     }
 
     [Fact]
-    public void TestIsModuleExcludedAndIncludedWithMatchingAndMismatchingFilter2()
+    public void TestIsModuleExcludedAndIncludedWithAnyModuleFilters()
     {
-      string[] modules = new[] { "ClassLibrary1", "ClassLibrary1.Tests" };
-      string[] includeFilters = new[] { "[*]ClassLibrary1*" };
-      string[] excludeFilters = new[] { "[*]ClassLibrary1.Tests.*" };
+      string[] modules = new[] { "Module.dll", "Module.Tests.dll" };
+      string[] includeFilters = new[] { "[*]Module*" };
+      string[] excludeFilters = new[] { "[*]Module.Tests.*" };
 
       IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, includeFilters, excludeFilters);
 
-      Assert.Equal(["ClassLibrary1", "ClassLibrary1.Tests"], result);
+      Assert.Equal(modules, result);
     }
 
     [Fact]
-    public void TestIsModuleExcludedAndIncludedWithMatchingAndMismatchingFilter3()
+    public void TestAreModulesExcludedWithAnyModuleFilters()
     {
-      string[] modules = new[] { "A", "A.Tests", "B", "B.Test.SuperTest.cs" };
+      string[] modules = new[] { "ModuleA.dll", "ModuleA.Tests.dll", "ModuleB.dll", "Module.B.Tests.dll" };
       string[] includeFilters = new[] { "" };
-      string[] excludeFilters = new[] { "[A*]*" };
+      string[] excludeFilters = new[] { "[ModuleA*]*" };
 
       IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, includeFilters, excludeFilters);
 
-      Assert.Equal(["B", "B.Test.SuperTest.cs"], result);
+      Assert.Equal(["ModuleB.dll", "Module.B.Tests.dll"], result);
     }
 
     [Fact]
