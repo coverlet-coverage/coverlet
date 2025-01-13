@@ -388,14 +388,6 @@ namespace Coverlet.Core.Helpers
         matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
     }
 
-    private static string CreateRegexExcludePattern(IEnumerable<string> filters, char escapeSymbol)
-    {
-      IEnumerable<string> filteredFilters = filters.Where(filter => filter.Substring(filter.IndexOf(']') + 1) == "*") ;
-      IEnumerable<string> regexPatterns = filteredFilters.Select(x =>
-        $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
-      return string.Join("|", regexPatterns);
-    }
-
     private static string GetIncludeModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
     {
       string pattern = CreateRegexIncludePattern(validFilters, escapeSymbol);
@@ -406,10 +398,18 @@ namespace Coverlet.Core.Helpers
         matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
     }
 
-    private static string CreateRegexIncludePattern(IEnumerable<string> filters, char escapeSymbol)
+    private static string CreateRegexExcludePattern(IEnumerable<string> filters, char escapeSymbol)
+      //only look for module filters here, types will be filtered out when instrumenting 
+      => CreateRegexPattern(filters, escapeSymbol, filter => filter.Substring(filter.IndexOf(']') + 1) == "*");
+
+    private static string CreateRegexIncludePattern(IEnumerable<string> filters, char escapeSymbol) =>
+      CreateRegexPattern(filters, escapeSymbol);
+
+    private static string CreateRegexPattern(IEnumerable<string> filters, char escapeSymbol, Func<string, bool> filterPredicate = null)
     {
-      IEnumerable<string> regexPatterns = filters.Select(x =>
-          $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+      IEnumerable<string> filteredFilters = filterPredicate != null ? filters.Where(filterPredicate) : filters;
+      IEnumerable<string> regexPatterns = filteredFilters.Select(x =>
+        $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
       return string.Join("|", regexPatterns);
     }
 
