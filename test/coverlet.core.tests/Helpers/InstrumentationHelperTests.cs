@@ -199,7 +199,7 @@ namespace Coverlet.Core.Helpers.Tests
     }
 
     [Fact]
-    public void TestIsModuleExcludedAndIncludedWithAnyModuleFilters()
+    public void TestSelectModulesWithTypeFiltersDoesNotExcludeAssemblyWithType()
     {
       string[] modules = new[] { "Module.dll", "Module.Tests.dll" };
       string[] includeFilters = new[] { "[*]Module*" };
@@ -211,7 +211,7 @@ namespace Coverlet.Core.Helpers.Tests
     }
 
     [Fact]
-    public void TestAreModulesExcludedWithAnyModuleFilters()
+    public void TestSelectModulesWithModuleFilterExcludesExpectedModules()
     {
       string[] modules = new[] { "ModuleA.dll", "ModuleA.Tests.dll", "ModuleB.dll", "Module.B.Tests.dll" };
       string[] includeFilters = new[] { "" };
