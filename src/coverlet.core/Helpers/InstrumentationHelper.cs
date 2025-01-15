@@ -360,19 +360,27 @@ namespace Coverlet.Core.Helpers
     {
       string[] validFilters = GetValidFilters(filters);
 
-      return !validFilters.Any() ? moduleKeys : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+      return !validFilters.Any() ? moduleKeys : GetIncludeModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
     }
 
     private string GetModuleKeysForExcludeFilters(IEnumerable<string> filters, char escapeSymbol, string moduleKeys)
     {
       string[] validFilters = GetValidFilters(filters);
 
-      return !validFilters.Any() ? string.Empty : GetModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+      return !validFilters.Any() ? string.Empty : GetExcludeModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
     }
 
-    private static string GetModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
+    private string[] GetValidFilters(IEnumerable<string> filters)
     {
-      string pattern = CreateRegexPattern(validFilters, escapeSymbol);
+      return (filters ?? Array.Empty<string>())
+        .Where(IsValidFilterExpression)
+        .Where(x => x.EndsWith("*"))
+        .ToArray();
+    }
+
+    private static string GetExcludeModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
+    {
+      string pattern = CreateRegexExcludePattern(validFilters, escapeSymbol);
       IEnumerable<Match> matches = Regex.Matches(moduleKeys, pattern, RegexOptions.IgnoreCase).Cast<Match>();
 
       return string.Join(
@@ -380,18 +388,28 @@ namespace Coverlet.Core.Helpers
         matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
     }
 
-    private string[] GetValidFilters(IEnumerable<string> filters)
+    private static string GetIncludeModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
     {
-      return (filters ?? Array.Empty<string>())
-          .Where(IsValidFilterExpression)
-          .Where(x => x.EndsWith("*"))
-          .ToArray();
+      string pattern = CreateRegexIncludePattern(validFilters, escapeSymbol);
+      IEnumerable<Match> matches = Regex.Matches(moduleKeys, pattern, RegexOptions.IgnoreCase).Cast<Match>();
+
+      return string.Join(
+        Environment.NewLine,
+        matches.Where(x => x.Success).Select(x => x.Groups[0].Value));
     }
 
-    private static string CreateRegexPattern(IEnumerable<string> filters, char escapeSymbol)
+    private static string CreateRegexExcludePattern(IEnumerable<string> filters, char escapeSymbol)
+      //only look for module filters here, types will be filtered out when instrumenting 
+      => CreateRegexPattern(filters, escapeSymbol, filter => filter.Substring(filter.IndexOf(']') + 1) == "*");
+
+    private static string CreateRegexIncludePattern(IEnumerable<string> filters, char escapeSymbol) =>
+      CreateRegexPattern(filters, escapeSymbol);
+
+    private static string CreateRegexPattern(IEnumerable<string> filters, char escapeSymbol, Func<string, bool> filterPredicate = null)
     {
-      IEnumerable<string> regexPatterns = filters.Select(x =>
-          $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+      IEnumerable<string> filteredFilters = filterPredicate != null ? filters.Where(filterPredicate) : filters;
+      IEnumerable<string> regexPatterns = filteredFilters.Select(x =>
+        $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
       return string.Join("|", regexPatterns);
     }
 

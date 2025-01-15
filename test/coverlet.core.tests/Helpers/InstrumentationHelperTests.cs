@@ -199,6 +199,30 @@ namespace Coverlet.Core.Helpers.Tests
     }
 
     [Fact]
+    public void TestSelectModulesWithTypeFiltersDoesNotExcludeAssemblyWithType()
+    {
+      string[] modules = new[] { "Module.dll", "Module.Tests.dll" };
+      string[] includeFilters = new[] { "[*]Module*" };
+      string[] excludeFilters = new[] { "[*]Module.Tests.*" };
+
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, includeFilters, excludeFilters);
+
+      Assert.Equal(modules, result);
+    }
+
+    [Fact]
+    public void TestSelectModulesWithModuleFilterExcludesExpectedModules()
+    {
+      string[] modules = new[] { "ModuleA.dll", "ModuleA.Tests.dll", "ModuleB.dll", "Module.B.Tests.dll" };
+      string[] includeFilters = new[] { "" };
+      string[] excludeFilters = new[] { "[ModuleA*]*" };
+
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, includeFilters, excludeFilters);
+
+      Assert.Equal(["ModuleB.dll", "Module.B.Tests.dll"], result);
+    }
+
+    [Fact]
     public void TestIsTypeExcludedWithoutFilter()
     {
       bool result = _instrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new string[0]);
@@ -326,6 +350,7 @@ namespace Coverlet.Core.Helpers.Tests
                     new object[] { "[Mod*le*]*" },
                     new object[] { "[Module?]*" },
                     new object[] { "[ModuleX?]*" },
+                    new object[] { "[*]*" }
             };
 
     public static IEnumerable<object[]> ValidModuleAndNamespaceFilterData =>
