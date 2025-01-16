@@ -102,7 +102,7 @@ namespace Coverlet.Core.Helpers.Tests
       string module = typeof(InstrumentationHelperTests).Assembly.Location;
       string identifier = Guid.NewGuid().ToString();
 
-      _instrumentationHelper.BackupOriginalModule(module, identifier);
+      _instrumentationHelper.BackupOriginalModule(module, identifier, false);
 
       string backupPath = Path.Combine(
           Path.GetTempPath(),

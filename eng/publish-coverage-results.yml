@@ -26,10 +26,11 @@ steps:
   artifact: CoverageResults_$(Agent.Os)_$(BuildConfiguration)
   condition: ${{parameters.condition}}
 
-- task: PublishCodeCoverageResults@2
+- task: PublishCodeCoverageResults@1
   displayName: 'Publish code coverage'
   condition: ${{parameters.condition}}
   inputs:
     codeCoverageTool: Cobertura
     summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageReport/Cobertura.xml'
+    reportDirectory: '$(Build.SourcesDirectory)/artifacts/CoverageReport'
     failIfCoverageEmpty: ${{parameters.breakBuild}}

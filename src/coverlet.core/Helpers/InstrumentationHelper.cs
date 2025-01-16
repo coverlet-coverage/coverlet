@@ -236,12 +236,28 @@ namespace Coverlet.Core.Helpers
       return (true, string.Empty);
     }
 
+    /// <summary>
+    /// Backs up the original module to a specified location.
+    /// </summary>
+    /// <param name="module">The path to the module to be backed up.</param>
+    /// <param name="identifier">A unique identifier to distinguish the backup file.</param>
     public void BackupOriginalModule(string module, string identifier)
+    {
+      BackupOriginalModule(module, identifier, true);
+    }
+
+    /// <summary>
+    /// Backs up the original module to a specified location.
+    /// </summary>
+    /// <param name="module">The path to the module to be backed up.</param>
+    /// <param name="identifier">A unique identifier to distinguish the backup file.</param>
+    /// <param name="withBackupList">Indicates whether to add the backup to the backup list. Required for test TestBackupOriginalModule</param>
+    public void BackupOriginalModule(string module, string identifier, bool withBackupList)
     {
       string backupPath = GetBackupPath(module, identifier);
       string backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
       _fileSystem.Copy(module, backupPath, true);
-      if (!_backupList.TryAdd(module, backupPath))
+      if (withBackupList && !_backupList.TryAdd(module, backupPath))
       {
         throw new ArgumentException($"Key already added '{module}'");
       }
@@ -250,13 +266,18 @@ namespace Coverlet.Core.Helpers
       if (_fileSystem.Exists(symbolFile))
       {
         _fileSystem.Copy(symbolFile, backupSymbolPath, true);
-        if (!_backupList.TryAdd(symbolFile, backupSymbolPath))
+        if (withBackupList && !_backupList.TryAdd(symbolFile, backupSymbolPath))
         {
           throw new ArgumentException($"Key already added '{module}'");
         }
       }
     }
 
+    /// <summary>
+    /// Restores the original module from a backup.
+    /// </summary>
+    /// <param name="module">The path to the module to be restored.</param>
+    /// <param name="identifier">A unique identifier to distinguish the backup file.</param>
     public virtual void RestoreOriginalModule(string module, string identifier)
     {
       string backupPath = GetBackupPath(module, identifier);
