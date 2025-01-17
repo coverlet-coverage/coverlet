@@ -7,7 +7,7 @@ parameters:
   assemblyfilters: '-xunit*'
   classfilters: ''
   breakBuild: false
-  minimumLineCoverage: 75
+  minimumLineCoverage: 90
 
 steps:
 - task: Powershell@2
