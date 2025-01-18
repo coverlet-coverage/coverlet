@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+- Fix empty coverage report when using include and exclude filters [#1726](https://github.com/coverlet-coverage/coverlet/issues/1726)
+
 ## Release date 2024-12-31
 ### Packages
 coverlet.msbuild 6.0.3
