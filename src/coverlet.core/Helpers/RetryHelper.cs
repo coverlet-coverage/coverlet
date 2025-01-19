@@ -18,18 +18,16 @@ namespace Coverlet.Core.Helpers
     /// <param name="action">The action to perform</param>
     /// <param name="backoffStrategy">A function returning a Timespan defining the backoff strategy to use.</param>
     /// <param name="maxAttemptCount">The maximum number of retries before bailing out. Defaults to 3.</param>
-    /// <param name="handledExceptions">A list of exception types to handle. Defaults to handling all exceptions.</param>
     public void Retry(
         Action action,
         Func<TimeSpan> backoffStrategy,
-        int maxAttemptCount = 3,
-        List<Type> handledExceptions = null)
+        int maxAttemptCount = 3)
     {
       Do<object>(() =>
       {
         action();
         return null;
-      }, backoffStrategy, maxAttemptCount, handledExceptions);
+      }, backoffStrategy, maxAttemptCount);
     }
 
     /// <summary>
@@ -39,12 +37,10 @@ namespace Coverlet.Core.Helpers
     /// <param name="action">The action to perform</param>
     /// <param name="backoffStrategy">A function returning a Timespan defining the backoff strategy to use.</param>
     /// <param name="maxAttemptCount">The maximum number of retries before bailing out. Defaults to 3.</param>
-    /// <param name="handledExceptions">A list of exception types to handle. Defaults to handling all exceptions.</param>
     public T Do<T>(
         Func<T> action,
         Func<TimeSpan> backoffStrategy,
-        int maxAttemptCount = 3,
-        List<Type> handledExceptions = null)
+        int maxAttemptCount = 3)
     {
       var exceptions = new List<Exception>();
 
@@ -60,14 +56,7 @@ namespace Coverlet.Core.Helpers
         }
         catch (Exception ex)
         {
-          if (handledExceptions == null || handledExceptions.Contains(ex.GetType()))
-          {
-            exceptions.Add(ex);
-          }
-          else
-          {
-            throw;
-          }
+          exceptions.Add(ex);
         }
       }
 

@@ -213,7 +213,7 @@ namespace Coverlet.Core.Tests
 
   class CustomRetryHelper : IRetryHelper
   {
-    public T Do<T>(Func<T> action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3, List<Type> handledExceptions = null)
+    public T Do<T>(Func<T> action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3)
     {
       var exceptions = new List<Exception>();
       for (int attempted = 0; attempted < maxAttemptCount; attempted++)
@@ -236,21 +236,14 @@ namespace Coverlet.Core.Tests
           }
           else
           {
-            if (handledExceptions == null || handledExceptions.Contains(ex.GetType()))
-            {
-              exceptions.Add(ex);
-            }
-            else
-            {
-              throw new AggregateException(exceptions);
-            }
+            exceptions.Add(ex);
           }
         }
       }
       throw new AggregateException(exceptions);
     }
 
-    public void Retry(Action action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3, List<Type> handledExceptions = null)
+    public void Retry(Action action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3)
     {
       Do<object>(() =>
       {

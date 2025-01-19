@@ -19,7 +19,6 @@ namespace Coverlet.Core.Helpers
   internal class InstrumentationHelper : IInstrumentationHelper
   {
     private const int RetryAttempts = 12;
-    private readonly List<Type> _retryExceptionList;
     private readonly ConcurrentDictionary<string, string> _backupList = new();
     private readonly IRetryHelper _retryHelper;
     private readonly IFileSystem _fileSystem;
@@ -35,7 +34,6 @@ namespace Coverlet.Core.Helpers
       _fileSystem = fileSystem;
       _logger = logger;
       _sourceRootTranslator = sourceRootTranslator;
-      _retryExceptionList = new List<Type> { typeof(IOException) };
     }
 
     public string[] GetCoverableModules(string moduleOrAppDirectory, string[] directories, bool includeTestAssembly)
@@ -80,9 +78,7 @@ namespace Coverlet.Core.Helpers
       if (!includeTestAssembly && !isAppDirectory)
         uniqueModules.Add(Path.GetFileName(moduleOrAppDirectory));
 
-      return dirs.SelectMany(d => Directory.EnumerateFiles(d))
-          .Where(m => IsAssembly(m) && uniqueModules.Add(Path.GetFileName(m)))
-          .ToArray();
+      return [.. dirs.SelectMany(d => Directory.EnumerateFiles(d)).Where(m => IsAssembly(m) && uniqueModules.Add(Path.GetFileName(m)))];
     }
 
     public bool HasPdb(string module, out bool embedded)
@@ -292,7 +288,7 @@ namespace Coverlet.Core.Helpers
         _fileSystem.Copy(backupPath, module, true);
         _fileSystem.Delete(backupPath);
         _backupList.TryRemove(module, out string _);
-      }, retryStrategy, RetryAttempts, _retryExceptionList);
+      }, retryStrategy, RetryAttempts);
 
       _retryHelper.Retry(() =>
       {
@@ -303,7 +299,7 @@ namespace Coverlet.Core.Helpers
           _fileSystem.Delete(backupSymbolPath);
           _backupList.TryRemove(symbolFile, out string _);
         }
-      }, retryStrategy, RetryAttempts, _retryExceptionList);
+      }, retryStrategy, RetryAttempts);
     }
 
     public virtual void RestoreOriginalModules()
@@ -320,14 +316,14 @@ namespace Coverlet.Core.Helpers
           _fileSystem.Copy(backupPath, key, true);
           _fileSystem.Delete(backupPath);
           _backupList.TryRemove(key, out string _);
-        }, retryStrategy, RetryAttempts, _retryExceptionList);
+        }, retryStrategy, RetryAttempts);
       }
     }
 
     public void DeleteHitsFile(string path)
     {
       Func<TimeSpan> retryStrategy = CreateRetryStrategy();
-      _retryHelper.Retry(() => _fileSystem.Delete(path), retryStrategy, RetryAttempts, _retryExceptionList);
+      _retryHelper.Retry(() => _fileSystem.Delete(path), retryStrategy);
     }
 
     public bool IsValidFilterExpression(string filter)
@@ -373,8 +369,8 @@ namespace Coverlet.Core.Helpers
       string excludedModuleKeys = GetModuleKeysForExcludeFilters(excludeFilters, escapeSymbol, includedModuleKeys);
 
       IEnumerable<string> moduleKeysToInclude = includedModuleKeys
-          .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
-          .Except(excludedModuleKeys.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
+          .Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
+          .Except(excludedModuleKeys.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries));
 
       return moduleKeysToInclude.SelectMany(x => modulesLookup[x]);
     }
@@ -383,22 +379,19 @@ namespace Coverlet.Core.Helpers
     {
       string[] validFilters = GetValidFilters(filters);
 
-      return !validFilters.Any() ? moduleKeys : GetIncludeModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+      return validFilters.Length == 0 ? moduleKeys : GetIncludeModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
     }
 
     private string GetModuleKeysForExcludeFilters(IEnumerable<string> filters, char escapeSymbol, string moduleKeys)
     {
       string[] validFilters = GetValidFilters(filters);
 
-      return !validFilters.Any() ? string.Empty : GetExcludeModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
+      return validFilters.Length == 0 ? string.Empty : GetExcludeModuleKeysForValidFilters(escapeSymbol, moduleKeys, validFilters);
     }
 
     private string[] GetValidFilters(IEnumerable<string> filters)
     {
-      return (filters ?? Array.Empty<string>())
-        .Where(IsValidFilterExpression)
-        .Where(x => x.EndsWith("*"))
-        .ToArray();
+      return [.. (filters ?? []).Where(IsValidFilterExpression).Where(x => x.EndsWith("*"))];
     }
 
     private static string GetExcludeModuleKeysForValidFilters(char escapeSymbol, string moduleKeys, string[] validFilters)
