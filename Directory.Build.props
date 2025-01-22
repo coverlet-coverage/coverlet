@@ -11,10 +11,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- Build properties -->
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
-    <AnalysisLevel>preview</AnalysisLevel>
+    <AnalysisLevel>latest</AnalysisLevel>
     <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <LangVersion>preview</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <NoWarn>$(NoWarn);NU1507;NU5105;CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RestoreSources>

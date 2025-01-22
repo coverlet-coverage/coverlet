@@ -102,7 +102,7 @@ namespace Coverlet.Core.Helpers.Tests
       string module = typeof(InstrumentationHelperTests).Assembly.Location;
       string identifier = Guid.NewGuid().ToString();
 
-      _instrumentationHelper.BackupOriginalModule(module, identifier);
+      _instrumentationHelper.BackupOriginalModule(module, identifier, false);
 
       string backupPath = Path.Combine(
           Path.GetTempPath(),
@@ -121,6 +121,7 @@ namespace Coverlet.Core.Helpers.Tests
     [InlineData("[coverlet.*.tests?]*")]
     [InlineData("[*]Coverlet.Core*")]
     [InlineData("[coverlet.*]*")]
+    [InlineData("[*]ClassLibrary1.Tests.*")]
     public void TestIsValidFilterExpression(string pattern)
     {
       Assert.True(_instrumentationHelper.IsValidFilterExpression(pattern));
@@ -132,6 +133,10 @@ namespace Coverlet.Core.Helpers.Tests
     [InlineData("*")]
     [InlineData("][")]
     [InlineData(null)]
+    [InlineData("[")]
+    [InlineData("[assembly][*")]
+    [InlineData("[assembly]*]")]
+    [InlineData("[]")]
     public void TestInValidFilterExpression(string pattern)
     {
       Assert.False(_instrumentationHelper.IsValidFilterExpression(pattern));
@@ -150,7 +155,7 @@ namespace Coverlet.Core.Helpers.Tests
     [Fact]
     public void TestSelectModulesWithoutIncludeAndExcludedFilters()
     {
-      string[] modules = new [] {"Module.dll"};
+      string[] modules = new[] { "Module.dll" };
       IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, new string[0], new string[0]);
 
       Assert.Equal(modules, result);
@@ -161,8 +166,8 @@ namespace Coverlet.Core.Helpers.Tests
     [InlineData("[Mismatch]*")]
     public void TestIsModuleExcludedWithSingleMismatchFilter(string filter)
     {
-      string[] modules = new [] {"Module.dll"};
-      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, new string[0], new[] {filter});
+      string[] modules = new[] { "Module.dll" };
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, new string[0], new[] { filter });
 
       Assert.Equal(modules, result);
     }
@@ -170,7 +175,7 @@ namespace Coverlet.Core.Helpers.Tests
     [Fact]
     public void TestIsModuleIncludedWithSingleMismatchFilter()
     {
-      string[] modules = new [] {"Module.dll"};
+      string[] modules = new[] { "Module.dll" };
       IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, new[] { "[Mismatch]*" }, new string[0]);
 
       Assert.Empty(result);
@@ -180,7 +185,7 @@ namespace Coverlet.Core.Helpers.Tests
     [MemberData(nameof(ValidModuleFilterData))]
     public void TestIsModuleExcludedAndIncludedWithFilter(string filter)
     {
-      string[] modules = new [] {"Module.dll"};
+      string[] modules = new[] { "Module.dll" };
       IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, new[] { filter }, new[] { filter });
 
       Assert.Empty(result);
@@ -190,8 +195,8 @@ namespace Coverlet.Core.Helpers.Tests
     [MemberData(nameof(ValidModuleFilterData))]
     public void TestIsModuleExcludedAndIncludedWithMatchingAndMismatchingFilter(string filter)
     {
-      string[] modules = new[] {"Module.dll"};
-      string[] filters = new[] {"[Mismatch]*", filter, "[Mismatch]*"};
+      string[] modules = new[] { "Module.dll" };
+      string[] filters = new[] { "[Mismatch]*", filter, "[Mismatch]*" };
 
       IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, filters, filters);
 

@@ -35,23 +35,31 @@ namespace Coverlet.Core.Reporters.Tests
         Identifier = Guid.NewGuid().ToString()
       };
 
-      var lines = new Lines();
-      lines.Add(1, 1);
-      lines.Add(2, 0);
+      var lines = new Lines
+      {
+        { 1, 1 },
+        { 2, 0 }
+      };
 
       var methods = new Methods();
       string methodString = "System.Void Coverlet.Core.Reporters.Tests.JsonReporterTests.TestReport()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
 
-      var classes = new Classes();
-      classes.Add("Coverlet.Core.Reporters.Tests.JsonReporterTests", methods);
+      var classes = new Classes
+      {
+        { "Coverlet.Core.Reporters.Tests.JsonReporterTests", methods }
+      };
 
-      var documents = new Documents();
-      documents.Add("doc.cs", classes);
+      var documents = new Documents
+      {
+        { "doc.cs", classes }
+      };
 
-      result.Modules = new Modules();
-      result.Modules.Add("module", documents);
+      result.Modules = new Modules
+      {
+        { "module", documents }
+      };
 
       var reporter = new JsonReporter();
       Assert.Equal(s_resultModule, reporter.Report(result, new Mock<ISourceRootTranslator>().Object), ignoreLineEndingDifferences: true);

@@ -28,11 +28,11 @@ namespace Coverlet.Console
     static int Main(string[] args)
     {
       var moduleOrAppDirectory = new Argument<string>("path", "Path to the test assembly or application directory.");
-      var target = new Option<string>(new[] { "--target", "-t" }, "Path to the test runner application.") { Arity = ArgumentArity.ZeroOrOne, IsRequired = true };
-      var targs = new Option<string>(new[] { "--targetargs", "-a" }, "Arguments to be passed to the test runner.") { Arity = ArgumentArity.ZeroOrOne };
-      var output = new Option<string>(new[] { "--output", "-o" }, "Output of the generated coverage report") { Arity = ArgumentArity.ZeroOrOne };
-      var verbosity = new Option<LogLevel>(new[] { "--verbosity", "-v" }, () => LogLevel.Normal, "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.") { Arity = ArgumentArity.ZeroOrOne };
-      var formats = new Option<string[]>(new[] { "--format", "-f" }, () => new[] { "json" }, "Format of the generated coverage report.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      var target = new Option<string>(["--target", "-t"], "Path to the test runner application.") { Arity = ArgumentArity.ZeroOrOne, IsRequired = true };
+      var targs = new Option<string>(["--targetargs", "-a"], "Arguments to be passed to the test runner.") { Arity = ArgumentArity.ZeroOrOne };
+      var output = new Option<string>(["--output", "-o"], "Output of the generated coverage report") { Arity = ArgumentArity.ZeroOrOne };
+      var verbosity = new Option<LogLevel>(["--verbosity", "-v"], () => LogLevel.Normal, "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.") { Arity = ArgumentArity.ZeroOrOne };
+      var formats = new Option<string[]>(["--format", "-f"], () => ["json"], "Format of the generated coverage report.") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       var threshold = new Option<string>("--threshold", "Exits with error if the coverage % is below value.") { Arity = ArgumentArity.ZeroOrOne };
       Option<List<string>> thresholdTypes = new Option<List<string>>("--threshold-type", () => new List<string>(new string[] { "line", "branch", "method" }), "Coverage type to apply the threshold to.").FromAmong("line", "branch", "method");
       var thresholdStat = new Option<ThresholdStatistic>("--threshold-stat", () => ThresholdStatistic.Minimum, "Coverage statistic used to enforce the threshold value.") { Arity = ArgumentArity.ZeroOrOne };
@@ -47,7 +47,7 @@ namespace Coverlet.Console
       var mergeWith = new Option<string>("--merge-with", "Path to existing coverage result to merge.") { Arity = ArgumentArity.ZeroOrOne };
       var useSourceLink = new Option<bool>("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.") { Arity = ArgumentArity.Zero };
       var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behaviour of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
+      var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behavior of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
       var sourceMappingFile = new Option<string>("--source-mapping-file", "Specifies the path to a SourceRootsMappings file.") { Arity = ArgumentArity.ZeroOrOne };
 
       RootCommand rootCommand = new()

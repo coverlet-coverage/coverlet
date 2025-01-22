@@ -20,7 +20,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Locator" />
     <PackageReference Include="Moq" />
+    <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="ReportGenerator.Core" />
+    <PackageReference Include="System.Memory" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.assemblyfixture" />
     <PackageReference Include="xunit.runner.visualstudio">
