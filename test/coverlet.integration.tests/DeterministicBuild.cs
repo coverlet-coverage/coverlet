@@ -110,7 +110,7 @@ namespace Coverlet.Integration.Tests
       string testResultFile = Path.Join(testResultPath, "coverage.json");
       string cmdArgument = $"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:CoverletOutput=\"{testResultFile}\" /p:DeterministicReport=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
-      bool result = DotnetCli(cmdArgument, out standardOutput, out standardError, _testProjectPath);
+      int result = DotnetCli(cmdArgument, out standardOutput, out standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -119,7 +119,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
-      Assert.True(result);
+      Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
       Assert.True(File.Exists(testResultFile));
@@ -154,7 +154,7 @@ namespace Coverlet.Integration.Tests
       string testResultFile = Path.Join(testResultPath, "coverage.json");
       string cmdArgument = $"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:CoverletOutput=\"{testResultFile}\" /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
-      bool result = DotnetCli(cmdArgument, out standardOutput, out standardError, _testProjectPath);
+      int result = DotnetCli(cmdArgument, out standardOutput, out standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -163,7 +163,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
-      Assert.True(result);
+      Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
       Assert.True(File.Exists(testResultFile));
@@ -203,7 +203,7 @@ namespace Coverlet.Integration.Tests
       string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", deterministicReport: true);
       string cmdArgument = $"test -c {_buildConfiguration} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
-      bool result = DotnetCli(cmdArgument, out standardOutput, out standardError, _testProjectPath);
+      int result = DotnetCli(cmdArgument, out standardOutput, out standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -212,7 +212,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
-      Assert.True(result);
+      Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       AssertCoverage(standardOutput);
 
@@ -258,7 +258,7 @@ namespace Coverlet.Integration.Tests
       string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", sourceLink: true);
       string cmdArgument = $"test -c {_buildConfiguration} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
-      bool result = DotnetCli(cmdArgument, out standardOutput, out standardError, _testProjectPath);
+      int result = DotnetCli(cmdArgument, out standardOutput, out standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -267,7 +267,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
-      Assert.True(result);
+      Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       AssertCoverage(standardOutput, checkDeterministicReport: false);
 
@@ -300,7 +300,7 @@ namespace Coverlet.Integration.Tests
     {
       if (Directory.Exists(testResultsPath))
       {
-        DirectoryInfo hdDirectory = new DirectoryInfo(testResultsPath);
+        DirectoryInfo hdDirectory = new (testResultsPath);
 
         // search for directory "In" which has second copy e.g. '_fv-az365-374_2023-10-10_14_26_42\In\fv-az365-374\coverage.json'
         DirectoryInfo[] intermediateFolder = hdDirectory.GetDirectories("In", SearchOption.AllDirectories);
@@ -316,7 +316,7 @@ namespace Coverlet.Integration.Tests
     {
       if (Directory.Exists(directory))
       {
-        DirectoryInfo hdDirectory = new DirectoryInfo(directory);
+        DirectoryInfo hdDirectory = new (directory);
         FileInfo[] filesInDir = hdDirectory.GetFiles("log.*.txt");
 
         foreach (FileInfo foundFile in filesInDir)
@@ -344,7 +344,7 @@ namespace Coverlet.Integration.Tests
     {
       if (Directory.Exists(directory))
       {
-        DirectoryInfo hdDirectory = new DirectoryInfo(directory);
+        DirectoryInfo hdDirectory = new (directory);
         FileInfo[] filesInDir = hdDirectory.GetFiles("coverage.cobertura.xml");
 
         foreach (FileInfo foundFile in filesInDir)
