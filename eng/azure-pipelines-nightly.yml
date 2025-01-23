@@ -15,6 +15,9 @@ steps:
 - task: NuGetAuthenticate@1
   displayName: Authenticate with NuGet feeds
 
+- script: dotnet restore
+  displayName: Restore packages
+
 - script: dotnet pack -c Release /p:PublicRelease=false
   displayName: Create NuGet packages
 
