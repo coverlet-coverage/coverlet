@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -30,31 +30,31 @@ namespace Coverlet.Console
     static int s_exitCode;
     static async Task Main(string[] args)
     {
-      CliArgument<string> moduleOrAppDirectory = new ("path") { Description = "Path to the test assembly or application directory." };
-      CliOption<string> target = new ("--target", aliases: new[]{ "--target", "-t" }) { Description = "Path to the test runner application." , Arity = ArgumentArity.ZeroOrOne, Required = true };
-      CliOption<string> targs = new ("--targetargs", aliases: new[] { "--targetargs", "-a" } ) { Description = "Arguments to be passed to the test runner.", Arity = ArgumentArity.ZeroOrOne };
-      CliOption<string> output = new ("--output", aliases:  new[] { "--output", "-o" }) { Description = "Output of the generated coverage report", Arity = ArgumentArity.ZeroOrOne };
-      CliOption<LogLevel> verbosity = new ("--verbosity", aliases: new[] { "--verbosity", "-v" }) { DefaultValueFactory = (_) => LogLevel.Normal, Description = "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.", Arity = ArgumentArity.ZeroOrOne };
-      CliOption<string[]> formats = new ("--format", aliases: new[] { "--format", "-f" }) { DefaultValueFactory = (_) => new[] { "json" }, Description = "Format of the generated coverage report.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      CliOption<string> threshold = new ("--threshold") { Description = "Exits with error if the coverage % is below value.", Arity = ArgumentArity.ZeroOrOne };
-      CliOption<List<string>> thresholdTypes = new ("--threshold-type") { DefaultValueFactory = (_) => new List<string>(new string[] { "line", "branch", "method" }), Description = ("Coverage type to apply the threshold to.")};
+      Argument<string> moduleOrAppDirectory = new("path") { Description = "Path to the test assembly or application directory." };
+      Option<string> target = new("--target", aliases: new[] { "--target", "-t" }) { Description = "Path to the test runner application.", Arity = ArgumentArity.ZeroOrOne, Required = true };
+      Option<string> targs = new("--targetargs", aliases: new[] { "--targetargs", "-a" }) { Description = "Arguments to be passed to the test runner.", Arity = ArgumentArity.ZeroOrOne };
+      Option<string> output = new("--output", aliases: new[] { "--output", "-o" }) { Description = "Output of the generated coverage report", Arity = ArgumentArity.ZeroOrOne };
+      Option<LogLevel> verbosity = new("--verbosity", aliases: new[] { "--verbosity", "-v" }) { DefaultValueFactory = (_) => LogLevel.Normal, Description = "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.", Arity = ArgumentArity.ZeroOrOne };
+      Option<string[]> formats = new("--format", aliases: new[] { "--format", "-f" }) { DefaultValueFactory = (_) => new[] { "json" }, Description = "Format of the generated coverage report.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string> threshold = new("--threshold") { Description = "Exits with error if the coverage % is below value.", Arity = ArgumentArity.ZeroOrOne };
+      Option<List<string>> thresholdTypes = new("--threshold-type") { DefaultValueFactory = (_) => new List<string>(new string[] { "line", "branch", "method" }), Description = ("Coverage type to apply the threshold to.") };
       thresholdTypes.AcceptOnlyFromAmong("line", "branch", "method");
-      CliOption<ThresholdStatistic> thresholdStat = new ("--threshold-stat") {DefaultValueFactory = (_) => ThresholdStatistic.Minimum, Description = "Coverage statistic used to enforce the threshold value." , Arity = ArgumentArity.ZeroOrOne };
-      CliOption<string[]> excludeFilters = new ("--exclude") { Description = "Filter expressions to exclude specific modules and types.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      CliOption<string[]> includeFilters = new ("--include") { Description = "Filter expressions to include only specific modules and types.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      CliOption<string[]> excludedSourceFiles = new ("--exclude-by-file") { Description = "Glob patterns specifying source files to exclude.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      CliOption<string[]> includeDirectories = new("--include-directory") { Description = "Include directories containing additional assemblies to be instrumented.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      CliOption<string[]> excludeAttributes = new ("--exclude-by-attribute") { Description = "Attributes to exclude from code coverage.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      CliOption<bool> includeTestAssembly = new ("--include-test-assembly") { Description = "Specifies whether to report code coverage of the test assembly.", Arity = ArgumentArity.Zero };
-      CliOption<bool> singleHit = new ("--single-hit") { Description = "Specifies whether to limit code coverage hit reporting to a single hit for each location", Arity = ArgumentArity.Zero };
-      CliOption<bool> skipAutoProp = new ("--skipautoprops") { Description = "Neither track nor record auto-implemented properties.", Arity = ArgumentArity.Zero };
-      CliOption<string> mergeWith = new ("--merge-with") { Description = "Path to existing coverage result to merge.", Arity = ArgumentArity.ZeroOrOne };
-      CliOption<bool> useSourceLink = new ("--use-source-link") { Description = "Specifies whether to use SourceLink URIs in place of file system paths.", Arity = ArgumentArity.Zero };
-      CliOption<string[]> doesNotReturnAttributes = new ("--does-not-return-attribute") { Description = "Attributes that mark methods that do not return", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      CliOption<string> excludeAssembliesWithoutSources = new ("--exclude-assemblies-without-sources") { Description = "Specifies behaviour of heuristic to ignore assemblies with missing source documents.", Arity = ArgumentArity.ZeroOrOne };
-      CliOption<string> sourceMappingFile = new ("--source-mapping-file") { Description = "Specifies the path to a SourceRootsMappings file.", Arity = ArgumentArity.ZeroOrOne };
+      Option<ThresholdStatistic> thresholdStat = new("--threshold-stat") { DefaultValueFactory = (_) => ThresholdStatistic.Minimum, Description = "Coverage statistic used to enforce the threshold value.", Arity = ArgumentArity.ZeroOrOne };
+      Option<string[]> excludeFilters = new("--exclude") { Description = "Filter expressions to exclude specific modules and types.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string[]> includeFilters = new("--include") { Description = "Filter expressions to include only specific modules and types.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string[]> excludedSourceFiles = new("--exclude-by-file") { Description = "Glob patterns specifying source files to exclude.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string[]> includeDirectories = new("--include-directory") { Description = "Include directories containing additional assemblies to be instrumented.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string[]> excludeAttributes = new("--exclude-by-attribute") { Description = "Attributes to exclude from code coverage.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<bool> includeTestAssembly = new("--include-test-assembly") { Description = "Specifies whether to report code coverage of the test assembly.", Arity = ArgumentArity.Zero };
+      Option<bool> singleHit = new("--single-hit") { Description = "Specifies whether to limit code coverage hit reporting to a single hit for each location", Arity = ArgumentArity.Zero };
+      Option<bool> skipAutoProp = new("--skipautoprops") { Description = "Neither track nor record auto-implemented properties.", Arity = ArgumentArity.Zero };
+      Option<string> mergeWith = new("--merge-with") { Description = "Path to existing coverage result to merge.", Arity = ArgumentArity.ZeroOrOne };
+      Option<bool> useSourceLink = new("--use-source-link") { Description = "Specifies whether to use SourceLink URIs in place of file system paths.", Arity = ArgumentArity.Zero };
+      Option<string[]> doesNotReturnAttributes = new("--does-not-return-attribute") { Description = "Attributes that mark methods that do not return", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string> excludeAssembliesWithoutSources = new("--exclude-assemblies-without-sources") { Description = "Specifies behaviour of heuristic to ignore assemblies with missing source documents.", Arity = ArgumentArity.ZeroOrOne };
+      Option<string> sourceMappingFile = new("--source-mapping-file") { Description = "Specifies the path to a SourceRootsMappings file.", Arity = ArgumentArity.ZeroOrOne };
 
-      CliRootCommand rootCommand = new("Cross platform .NET Core code coverage tool")
+      RootCommand rootCommand = new("Cross platform .NET Core code coverage tool")
       {
         moduleOrAppDirectory,
         target,
@@ -82,7 +82,7 @@ namespace Coverlet.Console
       rootCommand.Add(new HelpOption());
       rootCommand.Add(new VersionOption());
 
-      ParseResult parseResult = CliParser.Parse(rootCommand, args);
+      ParseResult parseResult = CommandLineParser.Parse(rootCommand, args);
 
       rootCommand.SetAction(async (context) =>
       {
@@ -138,7 +138,7 @@ namespace Coverlet.Console
 
       });
 
-      CliConfiguration config = new(rootCommand);
+      CommandLineConfiguration config = new(rootCommand);
 
       await config.InvokeAsync(args).ConfigureAwait(false);
       Environment.Exit(s_exitCode);
@@ -392,7 +392,7 @@ namespace Coverlet.Console
           }
           logger.LogError(errorMessageBuilder.ToString());
         }
-        
+
         return Task.FromResult(s_exitCode);
 
       }
