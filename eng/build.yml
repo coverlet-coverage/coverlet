@@ -18,6 +18,8 @@ steps:
 # Authenticate Azure DevOps NuGet feed
 - task: NuGetAuthenticate@1
   displayName: 'Authenticate Azure DevOps NuGet feed'
+  inputs:
+    forceReinstallCredentialProvider: true
 
 - task: DotNetCoreCLI@2
   displayName: Restore packages
