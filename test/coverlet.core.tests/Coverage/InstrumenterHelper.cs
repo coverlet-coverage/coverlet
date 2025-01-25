@@ -16,7 +16,6 @@ using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -253,7 +252,7 @@ namespace Coverlet.Core.Tests
     }
   }
 
-  // We log to files for debugging pourpose, we can check if instrumentation is ok
+  // We log to files for debugging purpose, we can check if instrumentation is ok
   class Logger : ILogger
   {
     readonly string _logFile;
@@ -302,37 +301,6 @@ namespace Coverlet.Core.Tests
     public override void RestoreOriginalModules()
     {
       // DO NOT RESTORE
-    }
-  }
-
-  public abstract class ExternalProcessExecutionTest
-  {
-    protected FunctionExecutor FunctionExecutor = new(
-    o =>
-    {
-      o.StartInfo.RedirectStandardError = true;
-      o.OnExit = p =>
-          {
-            if (p.ExitCode != 0)
-            {
-              string message = $"Function exit code failed with exit code: {p.ExitCode}" + Environment.NewLine +
-                                    p.StandardError.ReadToEnd();
-              throw new Xunit.Sdk.XunitException(message);
-            }
-          };
-    });
-  }
-
-  public static class FunctionExecutorExtensions
-  {
-    public static void RunInProcess(this FunctionExecutor executor, Func<string[], Task<int>> func, string[] args)
-    {
-      Assert.Equal(0, func(args).Result);
-    }
-
-    public static void RunInProcess(this FunctionExecutor executor, Func<Task<int>> func)
-    {
-      Assert.Equal(0, func().Result);
     }
   }
 }

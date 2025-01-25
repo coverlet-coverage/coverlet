@@ -1,8 +1,11 @@
-name: Close inactive issues
+name: Label inactive issues
 on:
   schedule:
     - cron: "0 1 * * 0"
   workflow_dispatch:
+  
+env:
+  DAYS_BEFORE_ISSUE_STALE: 90
 
 jobs:
   close-issues:
@@ -11,14 +14,12 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@v8
+      - uses: actions/stale@v9
         with:
-          exempt-issue-labels: "bug,tracking-external-issue,Known Issue"
-          days-before-issue-stale: 90
-          days-before-issue-close: 275
+          exempt-issue-labels: "bug,tracking-external-issue,Known Issue,stale"
+          days-before-issue-stale: ${{ env.DAYS_BEFORE_ISSUE_STALE }}
           stale-issue-label: "stale"
-          stale-issue-message: "This issue is stale because it has been open for 3 months with no activity."
-          close-issue-message: "This issue was closed because it has been inactive for 9 months since being marked as stale."
+          stale-issue-message: "This issue is stale because it has been open for ${{ env.DAYS_BEFORE_ISSUE_STALE }} days with no activity."
           days-before-pr-stale: -1
           days-before-pr-close: -1
           operations-per-run: 100

@@ -8,7 +8,7 @@
 |  coverlet.msbuild |  [![NuGet](https://img.shields.io/nuget/v/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/)   |  [![NuGet](https://img.shields.io/nuget/dt/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/) |
 |  coverlet.console |  [![NuGet](https://img.shields.io/nuget/v/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/)     |  [![NuGet](https://img.shields.io/nuget/dt/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/) |
 
-Coverlet is a cross platform code coverage framework for .NET, with support for line, branch and method coverage. It works with .NET Framework on Windows and .NET Core on all supported platforms.
+Coverlet is a cross platform code coverage framework for .NET, with support for line, branch and method coverage. It works with [.NET Framework](Documentation/KnownIssues.md#badimageformatexception-net-framework-47x-48x) on Windows and .NET Core on all supported platforms.
 
 **Coverlet documentation reflect the current repository state of the features, not the released ones.**
 **Check the [changelog](Documentation/Changelog.md) to understand if the documented feature you want to use has been officially released.**

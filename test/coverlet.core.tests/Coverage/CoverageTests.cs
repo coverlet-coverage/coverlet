@@ -177,10 +177,52 @@ namespace Coverlet.Core.Tests
 
       directory.Delete(true);
     }
+
+    [Fact]
+    public void GetSourceLinkUrl_ReturnsCorrectUrl()
+    {
+      // Arrange
+      var sourceLinkDocuments = new Dictionary<string, string>
+          {
+              { "src/coverlet.core/*", "https://raw.githubusercontent.com/repo/branch/*" }
+          };
+      var document = "src/coverlet.core/Coverage.cs";
+      var logger = new Mock<ILogger>();
+      var fileSystem = new Mock<IFileSystem>();
+      var assemblyAdapter = new Mock<IAssemblyAdapter>();
+      fileSystem.Setup(f => f.Exists(It.IsAny<string>())).Returns(true);
+      var sourceRootTranslator = new SourceRootTranslator("testLib.dll", logger.Object, fileSystem.Object, assemblyAdapter.Object);
+      var coverage = new Coverage("moduleOrDirectory", new CoverageParameters(), logger.Object, null, fileSystem.Object, sourceRootTranslator, null);
+
+      // Act
+      var result = coverage.GetSourceLinkUrl(sourceLinkDocuments, document);
+
+      // Assert
+      // ToDo: fix path of file should be "https://raw.githubusercontent.com/repo/branch/src/coverlet.core/Coverage.cs"
+      Assert.Equal("https://raw.githubusercontent.com/repo/branch/Coverage.cs", result);
+    }
+
+    [Fact]
+    public void GetSourceLinkUrl_ReturnsOriginalDocument_WhenNoMatch()
+    {
+      // Arrange
+      var sourceLinkDocuments = new Dictionary<string, string>
+          {
+              { "src/coverlet.core/X", "https://raw.githubusercontent.com/repo/branch/*" }
+          };
+      var document = "other/coverlet.core/Coverage.cs";
+      var coverage = new Coverage("moduleOrDirectory", new CoverageParameters(), null, null, null, null, null);
+
+      // Act
+      var result = coverage.GetSourceLinkUrl(sourceLinkDocuments, document);
+
+      // Assert
+      Assert.Equal("other/coverlet.core/Coverage.cs", result);
+    }
   }
 }
 
-public class BranchDictionaryConverter: JsonConverter
+public class BranchDictionaryConverter : JsonConverter
 {
   public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
   {

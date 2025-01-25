@@ -59,7 +59,9 @@ namespace Coverlet.Core.Helpers
           exceptions.Add(ex);
         }
       }
+
       throw new AggregateException(exceptions);
     }
+
   }
 }

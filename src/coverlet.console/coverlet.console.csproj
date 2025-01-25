@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\"/>
+    <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
     <None Include="..\..\Documentation\GlobalTool.md" Link="GlobalTool.md" Pack="true" PackagePath="\">
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </None>

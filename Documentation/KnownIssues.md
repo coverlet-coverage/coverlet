@@ -183,7 +183,7 @@ Stack Trace:
 
 *Solution:* Looks like this is caused by xUnit's app domains. For `dotnet test`, it can be disabled with the following argument: `-- RunConfiguration.DisableAppDomain=true`
 
-## Code coverage returns NaN%
+## Code coverage returns NaN
 
 *Symptoms:* You are getting following result when running Coverlet within CI/CD pipeline:
 
@@ -234,3 +234,50 @@ The XML code coverage report is too large for the coverlet to parse.
 *Potential Solutions:*
 
 * Reduce noise from auto generated code, for example excluding your EntityFrameworkCore Migrations namespace or automatically generated typed Http Clients. See [Excluding From Coverage](./MSBuildIntegration.md#excluding-from-coverage) for more information on ignoring namespaces from code coverage.
+
+## BadImageFormatException .NET Framework 4.7.x, 4.8.x
+
+*Symptoms:*
+
+```text
+BadImageFormatException during MetadataReaderProvider.FromPortablePdbStream in InstrumentationHelper.PortablePdbHasLocalSource, unable to check if the module has got local source.
+```
+
+*Solutions:*
+
+Change [DebugType](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype) from `full` to `portable`.
+
+>[!IMPORTANT]
+>NET Core introduces a new symbol file (PDB) format - portable PDBs. Unlike traditional PDBs which are Windows-only, portable PDBs can be created and read on all platforms.
+
+## CoverletCoverageDataCollector: Failed to instrument modules
+
+*Affected drivers*: VSTest integration `dotnet test --collect:"XPlat Code Coverage"`
+
+*Symptoms:*
+
+```text
+Data collector 'XPlat code coverage' message: [coverlet]Coverlet.Collector.Utilities.CoverletDataCollectorException: CoverletCoverageDataCollector: Failed to instrument modules
+ ---> System.AggregateException: One or more errors occurred. (The process cannot access the file XXX\ABC.pdb
+ ---> System.IO.IOException: The process cannot access the file 'XXX\ABC.pdb' because it is being used by another process.
+   at System.IO.FileSystem.CopyFile(String sourceFullPath, String destFullPath, Boolean overwrite)
+   at Coverlet.Core.Helpers.FileSystem.Copy(String sourceFileName, String destFileName, Boolean overwrite) in /_/src/coverlet.core/Helpers/FileSystem.cs:line 35
+   at Coverlet.Core.Helpers.InstrumentationHelper.<>c__DisplayClass16_0.<RestoreOriginalModule>b__1() in /_/src/coverlet.core/Helpers/InstrumentationHelper.cs:line 277
+   at Coverlet.Core.Helpers.RetryHelper.<>c__DisplayClass0_0.<Retry>b__0() in /_/src/coverlet.core/Helpers/RetryHelper.cs:line 28
+   at Coverlet.Core.Helpers.RetryHelper.Do[T](Func`1 action, Func`1 backoffStrategy, Int32 maxAttemptCount) in /_/src/coverlet.core/Helpers/RetryHelper.cs:line 55
+   --- End of inner exception stack trace ---
+   ...
+   ```
+
+   >[!Note]
+   >This is not an coverlet issue but running tests in parallel without proper separation of test case resources
+   >>
+   >>**dotnet vstest cli option**
+   >>
+   >>--Parallel
+   >>
+   >> Run tests in parallel. By default, all available cores on the machine are available for use. Specify an explicit number of cores by setting the MaxCpuCount property under the RunConfiguration node in the runsettings file.
+
+   *Solutions:*
+
+   use VSTest setting [-maxcpucount:1](https://learn.microsoft.com/en-us/visualstudio/msbuild/building-multiple-projects-in-parallel-with-msbuild?view=vs-2022#-maxcpucount-switch) which limits "worker processes".
