@@ -4,10 +4,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Tests.Utils;
-using Coverlet.Tests.Xunit.Extensions;
 using Microsoft.Extensions.DependencyModel;
 using Moq;
 using Xunit;
@@ -16,15 +16,14 @@ namespace Coverlet.Integration.Tests
 {
   public class WpfResolverTests : BaseTest
   {
-    [ConditionalFact]
-    [SkipOnOS(OS.Linux, "WPF only runs on Windows")]
-    [SkipOnOS(OS.MacOS, "WPF only runs on Windows")]
+    [Fact]
     public void TestInstrument_NetCoreSharedFrameworkResolver()
     {
+      Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant();
       string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf8");
       string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8"), buildConfiguration);
-      Assert.True(DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
+      Assert.Equal(0, DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
       string assemblyLocation = Directory.GetFiles(testBinaryPath, "coverlet.tests.projectsample.wpf8.dll", SearchOption.AllDirectories).First();
 
       var mockLogger = new Mock<ILogger>();
@@ -44,15 +43,14 @@ namespace Coverlet.Integration.Tests
       Assert.NotEmpty(assemblies);
     }
 
-    [ConditionalFact]
-    [SkipOnOS(OS.Linux, "WPF only runs on Windows")]
-    [SkipOnOS(OS.MacOS, "WPF only runs on Windows")]
+    [Fact]
     public void TestInstrument_NetCoreSharedFrameworkResolver_SelfContained()
     {
+      Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant();
       string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf8.selfcontained");
       string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8.selfcontained"), $"{buildConfiguration}_win-x64");
-      Assert.True(DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
+      Assert.Equal(0, DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
       string assemblyLocation = Directory.GetFiles(testBinaryPath, "coverlet.tests.projectsample.wpf8.selfcontained.dll", SearchOption.AllDirectories).First();
 
       var mockLogger = new Mock<ILogger>();

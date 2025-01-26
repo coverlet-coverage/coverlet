@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using Coverlet.Core.Instrumentation;
 using Xunit;
 
-namespace Coverlet.Core.Instrumentation.Tests
+namespace Coverlet.Core.Tests.Instrumentation
 {
   public class InstrumenterResultTests
   {

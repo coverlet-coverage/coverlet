@@ -13,17 +13,36 @@ namespace Coverlet.Core.Tests.Instrumentation
 {
   class TrackerContext : IDisposable
   {
+    private bool _disposed;
+
     public TrackerContext()
     {
       ModuleTrackerTemplate.HitsFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
       ModuleTrackerTemplate.FlushHitFile = true;
     }
 
+    protected virtual void Dispose(bool disposing)
+    {
+      if (!_disposed)
+      {
+        if (disposing)
+        {
+          // Dispose managed resources
+          File.Delete(ModuleTrackerTemplate.HitsFilePath);
+        }
+
+        // Dispose unmanaged resources
+        AppDomain.CurrentDomain.ProcessExit -= ModuleTrackerTemplate.UnloadModule;
+        AppDomain.CurrentDomain.DomainUnload -= ModuleTrackerTemplate.UnloadModule;
+
+        _disposed = true;
+      }
+    }
+
     public void Dispose()
     {
-      File.Delete(ModuleTrackerTemplate.HitsFilePath);
-      AppDomain.CurrentDomain.ProcessExit -= ModuleTrackerTemplate.UnloadModule;
-      AppDomain.CurrentDomain.DomainUnload -= ModuleTrackerTemplate.UnloadModule;
+      Dispose(true);
+      GC.SuppressFinalize(this);
     }
   }
 

@@ -74,13 +74,13 @@ namespace Coverlet.Core.Instrumentation
 
       // this is lazy because we cannot create NetCoreSharedFrameworkResolver if not on .NET Core runtime,
       // runtime folders are different
-      _compositeResolver = new Lazy<CompositeCompilationAssemblyResolver>(() => new CompositeCompilationAssemblyResolver(new ICompilationAssemblyResolver[]
-      {
+      _compositeResolver = new Lazy<CompositeCompilationAssemblyResolver>(() => new CompositeCompilationAssemblyResolver(
+      [
                 new NetCoreSharedFrameworkResolver(modulePath, _logger),
                 new AppBaseCompilationAssemblyResolver(),
                 new PackageCompilationAssemblyResolver(),
                 new ReferenceAssemblyPathResolver(),
-      }), true);
+      ]), true);
     }
 
     // Check name and public key but not version that could be different
@@ -220,7 +220,7 @@ namespace Coverlet.Core.Instrumentation
 
   internal class NetCoreSharedFrameworkResolver : ICompilationAssemblyResolver
   {
-    private readonly List<string> _aspNetSharedFrameworkDirs = new();
+    private readonly List<string> _aspNetSharedFrameworkDirs = [];
     private readonly ILogger _logger;
 
     public NetCoreSharedFrameworkResolver(string modulePath, ILogger logger)
@@ -310,7 +310,7 @@ namespace Coverlet.Core.Instrumentation
 
       if (runtimeOptionsElement?["framework"] != null)
       {
-        return new[] { (runtimeOptionsElement["framework"]["name"]?.Value<string>(), runtimeOptionsElement["framework"]["version"]?.Value<string>()) };
+        return [(runtimeOptionsElement["framework"]["name"]?.Value<string>(), runtimeOptionsElement["framework"]["version"]?.Value<string>())];
       }
 
       if (runtimeOptionsElement?["frameworks"] != null)

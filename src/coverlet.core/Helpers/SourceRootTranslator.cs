@@ -28,7 +28,7 @@ namespace Coverlet.Core.Helpers
     {
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
       _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-      _sourceRootMapping = new Dictionary<string, List<SourceRootMapping>>();
+      _sourceRootMapping = [];
     }
 
     public SourceRootTranslator(string sourceMappingFile, ILogger logger, IFileSystem fileSystem)
@@ -74,7 +74,7 @@ namespace Coverlet.Core.Helpers
         {
           if (!sourceToDeterministicPathMapping.ContainsKey(originalPath.OriginalPath))
           {
-            sourceToDeterministicPathMapping.Add(originalPath.OriginalPath, new List<string>());
+            sourceToDeterministicPathMapping.Add(originalPath.OriginalPath, []);
           }
           sourceToDeterministicPathMapping[originalPath.OriginalPath].Add(sourceRootMappingEntry.Key);
         }
@@ -109,7 +109,7 @@ namespace Coverlet.Core.Helpers
 
         if (!mapping.ContainsKey(mappedPath))
         {
-          mapping.Add(mappedPath, new List<SourceRootMapping>());
+          mapping.Add(mappedPath, []);
         }
 
         foreach (string path in originalPath.Split(';'))
@@ -128,7 +128,7 @@ namespace Coverlet.Core.Helpers
         return false;
       }
 
-         (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, targetFileName);
+         (_resolutionCacheFiles ??= []).Add(originalFileName, targetFileName);
       return true;
     }
 
@@ -153,7 +153,7 @@ namespace Coverlet.Core.Helpers
             string pathToCheck;
             if (_fileSystem.Exists(pathToCheck = Path.GetFullPath(originalFileName.Replace(mapping.Key, srm.OriginalPath))))
             {
-              (_resolutionCacheFiles ??= new Dictionary<string, string>()).Add(originalFileName, pathToCheck);
+              (_resolutionCacheFiles ??= []).Add(originalFileName, pathToCheck);
               _logger.LogVerbose($"Mapping resolved: '{FileSystem.EscapeFileName(originalFileName)}' -> '{FileSystem.EscapeFileName(pathToCheck)}'");
               return pathToCheck;
             }

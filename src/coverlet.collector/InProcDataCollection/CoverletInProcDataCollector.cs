@@ -85,7 +85,7 @@ namespace Coverlet.Collector.DataCollection
     {
     }
 
-    private Type GetInstrumentationClass(Assembly assembly)
+    internal Type GetInstrumentationClass(Assembly assembly)
     {
       try
       {

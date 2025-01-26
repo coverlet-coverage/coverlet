@@ -24,10 +24,9 @@ namespace Coverlet.Core.Reporters
       }
 
       // Calculate coverage
-      var summary = new CoverageSummary();
-      CoverageDetails overallLineCoverage = summary.CalculateLineCoverage(result.Modules);
-      CoverageDetails overallBranchCoverage = summary.CalculateBranchCoverage(result.Modules);
-      CoverageDetails overallMethodCoverage = summary.CalculateMethodCoverage(result.Modules);
+      CoverageDetails overallLineCoverage = CoverageSummary.CalculateLineCoverage(result.Modules);
+      CoverageDetails overallBranchCoverage = CoverageSummary.CalculateBranchCoverage(result.Modules);
+      CoverageDetails overallMethodCoverage = CoverageSummary.CalculateMethodCoverage(result.Modules);
 
       // Report coverage
       var stringBuilder = new StringBuilder();

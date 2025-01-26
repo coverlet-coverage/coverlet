@@ -11,10 +11,11 @@ using System.Text;
 using System.Threading;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Reporters;
 using Moq;
 using Xunit;
 
-namespace Coverlet.Core.Reporters.Tests
+namespace Coverlet.Core.Tests.Reporters
 {
   public class CoberturaReporterTests
   {
@@ -68,7 +69,7 @@ namespace Coverlet.Core.Reporters.Tests
       Thread.CurrentThread.CurrentCulture = new CultureInfo("it-IT");
       try
       {
-        // Assert conversion behaviour to be sure to be in a Italian culture context
+        // Assert conversion behavior to be sure to be in a Italian culture context
         // where decimal char is comma.
         Assert.Equal("1,5", (1.5).ToString());
 

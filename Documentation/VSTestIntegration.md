@@ -18,7 +18,7 @@ A sample project file looks like:
   </PropertyGroup>
   <ItemGroup>
     <!-- Minimum version 17.7.0 -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <!-- Update this reference when new version is released -->
     <PackageReference Include="coverlet.collector" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
