@@ -45,9 +45,7 @@ namespace Coverlet.Integration.Tests
         using var reader = new PackageArchiveReader(pkg);
         using Stream nuspecStream = reader.GetNuspec();
         var manifest = Manifest.ReadFrom(nuspecStream, false);
-#pragma warning disable CS8603 // Possible null reference return.
-        return manifest.Metadata.Version.OriginalVersion;
-#pragma warning restore CS8603 // Possible null reference return.
+        return manifest.Metadata.Version?.OriginalVersion ?? throw new InvalidOperationException("Version is null");
       }
     }
 

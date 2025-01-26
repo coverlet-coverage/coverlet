@@ -224,9 +224,7 @@ namespace Coverlet.Core.Reporters
       {
         if (path.StartsWith(basePath))
         {
-#pragma warning disable IDE0057 // Use range operator
           return path.Substring(basePath.Length);
-#pragma warning restore IDE0057 // Use range operator
         }
       }
       return path;
