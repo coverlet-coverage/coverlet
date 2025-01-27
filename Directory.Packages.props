@@ -30,7 +30,6 @@
          vstest 17.8 version
          NuGetFrameworksVersion is defined here https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/eng/Versions.props#L94C1-L94C1
     -->
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NuGet.Frameworks" Version="6.12.1" />
     <PackageVersion Include="NuGet.Packaging" Version="6.12.1" />
     <PackageVersion Include="NuGet.Versioning" Version="6.12.1" />

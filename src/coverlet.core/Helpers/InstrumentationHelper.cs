@@ -415,8 +415,10 @@ namespace Coverlet.Core.Helpers
     }
 
     private static string CreateRegexExcludePattern(IEnumerable<string> filters, char escapeSymbol)
-      //only look for module filters here, types will be filtered out when instrumenting 
+      //only look for module filters here, types will be filtered out when instrumenting
+#pragma warning disable IDE0057 // Use range operator
       => CreateRegexPattern(filters, escapeSymbol, filter => filter.Substring(filter.IndexOf(']') + 1) == "*");
+#pragma warning restore IDE0057 // Use range operator
 
     private static string CreateRegexIncludePattern(IEnumerable<string> filters, char escapeSymbol) =>
       CreateRegexPattern(filters, escapeSymbol);
@@ -424,8 +426,10 @@ namespace Coverlet.Core.Helpers
     private static string CreateRegexPattern(IEnumerable<string> filters, char escapeSymbol, Func<string, bool> filterPredicate = null)
     {
       IEnumerable<string> filteredFilters = filterPredicate != null ? filters.Where(filterPredicate) : filters;
+#pragma warning disable IDE0057 // Use range operator
       IEnumerable<string> regexPatterns = filteredFilters.Select(x =>
         $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+#pragma warning restore IDE0057 // Use range operator
       return string.Join("|", regexPatterns);
     }
 
