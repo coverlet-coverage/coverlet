@@ -491,9 +491,9 @@ namespace Coverlet.Core
       {
         string key = sourceLinkDocument.Key;
         if (Path.GetFileName(key) != "*") continue;
-
+#pragma warning disable IDE0057
         IReadOnlyList<SourceRootMapping> rootMapping = _sourceRootTranslator.ResolvePathRoot(key.Substring(0, key.Length - 1));
-
+#pragma warning restore IDE0057
         foreach (string keyMapping in rootMapping is null ? [key] : new List<string>(rootMapping.Select(m => m.OriginalPath)))
         {
           string directoryDocument = Path.GetDirectoryName(document);
@@ -505,8 +505,9 @@ namespace Coverlet.Core
           {
             if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
               continue;
-
+#pragma warning disable IDE0057
             relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
+#pragma warning restore IDE0057
           }
 
           if (relativePathOfBestMatch.Length == 0)
