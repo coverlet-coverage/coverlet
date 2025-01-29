@@ -2,16 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Symbols;
 using Moq;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -19,6 +20,16 @@ namespace Coverlet.Core.Tests
   public partial class CoverageTests
   {
     private readonly Mock<ILogger> _mockLogger = new();
+    readonly JsonSerializerOptions _options = new()
+    {
+      Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+      IncludeFields = true,
+      WriteIndented = true,
+      Converters =
+        {
+          new BranchDictionaryConverterFactory()
+        }
+    };
 
     [Fact]
     public void TestCoverage()
@@ -91,7 +102,7 @@ namespace Coverlet.Core.Tests
                                   new SourceRootTranslator(module, _mockLogger.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
-      string result = JsonConvert.SerializeObject(coverage.GetCoverageResult(), Formatting.Indented, new BranchDictionaryConverter());
+      string result = JsonSerializer.Serialize(coverage.GetCoverageResult(), _options);
 
       Assert.Contains("coverlet.core.tests.dll", result);
 
@@ -109,7 +120,7 @@ namespace Coverlet.Core.Tests
       File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
       File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-      // TODO: Find a way to mimick hits
+      // TODO: Find a way to mimic hits
       var instrumentationHelper =
           new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                     new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
@@ -130,7 +141,7 @@ namespace Coverlet.Core.Tests
       var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
-      string result = JsonConvert.SerializeObject(coverage.GetCoverageResult(), Formatting.Indented, new BranchDictionaryConverter());
+      string result = JsonSerializer.Serialize(coverage.GetCoverageResult(), _options);
 
       Assert.Contains("DeepThought.cs", result);
 
@@ -171,7 +182,7 @@ namespace Coverlet.Core.Tests
       var coverage = new Coverage(Path.Combine(directory.FullName, Path.GetFileName(module)), parameters, _mockLogger.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(_mockLogger.Object, new FileSystem()), new CecilSymbolHelper());
       coverage.PrepareModules();
 
-      JsonConvert.SerializeObject(coverage.GetCoverageResult());
+      string result = JsonSerializer.Serialize(coverage.GetCoverageResult(), _options);
 
       _mockLogger.Verify(l => l.LogInformation(It.Is<string>(v => v.Equals("MergeWith: file 'FileDoesNotExist.json' does not exist.")), It.IsAny<bool>()), Times.Once);
 
@@ -220,37 +231,44 @@ namespace Coverlet.Core.Tests
       Assert.Equal("other/coverlet.core/Coverage.cs", result);
     }
   }
+  public class BranchDictionaryConverterFactory : JsonConverterFactory
+  {
+    public override bool CanConvert(Type typeToConvert)
+    {
+      return typeof(Dictionary<BranchKey, Branch>).IsAssignableFrom(typeToConvert);
+    }
+
+    public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+    {
+      Type[] genericArgs = typeToConvert.GetGenericArguments();
+      Type keyType = genericArgs[0];
+      Type valueType = genericArgs[1];
+
+      JsonConverter converter = (JsonConverter)Activator.CreateInstance(
+          typeof(BranchDictionaryConverter<,>).MakeGenericType(new Type[] { keyType, valueType }));
+
+      return converter;
+    }
+  }
 }
 
-public class BranchDictionaryConverter : JsonConverter
+public class BranchDictionaryConverter<TKey, TValue> : JsonConverter<Dictionary<TKey, TValue>>
 {
-  public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-  {
-    Type type = value.GetType();
-    var keys = (IEnumerable)type.GetProperty("Keys")?.GetValue(value, null);
-    var values = (IEnumerable)type.GetProperty("Values")?.GetValue(value, null);
-    IEnumerator valueEnumerator = values.GetEnumerator();
-
-    writer.WriteStartArray();
-    foreach (object key in keys)
-    {
-      valueEnumerator.MoveNext();
-
-      writer.WriteStartArray();
-      serializer.Serialize(writer, key);
-      serializer.Serialize(writer, valueEnumerator.Current);
-      writer.WriteEndArray();
-    }
-    writer.WriteEndArray();
-  }
-
-  public override object ReadJson(JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
+  public override Dictionary<TKey, TValue> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
   {
     throw new NotImplementedException();
   }
 
-  public override bool CanConvert(Type objectType)
+  public override void Write(Utf8JsonWriter writer, Dictionary<TKey, TValue> value, JsonSerializerOptions options)
   {
-    return typeof(Dictionary<BranchKey, Branch>).IsAssignableFrom(objectType);
+    writer.WriteStartObject();
+
+    foreach (KeyValuePair<TKey, TValue> pair in value)
+    {
+      writer.WritePropertyName(pair.Key.ToString());
+      JsonSerializer.Serialize(writer, pair.Value, options);
+    }
+
+    writer.WriteEndObject();
   }
 }
