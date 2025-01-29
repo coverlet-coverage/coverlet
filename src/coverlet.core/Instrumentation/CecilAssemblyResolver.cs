@@ -318,7 +318,7 @@ namespace Coverlet.Core.Instrumentation
         return frameworksElement.EnumerateArray().Select(x => (x.GetProperty("name").GetString(), x.GetProperty("version").GetString())).ToList();
       }
 
-      if (runtimeOptionsElement.TryGetProperty("includedframeworks", out JsonElement runtimeoptionselement))
+      if (runtimeOptionsElement.TryGetProperty("includedFrameworks", out JsonElement runtimeoptionselement))
       {
         return runtimeoptionselement.EnumerateArray().Select(x => (x.GetProperty("name").GetString(), x.GetProperty("version").GetString())).ToList();
       }

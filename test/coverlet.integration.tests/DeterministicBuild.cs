@@ -31,7 +31,6 @@ namespace Coverlet.Integration.Tests
     public DeterministicBuild(ITestOutputHelper output)
     {
       _buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString();
-      //_buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
       _output = output;
       _type = output.GetType();
       _testMember = _type.GetField("test", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -39,7 +38,10 @@ namespace Coverlet.Integration.Tests
 
     private void CreateDeterministicTestPropsFile()
     {
-      var deterministicTestProps = new XDocument();
+      string propsFile = Path.Combine(_testProjectPath, PropsFileName);
+      File.Delete(propsFile);
+
+      XDocument deterministicTestProps = new();
       deterministicTestProps.Add(
               new XElement("Project",
                   new XElement("PropertyGroup",
@@ -48,7 +50,7 @@ namespace Coverlet.Integration.Tests
       _testProjectTfm = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!.
                        Descendants("PropertyGroup")!.Single().Element("TargetFramework")!.Value;
 
-      deterministicTestProps.Save(Path.Combine(_testProjectPath, PropsFileName));
+      deterministicTestProps.Save(Path.Combine(propsFile));
     }
 
     private protected void AssertCoverage(string standardOutput = "", bool checkDeterministicReport = true)
