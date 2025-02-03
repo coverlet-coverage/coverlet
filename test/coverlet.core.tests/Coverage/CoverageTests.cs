@@ -295,7 +295,7 @@ namespace Coverlet.Core.Tests
   }
 }
 
-public class BranchDictionaryConverter: JsonConverter
+public class BranchDictionaryConverter : JsonConverter
 {
   public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
   {
