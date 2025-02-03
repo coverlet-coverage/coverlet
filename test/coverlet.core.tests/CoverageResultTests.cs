@@ -13,14 +13,18 @@ namespace Coverlet.Core.Tests
 
     public CoverageResultTests()
     {
-      var lines = new Lines();
-      lines.Add(1, 1);
-      lines.Add(2, 1);
-      lines.Add(3, 1);
-      var branches = new Branches();
-      branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
-      branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 });
-      branches.Add(new BranchInfo { Line = 2, Hits = 0, Offset = 1, Path = 0, Ordinal = 1 });
+      var lines = new Lines
+      {
+        { 1, 1 },
+        { 2, 1 },
+        { 3, 1 }
+      };
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 },
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 },
+        new BranchInfo { Line = 2, Hits = 0, Offset = 1, Path = 0, Ordinal = 1 }
+      };
 
       // System.Void Coverlet.Core.Tests.CoverageResultTests::CoverageResultTests - 3/3 100% line 2/3 66.7% branch coverage
       var methods = new Methods();
@@ -38,17 +42,23 @@ namespace Coverlet.Core.Tests
                 {2, 0},
             };
 
-      var classes = new Classes();
-      classes.Add("Coverlet.Core.Tests.CoverageResultTests", methods);
+      var classes = new Classes
+      {
+        { "Coverlet.Core.Tests.CoverageResultTests", methods }
+      };
       // Methods  - 1/2 (50%)
       // Lines    - 3/5 (60%)
       // Branches - 2/3 (66.67%)
 
-      var documents = new Documents();
-      documents.Add("doc.cs", classes);
+      var documents = new Documents
+      {
+        { "doc.cs", classes }
+      };
 
-      _modules = new Modules();
-      _modules.Add("module", documents);
+      _modules = new Modules
+      {
+        { "module", documents }
+      };
     }
 
     [Fact]
@@ -156,7 +166,7 @@ namespace Coverlet.Core.Tests
     public void TestGetThresholdTypesBelowThresholdWhenNoModuleInstrumented()
     {
       var result = new CoverageResult();
-      result.Modules = new Modules();
+      result.Modules = [];
 
       var summary = new CoverageSummary();
       var thresholdTypeFlagValues = new Dictionary<ThresholdTypeFlags, double>()

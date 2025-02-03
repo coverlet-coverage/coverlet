@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using Xunit;
 
 namespace Coverlet.Core.Helpers.Tests
@@ -62,7 +63,6 @@ namespace Coverlet.Core.Helpers.Tests
       new RetryHelper().Retry(() => target.TargetActionThrows5Times(), retryStrategy, 20);
       Assert.Equal(6, target.Calls);
     }
-
   }
 
   public class RetryTarget
@@ -72,6 +72,21 @@ namespace Coverlet.Core.Helpers.Tests
     {
       Calls++;
       throw new Exception("Simulating Failure");
+    }
+    public void TargetActionThrows5Times()
+    {
+      Calls++;
+      if (Calls < 6) throw new Exception("Simulating Failure");
+    }
+  }
+
+  public class RetryTargetIOException
+  {
+    public int Calls { get; set; }
+    public void TargetActionThrows()
+    {
+      Calls++;
+      throw new IOException("Simulating Failure");
     }
     public void TargetActionThrows5Times()
     {

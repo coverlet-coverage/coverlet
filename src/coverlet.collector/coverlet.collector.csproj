@@ -40,6 +40,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" />
     <PackageReference Include="NuGet.Frameworks" />
+    <PackageReference Include="System.Buffers" />
+    <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,7 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="build\coverlet.collector.targets" >
+    <None Include="build\coverlet.collector.targets">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

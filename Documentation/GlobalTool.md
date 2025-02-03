@@ -114,6 +114,9 @@ coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custo
 
 The above command will write the results to the supplied path, if no file extension is specified it'll use the standard extension of the selected output format. To specify a directory instead, simply append a `/` to the end of the value.
 
+>[!TIP]
+>Use only folder name whenever multiple coverage output formats are used.
+
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custom/directory/" -f json -f lcov
 ```

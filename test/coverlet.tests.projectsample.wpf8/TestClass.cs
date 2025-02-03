@@ -3,7 +3,7 @@
 
 using System.Windows.Controls;
 
-namespace coverlet.tests.projectsample.wpf6
+namespace coverlet.tests.projectsample.wpf8
 {
     public class TestClass
     {

@@ -21,14 +21,18 @@ namespace Coverlet.Core.Tests
 
     private void SetupDataForArithmeticPrecision()
     {
-      var lines = new Lines();
-      lines.Add(1, 1);
+      var lines = new Lines
+      {
+        { 1, 1 }
+      };
       for (int i = 2; i <= 6; i++)
       {
         lines.Add(i, 0);
       }
-      var branches = new Branches();
-      branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 }
+      };
       for (int i = 2; i <= 6; i++)
       {
         branches.Add(new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = (uint)i });
@@ -40,24 +44,34 @@ namespace Coverlet.Core.Tests
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
-      var classes = new Classes();
-      classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
+      var classes = new Classes
+      {
+        { "Coverlet.Core.Tests.CoverageSummaryTests", methods }
+      };
 
-      var documents = new Documents();
-      documents.Add("doc.cs", classes);
+      var documents = new Documents
+      {
+        { "doc.cs", classes }
+      };
 
-      _moduleArithmeticPrecision = new Modules();
-      _moduleArithmeticPrecision.Add("module", documents);
+      _moduleArithmeticPrecision = new Modules
+      {
+        { "module", documents }
+      };
     }
 
     private void SetupDataSingleModule()
     {
-      var lines = new Lines();
-      lines.Add(1, 1);
-      lines.Add(2, 0);
-      var branches = new Branches();
-      branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 });
-      branches.Add(new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 });
+      var lines = new Lines
+      {
+        { 1, 1 },
+        { 2, 0 }
+      };
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 },
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 1, Ordinal = 2 }
+      };
 
       var methods = new Methods();
       string methodString = "System.Void Coverlet.Core.Tests.CoverageSummaryTests::TestCalculateSummary()";
@@ -65,14 +79,20 @@ namespace Coverlet.Core.Tests
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
-      var classes = new Classes();
-      classes.Add("Coverlet.Core.Tests.CoverageSummaryTests", methods);
+      var classes = new Classes
+      {
+        { "Coverlet.Core.Tests.CoverageSummaryTests", methods }
+      };
 
-      var documents = new Documents();
-      documents.Add("doc.cs", classes);
+      var documents = new Documents
+      {
+        { "doc.cs", classes }
+      };
 
-      _averageCalculationSingleModule = new Modules();
-      _averageCalculationSingleModule.Add("module", documents);
+      _averageCalculationSingleModule = new Modules
+      {
+        { "module", documents }
+      };
     }
 
     private void SetupDataMultipleModule()
