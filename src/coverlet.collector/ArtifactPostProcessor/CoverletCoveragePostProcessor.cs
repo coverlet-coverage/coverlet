@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace coverlet.collector.ArtifactPostProcessor
 {
@@ -55,6 +56,7 @@ namespace coverlet.collector.ArtifactPostProcessor
         var fileAttachments = attachments.SelectMany(x => x.Attachments.Where(IsFileWithJsonExt)).ToList();
         string mergeFilePath = fileAttachments.First().Uri.LocalPath;
 
+        // does merge only work for json extensions, how are they created now if isn't specified in runsettings
         MergeExistingJsonReports(attachments);
         WriteCoverageReports(reporters, mergeFilePath, _coverageResult);
         RemoveObsoleteReports(fileAttachments);
@@ -106,6 +108,8 @@ namespace coverlet.collector.ArtifactPostProcessor
 
     private string GetCoverageReport(CoverageResult coverageResult, IReporter reporter)
     {
+      AttachDebugger();
+
       try
       {
         // check if we need the sourceRootTranslator here 
@@ -115,6 +119,15 @@ namespace coverlet.collector.ArtifactPostProcessor
       {
         throw new CoverletDataCollectorException(
           $"{CoverletConstants.DataCollectorName}: Failed to get coverage report", ex);
+      }
+    }
+
+    private void AttachDebugger()
+    {
+      if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_DATACOLLECTOR_ATTACHMENT_DEBUG"), out int result) && result == 1)
+      {
+        Debugger.Launch();
+        Debugger.Break();
       }
     }
 
