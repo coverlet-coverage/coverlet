@@ -45,6 +45,8 @@ namespace coverlet.collector.ArtifactPostProcessor
       bool useSourceLink = _reportFormatParser.ParseUseSourceLink(configurationElement);
       bool reportMerging = _reportFormatParser.ParseReportMerging(configurationElement);
 
+      AttachDebugger();
+
       if (!reportMerging) return Task.FromResult(attachments);
 
       IList<IReporter> reporters = CreateReporters(formats).ToList();
@@ -54,11 +56,13 @@ namespace coverlet.collector.ArtifactPostProcessor
         _coverageResult.Parameters = new CoverageParameters() {DeterministicReport = deterministic, UseSourceLink = useSourceLink };
         
         var fileAttachments = attachments.SelectMany(x => x.Attachments.Where(IsFileWithJsonExt)).ToList();
-        string mergeFilePath = fileAttachments.First().Uri.LocalPath;
+        string mergeFilePath = Path.GetDirectoryName(fileAttachments.First().Uri.LocalPath);
 
         // does merge only work for json extensions, how are they created now if isn't specified in runsettings
         MergeExistingJsonReports(attachments);
         WriteCoverageReports(reporters, mergeFilePath, _coverageResult);
+        // check if we can remove more than just the json extension files
+        // maybe don't remove the merged json file as it is printed to the console
         RemoveObsoleteReports(fileAttachments);
 
         attachments = new List<AttachmentSet> { attachments.First() };
@@ -90,6 +94,7 @@ namespace coverlet.collector.ArtifactPostProcessor
       foreach (IReporter reporter in reporters)
       {
         string report = GetCoverageReport(coverageResult, reporter);
+        //throws exceptions -- check what the problem is
         string filePath = Path.Combine(directory, Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension));
         File.WriteAllText(filePath, report);
       }
@@ -108,8 +113,6 @@ namespace coverlet.collector.ArtifactPostProcessor
 
     private string GetCoverageReport(CoverageResult coverageResult, IReporter reporter)
     {
-      AttachDebugger();
-
       try
       {
         // check if we need the sourceRootTranslator here 
