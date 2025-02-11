@@ -3,7 +3,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <OutputType>Exe</OutputType>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
@@ -20,8 +22,8 @@
     <PackageReference Include="Moq" />
     <PackageReference Include="Tmds.ExecFunction" />
     <PackageReference Include="ReportGenerator.Core" />
-    <PackageReference Include="xunit" VersionOverride="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" VersionOverride="2.8.2">
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
