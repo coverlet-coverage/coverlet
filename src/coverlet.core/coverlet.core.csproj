@@ -14,10 +14,7 @@
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="System.Buffers" />
-    <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Text.Json" VersionOverride="6.0.11" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
@@ -28,6 +25,9 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
     <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutableVersion)" />
+    <PackageReference Include="System.Buffers" />
+    <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
 
 </Project>
