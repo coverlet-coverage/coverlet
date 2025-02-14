@@ -55,17 +55,20 @@ namespace coverlet.collector.ArtifactPostProcessor
       {
         _coverageResult.Parameters = new CoverageParameters() {DeterministicReport = deterministic, UseSourceLink = useSourceLink };
         
-        var fileAttachments = attachments.SelectMany(x => x.Attachments.Where(IsFileWithJsonExt)).ToList();
+        var fileAttachments = attachments.SelectMany(x => x.Attachments.Where(IsFileAttachment)).ToList();
         string mergeFilePath = Path.GetDirectoryName(fileAttachments.First().Uri.LocalPath);
 
         // does merge only work for json extensions, how are they created now if isn't specified in runsettings
         MergeExistingJsonReports(attachments);
-        WriteCoverageReports(reporters, mergeFilePath, _coverageResult);
-        // check if we can remove more than just the json extension files
-        // maybe don't remove the merged json file as it is printed to the console
+
         RemoveObsoleteReports(fileAttachments);
 
-        attachments = new List<AttachmentSet> { attachments.First() };
+        var mergedFileAttachment = WriteCoverageReports(reporters, mergeFilePath, _coverageResult);
+        // check if we can remove more than just the json extension files
+        // maybe don't remove the merged json file as it is printed to the console
+
+        attachments = new List<AttachmentSet> { mergedFileAttachment };
+        // create new attachment set with only the merged file (add new parameter to pass in the output directory; if not specified use first one)
       }
 
       return Task.FromResult(attachments);
@@ -89,20 +92,28 @@ namespace coverlet.collector.ArtifactPostProcessor
       }
     }
 
-    private void WriteCoverageReports(IEnumerable<IReporter> reporters, string directory, CoverageResult coverageResult)
+    private AttachmentSet WriteCoverageReports(IEnumerable<IReporter> reporters, string directory, CoverageResult coverageResult)
     {
+      var attachment = new AttachmentSet(new Uri(CoverletConstants.DefaultUri), string.Empty);
       foreach (IReporter reporter in reporters)
       {
         string report = GetCoverageReport(coverageResult, reporter);
         //throws exceptions -- check what the problem is
         string filePath = Path.Combine(directory, Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension));
         File.WriteAllText(filePath, report);
+        attachment.Attachments.Add(new UriDataAttachment(new Uri(filePath),string.Empty));
       }
+      return attachment;
     }
 
     private static bool IsFileWithJsonExt(UriDataAttachment x)
     {
-      return x.Uri.IsFile && Path.GetExtension(x.Uri.AbsolutePath).Equals(".json");
+      return IsFileAttachment(x) && Path.GetExtension(x.Uri.AbsolutePath).Equals(".json");
+    }
+
+    private static bool IsFileAttachment(UriDataAttachment x)
+    {
+      return x.Uri.IsFile;
     }
 
     private void MergeWithCoverageResult(string filePath, CoverageResult coverageResult)
