@@ -3,6 +3,7 @@
 
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
+using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Symbols;
 using Coverlet.MSbuild.Tasks;
 using Microsoft.Build.Framework;
@@ -60,6 +61,84 @@ namespace coverlet.msbuild.tasks.tests
       Assert.False(success);
       Assert.NotEmpty(_errors);
       Assert.Contains("Module test path 'testPath' not found", _errors[0].Message);
+    }
+
+    [Fact]
+    public void Execute_StateUnderTest_Success()
+    {
+
+      DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), nameof(InstrumentationTaskTests)));
+      string[] files =
+            [
+                "System.Private.CoreLib.dll",
+                "System.Private.CoreLib.pdb"
+            ];
+
+      foreach (string file in files)
+      {
+        File.Copy(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets", file), Path.Combine(directory.FullName, file), overwrite: true);
+      }
+      // Arrange
+      var partialMockFileSystem = new Mock<FileSystem>();
+      partialMockFileSystem.CallBase = true;
+      partialMockFileSystem.Setup(fs => fs.OpenRead(It.IsAny<string>())).Returns((string path) =>
+      {
+        if (Path.GetFileName(path.Replace(@"\", @"/")) == files[1])
+        {
+          return File.OpenRead(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), files[1]));
+        }
+        else
+        {
+          return File.OpenRead(path);
+        }
+      });
+      partialMockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns((string path) =>
+      {
+        if (Path.GetFileName(path.Replace(@"\", @"/")) == files[1])
+        {
+          return File.Exists(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), files[1]));
+        }
+        else
+        {
+          if (path.Contains(@":\git\runtime"))
+          {
+            return true;
+          }
+          else
+          {
+            return File.Exists(path);
+          }
+        }
+      });
+
+      var log = new TaskLoggingHelper(_buildEngine.Object, "InstrumentationTask");
+      Mock<Coverlet.Core.Abstractions.ILogger> _mockLogger = new();
+
+      IServiceCollection serviceCollection = new ServiceCollection();
+      serviceCollection.AddTransient<IFileSystem>(_ => partialMockFileSystem.Object);
+      serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+      serviceCollection.AddTransient<IAssemblyAdapter, AssemblyAdapter>();
+      serviceCollection.AddTransient<Coverlet.Core.Abstractions.ILogger, MSBuildLogger>(_ => new MSBuildLogger(log));
+      serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+      serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
+      serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator(_mockLogger.Object, new FileSystem()));
+      serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
+
+      ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+      BaseTask.ServiceProvider = serviceProvider;
+
+      var instrumentationTask = new InstrumentationTask
+      {
+        Path = Path.Combine(directory.FullName, files[0]),
+        BuildEngine = _buildEngine.Object
+      };
+
+      // Act
+      bool success = instrumentationTask.Execute();
+
+      // Assert
+      Assert.True(success);
+      Assert.Empty(_errors);
     }
   }
 }
