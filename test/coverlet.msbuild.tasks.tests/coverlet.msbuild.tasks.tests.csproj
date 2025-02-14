@@ -45,6 +45,12 @@
     <None Update="TestAssets\InstrumenterState.ItemSpec.data1.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestAssets\System.Private.CoreLib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestAssets\System.Private.CoreLib.pdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />

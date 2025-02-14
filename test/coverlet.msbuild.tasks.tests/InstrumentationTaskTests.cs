@@ -3,7 +3,6 @@
 
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Symbols;
 using Coverlet.MSbuild.Tasks;
 using Microsoft.Build.Framework;
