@@ -8,10 +8,11 @@ using System.IO;
 using System.Linq;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Enums;
+using Coverlet.Core.Helpers;
 using Moq;
 using Xunit;
 
-namespace Coverlet.Core.Helpers.Tests
+namespace Coverlet.Core.Tests.Helpers
 {
   public class InstrumentationHelperTests
   {
@@ -309,29 +310,25 @@ namespace Coverlet.Core.Helpers.Tests
 
       File.Copy(module, Path.Combine(newDir.FullName, Path.GetFileName(module)));
       module = Path.Combine(newDir.FullName, Path.GetFileName(module));
-      File.Copy("coverlet.tests.xunit.extensions.dll", Path.Combine(newDir.FullName, "coverlet.tests.xunit.extensions.dll"));
       File.Copy("coverlet.core.dll", Path.Combine(newDir2.FullName, "coverlet.core.dll"));
 
       string[] currentDirModules = _instrumentationHelper.GetCoverableModules(module, Array.Empty<string>(), false);
-      Assert.Single(currentDirModules);
-      Assert.Equal("coverlet.tests.xunit.extensions.dll", Path.GetFileName(currentDirModules[0]));
+      Assert.Empty(currentDirModules);
 
       string[] moreThanOneDirectory = _instrumentationHelper
                                  .GetCoverableModules(module, new string[] { newDir2.FullName }, false)
                                  .OrderBy(f => f).ToArray();
 
-      Assert.Equal(2, moreThanOneDirectory.Length);
-      Assert.Equal("coverlet.tests.xunit.extensions.dll", Path.GetFileName(moreThanOneDirectory[0]));
-      Assert.Equal("coverlet.core.dll", Path.GetFileName(moreThanOneDirectory[1]));
+      Assert.Single(moreThanOneDirectory);
+      Assert.Equal("coverlet.core.dll", Path.GetFileName(moreThanOneDirectory[0]));
 
       string[] moreThanOneDirectoryPlusTestAssembly = _instrumentationHelper
                                                  .GetCoverableModules(module, new string[] { newDir2.FullName }, true)
                                                  .OrderBy(f => f).ToArray();
 
-      Assert.Equal(3, moreThanOneDirectoryPlusTestAssembly.Length);
+      Assert.Equal(2, moreThanOneDirectoryPlusTestAssembly.Length);
       Assert.Equal("coverlet.core.tests.dll", Path.GetFileName(moreThanOneDirectoryPlusTestAssembly[0]));
-      Assert.Equal("coverlet.tests.xunit.extensions.dll", Path.GetFileName(moreThanOneDirectoryPlusTestAssembly[1]));
-      Assert.Equal("coverlet.core.dll", Path.GetFileName(moreThanOneDirectoryPlusTestAssembly[2]));
+      Assert.Equal("coverlet.core.dll", Path.GetFileName(moreThanOneDirectoryPlusTestAssembly[1]));
 
       newDir.Delete(true);
       newDir2.Delete(true);

@@ -4,6 +4,8 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
@@ -19,26 +21,19 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Moq" />
-    <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="ReportGenerator.Core" />
     <PackageReference Include="System.Linq.Async" />
     <PackageReference Include="System.Reflection.Metadata" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" />
-    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Buffers" />
-    <PackageReference Include="System.Memory" />
-    <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.xunit.extensions\coverlet.tests.xunit.extensions.csproj" />
 
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.empty\coverlet.tests.projectsample.empty.csproj" />
@@ -76,7 +71,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="copy $(ArtifactsPath)\$(ArtifactsBinOutputName)\coverlet.tests.projectsample.excludedbyattribute\$(ArtifactsPivots) $(TargetDir)TestAssets /Y" />
+    <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="copy $(ArtifactsPath)\$(ArtifactsBinOutputName)\coverlet.tests.projectsample.excludedbyattribute\$(Configuration) $(TargetDir)TestAssets /Y" />
     <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) OR $([MSBuild]::IsOSPlatform('Linux'))" Command="cp -r $(ArtifactsPath)/$(ArtifactsBinOutputName)/coverlet.tests.projectsample.excludedbyattribute/$(ArtifactsPivots) $(TargetDir)TestAssets" />
   </Target>
 

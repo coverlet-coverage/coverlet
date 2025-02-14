@@ -177,10 +177,13 @@ To use/debug local collectors build we need to tell to our project to restore an
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-        <PackageReference Include="xunit" Version="2.6.5" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6" />
-        <PackageReference Include="coverlet.collector" Version="6.0.0" /> <-- My local package version -->
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+      <PackageReference Include="xunit.v3" Version="1.0.1" />
+      <PackageReference Include="xunit.runner.visualstudio" Version="3.0.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="coverlet.collector" Version="6.0.3" /> <-- My local package version -->
     </ItemGroup>
 
     <ItemGroup>

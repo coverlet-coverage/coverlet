@@ -1,13 +1,11 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
-using System.Linq;
+using System.Runtime.InteropServices;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Symbols;
-using Coverlet.Tests.Xunit.Extensions;
 using Moq;
 using Xunit;
 
@@ -16,20 +14,21 @@ namespace Coverlet.Core.Tests
   public partial class CoverageTests
   {
 
-    [ConditionalFact]
-    [SkipOnOS(OS.MacOS, "Windows path format only - Simplified output paths issue")]
-    [SkipOnOS(OS.Linux, "Windows path format only - Simplified output paths issue")]
+    [Fact]
     public void TestCoverageSkipModule__AssemblyMarkedAsExcludeFromCodeCoverage()
     {
-      var partialMockFileSystem = new Mock<FileSystem>();
-      partialMockFileSystem.CallBase = true;
+      Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+      var partialMockFileSystem = new Mock<FileSystem>
+      {
+        CallBase = true
+      };
       partialMockFileSystem.Setup(fs => fs.NewFileStream(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Returns((string path, FileMode mode, FileAccess access) =>
       {
         return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
       });
       var loggerMock = new Mock<ILogger>();
 
-      string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll").First();
+      string excludedbyattributeDll = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "coverlet.tests.projectsample.excludedbyattribute.dll")[0];
 
       var instrumentationHelper =
           new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
@@ -37,11 +36,11 @@ namespace Coverlet.Core.Tests
 
       var parameters = new CoverageParameters
       {
-        IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = Array.Empty<string>(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = ["[coverlet.tests.projectsample.excludedbyattribute*]*"],
+        IncludeDirectories = [],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = true,
         SingleHit = false,
         MergeWith = string.Empty,

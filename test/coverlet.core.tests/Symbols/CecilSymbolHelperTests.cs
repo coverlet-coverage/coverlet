@@ -6,11 +6,12 @@ using System.Linq;
 using System.Reflection;
 using coverlet.tests.projectsample.netframework;
 using Coverlet.Core.Samples.Tests;
+using Coverlet.Core.Symbols;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Xunit;
 
-namespace Coverlet.Core.Symbols.Tests
+namespace Coverlet.Core.Tests.Symbols
 {
   public class CecilSymbolHelperTests
   {
@@ -255,7 +256,7 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoresSwitchIn_GeneratedMoveNext()
     {
       // arrange
-      string nestedName = typeof(Iterator).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(Iterator).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(Iterator).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -271,7 +272,7 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoresBranchesIn_GeneratedMoveNextForSingletonIterator()
     {
       // arrange
-      string nestedName = typeof(SingletonIterator).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(SingletonIterator).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(SingletonIterator).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -287,7 +288,7 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoresBranchesIn_AsyncAwaitStateMachine()
     {
       // arrange
-      string nestedName = typeof(AsyncAwaitStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(AsyncAwaitStateMachine).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachine).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -303,11 +304,11 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoresBranchesIn_AsyncAwaitStateMachineNetFramework()
     {
       // arrange
-      string location = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.netframework.dll").First();
+      string location = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.netframework.dll")[0];
       _resolver.AddSearchDirectory(Path.GetDirectoryName(location));
       _module = ModuleDefinition.ReadModule(location, _parameters);
 
-      string nestedName = typeof(AsyncAwaitStateMachineNetFramework).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(AsyncAwaitStateMachineNetFramework).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitStateMachineNetFramework).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -323,7 +324,7 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoresBranchesIn_AsyncAwaitValueTaskStateMachine()
     {
       // arrange
-      string nestedName = typeof(AsyncAwaitValueTaskStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(AsyncAwaitValueTaskStateMachine).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncAwaitValueTaskStateMachine).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -339,7 +340,7 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoresMostBranchesIn_AwaitForeachStateMachine()
     {
       // arrange
-      string nestedName = typeof(AwaitForeachStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(AwaitForeachStateMachine).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitForeachStateMachine).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -361,7 +362,7 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoresMostBranchesIn_AwaitForeachStateMachine_WithBranchesWithinIt()
     {
       // arrange
-      string nestedName = typeof(AwaitForeachStateMachine_WithBranches).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(AwaitForeachStateMachine_WithBranches).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitForeachStateMachine_WithBranches).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -388,7 +389,7 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoresExtraBranchesIn_AsyncIteratorStateMachine()
     {
       // arrange
-      string nestedName = typeof(AsyncIteratorStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(AsyncIteratorStateMachine).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncIteratorStateMachine).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -408,7 +409,7 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoreBranchesIn_AwaitUsingStateMachine()
     {
       // arrange
-      string nestedName = typeof(AwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(AwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AwaitUsingStateMachine).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
@@ -424,7 +425,7 @@ namespace Coverlet.Core.Symbols.Tests
     public void GetBranchPoints_IgnoreBranchesIn_ScopedAwaitUsingStateMachine()
     {
       // arrange
-      string nestedName = typeof(ScopedAwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic).First().Name;
+      string nestedName = typeof(ScopedAwaitUsingStateMachine).GetNestedTypes(BindingFlags.NonPublic)[0].Name;
       TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(ScopedAwaitUsingStateMachine).FullName);
       TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.EndsWith(nestedName));
       MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));

@@ -24,8 +24,8 @@ namespace Coverlet.Core
   {
     internal Method()
     {
-      Lines = new Lines();
-      Branches = new Branches();
+      Lines = [];
+      Branches = [];
     }
 
     public Lines Lines;
@@ -110,7 +110,7 @@ namespace Coverlet.Core
       }
     }
 
-    public ThresholdTypeFlags GetThresholdTypesBelowThreshold(CoverageSummary summary, Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues, ThresholdStatistic thresholdStat)
+    public ThresholdTypeFlags GetThresholdTypesBelowThreshold(Dictionary<ThresholdTypeFlags, double> thresholdTypeFlagValues, ThresholdStatistic thresholdStat)
     {
       ThresholdTypeFlags thresholdTypeFlags = ThresholdTypeFlags.None;
       switch (thresholdStat)
@@ -119,31 +119,30 @@ namespace Coverlet.Core
           {
             if (!Modules.Any())
               thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, 0, 0, 0);
-
-            foreach (KeyValuePair<string, Documents> module in Modules)
+            foreach ((double line, double branch, double method) in from KeyValuePair<string, Documents> module in Modules
+                                                                    let line = CoverageSummary.CalculateLineCoverage(module.Value).Percent
+                                                                    let branch = CoverageSummary.CalculateBranchCoverage(module.Value).Percent
+                                                                    let method = CoverageSummary.CalculateMethodCoverage(module.Value).Percent
+                                                                    select (line, branch, method))
             {
-              double line = summary.CalculateLineCoverage(module.Value).Percent;
-              double branch = summary.CalculateBranchCoverage(module.Value).Percent;
-              double method = summary.CalculateMethodCoverage(module.Value).Percent;
-
               thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, line, branch, method);
             }
           }
           break;
         case ThresholdStatistic.Average:
           {
-            double line = summary.CalculateLineCoverage(Modules).AverageModulePercent;
-            double branch = summary.CalculateBranchCoverage(Modules).AverageModulePercent;
-            double method = summary.CalculateMethodCoverage(Modules).AverageModulePercent;
+            double line = CoverageSummary.CalculateLineCoverage(Modules).AverageModulePercent;
+            double branch = CoverageSummary.CalculateBranchCoverage(Modules).AverageModulePercent;
+            double method = CoverageSummary.CalculateMethodCoverage(Modules).AverageModulePercent;
 
             thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, line, branch, method);
           }
           break;
         case ThresholdStatistic.Total:
           {
-            double line = summary.CalculateLineCoverage(Modules).Percent;
-            double branch = summary.CalculateBranchCoverage(Modules).Percent;
-            double method = summary.CalculateMethodCoverage(Modules).Percent;
+            double line = CoverageSummary.CalculateLineCoverage(Modules).Percent;
+            double branch = CoverageSummary.CalculateBranchCoverage(Modules).Percent;
+            double method = CoverageSummary.CalculateMethodCoverage(Modules).Percent;
 
             thresholdTypeFlags = CompareThresholdValues(thresholdTypeFlagValues, thresholdTypeFlags, line, branch, method);
           }

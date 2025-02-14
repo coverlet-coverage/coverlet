@@ -45,9 +45,7 @@ namespace Coverlet.Integration.Tests
         using var reader = new PackageArchiveReader(pkg);
         using Stream nuspecStream = reader.GetNuspec();
         var manifest = Manifest.ReadFrom(nuspecStream, false);
-#pragma warning disable CS8603 // Possible null reference return.
-        return manifest.Metadata.Version.OriginalVersion;
-#pragma warning restore CS8603 // Possible null reference return.
+        return manifest.Metadata.Version?.OriginalVersion ?? throw new InvalidOperationException("Version is null");
       }
     }
 
@@ -79,7 +77,7 @@ namespace Coverlet.Integration.Tests
       return new ClonedTemplateProject(finalRoot.FullName, cleanupOnDispose);
     }
 
-    private protected bool RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
+    private protected int RunCommand(string command, string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
     {
       Debug.WriteLine($"BaseTest.RunCommand: {command} {arguments}\nWorkingDirectory: {workingDirectory}");
       // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?view=net-7.0&redirectedfrom=MSDN#System_Diagnostics_Process_StandardOutput
@@ -101,10 +99,10 @@ namespace Coverlet.Integration.Tests
         throw new XunitException($"Command 'dotnet {arguments}' didn't end after 5 minute");
       }
       standardError = eOut;
-      return commandProcess.ExitCode == 0;
+      return commandProcess.ExitCode;
     }
 
-    private protected bool DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
+    private protected int DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
     {
       return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
     }
@@ -193,7 +191,7 @@ namespace Coverlet.Integration.Tests
       xml.Save(csproj);
     }
 
-    private protected void AddCoverletCollectosRef(string projectPath)
+    private protected void AddCoverletCollectorsRef(string projectPath)
     {
       string csproj = Path.Combine(projectPath, "coverlet.integration.template.csproj");
       if (!File.Exists(csproj))

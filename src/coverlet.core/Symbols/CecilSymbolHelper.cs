@@ -491,7 +491,7 @@ namespace Coverlet.Core.Symbols
           }
         }
 
-        _compilerGeneratedBranchesToExclude.TryAdd(methodDefinition.FullName, detectedBranches.ToArray());
+        _compilerGeneratedBranchesToExclude.TryAdd(methodDefinition.FullName, [.. detectedBranches]);
       }
 
       return _compilerGeneratedBranchesToExclude[methodDefinition.FullName].Contains(instruction.Offset);
@@ -722,7 +722,7 @@ namespace Coverlet.Core.Symbols
 
         if (instructions[currentIndex - 1].OpCode == OpCodes.Ldfld)
         {
-          if(! IsCompilerGeneratedField(instructions[currentIndex - 1], out FieldDefinition field)) return false;
+          if (!IsCompilerGeneratedField(instructions[currentIndex - 1], out FieldDefinition field)) return false;
 
           int maxReloadFieldIndex = Math.Min(currentIndex + 2, instructions.Count - 2);
 
@@ -1119,7 +1119,7 @@ namespace Coverlet.Core.Symbols
         OffsetPoints =
               pathOffsetList.Count > 1
                   ? pathOffsetList.GetRange(0, pathOffsetList.Count - 1)
-                  : new List<int>(),
+                  : [],
         EndOffset = pathOffsetList.Last()
       };
 
@@ -1160,26 +1160,26 @@ namespace Coverlet.Core.Symbols
         OffsetPoints =
               pathOffsetList1.Count > 1
                   ? pathOffsetList1.GetRange(0, pathOffsetList1.Count - 1)
-                  : new List<int>(),
+                  : [],
         EndOffset = pathOffsetList1.Last()
       };
 
       // only add branch if branch does not match a known sequence 
       // e.g. auto generated field assignment
       // or encapsulates at least one sequence point
-      int[] offsets = new[]
-      {
+      int[] offsets =
+            [
                 path0.Offset,
                 path0.EndOffset,
                 path1.Offset,
                 path1.EndOffset
-            };
+            ];
 
-      Code[][] ignoreSequences = new[]
-      {
+      Code[][] ignoreSequences =
+            [
                 // we may need other samples
-                new[] {Code.Brtrue_S, Code.Pop, Code.Ldsfld, Code.Ldftn, Code.Newobj, Code.Dup, Code.Stsfld, Code.Newobj}, // CachedAnonymousMethodDelegate field allocation 
-            };
+                [Code.Brtrue_S, Code.Pop, Code.Ldsfld, Code.Ldftn, Code.Newobj, Code.Dup, Code.Stsfld, Code.Newobj], // CachedAnonymousMethodDelegate field allocation 
+            ];
 
       int bs = offsets.Min();
       int be = offsets.Max();
@@ -1218,7 +1218,7 @@ namespace Coverlet.Core.Symbols
             OffsetPoints =
                   pathOffsetList1.Count > 1
                       ? pathOffsetList1.GetRange(0, pathOffsetList1.Count - 1)
-                      : new List<int>(),
+                      : [],
             EndOffset = pathOffsetList1.Last()
           }));
       pathCounter = counter;
@@ -1351,7 +1351,7 @@ namespace Coverlet.Core.Symbols
       {
         if (!_sequencePointOffsetToSkip.ContainsKey(methodDefinition.FullName))
         {
-          _sequencePointOffsetToSkip.TryAdd(methodDefinition.FullName, new List<int>());
+          _sequencePointOffsetToSkip.TryAdd(methodDefinition.FullName, []);
         }
         _sequencePointOffsetToSkip[methodDefinition.FullName].Add(instruction.Offset);
         _sequencePointOffsetToSkip[methodDefinition.FullName].Add(instruction.Next.Offset);

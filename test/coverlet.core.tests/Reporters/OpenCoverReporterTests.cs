@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -6,10 +6,11 @@ using System.IO;
 using System.Text;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Reporters;
 using Moq;
 using Xunit;
 
-namespace Coverlet.Core.Reporters.Tests
+namespace Coverlet.Core.Tests.Reporters
 {
   public class OpenCoverReporterTests
   {
@@ -20,10 +21,9 @@ namespace Coverlet.Core.Reporters.Tests
       {
         Parameters = new CoverageParameters(),
         Identifier = Guid.NewGuid().ToString(),
-
         Modules = []
       };
-      result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
+      result.Modules.Add("Coverlet.Core.Tests.Reporters", CreateFirstDocuments());
 
       var reporter = new OpenCoverReporter();
       string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
@@ -41,10 +41,9 @@ namespace Coverlet.Core.Reporters.Tests
       {
         Parameters = new CoverageParameters(),
         Identifier = Guid.NewGuid().ToString(),
-
         Modules = []
       };
-      result.Modules.Add("Coverlet.Core.Reporters.Tests", CreateFirstDocuments());
+      result.Modules.Add("Coverlet.Core.Tests.Reporters", CreateFirstDocuments());
       result.Modules.Add("Some.Other.Module", CreateSecondDocuments());
 
       var reporter = new OpenCoverReporter();
@@ -61,7 +60,7 @@ namespace Coverlet.Core.Reporters.Tests
       var result = new CoverageResult
       {
         Identifier = Guid.NewGuid().ToString(),
-        Modules = new Modules { { "Coverlet.Core.Reporters.Tests", CreateBranchCoverageDocuments() } },
+        Modules = new Modules { { "Coverlet.Core.Tests.Reporters", CreateBranchCoverageDocuments() } },
         Parameters = new CoverageParameters()
       };
 
@@ -86,7 +85,7 @@ namespace Coverlet.Core.Reporters.Tests
       var result = new CoverageResult
       {
         Identifier = Guid.NewGuid().ToString(),
-        Modules = new Modules { { "Coverlet.Core.Reporters.Tests", CreateBranchCoverageDocuments() } },
+        Modules = new Modules { { "Coverlet.Core.Tests.Reporters", CreateBranchCoverageDocuments() } },
         Parameters = new CoverageParameters()
       };
 
@@ -114,14 +113,14 @@ namespace Coverlet.Core.Reporters.Tests
       };
 
       var methods = new Methods();
-      string methodString = "System.Void Coverlet.Core.Reporters.Tests.OpenCoverReporterTests.TestReport()";
+      string methodString = "System.Void Coverlet.Core.Tests.Reporters.OpenCoverReporterTests.TestReport()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
       var classes = new Classes
       {
-        { "Coverlet.Core.Reporters.Tests.OpenCoverReporterTests", methods }
+        { "Coverlet.Core.Tests.Reporters.OpenCoverReporterTests", methods }
       };
 
       var documents = new Documents
@@ -188,7 +187,7 @@ namespace Coverlet.Core.Reporters.Tests
                 new BranchInfo {Line = 4, Hits = 0, Offset = 40, EndOffset = 44, Path = 1, Ordinal = 4}
             };
 
-      const string methodString = "System.Void Coverlet.Core.Reporters.Tests.OpenCoverReporterTests.TestReport()";
+      const string methodString = "System.Void Coverlet.Core.Tests.Reporters.OpenCoverReporterTests.TestReport()";
       var methods = new Methods
             {
                 {methodString, new Method { Lines = lines, Branches = branches}}
@@ -196,7 +195,7 @@ namespace Coverlet.Core.Reporters.Tests
 
       return new Documents
             {
-                {"doc.cs", new Classes {{"Coverlet.Core.Reporters.Tests.OpenCoverReporterTests", methods}}}
+                {"doc.cs", new Classes {{ "Coverlet.Core.Tests.Reporters.OpenCoverReporterTests", methods}}}
             };
     }
   }

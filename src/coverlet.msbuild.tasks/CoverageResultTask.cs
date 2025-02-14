@@ -104,7 +104,7 @@ namespace Coverlet.MSbuild.Tasks
           IReporter reporter = new ReporterFactory(format).CreateReporter();
           if (reporter == null)
           {
-            throw new Exception($"Specified output format '{format}' is not supported");
+            throw new ArgumentException($"Specified output format '{format}' is not supported");
           }
 
           if (reporter.OutputType == ReporterOutputType.Console)
@@ -155,7 +155,7 @@ namespace Coverlet.MSbuild.Tasks
           IEnumerable<string> thresholdValues = Threshold.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
           if (thresholdValues.Count() != thresholdTypeFlagQueue.Count)
           {
-            throw new Exception($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
+            throw new InvalidOperationException($"Threshold type flag count ({thresholdTypeFlagQueue.Count}) and values count ({thresholdValues.Count()}) doesn't match");
           }
 
           foreach (string threshold in thresholdValues)
@@ -166,7 +166,7 @@ namespace Coverlet.MSbuild.Tasks
             }
             else
             {
-              throw new Exception($"Invalid threshold value must be numeric");
+              throw new ArgumentException($"Invalid threshold value must be numeric");
             }
           }
         }
@@ -193,9 +193,9 @@ namespace Coverlet.MSbuild.Tasks
         var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
         var summary = new CoverageSummary();
 
-        CoverageDetails linePercentCalculation = summary.CalculateLineCoverage(result.Modules);
-        CoverageDetails branchPercentCalculation = summary.CalculateBranchCoverage(result.Modules);
-        CoverageDetails methodPercentCalculation = summary.CalculateMethodCoverage(result.Modules);
+        CoverageDetails linePercentCalculation = CoverageSummary.CalculateLineCoverage(result.Modules);
+        CoverageDetails branchPercentCalculation = CoverageSummary.CalculateBranchCoverage(result.Modules);
+        CoverageDetails methodPercentCalculation = CoverageSummary.CalculateMethodCoverage(result.Modules);
 
         double totalLinePercent = linePercentCalculation.Percent;
         double totalBranchPercent = branchPercentCalculation.Percent;
@@ -207,9 +207,9 @@ namespace Coverlet.MSbuild.Tasks
 
         foreach (KeyValuePair<string, Documents> module in result.Modules)
         {
-          double linePercent = summary.CalculateLineCoverage(module.Value).Percent;
-          double branchPercent = summary.CalculateBranchCoverage(module.Value).Percent;
-          double methodPercent = summary.CalculateMethodCoverage(module.Value).Percent;
+          double linePercent = CoverageSummary.CalculateLineCoverage(module.Value).Percent;
+          double branchPercent = CoverageSummary.CalculateBranchCoverage(module.Value).Percent;
+          double methodPercent = CoverageSummary.CalculateMethodCoverage(module.Value).Percent;
 
           coverageTable.AddRow(Path.GetFileNameWithoutExtension(module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
         }
@@ -226,7 +226,7 @@ namespace Coverlet.MSbuild.Tasks
 
         Console.WriteLine(coverageTable.ToStringAlternative());
 
-        ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(summary, thresholdTypeFlagValues, thresholdStat);
+        ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(thresholdTypeFlagValues, thresholdStat);
         if (thresholdTypeFlags != ThresholdTypeFlags.None)
         {
           var exceptionMessageBuilder = new StringBuilder();
@@ -248,7 +248,7 @@ namespace Coverlet.MSbuild.Tasks
                 $"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
           }
 
-          throw new Exception(exceptionMessageBuilder.ToString());
+          throw new InvalidOperationException(exceptionMessageBuilder.ToString());
         }
       }
       catch (Exception ex)

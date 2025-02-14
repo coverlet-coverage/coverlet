@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using Coverlet.Core.Abstractions;
 
@@ -54,7 +55,12 @@ namespace Coverlet.Core.Helpers
           }
           return action();
         }
-        catch (Exception ex)
+        catch (DirectoryNotFoundException)
+        {
+          // do nothing
+          return default;
+        }
+        catch (IOException ex)
         {
           exceptions.Add(ex);
         }

@@ -3,10 +3,11 @@
 
 using System;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Reporters;
 using Moq;
 using Xunit;
 
-namespace Coverlet.Core.Reporters.Tests
+namespace Coverlet.Core.Tests.Reporters
 {
   public class TestCreateReporterTests
   {
@@ -16,9 +17,11 @@ namespace Coverlet.Core.Reporters.Tests
     public TestCreateReporterTests()
     {
       _reporter = new TeamCityReporter();
-      _result = new CoverageResult();
-      _result.Parameters = new CoverageParameters();
-      _result.Identifier = Guid.NewGuid().ToString();
+      _result = new CoverageResult
+      {
+        Parameters = new CoverageParameters(),
+        Identifier = Guid.NewGuid().ToString()
+      };
 
       var lines = new Lines { { 1, 1 }, { 2, 0 } };
 
@@ -54,12 +57,12 @@ namespace Coverlet.Core.Reporters.Tests
             };
 
       var methods = new Methods();
-      string methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestReport()";
+      string methodString = "System.Void Coverlet.Core.Tests.Reporters.CoberturaReporterTests::TestReport()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;
 
-      var classes = new Classes { { "Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods } };
+      var classes = new Classes { { "Coverlet.Core.Tests.Reporters.CoberturaReporterTests", methods } };
 
       var documents = new Documents { { "doc.cs", classes } };
 

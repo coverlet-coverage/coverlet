@@ -1,9 +1,10 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Coverlet.Core.Helpers;
 using Xunit;
 
-namespace Coverlet.Core.Helpers.Tests
+namespace Coverlet.Core.Tests.Helpers
 {
   public class FileSystemTests
   {

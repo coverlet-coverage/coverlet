@@ -195,7 +195,7 @@ namespace Coverlet.CoreCoverage.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1275>(async instance =>
                       {
-                        var cts = new CancellationTokenSource();
+                        using var cts = new CancellationTokenSource();
                         await (Task)instance.Execute(cts.Token);
                       },
                       persistPrepareResultToFile: pathSerialize[0]);

@@ -3,19 +3,22 @@
 
 using System;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Reporters;
 using Moq;
 using Xunit;
 
-namespace Coverlet.Core.Reporters.Tests
+namespace Coverlet.Core.Tests.Reporters
 {
   public class LcovReporterTests
   {
     [Fact]
     public void TestReport()
     {
-      var result = new CoverageResult();
-      result.Parameters = new CoverageParameters();
-      result.Identifier = Guid.NewGuid().ToString();
+      var result = new CoverageResult
+      {
+        Parameters = new CoverageParameters(),
+        Identifier = Guid.NewGuid().ToString()
+      };
 
       var lines = new Lines
       {
@@ -30,7 +33,7 @@ namespace Coverlet.Core.Reporters.Tests
       };
 
       var methods = new Methods();
-      string methodString = "System.Void Coverlet.Core.Reporters.Tests.LcovReporterTests.TestReport()";
+      string methodString = "System.Void Coverlet.Core.Tests.Reporters.LcovReporterTests.TestReport()";
       methods.Add(methodString, new Method());
       methods[methodString].Lines = lines;
       methods[methodString].Branches = branches;

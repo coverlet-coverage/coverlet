@@ -57,7 +57,7 @@ namespace Coverlet.MSbuild.Tasks
       _logger = new MSBuildLogger(Log);
     }
 
-    private void AttachDebugger()
+    private static void AttachDebugger()
     {
       if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_MSBUILD_INSTRUMENTATIONTASK_DEBUG"), out int result) && result == 1)
       {
