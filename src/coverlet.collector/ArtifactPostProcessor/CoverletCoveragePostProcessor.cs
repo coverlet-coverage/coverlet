@@ -63,12 +63,11 @@ namespace coverlet.collector.ArtifactPostProcessor
 
         RemoveObsoleteReports(fileAttachments);
 
-        var mergedFileAttachment = WriteCoverageReports(reporters, mergeFilePath, _coverageResult);
+        AttachmentSet mergedFileAttachment = WriteCoverageReports(reporters, mergeFilePath, _coverageResult);
         // check if we can remove more than just the json extension files
         // maybe don't remove the merged json file as it is printed to the console
 
         attachments = new List<AttachmentSet> { mergedFileAttachment };
-        // create new attachment set with only the merged file (add new parameter to pass in the output directory; if not specified use first one)
       }
 
       return Task.FromResult(attachments);
@@ -79,7 +78,12 @@ namespace coverlet.collector.ArtifactPostProcessor
     // double check that new parameter is only useable for collectors
     private void RemoveObsoleteReports(List<UriDataAttachment> fileAttachments)
     {
-      fileAttachments.ForEach(x => File.Delete(x.Uri.LocalPath));
+      fileAttachments.ForEach(x =>
+      {
+        string directory = Path.GetDirectoryName(x.Uri.LocalPath);
+        if (! string.IsNullOrEmpty(directory))
+          Directory.Delete(directory, true);
+      });
     }
 
     private void MergeExistingJsonReports(IEnumerable<AttachmentSet> attachments)
@@ -98,10 +102,10 @@ namespace coverlet.collector.ArtifactPostProcessor
       foreach (IReporter reporter in reporters)
       {
         string report = GetCoverageReport(coverageResult, reporter);
-        //throws exceptions -- check what the problem is
-        string filePath = Path.Combine(directory, Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension));
-        File.WriteAllText(filePath, report);
-        attachment.Attachments.Add(new UriDataAttachment(new Uri(filePath),string.Empty));
+        var file = new FileInfo(Path.Combine(directory, Path.ChangeExtension(CoverletConstants.DefaultFileName, reporter.Extension)));
+        file.Directory?.Create();
+        File.WriteAllText(file.FullName, report);
+        attachment.Attachments.Add(new UriDataAttachment(new Uri(file.FullName),string.Empty));
       }
       return attachment;
     }
