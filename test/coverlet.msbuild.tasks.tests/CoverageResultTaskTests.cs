@@ -1,6 +1,10 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using coverlet.msbuild.tasks.tests;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
