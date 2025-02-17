@@ -20,10 +20,6 @@
     <PackageProjectUrl>https://github.com/coverlet-coverage/coverlet</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
-    <RestoreSources>
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json
-      https://api.nuget.org/v3/index.json;
-    </RestoreSources>
   </PropertyGroup>
 
   <ItemGroup>
