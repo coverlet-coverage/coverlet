@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -16,15 +16,17 @@
     <PackageTags>coverage;testing;unit-test;lcov;opencover;quality</PackageTags>
     <PackageReadmeFile>GlobalTool.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/coverlet-coverage/coverlet</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
- 
+
   <ItemGroup>
     <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="System.Text.RegularExpressions" VersionOverride="4.3.1" />
+    <PackageReference Include="System.Net.Http" VersionOverride="4.3.4" />
   </ItemGroup>
 
   <ItemGroup>
