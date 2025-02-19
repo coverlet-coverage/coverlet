@@ -64,8 +64,6 @@ namespace coverlet.collector.ArtifactPostProcessor
         RemoveObsoleteReports(fileAttachments);
 
         AttachmentSet mergedFileAttachment = WriteCoverageReports(reporters, mergeFilePath, _coverageResult);
-        // check if we can remove more than just the json extension files
-        // maybe don't remove the merged json file as it is printed to the console
 
         attachments = new List<AttachmentSet> { mergedFileAttachment };
       }
@@ -81,7 +79,7 @@ namespace coverlet.collector.ArtifactPostProcessor
       fileAttachments.ForEach(x =>
       {
         string directory = Path.GetDirectoryName(x.Uri.LocalPath);
-        if (! string.IsNullOrEmpty(directory))
+        if (! string.IsNullOrEmpty(directory) && Directory.Exists(directory))
           Directory.Delete(directory, true);
       });
     }
