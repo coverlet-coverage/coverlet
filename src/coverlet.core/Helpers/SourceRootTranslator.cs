@@ -24,11 +24,18 @@ namespace Coverlet.Core.Helpers
     private readonly Dictionary<string, List<string>> _sourceToDeterministicPathMapping;
     private Dictionary<string, string> _resolutionCacheFiles;
 
+    public SourceRootTranslator()
+    {
+      _sourceRootMapping = new Dictionary<string, List<SourceRootMapping>>();
+      _sourceToDeterministicPathMapping = new Dictionary<string, List<string>>();
+    }
+
     public SourceRootTranslator(ILogger logger, IFileSystem fileSystem)
     {
       _logger = logger ?? throw new ArgumentNullException(nameof(logger));
       _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
       _sourceRootMapping = new Dictionary<string, List<SourceRootMapping>>();
+      _sourceToDeterministicPathMapping = new Dictionary<string, List<string>>();
     }
 
     public SourceRootTranslator(string sourceMappingFile, ILogger logger, IFileSystem fileSystem)

@@ -11,13 +11,13 @@ using System.Xml;
 using Coverlet.Collector.Utilities;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
-using coverlet.core.Helpers;
 using Coverlet.Core.Reporters;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using Coverlet.Core.Helpers;
 
 namespace coverlet.collector.ArtifactPostProcessor
 {
@@ -58,7 +58,6 @@ namespace coverlet.collector.ArtifactPostProcessor
         var fileAttachments = attachments.SelectMany(x => x.Attachments.Where(IsFileAttachment)).ToList();
         string mergeFilePath = Path.GetDirectoryName(fileAttachments.First().Uri.LocalPath);
 
-        // does merge only work for json extensions, how are they created now if isn't specified in runsettings
         MergeExistingJsonReports(attachments);
 
         RemoveObsoleteReports(fileAttachments);
@@ -128,8 +127,8 @@ namespace coverlet.collector.ArtifactPostProcessor
     {
       try
       {
-        // check if we need the sourceRootTranslator here 
-        return reporter.Report(coverageResult, new DummySourceRootTranslator());
+        // empty source root translator returns the original path for deterministic report
+        return reporter.Report(coverageResult, new SourceRootTranslator());
       }
       catch (Exception ex)
       {
