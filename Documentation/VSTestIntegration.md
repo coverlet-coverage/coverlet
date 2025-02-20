@@ -5,7 +5,7 @@
 Since version `6.0.0`
 
 * .NET Core >= 6.0
-* .NET Framework >= 4.6.2
+* .NET Framework >= 4.7.2
 
 As explained in quick start section, to use collectors you need to run *SDK v6.0.100* (LTS) or newer and your project file must reference `coverlet.collector` and a minimum version of `Microsoft.NET.Test.Sdk`.
 
@@ -17,10 +17,10 @@ A sample project file looks like:
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Minimum version 17.7.0 -->
+    <!-- Minimum version 17.12.0 -->
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <!-- Update this reference when new version is released -->
-    <PackageReference Include="coverlet.collector" Version="6.0.0">
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -43,10 +43,10 @@ or
 ```text
 dotnet publish
 ...
-  ... -> C:\project\bin\Debug\netcoreapp3.0\testdll.dll
-  ... -> C:\project\bin\Debug\netcoreapp3.0\publish\
+  ... -> C:\project\bin\Debug\net6.0\testdll.dll
+  ... -> C:\project\bin\Debug\net6.0\publish\
 ...
-dotnet vstest C:\project\bin\Debug\netcoreapp3.0\publish\testdll.dll --collect:"XPlat Code Coverage"
+dotnet vstest C:\project\bin\Debug\net6.0\publish\testdll.dll --collect:"XPlat Code Coverage"
 ```
 
 As you can see in case of `vstest` verb you **must** publish project before.
@@ -59,12 +59,13 @@ Attachments:
 Test Run Successful.
 Total tests: 1
      Passed: 1
- Total time: 2,5451 Seconds
+ Total time: 2.5451 Seconds
 ```
 
 You can change the output directory using the standard `dotnet test` switch `--results-directory`
 
->*NB: By design VSTest platform will create your file under a random named folder(guid string) so if you need stable path to load file to some gui report system(i.e. coveralls, codecov, reportgenerator etc..) that doesn't support glob patterns or hierarchical  search, you'll need to manually move resulting file to a predictable folder*
+> [!NOTE]
+>*By design VSTest platform will create your file under a random named folder(guid string) so if you need stable path to load file to some gui report system(i.e. coveralls, codecov, reportgenerator etc..) that doesn't support glob patterns or hierarchical  search, you'll need to manually move resulting file to a predictable folder*
 
 ## Coverlet options supported by VSTest integration
 

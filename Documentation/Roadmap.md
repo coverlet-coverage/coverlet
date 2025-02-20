@@ -2,7 +2,7 @@
 
 This document describes the roadmap for coverlet showing priorities.
 Maintain coverlet means like any other project two things, answer/resolve soon as possible new issues that are blocking our users an second improve product with new features and enhancements in different areas.
-All coverlet issues are labeled and categorized to better support this activites.
+All coverlet issues are labeled and categorized to better support this activities.
 
 As soon as an issue is open is labeled with `untriaged` if not immediately solvable(we need to do some debugging/PoC to understand where is the issue).
 After triage a final correct label is applied and will be taken into account depending on priority order.

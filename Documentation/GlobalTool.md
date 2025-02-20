@@ -9,40 +9,43 @@ coverlet --help
 The current options are (output of `coverlet --help`):
 
 ```text
-Cross platform .NET Core code coverage tool 6.0.0.0
+Description:
+  Cross platform .NET Core code coverage tool
 
-Usage: coverlet [arguments] [options]
+Usage:
+  coverlet.console <path> [options]
 
 Arguments:
-  <ASSEMBLY|DIRECTORY>                  Path to the test assembly or application directory.
+  <path>  Path to the test assembly or application directory.
 
 Options:
-  -t|--target (REQUIRED)                Path to the test runner application.
-  -a|--targetargs                       Arguments to be passed to the test runner.
-  -o|--output                           Output of the generated coverage report
-  -v|--verbosity                        Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.
-  -f|--format                           Format of the generated coverage report. [default: json]
-  --threshold                           Exits with error if the coverage % is below value.
-  --threshold-type                      Coverage type to apply the threshold to.
-  --threshold-stat                      Coverage statistic used to enforce the threshold value. [default: Minimum]
-  --exclude                             Filter expressions to exclude specific modules and types.
-  --include                             Filter expressions to include only specific modules and types.
-  --exclude-by-file                     Glob patterns specifying source files to exclude.
-  --include-directory                   Include directories containing additional assemblies to be instrumented.
-  --exclude-by-attribute                Attributes to exclude from code coverage.
-  --include-test-assembly               Specifies whether to report code coverage of the test assembly.
-  --single-hit                          Specifies whether to limit code coverage hit reporting to a single hit for each location
-  --skipautoprops                       Neither track nor record auto-implemented properties.
-  --merge-with                          Path to existing coverage result to merge.
-  --use-source-link                     Specifies whether to use SourceLink URIs in place of file system paths.
-  --does-not-return-attribute           Attributes that mark methods that do not return.
-  --exclude-assemblies-without-sources  Specifies behaviour of heuristic to ignore assemblies with missing source documents.
-  --source-mapping-file                 Specifies the path to a SourceRootsMappings file.
-  --version                             Show version information
-  -?, -h, --help                        Show help and usage information
+  -t, --target <target> (REQUIRED)                                           Path to the test runner application.
+  -a, --targetargs <targetargs>                                              Arguments to be passed to the test runner.
+  -o, --output <output>                                                      Output of the generated coverage report
+  -v, --verbosity <Detailed|Minimal|Normal|Quiet>                            Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed. [default: Normal]
+  -f, --format <format>                                                      Format of the generated coverage report. [default: json]
+  --threshold <threshold>                                                    Exits with error if the coverage % is below value.
+  --threshold-type <branch|line|method>                                      Coverage type to apply the threshold to. [default: line|branch|method]
+  --threshold-stat <Average|Minimum|Total>                                   Coverage statistic used to enforce the threshold value. [default: Minimum]
+  --exclude <exclude>                                                        Filter expressions to exclude specific modules and types.
+  --include <include>                                                        Filter expressions to include only specific modules and types.
+  --exclude-by-file <exclude-by-file>                                        Glob patterns specifying source files to exclude.
+  --include-directory <include-directory>                                    Include directories containing additional assemblies to be instrumented.
+  --exclude-by-attribute <exclude-by-attribute>                              Attributes to exclude from code coverage.
+  --include-test-assembly                                                    Specifies whether to report code coverage of the test assembly.
+  --single-hit                                                               Specifies whether to limit code coverage hit reporting to a single hit for each location
+  --skipautoprops                                                            Neither track nor record auto-implemented properties.
+  --merge-with <merge-with>                                                  Path to existing coverage result to merge.
+  --use-source-link                                                          Specifies whether to use SourceLink URIs in place of file system paths.
+  --does-not-return-attribute <does-not-return-attribute>                    Attributes that mark methods that do not return
+  --exclude-assemblies-without-sources <exclude-assemblies-without-sources>  Specifies behaviour of heuristic to ignore assemblies with missing source documents.
+  --source-mapping-file <source-mapping-file>                                Specifies the path to a SourceRootsMappings file.
+  --version                                                                  Show version information
+  -?, -h, --help                                                             Show help and usage information
 ```
 
-NB. For [multiple value] options you can either specify values multiple times i.e.
+> [!NOTE]
+> For [multiple value] options you can either specify values multiple times i.e.
 
 ```shell
 --exclude-by-attribute 'Obsolete' --exclude-by-attribute 'GeneratedCode' --exclude-by-attribute 'CompilerGenerated'
@@ -74,10 +77,10 @@ _Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dl
 
 Sometimes, there are tests that doesn't use regular unit test frameworks like xunit. You may find yourself in a situation where your tests are driven by a custom executable/script, which when run, could do anything from making API calls to driving Selenium.
 
-As an example, suppose you have a folder `/integrationtest` which contains said executable (lets call it `runner.exe`) and everything it needs to successfully execute. You can use our tool to startup the executable and gather live coverage:
+As an example, suppose you have a folder `/integrationtests` which contains said executable (lets call it `runner.exe`) and everything it needs to successfully execute. You can use our tool to startup the executable and gather live coverage:
 
 ```bash
-coverlet "/integrationtest" --target "/application/runner.exe"
+coverlet "/integrationtests" --target "/application/runner.exe"
 ```
 
 Coverlet will first instrument all .NET assemblies within the `integrationtests` folder, after which it will execute `runner.exe`. Finally, at shutdown of your `runner.exe`, it will generate the coverage report. You can use all parameters available to customize the report generation. Coverage results will be generated once `runner.exe` exits. You can use all parameters available to customize the report generation.
@@ -106,7 +109,7 @@ The `--format` option can be specified multiple times to output multiple formats
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --format opencover --format lcov
 ```
 
-By default, Coverlet will output the coverage results file(s) in the current working directory. The `--output` or `-o` options can be used to override this behaviour.
+By default, Coverlet will output the coverage results file(s) in the current working directory. The `--output` or `-o` options can be used to override this behavior.
 
 ```bash
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --output "/custom/path/result.json"
@@ -256,7 +259,7 @@ Coverlet has the ability to map the paths contained inside the debug sources int
 
 The value for `--source-mapping-file` should be a file with each line being in the format `|path to map to=path in debug symbol`. For example to map the local checkout of a project `C:\git\coverlet` to project that was built with `<Deterministic>true</Deterministic>` which sets the sources to `/_/*` the following line must be in the mapping file.
 
-```
+```text
 |C:\git\coverlet\=/_/
 ```
 
