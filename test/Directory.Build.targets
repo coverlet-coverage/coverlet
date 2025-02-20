@@ -15,7 +15,7 @@
              (so that msbuild eval works even before they are built)
              so that they can still find the tooling that will be built by the build. -->
         <!--<CoverletToolsPath>$(RepoRoot)artifacts\bin\coverlet.msbuild.tasks\$(Configuration.ToLowerInvariant())_netstandard2.0\</CoverletToolsPath>-->
-        <CoverletToolsPath>$(RepoRoot)artifacts\bin\coverlet.msbuild.tasks\$(Configuration)\</CoverletToolsPath>
+        <CoverletToolsPath>$(RepoRoot)artifacts\bin\coverlet.msbuild.tasks\$(Configuration.ToLower())\</CoverletToolsPath>
       </PropertyGroup>
     </When>
   </Choose>

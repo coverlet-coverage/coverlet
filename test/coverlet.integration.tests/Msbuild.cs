@@ -46,7 +46,7 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"coverage.{_buildTargetFramework}.json";
+      string coverageFileName = $"coverage.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }
@@ -67,7 +67,7 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"coverage.{_buildTargetFramework}.json";
+      string coverageFileName = $"coverage.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }
@@ -88,7 +88,7 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"file.{_buildTargetFramework}.json";
+      string coverageFileName = $"file.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }
@@ -100,7 +100,7 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError));
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"file.{_buildTargetFramework}.ext";
+      string coverageFileName = $"file.ext";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }
@@ -143,7 +143,7 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 100% | 100%   | 100%   |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"file.ext1.{_buildTargetFramework}.ext2";
+      string coverageFileName = $"file.ext1.ext2";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }

@@ -18,7 +18,10 @@
     <ThresholdStat Condition="$(ThresholdStat) == ''">minimum</ThresholdStat>
     <ExcludeAssembliesWithoutSources Condition="$(ExcludeAssembliesWithoutSources) == ''"></ExcludeAssembliesWithoutSources>
   </PropertyGroup>
-  <PropertyGroup>
+  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <CoverletToolsPath Condition=" '$(CoverletToolsPath)' == '' ">$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\</CoverletToolsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
+    <CoverletToolsPath Condition=" '$(CoverletToolsPath)' == '' ">$(MSBuildThisFileDirectory)../tasks/netstandard2.0/</CoverletToolsPath>
   </PropertyGroup>
 </Project>
