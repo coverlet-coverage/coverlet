@@ -2,9 +2,10 @@
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <OutputType>Exe</OutputType>
+    <!-- This section should be enabled after using SDK 8.0.0 requirement (Microsoft.Bcl.AsyncInterfaces) -->
+    <!--<OutputType>Exe</OutputType>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>-->
     <Nullable>enable</Nullable>
     <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
@@ -19,6 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Build.Framework">

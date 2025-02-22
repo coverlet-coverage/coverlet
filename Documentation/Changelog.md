@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Improvements
 - use [xunit.v3](https://xunit.net/docs/getting-started/v3/whats-new) for tests and example code
-- Activate [Microsoft Testing Platform](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-platform-intro?tabs=dotnetcli) for coverlet.core.tests, coverlet.core.coverage.tests, coverlet.msbuild.test,coverlet.integration.tests
+- Activate [Microsoft Testing Platform](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-platform-intro?tabs=dotnetcli) for coverlet.core.tests, coverlet.core.coverage.tests, coverlet.integration.tests
 - Refactor tests to use standard `Fact` attributes instead of _ConditionalFact_ and remove obsolete project _coverlet.tests.xunit.extensions_
 - add unit test classes
   - Coverlet.Collector.Tests: CoverletInProcDataCollectorTests, CoverletSettingsTests,
