@@ -6,7 +6,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsample.integration.determisticbuild</AssemblyName>
-    <MSBuildWarningsAsMessages>NU1604</MSBuildWarningsAsMessages>
+    <MSBuildWarningsAsMessages>NU1604;NU1701</MSBuildWarningsAsMessages>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <RestoreSources>
       https://api.nuget.org/v3/index.json;
