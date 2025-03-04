@@ -265,3 +265,12 @@ To enable exceptions log for in-process data collectors
 ```shell
  set COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED=1
 ```
+
+## Enable collector post processing debugging
+Post processing is uses for automatically merging coverage reports with the `ReportMerging` option enabled. You can live attach and debug the post processor `COVERLET_DATACOLLECTOR_POSTPROCESSOR_DEBUG`.
+
+You will be asked to attach a debugger through UI popup.
+
+```shell
+ set COVERLET_DATACOLLECTOR_POSTPROCESSOR_DEBUG=1
+```

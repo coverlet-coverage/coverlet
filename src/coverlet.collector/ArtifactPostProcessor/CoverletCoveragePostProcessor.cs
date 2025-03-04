@@ -136,7 +136,7 @@ namespace coverlet.collector.ArtifactPostProcessor
 
     private void AttachDebugger()
     {
-      if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_DATACOLLECTOR_ATTACHMENT_DEBUG"), out int result) && result == 1)
+      if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_DATACOLLECTOR_POSTPROCESSOR_DEBUG"), out int result) && result == 1)
       {
         Debugger.Launch();
         Debugger.Break();
