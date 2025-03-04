@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## Release date 2024-01-20
+### Improvements
+- Implement solution based merging for data collector [#1307](https://github.com/coverlet-coverage/coverlet/issues/1307)
+
+## Release date 2025-01-20
 ### Packages
 coverlet.msbuild 6.0.4
 coverlet.console 6.0.4

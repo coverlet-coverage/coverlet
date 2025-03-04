@@ -15,10 +15,12 @@ namespace Coverlet.Collector.DataCollection
   internal class CoverletSettingsParser
   {
     private readonly TestPlatformEqtTrace _eqtTrace;
+    private readonly ReportFormatParser _reportFormatParser;
 
     public CoverletSettingsParser(TestPlatformEqtTrace eqtTrace)
     {
       _eqtTrace = eqtTrace;
+      _reportFormatParser = new ReportFormatParser();
     }
 
     /// <summary>
@@ -48,9 +50,10 @@ namespace Coverlet.Collector.DataCollection
         coverletSettings.DoesNotReturnAttributes = ParseDoesNotReturnAttributes(configurationElement);
         coverletSettings.DeterministicReport = ParseDeterministicReport(configurationElement);
         coverletSettings.ExcludeAssembliesWithoutSources = ParseExcludeAssembliesWithoutSources(configurationElement);
+        coverletSettings.ReportMerging = _reportFormatParser.ParseReportMerging(configurationElement);
       }
 
-      coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
+      coverletSettings.ReportFormats = _reportFormatParser.ParseReportFormats(configurationElement);
       coverletSettings.ExcludeFilters = ParseExcludeFilters(configurationElement);
 
       if (_eqtTrace.IsVerboseEnabled)
@@ -78,23 +81,6 @@ namespace Coverlet.Collector.DataCollection
       // 1) .NET core test run supports one testModule per run. Coverlet also supports one testModule per run. So, we are using first testSource only and ignoring others.
       // 2) If and when .NET full is supported with coverlet OR .NET core starts supporting multiple testModules, revisit this code to use other testModules as well.
       return testModules.FirstOrDefault();
-    }
-
-    /// <summary>
-    /// Parse report formats
-    /// </summary>
-    /// <param name="configurationElement">Configuration element</param>
-    /// <returns>Report formats</returns>
-    private static string[] ParseReportFormats(XmlElement configurationElement)
-    {
-      string[] formats = Array.Empty<string>();
-      if (configurationElement != null)
-      {
-        XmlElement reportFormatElement = configurationElement[CoverletConstants.ReportFormatElementName];
-        formats = SplitElement(reportFormatElement);
-      }
-
-      return formats is null || formats.Length == 0 ? new[] { CoverletConstants.DefaultReportFormat } : formats;
     }
 
     /// <summary>
