@@ -70,10 +70,7 @@ namespace coverlet.collector.ArtifactPostProcessor
       return Task.FromResult(attachments);
     }
 
-    // proper documentation for the whole feature
-    // integration tests? maybe in coverlet.integration.tests.Collectors?
-    // double check that new parameter is only useable for collectors
-    private void RemoveObsoleteReports(List<UriDataAttachment> fileAttachments)
+    private static void RemoveObsoleteReports(List<UriDataAttachment> fileAttachments)
     {
       fileAttachments.ForEach(x =>
       {

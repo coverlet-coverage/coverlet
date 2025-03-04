@@ -121,7 +121,7 @@ These are a list of options that are supported by coverlet. These can be specifi
 | DoesNotReturnAttribute   | Methods marked with these attributes are known not to return, statements following them will be excluded from coverage                                          |
 | DeterministicReport      | Generates deterministic report in context of deterministic build. Take a look at [documentation](DeterministicBuild.md) for further informations.
 | ExcludeAssembliesWithoutSources |  Specifies whether to exclude assemblies without source. Options are either MissingAll, MissingAny or None. Default is MissingAll.|
-| ReportMerging | Automatically merge coverage reports of multiple projects.|
+| ReportMerging | Automatically merge coverage reports if coverage is calculated for multiple projects. Default is false.|
 
 How to specify these options via runsettings?
 
