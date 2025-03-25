@@ -191,7 +191,6 @@ namespace Coverlet.MSbuild.Tasks
         }
 
         var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-        var summary = new CoverageSummary();
 
         CoverageDetails linePercentCalculation = CoverageSummary.CalculateLineCoverage(result.Modules);
         CoverageDetails branchPercentCalculation = CoverageSummary.CalculateBranchCoverage(result.Modules);

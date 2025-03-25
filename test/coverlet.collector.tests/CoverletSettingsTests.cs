@@ -4,7 +4,7 @@
 using Coverlet.Collector.DataCollection;
 using Xunit;
 
-namespace Coverlet.Collector.Tests.DataCollection
+namespace Coverlet.Collector.Tests
 {
   public class CoverletSettingsTests
   {

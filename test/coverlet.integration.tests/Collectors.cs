@@ -83,10 +83,8 @@ namespace Coverlet.Integration.Tests
       int cmdExitCode = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
       // IncludeTestAssembly=true we do it in other test
-      if (cmdExitCode != 0)
-      {
-        //_output.WriteLine(standardError);
-      }
+
+      Assert.Equal(0, cmdExitCode);
       Assert.Contains("Passed!", standardOutput);
       AssertCollectorsInjection(clonedTemplateProject);
 
@@ -98,10 +96,8 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
       int cmdExitCode = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError);
-      if (cmdExitCode != 0)
-      {
-        //_output.WriteLine(standardError);
-      }
+
+      Assert.Equal(0, cmdExitCode);
       Assert.Contains("Passed!", standardOutput);
       AssertCoverage(clonedTemplateProject);
       AssertCollectorsInjection(clonedTemplateProject);
@@ -113,10 +109,7 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
       int cmdExitCode = DotnetCli($"publish -c {_buildConfiguration} -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}", out string standardOutput, out string standardError);
-      if (cmdExitCode != 0)
-      {
-        //_output.WriteLine(standardError);
-      }
+
       Assert.Equal(0, cmdExitCode);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish"));
       Assert.NotNull(publishedTestFile);
@@ -133,10 +126,7 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
       int cmdExitCode = DotnetCli($"publish -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\"", out string standardOutput, out string standardError);
-      if (cmdExitCode != 0)
-      {
-        //_output.WriteLine(standardError);
-      }
+
       Assert.Equal(0, cmdExitCode);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish"));
       Assert.NotNull(publishedTestFile);
