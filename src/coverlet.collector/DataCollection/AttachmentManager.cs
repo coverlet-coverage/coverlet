@@ -23,6 +23,7 @@ namespace Coverlet.Collector.DataCollection
     private readonly IDirectoryHelper _directoryHelper;
     private readonly ICountDownEvent _countDownEvent;
     private readonly string _reportDirectory;
+    private bool _disposed;
 
     public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, ICountDownEvent countDownEvent)
         : this(dataSink,
@@ -73,20 +74,41 @@ namespace Coverlet.Collector.DataCollection
     /// </summary>
     public void Dispose()
     {
-      // Unregister events
-      try
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+      if (!_disposed)
       {
-        _countDownEvent.Wait();
-        if (_dataSink != null)
+        if (disposing)
         {
-          _dataSink.SendFileCompleted -= OnSendFileCompleted;
+          // Unregister events
+          try
+          {
+            _countDownEvent.Wait();
+            if (_dataSink != null)
+            {
+              _dataSink.SendFileCompleted -= OnSendFileCompleted;
+            }
+            CleanupReportDirectory();
+          }
+          catch (Exception ex)
+          {
+            _logger.LogWarning(ex.ToString());
+          }
         }
-        CleanupReportDirectory();
+
+        // Free any unmanaged resources here if there are any
+
+        _disposed = true;
       }
-      catch (Exception ex)
-      {
-        _logger.LogWarning(ex.ToString());
-      }
+    }
+
+    ~AttachmentManager()
+    {
+      Dispose(false);
     }
 
     /// <summary>

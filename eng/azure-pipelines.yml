@@ -16,9 +16,9 @@ jobs:
   strategy:
     matrix:
       Debug:
-        buildConfiguration: "Debug"
+        buildConfiguration: "debug"
       Release:
-        buildConfiguration: "Release"
+        buildConfiguration: "release"
   pool:
     vmImage: 'windows-latest'
   steps:
@@ -26,26 +26,26 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect packages
     inputs:
-      SourceFolder: artifacts\package\$(BuildConfiguration)
+      SourceFolder: artifacts\package\$(buildConfiguration)
       Contents: |
         *.nupkg
         *.snupkg
       TargetFolder: $(Build.ArtifactStagingDirectory)\Packages
-    condition: eq(variables['BuildConfiguration'], 'Release')
+    condition: eq(variables['buildConfiguration'], 'release')
   - task: PublishBuildArtifacts@1
     displayName: Publish packages as build artifacts
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)\Packages
       ArtifactName: Packages
       publishLocation: Container
-    condition: eq(variables['BuildConfiguration'], 'Release')
+    condition: eq(variables['buildConfiguration'], 'release')
   - task: PublishBuildArtifacts@1
     displayName: Publish tests artifacts
     inputs:
       PathtoPublish: $(Build.SourcesDirectory)\artifacts\publish
       ArtifactName: PublishedTests
       publishLocation: Container
-    condition: eq(variables['BuildConfiguration'], 'Debug')
+    condition: eq(variables['buildConfiguration'], 'debug')
   - template: CheckNugetStatus.yml
     parameters:
       sourcePath: '$(Build.SourcesDirectory)/src'
@@ -60,9 +60,9 @@ jobs:
   strategy:
     matrix:
       Debug:
-        buildConfiguration: "Debug"
+        buildConfiguration: "debug"
       Release:
-        buildConfiguration: "Release"
+        buildConfiguration: "release"
   pool:
     vmImage: 'macOS-latest'
   steps:
@@ -76,9 +76,9 @@ jobs:
   strategy:
     matrix:
       Debug:
-        buildConfiguration: "Debug"
+        buildConfiguration: "debug"
       Release:
-        buildConfiguration: "Release"
+        buildConfiguration: "release"
   pool:
     vmImage: 'ubuntu-latest'
   steps:

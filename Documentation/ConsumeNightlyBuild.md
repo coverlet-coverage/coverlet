@@ -33,7 +33,7 @@ PM> Install-Package coverlet.msbuild -Version X.X.X-preview.X.XXX -Source https:
 Example:
 
 ```powershell
-PM> Install-Package coverlet.msbuild -Version 3.0.4-preview.4.g5de0ad7d60 -Source https://pkgs.dev.azure.com/tonerdo/coverlet/_packaging/coverlet-nightly/nuget/v3/index.json
+PM> Install-Package coverlet.msbuild -Version 6.0.4-preview.4.g5de0ad7d60 -Source https://pkgs.dev.azure.com/tonerdo/coverlet/_packaging/coverlet-nightly/nuget/v3/index.json
 ```
 
 ### .NET CLI
@@ -45,7 +45,7 @@ PM> Install-Package coverlet.msbuild -Version 3.0.4-preview.4.g5de0ad7d60 -Sourc
 Example:
 
 ```bash
- dotnet add package coverlet.msbuild --version 3.0.4-preview.4.g5de0ad7d60 --source https://pkgs.dev.azure.com/tonerdo/coverlet/_packaging/coverlet-nightly/nuget/v3/index.json
+ dotnet add package coverlet.msbuild --version 6.0.4-preview.4.g5de0ad7d60 --source https://pkgs.dev.azure.com/tonerdo/coverlet/_packaging/coverlet-nightly/nuget/v3/index.json
 ```
 
 ### MSBuild project file
@@ -57,5 +57,5 @@ Example:
 Example:
 
 ```xml
-<PackageReference Include="coverlet.msbuild" Version="3.0.4-preview.4.g5de0ad7d60" />
+<PackageReference Include="coverlet.msbuild" Version="6.0.4-preview.4.g5de0ad7d60" />
 ```

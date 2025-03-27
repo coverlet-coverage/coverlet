@@ -41,15 +41,15 @@ namespace Coverlet.Core.Tests
       File.WriteAllText(reportFile, reporter.Report(coverageResult, new Mock<ISourceRootTranslator>().Object));
       // i.e. reportgenerator -reports:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If\report.cobertura.xml" -targetdir:"C:\git\coverlet\test\coverlet.core.tests\bin\Debug\netcoreapp2.0\Condition_If" -filefilters:+**\Samples\Instrumentation.cs
       Assert.True(new Generator().GenerateReport(new ReportConfiguration(
-      new[] { reportFile },
+      [reportFile],
       dir.FullName,
-      new string[0],
+      [],
       null,
-      new string[0],
-      new string[0],
-      new string[0],
-      new string[0],
-      string.IsNullOrEmpty(sourceFileFilter) ? new string[0] : new[] { sourceFileFilter },
+      [],
+      [],
+      [],
+      [],
+      string.IsNullOrEmpty(sourceFileFilter) ? [] : new[] { sourceFileFilter },
       null,
       null)));
     }
@@ -78,10 +78,7 @@ namespace Coverlet.Core.Tests
                                                            bool skipAutoProps = false,
                                                            string assemblyLocation = null)
     {
-      if (persistPrepareResultToFile is null)
-      {
-        throw new ArgumentNullException(nameof(persistPrepareResultToFile));
-      }
+      ArgumentNullException.ThrowIfNull(persistPrepareResultToFile);
 
       // Rename test file to avoid locks
       string location = typeof(T).Assembly.Location;
@@ -95,23 +92,16 @@ namespace Coverlet.Core.Tests
       string sourceRootTranslatorModulePath = assemblyLocation ?? newPath;
       SetTestContainer(sourceRootTranslatorModulePath, disableRestoreModules);
 
-      static string[] defaultFilters(string _) => Array.Empty<string>();
+      static string[] defaultFilters(string _) => [];
 
       var parameters = new CoverageParameters
       {
-        IncludeFilters = (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)).Concat(
-          new string[]
-          {
-                    $"[{Path.GetFileNameWithoutExtension(fileName)}*]{GetTypeFullName<T>()}*"
-          }).ToArray(),
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)).Concat(new string[]
-          {
-                    "[xunit.*]*",
-                    "[coverlet.*]*"
-          }).ToArray(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = [.. (includeFilter is null ? defaultFilters(fileName) : includeFilter(fileName)),
+                          $"[{Path.GetFileNameWithoutExtension(fileName)}*]{GetTypeFullName<T>()}*",],
+        IncludeDirectories = [],
+        ExcludeFilters = [.. (excludeFilter is null ? defaultFilters(fileName) : excludeFilter(fileName)), "[xunit.*]*", "[coverlet.*]*"],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = true,
         SingleHit = false,
         MergeWith = string.Empty,
@@ -143,7 +133,7 @@ namespace Coverlet.Core.Tests
       // string hitsFilePath = (string)tracker.GetField("HitsFilePath").GetValue(null);
 
       // Void UnloadModule(System.Object, System.EventArgs)
-      tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, new object[2] { null, null });
+      tracker.GetTypeInfo().GetMethod("UnloadModule").Invoke(null, [null, null]);
 
       // Persist CoveragePrepareResult
       using (var fs = new FileStream(persistPrepareResultToFile, FileMode.Open))
@@ -225,7 +215,11 @@ namespace Coverlet.Core.Tests
           }
           return action();
         }
-        catch (Exception ex)
+        catch (DirectoryNotFoundException)
+        {
+          throw;
+        }
+        catch (IOException ex)
         {
           if (ex.ToString().Contains("RestoreOriginalModules") || ex.ToString().Contains("RestoreOriginalModule"))
           {
@@ -239,7 +233,15 @@ namespace Coverlet.Core.Tests
           }
         }
       }
-      throw new AggregateException(exceptions);
+      // Do not throw exception if we're restoring modules
+      if (exceptions.ToString().Contains("RestoreOriginalModules") || exceptions.ToString().Contains("RestoreOriginalModule"))
+      {
+        return default;
+      }
+      else
+      {
+        throw new AggregateException(exceptions);
+      }
     }
 
     public void Retry(Action action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3)

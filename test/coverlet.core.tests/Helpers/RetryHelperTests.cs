@@ -3,19 +3,20 @@
 
 using System;
 using System.IO;
+using Coverlet.Core.Helpers;
 using Xunit;
 
-namespace Coverlet.Core.Helpers.Tests
+namespace Coverlet.Core.Tests.Helpers
 {
   public class RetryHelperTests
   {
     [Fact]
     public void TestRetryWithFixedRetryBackoff()
     {
-      Func<TimeSpan> retryStrategy = () =>
+      static TimeSpan retryStrategy()
       {
         return TimeSpan.FromMilliseconds(1);
-      };
+      }
 
       var target = new RetryTarget();
       try
@@ -32,12 +33,12 @@ namespace Coverlet.Core.Helpers.Tests
     public void TestRetryWithExponentialRetryBackoff()
     {
       int currentSleep = 6;
-      Func<TimeSpan> retryStrategy = () =>
+      TimeSpan retryStrategy()
       {
         var sleep = TimeSpan.FromMilliseconds(currentSleep);
         currentSleep *= 2;
         return sleep;
-      };
+      }
 
       var target = new RetryTarget();
       try
@@ -54,10 +55,10 @@ namespace Coverlet.Core.Helpers.Tests
     [Fact]
     public void TestRetryFinishesIfSuccessful()
     {
-      Func<TimeSpan> retryStrategy = () =>
+      static TimeSpan retryStrategy()
       {
         return TimeSpan.FromMilliseconds(1);
-      };
+      }
 
       var target = new RetryTarget();
       new RetryHelper().Retry(() => target.TargetActionThrows5Times(), retryStrategy, 20);
@@ -71,12 +72,12 @@ namespace Coverlet.Core.Helpers.Tests
     public void TargetActionThrows()
     {
       Calls++;
-      throw new Exception("Simulating Failure");
+      throw new IOException("Simulating Failure");
     }
     public void TargetActionThrows5Times()
     {
       Calls++;
-      if (Calls < 6) throw new Exception("Simulating Failure");
+      if (Calls < 6) throw new IOException("Simulating Failure");
     }
   }
 

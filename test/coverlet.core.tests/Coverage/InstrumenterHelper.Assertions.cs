@@ -19,10 +19,7 @@ namespace Coverlet.Core.Tests
   {
     public static CoverageResult GenerateReport(this CoverageResult coverageResult, [CallerMemberName] string directory = "", bool show = false)
     {
-      if (coverageResult is null)
-      {
-        throw new ArgumentNullException(nameof(coverageResult));
-      }
+      ArgumentNullException.ThrowIfNull(coverageResult);
 
       TestInstrumentationHelper.GenerateHtmlReport(coverageResult, directory: directory);
 
@@ -36,10 +33,7 @@ namespace Coverlet.Core.Tests
 
     public static bool IsPresent(this CoverageResult coverageResult, string docName)
     {
-      if (docName is null)
-      {
-        throw new ArgumentNullException(nameof(docName));
-      }
+      ArgumentNullException.ThrowIfNull(docName);
 
       foreach (InstrumenterResult instrumenterResult in coverageResult.InstrumentedResults)
       {
@@ -57,10 +51,7 @@ namespace Coverlet.Core.Tests
 
     public static Document Document(this CoverageResult coverageResult, string docName)
     {
-      if (docName is null)
-      {
-        throw new ArgumentNullException(nameof(docName));
-      }
+      ArgumentNullException.ThrowIfNull(docName);
 
       foreach (InstrumenterResult instrumenterResult in coverageResult.InstrumentedResults)
       {
@@ -118,10 +109,7 @@ namespace Coverlet.Core.Tests
 
     public static Document ExpectedTotalNumberOfBranches(this Document document, BuildConfiguration configuration, int totalExpectedBranch)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
@@ -142,10 +130,7 @@ namespace Coverlet.Core.Tests
 
     public static string ToStringBranches(this Document document)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       var builder = new StringBuilder();
       foreach (KeyValuePair<BranchKey, Branch> branch in document.Branches)
@@ -157,10 +142,7 @@ namespace Coverlet.Core.Tests
 
     public static Document AssertBranchesCovered(this Document document, BuildConfiguration configuration, params (int line, int ordinal, int hits)[] lines)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
@@ -174,16 +156,13 @@ namespace Coverlet.Core.Tests
       {
         foreach ((int lineToCheck, int ordinalToCheck, int expectedHits) in lines)
         {
-          if (branch.Value.Number == lineToCheck)
+          if (branch.Value.Number == lineToCheck && branch.Value.Ordinal == ordinalToCheck)
           {
-            if (branch.Value.Ordinal == ordinalToCheck)
-            {
-              branchesToCover.Remove($"[line {branch.Value.Number} ordinal {branch.Value.Ordinal}]");
+            branchesToCover.Remove($"[line {branch.Value.Number} ordinal {branch.Value.Ordinal}]");
 
-              if (branch.Value.Hits != expectedHits)
-              {
-                throw new XunitException($"Unexpected hits expected line: {lineToCheck} ordinal {ordinalToCheck} hits: {expectedHits} actual hits: {branch.Value.Hits}");
-              }
+            if (branch.Value.Hits != expectedHits)
+            {
+              throw new XunitException($"Unexpected hits expected line: {lineToCheck} ordinal {ordinalToCheck} hits: {expectedHits} actual hits: {branch.Value.Hits}");
             }
           }
         }
@@ -204,10 +183,7 @@ namespace Coverlet.Core.Tests
 
     public static Document AssertLinesCoveredAllBut(this Document document, BuildConfiguration configuration, params int[] linesNumber)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
@@ -250,10 +226,7 @@ namespace Coverlet.Core.Tests
 
     public static Document AssertLinesCoveredFromTo(this Document document, BuildConfiguration configuration, int from, int to)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
@@ -286,10 +259,7 @@ namespace Coverlet.Core.Tests
 
     public static Document AssertLinesCovered(this Document document, BuildConfiguration configuration, params (int line, int hits)[] lines)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
@@ -334,10 +304,7 @@ namespace Coverlet.Core.Tests
 
     private static Document AssertLinesCoveredInternal(this Document document, BuildConfiguration configuration, bool covered, params int[] lines)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
@@ -375,10 +342,7 @@ namespace Coverlet.Core.Tests
 
     public static Document AssertNonInstrumentedLines(this Document document, BuildConfiguration configuration, int from, int to)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
@@ -387,17 +351,14 @@ namespace Coverlet.Core.Tests
         return document;
       }
 
-      int[] lineRange = Enumerable.Range(from, to - from + 1).ToArray();
+      int[] lineRange = [.. Enumerable.Range(from, to - from + 1)];
 
       return AssertNonInstrumentedLines(document, configuration, lineRange);
     }
 
     public static Document AssertNonInstrumentedLines(this Document document, BuildConfiguration configuration, params int[] lines)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 
@@ -418,10 +379,7 @@ namespace Coverlet.Core.Tests
 
     public static Document AssertInstrumentLines(this Document document, BuildConfiguration configuration, params int[] lines)
     {
-      if (document is null)
-      {
-        throw new ArgumentNullException(nameof(document));
-      }
+      ArgumentNullException.ThrowIfNull(document);
 
       BuildConfiguration buildConfiguration = TestUtils.GetAssemblyBuildConfiguration();
 

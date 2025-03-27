@@ -1,6 +1,11 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using coverlet.msbuild.tasks.tests;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.MSbuild.Tasks;
@@ -10,6 +15,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
+
+[assembly: AssemblyFixture(typeof(MSBuildFixture))]
 
 namespace coverlet.msbuild.tasks.tests
 {
@@ -21,7 +28,8 @@ namespace coverlet.msbuild.tasks.tests
       MSBuildLocator.RegisterDefaults();
     }
   }
-  public class CoverageResultTaskTests : IAssemblyFixture<MSBuildFixture>
+
+  public class CoverageResultTaskTests
   {
     private readonly Mock<IBuildEngine> _buildEngine;
     private readonly List<BuildErrorEventArgs> _errors;
@@ -66,7 +74,7 @@ namespace coverlet.msbuild.tasks.tests
     }
 
     [Fact]
-    public void Execute_StateUnderTest_WithInstrumentationState_Fake()
+    public void Execute_StateUnderTest_WithInstrumentationState_ThresholdType()
     {
       // Arrange
       var mockFileSystem = new Mock<IFileSystem>();
@@ -85,18 +93,15 @@ namespace coverlet.msbuild.tasks.tests
       BaseTask.ServiceProvider = serviceProvider;
       _buildEngine.Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>())).Callback<BuildErrorEventArgs>(e => _errors.Add(e));
 
-#pragma warning disable CS8604 // Possible null reference argument for parameter..
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-      var InstrumenterState = new TaskItem(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "TestAssets\\InstrumenterState.ItemSpec.data1.xml"));
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-#pragma warning restore C8S604 // Possible null reference argument for parameter.
+      var baseDirectory = AppDomain.CurrentDomain.SetupInformation.ApplicationBase ?? string.Empty;
+      var InstrumenterState = new TaskItem(Path.Combine(baseDirectory, "TestAssets\\InstrumenterState.ItemSpec.data1.xml"));
 
       var coverageResultTask = new CoverageResultTask
       {
         OutputFormat = "cobertura",
         Output = "coverageDir",
-        Threshold = "50",
-        ThresholdType = "total",
+        Threshold = "50,60,70",
+        ThresholdType = "line,branch,method",
         ThresholdStat = "total",
         InstrumenterState = InstrumenterState
       };
@@ -106,12 +111,18 @@ namespace coverlet.msbuild.tasks.tests
       bool success = coverageResultTask.Execute();
 
       // Assert
-      Assert.True(success);
-      Assert.False(coverageResultTask.Log.HasLoggedErrors);
+      Assert.False(success);
+      Assert.True(coverageResultTask.Log.HasLoggedErrors);
+
+      // Verify the error message
+      string expectedErrorMessage = $"The total line coverage is below the specified 50{Environment.NewLine}" +
+                           $"The total branch coverage is below the specified 60{Environment.NewLine}" +
+                           "The total method coverage is below the specified 70";
+
+      Assert.Contains(expectedErrorMessage, _errors[0].Message);
 
       Assert.Contains("coverageDir.cobertura.xml", coverageResultTask.ReportItems[0].ItemSpec);
       Assert.Equal(16, coverageResultTask.ReportItems[0].MetadataCount);
-
     }
 
   }

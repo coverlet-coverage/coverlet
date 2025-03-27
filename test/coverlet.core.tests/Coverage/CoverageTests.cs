@@ -1,11 +1,10 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
@@ -31,18 +30,18 @@ namespace Coverlet.Core.Tests
       File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
       File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-      // TODO: Find a way to mimick hits
+      // TODO: Find a way to mimic hits
       var instrumentationHelper =
           new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                     new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
       var parameters = new CoverageParameters
       {
-        IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = Array.Empty<string>(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = ["[coverlet.tests.projectsample.excludedbyattribute*]*"],
+        IncludeDirectories = [],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = false,
         SingleHit = false,
         MergeWith = string.Empty,
@@ -76,11 +75,11 @@ namespace Coverlet.Core.Tests
 
       var parameters = new CoverageParameters
       {
-        IncludeFilters = Array.Empty<string>(),
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = Array.Empty<string>(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = [],
+        IncludeDirectories = [],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = true,
         SingleHit = false,
         MergeWith = string.Empty,
@@ -109,21 +108,21 @@ namespace Coverlet.Core.Tests
       File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
       File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-      // TODO: Find a way to mimick hits
+      // TODO: Find a way to mimic hits
       var instrumentationHelper =
           new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                     new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
       var parameters = new CoverageParameters
       {
-        IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = Array.Empty<string>(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = ["[coverlet.tests.projectsample.excludedbyattribute*]*"],
+        IncludeDirectories = [],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = false,
         SingleHit = false,
-        MergeWith = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "MergeWith.coverage.json").First(),
+        MergeWith = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "TestAssets"), "MergeWith.coverage.json")[0],
         UseSourceLink = false
       };
 
@@ -150,18 +149,18 @@ namespace Coverlet.Core.Tests
       File.Copy(module, Path.Combine(directory.FullName, Path.GetFileName(module)), true);
       File.Copy(pdb, Path.Combine(directory.FullName, Path.GetFileName(pdb)), true);
 
-      // TODO: Find a way to mimick hits
+      // TODO: Find a way to mimic hits
       var instrumentationHelper =
           new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
                                     new SourceRootTranslator(module, new Mock<ILogger>().Object, new FileSystem(), new AssemblyAdapter()));
 
       var parameters = new CoverageParameters
       {
-        IncludeFilters = new string[] { "[coverlet.tests.projectsample.excludedbyattribute*]*" },
-        IncludeDirectories = Array.Empty<string>(),
-        ExcludeFilters = Array.Empty<string>(),
-        ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        IncludeFilters = ["[coverlet.tests.projectsample.excludedbyattribute*]*"],
+        IncludeDirectories = [],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
         IncludeTestAssembly = false,
         SingleHit = false,
         MergeWith = "FileDoesNotExist.json",
@@ -220,37 +219,37 @@ namespace Coverlet.Core.Tests
       Assert.Equal("other/coverlet.core/Coverage.cs", result);
     }
   }
-}
 
-public class BranchDictionaryConverter : JsonConverter
-{
-  public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+  public class BranchDictionaryConverter : JsonConverter
   {
-    Type type = value.GetType();
-    var keys = (IEnumerable)type.GetProperty("Keys")?.GetValue(value, null);
-    var values = (IEnumerable)type.GetProperty("Values")?.GetValue(value, null);
-    IEnumerator valueEnumerator = values.GetEnumerator();
-
-    writer.WriteStartArray();
-    foreach (object key in keys)
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
-      valueEnumerator.MoveNext();
+      Type type = value.GetType();
+      var keys = (IEnumerable)type.GetProperty("Keys")?.GetValue(value, null);
+      var values = (IEnumerable)type.GetProperty("Values")?.GetValue(value, null);
+      IEnumerator valueEnumerator = values.GetEnumerator();
 
       writer.WriteStartArray();
-      serializer.Serialize(writer, key);
-      serializer.Serialize(writer, valueEnumerator.Current);
+      foreach (object key in keys)
+      {
+        valueEnumerator.MoveNext();
+
+        writer.WriteStartArray();
+        serializer.Serialize(writer, key);
+        serializer.Serialize(writer, valueEnumerator.Current);
+        writer.WriteEndArray();
+      }
       writer.WriteEndArray();
     }
-    writer.WriteEndArray();
-  }
 
-  public override object ReadJson(JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
-  {
-    throw new NotImplementedException();
-  }
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
+    {
+      throw new NotImplementedException();
+    }
 
-  public override bool CanConvert(Type objectType)
-  {
-    return typeof(Dictionary<BranchKey, Branch>).IsAssignableFrom(objectType);
+    public override bool CanConvert(Type objectType)
+    {
+      return typeof(Dictionary<BranchKey, Branch>).IsAssignableFrom(objectType);
+    }
   }
 }

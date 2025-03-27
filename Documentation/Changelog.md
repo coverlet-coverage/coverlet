@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+- use `<TargetFramework>netstandard2.0</TargetFramework>` for _coverlet.collector_ and _coverlet.msbuild.tasks_ Packages´
+
+### Improvements
+- use [xunit.v3](https://xunit.net/docs/getting-started/v3/whats-new) for tests and example code
+
+
 ## Release date 2024-01-20
 ### Packages
 coverlet.msbuild 6.0.4
@@ -60,8 +67,8 @@ coverlet.collector 6.0.1
 - Uncovered lines in .NET 8 for inheriting records [#1555](https://github.com/coverlet-coverage/coverlet/issues/1555)
 - Fix record constructors not covered when SkipAutoProps is true [#1561](https://github.com/coverlet-coverage/coverlet/issues/1561)
 - Fix .NET 7 Method Group branch coverage issue [#1447](https://github.com/coverlet-coverage/coverlet/issues/1447)
-- Fix ExcludeFromCodeCoverage does not exclude method in a partial class [#1548](https://github.com/coverlet-coverage/coverlet/issues/1548) 
-- Fix ExcludeFromCodeCoverage does not exclude F# task [#1547](https://github.com/coverlet-coverage/coverlet/issues/1547) 
+- Fix ExcludeFromCodeCoverage does not exclude method in a partial class [#1548](https://github.com/coverlet-coverage/coverlet/issues/1548)
+- Fix ExcludeFromCodeCoverage does not exclude F# task [#1547](https://github.com/coverlet-coverage/coverlet/issues/1547)
 - Fix issues where ExcludeFromCodeCoverage ignored [#1431](https://github.com/coverlet-coverage/coverlet/issues/1431)
 - Fix issues with ExcludeFromCodeCoverage attribute [#1484](https://github.com/coverlet-coverage/coverlet/issues/1484)
 - Fix broken links in documentation [#1514](https://github.com/coverlet-coverage/coverlet/issues/1514)

@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyTitle>coverlet.msbuild.tasks</AssemblyTitle>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
@@ -41,17 +41,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="$(MicrosoftBuildUtilitiesCorePackageVersion)" PrivateAssets="all" ExcludeAssets="Runtime" />
-    <PackageReference Include="System.Buffers" />
-    <PackageReference Include="System.Memory" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\coverlet.console\ConsoleTables\ConsoleTable.cs" Link="ConsoleTables\ConsoleTable.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -67,7 +60,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PackBuildOutputs">
+  <Target Name="PackBuildOutputs" DependsOnTargets="BuildOnlySettings;ResolveReferences">
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="tasks\$(TargetFramework)" />
       <TfmSpecificPackageFile Include="$(ProjectDepsFilePath)" PackagePath="tasks\$(TargetFramework)" />

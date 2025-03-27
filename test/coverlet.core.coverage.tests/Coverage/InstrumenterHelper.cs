@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -226,7 +226,11 @@ namespace Coverlet.Core.Tests
           }
           return action();
         }
-        catch (Exception ex)
+        catch (DirectoryNotFoundException)
+        {
+          throw;
+        }
+        catch (IOException ex)
         {
           if (ex.ToString().Contains("RestoreOriginalModules") || ex.ToString().Contains("RestoreOriginalModule"))
           {
@@ -240,7 +244,15 @@ namespace Coverlet.Core.Tests
           }
         }
       }
-      throw new AggregateException(exceptions);
+      // Do not throw exception if we're restoring modules
+      if (exceptions.ToString().Contains("RestoreOriginalModules") || exceptions.ToString().Contains("RestoreOriginalModule"))
+      {
+        return default;
+      }
+      else
+      {
+        throw new AggregateException(exceptions);
+      }
     }
 
     public void Retry(Action action, Func<TimeSpan> backoffStrategy, int maxAttemptCount = 3)

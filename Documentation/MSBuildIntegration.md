@@ -189,7 +189,7 @@ Examples
 * `/p:Include="[coverlet.*]Coverlet.Core.Coverage"` => Includes the Coverage class in the `Coverlet.Core` namespace belonging to any assembly that matches `coverlet.*` (e.g `coverlet.core`)
 * `/p:Include="[coverlet.*.tests?]*"` => Includes all types in any assembly starting with `coverlet.` and ending with `.test` or `.tests` (the `?` makes the `s`  optional)
 
-Both `Exclude` and `Include` properties can be used together but `Exclude` takes precedence. You can specify multiple filter expressions by separting them with a comma (`,`).
+Both `Exclude` and `Include` properties can be used together but `Exclude` takes precedence. You can specify multiple filter expressions by separating them with a comma (`,`).
 
 You can also include coverage of the test assembly itself by setting `/p:IncludeTestAssembly` to `true`.
 
@@ -198,7 +198,7 @@ You can also include coverage of the test assembly itself by setting `/p:Include
 Neither track nor record auto-implemented properties.
 Syntax:  `/p:SkipAutoProps=true`
 
-### Instrument module wihtout local sources file
+### Instrument module without local sources file
 
 Syntax:  `/p:InstrumentModulesWithoutLocalSources=true`
 
@@ -218,7 +218,7 @@ To exclude or include multiple assemblies when using Powershell scripts or creat
 Azure DevOps builds do not require double quotes to be unescaped:
 
 ```shell
-dotnet test --configuration $(buildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/ /p:Exclude="[MyAppName.DebugHost]*%2c[MyAppNamet.WebHost]*%2c[MyAppName.App]*"
+dotnet test --configuration $(buildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/ /p:Exclude="[MyAppName.DebugHost]*%2c[MyAppName.WebHost]*%2c[MyAppName.App]*"
 ```
 
 ### Note for Linux users
@@ -258,7 +258,7 @@ This parameter has three different values to control the automatic assembly excl
 | MissingAny | Includes the assembly only if all documents can be matched to corresponding source files. |
 | None | No assembly is excluded. |
 
-Here is an example of how to specifiy the parameter:
+Here is an example of how to specify the parameter:
 
 ```shell
 /p:ExcludeAssembliesWithoutSources="MissingAny"

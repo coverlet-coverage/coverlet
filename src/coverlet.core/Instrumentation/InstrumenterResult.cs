@@ -48,9 +48,7 @@ namespace Coverlet.Core.Instrumentation
     public int Line { get; set; }
     [DataMember]
     public int Ordinal { get; set; }
-
     public override bool Equals(object obj) => Equals(obj);
-
     public bool Equals(BranchKey other) => other is BranchKey branchKey && branchKey.Line == Line && branchKey.Ordinal == Ordinal;
 
     public override int GetHashCode()

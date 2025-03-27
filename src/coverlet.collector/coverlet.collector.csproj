@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyTitle>coverlet.collector</AssemblyTitle>
     <DevelopmentDependency>true</DevelopmentDependency>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -40,9 +40,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" />
     <PackageReference Include="NuGet.Frameworks" />
-    <PackageReference Include="System.Buffers" />
-    <PackageReference Include="System.Memory" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,7 +59,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PackBuildOutputs">
+  <Target Name="PackBuildOutputs" DependsOnTargets="BuildOnlySettings;ResolveReferences">
     <ItemGroup>
       <TfmSpecificPackageFile Include="build\coverlet.collector.targets" PackagePath="build\$(TargetFramework)" />
       <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="build\$(TargetFramework)" />

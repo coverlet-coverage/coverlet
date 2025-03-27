@@ -104,7 +104,7 @@ You can "load" your local build using simple switch:
     coverlet.testsubject -> D:\git\coverlet\test\coverlet.testsubject\bin\Debug\net6.0\coverlet.testsubject.dll
     coverlet.core -> D:\git\coverlet\src\coverlet.core\bin\Debug\netstandard2.0\coverlet.core.dll
     coverlet.msbuild.tasks -> D:\git\coverlet\src\coverlet.msbuild.tasks\bin\Debug\netstandard2.0\coverlet.msbuild.tasks.dll
-    coverlet.collector -> D:\git\coverlet\src\coverlet.collector\bin\Debug\net6.0\coverlet.collector.dll
+    coverlet.collector -> D:\git\coverlet\src\coverlet.collector\bin\Debug\netstandard2.0\coverlet.collector.dll
     coverlet.console -> D:\git\coverlet\src\coverlet.console\bin\Debug\net6.0\coverlet.console.dll
     coverlet.core.performancetest -> D:\git\coverlet\test\coverlet.core.performancetest\bin\Debug\net6.0\coverlet.core.performancetest.dll
     coverlet.core.tests -> D:\git\coverlet\test\coverlet.core.tests\bin\Debug\net6.0\coverlet.core.tests.dll
@@ -145,9 +145,9 @@ To use/debug local collectors build we need to tell to our project to restore an
     Restore completed in 50,28 ms for C:\git\coverlet\src\coverlet.collector\coverlet.collector.csproj.
     Restore completed in 50,28 ms for C:\git\coverlet\src\coverlet.core\coverlet.core.csproj.
     coverlet.core -> C:\git\coverlet\src\coverlet.core\bin\Debug\netstandard2.0\coverlet.core.dll
-    coverlet.collector -> C:\git\coverlet\src\coverlet.collector\bin\Debug\netcoreapp2.0\coverlet.collector.dll
-    Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.1.0.67.nupkg'.
-    Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.1.0.67.snupkg'.
+    coverlet.collector -> C:\git\coverlet\src\coverlet.collector\bin\Debug\netstandard2.0\coverlet.collector.dll
+    Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.6.0.4.nupkg'.
+    Successfully created package 'C:\git\coverlet\bin\Debug\Packages\coverlet.collector.6.0.4.snupkg'.
     ```
 
 2) Add new `NuGet.Config` file on your test project/solution
@@ -177,10 +177,13 @@ To use/debug local collectors build we need to tell to our project to restore an
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-        <PackageReference Include="xunit" Version="2.6.5" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6" />
-        <PackageReference Include="coverlet.collector" Version="6.0.0" /> <-- My local package version -->
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+      <PackageReference Include="xunit.v3" Version="1.1.0" />
+      <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="coverlet.collector" Version="6.0.4" /> <-- My local package version -->
     </ItemGroup>
 
     <ItemGroup>

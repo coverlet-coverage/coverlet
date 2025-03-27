@@ -468,10 +468,8 @@ namespace Coverlet.Core.Helpers
 
       foreach (string filter in filters)
       {
-#pragma warning disable IDE0057 // Use range operator
         string typePattern = filter.Substring(filter.IndexOf(']') + 1);
         string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
-#pragma warning restore IDE0057 // Use range operator
 
         typePattern = WildcardToRegex(typePattern);
         modulePattern = WildcardToRegex(modulePattern);

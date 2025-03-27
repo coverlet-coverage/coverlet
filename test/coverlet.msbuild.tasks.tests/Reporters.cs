@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Reporters;
@@ -13,7 +14,7 @@ namespace Coverlet.MSbuild.Tasks.Reporters.Tests
   {
     // we use lcov with extension .info and cobertura with extension .cobertura.xml
     // to have all possible extension format
-    // empty coverletOutput is not possible thank's to props default
+    // empty coverletOutput is not possible thanks to props default
     [Theory]
     // single tfm
     [InlineData("", "/folder/reportFolder/", "lcov", "/folder/reportFolder/coverage.info")]
