@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using Coverlet.Core.Abstractions;
-using Newtonsoft.Json;
 
 namespace Coverlet.Core.Reporters
 {
@@ -16,7 +17,13 @@ namespace Coverlet.Core.Reporters
 
     public string Report(CoverageResult result, ISourceRootTranslator _)
     {
-      return JsonConvert.SerializeObject(result.Modules, Formatting.Indented);
+      var options = new JsonSerializerOptions
+      {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        IncludeFields = true,
+        WriteIndented = true,
+      };
+      return JsonSerializer.Serialize(result.Modules, options);
     }
   }
 }
