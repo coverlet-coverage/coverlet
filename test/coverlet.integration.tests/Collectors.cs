@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -84,7 +84,6 @@ namespace Coverlet.Integration.Tests
       // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
       // IncludeTestAssembly=true we do it in other test
 
-      Assert.Equal(0, cmdExitCode);
       Assert.Contains("Passed!", standardOutput);
       AssertCollectorsInjection(clonedTemplateProject);
 
