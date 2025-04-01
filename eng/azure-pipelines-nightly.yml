@@ -10,12 +10,12 @@ steps:
 - task: UseDotNet@2
   inputs:
     useGlobalJson: true
-  displayName: Install .NET Core SDK 8.0.113
+  displayName: Install .NET Core SDK 8.0.114
 
 - task: NuGetAuthenticate@1
   displayName: Authenticate with NuGet feeds
 
-- script: dotnet restore
+- script: dotnet restore -s "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json"
   displayName: Restore packages
 
 - script: dotnet pack -c Release /p:PublicRelease=false

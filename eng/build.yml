@@ -21,7 +21,7 @@ steps:
   inputs:
     forceReinstallCredentialProvider: true
 
-- script: dotnet restore -s "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json"
+- script: dotnet restore -s "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-libraries/nuget/v3/index.json" -s "https://api.nuget.org/v3/index.json"
 
 - task: DotNetCoreCLI@2
   displayName: Restore packages
