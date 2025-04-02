@@ -16,8 +16,8 @@ namespace Coverlet.Integration.Tests
   public class DeterministicBuild : BaseTest, IDisposable
   {
     private static readonly string s_projectName = "coverlet.integration.determisticbuild";
-    //private readonly string _buildTargetFramework;
-    private string? _testProjectTfm;
+    private readonly string _buildTargetFramework;
+    private string[] _testProjectTfms = [];
     private readonly string _testProjectPath = TestUtils.GetTestProjectPath(s_projectName);
     private readonly string _testBinaryPath = TestUtils.GetTestBinaryPath(s_projectName);
     private readonly string _testResultsPath = TestUtils.GetTestResultsPath(s_projectName);
@@ -26,10 +26,13 @@ namespace Coverlet.Integration.Tests
     private readonly ITestOutputHelper _output;
     private readonly Type _type;
     private readonly FieldInfo? _testMember;
+    private readonly string _artifactsPivot;
 
     public DeterministicBuild(ITestOutputHelper output)
     {
       _buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString();
+      _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
+      _artifactsPivot = _buildConfiguration + "_" + _buildTargetFramework;
       _output = output;
       _type = output.GetType();
       _testMember = _type.GetField("test", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -46,8 +49,14 @@ namespace Coverlet.Integration.Tests
                   new XElement("PropertyGroup",
                       new XElement("coverletMsbuildVersion", GetPackageVersion("*msbuild*.nupkg")),
                       new XElement("coverletCollectorsVersion", GetPackageVersion("*collector*.nupkg")))));
-      _testProjectTfm = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!.
-                       Descendants("PropertyGroup")!.Single().Element("TargetFramework")!.Value;
+      _testProjectTfms = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!
+                         .Descendants("PropertyGroup")!
+                         .Single()
+                         .Element("TargetFrameworks")!
+                         .Value
+                         .Split(';');
+
+      Assert.Contains(_buildTargetFramework, _testProjectTfms);
 
       deterministicTestProps.Save(Path.Combine(propsFile));
     }
@@ -58,7 +67,7 @@ namespace Coverlet.Integration.Tests
       {
         bool coverageChecked = false;
         string reportFilePath = "";
-        foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput), "coverage.json", SearchOption.AllDirectories))
+        foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput), $"coverage.{_buildTargetFramework}.json", SearchOption.AllDirectories))
         {
           Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
           if (document != null)
@@ -93,7 +102,7 @@ namespace Coverlet.Integration.Tests
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
       CreateDeterministicTestPropsFile();
 
-      DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} /p:DeterministicSourcePaths=true", out string buildOutput, out string buildError, _testProjectPath);
+      DotnetCli($"build -c {_buildConfiguration} -f {_buildTargetFramework} -bl:build.{logFilename} /p:DeterministicSourcePaths=true", out string buildOutput, out string buildError, _testProjectPath);
       if (!string.IsNullOrEmpty(buildError))
       {
         _output.WriteLine(buildError);
@@ -103,13 +112,12 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(buildOutput);
       }
       Assert.Contains("Build succeeded.", buildOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _artifactsPivot.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.False(string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-      string testResultFile = Path.Join(testResultPath, "coverage.json");
-      string cmdArgument = $"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:CoverletOutput=\"{testResultFile}\" /p:DeterministicReport=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:CoverletOutput=\"coverage.json\" /p:DeterministicReport=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -123,6 +131,7 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
+      string testResultFile = Path.Join(testResultPath, $"coverage.{_buildTargetFramework}.json");
       Assert.True(File.Exists(testResultFile));
       AssertCoverage(standardOutput);
 
@@ -136,7 +145,7 @@ namespace Coverlet.Integration.Tests
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
       CreateDeterministicTestPropsFile();
 
-      DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string buildOutput, out string buildError, _testProjectPath);
+      DotnetCli($"build -c {_buildConfiguration} -f {_buildTargetFramework} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string buildOutput, out string buildError, _testProjectPath);
       if (!string.IsNullOrEmpty(buildError))
       {
         _output.WriteLine(buildError);
@@ -146,14 +155,13 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(buildOutput);
       }
       Assert.Contains("Build succeeded.", buildOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _artifactsPivot.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
 
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.False(string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-      string testResultFile = Path.Join(testResultPath, "coverage.json");
-      string cmdArgument = $"test -c {_buildConfiguration} --no-build /p:CollectCoverage=true /p:CoverletOutput=\"{testResultFile}\" /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:CoverletOutput=\"coverage.json\" /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -167,6 +175,7 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
+      string testResultFile = Path.Join(testResultPath, $"coverage.{_buildTargetFramework}.json");
       Assert.True(File.Exists(testResultFile));
       Assert.Contains("raw.githubusercontent.com", File.ReadAllText(testResultFile));
       AssertCoverage(standardOutput, checkDeterministicReport: false);
@@ -185,7 +194,7 @@ namespace Coverlet.Integration.Tests
       DeleteLogFiles(testLogFilesPath);
       DeleteCoverageFiles(testResultPath);
 
-      DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string buildOutput, out string buildError, _testProjectPath);
+      DotnetCli($"build -c {_buildConfiguration} -f {_buildTargetFramework} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string buildOutput, out string buildError, _testProjectPath);
       if (!string.IsNullOrEmpty(buildError))
       {
         _output.WriteLine(buildError);
@@ -195,14 +204,14 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(buildOutput);
       }
       Assert.Contains("Build succeeded.", buildOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _artifactsPivot.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
 
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
       string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", deterministicReport: true);
-      string cmdArgument = $"test -c {_buildConfiguration} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -240,7 +249,7 @@ namespace Coverlet.Integration.Tests
       DeleteLogFiles(testLogFilesPath);
       DeleteCoverageFiles(testResultPath);
 
-      DotnetCli($"build -c {_buildConfiguration} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string buildOutput, out string buildError, _testProjectPath);
+      DotnetCli($"build -c {_buildConfiguration} -f {_buildTargetFramework} -bl:build.{logFilename} --verbosity normal /p:DeterministicSourcePaths=true", out string buildOutput, out string buildError, _testProjectPath);
       if (!string.IsNullOrEmpty(buildError))
       {
         _output.WriteLine(buildError);
@@ -250,14 +259,14 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(buildOutput);
       }
       Assert.Contains("Build succeeded.", buildOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _buildConfiguration.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _artifactsPivot.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
 
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
       string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", sourceLink: true);
-      string cmdArgument = $"test -c {_buildConfiguration} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -370,11 +379,12 @@ namespace Coverlet.Integration.Tests
     private string GetReportPath(string standardOutput)
     {
       string reportPath = "";
-      if (standardOutput.Contains("coverage.json"))
+      string reportFileName = $"coverage.{_buildTargetFramework}.json";
+      if (standardOutput.Contains(reportFileName))
       {
-        reportPath = standardOutput.Split('\n').FirstOrDefault(line => line.Contains("coverage.json"))!.TrimStart();
+        reportPath = standardOutput.Split('\n').FirstOrDefault(line => line.Contains(reportFileName))!.TrimStart();
         reportPath = reportPath[reportPath.IndexOf(Directory.GetDirectoryRoot(_testProjectPath))..];
-        reportPath = reportPath[..reportPath.IndexOf("coverage.json")];
+        reportPath = reportPath[..reportPath.IndexOf(reportFileName)];
       }
       return reportPath;
     }
