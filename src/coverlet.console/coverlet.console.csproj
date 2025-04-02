@@ -24,9 +24,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" />
-    <PackageReference Include="System.Text.RegularExpressions" VersionOverride="4.3.1" />
-    <PackageReference Include="System.Net.Http" VersionOverride="4.3.4" />
   </ItemGroup>
 
   <ItemGroup>
