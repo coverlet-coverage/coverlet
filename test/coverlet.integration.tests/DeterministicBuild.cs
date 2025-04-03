@@ -61,13 +61,13 @@ namespace Coverlet.Integration.Tests
       deterministicTestProps.Save(Path.Combine(propsFile));
     }
 
-    private protected void AssertCoverage(string standardOutput = "", bool checkDeterministicReport = true)
+    private protected void AssertCoverage(string standardOutput = "", string reportName = "", bool checkDeterministicReport = true)
     {
       if (_buildConfiguration == "Debug")
       {
         bool coverageChecked = false;
         string reportFilePath = "";
-        foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput), $"coverage.{_buildTargetFramework}.json", SearchOption.AllDirectories))
+        foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput, reportName), reportName, SearchOption.AllDirectories))
         {
           Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
           if (document != null)
@@ -86,7 +86,7 @@ namespace Coverlet.Integration.Tests
         if (checkDeterministicReport)
         {
           // Verify deterministic report
-          foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput), "coverage.cobertura.xml", SearchOption.AllDirectories))
+          foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput, "coverage.cobertura.xml"), "coverage.cobertura.xml", SearchOption.AllDirectories))
           {
             Assert.Contains("/_/test/coverlet.integration.determisticbuild/DeepThought.cs", File.ReadAllText(coverageFile));
             File.Delete(coverageFile);
@@ -131,9 +131,9 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
-      string testResultFile = Path.Join(testResultPath, $"coverage.{_buildTargetFramework}.json");
-      Assert.True(File.Exists(testResultFile));
-      AssertCoverage(standardOutput);
+      string testResultFile = Path.Join(_testProjectPath, $"coverage.{_buildTargetFramework}.json");
+      Assert.True(File.Exists(testResultFile), $"File '{testResultFile}' does not exist");
+      AssertCoverage(standardOutput, $"coverage.{_buildTargetFramework}.json");
 
       CleanupBuildOutput();
     }
@@ -175,10 +175,10 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
-      string testResultFile = Path.Join(testResultPath, $"coverage.{_buildTargetFramework}.json");
-      Assert.True(File.Exists(testResultFile));
+      string testResultFile = Path.Join(_testProjectPath, $"coverage.{_buildTargetFramework}.json");
+      Assert.True(File.Exists(testResultFile), $"File '{testResultFile}' does not exist");
       Assert.Contains("raw.githubusercontent.com", File.ReadAllText(testResultFile));
-      AssertCoverage(standardOutput, checkDeterministicReport: false);
+      AssertCoverage(standardOutput, $"coverage.{_buildTargetFramework}.json", checkDeterministicReport: false);
 
       CleanupBuildOutput();
     }
@@ -224,7 +224,7 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
-      AssertCoverage(standardOutput);
+      AssertCoverage(standardOutput, "coverage.json");
 
       // delete irrelevant generated files
       DeleteTestIntermediateFiles(testResultPath);
@@ -279,7 +279,7 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
-      AssertCoverage(standardOutput, checkDeterministicReport: false);
+      AssertCoverage(standardOutput, "coverage.json", checkDeterministicReport: false);
 
       // delete irrelevant generated files
       DeleteTestIntermediateFiles(testResultPath);
@@ -376,10 +376,9 @@ namespace Coverlet.Integration.Tests
       }
     }
 
-    private string GetReportPath(string standardOutput)
+    private string GetReportPath(string standardOutput, string reportFileName = "")
     {
       string reportPath = "";
-      string reportFileName = $"coverage.{_buildTargetFramework}.json";
       if (standardOutput.Contains(reportFileName))
       {
         reportPath = standardOutput.Split('\n').FirstOrDefault(line => line.Contains(reportFileName))!.TrimStart();
