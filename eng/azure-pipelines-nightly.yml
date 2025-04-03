@@ -10,7 +10,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     useGlobalJson: true
-  displayName: Install .NET Core SDK 8.0.113
+  displayName: Install .NET Core SDK 8.0.114
 
 - task: NuGetAuthenticate@1
   displayName: Authenticate with NuGet feeds
