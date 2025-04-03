@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Extensions;
 
@@ -733,7 +734,7 @@ namespace Coverlet.Core.Symbols
                 field.Equals(reloadedField) &&
                 instructions[i + 1].OpCode == OpCodes.Callvirt &&
                 instructions[i + 1].Operand is MethodReference method &&
-                method.DeclaringType.FullName == "System.IAsyncDisposable" &&
+                method.ReturnType.FullName == typeof(ValueTask).FullName &&
                 method.Name == "DisposeAsync")
             {
               isFollowedByDisposeAsync = true;
@@ -755,7 +756,7 @@ namespace Coverlet.Core.Symbols
                   instructions[currentIndex - 1].OpCode == OpCodes.Ldloc_3) &&
                  instructions[currentIndex + 2].OpCode == OpCodes.Callvirt &&
                  instructions[currentIndex + 2].Operand is MethodReference method &&
-                 method.DeclaringType.FullName == "System.IAsyncDisposable" &&
+                 method.ReturnType.FullName == typeof(ValueTask).FullName &&
                  method.Name == "DisposeAsync")
         {
           isFollowedByDisposeAsync = true;
