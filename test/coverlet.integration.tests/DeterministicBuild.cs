@@ -85,8 +85,9 @@ namespace Coverlet.Integration.Tests
 
         if (checkDeterministicReport)
         {
+          string newName = reportName.Replace("json", "cobertura.xml");
           // Verify deterministic report
-          foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput, "coverage.cobertura.xml"), "coverage.cobertura.xml", SearchOption.AllDirectories))
+          foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput, newName), newName, SearchOption.AllDirectories))
           {
             Assert.Contains("/_/test/coverlet.integration.determisticbuild/DeepThought.cs", File.ReadAllText(coverageFile));
             File.Delete(coverageFile);
@@ -117,7 +118,7 @@ namespace Coverlet.Integration.Tests
       Assert.False(string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:CoverletOutput=\"coverage.json\" /p:DeterministicReport=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:DeterministicReport=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -161,7 +162,7 @@ namespace Coverlet.Integration.Tests
       Assert.False(string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:CoverletOutput=\"coverage.json\" /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
