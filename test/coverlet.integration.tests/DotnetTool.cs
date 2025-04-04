@@ -59,7 +59,6 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardError);
       }
-      //Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
       Assert.Equal((int)CommandExitCodes.Success, cmdExitCode);
@@ -84,7 +83,6 @@ namespace Coverlet.Integration.Tests
         // make standard output available in trx file
         _output.WriteLine(standardOutput);
       }
-      //Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
       Assert.Equal((int)CommandExitCodes.CoverageBelowThreshold, cmdExitCode);
@@ -111,7 +109,6 @@ namespace Coverlet.Integration.Tests
         // make standard output available in trx file
         _output.WriteLine(standardOutput);
       }
-      // Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
       Assert.Equal((int)CommandExitCodes.CoverageBelowThreshold, cmdExitCode);
@@ -138,7 +135,6 @@ namespace Coverlet.Integration.Tests
         // make standard output available in trx file
         _output.WriteLine(standardOutput);
       }
-      // Assert.Contains("Hello World!", standardOutput);
       Assert.True(File.Exists(outputPath));
       AssertCoverage(clonedTemplateProject, standardOutput: standardOutput);
       Assert.Equal((int)CommandExitCodes.CoverageBelowThreshold, cmdExitCode);
