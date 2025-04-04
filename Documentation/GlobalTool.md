@@ -275,5 +275,4 @@ Coverlet outputs specific exit codes to better support build automation systems 
 2 - Coverage percentage is below threshold.
 3 - Test fails and also coverage percentage is below threshold.
 101 - General exception occurred during coverlet process.
-102 - Missing options or invalid arguments for coverlet process.
 ```

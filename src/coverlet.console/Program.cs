@@ -25,6 +25,7 @@ namespace Coverlet.Console
 {
   public static class Program
   {
+    static int s_exitCode;
     static int Main(string[] args)
     {
       var moduleOrAppDirectory = new Argument<string>("path", "Path to the test assembly or application directory.");
@@ -175,7 +176,7 @@ namespace Coverlet.Console
 
       // Adjust log level based on user input.
       logger.Level = verbosity;
-      int exitCode = (int)CommandExitCodes.Success;
+      s_exitCode = (int)CommandExitCodes.Success;
 
       try
       {
@@ -357,44 +358,44 @@ namespace Coverlet.Console
         logger.LogInformation(coverageTable.ToStringAlternative());
         if (process.ExitCode > 0)
         {
-          exitCode += (int)CommandExitCodes.TestFailed;
+          s_exitCode = (int)CommandExitCodes.TestFailed;
         }
 
         ThresholdTypeFlags thresholdTypeFlags = result.GetThresholdTypesBelowThreshold(thresholdTypeFlagValues, thresholdStat);
         if (thresholdTypeFlags != ThresholdTypeFlags.None)
         {
-          exitCode += (int)CommandExitCodes.CoverageBelowThreshold;
-          var exceptionMessageBuilder = new StringBuilder();
+          s_exitCode = (int)CommandExitCodes.CoverageBelowThreshold;
+          var errorMessageBuilder = new StringBuilder();
           if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
           {
-            exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line]}");
+            errorMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line]}");
           }
 
           if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
           {
-            exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Branch]}");
+            errorMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Branch]}");
           }
 
           if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
           {
-            exceptionMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
+            errorMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
           }
-          throw new InvalidOperationException(exceptionMessageBuilder.ToString());
+          logger.LogError(errorMessageBuilder.ToString());
         }
 
-        return Task.FromResult(exitCode);
+        return Task.FromResult(s_exitCode);
 
       }
 
       catch (Win32Exception we) when (we.Source == "System.Diagnostics.Process")
       {
         logger.LogError($"Start process '{target}' failed with '{we.Message}'");
-        return Task.FromResult(exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception);
+        return Task.FromResult(s_exitCode > 0 ? s_exitCode : (int)CommandExitCodes.Exception);
       }
       catch (Exception ex)
       {
         logger.LogError(ex.Message);
-        return Task.FromResult(exitCode > 0 ? exitCode : (int)CommandExitCodes.Exception);
+        return Task.FromResult(s_exitCode > 0 ? s_exitCode : (int)CommandExitCodes.Exception);
       }
 
     }
