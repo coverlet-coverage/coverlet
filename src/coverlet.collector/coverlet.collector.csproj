@@ -27,7 +27,6 @@
     <Authors>tonerdo</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/coverlet-coverage/coverlet</PackageProjectUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.</Description>
