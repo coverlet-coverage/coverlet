@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -299,7 +299,7 @@ namespace Coverlet.Integration.Tests
     {
       if (Directory.Exists(testResultsPath))
       {
-        DirectoryInfo hdDirectory = new DirectoryInfo(testResultsPath);
+        DirectoryInfo hdDirectory = new (testResultsPath);
 
         // search for directory "In" which has second copy e.g. '_fv-az365-374_2023-10-10_14_26_42\In\fv-az365-374\coverage.json'
         DirectoryInfo[] intermediateFolder = hdDirectory.GetDirectories("In", SearchOption.AllDirectories);
@@ -315,7 +315,7 @@ namespace Coverlet.Integration.Tests
     {
       if (Directory.Exists(directory))
       {
-        DirectoryInfo hdDirectory = new DirectoryInfo(directory);
+        DirectoryInfo hdDirectory = new (directory);
         FileInfo[] filesInDir = hdDirectory.GetFiles("log.*.txt");
 
         foreach (FileInfo foundFile in filesInDir)
@@ -343,7 +343,7 @@ namespace Coverlet.Integration.Tests
     {
       if (Directory.Exists(directory))
       {
-        DirectoryInfo hdDirectory = new DirectoryInfo(directory);
+        DirectoryInfo hdDirectory = new (directory);
         FileInfo[] filesInDir = hdDirectory.GetFiles("coverage.cobertura.xml");
 
         foreach (FileInfo foundFile in filesInDir)
