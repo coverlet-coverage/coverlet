@@ -8,8 +8,8 @@
     <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.7.115" />
   </ItemGroup>
   <PropertyGroup>
-    <MicrosoftBuildVersion>17.13.9</MicrosoftBuildVersion>
-    <MicrosoftCodeAnalysisVersion>4.12.0</MicrosoftCodeAnalysisVersion>
+    <MicrosoftBuildVersion>17.11.4</MicrosoftBuildVersion>
+    <MicrosoftCodeAnalysisVersion>4.13.0</MicrosoftCodeAnalysisVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>17.13.0</MicrosoftNETTestSdkVersion>
     <NugetPackageVersion>6.13.2</NugetPackageVersion>
@@ -21,7 +21,7 @@
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
-    <PackageVersion Include="Microsoft.Build.Locator" Version="1.7.8" />
+    <PackageVersion Include="Microsoft.Build.Locator" Version="1.9.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
@@ -39,7 +39,6 @@
          vstest 17.8 version
          NuGetFrameworksVersion is defined here https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/eng/Versions.props#L94C1-L94C1
     -->
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NuGet.Frameworks" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
@@ -66,6 +65,6 @@
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageVersion Include="System.Text.Json" Version="8.0.5" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
-    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.0" />
+    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.2" />
   </ItemGroup>
 </Project>

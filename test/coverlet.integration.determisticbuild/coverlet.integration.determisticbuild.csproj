@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" />
   
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsample.integration.determisticbuild</AssemblyName>
     <MSBuildWarningsAsMessages>NU1604;NU1701</MSBuildWarningsAsMessages>
@@ -29,6 +29,5 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="6.0.5" />
   </ItemGroup>
 </Project>
