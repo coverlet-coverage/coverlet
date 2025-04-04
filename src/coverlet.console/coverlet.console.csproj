@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
+    <TargetFrameworks>$(NetMinimum)</TargetFrameworks>
     <ToolCommandName>coverlet</ToolCommandName>
     <PackAsTool>true</PackAsTool>
     <AssemblyTitle>coverlet.console</AssemblyTitle>

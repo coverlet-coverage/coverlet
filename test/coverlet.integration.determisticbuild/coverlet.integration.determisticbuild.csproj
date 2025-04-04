@@ -29,6 +29,5 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <!-- <PackageReference Include="System.Security.Cryptography.Pkcs" Version="6.0.5" /> -->
   </ItemGroup>
 </Project>
