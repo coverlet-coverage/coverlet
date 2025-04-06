@@ -34,7 +34,15 @@ steps:
   condition: always()
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)'
-    Contents: '**/*.binlog'
+    Contents: '*.binlog'
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
+
+- task: CopyFiles@2
+  displayName: Copy DeterministicBuild binlog files
+  condition: always()
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: 'test\coverlet.integration.determisticbuild\*.binlog'
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: PublishPipelineArtifact@1

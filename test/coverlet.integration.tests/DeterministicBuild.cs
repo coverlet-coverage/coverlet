@@ -20,7 +20,7 @@ namespace Coverlet.Integration.Tests
     private string? _testProjectTfm;
     private readonly string _testProjectPath = TestUtils.GetTestProjectPath(s_projectName);
     private readonly string _testBinaryPath = TestUtils.GetTestBinaryPath(s_projectName);
-    private readonly string _testResultsPath = TestUtils.GetTestResultsPath(s_projectName);
+    private readonly string _testResultsPath = TestUtils.GetTestResultsPath();
     private const string PropsFileName = "DeterministicTest.props";
     private readonly string _buildConfiguration;
     private readonly ITestOutputHelper _output;

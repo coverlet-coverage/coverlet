@@ -39,12 +39,12 @@
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
-    <VSTestResultsDirectory>$(RepoRoot)artifacts/testresults/$(Configuration.ToLowerInvariant())</VSTestResultsDirectory>
+    <VSTestResultsDirectory>$(RepoRoot)artifacts/reports/$(Configuration.ToLowerInvariant())</VSTestResultsDirectory>
     <VSTestLogger>@(VSTestLogger)</VSTestLogger>
   </PropertyGroup>
 
     <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <VSTestResultsDirectory>$(RepoRoot)artifacts\testresults\$(Configuration.ToLowerInvariant())</VSTestResultsDirectory>
+    <VSTestResultsDirectory>$(RepoRoot)artifacts\reports\$(Configuration.ToLowerInvariant())</VSTestResultsDirectory>
     <VSTestLogger>@(VSTestLogger)</VSTestLogger>
   </PropertyGroup>
 
