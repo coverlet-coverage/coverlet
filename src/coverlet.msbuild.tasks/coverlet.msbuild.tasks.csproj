@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;$(NetMinimum)</TargetFrameworks>
     <AssemblyTitle>coverlet.msbuild.tasks</AssemblyTitle>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
@@ -40,6 +40,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="$(MicrosoftBuildUtilitiesCorePackageVersion)" PrivateAssets="all" ExcludeAssets="Runtime" />
   </ItemGroup>
 
@@ -49,6 +50,9 @@
 
   <ItemGroup>
     <None Include="coverlet.msbuild.props" Pack="true" PackagePath="build\">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="buildMultiTargeting\coverlet.msbuild.props" Pack="true" PackagePath="buildMultiTargeting\">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="coverlet.msbuild.targets" Pack="true" PackagePath="build\">

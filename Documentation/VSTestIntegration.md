@@ -2,12 +2,12 @@
 
 **Supported runtime versions**:
 
-Since version `6.0.0`
+Since version `8.0.0`
 
-* .NET Core >= 6.0
+* .NET Core >= 8.0
 * .NET Framework >= 4.7.2
 
-As explained in quick start section, to use collectors you need to run *SDK v6.0.100* (LTS) or newer and your project file must reference `coverlet.collector` and a minimum version of `Microsoft.NET.Test.Sdk`.
+As explained in quick start section, to use collectors you need to run *SDK v8.0.100* (LTS) or newer and your project file must reference `coverlet.collector` and a minimum version of `Microsoft.NET.Test.Sdk`.
 
 A sample project file looks like:
 
@@ -20,7 +20,7 @@ A sample project file looks like:
     <!-- Minimum version 17.13.0 -->
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <!-- Update this reference when new version is released -->
-    <PackageReference Include="coverlet.collector" Version="6.0.4">
+    <PackageReference Include="coverlet.collector" Version="8.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -43,10 +43,10 @@ or
 ```text
 dotnet publish
 ...
-  ... -> C:\project\bin\Debug\net6.0\testdll.dll
-  ... -> C:\project\bin\Debug\net6.0\publish\
+  ... -> C:\project\bin\Debug\net8.0\testdll.dll
+  ... -> C:\project\bin\Debug\net8.0\publish\
 ...
-dotnet vstest C:\project\bin\Debug\net6.0\publish\testdll.dll --collect:"XPlat Code Coverage"
+dotnet vstest C:\project\bin\Debug\net8.0\publish\testdll.dll --collect:"XPlat Code Coverage"
 ```
 
 As you can see in case of `vstest` verb you **must** publish project before.

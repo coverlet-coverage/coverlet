@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Coverlet.Core
 {
@@ -59,6 +59,14 @@ namespace Coverlet.Core
     private readonly CoverageParameters _parameters;
 
     public string Identifier { get; }
+
+    readonly JsonSerializerOptions _options = new()
+    {
+      PropertyNameCaseInsensitive = true,
+      DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+      IncludeFields = true,
+      WriteIndented = true
+    };
 
     public Coverage(string moduleOrDirectory,
         CoverageParameters parameters,
@@ -313,7 +321,7 @@ namespace Coverlet.Core
         {
           _logger.LogInformation($"MergeWith: '{_parameters.MergeWith}'.");
           string json = _fileSystem.ReadAllText(_parameters.MergeWith);
-          coverageResult.Merge(JsonConvert.DeserializeObject<Modules>(json));
+          coverageResult.Merge(JsonSerializer.Deserialize<Modules>(json, _options));
         }
         else
         {
@@ -366,8 +374,8 @@ namespace Coverlet.Core
         var documents = result.Documents.Values.ToList();
         if (_parameters.UseSourceLink && result.SourceLink != null)
         {
-          JToken jObject = JObject.Parse(result.SourceLink)["documents"];
-          Dictionary<string, string> sourceLinkDocuments = JsonConvert.DeserializeObject<Dictionary<string, string>>(jObject.ToString());
+          JsonNode jObject = JsonNode.Parse(result.SourceLink)["documents"];
+          Dictionary<string, string> sourceLinkDocuments = JsonSerializer.Deserialize<Dictionary<string, string>>(jObject.ToString());
           foreach (Document document in documents)
           {
             document.Path = GetSourceLinkUrl(sourceLinkDocuments, document.Path);
@@ -480,9 +488,9 @@ namespace Coverlet.Core
       {
         string key = sourceLinkDocument.Key;
         if (Path.GetFileName(key) != "*") continue;
-
+#pragma warning disable IDE0057
         IReadOnlyList<SourceRootMapping> rootMapping = _sourceRootTranslator.ResolvePathRoot(key.Substring(0, key.Length - 1));
-
+#pragma warning restore IDE0057
         foreach (string keyMapping in rootMapping is null ? [key] : new List<string>(rootMapping.Select(m => m.OriginalPath)))
         {
           string directoryDocument = Path.GetDirectoryName(document);
@@ -494,8 +502,9 @@ namespace Coverlet.Core
           {
             if (!directoryDocument.StartsWith(sourceLinkRoot + Path.DirectorySeparatorChar))
               continue;
-
+#pragma warning disable IDE0057
             relativePath = directoryDocument.Substring(sourceLinkRoot.Length + 1);
+#pragma warning restore IDE0057
           }
 
           if (relativePathOfBestMatch.Length == 0)
