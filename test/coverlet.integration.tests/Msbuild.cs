@@ -109,7 +109,7 @@ namespace Coverlet.Integration.Tests
     public void TestMsbuild_CoverletOutput_Folder_FileNameExtension_SpecifyFramework()
     {
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net6.0" };
+      string[] targetFrameworks = new string[] { "net8.0" };
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       Assert.False(clonedTemplateProject.IsMultipleTargetFramework());
       string framework = clonedTemplateProject.GetTargetFrameworks().Single();
