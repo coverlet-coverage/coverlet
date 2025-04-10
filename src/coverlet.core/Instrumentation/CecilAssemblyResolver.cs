@@ -5,12 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Exceptions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Mono.Cecil;
-using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
 
 namespace Coverlet.Core.Instrumentation
@@ -296,29 +296,32 @@ namespace Coverlet.Core.Instrumentation
     {
       string jsonString = File.ReadAllText(_runtimeConfigFile);
 
-      var jsonLoadSettings = new JsonLoadSettings()
+      var documentOptions = new JsonDocumentOptions
       {
-        CommentHandling = CommentHandling.Ignore
+        CommentHandling = JsonCommentHandling.Skip
       };
 
-      var configuration = JObject.Parse(jsonString, jsonLoadSettings);
+      using var configuration = JsonDocument.Parse(jsonString, documentOptions);
 
-      JToken rootElement = configuration.Root;
-      JToken runtimeOptionsElement = rootElement["runtimeOptions"];
+      JsonElement rootElement = configuration.RootElement;
+      JsonElement runtimeOptionsElement = rootElement.GetProperty("runtimeOptions");
 
-      if (runtimeOptionsElement?["framework"] != null)
+      if (runtimeOptionsElement.TryGetProperty("framework", out JsonElement frameworkElement))
       {
-        return [(runtimeOptionsElement["framework"]["name"]?.Value<string>(), runtimeOptionsElement["framework"]["version"]?.Value<string>())];
+        return new List<(string, string)>
+          {
+              (runtimeOptionsElement.GetProperty("framework").GetProperty("name").GetString(), runtimeOptionsElement.GetProperty("framework").GetProperty("version").GetString())
+          };
       }
 
-      if (runtimeOptionsElement?["frameworks"] != null)
+      if (runtimeOptionsElement.TryGetProperty("frameworks", out JsonElement frameworksElement))
       {
-        return runtimeOptionsElement["frameworks"].Select(x => (x["name"]?.Value<string>(), x["version"]?.Value<string>())).ToList();
+        return frameworksElement.EnumerateArray().Select(x => (x.GetProperty("name").GetString(), x.GetProperty("version").GetString())).ToList();
       }
 
-      if (runtimeOptionsElement?["includedFrameworks"] != null)
+      if (runtimeOptionsElement.TryGetProperty("includedFrameworks", out JsonElement runtimeoptionselement))
       {
-        return runtimeOptionsElement["includedFrameworks"].Select(x => (x["name"]?.Value<string>(), x["version"]?.Value<string>())).ToList();
+        return runtimeoptionselement.EnumerateArray().Select(x => (x.GetProperty("name").GetString(), x.GetProperty("version").GetString())).ToList();
       }
 
       throw new InvalidOperationException($"Unable to read runtime configuration from {_runtimeConfigFile}.");
