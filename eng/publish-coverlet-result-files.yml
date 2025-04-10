@@ -15,6 +15,11 @@ steps:
        **/log.txt
        **/log.datacollector.*.txt
        **/log.host.*.txt
+       **/coverlet.integration.tests.diag*.log
+       **/coverlet.collector.tests.diag*.log
+       **/coverlet.msbuild.tasks.tests.diag*.log
+       **/coverlet.core.coverage.tests.diag*.log
+       **/coverlet.core.tests.diag*.log
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: CopyFiles@2
