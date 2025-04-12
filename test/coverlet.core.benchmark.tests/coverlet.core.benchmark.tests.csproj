@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -15,6 +15,7 @@
     <!-- Disable entry point generation as this project has it's own entry point -->
     <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet.TestAdapter" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
@@ -23,15 +24,15 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
-
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Update="TestAssets\System.Private.CoreLib.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Include="..\coverlet.core.tests\TestAssets\System.Private.CoreLib.dll" Link="TestAssets\System.Private.CoreLib.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TestAssets\System.Private.CoreLib.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Include="..\coverlet.core.tests\TestAssets\System.Private.CoreLib.pdb" Link="TestAssets\System.Private.CoreLib.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>
