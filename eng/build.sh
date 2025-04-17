@@ -26,7 +26,7 @@ dotnet test test/coverlet.collector.tests /p:CollectCoverage=true /p:CoverletOut
 dotnet build-server shutdown
 dotnet test test/coverlet.core.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/reports" --verbosity detailed --diag ./artifacts/log/debug/coverlet.core.tests.log
 dotnet build-server shutdown
-dotnet test test/coverlet.core.coverage.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" -- --results-directory "$(pwd)/artifacts/reports" --diagnostic-verbosity debug  --diagnostic --diagnostic-output-directory "$(pwd)/artifacts/log/debug"
+dotnet test test/coverlet.core.coverage.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" -- --results-directory "$(pwd)/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.trx" --diagnostic-verbosity debug  --diagnostic --diagnostic-output-directory "$(pwd)/artifacts/log/debug"
 dotnet build-server shutdown
 dotnet test test/coverlet.msbuild.tasks.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/reports" --verbosity detailed --diag ./artifacts/log/debug/coverlet.msbuild.tasks.tests.log
 dotnet build-server shutdown
