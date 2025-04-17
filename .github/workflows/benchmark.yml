@@ -1,0 +1,49 @@
+name: Build and run benchmarks
+
+# Description:
+# This workflow automates performance benchmarking for the Coverlet project.
+#
+# Triggers:
+# - Manual trigger via workflow_dispatch
+#
+# What it does:
+# 1. Sets up Ubuntu environment
+# 2. Installs .NET SDK based on global.json
+# 3. Builds benchmark tests in Release mode
+# 4. Runs performance benchmarks using BenchmarkDotNet
+# 5. Uploads benchmark results as artifacts
+#
+# Results:
+# - Benchmark artifacts are stored under: artifacts/bin/coverlet.core.benchmark.tests/release/BenchmarkDotNet.Artifacts/results/
+# - Results can be downloaded from GitHub Actions artifacts
+#
+# Usage:
+# - Can be manually triggered from Actions tab using workflow_dispatch
+# - Use results to monitor performance changes over time
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4.2.2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3.4.0
+      with:
+        global-json-file: global.json
+        source-url: https://pkgs.dev.azure.com/bertk0374/_packaging/intern/nuget/v3/index.json
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build release
+      run: dotnet build --no-restore -c Release ./test/coverlet.core.benchmark.tests/coverlet.core.benchmark.tests.csproj
+    - name: Run Benchmarks
+      run: cd ./artifacts/bin/coverlet.core.benchmark.tests/release && ./coverlet.core.benchmark.tests
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v2
+      with:
+        name: Benchmark_Results
+        path: ./artifacts/bin/coverlet.core.benchmark.tests/release/BenchmarkDotNet.Artifacts/results/*
