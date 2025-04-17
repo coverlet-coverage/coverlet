@@ -15,19 +15,23 @@
 #
 # Note: Ensure that the .NET SDK is installed and available in the system PATH.
 
+# Build configuration
+BUILD_CONFIG="debug"
+
 # Build the project
-dotnet build -c debug -bl:build.binlog
-dotnet pack -c debug
+dotnet build -c $BUILD_CONFIG -bl:build.binlog
+dotnet pack -c $BUILD_CONFIG
 dotnet pack -c release
 dotnet build-server shutdown
 
 # Run tests with code coverage
-dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c debug --no-build -bl:test.core.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" -- --results-directory "artifacts/Reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.core.tests.trx" --diagnostic --diagnostic-output-directory "artifacts/log/debug" --diagnostic-output-fileprefix "coverlet.core.tests"
+dotnet test test/coverlet.collector.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/reports" --diag:"artifacts/log/${BUILD_CONFIG}/coverlet.collector.test.log;tracelevel=verbose"
 dotnet build-server shutdown
-dotnet test test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -c debug --no-build -bl:test.core.coverage.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" -- --results-directory "artifacts/Reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.trx" --diagnostic --diagnostic-output-directory "artifacts/log/debug" --diagnostic-output-fileprefix "coverlet.core.coverage.tests"
+dotnet test test/coverlet.core.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/reports" --verbosity detailed --diag ./artifacts/log/${BUILD_CONFIG}/coverlet.core.tests.log
 dotnet build-server shutdown
-dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -c debug --no-build -bl:test.msbuild.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" -- --results-directory:"artifacts/Reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.msbuild.tasks.tests.trx" --diagnostic --diagnostic-output-directory "artifacts/log/debug" --diagnostic-output-fileprefix "coverlet.msbuild.tasks.tests"
+dotnet test test/coverlet.core.coverage.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" -- --results-directory "$(pwd)/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename --diagnostic-verbosity ${BUILD_CONFIG} --diagnostic --diagnostic-output-directory "$(pwd)/artifacts/log/${BUILD_CONFIG}"
 dotnet build-server shutdown
-dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c debug --no-build -bl:test.collector.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"artifacts/log/debug/coverlet.collector.test.diag.log;tracelevel=verbose"
+dotnet test test/coverlet.msbuild.tasks.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/reports" --verbosity detailed --diag ./artifacts/log/${BUILD_CONFIG}/coverlet.msbuild.tasks.tests.log
 dotnet build-server shutdown
-dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c debug --no-build -bl:test.integration.binlog -- --results-directory "artifacts/Reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.tests.trx" --diagnostic --diagnostic-output-directory "artifacts/log/debug" --diagnostic-output-fileprefix "coverlet.integration.tests"
+dotnet test test/coverlet.integration.tests -f net8.0 --results-directory:"./artifacts/reports" --verbosity detailed --diag ./artifacts/log/${BUILD_CONFIG}/coverlet.integration.tests.net8.log
+dotnet test test/coverlet.integration.tests -f net9.0 --results-directory:"./artifacts/reports" --verbosity detailed --diag ./artifacts/log/${BUILD_CONFIG}/coverlet.integration.tests.net9.log
