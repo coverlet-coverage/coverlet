@@ -1,13 +1,13 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
-	"name": "coverlet .NET 8.0)",
+	"name": "coverlet .NET 9.0)",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm",
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
 	"features": {
 		"ghcr.io/devcontainers/features/dotnet:2": {
-            "version": "8.0.114",
-            "additionalVersions": "6.0.428"
+            "version": "9.0.203",
+            "additionalVersions": ["6.0.428", "8.0.408"]
         }
 	},
 
