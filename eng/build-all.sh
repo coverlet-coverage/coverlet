@@ -59,21 +59,16 @@ dotnet build-server shutdown
 
 # Commented out sections converted to shell script comments
 : <<'END_COMMENT'
-dotnet publish tool/Microsoft.DotNet.RemoteExecutor/tests/Microsoft.DotNet.RemoteExecutor.Tests.csproj
 
-dotnet test test/coverlet.collector.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/Reports"
-dotnet test test/coverlet.core.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/Reports"
-dotnet test test/coverlet.integration.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/Reports"
-dotnet test test/coverlet.msbuild.tasks.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/Reports"
+dotnet test test/coverlet.collector.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" --results-directory:"./artifacts/Reports" -c debug --no-build -bl:test.collector.binlog --diag:"artifacts/log/debug/coverlet.collector.test.diag.log;tracelevel=verbose"
+dotnet test test/coverlet.core.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" -c debug --no-build -bl:test.core.binlog  
+dotnet test test/coverlet.core.coverage.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" -c debug --no-build -bl:test.core.coverage.binlog 
+dotnet test test/coverlet.msbuild.tasks.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" -c debug --no-build -bl:test.msbuild.binlog
+dotnet test test/coverlet.integration.tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*" -c debug --no-build -bl:test.integration.binlog
 
-dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj /p:CollectCoverage=true -c Debug --no-build -bl:test.core.binlog --diag:"artifacts/log/debug/coverlet.core.test.diag.log;tracelevel=verbose"
-dotnet test test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj /p:CollectCoverage=true -c Debug --no-build -bl:test.core.coverage.binlog --diag:"artifacts/log/debug/coverlet.core.coverage.test.diag.log;tracelevel=verbose"
-dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj /p:CollectCoverage=true -c Debug --no-build -bl:test.msbuild.binlog --diag:"artifacts/log/debug/coverlet.msbuild.test.diag.log;tracelevel=verbose"
-
-dotnet test --no-build -bl:test.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*,\[coverlet.tests.xunit.extensions]*,\[coverlet.tests.projectsample]*,\[testgen_]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"artifacts/log/Debug/coverlet.test.diag.log;tracelevel=verbose"
-
-dotnet test -c Debug --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 reportgenerator -reports:"**/*.opencover.xml" -targetdir:"artifacts/reports" -reporttypes:"HtmlInline_AzurePipelines_Dark;Cobertura" -assemblyfilters:"-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverlet.tests.utils;-coverlet.tests.xunit.extensions;-coverletsamplelib.integration.template;-testgen_*"
 
 dotnet test test/coverlet.core.remote.tests/coverlet.core.remote.tests.csproj -c Debug /p:CollectCoverage=true /p:CoverletOutputFormat=opencover --diag:"artifacts/log/debug/coverlet.core.remote.test.diag.log;tracelevel=verbose"
+
+find . -name *.trx && find . -name *.opencover.xml
 END_COMMENT
