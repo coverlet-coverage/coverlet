@@ -4,5 +4,9 @@
   <PropertyGroup>
     <IsTestProject>true</IsTestProject>
     <NoWarn>$(NoWarn);NU1301;IDE0007;IDE0008</NoWarn>
+        <!-- MTP settings -->
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
   </PropertyGroup>
 </Project>
