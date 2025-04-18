@@ -6,9 +6,11 @@ Coverlet.core.benchmark uses [BenchmarkDotNet](https://github.com/dotnet/Benchma
 - Make sure you have the latest version of the .NET SDK installed
 - Make sure you have the latest version of the BenchmarkDotNet package installed
 
-Use a terminal and navigate to the `artifacts\bin\coverlet.core.benchmark.tests\release` directory. Then run the following command:
+Use a terminal and run the following commands:
 
 ```bash
+dotnet build test/coverlet.core.benchmark.tests -c release
+cd artifacts/bin/coverlet.core.benchmark.tests/release
 coverlet.core.benchmark.tests.exe
 ```
 > [!TIP]
@@ -30,6 +32,11 @@ results\BenchmarkRun-joined-2025-04-11-08-55-34-report.html
 > [!NOTE]
 > This should be done for every coverlet release to avoid performance degradations.
 
+
+## Additional information
+- [BenchmarkDotNet](https://benchmarkdotnet.org)
+- [Analyze BenchmarkDotNet data in Visual Studio](https://learn.microsoft.com/en-us/visualstudio/profiling/profiling-with-benchmark-dotnet)
+- [.NET benchmarking and profiling for beginners](https://medium.com/ingeniouslysimple/net-benchmarking-and-profiling-for-beginners-62462e1e9a19)
 
 <blockquote>
 

@@ -1,21 +1,19 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
+using BenchmarkDotNet.Attributes;
+using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Symbols;
-
-using BenchmarkDotNet.Attributes;
 using Coverlet.Core.Instrumentation;
-using Coverlet.Core;
-using System.IO;
+using Coverlet.Core.Symbols;
 using Moq;
 
 namespace coverlet.core.benchmark.tests
 {
-  [MemoryDiagnoser]
   public class InstrumenterBenchmarks
-    {
+  {
     Mock<ILogger> _mockLogger;
     Mock<FileSystem> _partialMockFileSystem;
     readonly string[] _files = new[]
@@ -28,12 +26,6 @@ namespace coverlet.core.benchmark.tests
     SourceRootTranslator _sourceRootTranslator;
     CoverageParameters _parameters;
     InstrumentationHelper _instrumentationHelper;
-
-    //[GlobalSetup(Target = nameof(InstrumenterBenchmarks))]
-    //public void InstrumenterBenchmarkSetup()
-    //{
-
-    //}
 
     [GlobalCleanup]
     public void IterationCleanup()
