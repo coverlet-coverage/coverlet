@@ -85,5 +85,24 @@ namespace coverlet.core.benchmark.tests
       InstrumenterResult result = _instrumenter.Instrument();
     }
 
+    [Benchmark]
+    public void InstrumenterBigClassBenchmark()
+    {
+      _mockLogger = new Mock<ILogger>();
+
+      string bigClassFilePath = Path.Combine(Directory.GetCurrentDirectory(), "coverlet.testsubject.dll");
+
+      _partialMockFileSystem = new Mock<FileSystem>();
+      _partialMockFileSystem.CallBase = true;
+
+      _sourceRootTranslator = new SourceRootTranslator(_mockLogger.Object, new FileSystem());
+      _parameters = new CoverageParameters();
+      _instrumentationHelper =
+          new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), _partialMockFileSystem.Object, _mockLogger.Object, _sourceRootTranslator);
+      _instrumenter = new Instrumenter(bigClassFilePath, "_coverlet_instrumented", _parameters, _mockLogger.Object, _instrumentationHelper, _partialMockFileSystem.Object, _sourceRootTranslator, new CecilSymbolHelper());
+
+      // Benchmark the instrumentation of BigClass
+      InstrumenterResult result = _instrumenter.Instrument();
+    }
   }
 }
