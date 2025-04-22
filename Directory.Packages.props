@@ -20,6 +20,7 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="BenchmarkDotNet.TestAdapter" Version="0.14.0" />
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.14.0" />
+    <!--<PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="17.13.35606.1" />-->
     <PackageVersion Include="DotNetConfig" Version="1.2.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />

@@ -319,3 +319,4 @@ BenchmarkDotNet.Artifacts/
 /NuGet.config
 nuget.config
 *.dmp
+test/coverlet.core.benchmark.tests/InstrumentationHelperBenchmarks.cs
