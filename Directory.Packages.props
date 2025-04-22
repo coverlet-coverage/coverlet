@@ -29,6 +29,7 @@
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+    <PackageVersion Include="Microsoft.Sbom.Targets" Version="3.1.0" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftNETTestSdkVersion)" />
     <!-- Microsoft.TestPlatform.ObjectModel has a dependency to NuGet.Frameworks with specific version -->
     <!-- https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L36-->
