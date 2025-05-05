@@ -36,7 +36,6 @@ namespace coverlet.core.benchmark.tests
       var summary = BenchmarkRunner.Run(new[]{
             BenchmarkConverter.TypeToBenchmarks( typeof(CoverageBenchmarks), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(InstrumenterBenchmarks), config),
-            BenchmarkConverter.TypeToBenchmarks( typeof(InstrumentationHelperBenchmarks), config),
             });
 
       // Use this to select benchmarks from the console and execute with additional options e.g. 'coverlet.core.benchmark.tests.exe --profiler EP'
