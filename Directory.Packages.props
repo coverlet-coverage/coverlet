@@ -58,7 +58,7 @@
     <PackageVersion Include="Tmds.ExecFunction" Version="0.8.0" />
     <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
-    <PackageVersion Include="System.Buffers" Version="4.6.0" />
+    <PackageVersion Include="System.Buffers" Version="4.6.1" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
