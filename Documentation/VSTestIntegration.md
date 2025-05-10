@@ -43,10 +43,10 @@ or
 ```text
 dotnet publish
 ...
-  ... -> C:\project\bin\Debug\net6.0\testdll.dll
-  ... -> C:\project\bin\Debug\net6.0\publish\
+  ... -> C:\project\bin\Debug\net8.0\testdll.dll
+  ... -> C:\project\bin\Debug\net8.0\publish\
 ...
-dotnet vstest C:\project\bin\Debug\net6.0\publish\testdll.dll --collect:"XPlat Code Coverage"
+dotnet vstest C:\project\bin\Debug\net8.0\publish\testdll.dll --collect:"XPlat Code Coverage"
 ```
 
 As you can see in case of `vstest` verb you **must** publish project before.

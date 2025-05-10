@@ -9,19 +9,19 @@
   </ItemGroup>
   <PropertyGroup>
     <MicrosoftBuildVersion>17.13.9</MicrosoftBuildVersion>
-    <MicrosoftCodeAnalysisVersion>4.12.0</MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisVersion>4.13.0</MicrosoftCodeAnalysisVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>17.13.0</MicrosoftNETTestSdkVersion>
     <NugetPackageVersion>6.13.2</NugetPackageVersion>
-    <XunitV3Version>2.0.0</XunitV3Version>
-    <XunitRunnerVisualstudioVersion>3.0.2</XunitRunnerVisualstudioVersion>
+    <XunitV3Version>2.0.2</XunitV3Version>
+    <XunitRunnerVisualstudioVersion>3.1.0</XunitRunnerVisualstudioVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DotNetConfig" Version="1.2.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
-    <PackageVersion Include="Microsoft.Build.Locator" Version="1.7.8" />
+    <PackageVersion Include="Microsoft.Build.Locator" Version="1.9.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
