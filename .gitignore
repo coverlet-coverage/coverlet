@@ -318,4 +318,3 @@ FolderProfile.pubxml
 /NuGet.config
 nuget.config
 *.dmp
-/test/coverlet.core.coverage.tests/System.Private.CoreLib-version.png

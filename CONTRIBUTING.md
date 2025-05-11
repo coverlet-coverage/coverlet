@@ -6,7 +6,7 @@ Contributions are highly welcome, however, except for very small changes, kindly
 
 STS version [.NET SDK 9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) for development environment
 
-LTS version [.NET SDK 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) for runtime environment
+LTS version [.NET SDK 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) for runtime environment
 
 ## Building the Project
 
