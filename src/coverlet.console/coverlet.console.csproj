@@ -6,8 +6,8 @@
     <ToolCommandName>coverlet</ToolCommandName>
     <PackAsTool>true</PackAsTool>
     <AssemblyTitle>coverlet.console</AssemblyTitle>
-    <!-- create SBOM -->
-    <GenerateSBOM>true</GenerateSBOM>
+    <!-- create SBOM for CI build-->
+    <GenerateSBOM>$(TF_BUILD)</GenerateSBOM>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
