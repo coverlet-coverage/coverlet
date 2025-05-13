@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -16,7 +16,6 @@ using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests
