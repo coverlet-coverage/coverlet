@@ -16,25 +16,20 @@ namespace Coverlet.CoreCoverage.Tests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void SkipAutoProps(bool skipAutoProps)
+    public async Task SkipAutoPropsAsync(bool skipAutoProps)
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] parameters) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoProps>(instance =>
-                  {
-                    instance.AutoPropsNonInit = 10;
-                    instance.AutoPropsInit = 20;
-                    int readValue = instance.AutoPropsNonInit;
-                    readValue = instance.AutoPropsInit;
-                    return Task.CompletedTask;
-                  },
-                  persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
-
-          return 0;
-        }, [path, skipAutoProps.ToString()]);
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoProps>(instance =>
+                {
+                  instance.AutoPropsNonInit = 10;
+                  instance.AutoPropsInit = 20;
+                  int readValue = instance.AutoPropsNonInit;
+                  readValue = instance.AutoPropsInit;
+                  return Task.CompletedTask;
+                },
+                persistPrepareResultToFile: path, skipAutoProps: bool.Parse(skipAutoProps.ToString()));
 
         if (skipAutoProps)
         {
@@ -64,25 +59,20 @@ namespace Coverlet.CoreCoverage.Tests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void SkipAutoPropsInRecords(bool skipAutoProps)
+    public async Task SkipAutoPropsInRecords(bool skipAutoProps)
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] parameters) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordWithPropertyInit>(instance =>
-                      {
-                        instance.RecordAutoPropsNonInit = string.Empty;
-                        instance.RecordAutoPropsInit = string.Empty;
-                        string readValue = instance.RecordAutoPropsInit;
-                        readValue = instance.RecordAutoPropsNonInit;
-                        return Task.CompletedTask;
-                      },
-                  persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
-
-          return 0;
-        }, [path, skipAutoProps.ToString()]);
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordWithPropertyInit>(instance =>
+                    {
+                      instance.RecordAutoPropsNonInit = string.Empty;
+                      instance.RecordAutoPropsInit = string.Empty;
+                      string readValue = instance.RecordAutoPropsInit;
+                      readValue = instance.RecordAutoPropsNonInit;
+                      return Task.CompletedTask;
+                    },
+                persistPrepareResultToFile: path, skipAutoProps: bool.Parse(skipAutoProps.ToString()));
 
         if (skipAutoProps)
         {
@@ -111,21 +101,16 @@ namespace Coverlet.CoreCoverage.Tests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void SkipRecordWithProperties(bool skipAutoProps)
+    public async Task SkipRecordWithPropertiesAsync(bool skipAutoProps)
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] parameters) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithRecordsAutoProperties>(instance =>
-                      {
-                        return Task.CompletedTask;
-                      },
-                      persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
-
-          return 0;
-        }, [path, skipAutoProps.ToString()]);
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithRecordsAutoProperties>(instance =>
+                    {
+                      return Task.CompletedTask;
+                    },
+                    persistPrepareResultToFile: path, skipAutoProps: bool.Parse(skipAutoProps.ToString()));
 
         if (skipAutoProps)
         {
@@ -153,21 +138,16 @@ namespace Coverlet.CoreCoverage.Tests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void SkipInheritingRecordsWithProperties(bool skipAutoProps)
+    public async Task SkipInheritingRecordsWithPropertiesAsync(bool skipAutoProps)
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] parameters) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithInheritingRecordsAndAutoProperties>(instance =>
-            {
-              return Task.CompletedTask;
-            },
-            persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
-
-          return 0;
-        }, [path, skipAutoProps.ToString()]);
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithInheritingRecordsAndAutoProperties>(instance =>
+          {
+            return Task.CompletedTask;
+          },
+          persistPrepareResultToFile: path, skipAutoProps: bool.Parse(skipAutoProps.ToString()));
 
         if (skipAutoProps)
         {

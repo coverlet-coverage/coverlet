@@ -14,22 +14,18 @@ namespace Coverlet.CoreCoverage.Tests
   public partial class CoverageTests
   {
     [Fact]
-    public void AwaitUsing()
+    public async Task AwaitUsingAsync()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AwaitUsing>(async instance =>
-                  {
-                    await (ValueTask)instance.HasAwaitUsing();
-                    await (Task)instance.Issue914_Repro();
-                    await (Task)instance.Issue1490_Repro<string>();
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AwaitUsing>(async instance =>
+                {
+                  await (ValueTask)instance.HasAwaitUsing();
+                  await (Task)instance.Issue914_Repro();
+                  await (Task)instance.Issue1490_Repro<string>();
 
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, [path]);
+                }, persistPrepareResultToFile: path);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AwaitUsing.cs")

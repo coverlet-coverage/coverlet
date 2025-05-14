@@ -7,7 +7,6 @@ using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
 using Coverlet.Tests.Utils;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.CoreCoverage.Tests
@@ -15,22 +14,17 @@ namespace Coverlet.CoreCoverage.Tests
   public partial class CoverageTests : ExternalProcessExecutionTest
   {
     [Fact]
-    public void Yield_Single()
+    public async Task Yield_SingleAsync()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
-                  {
-                    foreach (dynamic _ in instance.One()) ;
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                {
+                  foreach (dynamic _ in instance.One()) ;
 
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, [path]);
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: path);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -46,21 +40,17 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
-    public void Yield_Two()
+    public async Task Yield_TwoAsync()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
-                  {
-                    foreach (dynamic _ in instance.Two()) ;
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                {
+                  foreach (dynamic _ in instance.Two()) ;
 
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, [path]);
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: path);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -76,22 +66,17 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
-    public void Yield_SingleWithSwitch()
+    public async Task Yield_SingleWithSwitchAsync()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
-                  {
-                    foreach (dynamic _ in instance.OneWithSwitch(2)) ;
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                {
+                  foreach (dynamic _ in instance.OneWithSwitch(2)) ;
 
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, [path]);
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: path);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -107,21 +92,17 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
-    public void Yield_Three()
+    public async Task Yield_ThreeAsync()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
-                  {
-                    foreach (dynamic _ in instance.Three()) ;
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                {
+                  foreach (dynamic _ in instance.Three()) ;
 
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, [path]);
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: path);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
@@ -139,21 +120,17 @@ namespace Coverlet.CoreCoverage.Tests
     private static readonly string[] s_stringArray = ["one", "two", "three", "four"];
 
     [Fact]
-    public void Yield_Enumerable()
+    public async Task Yield_EnumerableAsync()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
-                  {
-                    foreach (dynamic _ in instance.Enumerable(s_stringArray)) ;
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Yield>(instance =>
+                {
+                  foreach (dynamic _ in instance.Enumerable(s_stringArray)) ;
 
-                    return Task.CompletedTask;
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, [path]);
+                  return Task.CompletedTask;
+                }, persistPrepareResultToFile: path);
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 

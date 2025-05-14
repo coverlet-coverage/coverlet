@@ -16,6 +16,7 @@ using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
+using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests

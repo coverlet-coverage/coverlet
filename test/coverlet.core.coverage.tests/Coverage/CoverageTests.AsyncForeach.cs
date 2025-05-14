@@ -15,23 +15,19 @@ namespace Coverlet.CoreCoverage.Tests
   public partial class CoverageTests
   {
     [Fact]
-    public void AsyncForeach()
+    public async Task AsyncForeachAsync()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(async instance =>
-                  {
-                    int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));
-                    res += await (ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3));
-                    res += await (ValueTask<int>)instance.SumEmpty();
-                    await (ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3));
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncForeach>(async instance =>
+                {
+                  int res = await (ValueTask<int>)instance.SumWithATwist(AsyncEnumerable.Range(1, 5));
+                  res += await (ValueTask<int>)instance.Sum(AsyncEnumerable.Range(1, 3));
+                  res += await (ValueTask<int>)instance.SumEmpty();
+                  await (ValueTask)instance.GenericAsyncForeach<object>(AsyncEnumerable.Range(1, 3));
 
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, [path]);
+                }, persistPrepareResultToFile: path);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncForeach.cs")

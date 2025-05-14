@@ -9,7 +9,6 @@ using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
 using Coverlet.Tests.Utils;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.CoreCoverage.Tests
@@ -17,27 +16,24 @@ namespace Coverlet.CoreCoverage.Tests
   public partial class CoverageTests
   {
     [Fact]
-    public void AsyncAwait()
+    public async Task AsyncAwaitAsync()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwait>(async instance =>
-                  {
-                    instance.SyncExecution();
 
-                    int res = await (Task<int>)instance.AsyncExecution(true);
-                    res = await (Task<int>)instance.AsyncExecution(1);
-                    res = await (Task<int>)instance.AsyncExecution(2);
-                    res = await (Task<int>)instance.AsyncExecution(3);
-                    res = await (Task<int>)instance.ContinuationCalled();
-                    res = await (Task<int>)instance.ConfigureAwait();
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwait>(async instance =>
+                {
+                  instance.SyncExecution();
 
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, [path]);
+                  int res = await (Task<int>)instance.AsyncExecution(true);
+                  res = await (Task<int>)instance.AsyncExecution(1);
+                  res = await (Task<int>)instance.AsyncExecution(2);
+                  res = await (Task<int>)instance.AsyncExecution(3);
+                  res = await (Task<int>)instance.ContinuationCalled();
+                  res = await (Task<int>)instance.ConfigureAwait();
+
+                }, persistPrepareResultToFile: path);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncAwait.cs")
@@ -73,21 +69,16 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
-    public void AsyncAwait_Issue_669_1()
+    public async Task AsyncAwait_Issue_669_1Async()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_1>(async instance =>
-                  {
-                    await (Task)instance.Test();
-                  },
-                  persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, [path]);
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_1>(async instance =>
+                {
+                  await (Task)instance.Test();
+                },
+                persistPrepareResultToFile: path);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncAwait.cs")
@@ -102,23 +93,18 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact(Skip = "Unhandled exception: System.InvalidOperationException: Sequence contains more than one matching element, InstrumenterHelper.cs:line 139 ")]
-    public void AsyncAwait_Issue_669_2()
+    [Fact]
+    public async Task AsyncAwait_Issue_669_2Async()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(async instance =>
-                  {
-                    await (ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest();
-                  },
-                  persistPrepareResultToFile: pathSerialize[0],
-                  assemblyLocation: Assembly.GetExecutingAssembly().Location);
-
-          return 0;
-        }, [path]);
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_669_2>(async instance =>
+                {
+                  await (ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest();
+                },
+                persistPrepareResultToFile: path,
+                assemblyLocation: Assembly.GetExecutingAssembly().Location);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncAwait.cs")
@@ -132,21 +118,16 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
-    public void AsyncAwait_Issue_1177()
+    public async Task AsyncAwait_Issue_1177Async()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1177>(async instance =>
-                      {
-                        await (Task)instance.Test();
-                      },
-                      persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, [path]);
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1177>(async instance =>
+                    {
+                      await (Task)instance.Test();
+                    },
+                    persistPrepareResultToFile: path);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
         document.AssertLinesCovered(BuildConfiguration.Debug, (133, 1), (134, 1), (135, 1), (136, 1), (137, 1));
@@ -159,21 +140,16 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
-    public void AsyncAwait_Issue_1233()
+    public async Task AsyncAwait_Issue_1233Async()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1233>(async instance =>
-                      {
-                        await (Task)instance.Test();
-                      },
-                      persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, [path]);
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1233>(async instance =>
+                    {
+                      await (Task)instance.Test();
+                    },
+                    persistPrepareResultToFile: path);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
         document.AssertLinesCovered(BuildConfiguration.Debug, (150, 1));
@@ -186,22 +162,17 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
-    public void AsyncAwait_Issue_1275()
+    public async Task AsyncAwait_Issue_1275Async()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1275>(async instance =>
-                      {
-                        using var cts = new CancellationTokenSource();
-                        await (Task)instance.Execute(cts.Token);
-                      },
-                      persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, [path]);
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1275>(async instance =>
+                    {
+                      using var cts = new CancellationTokenSource();
+                      await (Task)instance.Execute(cts.Token);
+                    },
+                    persistPrepareResultToFile: path);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
         document.AssertLinesCoveredFromTo(BuildConfiguration.Debug, 170, 176);

@@ -7,7 +7,6 @@ using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
 using Coverlet.Tests.Utils;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.CoreCoverage.Tests
@@ -15,20 +14,16 @@ namespace Coverlet.CoreCoverage.Tests
   public partial class CoverageTests
   {
     [Fact]
-    public void AsyncIterator()
+    public async Task AsyncIteratorAsync()
     {
       string path = Path.GetTempFileName();
       try
       {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncIterator>(async instance =>
-                  {
-                    int res = await (Task<int>)instance.Issue1104_Repro();
+        CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncIterator>(async instance =>
+                {
+                  int res = await (Task<int>)instance.Issue1104_Repro();
 
-                  }, persistPrepareResultToFile: pathSerialize[0]);
-          return 0;
-        }, [path]);
+                }, persistPrepareResultToFile: path);
 
         TestInstrumentationHelper.GetCoverageResult(path)
         .Document("Instrumentation.AsyncIterator.cs")
