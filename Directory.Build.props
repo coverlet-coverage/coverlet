@@ -55,9 +55,9 @@
      -->
     <!-- VSTest dependency versions -->
     <!-- https://github.com/microsoft/vstest/blob/fde8bf79d3f0f80e3548f873a56ffb4100c0ae49/eng/Versions.props#L22C1-L54C2 -->
-    <MicrosoftBuildUtilitiesCorePackageVersion>15.9.20</MicrosoftBuildUtilitiesCorePackageVersion>
-    <SystemReflectionMetadataVersion>1.6.0</SystemReflectionMetadataVersion>
-    <SystemCollectionsImmutableVersion>1.5.0</SystemCollectionsImmutableVersion>
+    <!--<MicrosoftBuildUtilitiesCorePackageVersion>15.9.20</MicrosoftBuildUtilitiesCorePackageVersion>-->
+    <!--<SystemReflectionMetadataVersion>1.6.0</SystemReflectionMetadataVersion>
+    <SystemCollectionsImmutableVersion>1.5.0</SystemCollectionsImmutableVersion>-->
 
     <!-- some additional information about dependency management limitations for MSBuild tasks (coverlet.msbuild.tasks)
        - msBuild task with dependencies https://natemcmaster.com/blog/2017/11/11/msbuild-task-with-dependencies/

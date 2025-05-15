@@ -7,16 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="6.0.2" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="6.0.2" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="System.Text.Json" VersionOverride="6.0.11" />
-    <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
-    <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutableVersion)" />
+    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Buffers" />
     <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Threading.Tasks.Extensions" />
