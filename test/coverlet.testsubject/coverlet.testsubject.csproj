@@ -2,8 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="..\coverlet.core.tests\TestAssets\System.Private.CoreLib.dll" Link="System.Private.CoreLib.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\coverlet.core.tests\TestAssets\System.Private.CoreLib.pdb" Link="System.Private.CoreLib.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

@@ -23,7 +23,9 @@ namespace coverlet.core.benchmark.tests
     public static void Main(string[] args)
     {
       var config = DefaultConfig.Instance
+            .WithOptions(ConfigOptions.DisableOptimizationsValidator)
             .WithOptions(ConfigOptions.JoinSummary)
+            .WithOption(ConfigOptions.DisableLogFile, true)
             .AddJob(Job
               .ShortRun
               .WithLaunchCount(1)
@@ -33,9 +35,14 @@ namespace coverlet.core.benchmark.tests
             //.AddDiagnoser(new InliningDiagnoser(), new EtwProfiler()) // only windows platform, requires elevated privileges
             //.AddDiagnoser(new EventPipeProfiler(EventPipeProfile.CpuSampling)) // stops collecting results ???
             ;
+#if DEBUG
+      config = config.WithOptions(ConfigOptions.DisableOptimizationsValidator);
+      System.Diagnostics.Debugger.Launch(); // Optional: force debugger attachment
+#endif
       var summary = BenchmarkRunner.Run(new[]{
             BenchmarkConverter.TypeToBenchmarks( typeof(CoverageBenchmarks), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(InstrumenterBenchmarks), config),
+            BenchmarkConverter.TypeToBenchmarks( typeof(CoverageWorkflowBenchmark ), config),
             });
 
       // Use this to select benchmarks from the console and execute with additional options e.g. 'coverlet.core.benchmark.tests.exe --profiler EP'

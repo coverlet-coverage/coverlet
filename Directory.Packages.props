@@ -9,7 +9,7 @@
   </ItemGroup>
   <PropertyGroup>
     <MicrosoftBuildVersion>17.13.9</MicrosoftBuildVersion>
-    <MicrosoftCodeAnalysisVersion>4.12.0</MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisVersion>4.13.0</MicrosoftCodeAnalysisVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>17.13.0</MicrosoftNETTestSdkVersion>
     <NugetPackageVersion>6.13.2</NugetPackageVersion>

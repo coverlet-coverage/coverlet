@@ -12,7 +12,7 @@
     <NoWarn>$(NoWarn);CS0162</NoWarn>
     <!-- Disable entry point generation as this project has it's own entry point -->
     <GenerateProgramFile>false</GenerateProgramFile>
-  </PropertyGroup>
+</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" />
@@ -25,7 +25,6 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.testsubject\coverlet.testsubject.csproj" />
   </ItemGroup>
 
