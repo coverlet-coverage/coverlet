@@ -80,7 +80,7 @@ namespace coverlet.core.benchmark.tests
 
       _rId = GetPortableRuntimeIdentifier();
 
-      RecreateSUT();
+      StopBuildServer();
 
       // Set up service collection like in InstrumentationTask
       IServiceCollection serviceCollection = new ServiceCollection();
@@ -113,22 +113,12 @@ namespace coverlet.core.benchmark.tests
       _cecilSymbolHelper = serviceProvider.GetRequiredService<ICecilSymbolHelper>();
     }
 
-    private void RecreateSUT()
+    private void StopBuildServer()
     {
       Process.RunToCompletion(
           DotnetMuxer.Path.FullName,
           $"build-server shutdown",
           workingDirectory: _coverletTestSubjectSourcePath);
-
-      //Process.RunToCompletion(
-      //    DotnetMuxer.Path.FullName,
-      //    $"clean -c Debug -r {_rId}",
-      //    workingDirectory: _coverletTestSubjectSourcePath);
-
-      //Process.RunToCompletion(
-      //    DotnetMuxer.Path.FullName,
-      //    $"build -c Debug -r {_rId} -o \"{_coverletTestSubjectArtifactPath}\"",
-      //    workingDirectory: _coverletTestSubjectSourcePath);
     }
 
     private static string GetPortableRuntimeIdentifier()
@@ -145,7 +135,7 @@ namespace coverlet.core.benchmark.tests
         // Ensure assemblies are unloaded
         GC.Collect();
         GC.WaitForPendingFinalizers();
-        RecreateSUT();
+        StopBuildServer();
       }
       catch (Exception ex)
       {
@@ -279,6 +269,11 @@ namespace coverlet.core.benchmark.tests
 
         // Prepare modules for instrumentation
         _coveragePrepareResult = _coverage.PrepareModules();
+
+        if (_coveragePrepareResult.Results.Length == 0)
+        {
+          throw (new InvalidOperationException("Instrumentation failed: _coveragePrepareResult.Results missing"));
+        }
 
       }
       catch (Exception ex)

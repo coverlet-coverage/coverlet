@@ -25,21 +25,8 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
+    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.testsubject\coverlet.testsubject.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\coverlet.core.tests\TestAssets\System.Private.CoreLib.dll" Link="TestAssets\System.Private.CoreLib.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="..\coverlet.core.tests\TestAssets\System.Private.CoreLib.pdb" Link="TestAssets\System.Private.CoreLib.pdb">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="..\coverlet.core.tests\TestAssets\coverlet.testsubject.dll" Link="TestAssets\coverlet.testsubject.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="..\coverlet.core.tests\TestAssets\coverlet.testsubject.pdb" Link="TestAssets\coverlet.testsubject.pdb">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>
