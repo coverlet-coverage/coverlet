@@ -35,13 +35,13 @@ namespace coverlet.core.benchmark.tests
     [Benchmark]
     public void InstrumenterBigClassBenchmark()
     {
-      string bigClassFilePath = Path.Combine(Directory.GetCurrentDirectory(), "coverlet.testsubject.dll");
+      string testSubjectDLLFilePath = Path.Combine(Directory.GetCurrentDirectory(), "coverlet.testsubject.dll");
       string _coverletTestSubjectArtifactPath = Directory.GetCurrentDirectory();
       _logger = new ConsoleLogger();
 
       _coverageParameters = new CoverageParameters
       {
-        Module = bigClassFilePath,
+        Module = testSubjectDLLFilePath,
         IncludeFilters = ["[coverlet.testsubject]*"],
         IncludeDirectories = [_coverletTestSubjectArtifactPath],
         ExcludeFilters = null,
@@ -89,10 +89,10 @@ namespace coverlet.core.benchmark.tests
       _parameters = new CoverageParameters();
       _instrumentationHelper =
           new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), _fileSystem, _logger, _sourceRootTranslator);
-      _instrumenter = new Instrumenter(bigClassFilePath, "_coverlet_instrumented", _parameters, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator, new CecilSymbolHelper());
+      _instrumenter = new Instrumenter(testSubjectDLLFilePath, "_coverlet_instrumented", _parameters, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator, new CecilSymbolHelper());
 
       _coverage = new Coverage(
-          bigClassFilePath,
+          testSubjectDLLFilePath,
           _coverageParameters,
           _logger,
           _instrumentationHelper,
