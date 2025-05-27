@@ -48,7 +48,7 @@ namespace Coverlet.Console
       var mergeWith = new Option<string>("--merge-with", "Path to existing coverage result to merge.") { Arity = ArgumentArity.ZeroOrOne };
       var useSourceLink = new Option<bool>("--use-source-link", "Specifies whether to use SourceLink URIs in place of file system paths.") { Arity = ArgumentArity.Zero };
       var doesNotReturnAttributes = new Option<string[]>("--does-not-return-attribute", "Attributes that mark methods that do not return") { Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      var excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behavior of heuristic to ignore assemblies with missing source documents.") { Arity = ArgumentArity.ZeroOrOne };
+      Option<string> excludeAssembliesWithoutSources = new Option<string>("--exclude-assemblies-without-sources", "Specifies behavior of heuristic to ignore assemblies with missing source documents.").FromAmong("MissingAll", "MissingAny", "None");
       var sourceMappingFile = new Option<string>("--source-mapping-file", "Specifies the path to a SourceRootsMappings file.") { Arity = ArgumentArity.ZeroOrOne };
 
       RootCommand rootCommand = new()

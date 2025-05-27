@@ -141,5 +141,89 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("The minimum line coverage is below the specified 80", standardOutput);
       Assert.Contains("The minimum method coverage is below the specified 80", standardOutput);
     }
+
+    [Fact]
+    public void ExcludeAssembliesWithoutSources_WrongValue()
+    {
+      using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
+      UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+      string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+      string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
+
+      // Build the test project
+      DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}",
+          out string buildOutput,
+          out string buildError);
+
+      string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll")
+          .Single(f => !f.Contains("obj") && !f.Contains("ref"));
+
+      // Run coverage with exclude-assemblies-without-sources parameter
+      int cmdExitCode = RunCommand(
+          coverletToolCommandPath,
+          $"\"{publishedTestFile}\" --target \"dotnet\" " +
+          $"--targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\" " +
+          $"--exclude-assemblies-without-sources nonsense " +
+          $"--output \"{outputPath}\"",
+          out string standardOutput,
+          out string standardError);
+
+      if (!string.IsNullOrEmpty(standardError))
+      {
+        _output.WriteLine(standardError);
+      }
+      else
+      {
+        _output.WriteLine(standardOutput);
+      }
+
+      // Verify results
+      Assert.Contains("Argument 'nonsense' not recognized. Must be one of:\t'MissingAll'\t'MissingAny'\t'None'", standardError);
+    }
+
+    [Theory]
+    [InlineData("MissingAll")]
+    [InlineData("MissingAny")]
+    [InlineData("None")]
+    public void ExcludeAssembliesWithoutSources_DifferentModes(string mode)
+    {
+      using ClonedTemplateProject clonedTemplateProject = CloneTemplateProject();
+      UpdateNugetConfigWithLocalPackageFolder(clonedTemplateProject.ProjectRootPath!);
+      string coverletToolCommandPath = InstallTool(clonedTemplateProject.ProjectRootPath!);
+      string outputPath = $"{clonedTemplateProject.ProjectRootPath}{Path.DirectorySeparatorChar}coverage.json";
+
+      // Build the test project
+      DotnetCli($"build -f {_buildTargetFramework} {clonedTemplateProject.ProjectRootPath}",
+          out string buildOutput,
+          out string buildError);
+
+      string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll")
+          .Single(f => !f.Contains("obj") && !f.Contains("ref"));
+
+      // Run coverage with different exclude-assemblies-without-sources modes
+      int cmdExitCode = RunCommand(
+          coverletToolCommandPath,
+          $"\"{publishedTestFile}\" --target \"dotnet\" " +
+          $"--targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\" " +
+          $"--exclude-assemblies-without-sources {mode} " +
+          $"--output \"{outputPath}\"",
+          out string standardOutput,
+          out string standardError);
+
+      if (!string.IsNullOrEmpty(standardError))
+      {
+        _output.WriteLine(standardError);
+      }
+      else
+      {
+        _output.WriteLine(standardOutput);
+      }
+
+      // Verify basic execution
+      Assert.Empty(standardError);
+      Assert.True(File.Exists(outputPath), "Coverage output file should exist");
+      Assert.Equal((int)CommandExitCodes.Success, cmdExitCode);
+      Assert.Contains("Passed!", standardOutput);
+    }
   }
 }
