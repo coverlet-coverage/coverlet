@@ -7,6 +7,9 @@ on:
 env:
   DAYS_BEFORE_ISSUE_CLOSE: 275
 
+permissions:
+  contents: read
+
 jobs:
   close-issues:
     runs-on: ubuntu-latest
