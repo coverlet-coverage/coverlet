@@ -318,3 +318,4 @@ FolderProfile.pubxml
 /NuGet.config
 nuget.config
 *.dmp
+Playground/
