@@ -68,12 +68,9 @@ jobs:
       with:
         global-json-file: global.json
 
-    # - name: Restore dependencies
-    #   run: dotnet restore
-
     - run: |
         echo "Run, Build Application using script"
-        dotnet build -c coverlet.sln
+        dotnet build coverlet.sln --configuration Debug
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
