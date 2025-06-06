@@ -14,7 +14,7 @@ namespace Coverlet.Integration.Tests
     private readonly string _buildConfiguration;
     private readonly string _buildTargetFramework;
     private readonly ITestOutputHelper _output;
-    private static readonly string s_expectedResult = "| coverletsamplelib.integration.template | 50 %  | 100 %   | 50 %    |";
+    private static readonly string s_expectedResult = "| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |";
 
     public Msbuild(ITestOutputHelper output)
     {
