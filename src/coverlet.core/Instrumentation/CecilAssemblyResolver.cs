@@ -304,7 +304,10 @@ namespace Coverlet.Core.Instrumentation
       using var configuration = JsonDocument.Parse(jsonString, documentOptions);
 
       JsonElement rootElement = configuration.RootElement;
-      JsonElement runtimeOptionsElement = rootElement.GetProperty("runtimeOptions");
+      if (!rootElement.TryGetProperty("runtimeOptions", out JsonElement runtimeOptionsElement))
+      {
+        throw new InvalidOperationException($"The 'runtimeOptions' property is missing in the runtime configuration file {_runtimeConfigFile}.");
+      }
 
       if (runtimeOptionsElement.TryGetProperty("framework", out JsonElement frameworkElement))
       {

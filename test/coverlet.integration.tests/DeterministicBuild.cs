@@ -49,7 +49,7 @@ namespace Coverlet.Integration.Tests
       _testProjectTfm = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!.
                        Descendants("PropertyGroup")!.Single().Element("TargetFramework")!.Value;
 
-      deterministicTestProps.Save(Path.Combine(propsFile));
+      deterministicTestProps.Save(propsFile);
     }
 
     private protected void AssertCoverage(string standardOutput = "", bool checkDeterministicReport = true)
