@@ -14,6 +14,7 @@ namespace Coverlet.Integration.Tests
     private readonly string _buildConfiguration;
     private readonly string _buildTargetFramework;
     private readonly ITestOutputHelper _output;
+    private static readonly string _expectedResult = "| coverletsamplelib.integration.template | 50 %  | 100 %   | 50 %    |";
 
     public Msbuild(ITestOutputHelper output)
     {
@@ -45,7 +46,7 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"coverage.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
@@ -66,7 +67,7 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"coverage.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
@@ -87,7 +88,7 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
@@ -99,7 +100,7 @@ namespace Coverlet.Integration.Tests
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       Assert.Equal(0, DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError));
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.ext";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
@@ -123,7 +124,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext")));
       AssertCoverage(clonedTemplateProject, "file.ext");
     }
@@ -142,7 +143,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.ext1.ext2";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
@@ -164,7 +165,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
 
       foreach (string targetFramework in targetFrameworks)
       {
@@ -191,7 +192,7 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
 
       foreach (string targetFramework in targetFrameworks)
       {
@@ -218,7 +219,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
 
       foreach (string targetFramework in targetFrameworks)
       {
@@ -248,7 +249,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
 
       foreach (string targetFramework in targetFrameworks)
       {
@@ -281,7 +282,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
 
       foreach (string targetFramework in targetFrameworks)
       {
@@ -307,7 +308,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      Assert.Contains($"{_expectedResult}", standardOutput, StringComparison.Ordinal);
 
       foreach (string targetFramework in targetFrameworks)
       {
