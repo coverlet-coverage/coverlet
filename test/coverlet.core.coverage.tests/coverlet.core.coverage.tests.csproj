@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
+  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" />
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -37,5 +37,5 @@
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
   </ItemGroup>
   
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />
+  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" />
 </Project>

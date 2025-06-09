@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.props" />
+  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" />
   <PropertyGroup>
     <TargetFrameworks>$(NetMinimum)</TargetFrameworks>
     <OutputType>Exe</OutputType>
@@ -56,5 +56,5 @@
     </None>
   </ItemGroup>
 
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.targets" />
+  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" />
 </Project>
