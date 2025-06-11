@@ -8,11 +8,12 @@
     <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.7.115" />
   </ItemGroup>
   <PropertyGroup>
-    <MicrosoftBuildVersion>17.13.9</MicrosoftBuildVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>17.11.31</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildVersion>17.13.26</MicrosoftBuildVersion>
     <MicrosoftCodeAnalysisVersion>4.13.0</MicrosoftCodeAnalysisVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>17.13.0</MicrosoftNETTestSdkVersion>
-    <NugetPackageVersion>6.13.2</NugetPackageVersion>
+    <NugetPackageVersion>6.14.0</NugetPackageVersion>
     <XunitV3Version>2.0.0</XunitV3Version>
     <XunitRunnerVisualstudioVersion>3.1.0</XunitRunnerVisualstudioVersion>
   </PropertyGroup>
@@ -53,11 +54,12 @@
     <PackageVersion Include="Tmds.ExecFunction" Version="0.8.0" />
     <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
-    <PackageVersion Include="System.Buffers" Version="4.6.0" />
+    <PackageVersion Include="System.Buffers" Version="4.6.1" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+    <PackageVersion Include="System.Diagnostics.EventLog" Version="8.0.2" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
-    <PackageVersion Include="System.Memory" Version="4.6.0" />
+    <PackageVersion Include="System.Memory" Version="4.6.3" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reflection.Metadata" Version="8.0.1" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
