@@ -1,4 +1,5 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -7,12 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+
 - Fix branchpoint exclusion for sdk 8.0.407 [#1741](https://github.com/coverlet-coverage/coverlet/issues/1741)
 - Use `<TargetFramework>netstandard2.0</TargetFramework>` for _coverlet.collector_ and _coverlet.msbuild.tasks_ Packages´
 
 ### Improvements
-- Use [xunit.v3](https://xunit.net/docs/getting-started/v3/whats-new) for tests and example code
 
+- Upgraded minimum required .NET SDK and runtime to .NET 8.0 LTS (Long Term Support) (**Breaking Change**)
+- Use [xunit.v3](https://xunit.net/docs/getting-started/v3/whats-new) for tests and example code
 
 ## Release date 2024-01-20
 ### Packages

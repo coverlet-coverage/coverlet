@@ -61,20 +61,20 @@ This is the steps to release new packages to nuget.org
   dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
   ...
   coverlet.core -> C:\GitHub\coverlet\artifacts\bin\coverlet.core\release_netstandard2.0\coverlet.core.dll
-  coverlet.core -> C:\GitHub\coverlet\artifacts\bin\coverlet.core\release_net6.0\coverlet.core.dll
+  coverlet.core -> C:\GitHub\coverlet\artifacts\bin\coverlet.core\release_net8.0\coverlet.core.dll
   coverlet.collector -> C:\GitHub\coverlet\artifacts\bin\coverlet.collector\release_netstandard2.0\coverlet.collector.dll
-  coverlet.collector -> C:\GitHub\coverlet\artifacts\bin\coverlet.collector\release_net6.0\coverlet.collector.dll
+  coverlet.collector -> C:\GitHub\coverlet\artifacts\bin\coverlet.collector\release_net8.0\coverlet.collector.dll
   coverlet.msbuild.tasks -> C:\GitHub\coverlet\artifacts\bin\coverlet.msbuild.tasks\release_netstandard2.0\coverlet.msbuild.tasks.dll
-  coverlet.msbuild.tasks -> C:\GitHub\coverlet\artifacts\bin\coverlet.msbuild.tasks\release_net6.0\coverlet.msbuild.tasks.dll
+  coverlet.msbuild.tasks -> C:\GitHub\coverlet\artifacts\bin\coverlet.msbuild.tasks\release_net8.0\coverlet.msbuild.tasks.dll
   coverlet.console -> C:\GitHub\coverlet\artifacts\bin\coverlet.console\release\coverlet.console.dll
   coverlet.console -> C:\GitHub\coverlet\artifacts\bin\coverlet.console\release\coverlet.console.exe
   ...
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.6.0.1.nupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.6.0.1.snupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.6.0.1.nupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.6.0.1.snupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.6.0.1.nupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.6.0.1.snupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.8.0.1.nupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.8.0.1.snupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.8.0.1.nupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.8.0.1.snupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.8.0.1.nupkg'.
+  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.8.0.1.snupkg'.
   ...
   ```
 

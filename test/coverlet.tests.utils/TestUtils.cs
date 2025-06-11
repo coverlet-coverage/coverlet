@@ -39,6 +39,12 @@ namespace Coverlet.Tests.Utils
 #if NET8_0
       return "net8.0";
 #endif
+#if NET9_0
+      return "net9.0";
+#endif
+#if NET10_0
+      return "net10.0";
+#endif
       throw new NotSupportedException($"Build configuration not supported");
     }
 

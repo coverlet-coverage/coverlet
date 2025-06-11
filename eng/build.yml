@@ -1,13 +1,8 @@
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 6.0.428
-  displayName: Install .NET Core SDK 6.0.428
-
-- task: UseDotNet@2
-  inputs:
     useGlobalJson: true
-  displayName: Install .NET Core SDK 8.0.113
+  displayName: Install .NET Core SDK 8.0.411
 
 # create artifact/package folder
 - pwsh: |
