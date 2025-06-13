@@ -48,7 +48,7 @@ namespace Coverlet.Integration.Tests
                       new XElement("coverletMsbuildVersion", GetPackageVersion("*msbuild*.nupkg")),
                       new XElement("coverletCollectorsVersion", GetPackageVersion("*collector*.nupkg")))));
       _testProjectTfm = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!.
-                       Descendants("PropertyGroup")!.Single().Element("TargetFramework")!.Value;
+                       Descendants("PropertyGroup")!.First().Element("TargetFramework")!.Value;
 
       deterministicTestProps.Save(propsFile);
     }
