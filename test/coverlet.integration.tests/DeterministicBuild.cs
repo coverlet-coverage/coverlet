@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Coverlet.Integration.Tests
 {
+  [Collection("DeterministicBuild Collection")]
   public class DeterministicBuild : BaseTest, IDisposable
   {
     private static readonly string s_projectName = "coverlet.integration.determisticbuild";
@@ -431,5 +432,12 @@ namespace Coverlet.Integration.Tests
     {
       File.Delete(Path.Combine(_testProjectPath, PropsFileName));
     }
+  }
+  [CollectionDefinition("DeterministicBuild Collection", DisableParallelization = true)]
+  public class DeterministicBuildCollection
+  {
+    // This class has no code, and is never created.
+    // Its purpose is to be the place to apply [CollectionDefinition] and all the
+    // ICollectionFixture<> interfaces.
   }
 }
