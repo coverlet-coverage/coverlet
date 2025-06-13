@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Import coverlet version-->
-  <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" Condition="Exists('$(MSBuildThisFileDirectory)\DeterministicTest.props')" />
+  <!-- Define default values if props file doesn't exist -->
+  <PropertyGroup Condition="!Exists('DeterministicTest.props')">
+    <coverletCollectorsVersion>6.0.4</coverletCollectorsVersion>
+    <coverletMsbuildVersion>6.0.4</coverletMsbuildVersion>
+  </PropertyGroup>
   
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -16,7 +21,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageReference Include="coverlet.msbuild" Version="$(coverletMsbuildVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,6 +34,5 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.1" />
   </ItemGroup>
 </Project>
