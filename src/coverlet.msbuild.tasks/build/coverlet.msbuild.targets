@@ -1,0 +1,3 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\coverlet.msbuild.targets" />
+</Project>
