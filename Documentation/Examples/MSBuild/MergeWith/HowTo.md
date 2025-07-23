@@ -1,24 +1,57 @@
-**Run from solution root sln**
+# Merging Coverage Reports
 
-To merge report together you need to run separate test and merge in one `json` format file.
-Last command will join and create final needed format file.
+## Running Tests Separately
 
-```shell
-dotnet test XUnitTestProject1\XUnitTestProject1.csproj /p:CollectCoverage=true  /p:CoverletOutput=../CoverageResults/
-dotnet test XUnitTestProject2\XUnitTestProject2.csproj /p:CollectCoverage=true  /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json"
-dotnet test XUnitTestProject3\XUnitTestProject3.csproj /p:CollectCoverage=true  /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json" /p:CoverletOutputFormat="opencover"
+To merge coverage reports, run tests for each project and combine them into a single file:
+
+```bash
+# Generate coverage for first project
+dotnet test XUnitTestProject1/XUnitTestProject1.csproj \
+    /p:CollectCoverage=true \
+    /p:CoverletOutput=../CoverageResults/
+
+# Merge coverage from second project
+dotnet test XUnitTestProject2/XUnitTestProject2.csproj \
+    /p:CollectCoverage=true \
+    /p:CoverletOutput=../CoverageResults/ \
+    /p:MergeWith="../CoverageResults/coverage.json"
+
+# Merge coverage from third project and generate final OpenCover report
+dotnet test XUnitTestProject3/XUnitTestProject3.csproj \
+    /p:CollectCoverage=true \
+    /p:CoverletOutput=../CoverageResults/ \
+    /p:MergeWith="../CoverageResults/coverage.json" \
+    /p:CoverletOutputFormat="opencover"
 ```
 
-You can merge also running `dotnet test` and merge with single command from a solution file, but you need to ensure that tests will run sequentially(`-m:1`). This slow down testing but avoid invalid coverage result.
+## Running Tests from Solution
 
-```shell
-dotnet test /p:CollectCoverage=true  /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json" /p:CoverletOutputFormat=\"opencover,json\" -m:1
+To merge coverage using a single command (requires sequential execution):
+
+```bash
+dotnet test \
+    /p:CollectCoverage=true \
+    /p:CoverletOutput=../CoverageResults/ \
+    /p:MergeWith="../CoverageResults/coverage.json" \
+    /p:CoverletOutputFormat="opencover,json" \
+    -m:1
 ```
 
-N.B. You need to specify `json` format plus another format(the final one), because Coverlet can only merge proprietary format. At the end you can delete temporary `coverage.json` file.
+> **Note**: Sequential execution (`-m:1`) ensures accurate coverage but increases test duration.
 
-You can also merge the coverage result and generate another valid format to export the content than opencover, like cobertura.
+## Important Considerations
 
-```shell
-dotnet test /p:CollectCoverage=true  /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json" /p:CoverletOutputFormat=\"cobertura,json\" -m:1
+- Include `json` format alongside your desired output format
+- Coverlet only merges its proprietary JSON format
+- The temporary `coverage.json` file can be deleted after merging
+
+## Example with Cobertura Output
+
+```bash
+dotnet test \
+    /p:CollectCoverage=true \
+    /p:CoverletOutput=../CoverageResults/ \
+    /p:MergeWith="../CoverageResults/coverage.json" \
+    /p:CoverletOutputFormat="cobertura,json" \
+    -m:1
 ```
