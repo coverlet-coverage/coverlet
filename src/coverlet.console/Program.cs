@@ -28,7 +28,7 @@ namespace Coverlet.Console
   public static class Program
   {
     static int s_exitCode;
-    static async Task Main(string[] args)
+    static async Task<int> Main(string[] args)
     {
       Argument<string> moduleOrAppDirectory = new("path") { Description = "Path to the test assembly or application directory." };
       Option<string> target = new("--target", aliases: new[] { "--target", "-t" }) { Description = "Path to the test runner application.", Arity = ArgumentArity.ZeroOrOne, Required = true };
@@ -143,7 +143,7 @@ namespace Coverlet.Console
       CommandLineConfiguration config = new(rootCommand);
 
       await config.InvokeAsync(args).ConfigureAwait(false);
-      Environment.Exit(s_exitCode);
+      return s_exitCode;
     }
     private static Task<int> HandleCommand(string moduleOrAppDirectory,
                                                            string target,
