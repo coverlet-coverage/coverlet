@@ -29,9 +29,5 @@ internal enum CommandExitCodes
   /// </summary>
   Exception = 101,
 
-  /// <summary>
-  /// Indicates missing options or empty arguments for Coverlet process.
-  /// </summary>
-  CommandParsingException = 102
 }
 

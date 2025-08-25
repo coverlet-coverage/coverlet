@@ -38,7 +38,7 @@ Options:
   --merge-with <merge-with>                                                  Path to existing coverage result to merge.
   --use-source-link                                                          Specifies whether to use SourceLink URIs in place of file system paths.
   --does-not-return-attribute <does-not-return-attribute>                    Attributes that mark methods that do not return
-  --exclude-assemblies-without-sources <exclude-assemblies-without-sources>  Specifies behaviour of heuristic to ignore assemblies with missing source documents.
+  --exclude-assemblies-without-sources <exclude-assemblies-without-sources>  Specifies behavior of heuristic to ignore assemblies with missing source documents. [default: MissingAll]
   --source-mapping-file <source-mapping-file>                                Specifies the path to a SourceRootsMappings file.
   --version                                                                  Show version information
   -?, -h, --help                                                             Show help and usage information
@@ -275,5 +275,4 @@ Coverlet outputs specific exit codes to better support build automation systems 
 2 - Coverage percentage is below threshold.
 3 - Test fails and also coverage percentage is below threshold.
 101 - General exception occurred during coverlet process.
-102 - Missing options or invalid arguments for coverlet process.
 ```
