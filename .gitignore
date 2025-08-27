@@ -319,3 +319,4 @@ FolderProfile.pubxml
 nuget.config
 *.dmp
 Playground*/
+coverlet.MTP/
