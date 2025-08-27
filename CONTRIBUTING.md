@@ -4,9 +4,9 @@ Contributions are highly welcome, however, except for very small changes, kindly
 
 ## Requirements
 
-[.NET SDK 6.0](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
-[.NET SDK 7.0](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
-[.NET SDK 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+STS version [.NET SDK 9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) for development environment
+
+LTS version [.NET SDK 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) for runtime environment
 
 ## Building the Project
 
