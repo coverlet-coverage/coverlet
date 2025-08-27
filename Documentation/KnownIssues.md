@@ -131,7 +131,7 @@ dotnet test test-assembly.dll /collect:"XPlat Code Coverage" -- DataCollectionRu
 *Symptoms:* during build/instrumentation you may get an exception like:
 
 ```text
-[coverlet] Unable to instrument module: ..\UnitTests\bin\Debug\net6.0\Core.Messaging.dll because : Failed to resolve assembly: 'Microsoft.Azure.ServiceBus, Version=7.16.1.0, Culture=neutral, PublicKeyToken=7e34167dcc6d6d8c' [..\UnitTests.csproj]
+[coverlet] Unable to instrument module: ..\UnitTests\bin\Debug\net8.0\Core.Messaging.dll because : Failed to resolve assembly: 'Microsoft.Azure.ServiceBus, Version=7.16.1.0, Culture=neutral, PublicKeyToken=7e34167dcc6d6d8c' [..\UnitTests.csproj]
 ```
 
 In the instrumentation phase, Coverlet needs to load all references used by your instrumented module. Sometimes the build phase (out of Coverlet's control) does not copy those dlls to the output folder because they are not resolved till runtime or at publish phase from the NuGet packages folders.
@@ -155,13 +155,13 @@ or by adding the property `<CopyLocalLockFileAssemblies>` to the project file
 
 NB. This **DOESN'T ALWAYS WORK**, for example in case of the shared framework <https://github.com/dotnet/cli/issues/12705#issuecomment-536686785>
 
-We can do nothing at the moment as this is a build behaviour out of our control.
+We can do nothing at the moment as this is a build behavior out of our control.
 
 For .NET runtime version >= 3.0 the new default behavior is to copy all assets to the build output (CopyLocalLockFileAssemblies=true) <https://github.com/dotnet/cli/issues/12705#issuecomment-535150372>, unfortunately the issue could still arise.
 
 In this case the only workaround at the moment is to *manually copy* missing dlls to the output folder: <https://github.com/coverlet-coverage/coverlet/issues/560#issue-496440052>
 
-> The only reliable way to work around this problem is to drop the DLL in the unit tests project's bin\Release\netcoreapp2.2 directory.
+> The only reliable way to work around this problem is to drop the DLL in the unit tests project's bin\Release directory.
 
 ## Tests fail if assembly is strong named
 
