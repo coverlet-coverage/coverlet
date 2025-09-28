@@ -2,7 +2,7 @@
 
 All Coverlet drivers share the same coverage engine. Since version 3.0.0, we've consolidated versioning across drivers, so for every new release, all drivers will have the same version number.
 
-We think that keeping the versions in sync better expresses the set of features every release will have. This does not mean that all drivers will support every functionality/feature or have the same behaviours, since they are limited by the context they're running in.
+We think that keeping the versions in sync better expresses the set of features every release will have. This does not mean that all drivers will support every functionality/feature or have the same behaviors, since they are limited by the context they're running in.
 
 In the table below we keep track of main differences:
 

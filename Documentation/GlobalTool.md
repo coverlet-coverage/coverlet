@@ -176,7 +176,7 @@ You can specify the `--threshold-type` option multiple times. Valid values inclu
 coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --threshold 80 --threshold-type line --threshold-type method
 ```
 
-By default, Coverlet will validate the threshold value against the coverage result of each module. The `--threshold-stat` option allows you to change this behaviour and can have any of the following values:
+By default, Coverlet will validate the threshold value against the coverage result of each module. The `--threshold-stat` option allows you to change this behavior and can have any of the following values:
 
 * Minimum (Default): Ensures the coverage result of each module isn't less than the threshold
 * Total: Ensures the total combined coverage result of all modules isn't less than the threshold
