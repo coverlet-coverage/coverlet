@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use [xunit.v3](https://xunit.net/docs/getting-started/v3/whats-new) for tests and example code
 
 
-## Release date 2024-01-20
+## Release date 2025-01-20
 ### Packages
 coverlet.msbuild 6.0.4
 coverlet.console 6.0.4
