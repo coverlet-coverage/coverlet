@@ -4,23 +4,23 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.7.115" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.8.118" />
   </ItemGroup>
   <PropertyGroup>
-    <MicrosoftBuildVersion>17.11.31</MicrosoftBuildVersion> <!-- .NET 8.0 support -->
+    <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion> <!-- .NET 8.0 support -->
     <MicrosoftCodeAnalysisVersion>4.12.0</MicrosoftCodeAnalysisVersion>
     <NugetPackageVersion>6.14.0</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>17.14.1</MicrosoftNETTestSdkVersion>
     <XunitV3Version>3.0.0</XunitV3Version>
-    <XunitRunnerVisualstudioVersion>3.1.3</XunitRunnerVisualstudioVersion>
+    <XunitRunnerVisualstudioVersion>3.1.5</XunitRunnerVisualstudioVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DotNetConfig" Version="1.2.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
-    <PackageVersion Include="Microsoft.Build.Locator" Version="1.9.1" />
+    <PackageVersion Include="Microsoft.Build.Locator" Version="1.10.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
