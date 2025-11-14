@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Coverlet.Integration.Tests
 {
+  [Collection("DeterministicBuild Collection")]
   public class DeterministicBuild : BaseTest, IDisposable
   {
     private static readonly string s_projectName = "coverlet.integration.determisticbuild";
@@ -30,7 +31,6 @@ namespace Coverlet.Integration.Tests
     public DeterministicBuild(ITestOutputHelper output)
     {
       _buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString();
-      //_buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
       _output = output;
       _type = output.GetType();
       _testMember = _type.GetField("test", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -38,16 +38,19 @@ namespace Coverlet.Integration.Tests
 
     private void CreateDeterministicTestPropsFile()
     {
-      var deterministicTestProps = new XDocument();
+      string propsFile = Path.Combine(_testProjectPath, PropsFileName);
+      File.Delete(propsFile);
+
+      XDocument deterministicTestProps = new();
       deterministicTestProps.Add(
               new XElement("Project",
                   new XElement("PropertyGroup",
                       new XElement("coverletMsbuildVersion", GetPackageVersion("*msbuild*.nupkg")),
                       new XElement("coverletCollectorsVersion", GetPackageVersion("*collector*.nupkg")))));
       _testProjectTfm = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!.
-                       Descendants("PropertyGroup")!.Single().Element("TargetFramework")!.Value;
+                       Descendants("PropertyGroup")!.First().Element("TargetFramework")!.Value;
 
-      deterministicTestProps.Save(Path.Combine(_testProjectPath, PropsFileName));
+      deterministicTestProps.Save(propsFile);
     }
 
     private protected void AssertCoverage(string standardOutput = "", bool checkDeterministicReport = true)
@@ -380,5 +383,12 @@ namespace Coverlet.Integration.Tests
     {
       File.Delete(Path.Combine(_testProjectPath, PropsFileName));
     }
+  }
+  [CollectionDefinition("DeterministicBuild Collection", DisableParallelization = true)]
+  public class DeterministicBuildCollection
+  {
+    // This class has no code, and is never created.
+    // Its purpose is to be the place to apply [CollectionDefinition] and all the
+    // ICollectionFixture<> interfaces.
   }
 }

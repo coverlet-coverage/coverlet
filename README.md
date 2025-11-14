@@ -44,8 +44,8 @@ Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visua
 ```bash
 dotnet add package coverlet.collector
 ```
-
-N.B. You **MUST** add package only to test projects and if you create xunit test projects (`dotnet new xunit`) you'll find the reference already present in `csproj` file because Coverlet is the default coverage tool for every .NET Core and >= .NET 6 applications, you've only to update to last version if needed. Do not add `coverlet.collector` and `coverlet.msbuild` package in a test project.
+> [!NOTE]
+> You **MUST** add package only to test projects and if you create xunit test projects (`dotnet new xunit`) you will find the reference already present in `csproj` file because Coverlet is the default coverage tool for every .NET Core and >= *.NET 8* applications, you've only to update to last version if needed. Add `coverlet.collector` *OR* `coverlet.msbuild` package in a test project.
 
 ### Usage (coverlet.collector)
 
@@ -61,11 +61,11 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
 #### Requirements (coverlet.collector)
 
-* _You need to be running .NET 6.0 SDK v6.0.316 or newer_
-* _You need to reference version 17.5.0 and above of Microsoft.NET.Test.Sdk_
+* _You need to be running .NET 8.0 SDK v8.0.112 or newer_
+* _You need to reference version 17.12.0 and above of Microsoft.NET.Test.Sdk_
 
 ```xml
-<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 ```
 
 ### MSBuild Integration (suffers of possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
@@ -120,7 +120,7 @@ See [documentation](Documentation/GlobalTool.md) for advanced usage.
 
 .NET global tools rely on a .NET Core runtime installed on your machine https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong
 
-.NET Coverlet global tool requires _.NET Core 2.2 and above_
+.NET Coverlet global tool requires _.NET 8.0 or above_
 
 ## How It Works
 
