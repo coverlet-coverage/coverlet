@@ -17,7 +17,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     </ItemGroup>
     <Copy SourceFiles="@(CoverletDataCollectorFiles)" DestinationFolder="$(PublishDir)%(RecursiveDir)" />
   </Target>
-  
+
   <Target Name="SetXPlatDataCollectorPath" BeforeTargets="VSTest">
     <PropertyGroup>
       <VSTestTestAdapterPath>$(VSTestTestAdapterPath);$(MSBuildThisFileDirectory)</VSTestTestAdapterPath>

@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Coverlet.Core;
@@ -102,9 +103,11 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact(Skip = "Unhandled exception: System.InvalidOperationException: Sequence contains more than one matching element, InstrumenterHelper.cs:line 139 ")]
+    [Fact]
     public void AsyncAwait_Issue_669_2()
     {
+      // fails on CI with Windows OS - unknown reason - successfully executed locally (CLI)
+      Assert.SkipWhen(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "This test is skipped on Windows for CI environment");
       string path = Path.GetTempFileName();
       try
       {

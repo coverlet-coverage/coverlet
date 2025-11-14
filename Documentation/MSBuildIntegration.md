@@ -144,7 +144,7 @@ You can also ignore additional attributes by using the `ExcludeByAttribute` prop
 * Use attribute name, attribute full name or fully qualified name of the attribute type (`Obsolete`, `ObsoleteAttribute`, `System.ObsoleteAttribute`)
 
 ```bash
-dotnet test /p:CollectCoverage=true /p:ExcludeByAttribute="Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute"
+dotnet test /p:CollectCoverage=true /p:ExcludeByAttribute="Obsolete%2cGeneratedCodeAttribute"
 ```
 
 ### Source Files

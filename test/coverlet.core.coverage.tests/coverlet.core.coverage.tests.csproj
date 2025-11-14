@@ -22,7 +22,7 @@
     <PackageReference Include="Moq" />
     <PackageReference Include="Tmds.ExecFunction" />
     <PackageReference Include="ReportGenerator.Core" />
-    <PackageReference Include="xunit.v3" VersionOverride="2.0.0" />
+    <PackageReference Include="xunit.v3" VersionOverride="2.0.0"/>
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

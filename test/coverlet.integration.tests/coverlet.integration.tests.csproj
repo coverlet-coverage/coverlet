@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\coverlet.console\coverlet.console.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.integration.template\coverlet.integration.template.csproj" />
   </ItemGroup>

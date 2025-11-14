@@ -1,17 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Import coverlet version-->
-  <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" />
-  
+  <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" Condition="Exists('$(MSBuildThisFileDirectory)\DeterministicTest.props')" />
+
   <PropertyGroup>
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsample.integration.determisticbuild</AssemblyName>
-    <MSBuildWarningsAsMessages>NU1604;NU1701</MSBuildWarningsAsMessages>
+    <MSBuildWarningsAsMessages>NU1604</MSBuildWarningsAsMessages>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <RestoreSources>
       https://api.nuget.org/v3/index.json;
       $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
     </RestoreSources>
+  </PropertyGroup>
+
+  <!-- Define default values if props file doesn't exist -->
+  <PropertyGroup Condition="!Exists('DeterministicTest.props')">
+    <coverletCollectorsVersion>6.0.4</coverletCollectorsVersion>
+    <coverletMsbuildVersion>6.0.4</coverletMsbuildVersion>
   </PropertyGroup>
 
   <ItemGroup>

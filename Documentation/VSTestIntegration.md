@@ -7,7 +7,7 @@ Since version `8.0.0`
 * .NET Core >= 8.0
 * .NET Framework >= 4.7.2
 
-As explained in quick start section, to use collectors you need to run *SDK v8.0.100* (LTS) or newer and your project file must reference `coverlet.collector` and a minimum version of `Microsoft.NET.Test.Sdk`.
+As explained in quick start section, to use collectors you need to run *SDK v8.0.414* (LTS) or newer and your project file must reference `coverlet.collector` and a minimum version of `Microsoft.NET.Test.Sdk`.
 
 A sample project file looks like:
 
@@ -75,11 +75,11 @@ We're working to fill the gaps.
 > [!TIP]
 > *Some alternative solutions to merge coverage files*
 >
-> * use _dotnet-coverage_ tool and merge multiple coverage files
+> * use *dotnet-coverage* tool and merge multiple coverage files
 >
 >   `dotnet-coverage merge artifacts/coverage/**/coverage.cobertura.xml -f cobertura -o artifacts/coverage/coverage.xml`*
 >
-> * use _dotnet-reportgenerator-globaltool_ to create a HTML report and a merged coverage file
+> * use *dotnet-reportgenerator-globaltool* to create a HTML report and a merged coverage file
 >
 >   `reportgenerator -reports:"**/*.cobertura.xml" -targetdir:"artifacts\reports.cobertura" -reporttypes:"HtmlInline_AzurePipelines_Dark;Cobertura"`
 
@@ -110,8 +110,8 @@ These are a list of options that are supported by coverlet. These can be specifi
 | Option                   | Summary                                                                                                                                                         |
 |:-------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Format                   | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.                                 |
-| Exclude                  | Exclude from code coverage analysing using filter expressions.                                                                                                  |
-| ExcludeByAttribute       | Exclude a method, an entire class or assembly from code coverage decorated by an attribute.    |
+| Exclude                  | Exclude from code coverage analyzing using filter expressions.                                                                                                  |
+| ExcludeByAttribute       | Exclude a method, an entire class or assembly from code coverage decorated by an attribute.                                                                     |
 | ExcludeByFile            | Ignore specific source files from code coverage.                                                                                                                |
 | Include                  | Explicitly set what to include in code coverage analysis using filter expressions.                                                                              |
 | IncludeDirectory         | Explicitly set which directories to include in code coverage analysis.                                                                                          |
@@ -120,8 +120,8 @@ These are a list of options that are supported by coverlet. These can be specifi
 | IncludeTestAssembly      | Include coverage of the test assembly.                                                                                                                          |
 | SkipAutoProps            | Neither track nor record auto-implemented properties.                                                                                                           |
 | DoesNotReturnAttribute   | Methods marked with these attributes are known not to return, statements following them will be excluded from coverage                                          |
-| DeterministicReport      | Generates deterministic report in context of deterministic build. Take a look at [documentation](DeterministicBuild.md) for further informations.
-| ExcludeAssembliesWithoutSources |  Specifies whether to exclude assemblies without source. Options are either MissingAll, MissingAny or None. Default is MissingAll.|
+| DeterministicReport      | Generates deterministic report in context of deterministic build. Take a look at [documentation](DeterministicBuild.md) for further information.                |
+| ExcludeAssembliesWithoutSources |  Specifies whether to exclude assemblies without source. Options are either MissingAll, MissingAny or None. Default is MissingAll.                       |
 
 How to specify these options via runsettings?
 
