@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Help;
-using System.CommandLine.Parsing;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -31,11 +29,11 @@ namespace Coverlet.Console
     static async Task<int> Main(string[] args)
     {
       Argument<string> moduleOrAppDirectory = new("path") { Description = "Path to the test assembly or application directory." };
-      Option<string> target = new("--target", aliases: new[] { "--target", "-t" }) { Description = "Path to the test runner application.", Arity = ArgumentArity.ZeroOrOne, Required = true };
-      Option<string> targs = new("--targetargs", aliases: new[] { "--targetargs", "-a" }) { Description = "Arguments to be passed to the test runner.", Arity = ArgumentArity.ZeroOrOne };
-      Option<string> output = new("--output", aliases: new[] { "--output", "-o" }) { Description = "Output of the generated coverage report", Arity = ArgumentArity.ZeroOrOne };
-      Option<LogLevel> verbosity = new("--verbosity", aliases: new[] { "--verbosity", "-v" }) { DefaultValueFactory = (_) => LogLevel.Normal, Description = "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.", Arity = ArgumentArity.ZeroOrOne };
-      Option<string[]> formats = new("--format", aliases: new[] { "--format", "-f" }) { DefaultValueFactory = (_) => new[] { "json" }, Description = "Format of the generated coverage report.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      Option<string> target = new("--target", "-t") { Description = "Path to the test runner application.", Arity = ArgumentArity.ZeroOrOne, Required = true };
+      Option<string> targs = new("--targetargs", "-a") { Description = "Arguments to be passed to the test runner.", Arity = ArgumentArity.ZeroOrOne };
+      Option<string> output = new("--output", "-o") { Description = "Output of the generated coverage report", Arity = ArgumentArity.ZeroOrOne };
+      Option<LogLevel> verbosity = new("--verbosity", "-v") { DefaultValueFactory = (_) => LogLevel.Normal, Description = "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.", Arity = ArgumentArity.ZeroOrOne };
+      Option<string[]> formats = new("--format", "-f") { DefaultValueFactory = (_) => new[] { "json" }, Description = "Format of the generated coverage report.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       formats.AcceptOnlyFromAmong("json", "lcov", "opencover", "cobertura", "teamcity");
       Option<string> threshold = new("--threshold") { Description = "Exits with error if the coverage % is below value.", Arity = ArgumentArity.ZeroOrOne };
       Option<List<string>> thresholdTypes = new("--threshold-type") { DefaultValueFactory = (_) => ["line", "branch", "method"], Description = "Coverage type to apply the threshold to." };
@@ -56,37 +54,31 @@ namespace Coverlet.Console
       excludeAssembliesWithoutSources.AcceptOnlyFromAmong("MissingAll", "MissingAny", "None");
       Option<string> sourceMappingFile = new("--source-mapping-file") { Description = "Specifies the path to a SourceRootsMappings file.", Arity = ArgumentArity.ZeroOrOne };
 
-      RootCommand rootCommand = new("Cross platform .NET Core code coverage tool")
-      {
-        moduleOrAppDirectory,
-        target,
-        targs,
-        output,
-        verbosity,
-        formats,
-        threshold,
-        thresholdTypes,
-        thresholdStat,
-        excludeFilters,
-        includeFilters,
-        excludedSourceFiles,
-        includeDirectories,
-        excludeAttributes,
-        includeTestAssembly,
-        singleHit,
-        skipAutoProp,
-        mergeWith,
-        useSourceLink,
-        doesNotReturnAttributes,
-        excludeAssembliesWithoutSources,
-        sourceMappingFile
-      };
-      rootCommand.Add(new HelpOption());
-      rootCommand.Add(new VersionOption());
+      RootCommand rootCommand = new("Cross platform .NET Core code coverage tool");
+      rootCommand.Arguments.Add(moduleOrAppDirectory);
+      rootCommand.Options.Add(target);
+      rootCommand.Options.Add(targs);
+      rootCommand.Options.Add(output);
+      rootCommand.Options.Add(verbosity);
+      rootCommand.Options.Add(formats);
+      rootCommand.Options.Add(threshold);
+      rootCommand.Options.Add(thresholdTypes);
+      rootCommand.Options.Add(thresholdStat);
+      rootCommand.Options.Add(excludeFilters);
+      rootCommand.Options.Add(includeFilters);
+      rootCommand.Options.Add(excludedSourceFiles);
+      rootCommand.Options.Add(includeDirectories);
+      rootCommand.Options.Add(excludeAttributes);
+      rootCommand.Options.Add(includeTestAssembly);
+      rootCommand.Options.Add(singleHit);
+      rootCommand.Options.Add(skipAutoProp);
+      rootCommand.Options.Add(mergeWith);
+      rootCommand.Options.Add(useSourceLink);
+      rootCommand.Options.Add(doesNotReturnAttributes);
+      rootCommand.Options.Add(excludeAssembliesWithoutSources);
+      rootCommand.Options.Add(sourceMappingFile);
 
-      ParseResult parseResult = CommandLineParser.Parse(rootCommand, args);
-
-      rootCommand.SetAction(async (context) =>
+      rootCommand.SetAction(async (parseResult) =>
       {
         string moduleOrAppDirectoryValue = parseResult.GetValue(moduleOrAppDirectory);
         string targetValue = parseResult.GetValue(target);
@@ -136,13 +128,13 @@ namespace Coverlet.Console
                       doesNotReturnAttributesValue,
                       excludeAssembliesWithoutSourcesValue,
                       sourceMappingFileValue);
-        //context.ExitCode = taskStatus;
 
+        s_exitCode = taskStatus;
+        return taskStatus;
       });
 
-      CommandLineConfiguration config = new(rootCommand);
-
-      await config.InvokeAsync(args).ConfigureAwait(false);
+      ParseResult parseResult = rootCommand.Parse(args);
+      await parseResult.InvokeAsync();
       return s_exitCode;
     }
     private static Task<int> HandleCommand(string moduleOrAppDirectory,
