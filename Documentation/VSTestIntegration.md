@@ -7,7 +7,7 @@ Since version `8.0.0`
 * .NET Core >= 8.0
 * .NET Framework >= 4.7.2
 
-As explained in quick start section, to use collectors you need to run *SDK v8.0.411* (LTS) or newer and your project file must reference `coverlet.collector` and a minimum version of `Microsoft.NET.Test.Sdk`.
+As explained in quick start section, to use collectors you need to run *SDK v8.0.414* (LTS) or newer and your project file must reference `coverlet.collector` and a minimum version of `Microsoft.NET.Test.Sdk`.
 
 A sample project file looks like:
 

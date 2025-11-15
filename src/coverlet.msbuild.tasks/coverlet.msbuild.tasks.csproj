@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;$(NetMinimum)</TargetFrameworks>
     <AssemblyTitle>coverlet.msbuild.tasks</AssemblyTitle>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
@@ -39,6 +39,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="$(MicrosoftBuildVersion)" PrivateAssets="all" ExcludeAssets="Runtime" />
     <PackageReference Include="System.Security.AccessControl" />
   </ItemGroup>
@@ -48,16 +49,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="coverlet.msbuild.props" Pack="true" PackagePath="build\">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="coverlet.msbuild.targets" Pack="true" PackagePath="build\">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
     <None Include="..\..\Documentation\MSBuildIntegration.md" Link="MSBuildIntegration.md" Pack="true" PackagePath="\">
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </None>
+  </ItemGroup>
+
+  <!-- NuGet package layout -->
+  <!-- NuGet folders https://learn.microsoft.com/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->
+  <ItemGroup>
+    <Content Include="buildMultiTargeting/**" Pack="true">
+      <PackagePath>buildMultiTargeting</PackagePath>
+    </Content>
+    <TfmSpecificPackageFile Include="buildTransitive/**">
+      <PackagePath>buildTransitive/$(TargetFramework)</PackagePath>
+    </TfmSpecificPackageFile>
+    <TfmSpecificPackageFile Include="build/**">
+      <PackagePath>build/$(TargetFramework)</PackagePath>
+    </TfmSpecificPackageFile>
   </ItemGroup>
 
   <Target Name="PackBuildOutputs" DependsOnTargets="BuildOnlySettings;ResolveReferences">

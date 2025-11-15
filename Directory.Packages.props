@@ -29,15 +29,6 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftNETTestSdkVersion)" />
-    <!-- Microsoft.TestPlatform.ObjectModel has a dependency to NuGet.Frameworks with specific version -->
-    <!-- https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/src/Microsoft.TestPlatform.ObjectModel/Microsoft.TestPlatform.ObjectModel.csproj#L36-->
-    <!-- wrong configuration will create "build\coverlet.msbuild.targets(72,5): error : Unable to read beyond the end of the stream."  -->
-    <!--
-         vstest 17.5 version /scripts/build/TestPlatform.Dependencies.props
-         https://github.com/microsoft/vstest/blob/81f87947b316a4faf2bcb5b8c8fa1591baafcc39/scripts/build/TestPlatform.Dependencies.props#L57
-         vstest 17.8 version
-         NuGetFrameworksVersion is defined here https://github.com/microsoft/vstest/blob/9a0c41811637edf4afe0e265e08fdd1cb18109ed/eng/Versions.props#L94C1-L94C1
-    -->
     <PackageVersion Include="NuGet.Frameworks" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />

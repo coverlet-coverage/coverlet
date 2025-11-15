@@ -33,9 +33,6 @@ namespace Coverlet.Tests.Utils
 
     public static string GetAssemblyTargetFramework()
     {
-#if NET6_0
-      return "net6.0";
-#endif
 #if NET8_0
       return "net8.0";
 #endif
@@ -63,9 +60,9 @@ namespace Coverlet.Tests.Utils
       return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel3Parents)), "package", buildConfiguration);
     }
 
-    public static string GetTestResultsPath(string directoryName)
+    public static string GetTestResultsPath()
     {
-      return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel3Parents)), "testresults", directoryName);
+      return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel3Parents)), "reports");
     }
 
   }

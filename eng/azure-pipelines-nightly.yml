@@ -4,6 +4,11 @@ pool:
 steps:
 - task: UseDotNet@2
   inputs:
+    version: 8.0.414
+  displayName: Install .NET Core SDK 8.0.412
+
+- task: UseDotNet@2
+  inputs:
     useGlobalJson: true
     displayName: Use .NET SDK from global.json
 

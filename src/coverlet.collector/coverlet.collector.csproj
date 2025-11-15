@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>$(NetMinimum);netstandard2.0</TargetFrameworks>
     <AssemblyTitle>coverlet.collector</AssemblyTitle>
     <DevelopmentDependency>true</DevelopmentDependency>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -39,6 +39,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" />
     <PackageReference Include="NuGet.Frameworks" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,20 +54,20 @@
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
 
+  <!-- NuGet package layout -->
+  <!-- NuGet folders https://learn.microsoft.com/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->
   <ItemGroup>
-    <None Include="build\coverlet.collector.targets">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <TfmSpecificPackageFile Include="build/**">
+      <PackagePath>build/$(TargetFramework)</PackagePath>
+    </TfmSpecificPackageFile>
   </ItemGroup>
 
-  <Target Name="PackBuildOutputs" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+  <Target Name="PackBuildOutputs" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="build\coverlet.collector.targets" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="$(ProjectDepsFilePath)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="build\$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="$(TargetPath);$(ProjectDepsFilePath);@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="build\$(TargetFramework)" />
       <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="build\$(TargetFramework)" />
       <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="build\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubPath)" />
     </ItemGroup>
   </Target>
+  
 </Project>
