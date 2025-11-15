@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -51,12 +51,21 @@ namespace Coverlet.Integration.Tests
                   new XElement("PropertyGroup",
                       new XElement("coverletMsbuildVersion", GetPackageVersion("*msbuild*.nupkg")),
                       new XElement("coverletCollectorsVersion", GetPackageVersion("*collector*.nupkg")))));
-      _testProjectTfms = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!
-                         .Descendants("PropertyGroup")!
-                         .Single()
-                         .Element("TargetFrameworks")!
-                         .Value
-                         .Split(';');
+
+      string csprojPath = Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj");
+      XElement csproj = XElement.Load(csprojPath)!;
+
+      // Use only the first top-level PropertyGroup in the project file
+      XElement? firstPropertyGroup = csproj.Elements("PropertyGroup").FirstOrDefault();
+      if (firstPropertyGroup is null)
+        throw new InvalidOperationException("No top-level <PropertyGroup> found in project file.");
+
+      // Prefer TargetFrameworks, fall back to single TargetFramework
+      XElement? tfmsElement = firstPropertyGroup.Element("TargetFrameworks") ?? firstPropertyGroup.Element("TargetFramework");
+      if (tfmsElement is null)
+        throw new InvalidOperationException("No <TargetFrameworks> or <TargetFramework> element found in the first PropertyGroup.");
+
+      _testProjectTfms = tfmsElement.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
       Assert.Contains(_buildTargetFramework, _testProjectTfms);
 
