@@ -120,7 +120,7 @@ You can do the same for `Threshold` as well.
 dotnet test /p:CollectCoverage=true /p:Threshold=\"80,100,70\" /p:ThresholdType=\"line,branch,method\"
 ```
 
-By default, Coverlet will validate the threshold value against the coverage result of each module. The `/p:ThresholdStat` option allows you to change this behaviour and can have any of the following values:
+By default, Coverlet will validate the threshold value against the coverage result of each module. The `/p:ThresholdStat` option allows you to change this behavior and can have any of the following values:
 
 * Minimum (Default): Ensures the coverage result of each module isn't less than the threshold
 * Total: Ensures the total combined coverage result of all modules isn't less than the threshold
