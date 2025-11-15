@@ -37,7 +37,7 @@
     <PackageVersion Include="ReportGenerator.Core" Version="5.3.11" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="8.1.8" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.0-beta6.25358.103" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.0" />
     <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
     <!-- latest Tmds.ExecFunction package uses EnvDTE V17.8.37221 -->
     <PackageVersion Include="Tmds.ExecFunction" Version="0.8.0" />
