@@ -64,7 +64,7 @@ jobs:
         build-mode: "manual" # Use "auto" for automatic build detection, or "none" to skip the build step.
 
     - name: Setup dotnet using global.json
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         global-json-file: global.json
 
