@@ -17,7 +17,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           exempt-issue-labels: "bug,tracking-external-issue,Known Issue"
           days-before-issue-close: ${{ env.DAYS_BEFORE_ISSUE_CLOSE }}
