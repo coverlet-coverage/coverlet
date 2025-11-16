@@ -12,6 +12,12 @@ steps:
     useGlobalJson: true
     displayName: Use .NET SDK from global.json
 
+# create artifact/package folder
+- pwsh: |
+    New-Item -ItemType Directory -Path artifacts/package/debug -Force
+    New-Item -ItemType Directory -Path artifacts/package/release -Force
+  displayName: create folder artifacts/package/$(BuildConfiguration)
+
 - task: NuGetAuthenticate@1
   displayName: Authenticate with NuGet feeds
 
