@@ -69,8 +69,10 @@ jobs:
         global-json-file: global.json
 
     - run: |
-         mkdir artifacts/package/debug
-         mkdir artifacts/package/release
+         mkdir ./artifacts
+         mkdir ./artifacts/package
+         mkdir ./artifacts/package/debug
+         mkdir ./artifacts/package/release
 
     - run: |
         echo "Run, Build Application using script"
