@@ -8,12 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
-
+- Fix System.CommandLine 2.0 release is available [#1776](https://github.com/coverlet-coverage/coverlet/issues/1776)
+- Fix Excluding From Coverage bad defaults from given example [#1764](https://github.com/coverlet-coverage/coverlet/issues/1764)
 - Fix branchpoint exclusion for sdk 8.0.407 [#1741](https://github.com/coverlet-coverage/coverlet/issues/1741)
-- Use `<TargetFramework>netstandard2.0</TargetFramework>` for _coverlet.collector_ and _coverlet.msbuild.tasks_ Packages´
 
 ### Improvements
 
+- Use multi targets projects for coverlet.collector, coverlet.msbuild.tasks packages [#1742](https://github.com/coverlet-coverage/coverlet/pull/1742)
+- Use .NET 8.0 target framework for coverlet.core and remove Newtonsoft.Json [#1733](https://github.com/coverlet-coverage/coverlet/pull/1733)
+- Use latest System.CommandLine version [#1660](https://github.com/coverlet-coverage/coverlet/pull/1660)
 - Upgraded minimum required .NET SDK and runtime to .NET 8.0 LTS (Long Term Support) (**Breaking Change**)
 - Use [xunit.v3](https://xunit.net/docs/getting-started/v3/whats-new) for tests and example code
 
