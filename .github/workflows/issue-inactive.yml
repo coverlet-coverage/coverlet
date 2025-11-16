@@ -3,7 +3,7 @@ on:
   schedule:
     - cron: "0 1 * * 0"
   workflow_dispatch:
-  
+
 env:
   DAYS_BEFORE_ISSUE_STALE: 90
 
@@ -17,7 +17,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           exempt-issue-labels: "bug,tracking-external-issue,Known Issue,stale"
           days-before-issue-stale: ${{ env.DAYS_BEFORE_ISSUE_STALE }}
