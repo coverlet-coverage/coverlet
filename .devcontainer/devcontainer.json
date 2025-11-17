@@ -1,0 +1,51 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
+{
+	"name": "coverlet .NET 10.0)",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
+	"features": {
+		"ghcr.io/devcontainers/features/dotnet:2": {
+            "version": "10.0.100",
+            "additionalVersions": ["6.0.428", "8.0.414", "9.0.307"]
+        }
+	},
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [5000, 5001],
+	// "portsAttributes": {
+	//		"5001": {
+	//			"protocol": "https"
+	//		}
+	// }
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "dotnet restore",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+		  "extensions": [
+			"ms-dotnettools.vscode-dotnet-runtime",
+			"GitHub.vscode-pull-request-github",
+			"ms-dotnettools.csharp",
+			"ms-dotnettools.dotnet-interactive-vscode",
+			"ms-dotnettools.csdevkit",
+			"ms-vscode.powershell",
+			"ms-azure-devops.azure-pipelines",
+            "GitHub.copilot-chat",
+            "GitHub.copilot",
+            "mhutchie.git-graph",
+		    "streetsidesoftware.code-spell-checker",
+			"streetsidesoftware.code-spell-checker-german",
+			"streetsidesoftware.code-spell-checker-english",
+			"fernandoescolar.vscode-solution-explorer"]
+		}
+	}
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
