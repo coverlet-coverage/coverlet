@@ -7,7 +7,7 @@
 	"features": {
 		"ghcr.io/devcontainers/features/dotnet:2": {
             "version": "10.0.100",
-            "additionalVersions": ["6.0.428", "8.0.414", "9.0.307"]
+            "additionalVersions": ["6.0.428", "8.0.416", "9.0.307"]
         }
 	},
 
