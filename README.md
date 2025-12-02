@@ -177,14 +177,14 @@ If you find a bug or have a feature request, please report them at this reposito
 ## Coverlet Team
 
 Author and owner
-* [Toni Solarin-Sodara](https://github.com/tonerdo)
+* [Toni Solarin-Sodara](https://github.com/tonerdo) (Inactive)
 
 Co-maintainers
 
 * [David Müller](https://github.com/daveMueller)
 * [Bert](https://github.com/Bertk)
-* [Peter Liljenberg](https://github.com/petli)
-* [Marco Rossignoli](https://github.com/MarcoRossignoli)
+* [Peter Liljenberg](https://github.com/petli) (Inactive)
+* [Marco Rossignoli](https://github.com/MarcoRossignoli) (Inactive)
 
 ## Code of Conduct
 
