@@ -19,6 +19,8 @@
     <GenerateDependencyFile>true</GenerateDependencyFile>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
     <NoWarn>$(NoWarn);NU5100;NU5129;NU5127</NoWarn>
+    <!-- create SBOM for CI build-->
+    <GenerateSBOM>true</GenerateSBOM>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
@@ -42,6 +44,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="$(MicrosoftBuildVersion)" PrivateAssets="all" ExcludeAssets="Runtime" />
     <PackageReference Include="System.Security.AccessControl" />
+    <PackageReference Include="Microsoft.Sbom.Targets">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
