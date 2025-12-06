@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics.CodeAnalysis;
@@ -20,6 +20,7 @@ namespace coverlet.MTP.unit.tests
 
     [Theory]
     [InlineData("formats", "invalid", "The value 'invalid' is not a valid option for 'formats'.")]
+    [InlineData("formats", "", "At least one format must be specified.")]
     [InlineData("exclude-assemblies-without-sources", "invalid", "The value 'invalid' is not a valid option for 'exclude-assemblies-without-sources'.")]
     [InlineData("exclude-assemblies-without-sources", "", "At least one value must be specified for 'exclude-assemblies-without-sources'.")]
     public async Task IsInvalid_When_Option_Has_InvalidValue(string optionName, string value, string expectedError)
