@@ -323,3 +323,4 @@ Playground*/
 coverlet.MTP/
 # ignore copilot agents
 .github/agents/
+current.diff
