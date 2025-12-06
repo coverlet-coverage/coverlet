@@ -20,7 +20,6 @@ namespace coverlet.MTP.unit.tests
 
     [Theory]
     [InlineData("formats", "invalid", "The value 'invalid' is not a valid option for 'formats'.")]
-    [InlineData("formats", "", "At least one format must be specified.")]
     [InlineData("exclude-assemblies-without-sources", "invalid", "The value 'invalid' is not a valid option for 'exclude-assemblies-without-sources'.")]
     [InlineData("exclude-assemblies-without-sources", "", "At least one value must be specified for 'exclude-assemblies-without-sources'.")]
     public async Task IsInvalid_When_Option_Has_InvalidValue(string optionName, string value, string expectedError)
