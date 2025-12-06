@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <!--
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
+    </RestoreSources>
+    -->
+    <IsPackable>false</IsPackable>
+    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="0.23.0"/>
+    <!--<PackageReference Include="coverlet.MTP" Version="8.0.0-preview.33.ga9274247b6" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\coverlet.MTP\coverlet.MTP.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectCapability Include="TestingPlatform" />
+    <ProjectCapability Include="TestingPlatformApplication" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Remove="Microsoft.CodeAnalysis.BannedApiAnalyzers" />
+  </ItemGroup>
+</Project>

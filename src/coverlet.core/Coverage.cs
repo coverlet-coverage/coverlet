@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -45,6 +45,8 @@ namespace Coverlet.Core
     public bool DeterministicReport { get; set; }
     [DataMember]
     public string ExcludeAssembliesWithoutSources { get; set; }
+    [DataMember]
+    public bool DisableManagedInstrumentationRestore { get; set; }
   }
 
   internal class Coverage
@@ -134,7 +136,7 @@ namespace Coverlet.Core
 
         if (instrumenter.CanInstrument())
         {
-          _instrumentationHelper.BackupOriginalModule(module, Identifier);
+          _instrumentationHelper.BackupOriginalModule(module, Identifier, _parameters.DisableManagedInstrumentationRestore);
 
           // Guard code path and restore if instrumentation fails.
           try

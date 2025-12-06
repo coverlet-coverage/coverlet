@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
     <OutputType>Exe</OutputType>
@@ -22,7 +22,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Formats.Asn1" Version="8.0.2" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.0"/>
     <PackageReference Include="System.Text.Json" Version="8.0.6" />
   </ItemGroup>
 
@@ -33,4 +33,8 @@
     <ProjectReference Include="$(RepoRoot)test\coverlet.integration.template\coverlet.integration.template.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Remove="Microsoft.CodeAnalysis.BannedApiAnalyzers" />
+  </ItemGroup>
+  
 </Project>

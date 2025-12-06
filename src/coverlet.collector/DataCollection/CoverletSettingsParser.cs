@@ -48,6 +48,7 @@ namespace Coverlet.Collector.DataCollection
         coverletSettings.DoesNotReturnAttributes = ParseDoesNotReturnAttributes(configurationElement);
         coverletSettings.DeterministicReport = ParseDeterministicReport(configurationElement);
         coverletSettings.ExcludeAssembliesWithoutSources = ParseExcludeAssembliesWithoutSources(configurationElement);
+        coverletSettings.DisableManagedInstrumentationRestore = ParseDisableManagedInstrumentationRestore(configurationElement);
       }
 
       coverletSettings.ReportFormats = ParseReportFormats(configurationElement);
@@ -231,6 +232,18 @@ namespace Coverlet.Collector.DataCollection
       XmlElement includeTestAssemblyElement = configurationElement[CoverletConstants.IncludeTestAssemblyElementName];
       bool.TryParse(includeTestAssemblyElement?.InnerText, out bool includeTestAssembly);
       return includeTestAssembly;
+    }
+
+    /// <summary>
+    /// Disable Managed Instrumentation Restore flag
+    /// </summary>
+    /// <param name="configurationElement">Configuration element</param>
+    /// <returns>Include Test Assembly Flag</returns>
+    private static bool ParseDisableManagedInstrumentationRestore(XmlElement configurationElement)
+    {
+      XmlElement disableManagedInstrumentationRestoreElement = configurationElement[CoverletConstants.DisableManagedInstrumentationRestore];
+      bool.TryParse(disableManagedInstrumentationRestoreElement?.InnerText, out bool disableManagedInstrumentationRestore);
+      return disableManagedInstrumentationRestore;
     }
 
     /// <summary>

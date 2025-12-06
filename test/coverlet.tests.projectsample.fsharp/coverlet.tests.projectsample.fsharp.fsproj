@@ -12,5 +12,9 @@
   <ItemGroup>
     <Compile Include="Library.fs" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Remove="Microsoft.CodeAnalysis.BannedApiAnalyzers" />
+  </ItemGroup>
 
 </Project>

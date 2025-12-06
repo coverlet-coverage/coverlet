@@ -86,6 +86,11 @@ namespace Coverlet.Collector.DataCollection
     /// </summary>
     public string ExcludeAssembliesWithoutSources { get; set; }
 
+    /// <summary>
+    /// Disable managed instrumentation restore flag
+    /// </summary>
+    public bool DisableManagedInstrumentationRestore { get; set; }
+
     public override string ToString()
     {
       var builder = new StringBuilder();
