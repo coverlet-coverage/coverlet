@@ -263,3 +263,31 @@ Here is an example of how to specify the parameter:
 ```shell
 /p:ExcludeAssembliesWithoutSources="MissingAny"
 ```
+
+## Enable Restore of instrumented assembly
+
+The DisableManagedInstrumentationRestore property controls whether Coverlet should restore (revert) an assembly to its original state after instrumentation. By _default_, this is set to __false__, meaning:
+
+ 1. Coverlet instruments (modifies) the assembly to track code coverage
+ 1. After coverage collection, it restores the assembly back to its original state
+
+
+When set to __true__:
+- The assembly remains in its instrumented state
+- This can help avoid file access conflicts
+- Useful for testing/debugging instrumentation without restoration
+
+
+Example use case:
+
+```xml
+<PropertyGroup>
+  <!-- Prevent Coverlet from reverting instrumentation changes -->
+  <DisableManagedInstrumentationRestore>true</DisableManagedInstrumentationRestore>
+</PropertyGroup>
+```
+
+This setting is particularly helpful when troubleshooting instrumentation issues or when dealing with file locking problems during coverage collection.
+
+> [!NOTE] 
+> Make sure instrumented binaries are not deployed into production.

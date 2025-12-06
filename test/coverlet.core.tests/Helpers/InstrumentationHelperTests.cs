@@ -103,6 +103,7 @@ namespace Coverlet.Core.Tests.Helpers
       string module = typeof(InstrumentationHelperTests).Assembly.Location;
       string identifier = Guid.NewGuid().ToString();
 
+      // Ensure the backup list is used to restore the original module
       _instrumentationHelper.BackupOriginalModule(module, identifier, false);
 
       string backupPath = Path.Combine(
