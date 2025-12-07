@@ -22,6 +22,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+		<!-- Microsoft.TestPlatform.TestHost (v18.0.1) dependens of Newtonsoft.Json -->
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="coverlet.msbuild" Version="$(coverletMsbuildVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
