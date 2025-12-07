@@ -318,9 +318,8 @@ FolderProfile.pubxml
 /NuGet.config
 nuget.config
 *.dmp
-Playground*/
 # extended playground
-coverlet.MTP/
+Playground*/
 # ignore copilot agents
 .github/agents/
 current.diff
