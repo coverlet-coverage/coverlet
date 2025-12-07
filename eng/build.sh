@@ -15,10 +15,8 @@ set -e
 # For running tests, use the separate test.sh script.
 
 # Get the workspace root directory
-# Get the workspace root directory (parent of the script's directory)
-WORKSPACE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$WORKSPACE_ROOT"
-echo "Starting build... (root folder: ${PWD##*/})"
 
 echo "Please cleanup '/tmp' folder if needed!"
 
@@ -27,7 +25,6 @@ dotnet build-server shutdown
 pkill -f "coverlet.core.tests.exe" 2>/dev/null || true
 
 # Delete coverage files
-echo "Cleaning up coverage files and build artifacts..."
 find . -name "coverage.cobertura.xml" -delete 2>/dev/null || true
 find . -name "coverage.json" -delete 2>/dev/null || true
 find . -name "coverage.net8.0.json" -delete 2>/dev/null || true

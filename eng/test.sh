@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# Get the workspace root directory
+WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Get the workspace root directory (parent of the script's directory)
 WORKSPACE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$WORKSPACE_ROOT"
@@ -16,6 +18,7 @@ pkill -f "coverlet.integration.tests.dll" 2>/dev/null || true
 dotnet build-server shutdown
 dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c Debug --no-build -bl:test.core.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" -- --results-directory "$WORKSPACE_ROOT/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.core.tests.trx" --diagnostic --diagnostic-output-directory "$WORKSPACE_ROOT/artifacts/log/Debug" --diagnostic-output-fileprefix "coverlet.core.tests"
 
+# coverlet.core.coverage.tests !!!! does not work on Linux (Dev Container) maybe takes hours !!!!
 # coverlet.core.coverage.tests !!!! does not work on Linux (Dev Container) VS debugger assemblies not available !!!!
 # dotnet build-server shutdown
 # dotnet test test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -c Debug --no-build -bl:test.core.coverage.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" -- --results-directory "$WORKSPACE_ROOT/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.trx" --diagnostic --diagnostic-output-directory "$WORKSPACE_ROOT/artifacts/log/Debug" --diagnostic-output-fileprefix "coverlet.core.coverage.tests"
