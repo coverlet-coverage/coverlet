@@ -45,6 +45,12 @@ namespace Coverlet.Tests.Utils
       throw new NotSupportedException($"Build configuration not supported");
     }
 
+    public static string GetBuildConfigurationString()
+    {
+      // Returns lowercase configuration string to match MSBuild output paths on case-sensitive filesystems
+      return GetAssemblyBuildConfiguration().ToString().ToLower();
+    }
+
     public static string GetTestProjectPath(string directoryName)
     {
       return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel4Parents)), "test", directoryName);
