@@ -32,7 +32,7 @@ namespace Coverlet.Integration.Tests
 
     public DeterministicBuild(ITestOutputHelper output)
     {
-      _buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString();
+      _buildConfiguration = TestUtils.GetBuildConfigurationString();
       _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
       _artifactsPivot = _buildConfiguration + "_" + _buildTargetFramework;
       _output = output;
@@ -74,7 +74,7 @@ namespace Coverlet.Integration.Tests
 
     private protected void AssertCoverage(string standardOutput = "", string reportName = "", bool checkDeterministicReport = true)
     {
-      if (_buildConfiguration == "Debug")
+      if (_buildConfiguration == "debug")
       {
         bool coverageChecked = false;
         string reportFilePath = "";
