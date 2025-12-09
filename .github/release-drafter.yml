@@ -10,7 +10,7 @@ categories:
       - 'test bug'
       - 'bug'
   - title: '🧰 Maintenance'
-    label: 
+    labels: 
       - 'chore'
       - 'dependencies'
       - 'documentation'
@@ -33,9 +33,6 @@ version-resolver:
     labels:
       - 'patch'
   default: patch
-
-exclude-labels:
-  - 'skip-changelog'
 
 autolabeler:
   - label: 'chore'
