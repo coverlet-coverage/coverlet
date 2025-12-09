@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - master
+  # pull_request event is required only for autolabeler
+  pull_request:
+    # Only following types are handled by the action, but one can default to all as well
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: read
@@ -18,6 +22,6 @@ jobs:
       - uses: release-drafter/release-drafter@v6
         with:
           prerelease: true
-          prerelease-identifier: beta
+          prerelease-identifier: preview
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

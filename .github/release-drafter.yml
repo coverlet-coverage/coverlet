@@ -1,0 +1,65 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'test bug'
+      - 'bug'
+  - title: '🧰 Maintenance'
+    labels: 
+      - 'chore'
+      - 'dependencies'
+      - 'documentation'
+
+
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
+
+exclude-labels:
+  - 'skip-changelog'
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+  default: patch
+
+autolabeler:
+  - label: 'chore'
+    files:
+      - '*.md'
+      - 'Documentation/**'
+  - label: 'bug'
+    branch:
+      - '/fix\/.+/'
+    title:
+      - '/fix/i'
+      - '/bug/i'
+  - label: 'enhancement'
+    branch:
+      - '/feature\/.+/'
+  - label: 'dependencies'
+    files:
+      - 'global.json'
+      - 'Directory.Packages.props'
+      - '*.props'
+      - '*.targets'
+
+
+template: |
+  # What's Changed
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
