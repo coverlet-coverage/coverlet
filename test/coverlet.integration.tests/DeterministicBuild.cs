@@ -83,10 +83,9 @@ namespace Coverlet.Integration.Tests
           Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
           if (document != null)
           {
-            // Only assert on the return statement (line 7), as braces may not be instrumented consistently across environments
             document.Class("Coverlet.Integration.DeterministicBuild.DeepThought")
                 .Method("System.Int32 Coverlet.Integration.DeterministicBuild.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
-                .AssertLinesCovered((7, 1));
+                .AssertLinesCovered((6, 1), (7, 1), (8, 1));
             coverageChecked = true;
             reportFilePath = coverageFile;
           }
