@@ -13,7 +13,7 @@
     <NugetPackageVersion>7.0.1</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>18.0.1</MicrosoftNETTestSdkVersion>
-    <XunitV3Version>3.0.0</XunitV3Version>
+    <XunitV3Version>3.2.1</XunitV3Version>
     <XunitRunnerVisualstudioVersion>3.1.5</XunitRunnerVisualstudioVersion>
     <MicrosoftTestingPlatformVersion>1.9.1</MicrosoftTestingPlatformVersion>
   </PropertyGroup>

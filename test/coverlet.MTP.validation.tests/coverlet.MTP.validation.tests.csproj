@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <!--
     <RestoreSources>
@@ -17,12 +19,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TUnit" Version="0.23.0"/>
-    <!--<PackageReference Include="coverlet.MTP" Version="8.0.0-preview.33.ga9274247b6" />-->
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)src\coverlet.MTP\coverlet.MTP.csproj" />
+    <PackageReference Include="xunit.v3" Version="$(XunitV3Version)" />
+    <!--<PackageReference Include="coverlet.MTP" Version="8.0.0-preview.28.g4608ccb7ad" />-->
+    <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,5 +31,18 @@
 
   <ItemGroup>
     <PackageReference Remove="Microsoft.CodeAnalysis.BannedApiAnalyzers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TestProjects\BasicTestProject\BasicTestProject.csproj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestProjects\CalculateSampleTests\CalculateSampleTests.csproj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
