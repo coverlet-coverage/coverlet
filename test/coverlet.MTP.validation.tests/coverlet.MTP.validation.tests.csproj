@@ -1,5 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- This test project does NOT need MTP runner itself -->
+  <!-- It tests a SEPARATE BasicTestProject that uses MTP -->
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -16,11 +17,10 @@
     -->
     <IsPackable>false</IsPackable>
     <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
-  </PropertyGroup>
-
+    </PropertyGroup>
+      
   <ItemGroup>
     <PackageReference Include="xunit.v3" Version="$(XunitV3Version)" />
-    <!--<PackageReference Include="coverlet.MTP" Version="8.0.0-preview.28.g4608ccb7ad" />-->
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
   </ItemGroup>
 
@@ -38,11 +38,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="TestProjects\BasicTestProject\BasicTestProject.csproj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="TestProjects\CalculateSampleTests\CalculateSampleTests.csproj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="TestProjects\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  
+  <!-- Ensure packages are built before running tests -->
+  <Target Name="EnsureCoverletPackagesBuilt" BeforeTargets="Build">
+    <Message Text="Checking if coverlet.core and coverlet.MTP packages are built..." Importance="high" />
+
+    <PropertyGroup>
+      <PackagePath>$(RepoRoot)artifacts\package\$(Configuration)</PackagePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <MtpPackages Include="$(PackagePath)\coverlet.MTP.*.nupkg" />
+    </ItemGroup>
+
+    <!-- Only check for coverlet.MTP package -->
+    <Error Condition="'@(MtpPackages)' == ''"
+           Text="coverlet.MTP package not found in '$(PackagePath)'.%0ARun: dotnet pack src/coverlet.MTP/coverlet.MTP.csproj -c $(Configuration)" />
+
+    <Message Text="Found coverlet.MTP package: @(MtpPackages)" Importance="high" />
+  </Target>
 </Project>

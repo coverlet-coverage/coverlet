@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- 
+    Isolate MTP validation tests from global VSTest settings.
+    This file takes precedence over the root Directory.Build.props for this folder.
+  -->
+
+  <!-- Import the root Directory.Build.props first to get common settings -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+
+  <!-- Override/Clear ALL VSTest properties that conflict with MTP -->
+  <PropertyGroup>
+    <VSTestLogger></VSTestLogger>
+    <VSTestResultsDirectory></VSTestResultsDirectory>
+    <VSTestNoBuild></VSTestNoBuild>
+    <VSTestArtifactsProcessingMode></VSTestArtifactsProcessingMode>
+    <VSTestSessionCorrelationId></VSTestSessionCorrelationId>
+    <VSTestTestCaseFilter></VSTestTestCaseFilter>
+    <VSTestSetting></VSTestSetting>
+    <VSTestCollect></VSTestCollect>
+    <VSTestBlame></VSTestBlame>
+    <VSTestBlameCrash></VSTestBlameCrash>
+    <VSTestBlameHang></VSTestBlameHang>
+    <VSTestTraceDataCollector></VSTestTraceDataCollector>
+    <VSTestConsolePath></VSTestConsolePath>
+    <VSTestListTests></VSTestListTests>
+    <VSTestDiag></VSTestDiag>
+    <VSTestFramework></VSTestFramework>
+    <VSTestPlatform></VSTestPlatform>
+    <VSTestCLIRunSettings></VSTestCLIRunSettings>
+    
+    <!-- Ensure MTP is enabled -->
+    <EnableMSTestRunner>false</EnableMSTestRunner>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+
+</Project>
