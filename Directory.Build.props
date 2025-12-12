@@ -41,17 +41,17 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' And '$(UseMicrosoftTestingPlatformRunner)' != 'true'">
     <VSTestLogger Include="trx%3BLogFileName=TestResults-$(TargetFramework)-$(MSBuildProjectName).trx" />
     <VSTestLogger Include="html%3BLogFileName=TestResults-$(TargetFramework)-$(MSBuildProjectName).html" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
+  <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' And '$(UseMicrosoftTestingPlatformRunner)' != 'true'">
     <VSTestResultsDirectory>$(RepoRoot)artifacts/reports/$(Configuration.ToLowerInvariant())</VSTestResultsDirectory>
     <VSTestLogger>@(VSTestLogger)</VSTestLogger>
   </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' And '$(UseMicrosoftTestingPlatformRunner)' != 'true'">
     <VSTestResultsDirectory>$(RepoRoot)artifacts\reports\$(Configuration.ToLowerInvariant())</VSTestResultsDirectory>
     <VSTestLogger>@(VSTestLogger)</VSTestLogger>
   </PropertyGroup>

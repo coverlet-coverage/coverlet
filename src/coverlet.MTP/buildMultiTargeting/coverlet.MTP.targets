@@ -17,7 +17,14 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     </ItemGroup>
     <Copy SourceFiles="@(CoverletMTPFiles)" DestinationFolder="$(PublishDir)%(RecursiveDir)" />
   </Target>
-  
+
+  <!-- Not sure what shall be defined for MTP project -->
+  <!--<Target Name="SetXPlatDataCollectorPath" BeforeTargets="VSTest">
+    <PropertyGroup>
+      <VSTestTestAdapterPath>$(VSTestTestAdapterPath);$(MSBuildThisFileDirectory)</VSTestTestAdapterPath>
+    </PropertyGroup>
+  </Target>-->
+
   <PropertyGroup>
     <_CoverletSdkNETCoreSdkVersion>$(NETCoreSdkVersion)</_CoverletSdkNETCoreSdkVersion>
     <_CoverletSdkNETCoreSdkVersion Condition="$(_CoverletSdkNETCoreSdkVersion.Contains('-'))">$(_CoverletSdkNETCoreSdkVersion.Split('-')[0])</_CoverletSdkNETCoreSdkVersion>

@@ -18,7 +18,7 @@ namespace coverlet.Extension
       if (ignoreIfNotSupported)
       {
 #if !NETCOREAPP
-              coverletExtensionConfiguration.Enable =false;
+              coverletExtensionConfiguration.Enable = false;
 #endif
       }
 
