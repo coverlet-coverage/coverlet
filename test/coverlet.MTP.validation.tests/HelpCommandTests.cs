@@ -22,7 +22,7 @@ public class HelpCommandTests
   private const string PropsFileName = "MTPTest.props";
   private string[] _testProjectTfms = [];
   private static readonly string s_projectName = "coverlet.MTP.validation.tests";
-  private const string sutName = "BasicTestProject";
+  private const string SutName = "BasicTestProject";
   private readonly string _projectOutputPath = TestUtils.GetTestBinaryPath(s_projectName);
   private readonly string _testProjectPath;
   private readonly string _repoRoot ;
@@ -84,7 +84,7 @@ public class HelpCommandTests
                 new XElement("PropertyGroup",
                     new XElement("coverletMTPVersion", GetPackageVersion("*MTP*.nupkg")))));
 
-    string csprojPath = Path.Combine(_testProjectPath, sutName + ".csproj");
+    string csprojPath = Path.Combine(_testProjectPath, SutName + ".csproj");
     XElement csproj = XElement.Load(csprojPath)!;
 
     // Use only the first top-level PropertyGroup in the project file
@@ -480,7 +480,7 @@ public class HelpCommandTests
 
   private string GetSUTBinaryPath()
   {
-    string binTestProjectPath = Path.Combine(_repoRoot, "artifacts", "bin", sutName);
+    string binTestProjectPath = Path.Combine(_repoRoot, "artifacts", "bin", SutName);
     string binPath = Path.Combine(binTestProjectPath, _buildConfiguration);
     return binPath;
   }
@@ -538,7 +538,7 @@ private async Task<int> BuildProject(string projectPath)
 
   private async Task<TestResult> RunTestsWithHelp()
   {
-    string testExecutable = Path.Combine(GetSUTBinaryPath(), sutName + ".dll");
+    string testExecutable = Path.Combine(GetSUTBinaryPath(), SutName + ".dll");
 
     var processStartInfo = new ProcessStartInfo
     {
@@ -569,7 +569,7 @@ private async Task<int> BuildProject(string projectPath)
 
   private async Task<TestResult> RunTestsWithInfo()
   {
-    string testExecutable = Path.Combine(GetSUTBinaryPath(), sutName + ".dll");
+    string testExecutable = Path.Combine(GetSUTBinaryPath(), SutName + ".dll");
 
     var processStartInfo = new ProcessStartInfo
     {
