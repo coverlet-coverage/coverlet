@@ -22,9 +22,10 @@ public class HelpCommandTests
   private const string PropsFileName = "MTPTest.props";
   private string[] _testProjectTfms = [];
   private static readonly string s_projectName = "coverlet.MTP.validation.tests";
-  private static readonly string s_sutName = "BasicTestProject";
+  private const string sutName = "BasicTestProject";
   private readonly string _projectOutputPath = TestUtils.GetTestBinaryPath(s_projectName);
   private readonly string _testProjectPath;
+  private readonly string _repoRoot ;
 
   public HelpCommandTests()
   {
@@ -32,10 +33,10 @@ public class HelpCommandTests
     _buildTargetFramework = "net8.0";
 
     // Get repository root
-    string repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
-    _localPackagesPath = Path.Combine(repoRoot, "artifacts", "packages", _buildConfiguration.ToLowerInvariant(), "Shipping");
+    _repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
+    _localPackagesPath = Path.Combine(_repoRoot, "artifacts", "packages", _buildConfiguration.ToLowerInvariant(), "Shipping");
 
-    _projectOutputPath = Path.Combine(repoRoot, "artifacts", "bin", s_projectName, _buildConfiguration.ToLowerInvariant()); 
+    _projectOutputPath = Path.Combine(_repoRoot, "artifacts", "bin", s_projectName, _buildConfiguration.ToLowerInvariant()); 
 
     // Use dedicated test project in TestProjects subdirectory
     _testProjectPath = Path.Combine(
@@ -83,7 +84,7 @@ public class HelpCommandTests
                 new XElement("PropertyGroup",
                     new XElement("coverletMTPVersion", GetPackageVersion("*MTP*.nupkg")))));
 
-    string csprojPath = Path.Combine(_testProjectPath, s_sutName + ".csproj");
+    string csprojPath = Path.Combine(_testProjectPath, sutName + ".csproj");
     XElement csproj = XElement.Load(csprojPath)!;
 
     // Use only the first top-level PropertyGroup in the project file
@@ -457,11 +458,7 @@ public class HelpCommandTests
 
   private void VerifyCoverletMtpDeployed()
   {
-    string binPath = Path.Combine(
-      _testProjectPath,
-      "bin",
-      _buildConfiguration,
-      _buildTargetFramework);
+    string binPath = GetSUTBinaryPath();
 
     string coverletMtpDll = Path.Combine(binPath, "coverlet.MTP.dll");
     string coverletCoreDll = Path.Combine(binPath, "coverlet.core.dll");
@@ -479,6 +476,13 @@ public class HelpCommandTests
       throw new InvalidOperationException(
         $"coverlet.core.dll not found in '{binPath}'. This is a dependency of coverlet.MTP.");
     }
+  }
+
+  private string GetSUTBinaryPath()
+  {
+    string binTestProjectPath = Path.Combine(_repoRoot, "artifacts", "bin", sutName);
+    string binPath = Path.Combine(binTestProjectPath, _buildConfiguration);
+    return binPath;
   }
 
   private void UpdateNuGetConfig()
@@ -534,12 +538,7 @@ private async Task<int> BuildProject(string projectPath)
 
   private async Task<TestResult> RunTestsWithHelp()
   {
-    string testExecutable = Path.Combine(
-      _testProjectPath, 
-      "bin", 
-      _buildConfiguration, 
-      _buildTargetFramework, 
-      "BasicTestProject.dll");
+    string testExecutable = Path.Combine(GetSUTBinaryPath(), sutName + ".dll");
 
     var processStartInfo = new ProcessStartInfo
     {
@@ -570,12 +569,7 @@ private async Task<int> BuildProject(string projectPath)
 
   private async Task<TestResult> RunTestsWithInfo()
   {
-    string testExecutable = Path.Combine(
-      _testProjectPath, 
-      "bin", 
-      _buildConfiguration, 
-      _buildTargetFramework, 
-      "BasicTestProject.dll");
+    string testExecutable = Path.Combine(GetSUTBinaryPath(), sutName + ".dll");
 
     var processStartInfo = new ProcessStartInfo
     {
