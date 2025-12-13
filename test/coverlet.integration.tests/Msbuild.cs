@@ -17,7 +17,7 @@ namespace Coverlet.Integration.Tests
 
     public Msbuild(ITestOutputHelper output)
     {
-      _buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString();
+      _buildConfiguration = TestUtils.GetBuildConfigurationString();
       _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
       _output = output;
     }

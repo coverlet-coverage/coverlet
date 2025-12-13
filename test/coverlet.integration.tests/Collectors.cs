@@ -50,7 +50,7 @@ namespace Coverlet.Integration.Tests
 
     public Collectors()
     {
-      _buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString();
+      _buildConfiguration = TestUtils.GetBuildConfigurationString();
       _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
     }
 
