@@ -41,22 +41,4 @@
     <None Include="TestProjects\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   
-  <!-- Ensure packages are built before running tests -->
-  <Target Name="EnsureCoverletPackagesBuilt" BeforeTargets="Build">
-    <Message Text="Checking if coverlet.core and coverlet.MTP packages are built..." Importance="high" />
-
-    <PropertyGroup>
-      <PackagePath>$(RepoRoot)artifacts\package\$(Configuration)</PackagePath>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <MtpPackages Include="$(PackagePath)\coverlet.MTP.*.nupkg" />
-    </ItemGroup>
-
-    <!-- Only check for coverlet.MTP package -->
-    <Error Condition="'@(MtpPackages)' == ''"
-           Text="coverlet.MTP package not found in '$(PackagePath)'.%0ARun: dotnet pack src/coverlet.MTP/coverlet.MTP.csproj -c $(Configuration)" />
-
-    <Message Text="Found coverlet.MTP package: @(MtpPackages)" Importance="high" />
-  </Target>
 </Project>

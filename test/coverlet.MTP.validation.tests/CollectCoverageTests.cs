@@ -20,6 +20,7 @@ public class CollectCoverageTests
   private readonly string _localPackagesPath;
   private const string CoverageJsonFileName = "coverage.json";
   private const string CoverageCoberturaFileName = "coverage.cobertura.xml";
+  private readonly string _repoRoot;
 
   public CollectCoverageTests()
   {
@@ -27,8 +28,8 @@ public class CollectCoverageTests
     _buildTargetFramework = "net8.0";
     
     // Get local packages path (adjust based on your build output)
-    string repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
-    _localPackagesPath = Path.Combine(repoRoot, "artifacts", "package", _buildConfiguration.ToLowerInvariant());
+    _repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
+    _localPackagesPath = Path.Combine(_repoRoot, "artifacts", "package", _buildConfiguration.ToLowerInvariant());
   }
 
   [Fact]
@@ -41,12 +42,10 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage");
 
-    TestContext.Current.AddAttachment(
-         "Test Output",
-         result.CombinedOutput);
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.Equal(0, result.ExitCode);
+    Assert.True( result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
     Assert.Contains("Passed!", result.StandardOutput);
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
@@ -69,12 +68,10 @@ public class CollectCoverageTests
       testProject.ProjectPath,
       "--coverage --coverage-output-format cobertura");
 
-    TestContext.Current.AddAttachment(
-         "Test Output",
-         result.CombinedOutput);
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.Equal(0, result.ExitCode);
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories);
     Assert.NotEmpty(coverageFiles);
@@ -94,12 +91,10 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage");
 
-    TestContext.Current.AddAttachment(
-         "Test Output",
-         result.CombinedOutput);
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.Equal(0, result.ExitCode);
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
@@ -149,12 +144,10 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage");
 
-    TestContext.Current.AddAttachment(
-         "Test Output",
-         result.CombinedOutput);
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.Equal(0, result.ExitCode);
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
@@ -207,12 +200,10 @@ public class CollectCoverageTests
       testProject.ProjectPath,
       "--coverage --coverage-output-format json,cobertura,lcov");
 
-    TestContext.Current.AddAttachment(
-         "Test Output",
-         result.CombinedOutput);
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.Equal(0, result.ExitCode);
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
 
     // Verify all formats are generated
     Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, "coverage.json", SearchOption.AllDirectories));
@@ -223,6 +214,7 @@ public class CollectCoverageTests
   #region Helper Methods
 
   private TestProject CreateTestProject(
+
     bool includeSimpleTest = false,
     bool includeMethodTests = false,
     bool includeMultipleClasses = false,
@@ -230,7 +222,11 @@ public class CollectCoverageTests
     bool includeBranchTest = false,
     bool includeMultipleTests = false)
   {
-    string tempPath = Path.Combine(Path.GetTempPath(), $"CoverletMTP_Test_{Guid.NewGuid():N}");
+    // Use repository artifacts folder instead of user temp
+    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    Directory.CreateDirectory(artifactsTemp);
+
+    string tempPath = Path.Combine(artifactsTemp, $"CoverletMTP_Test_{Guid.NewGuid():N}");
     Directory.CreateDirectory(tempPath);
 
     // Create NuGet.config to use local packages
@@ -496,10 +492,28 @@ public class ExcludedClass
     string projectName = Path.GetFileNameWithoutExtension(projectPath);
     string testExecutable = Path.Combine(projectDir, "bin", _buildConfiguration, _buildTargetFramework, $"{projectName}.dll");
 
+    if (!File.Exists(testExecutable))
+    {
+      throw new FileNotFoundException(
+        $"Test executable not found: {testExecutable}\n" +
+        $"Build may have failed silently.");
+    }
+
+    string coverletMtpDll = Path.Combine(
+      Path.GetDirectoryName(testExecutable)!,
+      "coverlet.MTP.dll");
+
+    if (!File.Exists(coverletMtpDll))
+    {
+      throw new FileNotFoundException(
+        $"Coverlet MTP extension not found: {coverletMtpDll}\n" +
+        $"The coverlet.MTP NuGet package may not have restored correctly.");
+    }
+
     var processStartInfo = new ProcessStartInfo
     {
       FileName = "dotnet",
-      Arguments = $"exec \"{testExecutable}\" {arguments}",
+      Arguments = $"exec \"{testExecutable}\" {arguments} --diagnostic --diagnostic-verbosity trace",
       RedirectStandardOutput = true,
       RedirectStandardError = true,
       UseShellExecute = false,
@@ -514,12 +528,28 @@ public class ExcludedClass
 
     await process.WaitForExitAsync();
 
+    string errorContext = process.ExitCode switch
+    {
+      0 => "Success",
+      1 => "Test failures occurred",
+      2 => "Invalid command-line arguments",
+      3 => "Test discovery failed",
+      4 => "Test execution failed",
+      5 => "Unexpected error (unhandled exception)",
+      _ => "Unknown error"
+    };
+
     return new TestResult
     {
       ExitCode = process.ExitCode,
+      ErrorText = errorContext,
       StandardOutput = output,
       StandardError = error,
-      CombinedOutput = $"STDOUT:\n{output}\n\nSTDERR:\n{error}"
+      CombinedOutput = $"=== TEST EXECUTABLE ===\n{testExecutable}\n\n" +
+                    $"=== ARGUMENTS ===\n{arguments}\n\n" +
+                    $"=== EXIT CODE ===\n{process.ExitCode}\n\n" +
+                    $"=== STDOUT ===\n{output}\n\n" +
+                    $"=== STDERR ===\n{error}"
     };
   }
 
@@ -544,24 +574,43 @@ public class ExcludedClass
 
     public void Dispose()
     {
-      try
+      string? projectDir = Path.GetDirectoryName(ProjectPath);
+      if (projectDir == null || !Directory.Exists(projectDir))
+        return;
+
+      // Retry cleanup to handle file locks (especially on Windows)
+      for (int i = 0; i < 3; i++)
       {
-        string? projectDir = Path.GetDirectoryName(ProjectPath);
-        if (projectDir != null && Directory.Exists(projectDir))
+        try
         {
-          Directory.Delete(projectDir, true);
+          Directory.Delete(projectDir, recursive: true);
+          return; // Success
+        }
+        catch (IOException) when (i < 2)
+        {
+          // File may be locked by antivirus or other process
+          System.Threading.Thread.Sleep(100);
+        }
+        catch (UnauthorizedAccessException) when (i < 2)
+        {
+          // Mark files as normal (remove read-only) and retry
+          foreach (var file in Directory.GetFiles(projectDir, "*", SearchOption.AllDirectories))
+          {
+            File.SetAttributes(file, FileAttributes.Normal);
+          }
+          System.Threading.Thread.Sleep(100);
         }
       }
-      catch
-      {
-        // Swallow cleanup exceptions
-      }
+      
+      // Log cleanup failure but don't throw (test already finished)
+      Debug.WriteLine($"Warning: Failed to cleanup test directory: {projectDir}");
     }
   }
 
   private class TestResult
   {
     public int ExitCode { get; set; }
+    public string ErrorText { get; set; } = string.Empty;
     public string StandardOutput { get; set; } = string.Empty;
     public string StandardError { get; set; } = string.Empty;
     public string CombinedOutput { get; set; } = string.Empty;

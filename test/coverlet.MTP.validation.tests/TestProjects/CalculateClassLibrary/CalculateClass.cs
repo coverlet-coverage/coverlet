@@ -3,7 +3,7 @@
 
 namespace CalculateClassLibrary
 {
-    public class Class1
+    public class CalculateClass
     {
         public static int Add(int x, int y) =>
             x + y;

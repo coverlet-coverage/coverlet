@@ -1,3 +1,4 @@
 <Project>
-  <Import Project="$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\coverlet.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\coverlet.MTP.props"
+        Condition="Exists('$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\coverlet.MTP.props')" />
 </Project>
