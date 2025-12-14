@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- This test project does NOT need MTP runner itself -->
   <!-- It tests a SEPARATE BasicTestProject that uses MTP -->
   <PropertyGroup>
@@ -20,7 +20,8 @@
     </PropertyGroup>
       
   <ItemGroup>
-    <PackageReference Include="xunit.v3" Version="$(XunitV3Version)" />
+    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)"/>
+    <PackageReference Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
   </ItemGroup>
 

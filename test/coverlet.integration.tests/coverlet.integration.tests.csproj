@@ -19,7 +19,7 @@
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
-    <PackageReference Include="xunit.v3" Version="$(XunitV3Version)" />
+    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
