@@ -247,6 +247,9 @@ public class CollectCoverageTests
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>    
     <OutputType>Exe</OutputType>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)</ArtifactsPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include=""xunit.v3"" Version=""3.2.1"" />
@@ -466,7 +469,8 @@ public class ExcludedClass
       RedirectStandardOutput = true,
       RedirectStandardError = true,
       UseShellExecute = false,
-      CreateNoWindow = true
+      CreateNoWindow = true,
+      WorkingDirectory = Path.GetDirectoryName(projectPath)
     };
 
     using var process = Process.Start(processStartInfo);
@@ -490,7 +494,7 @@ public class ExcludedClass
     // For MTP, we need to run the test executable directly, not through dotnet test
     string projectDir = Path.GetDirectoryName(projectPath)!;
     string projectName = Path.GetFileNameWithoutExtension(projectPath);
-    string testExecutable = Path.Combine(projectDir, "bin", _buildConfiguration, _buildTargetFramework, $"{projectName}.dll");
+    string testExecutable = Path.Combine(projectDir, "bin", projectName, _buildConfiguration.ToLower(), $"{projectName}.dll");
 
     if (!File.Exists(testExecutable))
     {
