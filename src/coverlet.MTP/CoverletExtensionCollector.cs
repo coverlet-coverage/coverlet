@@ -86,7 +86,7 @@ namespace coverlet.Extension.Collector
         {
           CoveragePrepareResult prepareResult = _coverage.PrepareModules();
           _logger.LogInformation($"Code coverage instrumentation completed. Instrumented {prepareResult.Results.Length} modules");
-        });
+        }, cancellationToken);
 
       }
       catch (Exception ex)
@@ -146,7 +146,7 @@ namespace coverlet.Extension.Collector
 
               string report = Path.Combine(directory, filename);
               _logger.LogInformation($"  Generating report '{report}'", important: true);
-              await Task.Run(() => fileSystem.WriteAllText(report, reporter.Report(result, sourceRootTranslator)));
+              await Task.Run(() => fileSystem.WriteAllText(report, reporter.Report(result, sourceRootTranslator)), cancellation);
             }
           }
 
