@@ -140,14 +140,14 @@ internal sealed class CoverageConfiguration
     string? path = System.Reflection.Assembly.GetEntryAssembly()?.Location;
     if (!string.IsNullOrEmpty(path) && File.Exists(path))
     {
-      return path;
+      return path!;
     }
 
     // 2. Current process main module
     path = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
     if (!string.IsNullOrEmpty(path) && File.Exists(path))
     {
-      return path;
+      return path!;
     }
 
     // 3. Base directory + first command line argument
