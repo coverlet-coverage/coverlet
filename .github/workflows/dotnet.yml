@@ -131,7 +131,7 @@ jobs:
         dotnet build-server shutdown
         dotnet test ./test/coverlet.collector.tests/coverlet.collector.tests.csproj -c ${{env.BuildConfiguration}} --no-build -bl:test.collector.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"./artifacts/log/${{env.BuildConfiguration}}/coverlet.collector.test.diag.log;tracelevel=verbose"
         dotnet build-server shutdown
-        dotnet test ./test/coverlet.integration.tests/coverlet.integration.tests.csproj -c ${{env.BuildConfiguration}} --no-build -bl:test.integration.binlog -- --results-directory "./artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.tests.trx" --diagnostic --diagnostic-output-directory "./artifacts/log/${{env.BuildConfiguration}}" --diagnostic-output-fileprefix "coverlet.integration.tests"
+        dotnet test ./test/coverlet.integration.tests/coverlet.integration.tests.csproj -c ${{env.BuildConfiguration}} --no-build -bl:test.integration.binlog -- --results-directory "./artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.tests.trx" --diagnostic --diagnostic-output-directory "./artifacts/log/${{env.BuildConfiguration}}"
       name: Run unit tests with coverage
       env:
         MSBUILDDISABLENODEREUSE: 1

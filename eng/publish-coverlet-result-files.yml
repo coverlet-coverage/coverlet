@@ -6,20 +6,23 @@ steps:
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)/artifacts'
     Contents: |
-       **/*.trx
-       **/*.html
-       **/*.opencover.xml
-       **/*.cobertura.xml
-       **/*.coverage.json
-       **/*.diag.log
-       **/log.txt
-       **/log.datacollector.*.txt
-       **/log.host.*.txt
-       **/coverlet.integration.tests.diag*.log
-       **/coverlet.collector.tests.diag*.log
-       **/coverlet.msbuild.tasks.tests.diag*.log
-       **/coverlet.core.coverage.tests.diag*.log
-       **/coverlet.core.tests.diag*.log
+      **/*.trx
+      **/*.html
+      **/*.opencover.xml
+      **/*.cobertura.xml
+      **/*.coverage.json
+      **/log.txt
+      **/log.datacollector.*.txt
+      **/log.host.*.txt
+      **/coverlet.MTP.unit.tests/**/*.diag
+      **/coverlet.MTP.unit.tests/**/*.log
+      **/coverlet.MTP.validation.tests/**/*.diag
+      **/coverlet.MTP.validation.tests/**/*.log
+      **/coverlet.core.coverage.tests/**/*.diag
+      **/coverlet.core.coverage.tests/**/*.log
+      **/coverlet.core.tests/**/*.diag
+      **/coverlet.core.tests/**/*.log
+      **/*.diag
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: CopyFiles@2

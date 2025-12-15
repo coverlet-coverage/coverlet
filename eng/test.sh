@@ -32,7 +32,7 @@ dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c Deb
 
 # coverlet.integration.tests (default net8.0)
 dotnet build-server shutdown
-dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net8.0 -c Debug --no-build -bl:test.integration.binlog -- --results-directory "$WORKSPACE_ROOT/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.tests.trx" --diagnostic --diagnostic-output-directory "$WORKSPACE_ROOT/artifacts/log/Debug" --diagnostic-output-fileprefix "coverlet.integration.tests"
+dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net8.0 -c Debug --no-build -bl:test.integration.binlog -- --results-directory "$WORKSPACE_ROOT/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.tests.trx" --diagnostic --diagnostic-output-directory "$WORKSPACE_ROOT/artifacts/log/Debug"
 
 dotnet build-server shutdown
 
@@ -45,8 +45,7 @@ if [[ "$SDK_MAJOR_VERSION" -ge 9 ]]; then
     # Check if the net9.0 test dll exists
     if [ -f "$WORKSPACE_ROOT/artifacts/bin/coverlet.integration.tests/debug_net9.0/coverlet.integration.tests.dll" ]; then
         echo "Executing command for SDK version $SDK_VERSION (9.0+ detected)..."
-        dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net9.0 -c Debug --no-build -bl:test.integration.binlog -- --results-directory "$WORKSPACE_ROOT/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.tests.trx" --diagnostic --diagnostic-output-directory "$WORKSPACE_ROOT/artifacts/log/Debug" --diagnostic-output-fileprefix "coverlet.integration.tests"
-        dotnet build-server shutdown
+        dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net9.0 -c Debug --no-build -bl:test.integration.binlog -- --results-directory "$WORKSPACE_ROOT/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.tests.trx" --diagnostic --diagnostic-output-directory "$WORKSPACE_ROOT/artifacts/log/Debug"
     else
         echo "Skipping command execution. Required file does not exist."
     fi
