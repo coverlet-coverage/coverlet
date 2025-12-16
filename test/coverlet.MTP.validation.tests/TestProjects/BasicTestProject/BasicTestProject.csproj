@@ -25,6 +25,8 @@
     <!-- VSTest properties are irrelevant -->
     <VSTestLogger></VSTestLogger>
     <VSTestResultsDirectory></VSTestResultsDirectory>
+    <!-- replace the xUnit.net native command line experience with the Microsoft Testing Platform command line experience -->
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
   </PropertyGroup>
 
 	<!-- Define default values if props file doesn't exist -->
@@ -35,7 +37,8 @@
   <ItemGroup>
     <!-- XUnit v3 for Microsoft Testing Platform -->
     <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)"/>
+		<PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
+    <PackageReference Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
 
 		<!-- Coverlet MTP Extension - version will be provided by local NuGet.config -->
     <PackageReference Include="coverlet.MTP" Version="$(coverletMTPVersion)" />

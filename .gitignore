@@ -323,3 +323,4 @@ Playground*/
 # ignore copilot agents
 .github/agents/
 current.diff
+/test/coverlet.MTP.validation.tests/TestProjects/BasicTestProject/MTPTest.props

@@ -17,6 +17,8 @@
     -->
     <IsPackable>false</IsPackable>
     <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+    <!-- replace the xUnit.net native command line experience with the Microsoft Testing Platform command line experience -->
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     </PropertyGroup>
       
   <ItemGroup>

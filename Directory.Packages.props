@@ -58,6 +58,7 @@
     <!-- latest Tmds.ExecFunction package uses EnvDTE V17.8.37221 -->
     <PackageVersion Include="Tmds.ExecFunction" Version="0.8.0" />
     <!-- <PackageVersion Include="xunit" Version="2.9.3" /> -->
+    <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.runner.msbuild" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
