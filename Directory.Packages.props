@@ -36,6 +36,7 @@
     <!--<PackageVersion Include="MSTest.TestFramework" Version="3.9.1" />-->
     <!-- Microsoft Testing Platform-->
     <PackageVersion Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="$(MicrosoftTestingPlatformVersion)" />
     <!--<PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSTest" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSTest.Extensions" Version="$(MicrosoftTestingPlatformVersion)" />-->

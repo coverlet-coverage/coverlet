@@ -252,7 +252,9 @@ public class CollectCoverageTests
     <ArtifactsPath>$(MSBuildThisFileDirectory)</ArtifactsPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include=""xunit.v3"" Version=""3.2.1"" />
+    <!-- Use xunit.v3.mtp-v2 which is designed for MTP v2.x -->
+    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.1"" />
+    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.0.2"" />
     <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
   </ItemGroup>
 </Project>");
