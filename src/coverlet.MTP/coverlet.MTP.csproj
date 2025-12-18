@@ -56,7 +56,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Testing.Platform" />
-    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" />
     <PackageReference Include="System.Buffers" />
     <PackageReference Include="System.Memory" />
   </ItemGroup>

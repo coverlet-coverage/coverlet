@@ -105,6 +105,24 @@ public class HelpCommandTests
   }
 
   [Fact]
+  public async Task Help_ShowsCoverageOption()
+  {
+    // Arrange
+    await EnsureTestProjectBuilt();
+
+    // Act
+    TestResult result = await RunTestsWithHelp();
+
+    TestContext.Current.AddAttachment(
+      "Test Output",
+      result.CombinedOutput);
+
+    // Assert - Check for --coverlet-coverage option that enables coverage collection
+    Assert.Contains("--coverlet-coverage", result.StandardOutput);
+    Assert.Contains("Enable code coverage collection", result.StandardOutput);
+  }
+
+  [Fact]
   public async Task Help_ShowsCoverletMtpExtension()
   {
     CreateDeterministicTestPropsFile();

@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using coverlet.Extension;
+using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 using Xunit;
 
@@ -91,6 +92,7 @@ namespace coverlet.MTP.unit.tests
 
       var expectedOptions = new[]
       {
+                "coverage",
                 "formats",
                 "exclude",
                 "include",

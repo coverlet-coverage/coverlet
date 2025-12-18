@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using coverlet.Extension.Collector;
+using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Extensions.Diagnostics;
 using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;

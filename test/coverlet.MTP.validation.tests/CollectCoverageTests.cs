@@ -40,7 +40,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage");
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage --formats json");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -66,7 +66,7 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(
       testProject.ProjectPath,
-      "--coverage --coverage-output-format cobertura");
+      "--coverlet-coverage --formats cobertura");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -89,7 +89,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage");
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -142,7 +142,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage");
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -198,7 +198,7 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(
       testProject.ProjectPath,
-      "--coverage --coverage-output-format json,cobertura,lcov");
+      "--coverlet-coverage --formats json,cobertura,lcov");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -250,6 +250,11 @@ public class CollectCoverageTests
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)</ArtifactsPath>
+    <!-- restore from local folder and nuget.org -->
+    <RestoreSources>
+			https://api.nuget.org/v3/index.json;
+			$(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
+		</RestoreSources>
   </PropertyGroup>
   <ItemGroup>
     <!-- Use xunit.v3.mtp-v2 which is designed for MTP v2.x -->

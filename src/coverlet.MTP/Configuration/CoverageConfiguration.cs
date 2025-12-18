@@ -21,7 +21,7 @@ internal sealed class CoverageConfiguration
   public string[] GetOutputFormats()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.CoverageOutputFormatOptionName,
+      CoverletCommandLineOptionsProvider.FormatsOptionName,
       out string[]? formats))
     {
       return formats[0].Split(',')
@@ -32,24 +32,24 @@ internal sealed class CoverageConfiguration
     return new[] { "json" }; // Default format
   }
 
-  public string GetOutputPath()
-  {
-    if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.CoverageOutputOptionName,
-      out string[]? outputPath))
-    {
-      return outputPath[0];
-    }
+  //public string GetOutputPath()
+  //{
+  //  if (_commandLineOptions.TryGetOptionArgumentList(
+  //    CoverletCommandLineOptionsProvider.CoverageOutputOptionName,
+  //    out string[]? outputPath))
+  //  {
+  //    return outputPath[0];
+  //  }
 
-    // Default: TestResults folder next to test assembly
-    string testDir = Path.GetDirectoryName(GetTestAssemblyPath()) ?? AppContext.BaseDirectory;
-    return Path.Combine(testDir, "TestResults");
-  }
+  //  // Default: TestResults folder next to test assembly
+  //  string testDir = Path.GetDirectoryName(GetTestAssemblyPath()) ?? AppContext.BaseDirectory;
+  //  return Path.Combine(testDir, "TestResults");
+  //}
 
   public string[] GetIncludeFilters()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.CoverageIncludeOptionName,
+      CoverletCommandLineOptionsProvider.IncludeOptionName,
       out string[]? filters))
     {
       return filters;
@@ -61,7 +61,7 @@ internal sealed class CoverageConfiguration
   public string[] GetExcludeFilters()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.CoverageExcludeOptionName,
+      CoverletCommandLineOptionsProvider.ExcludeOptionName,
       out string[]? filters))
     {
       return filters;
@@ -73,7 +73,7 @@ internal sealed class CoverageConfiguration
   public string[] GetExcludeByFileFilters()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.CoverageExcludeByFileOptionName,
+      CoverletCommandLineOptionsProvider.ExcludeByFileOptionName,
       out string[]? filters))
     {
       return filters;
@@ -85,7 +85,7 @@ internal sealed class CoverageConfiguration
   public string[] GetExcludeByAttributeFilters()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.CoverageExcludeByAttributeOptionName,
+      CoverletCommandLineOptionsProvider.ExcludeByAttributeOptionName,
       out string[]? filters))
     {
       return filters;
@@ -97,7 +97,7 @@ internal sealed class CoverageConfiguration
   public string[] GetIncludeDirectories()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.CoverageIncludeDirectoryOptionName,
+      CoverletCommandLineOptionsProvider.IncludeDirectoryOptionName,
       out string[]? directories))
     {
       return directories;
@@ -107,18 +107,18 @@ internal sealed class CoverageConfiguration
   }
 
   public bool UseSingleHit =>
-    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.CoverageSingleHitOptionName);
+    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.SingleHitOptionName);
 
   public bool IncludeTestAssembly =>
-    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.CoverageIncludeTestAssemblyOptionName);
+    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.IncludeTestAssemblyOptionName);
 
   public bool SkipAutoProps =>
-    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.CoverageSkipAutoPropsOptionName);
+    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.SkipAutoPropsOptionName);
 
   public string[] GetDoesNotReturnAttributes()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.CoverageDoesNotReturnAttributeOptionName,
+      CoverletCommandLineOptionsProvider.DoesNotReturnAttributeOptionName,
       out string[]? attributes))
     {
       return attributes;
@@ -128,7 +128,7 @@ internal sealed class CoverageConfiguration
   }
 
   public bool ExcludeAssembliesWithoutSources =>
-    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.CoverageExcludeAssembliesWithoutSourcesOptionName);
+    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.ExcludeAssembliesWithoutSourcesOptionName);
 
   /// <summary>
   /// Gets the test assembly path using multiple fallback strategies.

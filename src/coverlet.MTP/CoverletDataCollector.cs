@@ -42,7 +42,7 @@ internal sealed class CoverletDataCollector : IDataProducer, ITestSessionLifetim
 
   public Task<bool> IsEnabledAsync()
   {
-    // Only enable if --coverage flag is present
+    // Only enable if --coverlet-coverage flag is present
     return Task.FromResult(_configuration.IsCoverageEnabled);
   }
 
@@ -128,8 +128,8 @@ internal sealed class CoverletDataCollector : IDataProducer, ITestSessionLifetim
       // Collect coverage results
       CoverageResult result = _coverage.GetCoverageResult();
 
-      string outputPath = _configuration.GetOutputPath();
-      Directory.CreateDirectory(outputPath);
+      //string outputPath = _configuration.GetOutputPath();
+      //Directory.CreateDirectory(outputPath);
 
       string[] formats = _configuration.GetOutputFormats();
 
@@ -144,7 +144,8 @@ internal sealed class CoverletDataCollector : IDataProducer, ITestSessionLifetim
           _ => $"coverage.{format}"
         };
 
-        string fullPath = Path.Combine(outputPath, fileName);
+        string fullPath = fileName;
+        //string fullPath = Path.Combine(outputPath, fileName);
 
         // Generate report using appropriate reporter
         IReporter reporter = format.ToLowerInvariant() switch

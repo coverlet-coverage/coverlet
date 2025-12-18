@@ -12,6 +12,7 @@ using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
+using Coverlet.MTP.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
@@ -49,13 +50,22 @@ namespace coverlet.Extension.Collector
       _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
       _commandLineOptions = commandLineOptions ?? throw new ArgumentNullException(nameof(commandLineOptions));
       _configuration = new CoverletExtensionConfiguration();
-      _logger = new CoverletLoggerAdapter(_loggerFactory); // Initialize the logger adapter
+      _logger = new CoverletLoggerAdapter(_loggerFactory);
       _serviceProvider = CreateServiceProvider();
     }
 
     /// <inheritdoc/>
     public async Task BeforeRunAsync(CancellationToken cancellationToken)
     {
+      // Only collect coverage if --coverlet-coverage flag is explicitly provided
+      bool isCoverageEnabled = _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
+
+      if (!isCoverageEnabled)
+      {
+        _logger.LogInformation($"Coverage collection is disabled. Use --{CoverletOptionNames.Coverage} to enable it.");
+        return;
+      }
+
       try
       {
         var parameters = new CoverageParameters
@@ -81,7 +91,6 @@ namespace coverlet.Extension.Collector
             _serviceProvider.GetRequiredService<ICecilSymbolHelper>());
 
         // Instrument assemblies before any test execution
-        // Shall be executed asynchronous (out-process)
         await Task.Run(() =>
         {
           CoveragePrepareResult prepareResult = _coverage.PrepareModules();
@@ -103,55 +112,54 @@ namespace coverlet.Extension.Collector
       {
         if (_coverage == null)
         {
-          _logger.LogError("Coverage instance not initialized");
+          _logger.LogInformation("Coverage was not collected.");
+          return;
         }
-        else
+
+        _logger.LogInformation("\nCalculating coverage result...");
+        CoverageResult result = _coverage!.GetCoverageResult();
+
+        string dOutput = _configuration.OutputDirectory != null ? _configuration.OutputDirectory : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
+
+        string directory = Path.GetDirectoryName(dOutput)!;
+
+        if (!Directory.Exists(directory))
         {
-          _logger.LogInformation("\nCalculating coverage result...");
-          CoverageResult result = _coverage!.GetCoverageResult();
-
-          string dOutput = _configuration.OutputDirectory != null ? _configuration.OutputDirectory : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
-
-          string directory = Path.GetDirectoryName(dOutput)!;
-
-          if (!Directory.Exists(directory))
-          {
-            Directory.CreateDirectory(directory);
-          }
-
-          ISourceRootTranslator sourceRootTranslator = _serviceProvider.GetRequiredService<ISourceRootTranslator>();
-          IFileSystem fileSystem = _serviceProvider.GetService<IFileSystem>()!;
-
-          // Convert to coverlet format
-          foreach (string format in _configuration.formats)
-          {
-            IReporter reporter = new ReporterFactory(format).CreateReporter();
-            if (reporter == null)
-            {
-              throw new InvalidOperationException($"Specified output format '{format}' is not supported");
-            }
-
-            if (reporter.OutputType == ReporterOutputType.Console)
-            {
-              // Output to console
-              _logger.LogInformation("  Outputting results to console", important: true);
-              _logger.LogInformation(reporter.Report(result, sourceRootTranslator), important: true);
-            }
-            else
-            {
-              // Output to file
-              string filename = Path.GetFileName(dOutput);
-              filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
-              filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
-
-              string report = Path.Combine(directory, filename);
-              _logger.LogInformation($"  Generating report '{report}'", important: true);
-              await Task.Run(() => fileSystem.WriteAllText(report, reporter.Report(result, sourceRootTranslator)), cancellation);
-            }
-          }
-
-          _logger.LogInformation("Code coverage collection completed");
+          Directory.CreateDirectory(directory);
         }
+
+        ISourceRootTranslator sourceRootTranslator = _serviceProvider.GetRequiredService<ISourceRootTranslator>();
+        IFileSystem fileSystem = _serviceProvider.GetService<IFileSystem>()!;
+
+        // Convert to coverlet format
+        foreach (string format in _configuration.formats)
+        {
+          IReporter reporter = new ReporterFactory(format).CreateReporter();
+          if (reporter == null)
+          {
+            throw new InvalidOperationException($"Specified output format '{format}' is not supported");
+          }
+
+          if (reporter.OutputType == ReporterOutputType.Console)
+          {
+            // Output to console
+            _logger.LogInformation("  Outputting results to console", important: true);
+            _logger.LogInformation(reporter.Report(result, sourceRootTranslator), important: true);
+          }
+          else
+          {
+            // Output to file
+            string filename = Path.GetFileName(dOutput);
+            filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
+            filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
+
+            string report = Path.Combine(directory, filename);
+            _logger.LogInformation($"  Generating report '{report}'", important: true);
+            await Task.Run(() => fileSystem.WriteAllText(report, reporter.Report(result, sourceRootTranslator)), cancellation);
+          }
+        }
+
+        _logger.LogInformation("Code coverage collection completed");
       }
       catch (Exception ex)
       {
@@ -164,16 +172,12 @@ namespace coverlet.Extension.Collector
     {
       var services = new ServiceCollection();
 
-      // Register core dependencies with explicit ILogger interface
-      services.AddSingleton<Coverlet.Core.Abstractions.ILogger>(_logger); // Register the adapter with the correct interface
+      services.AddSingleton<Coverlet.Core.Abstractions.ILogger>(_logger);
       services.AddSingleton<IFileSystem, FileSystem>();
       services.AddSingleton<IAssemblyAdapter, AssemblyAdapter>();
-
-      // Register instrumentation components with singleton lifetime
       services.AddSingleton<IInstrumentationHelper, InstrumentationHelper>();
       services.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
 
-      // Register SourceRootTranslator with its dependencies
       services.AddSingleton<ISourceRootTranslator>(provider =>
           new SourceRootTranslator(
               _configuration.sourceMappingFile,
@@ -208,9 +212,16 @@ namespace coverlet.Extension.Collector
       throw new NotImplementedException();
     }
 
-    Task<bool> IExtension.IsEnabledAsync()
+    /// <summary>
+    /// Determines if the extension is enabled.
+    /// Always returns true so that command-line options appear in help.
+    /// Actual coverage collection is controlled by the --coverlet-coverage flag.
+    /// </summary>
+    public Task<bool> IsEnabledAsync()
     {
-      return _extension.IsEnabledAsync();
+      // Always enable the extension so options appear in help
+      // Coverage collection is controlled by checking the --coverlet-coverage flag in BeforeRunAsync
+      return Task.FromResult(true);
     }
   }
 }
