@@ -33,6 +33,29 @@ public class CollectCoverageTests
   }
 
   [Fact]
+  public async Task BasicNoCoverage_CollectsDataForCoveredLines()
+  {
+    // Arrange
+    using var testProject = CreateTestProject(includeSimpleTest: true,
+      includeMethodTests: true,
+      includeMultipleClasses: true,
+      includeCalculatorTest: true,
+      includeBranchTest: true,
+      includeMultipleTests: true);
+    await BuildProject(testProject.ProjectPath);
+
+    // Act
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--formats json", testName: TestContext.Current.TestCase!.TestMethodName!);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+    Assert.Contains("Passed!", result.StandardOutput);
+
+  }
+
+  [Fact]
   public async Task BasicCoverage_CollectsDataForCoveredLines()
   {
     // Arrange
@@ -45,7 +68,7 @@ public class CollectCoverageTests
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.True( result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
     Assert.Contains("Passed!", result.StandardOutput);
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
@@ -71,7 +94,7 @@ public class CollectCoverageTests
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories);
     Assert.NotEmpty(coverageFiles);
@@ -94,7 +117,7 @@ public class CollectCoverageTests
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
@@ -147,7 +170,7 @@ public class CollectCoverageTests
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
@@ -204,7 +227,7 @@ public class CollectCoverageTests
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
     // Assert
-    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
     // Verify all formats are generated
     Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, "coverage.json", SearchOption.AllDirectories));
@@ -258,10 +281,14 @@ public class CollectCoverageTests
 		</RestoreSources>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include=""Tests.cs"" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- Use xunit.v3.mtp-v2 which is designed for MTP v2.x -->
     <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.1"" />
     <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.0.2"" />
     <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.0.2"" />
   </ItemGroup>
 </Project>");
 
@@ -327,7 +354,6 @@ public class CollectCoverageTests
     codeBuilder.AppendLine("using Xunit;");
     codeBuilder.AppendLine();
     codeBuilder.AppendLine("namespace TestProject;");
-    codeBuilder.AppendLine();
 
     if (includeSimpleTest)
     {
@@ -407,14 +433,14 @@ public class BranchTests
   [Fact]
   public void Branch_PositivePath_IsCovered()
   {
-    var result = CheckValue(10);
+    string result = CheckValue(10);
     Assert.Equal(""Positive"", result);
   }
 
   [Fact]
   public void Branch_NegativePath_IsCovered()
   {
-    var result = CheckValue(-5);
+    string result = CheckValue(-5);
     Assert.Equal(""Negative"", result);
   }
 
@@ -544,7 +570,7 @@ public class ExcludedClass
 
     string errorContext = process.ExitCode switch
     {
-      0 => "Success, no errors",
+      0 => "success, no errors",
       1 => "unknown errors",
       2 => "test failure",
       3 => "test session was aborted",
