@@ -3,10 +3,10 @@
 
 using coverlet.Extension.Collector;
 using Coverlet.MTP.CommandLine;
-using Microsoft.Testing.Extensions.Diagnostics;
 using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Services;
+using Microsoft.Testing.Extensions.Diagnostics;
 
 namespace coverlet.Extension
 {
@@ -15,13 +15,6 @@ namespace coverlet.Extension
     public static void AddCoverletExtensionProvider(this ITestApplicationBuilder builder, bool ignoreIfNotSupported = false)
     {
       CoverletExtension _extension = new();
-      CoverletExtensionConfiguration coverletExtensionConfiguration = new();
-      if (ignoreIfNotSupported)
-      {
-#if !NETCOREAPP
-              coverletExtensionConfiguration.Enable = false;
-#endif
-      }
 
       builder.TestHostControllers.AddEnvironmentVariableProvider(serviceProvider
           => new CoverletExtensionEnvironmentVariableProvider(
@@ -29,15 +22,12 @@ namespace coverlet.Extension
               serviceProvider.GetCommandLineOptions(),
               serviceProvider.GetLoggerFactory()));
 
-      // Fix for CS0029 and CS1662:
-      // Ensure that CoverletExtensionCollector implements ITestHostProcessLifetimeHandler
       builder.TestHostControllers.AddProcessLifetimeHandler(static serviceProvider
           => new CoverletExtensionCollector(
               serviceProvider.GetLoggerFactory(),
               serviceProvider.GetCommandLineOptions()) as ITestHostProcessLifetimeHandler);
 
       builder.CommandLine.AddProvider(() => new CoverletExtensionCommandLineProvider(_extension));
-
     }
   }
 }

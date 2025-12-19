@@ -40,7 +40,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage --formats json");
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage --formats json", testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -66,7 +66,7 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(
       testProject.ProjectPath,
-      "--coverlet-coverage --formats cobertura");
+      "--coverlet-coverage --formats cobertura", testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -89,7 +89,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage");
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage", testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -142,7 +142,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage");
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage", testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -198,7 +198,8 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(
       testProject.ProjectPath,
-      "--coverlet-coverage --formats json,cobertura,lcov");
+      "--coverlet-coverage --formats json,cobertura,lcov",
+      testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -496,7 +497,7 @@ public class ExcludedClass
     return process.ExitCode;
   }
 
-  private async Task<TestResult> RunTestsWithCoverage(string projectPath, string arguments)
+  private async Task<TestResult> RunTestsWithCoverage(string projectPath, string arguments, string testName)
   {
     // For MTP, we need to run the test executable directly, not through dotnet test
     string projectDir = Path.GetDirectoryName(projectPath)!;
@@ -521,10 +522,12 @@ public class ExcludedClass
         $"The coverlet.MTP NuGet package may not have restored correctly.");
     }
 
+    string diagFolder = new Uri(Path.Combine(projectDir, "..")).LocalPath;
+
     var processStartInfo = new ProcessStartInfo
     {
       FileName = "dotnet",
-      Arguments = $"exec \"{testExecutable}\" {arguments} --diagnostic --diagnostic-verbosity trace",
+      Arguments = $"exec \"{testExecutable}\" {arguments} --diagnostic --diagnostic-verbosity trace --diagnostic-output-directory {diagFolder} --diagnostic-file-prefix {testName}",
       RedirectStandardOutput = true,
       RedirectStandardError = true,
       UseShellExecute = false,

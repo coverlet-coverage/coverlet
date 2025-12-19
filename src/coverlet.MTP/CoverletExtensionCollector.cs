@@ -1,27 +1,21 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// see details here: https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-architecture-extensions#the-itestsessionlifetimehandler-extensions
-// Coverlet instrumentation should be done before any test is executed, and the coverage data should be collected after all tests have run.
-// Coverlet collects code coverage data and does not need to be aware of the test framework being used. It also does not need test case details or test results.
-
 using coverlet.Extension.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
-using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
-using Coverlet.MTP.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
-using Microsoft.Testing.Platform.TestHost;
+using Coverlet.MTP.CommandLine;
 
 namespace coverlet.Extension.Collector
 {
   /// <summary>
-  /// Implements test session lifetime handling for coverage collection using the Microsoft Testing Platform.
+  /// Implements test host process lifetime handling for coverage collection using the Microsoft Testing Platform.
   /// </summary>
   internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandler
   {
@@ -31,21 +25,18 @@ namespace coverlet.Extension.Collector
     private Coverage? _coverage;
     private readonly Microsoft.Testing.Platform.Logging.ILoggerFactory _loggerFactory;
     private readonly Microsoft.Testing.Platform.CommandLine.ICommandLineOptions _commandLineOptions;
+    private bool _coverageEnabled;
 
     private readonly CoverletExtension _extension = new();
 
     string IExtension.Uid => _extension.Uid;
-
     string IExtension.Version => _extension.Version;
-
     string IExtension.DisplayName => _extension.DisplayName;
-
     string IExtension.Description => _extension.Description;
 
-    /// <summary>
-    /// Initializes a new instance of the CoverletCollectorExtension class.
-    /// </summary>
-    public CoverletExtensionCollector(Microsoft.Testing.Platform.Logging.ILoggerFactory loggerFactory, Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions)
+    public CoverletExtensionCollector(
+      Microsoft.Testing.Platform.Logging.ILoggerFactory loggerFactory,
+      Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions)
     {
       _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
       _commandLineOptions = commandLineOptions ?? throw new ArgumentNullException(nameof(commandLineOptions));
@@ -54,73 +45,112 @@ namespace coverlet.Extension.Collector
       _serviceProvider = CreateServiceProvider();
     }
 
-    /// <inheritdoc/>
-    public async Task BeforeRunAsync(CancellationToken cancellationToken)
+    /// <summary>
+    /// Called before the test host process starts. Instruments assemblies for coverage collection.
+    /// </summary>
+    Task ITestHostProcessLifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken cancellationToken)
     {
-      // Only collect coverage if --coverlet-coverage flag is explicitly provided
-      bool isCoverageEnabled = _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
+      // Check if --coverlet-coverage flag was provided
+      _coverageEnabled = _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
 
-      if (!isCoverageEnabled)
+      if (!_coverageEnabled)
       {
-        _logger.LogInformation($"Coverage collection is disabled. Use --{CoverletOptionNames.Coverage} to enable it.");
+        _logger.LogInformation("Coverage collection is disabled. Use --coverlet-coverage to enable.");
+        return Task.CompletedTask;
+      }
+
+      _logger.LogInformation("Initializing coverage instrumentation...");
+
+      try
+      {
+        // Parse additional options from command line
+        ParseCommandLineOptions();
+
+        // Initialize the Coverage instance for instrumentation
+        IFileSystem fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        ISourceRootTranslator sourceRootTranslator = _serviceProvider.GetRequiredService<ISourceRootTranslator>();
+        IInstrumentationHelper instrumentationHelper = _serviceProvider.GetRequiredService<IInstrumentationHelper>();
+        ICecilSymbolHelper cecilSymbolHelper = _serviceProvider.GetRequiredService<ICecilSymbolHelper>();
+
+        // Get the test assembly path (the entry assembly being executed)
+        string testModule = System.Reflection.Assembly.GetEntryAssembly()?.Location
+            ?? throw new InvalidOperationException("Could not determine test assembly location");
+
+        var parameters = new CoverageParameters
+        {
+          Module = testModule,
+          IncludeFilters = _configuration.IncludeFilters,
+          IncludeDirectories = _configuration.IncludeDirectories,
+          ExcludeFilters = _configuration.ExcludeFilters,
+          ExcludedSourceFiles = _configuration.ExcludedSourceFiles,
+          ExcludeAttributes = _configuration.ExcludeAttributes,
+          IncludeTestAssembly = _configuration.IncludeTestAssembly,
+          SingleHit = _configuration.SingleHit,
+          MergeWith = _configuration.MergeWith,
+          UseSourceLink = _configuration.UseSourceLink,
+          DoesNotReturnAttributes = _configuration.DoesNotReturnAttributes,
+          SkipAutoProps = _configuration.SkipAutoProps,
+          DeterministicReport = _configuration.DeterministicReport,
+          ExcludeAssembliesWithoutSources = _configuration.ExcludeAssembliesWithoutSources
+        };
+
+        _coverage = new Coverage(
+          testModule,
+          parameters,
+          _logger,
+          instrumentationHelper,
+          fileSystem,
+          sourceRootTranslator,
+          cecilSymbolHelper);
+
+        _coverage.PrepareModules();
+
+        _logger.LogInformation("Coverage instrumentation initialized successfully");
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError("Failed to initialize coverage instrumentation");
+        _logger.LogError(ex);
+        _coverageEnabled = false;
+      }
+
+      return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Called when the test host process has started. Can be used for logging/tracking.
+    /// </summary>
+    Task ITestHostProcessLifetimeHandler.OnTestHostProcessStartedAsync(
+      ITestHostProcessInformation testHostProcessInformation,
+      CancellationToken cancellation)
+    {
+      if (_coverageEnabled)
+      {
+        _logger.LogInformation($"Test host process started (PID: {testHostProcessInformation.PID})");
+      }
+      return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Called when the test host process has exited. Collects coverage data and generates reports.
+    /// </summary>
+    async Task ITestHostProcessLifetimeHandler.OnTestHostProcessExitedAsync(
+      ITestHostProcessInformation testHostProcessInformation,
+      CancellationToken cancellation)
+    {
+      if (!_coverageEnabled || _coverage == null)
+      {
         return;
       }
 
       try
       {
-        var parameters = new CoverageParameters
-        {
-          IncludeFilters = _configuration.IncludePatterns,
-          ExcludeFilters = _configuration.ExcludePatterns,
-          IncludeTestAssembly = _configuration.IncludeTestAssembly,
-          SingleHit = false,
-          UseSourceLink = true,
-          SkipAutoProps = true,
-          ExcludeAssembliesWithoutSources = AssemblySearchType.MissingAll.ToString().ToLowerInvariant(),
-        };
-
-        string moduleDirectory = Path.GetDirectoryName(AppContext.BaseDirectory) ?? string.Empty;
-
-        _coverage = new Coverage(
-            moduleDirectory,
-            parameters,
-            _logger,
-            _serviceProvider.GetRequiredService<IInstrumentationHelper>(),
-            _serviceProvider.GetRequiredService<IFileSystem>(),
-            _serviceProvider.GetRequiredService<ISourceRootTranslator>(),
-            _serviceProvider.GetRequiredService<ICecilSymbolHelper>());
-
-        // Instrument assemblies before any test execution
-        await Task.Run(() =>
-        {
-          CoveragePrepareResult prepareResult = _coverage.PrepareModules();
-          _logger.LogInformation($"Code coverage instrumentation completed. Instrumented {prepareResult.Results.Length} modules");
-        }, cancellationToken);
-
-      }
-      catch (Exception ex)
-      {
-        _logger.LogError("Failed to initialize code coverage");
-        _logger.LogError(ex);
-      }
-    }
-
-    /// <inheritdoc/>
-    public async Task AfterRunAsync(int exitCode, CancellationToken cancellation)
-    {
-      try
-      {
-        if (_coverage == null)
-        {
-          _logger.LogInformation("Coverage was not collected.");
-          return;
-        }
-
+        _logger.LogInformation($"Test host process exited (PID: {testHostProcessInformation.PID}, ExitCode: {testHostProcessInformation.ExitCode})");
         _logger.LogInformation("\nCalculating coverage result...");
-        CoverageResult result = _coverage!.GetCoverageResult();
 
-        string dOutput = _configuration.OutputDirectory != null ? _configuration.OutputDirectory : Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
+        CoverageResult result = _coverage.GetCoverageResult();
 
+        string dOutput = _configuration.OutputDirectory ?? Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar.ToString();
         string directory = Path.GetDirectoryName(dOutput)!;
 
         if (!Directory.Exists(directory))
@@ -129,9 +159,8 @@ namespace coverlet.Extension.Collector
         }
 
         ISourceRootTranslator sourceRootTranslator = _serviceProvider.GetRequiredService<ISourceRootTranslator>();
-        IFileSystem fileSystem = _serviceProvider.GetService<IFileSystem>()!;
+        IFileSystem fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
 
-        // Convert to coverlet format
         foreach (string format in _configuration.formats)
         {
           IReporter reporter = new ReporterFactory(format).CreateReporter();
@@ -142,13 +171,11 @@ namespace coverlet.Extension.Collector
 
           if (reporter.OutputType == ReporterOutputType.Console)
           {
-            // Output to console
             _logger.LogInformation("  Outputting results to console", important: true);
             _logger.LogInformation(reporter.Report(result, sourceRootTranslator), important: true);
           }
           else
           {
-            // Output to file
             string filename = Path.GetFileName(dOutput);
             filename = (filename == string.Empty) ? $"coverage.{reporter.Extension}" : filename;
             filename = Path.HasExtension(filename) ? filename : $"{filename}.{reporter.Extension}";
@@ -168,6 +195,24 @@ namespace coverlet.Extension.Collector
       }
     }
 
+    /// <summary>
+    /// Always returns true so command-line options appear in help.
+    /// Actual coverage collection is controlled by --coverlet-coverage flag.
+    /// </summary>
+    public Task<bool> IsEnabledAsync() => Task.FromResult(true);
+
+    private void ParseCommandLineOptions()
+    {
+      // Parse --formats option
+      if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Formats, out string[]? formats) && formats != null)
+      {
+        _configuration.formats = formats.SelectMany(f => f.Split(',')).ToArray();
+      }
+
+      // Parse other options as needed (--include, --exclude, --output, etc.)
+      // Add similar parsing for other CoverletOptionNames
+    }
+
     private IServiceProvider CreateServiceProvider()
     {
       var services = new ServiceCollection();
@@ -185,43 +230,6 @@ namespace coverlet.Extension.Collector
               provider.GetRequiredService<IFileSystem>()));
 
       return services.BuildServiceProvider();
-    }
-
-    public Task OnTestSessionStartingAsync(SessionUid sessionUid, CancellationToken cancellationToken)
-    {
-      throw new NotImplementedException();
-    }
-
-    public Task OnTestSessionFinishingAsync(SessionUid sessionUid, CancellationToken cancellationToken)
-    {
-      throw new NotImplementedException();
-    }
-
-    Task ITestHostProcessLifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken cancellationToken)
-    {
-      throw new NotImplementedException();
-    }
-
-    Task ITestHostProcessLifetimeHandler.OnTestHostProcessStartedAsync(ITestHostProcessInformation testHostProcessInformation, CancellationToken cancellation)
-    {
-      throw new NotImplementedException();
-    }
-
-    Task ITestHostProcessLifetimeHandler.OnTestHostProcessExitedAsync(ITestHostProcessInformation testHostProcessInformation, CancellationToken cancellation)
-    {
-      throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Determines if the extension is enabled.
-    /// Always returns true so that command-line options appear in help.
-    /// Actual coverage collection is controlled by the --coverlet-coverage flag.
-    /// </summary>
-    public Task<bool> IsEnabledAsync()
-    {
-      // Always enable the extension so options appear in help
-      // Coverage collection is controlled by checking the --coverlet-coverage flag in BeforeRunAsync
-      return Task.FromResult(true);
     }
   }
 }

@@ -20,9 +20,9 @@ namespace coverlet.MTP.unit.tests
     }
 
     [Theory]
-    [InlineData("formats", "invalid", "The value 'invalid' is not a valid option for 'formats'.")]
-    [InlineData("exclude-assemblies-without-sources", "invalid", "The value 'invalid' is not a valid option for 'exclude-assemblies-without-sources'.")]
-    [InlineData("exclude-assemblies-without-sources", "", "At least one value must be specified for 'exclude-assemblies-without-sources'.")]
+    [InlineData(CoverletOptionNames.Formats, "invalid", "The value 'invalid' is not a valid option for 'formats'.")]
+    [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "invalid", "The value 'invalid' is not a valid option for 'exclude-assemblies-without-sources'.")]
+    [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "", "At least one value must be specified for 'exclude-assemblies-without-sources'.")]
     public async Task IsInvalid_When_Option_Has_InvalidValue(string optionName, string value, string expectedError)
     {
       CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
@@ -35,14 +35,14 @@ namespace coverlet.MTP.unit.tests
     }
 
     [Theory]
-    [InlineData("formats", "json")]
-    [InlineData("formats", "lcov")]
-    [InlineData("formats", "opencover")]
-    [InlineData("formats", "cobertura")]
-    [InlineData("formats", "teamcity")]
-    [InlineData("exclude-assemblies-without-sources", "MissingAll")]
-    [InlineData("exclude-assemblies-without-sources", "MissingAny")]
-    [InlineData("exclude-assemblies-without-sources", "None")]
+    [InlineData(CoverletOptionNames.Formats, "json")]
+    [InlineData(CoverletOptionNames.Formats, "lcov")]
+    [InlineData(CoverletOptionNames.Formats, "opencover")]
+    [InlineData(CoverletOptionNames.Formats, "cobertura")]
+    [InlineData(CoverletOptionNames.Formats, "teamcity")]
+    [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "MissingAll")]
+    [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "MissingAny")]
+    [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "None")]
     public async Task IsValid_When_Option_Has_ValidValue(string optionName, string value)
     {
       CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
@@ -54,13 +54,13 @@ namespace coverlet.MTP.unit.tests
     }
 
     [Theory]
-    [InlineData("exclude")]
-    [InlineData("include")]
-    [InlineData("exclude-by-file")]
-    [InlineData("include-directory")]
-    [InlineData("exclude-by-attribute")]
-    [InlineData("does-not-return-attribute")]
-    [InlineData("source-mapping-file")]
+    [InlineData(CoverletOptionNames.Exclude)]
+    [InlineData(CoverletOptionNames.Include)]
+    [InlineData(CoverletOptionNames.ExcludeByFile)]
+    [InlineData(CoverletOptionNames.IncludeDirectory)]
+    [InlineData(CoverletOptionNames.ExcludeByAttribute)]
+    [InlineData(CoverletOptionNames.DoesNotReturnAttribute)]
+    [InlineData(CoverletOptionNames.SourceMappingFile)]
     public async Task IsValid_For_NonValidated_Options(string optionName)
     {
       CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
@@ -72,9 +72,9 @@ namespace coverlet.MTP.unit.tests
     }
 
     [Theory]
-    [InlineData("include-test-assembly")]
-    [InlineData("single-hit")]
-    [InlineData("skipautoprops")]
+    [InlineData(CoverletOptionNames.IncludeTestAssembly)]
+    [InlineData(CoverletOptionNames.SingleHit)]
+    [InlineData(CoverletOptionNames.SkipAutoProps)]
     public async Task IsValid_For_FlagOptions(string optionName)
     {
       CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
@@ -92,19 +92,19 @@ namespace coverlet.MTP.unit.tests
 
       var expectedOptions = new[]
       {
-                "coverage",
-                "formats",
-                "exclude",
-                "include",
-                "exclude-by-file",
-                "include-directory",
-                "exclude-by-attribute",
-                "include-test-assembly",
-                "single-hit",
-                "skipautoprops",
-                "does-not-return-attribute",
-                "exclude-assemblies-without-sources",
-                "source-mapping-file"
+                CoverletOptionNames.Coverage,
+                CoverletOptionNames.Formats,
+                CoverletOptionNames.Exclude,
+                CoverletOptionNames.Include,
+                CoverletOptionNames.ExcludeByFile,
+                CoverletOptionNames.IncludeDirectory,
+                CoverletOptionNames.ExcludeByAttribute,
+                CoverletOptionNames.IncludeTestAssembly,
+                CoverletOptionNames.SingleHit,
+                CoverletOptionNames.SkipAutoProps,
+                CoverletOptionNames.DoesNotReturnAttribute,
+                CoverletOptionNames.ExcludeAssembliesWithoutSources,
+                CoverletOptionNames.SourceMappingFile
             };
 
       Assert.Equal(expectedOptions.Length, options.Count);
