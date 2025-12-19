@@ -198,7 +198,7 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(
       testProject.ProjectPath,
-      "--coverlet-coverage --formats json,cobertura,lcov",
+      "--coverlet-coverage --formats json --formats cobertura --formats lcov",
       testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
@@ -544,13 +544,21 @@ public class ExcludedClass
 
     string errorContext = process.ExitCode switch
     {
-      0 => "Success",
-      1 => "Test failures occurred",
-      2 => "Invalid command-line arguments",
-      3 => "Test discovery failed",
-      4 => "Test execution failed",
-      5 => "Unexpected error (unhandled exception)",
-      _ => "Unknown error"
+      0 => "Success, no errors",
+      1 => "unknown errors",
+      2 => "test failure",
+      3 => "test session was aborted",
+      4 => "setup of used extensions is invalid",
+      5 => "command line arguments passed to the test app are invalid",
+      6 => "test session is using a non-implemented feature",
+      7 => "unable to complete successfully (likely crashed)",
+      8 => "test session ran zero tests",
+      9 => "minimum execution policy for the executed tests was violated",
+      10 => "test adapter, Testing.Platform Test Framework, MSTest, NUnit, or xUnit, failed to run tests for an infrastructure reason",
+      11 => "test process will exit if dependent process exits",
+      12 => "test session was unable to run because the client does not support any of the supported protocol versions",
+      13 => "excited number of maximum failed tests ",
+      _  => "unrecognized exit code"
     };
 
     return new TestResult

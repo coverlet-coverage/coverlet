@@ -51,7 +51,7 @@ internal sealed class CoverletCommandLineOptionsProvider : ICommandLineOptionsPr
 
       new(FormatsOptionName,
           "Output format(s) for coverage report (json, lcov, opencover, cobertura). Multiple formats can be specified comma-separated.",
-          ArgumentArity.ExactlyOne, isHidden: false),
+          ArgumentArity.OneOrMore, isHidden: false),
 
       //new(OutputOptionName,
       //    "Output path for coverage files",

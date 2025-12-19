@@ -55,6 +55,7 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
 
       foreach (string format in arguments)
       {
+        // does not support string with multiple formats e.g. "json,lcov"
         if (!s_supportedFormats.Contains(format))
         {
           return Task.FromResult(ValidationResult.Invalid($"The value '{format}' is not a valid option for '{commandOption.Name}'."));
