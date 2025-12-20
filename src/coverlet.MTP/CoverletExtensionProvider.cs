@@ -4,6 +4,7 @@
 using coverlet.Extension.Collector;
 using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.Builder;
+using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Extensions.Diagnostics;
@@ -23,9 +24,16 @@ namespace coverlet.Extension
               serviceProvider.GetLoggerFactory()));
 
       builder.TestHostControllers.AddProcessLifetimeHandler(static serviceProvider
-          => new CoverletExtensionCollector(
-              serviceProvider.GetLoggerFactory(),
-              serviceProvider.GetCommandLineOptions()) as ITestHostProcessLifetimeHandler);
+          =>
+          {
+            // Configuration may be null when coverlet-coverage is not enabled.
+            // The collector checks for --coverlet-coverage flag before using configuration.
+            IConfiguration configuration = serviceProvider.GetConfiguration();
+            return new CoverletExtensionCollector(
+                serviceProvider.GetLoggerFactory(),
+                serviceProvider.GetCommandLineOptions(),
+                configuration) as ITestHostProcessLifetimeHandler;
+          });
 
       builder.CommandLine.AddProvider(() => new CoverletExtensionCommandLineProvider(_extension));
     }

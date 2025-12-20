@@ -27,6 +27,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.0.0-1.25277.114" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" />
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->

@@ -20,6 +20,7 @@ public class CollectCoverageTests
   private readonly string _localPackagesPath;
   private const string CoverageJsonFileName = "coverage.json";
   private const string CoverageCoberturaFileName = "coverage.cobertura.xml";
+  private const string CoverageLcovFileName = "coverage.info";
   private readonly string _repoRoot;
 
   public CollectCoverageTests()
@@ -33,7 +34,7 @@ public class CollectCoverageTests
   }
 
   [Fact]
-  public async Task BasicNoCoverage_CollectsDataForCoveredLines()
+  public async Task TestCodeWithoutCodeCoverage()
   {
     // Arrange
     using var testProject = CreateTestProject(includeSimpleTest: true,
@@ -71,12 +72,7 @@ public class CollectCoverageTests
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
     Assert.Contains("Passed!", result.StandardOutput);
 
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
-    Assert.NotEmpty(coverageFiles);
-
-    var coverageData = ParseCoverageJson(coverageFiles[0]);
-    Assert.NotNull(coverageData);
-    Assert.True(coverageData.RootElement.TryGetProperty("Modules", out _));
+    CheckCoverageResult(testProject, result, CoverageJsonFileName);
   }
 
   [Fact]
@@ -96,12 +92,7 @@ public class CollectCoverageTests
     // Assert
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories);
-    Assert.NotEmpty(coverageFiles);
-
-    var xmlDoc = XDocument.Load(coverageFiles[0]);
-    Assert.NotNull(xmlDoc.Root);
-    Assert.Equal("coverage", xmlDoc.Root.Name.LocalName);
+    CheckCoverageResult(testProject, result, CoverageCoberturaFileName);
   }
 
   [Fact]
@@ -118,6 +109,8 @@ public class CollectCoverageTests
 
     // Assert
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+
+    CheckCoverageResult(testProject, result, CoverageJsonFileName);
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
@@ -171,6 +164,8 @@ public class CollectCoverageTests
 
     // Assert
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+
+    CheckCoverageResult(testProject, result, CoverageJsonFileName);
 
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
@@ -229,10 +224,75 @@ public class CollectCoverageTests
     // Assert
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
+    //CheckCoverageResult(testProject, result, CoverageJsonFileName);
+
     // Verify all formats are generated
-    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, "coverage.json", SearchOption.AllDirectories));
-    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, "coverage.cobertura.xml", SearchOption.AllDirectories));
-    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, "coverage.info", SearchOption.AllDirectories));
+    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories));
+    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories));
+    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageLcovFileName, SearchOption.AllDirectories));
+  }
+
+  private void CheckCoverageResult(TestProject testProject, TestResult result, string filename)
+  {
+    // Check if output directory exists before searching for coverage files
+    Assert.True(
+      Directory.Exists(testProject.OutputDirectory),
+      $"Coverage output directory does not exist: {testProject.OutputDirectory}\n" +
+      $"This may indicate that coverage collection failed or the test executable was not built correctly.\n\n" +
+      $"Test Output:\n{result.CombinedOutput}");
+
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, filename, SearchOption.AllDirectories);
+    Assert.True(
+      coverageFiles.Length > 0,
+      $"No coverage file '{CoverageJsonFileName}' found in '{testProject.OutputDirectory}'.\n" +
+      $"Coverage collection may have failed. Check if --coverlet-coverage flag is being processed correctly.\n\n" +
+      $"Test Output:\n{result.CombinedOutput}");
+
+    if (filename == CoverageJsonFileName)
+    {
+      // empty JSON file example:
+      // {}
+      var coverageData = ParseCoverageJson(coverageFiles[0]);
+      Assert.NotNull(coverageData);
+      Assert.True(coverageData.RootElement.TryGetProperty("Modules", out _), $"{CoverageJsonFileName} file has no 'Modules'");
+    }
+    if (filename == CoverageCoberturaFileName)
+    {
+      // parse XML file and ensure it has valid elements
+      // invalid file XML example:
+      // <?xml version="1.0" encoding="utf-8"?>
+      // <coverage line-rate="0" branch-rate="0" version="1.9" timestamp="1766234003" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0">
+      //   <sources />
+      //   <packages />
+      // </coverage>
+      XDocument coberturaDoc = XDocument.Load(coverageFiles[0]);
+      Assert.NotNull(coberturaDoc.Root);
+      Assert.True(coberturaDoc.Root.Name.LocalName == "coverage", $"{CoverageCoberturaFileName} XML root element is not 'coverage'");
+
+      // Check that sources element exists and has at least one source entry
+      XElement? sourcesElement = coberturaDoc.Root.Element("sources");
+      Assert.True(
+        sourcesElement != null,
+        $"{CoverageCoberturaFileName} XML file is missing 'sources' element.\n" +
+        $"Coverage file: {coverageFiles[0]}\n\n" +
+        $"Test Output:\n{result.CombinedOutput}");
+
+      bool hasSourceEntries = sourcesElement.Elements("source").Any();
+      Assert.True(
+        hasSourceEntries,
+        $"{CoverageCoberturaFileName} XML 'sources' element is empty - no source directories were recorded.\n" +
+        $"This indicates coverage instrumentation may have failed.\n" +
+        $"Coverage file: {coverageFiles[0]}\n\n" +
+        $"Test Output:\n{result.CombinedOutput}");
+
+      // Also check that packages element has content
+      XElement? packagesElement = coberturaDoc.Root.Element("packages");
+      Assert.True(
+        packagesElement != null && packagesElement.Elements("package").Any(),
+        $"{CoverageCoberturaFileName} XML 'packages' element is empty - no coverage data was collected.\n" +
+        $"Coverage file: {coverageFiles[0]}\n\n" +
+        $"Test Output:\n{result.CombinedOutput}");
+    }
   }
 
   #region Helper Methods
@@ -303,7 +363,9 @@ public class CollectCoverageTests
 
     File.WriteAllText(Path.Combine(tempPath, "Tests.cs"), testCode);
 
-    return new TestProject(projectFile, Path.Combine(tempPath, "bin", _buildConfiguration, _buildTargetFramework));
+    // sample 'artifacts\tmp\debug\CoverletMTP_Test_42ddc59580ad4d7696ccebaadcc8e4f6\bin\TestProject\debug'
+    string outputPath = Path.Combine(tempPath, "bin", "TestProject", _buildConfiguration.ToLower());
+    return new TestProject(projectFile, outputPath);
   }
 
   private void CreateNuGetConfig(string projectPath)

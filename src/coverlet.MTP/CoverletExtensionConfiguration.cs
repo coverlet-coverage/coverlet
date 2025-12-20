@@ -26,5 +26,6 @@ namespace coverlet.Extension.Collector
     public bool SkipAutoProps { get; set; }
     public bool DeterministicReport { get; set; }
     public string? ExcludeAssembliesWithoutSources { get; set; }
+    public bool DisableManagedInstrumentationRestore { get; set; }
   }
 }
