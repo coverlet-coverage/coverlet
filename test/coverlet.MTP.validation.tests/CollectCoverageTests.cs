@@ -46,7 +46,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--formats json", testName: TestContext.Current.TestCase!.TestMethodName!);
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage-output-format json", testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -64,7 +64,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage --formats json", testName: TestContext.Current.TestCase!.TestMethodName!);
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage --coverage-output-format json", testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -85,7 +85,7 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(
       testProject.ProjectPath,
-      "--coverlet-coverage --formats cobertura", testName: TestContext.Current.TestCase!.TestMethodName!);
+      "--coverage --coverage-output-format cobertura", testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -103,7 +103,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage", testName: TestContext.Current.TestCase!.TestMethodName!);
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage", testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -158,7 +158,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.ProjectPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverlet-coverage", testName: TestContext.Current.TestCase!.TestMethodName!);
+    var result = await RunTestsWithCoverage(testProject.ProjectPath, "--coverage", testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -216,7 +216,7 @@ public class CollectCoverageTests
     // Act
     var result = await RunTestsWithCoverage(
       testProject.ProjectPath,
-      "--coverlet-coverage --formats json --formats cobertura --formats lcov",
+      "--coverage --coverage-output-format json --coverage-output-format cobertura --coverage-output-format lcov",
       testName: TestContext.Current.TestCase!.TestMethodName!);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);

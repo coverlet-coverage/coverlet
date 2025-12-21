@@ -20,9 +20,9 @@ namespace coverlet.MTP.unit.tests
     }
 
     [Theory]
-    [InlineData(CoverletOptionNames.Formats, "invalid", "The value 'invalid' is not a valid option for 'formats'.")]
-    [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "invalid", "The value 'invalid' is not a valid option for 'exclude-assemblies-without-sources'.")]
-    [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "", "At least one value must be specified for 'exclude-assemblies-without-sources'.")]
+    [InlineData(CoverletOptionNames.Formats, "invalid", "The value 'invalid' is not a valid option for 'coverage-output-format'.")]
+    [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "invalid", "The value 'invalid' is not a valid option for 'coverage-exclude-assemblies-without-sources'.")]
+    [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "", "At least one value must be specified for 'coverage-exclude-assemblies-without-sources'.")]
     public async Task IsInvalid_When_Option_Has_InvalidValue(string optionName, string value, string expectedError)
     {
       CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
@@ -60,7 +60,7 @@ namespace coverlet.MTP.unit.tests
     [InlineData(CoverletOptionNames.IncludeDirectory)]
     [InlineData(CoverletOptionNames.ExcludeByAttribute)]
     [InlineData(CoverletOptionNames.DoesNotReturnAttribute)]
-    [InlineData(CoverletOptionNames.SourceMappingFile)]
+    //[InlineData(CoverletOptionNames.SourceMappingFile)]
     public async Task IsValid_For_NonValidated_Options(string optionName)
     {
       CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
@@ -103,8 +103,8 @@ namespace coverlet.MTP.unit.tests
                 CoverletOptionNames.SingleHit,
                 CoverletOptionNames.SkipAutoProps,
                 CoverletOptionNames.DoesNotReturnAttribute,
-                CoverletOptionNames.ExcludeAssembliesWithoutSources,
-                CoverletOptionNames.SourceMappingFile
+                CoverletOptionNames.ExcludeAssembliesWithoutSources
+                //CoverletOptionNames.SourceMappingFile
             };
 
       Assert.Equal(expectedOptions.Length, options.Count);

@@ -40,7 +40,7 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
       new CommandLineOption(CoverletOptionNames.SkipAutoProps, "Neither track nor record auto-implemented properties.", ArgumentArity.Zero, isHidden: false),
       new CommandLineOption(CoverletOptionNames.DoesNotReturnAttribute, "Attributes that mark methods that do not return", ArgumentArity.ZeroOrMore, isHidden: false),
       new CommandLineOption(CoverletOptionNames.ExcludeAssembliesWithoutSources, "Specifies behavior of heuristic to ignore assemblies with missing source documents.", ArgumentArity.ZeroOrOne, isHidden: false),
-      new CommandLineOption(CoverletOptionNames.SourceMappingFile, "Specifies the path to a SourceRootsMappings file.", ArgumentArity.ZeroOrOne, isHidden: false)
+      //new CommandLineOption(CoverletOptionNames.SourceMappingFile, "Specifies the path to a SourceRootsMappings file.", ArgumentArity.ZeroOrOne, isHidden: false)
     ];
   }
 

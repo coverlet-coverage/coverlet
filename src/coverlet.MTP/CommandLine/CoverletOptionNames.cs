@@ -3,23 +3,22 @@
 
 namespace Coverlet.MTP.CommandLine;
 
-/// <summary>
-/// Centralized constants for Coverlet command-line option names.
-/// Ensures consistency across all command-line providers.
-/// </summary>
 internal static class CoverletOptionNames
 {
-  public const string Coverage = "coverlet-coverage";
-  public const string Formats = "formats";
-  public const string Exclude = "exclude";
-  public const string Include = "include";
-  public const string ExcludeByFile = "exclude-by-file";
-  public const string IncludeDirectory = "include-directory";
-  public const string ExcludeByAttribute = "exclude-by-attribute";
-  public const string IncludeTestAssembly = "include-test-assembly";
-  public const string SingleHit = "single-hit";
-  public const string SkipAutoProps = "skipautoprops";
-  public const string DoesNotReturnAttribute = "does-not-return-attribute";
-  public const string ExcludeAssembliesWithoutSources = "exclude-assemblies-without-sources";
+  public const string Coverage = "coverage";
+  public const string Formats = "coverage-output-format";
+  public const string Output = "coverage-output";
+  public const string Include = "coverage-include";
+  public const string Exclude = "coverage-exclude";
+  public const string ExcludeByFile = "coverage-exclude-by-file";
+  public const string ExcludeByAttribute = "coverage-exclude-by-attribute";
+  public const string IncludeDirectory = "coverage-include-directory";
+  public const string SingleHit = "coverage-single-hit";
+  public const string IncludeTestAssembly = "coverage-include-test-assembly";
+  public const string SkipAutoProps = "coverage-skip-auto-props";
+  public const string DoesNotReturnAttribute = "coverage-does-not-return-attribute";
+  public const string ExcludeAssembliesWithoutSources = "coverage-exclude-assemblies-without-sources";
+  public const string SourceLink = "coverage-source-link";
   public const string SourceMappingFile = "source-mapping-file";
+  public const string MergeWith = "coverage-merge-with";
 }

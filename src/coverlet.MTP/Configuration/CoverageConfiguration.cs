@@ -3,55 +3,82 @@
 
 using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Logging;
 
 namespace Coverlet.MTP.Configuration;
 
 internal sealed class CoverageConfiguration
 {
   private readonly ICommandLineOptions _commandLineOptions;
+  private readonly ILogger? _logger;
 
-  public CoverageConfiguration(ICommandLineOptions commandLineOptions)
+  // Default exclusions matching coverlet.collector behavior
+  // See: https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/VSTestIntegration.md
+  private static readonly string[] s_defaultExcludeFilters = new[]
+  {
+    "[xunit.*]*",
+    "[Microsoft.Testing.*]*",
+    "[coverlet.*]*"
+  };
+
+  private static readonly string[] s_defaultExcludeByAttributes = new[]
+  {
+    "ExcludeFromCodeCoverage",
+    "ExcludeFromCodeCoverageAttribute",
+    "GeneratedCodeAttribute",
+    "CompilerGeneratedAttribute"
+  };
+
+  public CoverageConfiguration(ICommandLineOptions commandLineOptions, ILogger? logger = null)
   {
     _commandLineOptions = commandLineOptions;
+    _logger = logger;
   }
 
   public bool IsCoverageEnabled =>
-    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.CoverageOptionName);
+    _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
 
   public string[] GetOutputFormats()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.FormatsOptionName,
+      CoverletOptionNames.Formats,
       out string[]? formats))
     {
+      LogOptionValue(CoverletOptionNames.Formats, formats, isExplicit: true);
       return formats[0].Split(',')
         .Select(f => f.Trim())
         .ToArray();
     }
 
-    return new[] { "json" }; // Default format
+    string[] defaultFormats = new[] { "json", "cobertura" };
+    LogOptionValue(CoverletOptionNames.Formats, defaultFormats, isExplicit: false);
+    return defaultFormats;
   }
 
-  //public string GetOutputPath()
-  //{
-  //  if (_commandLineOptions.TryGetOptionArgumentList(
-  //    CoverletCommandLineOptionsProvider.CoverageOutputOptionName,
-  //    out string[]? outputPath))
-  //  {
-  //    return outputPath[0];
-  //  }
+  public string GetOutputDirectory()
+  {
+    if (_commandLineOptions.TryGetOptionArgumentList(
+      CoverletOptionNames.Output,
+      out string[]? outputPath))
+    {
+      LogOptionValue(CoverletOptionNames.Output, outputPath, isExplicit: true);
+      return outputPath[0];
+    }
 
-  //  // Default: TestResults folder next to test assembly
-  //  string testDir = Path.GetDirectoryName(GetTestAssemblyPath()) ?? AppContext.BaseDirectory;
-  //  return Path.Combine(testDir, "TestResults");
-  //}
+    // Default: TestResults folder next to test assembly
+    string testDir = Path.GetDirectoryName(GetTestAssemblyPath()) ?? AppContext.BaseDirectory;
+    string defaultPath = Path.Combine(testDir, "TestResults");
+    LogOptionValue(CoverletOptionNames.Output, new[] { defaultPath }, isExplicit: false);
+    return defaultPath;
+  }
 
   public string[] GetIncludeFilters()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.IncludeOptionName,
+      CoverletOptionNames.Include,
       out string[]? filters))
     {
+      LogOptionValue(CoverletOptionNames.Include, filters, isExplicit: true);
       return filters;
     }
 
@@ -61,21 +88,26 @@ internal sealed class CoverageConfiguration
   public string[] GetExcludeFilters()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.ExcludeOptionName,
+      CoverletOptionNames.Exclude,
       out string[]? filters))
     {
-      return filters;
+      // Merge explicit exclusions with defaults
+      string[] merged = s_defaultExcludeFilters.Concat(filters).Distinct().ToArray();
+      LogOptionValue(CoverletOptionNames.Exclude, merged, isExplicit: true);
+      return merged;
     }
 
-    return Array.Empty<string>();
+    LogOptionValue(CoverletOptionNames.Exclude, s_defaultExcludeFilters, isExplicit: false);
+    return s_defaultExcludeFilters;
   }
 
   public string[] GetExcludeByFileFilters()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.ExcludeByFileOptionName,
+      CoverletOptionNames.ExcludeByFile,
       out string[]? filters))
     {
+      LogOptionValue(CoverletOptionNames.ExcludeByFile, filters, isExplicit: true);
       return filters;
     }
 
@@ -85,21 +117,26 @@ internal sealed class CoverageConfiguration
   public string[] GetExcludeByAttributeFilters()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.ExcludeByAttributeOptionName,
+      CoverletOptionNames.ExcludeByAttribute,
       out string[]? filters))
     {
-      return filters;
+      // Merge explicit exclusions with defaults
+      string[] merged = s_defaultExcludeByAttributes.Concat(filters).Distinct().ToArray();
+      LogOptionValue(CoverletOptionNames.ExcludeByAttribute, merged, isExplicit: true);
+      return merged;
     }
 
-    return Array.Empty<string>();
+    LogOptionValue(CoverletOptionNames.ExcludeByAttribute, s_defaultExcludeByAttributes, isExplicit: false);
+    return s_defaultExcludeByAttributes;
   }
 
   public string[] GetIncludeDirectories()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.IncludeDirectoryOptionName,
+      CoverletOptionNames.IncludeDirectory,
       out string[]? directories))
     {
+      LogOptionValue(CoverletOptionNames.IncludeDirectory, directories, isExplicit: true);
       return directories;
     }
 
@@ -107,20 +144,21 @@ internal sealed class CoverageConfiguration
   }
 
   public bool UseSingleHit =>
-    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.SingleHitOptionName);
+    _commandLineOptions.IsOptionSet(CoverletOptionNames.SingleHit);
 
   public bool IncludeTestAssembly =>
-    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.IncludeTestAssemblyOptionName);
+    _commandLineOptions.IsOptionSet(CoverletOptionNames.IncludeTestAssembly);
 
   public bool SkipAutoProps =>
-    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.SkipAutoPropsOptionName);
+    GetBoolOptionWithDefault(CoverletOptionNames.SkipAutoProps, defaultValue: true);
 
   public string[] GetDoesNotReturnAttributes()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletCommandLineOptionsProvider.DoesNotReturnAttributeOptionName,
+      CoverletOptionNames.DoesNotReturnAttribute,
       out string[]? attributes))
     {
+      LogOptionValue(CoverletOptionNames.DoesNotReturnAttribute, attributes, isExplicit: true);
       return attributes;
     }
 
@@ -128,7 +166,23 @@ internal sealed class CoverageConfiguration
   }
 
   public bool ExcludeAssembliesWithoutSources =>
-    _commandLineOptions.IsOptionSet(CoverletCommandLineOptionsProvider.ExcludeAssembliesWithoutSourcesOptionName);
+    GetBoolOptionWithDefault(CoverletOptionNames.ExcludeAssembliesWithoutSources, defaultValue: true);
+
+  public bool UseSourceLink =>
+    _commandLineOptions.IsOptionSet(CoverletOptionNames.SourceLink);
+
+  public string? GetMergeWith()
+  {
+    if (_commandLineOptions.TryGetOptionArgumentList(
+      CoverletOptionNames.MergeWith,
+      out string[]? mergeWith))
+    {
+      LogOptionValue(CoverletOptionNames.MergeWith, mergeWith, isExplicit: true);
+      return mergeWith[0];
+    }
+
+    return null;
+  }
 
   /// <summary>
   /// Gets the test assembly path using multiple fallback strategies.
@@ -163,5 +217,58 @@ internal sealed class CoverageConfiguration
 
     // 4. Fallback to base directory
     return AppContext.BaseDirectory;
+  }
+
+  /// <summary>
+  /// Logs all active coverage configuration settings for diagnostics.
+  /// </summary>
+  public void LogConfigurationSummary()
+  {
+    if (_logger is null)
+    {
+      return;
+    }
+
+    _logger.LogInformation("=== Coverlet Coverage Configuration ===");
+    _logger.LogInformation($"Test Assembly: {GetTestAssemblyPath()}");
+    _logger.LogInformation($"Output Directory: {GetOutputDirectory()}");
+    _logger.LogInformation($"Output Formats: {string.Join(", ", GetOutputFormats())}");
+    _logger.LogInformation($"Include Filters: {FormatArrayForLog(GetIncludeFilters())}");
+    _logger.LogInformation($"Exclude Filters: {FormatArrayForLog(GetExcludeFilters())}");
+    _logger.LogInformation($"Exclude by File: {FormatArrayForLog(GetExcludeByFileFilters())}");
+    _logger.LogInformation($"Exclude by Attribute: {FormatArrayForLog(GetExcludeByAttributeFilters())}");
+    _logger.LogInformation($"Include Directories: {FormatArrayForLog(GetIncludeDirectories())}");
+    _logger.LogInformation($"Single Hit: {UseSingleHit}");
+    _logger.LogInformation($"Include Test Assembly: {IncludeTestAssembly}");
+    _logger.LogInformation($"Skip Auto Properties: {SkipAutoProps}");
+    _logger.LogInformation($"Exclude Assemblies Without Sources: {ExcludeAssembliesWithoutSources}");
+    _logger.LogInformation($"Use Source Link: {UseSourceLink}");
+    _logger.LogInformation($"Merge With: {GetMergeWith() ?? "(none)"}");
+    _logger.LogInformation("========================================");
+  }
+
+  private bool GetBoolOptionWithDefault(string optionName, bool defaultValue)
+  {
+    bool isSet = _commandLineOptions.IsOptionSet(optionName);
+    if (isSet)
+    {
+      _logger?.LogDebug($"[Explicitly set] {optionName}: true");
+      return true;
+    }
+
+    _logger?.LogDebug($"[Default] {optionName}: {defaultValue}");
+    return defaultValue;
+  }
+
+  private void LogOptionValue(string optionName, string[] values, bool isExplicit)
+  {
+    string prefix = isExplicit ? "[Explicitly set]" : "[Default]";
+    string valuesStr = values.Length == 0 ? "(empty)" : string.Join(", ", values);
+    _logger?.LogDebug($"{prefix} {optionName}: {valuesStr}");
+  }
+
+  private static string FormatArrayForLog(string[] values)
+  {
+    return values.Length == 0 ? "(none)" : string.Join(", ", values);
   }
 }
