@@ -30,7 +30,7 @@ internal static class CoverletCommandLineOptionDefinitions
       new CommandLineOption(CoverletOptionNames.SkipAutoProps, "Skip auto-implemented properties.", ArgumentArity.Zero, isHidden: false),
       new CommandLineOption(CoverletOptionNames.DoesNotReturnAttribute, "Attributes that mark methods as not returning.", ArgumentArity.ZeroOrMore, isHidden: false),
       new CommandLineOption(CoverletOptionNames.ExcludeAssembliesWithoutSources, "Exclude assemblies without source code.", ArgumentArity.ZeroOrOne, isHidden: false),
-      new CommandLineOption(CoverletOptionNames.SourceMappingFile, "Output path for SourceRootsMappings file.", ArgumentArity.ZeroOrOne, isHidden: false)
+     // new CommandLineOption(CoverletOptionNames.SourceMappingFile, "Output path for SourceRootsMappings file.", ArgumentArity.ZeroOrOne, isHidden: false)
     ];
   }
 }

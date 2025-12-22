@@ -18,5 +18,5 @@ internal static class CoverletOptionNames
   public const string SkipAutoProps = "coverage-skip-auto-props";
   public const string DoesNotReturnAttribute = "coverage-does-not-return-attribute";
   public const string ExcludeAssembliesWithoutSources = "coverage-exclude-assemblies-without-sources";
-  public const string SourceMappingFile = "coverage-source-mapping-file";
+  //public const string SourceMappingFile = "coverage-source-mapping-file";
 }

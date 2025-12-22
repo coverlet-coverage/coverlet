@@ -119,7 +119,7 @@ public class HelpCommandTests
 
     // Assert - Check for --coverlet-coverage option that enables coverage collection
     Assert.Contains("--coverage", result.StandardOutput);
-    Assert.Contains("Enable code coverage collection", result.StandardOutput);
+    Assert.Contains("Enable code coverage data collection.", result.StandardOutput);
   }
 
   [Fact]
@@ -155,7 +155,7 @@ public class HelpCommandTests
 
     // Assert - Check for formats option from CoverletExtensionCommandLineProvider
     Assert.Contains("--coverage-output-format", result.StandardOutput);
-    Assert.Contains("Specifies the output formats for the coverage report", result.StandardOutput);
+    Assert.Contains("Output format(s) for coverage report (json, lcov, opencover, cobertura)", result.StandardOutput);
   }
 
   [Fact]
@@ -173,7 +173,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-exclude", result.StandardOutput);
-    Assert.Contains("Filter expressions to exclude specific modules and types", result.StandardOutput);
+    Assert.Contains("Exclude assemblies matching filters (e.g., [Assembly]Type)", result.StandardOutput);
   }
 
   [Fact]
@@ -191,7 +191,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-include", result.StandardOutput);
-    Assert.Contains("Filter expressions to include only specific modules and type", result.StandardOutput);
+    Assert.Contains("Include assemblies matching filters (e.g., [Assembly]Type)", result.StandardOutput);
   }
 
   [Fact]
@@ -209,7 +209,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-exclude-by-file", result.StandardOutput);
-    Assert.Contains("Glob patterns specifying source files to exclude", result.StandardOutput);
+    Assert.Contains("Exclude source files matching glob patterns", result.StandardOutput);
   }
 
   [Fact]
@@ -227,7 +227,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-include-directory", result.StandardOutput);
-    Assert.Contains("Include directories containing additional assemblies", result.StandardOutput);
+    Assert.Contains("Include additional directories for instrumentation", result.StandardOutput);
   }
 
   [Fact]
@@ -245,7 +245,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-exclude-by-attribute", result.StandardOutput);
-    Assert.Contains("Attributes to exclude from code coverage", result.StandardOutput);
+    Assert.Contains("Exclude methods/classes decorated with attributes.", result.StandardOutput);
   }
 
   [Fact]
@@ -263,7 +263,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-include-test-assembly", result.StandardOutput);
-    Assert.Contains("Specifies whether to report code coverage of the test assembly", result.StandardOutput);
+    Assert.Contains("Include test assembly in coverage", result.StandardOutput);
   }
 
   [Fact]
@@ -281,7 +281,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-single-hit", result.StandardOutput);
-    Assert.Contains("limit code coverage hit reporting to a single hit", result.StandardOutput);
+    Assert.Contains("Limit the number of hits to one for each location", result.StandardOutput);
   }
 
   [Fact]
@@ -299,7 +299,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-skip-auto-props", result.StandardOutput);
-    Assert.Contains("Neither track nor record auto-implemented properties", result.StandardOutput);
+    Assert.Contains("Skip auto-implemented properties", result.StandardOutput);
   }
 
   [Fact]
@@ -317,7 +317,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-does-not-return-attribute", result.StandardOutput);
-    Assert.Contains("Attributes that mark methods that do not return", result.StandardOutput);
+    Assert.Contains("Attributes that mark methods as not returning", result.StandardOutput);
   }
 
   [Fact]
@@ -335,7 +335,7 @@ public class HelpCommandTests
 
     // Assert
     Assert.Contains("--coverage-exclude-assemblies-without-sources", result.StandardOutput);
-    Assert.Contains("Specifies behavior of heuristic to ignore assemblies with missing source documents", result.StandardOutput);
+    Assert.Contains("Exclude assemblies without source code", result.StandardOutput);
   }
 
   //[Fact]

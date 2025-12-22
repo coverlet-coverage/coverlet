@@ -92,20 +92,20 @@ namespace coverlet.MTP.unit.tests
 
       var expectedOptions = new[]
       {
-                CoverletOptionNames.Coverage,
-                CoverletOptionNames.Formats,
-                CoverletOptionNames.Exclude,
-                CoverletOptionNames.Include,
-                CoverletOptionNames.ExcludeByFile,
-                CoverletOptionNames.IncludeDirectory,
-                CoverletOptionNames.ExcludeByAttribute,
-                CoverletOptionNames.IncludeTestAssembly,
-                CoverletOptionNames.SingleHit,
-                CoverletOptionNames.SkipAutoProps,
-                CoverletOptionNames.DoesNotReturnAttribute,
-                CoverletOptionNames.ExcludeAssembliesWithoutSources
-                //CoverletOptionNames.SourceMappingFile
-            };
+          CoverletOptionNames.Coverage,
+          CoverletOptionNames.Formats,
+          CoverletOptionNames.Output,
+          CoverletOptionNames.Include,
+          CoverletOptionNames.IncludeDirectory,
+          CoverletOptionNames.Exclude,
+          CoverletOptionNames.ExcludeByFile,
+          CoverletOptionNames.ExcludeByAttribute,
+          CoverletOptionNames.IncludeTestAssembly,
+          CoverletOptionNames.SingleHit,
+          CoverletOptionNames.SkipAutoProps,
+          CoverletOptionNames.DoesNotReturnAttribute,
+          CoverletOptionNames.ExcludeAssembliesWithoutSources,
+       };
 
       Assert.Equal(expectedOptions.Length, options.Count);
       Assert.All(expectedOptions, name => Assert.Contains(options, o => o.Name == name));
