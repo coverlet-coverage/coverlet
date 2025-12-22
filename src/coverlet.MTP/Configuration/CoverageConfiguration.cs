@@ -55,6 +55,22 @@ internal sealed class CoverageConfiguration
     return defaultFormats;
   }
 
+  public string GetOutputSourceMappingDirectory()
+  {
+    if (_commandLineOptions.TryGetOptionArgumentList(
+      CoverletOptionNames.SourceMappingFile,
+      out string[]? outputPath))
+    {
+      LogOptionValue(CoverletOptionNames.SourceMappingFile, outputPath, isExplicit: true);
+      return outputPath[0];
+    }
+    // Default: TestResults folder next to test assembly
+    string testDir = Path.GetDirectoryName(GetTestAssemblyPath()) ?? AppContext.BaseDirectory;
+    string defaultPath = Path.Combine(testDir, "TestResults");
+    LogOptionValue(CoverletOptionNames.Output, new[] { defaultPath }, isExplicit: false);
+    return defaultPath;
+  }
+
   public string GetOutputDirectory()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
@@ -168,22 +184,6 @@ internal sealed class CoverageConfiguration
   public bool ExcludeAssembliesWithoutSources =>
     GetBoolOptionWithDefault(CoverletOptionNames.ExcludeAssembliesWithoutSources, defaultValue: true);
 
-  public bool UseSourceLink =>
-    _commandLineOptions.IsOptionSet(CoverletOptionNames.SourceLink);
-
-  public string? GetMergeWith()
-  {
-    if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletOptionNames.MergeWith,
-      out string[]? mergeWith))
-    {
-      LogOptionValue(CoverletOptionNames.MergeWith, mergeWith, isExplicit: true);
-      return mergeWith[0];
-    }
-
-    return null;
-  }
-
   /// <summary>
   /// Gets the test assembly path using multiple fallback strategies.
   /// </summary>
@@ -242,8 +242,7 @@ internal sealed class CoverageConfiguration
     _logger.LogInformation($"Include Test Assembly: {IncludeTestAssembly}");
     _logger.LogInformation($"Skip Auto Properties: {SkipAutoProps}");
     _logger.LogInformation($"Exclude Assemblies Without Sources: {ExcludeAssembliesWithoutSources}");
-    _logger.LogInformation($"Use Source Link: {UseSourceLink}");
-    _logger.LogInformation($"Merge With: {GetMergeWith() ?? "(none)"}");
+    _logger.LogInformation($"Output directory for source mapping file: {GetOutputSourceMappingDirectory()}");
     _logger.LogInformation("========================================");
   }
 

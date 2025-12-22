@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Xml.Linq;
 using Xunit;
 
-namespace coverlet.MTP.validation.tests;
+namespace Coverlet.MTP.validation.tests;
 
 /// <summary>
 /// Integration tests for Coverlet Microsoft Testing Platform extension.

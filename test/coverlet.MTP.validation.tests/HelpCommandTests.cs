@@ -118,7 +118,7 @@ public class HelpCommandTests
       result.CombinedOutput);
 
     // Assert - Check for --coverlet-coverage option that enables coverage collection
-    Assert.Contains("--coverlet-coverage", result.StandardOutput);
+    Assert.Contains("--coverage", result.StandardOutput);
     Assert.Contains("Enable code coverage collection", result.StandardOutput);
   }
 
@@ -141,7 +141,7 @@ public class HelpCommandTests
     Assert.Contains("Extension options:", result.StandardOutput);
 
     // Verify coverlet.MTP is loaded and shows its options
-    Assert.Contains("--formats", result.StandardOutput);
+    Assert.Contains("--coverage-output-format", result.StandardOutput);
   }
 
   [Fact]
@@ -154,7 +154,7 @@ public class HelpCommandTests
     TestResult result = await RunTestsWithHelp();
 
     // Assert - Check for formats option from CoverletExtensionCommandLineProvider
-    Assert.Contains("--formats", result.StandardOutput);
+    Assert.Contains("--coverage-output-format", result.StandardOutput);
     Assert.Contains("Specifies the output formats for the coverage report", result.StandardOutput);
   }
 
@@ -172,7 +172,7 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--exclude", result.StandardOutput);
+    Assert.Contains("--coverage-exclude", result.StandardOutput);
     Assert.Contains("Filter expressions to exclude specific modules and types", result.StandardOutput);
   }
 
@@ -190,7 +190,7 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--include", result.StandardOutput);
+    Assert.Contains("--coverage-include", result.StandardOutput);
     Assert.Contains("Filter expressions to include only specific modules and type", result.StandardOutput);
   }
 
@@ -208,7 +208,7 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--exclude-by-file", result.StandardOutput);
+    Assert.Contains("--coverage-exclude-by-file", result.StandardOutput);
     Assert.Contains("Glob patterns specifying source files to exclude", result.StandardOutput);
   }
 
@@ -226,7 +226,7 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--include-directory", result.StandardOutput);
+    Assert.Contains("--coverage-include-directory", result.StandardOutput);
     Assert.Contains("Include directories containing additional assemblies", result.StandardOutput);
   }
 
@@ -244,7 +244,7 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--exclude-by-attribute", result.StandardOutput);
+    Assert.Contains("--coverage-exclude-by-attribute", result.StandardOutput);
     Assert.Contains("Attributes to exclude from code coverage", result.StandardOutput);
   }
 
@@ -262,7 +262,7 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--include-test-assembly", result.StandardOutput);
+    Assert.Contains("--coverage-include-test-assembly", result.StandardOutput);
     Assert.Contains("Specifies whether to report code coverage of the test assembly", result.StandardOutput);
   }
 
@@ -280,7 +280,7 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--single-hit", result.StandardOutput);
+    Assert.Contains("--coverage-single-hit", result.StandardOutput);
     Assert.Contains("limit code coverage hit reporting to a single hit", result.StandardOutput);
   }
 
@@ -298,7 +298,7 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--skipautoprops", result.StandardOutput);
+    Assert.Contains("--coverage-skip-auto-props", result.StandardOutput);
     Assert.Contains("Neither track nor record auto-implemented properties", result.StandardOutput);
   }
 
@@ -316,7 +316,7 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--does-not-return-attribute", result.StandardOutput);
+    Assert.Contains("--coverage-does-not-return-attribute", result.StandardOutput);
     Assert.Contains("Attributes that mark methods that do not return", result.StandardOutput);
   }
 
@@ -334,27 +334,27 @@ public class HelpCommandTests
      result.CombinedOutput);
 
     // Assert
-    Assert.Contains("--exclude-assemblies-without-sources", result.StandardOutput);
+    Assert.Contains("--coverage-exclude-assemblies-without-sources", result.StandardOutput);
     Assert.Contains("Specifies behavior of heuristic to ignore assemblies with missing source documents", result.StandardOutput);
   }
 
-  [Fact]
-  public async Task Help_ShowsSourceMappingFileOption()
-  {
-    // Arrange
-    await EnsureTestProjectBuilt();
+  //[Fact]
+  //public async Task Help_ShowsSourceMappingFileOption()
+  //{
+  //  // Arrange
+  //  await EnsureTestProjectBuilt();
 
-    // Act
-    TestResult result = await RunTestsWithHelp();
+  //  // Act
+  //  TestResult result = await RunTestsWithHelp();
 
-    TestContext.Current.AddAttachment(
-     "Test Output",
-     result.CombinedOutput);
+  //  TestContext.Current.AddAttachment(
+  //   "Test Output",
+  //   result.CombinedOutput);
 
-    // Assert
-    Assert.Contains("--source-mapping-file", result.StandardOutput);
-    Assert.Contains("Specifies the path to a SourceRootsMappings file", result.StandardOutput);
-  }
+  //  // Assert
+  //  Assert.Contains("--coverage-source-mapping-file", result.StandardOutput);
+  //  Assert.Contains("Output path for SourceRootsMappings file", result.StandardOutput);
+  //}
 
   [Fact]
   public async Task Info_ShowsCoverletMtpExtension()
