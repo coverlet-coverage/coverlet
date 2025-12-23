@@ -38,9 +38,12 @@ steps:
 - script: dotnet pack -c $(BuildConfiguration) --no-restore
   displayName: Pack
 
+     # investigate: How to generate code coverage results not using coverlet.msbuild.tasks
+     # artifacts\bin\coverlet.MTP.unit.tests\debug\coverlet.MTP.unit.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.unit.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.unit.tests_"
+
 - script: |
-    artifacts\bin\coverlet.MTP.unit.tests\debug\coverlet.MTP.unit.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.unit.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.unit.tests_"
-    artifacts\bin\coverlet.MTP.validation.tests\debug\coverlet.MTP.validation.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.validation.tests_"
+    dotnet test test/coverlet.MTP.unit.tests/coverlet.MTP.unit.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.unit.MTP.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ExcludeByAttribute="GeneratedCodeAttribute" -- --results-directory "$(Build.SourcesDirectory))/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.unit.tests.trx" --diagnostic-verbosity trace  --diagnostic --diagnostic-output-directory "./artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.unit.tests_"  
+    artifacts/bin/coverlet.MTP.validation.tests/$(BuildConfiguration)/coverlet.MTP.validation.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.validation.tests_"
     dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.core.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/coverlet.core.tests.diag;tracelevel=verbose"
     dotnet test test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.core.coverage.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" -- --results-directory "$(Build.SourcesDirectory))/artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.trx" --diagnostic-verbosity trace  --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-output-fileprefix "coverlet.core.coverage.tests_"
     dotnet test test/coverlet.msbuild.tasks.tests\coverlet.msbuild.tasks.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.msbuild.tasks.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/coverlet.msbuild.tasks.tests.diag;tracelevel=verbose"
@@ -67,6 +70,6 @@ steps:
   parameters:
     reports: $(Build.SourcesDirectory)\**\*.opencover.xml
     condition: and(succeededORFailed(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
-    minimumLineCoverage: 70
+    minimumLineCoverage: 90
     assemblyfilters: '-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverletsamplelib.integration.template;-coverlet.tests.utils'
 
