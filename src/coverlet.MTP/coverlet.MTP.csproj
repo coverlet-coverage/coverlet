@@ -92,10 +92,7 @@
       <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="lib\$(TargetFramework)" />
 
       <!-- 3. ALL transitive dependencies (System.*.dll, etc.) EXCEPT framework references -->
-      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)"
-                             Exclude="@(_ResolvedProjectReferencePaths)"
-                             PackagePath="lib\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubDirectory)"
-                             Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' != 'Microsoft.Testing.Platform' AND '%(ReferenceCopyLocalPaths.NuGetPackageId)' != 'Microsoft.Extensions.DependencyInjection'" />
+      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="lib\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubDirectory)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' != 'Microsoft.Testing.Platform' AND '%(ReferenceCopyLocalPaths.NuGetPackageId)' != 'Microsoft.Extensions.DependencyInjection'" />
     </ItemGroup>
     <!-- Print batches for debug purposes -->
     <Message Text="Batch for .nupkg: ReferenceCopyLocalPaths = @(_ReferenceCopyLocalPaths), ReferenceCopyLocalPaths.DestinationSubDirectory = %(_ReferenceCopyLocalPaths.DestinationSubDirectory) Filename = %(_ReferenceCopyLocalPaths.Filename) Extension = %(_ReferenceCopyLocalPaths.Extension)" Importance="High" Condition="'@(_ReferenceCopyLocalPaths)' != ''" />

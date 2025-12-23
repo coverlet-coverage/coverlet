@@ -55,21 +55,21 @@ internal sealed class CoverageConfiguration
     return defaultFormats;
   }
 
-  //public string GetOutputSourceMappingDirectory()
-  //{
-  //  if (_commandLineOptions.TryGetOptionArgumentList(
-  //    CoverletOptionNames.SourceMappingFile,
-  //    out string[]? outputPath))
-  //  {
-  //    LogOptionValue(CoverletOptionNames.SourceMappingFile, outputPath, isExplicit: true);
-  //    return outputPath[0];
-  //  }
-  //  // Default: TestResults folder next to test assembly
-  //  string testDir = Path.GetDirectoryName(GetTestAssemblyPath()) ?? AppContext.BaseDirectory;
-  //  string defaultPath = Path.Combine(testDir, "TestResults");
-  //  LogOptionValue(CoverletOptionNames.SourceMappingFile, new[] { defaultPath }, isExplicit: false);
-  //  return defaultPath;
-  //}
+  public string GetOutputSourceMappingDirectory()
+  {
+    if (_commandLineOptions.TryGetOptionArgumentList(
+      CoverletOptionNames.SourceMappingFile,
+      out string[]? outputPath))
+    {
+      LogOptionValue(CoverletOptionNames.SourceMappingFile, outputPath, isExplicit: true);
+      return outputPath[0];
+    }
+    // Default: TestResults folder next to test assembly
+    string testDir = Path.GetDirectoryName(GetTestAssemblyPath()) ?? AppContext.BaseDirectory;
+    string defaultPath = Path.Combine(testDir, "TestResults");
+    LogOptionValue(CoverletOptionNames.SourceMappingFile, new[] { defaultPath }, isExplicit: false);
+    return defaultPath;
+  }
 
   public string GetOutputDirectory()
   {
