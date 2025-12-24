@@ -5,10 +5,8 @@ using System.Reflection;
 using Coverlet.Core.Instrumentation;
 using Coverlet.MTP.Configuration;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using Microsoft.Testing.Platform.Services;
-using Microsoft.Testing.Platform.TestHost;
 
 namespace Coverlet.MTP.InProcDataCollection;
 
@@ -32,22 +30,34 @@ public class CoverletTestSessionHandler : ITestSessionLifetimeHandler
   public string DisplayName => "Coverlet Coverage Session Handler";
   public string Description => "Flushes coverage data at end of test session";
 
-  string IExtension.Uid => throw new NotImplementedException();
-
-  string IExtension.Version => throw new NotImplementedException();
-
-  string IExtension.DisplayName => throw new NotImplementedException();
-
-  string IExtension.Description => throw new NotImplementedException();
-
   public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-  public Task OnTestSessionStartingAsync(SessionUid sessionUid)
+  Task ITestSessionLifetimeHandler.OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
+  {
+    return ((ITestSessionLifetimeHandler)this).OnTestSessionStartingAsync(testSessionContext);
+  }
+
+  Task ITestSessionLifetimeHandler.OnTestSessionFinishingAsync(ITestSessionContext testSessionContext)
+  {
+    return ((ITestSessionLifetimeHandler)this).OnTestSessionFinishingAsync(testSessionContext);
+  }
+
+  public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
+  {
+    throw new NotImplementedException();
+  }
+
+  public Task OnTestSessionFinishingAsync(ITestSessionContext testSessionContext)
+  {
+    throw new NotImplementedException();
+  }
+
+  private Task OnTestSessionStartingAsync_Impl(ITestSessionContext testSessionContext)
   {
     return Task.CompletedTask;
   }
 
-  public Task OnTestSessionFinishingAsync(SessionUid sessionUid)
+  private Task OnTestSessionFinishingAsync_Impl(ITestSessionContext testSessionContext)
   {
     foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
     {
@@ -90,20 +100,5 @@ public class CoverletTestSessionHandler : ITestSessionLifetimeHandler
     {
       return null;
     }
-  }
-
-  Task ITestSessionLifetimeHandler.OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
-  {
-    throw new NotImplementedException();
-  }
-
-  Task ITestSessionLifetimeHandler.OnTestSessionFinishingAsync(ITestSessionContext testSessionContext)
-  {
-    throw new NotImplementedException();
-  }
-
-  Task<bool> IExtension.IsEnabledAsync()
-  {
-    throw new NotImplementedException();
   }
 }
