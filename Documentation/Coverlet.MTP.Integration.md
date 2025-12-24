@@ -1,6 +1,6 @@
 # Coverlet Microsoft Testing Platform Integration
 
-[Microsoft.Testing.Platform and Microsoft Test Framework](https://github.com/microsoft/testfx) is a lightweight alternativ for VSTest.
+[Microsoft.Testing.Platform and Microsoft Test Framework](https://github.com/microsoft/testfx) is a lightweight alternative for VSTest.
 
 More information is available here:
 
@@ -28,16 +28,17 @@ dotnet add package coverlet.MTP
 ToDo: Usage details
 
 A sample project file looks like:
+
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
    <PropertyGroup>
       <TargetFramework>net8.0</TargetFramework>
       <IsPackable>false</IsPackable>
       <IsTestProject>true</IsTestProject>
-      <!-- Enable Microsoft Testing Platform -->
+      <OutputType>Exe</OutputType>
+      <!-- Enable Microsoft Testing Platform - not required for .NET 10 and later -->
       <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
       <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-      <OutputType>Exe</OutputType>
    </PropertyGroup>
       <ItemGroup>
       <!-- Use xunit.v3.mtp-v2 for MTP v2.x compatibility -->
@@ -108,7 +109,7 @@ dotnet exec TestProject.dll --coverlet --coverlet-output-format cobertura
 **Generate coverage in multiple formats:**
 
 ```bash
-dotnet exec TestProject.dll --coverlet --coverlet-output-format json --coverlet-output-format cobertura --coverlet-output-format lcov
+dotnet run TestProject.dll --coverlet --coverlet-output-format json --coverlet-output-format cobertura --coverlet-output-format lcov
 ```
 
 **Specify output directory:**

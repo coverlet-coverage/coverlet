@@ -1,17 +1,18 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using coverlet.Extension;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Symbols;
 using Coverlet.Core.Reporters;
+using Coverlet.Core.Symbols;
 using Coverlet.MTP.Configuration;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using Microsoft.Testing.Platform.Messages;
-using Microsoft.Testing.Platform.TestHost;
 using Microsoft.Testing.Platform.Services;
+using Microsoft.Testing.Platform.TestHost;
 
 namespace Coverlet.MTP;
 
@@ -34,7 +35,7 @@ internal sealed class CoverletDataCollector : IDataProducer, ITestSessionLifetim
   }
 
   public string Uid => nameof(CoverletDataCollector);
-  public string Version => "1.0.0";
+  public string Version => typeof(CoverletExtension).Assembly.GetName().Version?.ToString() ?? "1.0.0";
   public string DisplayName => "Coverlet Code Coverage Collector";
   public string Description => "Collects code coverage data using Coverlet instrumentation";
 

@@ -16,6 +16,7 @@
     <EnablePackageValidation>false</EnablePackageValidation>
     <!--<IsTestProject>true</IsTestProject>-->
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
     <IsPackable>true</IsPackable>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <!-- disable transitive version update and use versions defined in coverlet.core -->
@@ -28,6 +29,7 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EmbedUntrackedSources>true</EmbedUntrackedSources> -->
+    
   </PropertyGroup>
 
   <PropertyGroup>

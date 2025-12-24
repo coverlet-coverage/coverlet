@@ -5,7 +5,15 @@
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
+  - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+  - package-ecosystem: "nuget"
+    directory: "/src"
+    target-branch: "main"
+    open-pull-requests-limit: 15
+    schedule:
+      interval: "monthly"
+    registries:
+      - nuget-azure-devops

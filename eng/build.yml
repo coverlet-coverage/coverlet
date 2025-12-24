@@ -49,21 +49,8 @@ steps:
     dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.collector.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.collector.tests.diag.$(BuildConfiguration).log;tracelevel=verbose"
     dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c $(BuildConfiguration) -f net8.0 --no-build -bl:test.integration.binlog --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.integration.tests.diag.net8.0.$(BuildConfiguration).log;tracelevel=verbose"
     dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c $(BuildConfiguration) -f net9.0 --no-build -bl:test.integration.binlog --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.integration.tests.diag.net9.0.$(BuildConfiguration).log;tracelevel=verbose"
+    dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.MTP.validation.tests/$(BuildConfiguration)/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.validation.tests_"
   displayName: Run unit tests with coverage
-  env:
-    MSBUILDDISABLENODEREUSE: 1
-
-- script: |
-    .\artifacts\bin\coverlet.MTP.validation.tests\$(BuildConfiguration)\coverlet.MTP.validation.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.validation.tests_"
-  condition: eq( variables['Agent.OS'], 'Windows_NT' )
-  displayName: Run unit tests with coverage (Windows only)
-  env:
-    MSBUILDDISABLENODEREUSE: 1
-
-- script: |
-    ./artifacts/bin/coverlet.MTP.validation.tests/$(BuildConfiguration)/coverlet.MTP.validation.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.validation.tests_"
-  condition: ne( variables['Agent.OS'], 'Windows_NT' )
-  displayName: Run unit tests with coverage (macOS, Linux)
   env:
     MSBUILDDISABLENODEREUSE: 1
 

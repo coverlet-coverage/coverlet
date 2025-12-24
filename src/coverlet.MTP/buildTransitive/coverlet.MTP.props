@@ -1,12 +1,9 @@
 <Project>
-  <Import Project="$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\coverlet.MTP.props" 
+  <Import Project="$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\coverlet.MTP.props"
           Condition="Exists('$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\coverlet.MTP.props')" />
 
-  <PropertyGroup>
     <!-- Coverlet is now opt-in via '- -coverage' command line argument -->
     <!-- No automatic instrumentation without explicit user request -->
-    <CoverletMTPEnabled Condition="'$(CoverletMTPEnabled)' == ''">false</CoverletMTPEnabled>
-  </PropertyGroup>
 
   <ItemGroup>
     <!-- Register the extension assembly for MTP to discover -->
