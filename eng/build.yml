@@ -54,14 +54,14 @@ steps:
     MSBUILDDISABLENODEREUSE: 1
 
 - script: |
-    artifacts\bin\coverlet.MTP.validation.tests\$(BuildConfiguration)\coverlet.MTP.validation.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.validation.tests_"
+    .\artifacts\bin\coverlet.MTP.validation.tests\$(BuildConfiguration)\coverlet.MTP.validation.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.validation.tests_"
   condition: eq( variables['Agent.OS'], 'Windows_NT' )
   displayName: Run unit tests with coverage (Windows only)
   env:
     MSBUILDDISABLENODEREUSE: 1
 
 - script: |
-    artifacts/bin/coverlet.MTP.validation.tests/$(BuildConfiguration)/coverlet.MTP.validation.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.validation.tests_"
+    ./artifacts/bin/coverlet.MTP.validation.tests/$(BuildConfiguration)/coverlet.MTP.validation.tests.exe --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)" --diagnostic-file-prefix "coverlet.MTP.validation.tests_"
   condition: ne( variables['Agent.OS'], 'Windows_NT' )
   displayName: Run unit tests with coverage (macOS, Linux)
   env:
