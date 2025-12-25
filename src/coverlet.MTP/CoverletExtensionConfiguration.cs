@@ -9,8 +9,6 @@ namespace coverlet.Extension.Collector
   internal class CoverletExtensionConfiguration
   {
     public string[] formats { get; set; } = ["json"];
-    public string? sourceMappingFile { get; set; }
-    public string? OutputDirectory { get; set; }
 
     // Coverage parameters
     public string[]? IncludeFilters { get; set; }

@@ -19,7 +19,6 @@ internal static class CoverletCommandLineOptionDefinitions
     [
       new CommandLineOption(CoverletOptionNames.Coverage, "Enable code coverage data collection.", ArgumentArity.Zero, isHidden: false),
       new CommandLineOption(CoverletOptionNames.Formats, "Output format(s) for coverage report (json, lcov, opencover, cobertura).", ArgumentArity.OneOrMore, isHidden: false),
-      new CommandLineOption(CoverletOptionNames.Output, "Output path for coverage files.", ArgumentArity.ExactlyOne, isHidden: false),
       new CommandLineOption(CoverletOptionNames.Include, "Include assemblies matching filters (e.g., [Assembly]Type).", ArgumentArity.OneOrMore, isHidden: false),
       new CommandLineOption(CoverletOptionNames.IncludeDirectory, "Include additional directories for instrumentation.", ArgumentArity.OneOrMore, isHidden: false),
       new CommandLineOption(CoverletOptionNames.Exclude, "Exclude assemblies matching filters (e.g., [Assembly]Type).", ArgumentArity.OneOrMore, isHidden: false),
@@ -30,7 +29,6 @@ internal static class CoverletCommandLineOptionDefinitions
       new CommandLineOption(CoverletOptionNames.SkipAutoProps, "Skip auto-implemented properties.", ArgumentArity.Zero, isHidden: false),
       new CommandLineOption(CoverletOptionNames.DoesNotReturnAttribute, "Attributes that mark methods as not returning.", ArgumentArity.ZeroOrMore, isHidden: false),
       new CommandLineOption(CoverletOptionNames.ExcludeAssembliesWithoutSources, "Exclude assemblies without source code.", ArgumentArity.ZeroOrOne, isHidden: false),
-      new CommandLineOption(CoverletOptionNames.SourceMappingFile, "Output path for SourceRootsMappings file.", ArgumentArity.ZeroOrOne, isHidden: false),
     ];
   }
 }

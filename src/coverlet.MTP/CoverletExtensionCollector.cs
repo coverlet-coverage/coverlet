@@ -9,6 +9,9 @@ using coverlet.Extension.Logging;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
 using Coverlet.MTP.CommandLine;
+using Microsoft.Testing.Platform.Configurations;
+using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
@@ -25,10 +28,10 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
   private readonly CoverletLoggerAdapter _logger;
   private readonly CoverletExtensionConfiguration _configuration;
   private IServiceProvider? _serviceProvider;
-  private readonly Microsoft.Testing.Platform.Configurations.IConfiguration? _platformConfiguration;
+  private readonly IConfiguration? _platformConfiguration;
   private Coverage? _coverage;
-  private readonly Microsoft.Testing.Platform.Logging.ILoggerFactory _loggerFactory;
-  private readonly Microsoft.Testing.Platform.CommandLine.ICommandLineOptions _commandLineOptions;
+  private readonly ILoggerFactory _loggerFactory;
+  private readonly ICommandLineOptions _commandLineOptions;
   private bool _coverageEnabled;
   private string? _testModulePath;
   private string? _coverageIdentifier;
@@ -55,7 +58,7 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
   {
     _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
     _commandLineOptions = commandLineOptions ?? throw new ArgumentNullException(nameof(commandLineOptions));
-    _platformConfiguration = configuration;
+    _platformConfiguration = configuration ?? throw new ArgumentNullException(nameof(loggerFactory));
     _configuration = new CoverletExtensionConfiguration();
     _logger = new CoverletLoggerAdapter(_loggerFactory);
 
@@ -282,7 +285,7 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
 
   private async Task GenerateReportsAsync(CoverageResult result, CancellationToken cancellation)
   {
-    string outputDirectory = _configuration.OutputDirectory ??
+    string outputDirectory = _platformConfiguration!.GetTestResultDirectory() ??
       Path.GetDirectoryName(_testModulePath) + Path.DirectorySeparatorChar;
 
     string directory = Path.GetDirectoryName(outputDirectory)!;

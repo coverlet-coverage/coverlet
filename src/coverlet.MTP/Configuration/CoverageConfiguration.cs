@@ -45,47 +45,12 @@ internal sealed class CoverageConfiguration
       out string[]? formats))
     {
       LogOptionValue(CoverletOptionNames.Formats, formats, isExplicit: true);
-      return formats[0].Split(',')
-        .Select(f => f.Trim())
-        .ToArray();
+      return formats;
     }
 
     string[] defaultFormats = new[] { "json", "cobertura" };
     LogOptionValue(CoverletOptionNames.Formats, defaultFormats, isExplicit: false);
     return defaultFormats;
-  }
-
-  public string GetOutputSourceMappingDirectory()
-  {
-    if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletOptionNames.SourceMappingFile,
-      out string[]? outputPath))
-    {
-      LogOptionValue(CoverletOptionNames.SourceMappingFile, outputPath, isExplicit: true);
-      return outputPath[0];
-    }
-    // Default: TestResults folder next to test assembly
-    string testDir = Path.GetDirectoryName(GetTestAssemblyPath()) ?? AppContext.BaseDirectory;
-    string defaultPath = Path.Combine(testDir, "TestResults");
-    LogOptionValue(CoverletOptionNames.SourceMappingFile, new[] { defaultPath }, isExplicit: false);
-    return defaultPath;
-  }
-
-  public string GetOutputDirectory()
-  {
-    if (_commandLineOptions.TryGetOptionArgumentList(
-      CoverletOptionNames.Output,
-      out string[]? outputPath))
-    {
-      LogOptionValue(CoverletOptionNames.Output, outputPath, isExplicit: true);
-      return outputPath[0];
-    }
-
-    // Default: TestResults folder next to test assembly
-    string testDir = Path.GetDirectoryName(GetTestAssemblyPath()) ?? AppContext.BaseDirectory;
-    string defaultPath = Path.Combine(testDir, "TestResults");
-    LogOptionValue(CoverletOptionNames.Output, new[] { defaultPath }, isExplicit: false);
-    return defaultPath;
   }
 
   public string[] GetIncludeFilters()
@@ -231,7 +196,6 @@ internal sealed class CoverageConfiguration
 
     _logger.LogInformation("=== Coverlet Coverage Configuration ===");
     _logger.LogInformation($"Test Assembly: {GetTestAssemblyPath()}");
-    _logger.LogInformation($"Output Directory: {GetOutputDirectory()}");
     _logger.LogInformation($"Output Formats: {string.Join(", ", GetOutputFormats())}");
     _logger.LogInformation($"Include Filters: {FormatArrayForLog(GetIncludeFilters())}");
     _logger.LogInformation($"Exclude Filters: {FormatArrayForLog(GetExcludeFilters())}");

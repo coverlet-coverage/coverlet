@@ -9,16 +9,11 @@
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <!--
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
-    </RestoreSources>
-    -->
     <IsPackable>false</IsPackable>
     <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     <!-- replace the xUnit.net native command line experience with the Microsoft Testing Platform command line experience -->
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <Deterministic>false</Deterministic>
     </PropertyGroup>
       
   <ItemGroup>

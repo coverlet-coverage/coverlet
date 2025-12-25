@@ -80,85 +80,6 @@ public class CoverageConfigurationTests
     Assert.Contains("cobertura", result);
   }
 
-  [Fact]
-  public void GetOutputFormats_WhenSpecified_ReturnsSpecifiedFormats()
-  {
-    // Arrange
-    string[]? formats = new[] { "opencover,lcov" };
-    _mockCommandLineOptions
-      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
-      .Returns(true);
-
-    var config = new CoverageConfiguration(_mockCommandLineOptions.Object);
-
-    // Act
-    string[] result = config.GetOutputFormats();
-
-    // Assert
-    Assert.Equal(2, result.Length);
-    Assert.Contains("opencover", result);
-    Assert.Contains("lcov", result);
-  }
-
-  [Fact]
-  public void GetOutputFormats_WhenSpecifiedWithSpaces_TrimsValues()
-  {
-    // Arrange
-    string[]? formats = new[] { " json , cobertura " };
-    _mockCommandLineOptions
-      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
-      .Returns(true);
-
-    var config = new CoverageConfiguration(_mockCommandLineOptions.Object);
-
-    // Act
-    string[] result = config.GetOutputFormats();
-
-    // Assert
-    Assert.Equal(2, result.Length);
-    Assert.Equal("json", result[0]);
-    Assert.Equal("cobertura", result[1]);
-  }
-
-  #endregion
-
-  #region GetOutputDirectory Tests
-
-  [Fact]
-  public void GetOutputDirectory_WhenSpecified_ReturnsSpecifiedPath()
-  {
-    // Arrange
-    string[]? outputPath = new[] { "/custom/output/path" };
-    _mockCommandLineOptions
-      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Output, out outputPath))
-      .Returns(true);
-
-    var config = new CoverageConfiguration(_mockCommandLineOptions.Object);
-
-    // Act
-    string result = config.GetOutputDirectory();
-
-    // Assert
-    Assert.Equal("/custom/output/path", result);
-  }
-
-  [Fact]
-  public void GetOutputDirectory_WhenNotSpecified_ReturnsDefaultTestResultsPath()
-  {
-    // Arrange
-    _mockCommandLineOptions
-      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Output, out It.Ref<string[]?>.IsAny))
-      .Returns(false);
-
-    var config = new CoverageConfiguration(_mockCommandLineOptions.Object);
-
-    // Act
-    string result = config.GetOutputDirectory();
-
-    // Assert
-    Assert.Contains("TestResults", result);
-  }
-
   #endregion
 
   #region GetIncludeFilters Tests
@@ -593,45 +514,6 @@ public class CoverageConfigurationTests
     // Assert
     // Should return either a file that exists or a directory that exists
     Assert.True(File.Exists(result) || Directory.Exists(result));
-  }
-
-  #endregion
-
-  #region GetOutputSourceMappingDirectory Tests
-
-  [Fact]
-  public void GetOutputSourceMappingDirectory_WhenSpecified_ReturnsSpecifiedPath()
-  {
-    // Arrange
-    string[]? outputPath = new[] { "/custom/mapping/path" };
-    _mockCommandLineOptions
-      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.SourceMappingFile, out outputPath))
-      .Returns(true);
-
-    var config = new CoverageConfiguration(_mockCommandLineOptions.Object);
-
-    // Act
-    string result = config.GetOutputSourceMappingDirectory();
-
-    // Assert
-    Assert.Equal("/custom/mapping/path", result);
-  }
-
-  [Fact]
-  public void GetOutputSourceMappingDirectory_WhenNotSpecified_ReturnsDefaultTestResultsPath()
-  {
-    // Arrange
-    _mockCommandLineOptions
-      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.SourceMappingFile, out It.Ref<string[]?>.IsAny))
-      .Returns(false);
-
-    var config = new CoverageConfiguration(_mockCommandLineOptions.Object);
-
-    // Act
-    string result = config.GetOutputSourceMappingDirectory();
-
-    // Assert
-    Assert.Contains("TestResults", result);
   }
 
   #endregion

@@ -33,12 +33,10 @@ A sample project file looks like:
 <Project Sdk="Microsoft.NET.Sdk">
    <PropertyGroup>
       <TargetFramework>net8.0</TargetFramework>
-      <IsPackable>false</IsPackable>
-      <IsTestProject>true</IsTestProject>
       <OutputType>Exe</OutputType>
-      <!-- Enable Microsoft Testing Platform - not required for .NET 10 and later -->
-      <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-      <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+      <!-- Enable Microsoft Testing Platform -->
+      <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner> 
+      <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> <!-- not required for .NET 10 and later -->
    </PropertyGroup>
       <ItemGroup>
       <!-- Use xunit.v3.mtp-v2 for MTP v2.x compatibility -->
@@ -76,10 +74,9 @@ dotnet exec <test-assembly.dll> --help
 ### Coverage Options
 
 | Option | Description |
-|:-------|:------------|
+| :------- | :------------ |
 | `--coverlet` | Enable code coverage data collection. |
 | `--coverlet-output-format <format>` | Output format(s) for coverage report. Supported formats: `json`, `lcov`, `opencover`, `cobertura`, `teamcity`. Can be specified multiple times. |
-| `--coverlet-output <path>` | Output path for coverage files. |
 | `--coverlet-include <filter>` | Include assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. |
 | `--coverlet-include-directory <path>` | Include additional directories for instrumentation. Can be specified multiple times. |
 | `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. |
@@ -90,7 +87,6 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-skip-auto-props` | Skip auto-implemented properties. |
 | `--coverlet-does-not-return-attribute <attribute>` | Attributes that mark methods as not returning. Can be specified multiple times. |
 | `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. |
-| `--coverlet-source-mapping-file <path>` | Path to a SourceRootsMappings file. |
 
 ### Examples
 
@@ -110,12 +106,6 @@ dotnet exec TestProject.dll --coverlet --coverlet-output-format cobertura
 
 ```bash
 dotnet run TestProject.dll --coverlet --coverlet-output-format json --coverlet-output-format cobertura --coverlet-output-format lcov
-```
-
-**Specify output directory:**
-
-```bash
-dotnet exec TestProject.dll --coverlet --coverlet-output ./coverage/
 ```
 
 **Include only specific assemblies:**
@@ -145,8 +135,6 @@ Coverlet can generate coverage results in multiple formats:
 - `opencover` - OpenCover XML format
 - `cobertura` - Cobertura XML format
 - `teamcity` - TeamCity service messages
-
-By default, coverage files are written to the current working directory. Use `--coverlet-output` to specify a different location.
 
 ## Filter Expressions
 
@@ -206,10 +194,10 @@ The `coverlet.MTP` extension integrates with the Microsoft Testing Platform usin
 ## Comparison with coverlet.collector (VSTest)
 
 | Feature | coverlet.MTP | coverlet.collector |
-|:--------|:-------------|:-------------------|
+| :-------- | :------------- | :------------------- |
 | Test Platform | Microsoft Testing Platform | VSTest |
 | Configuration | Command line options | runsettings file |
-| Output Location | Configurable via `--coverlet-output` | TestResults folder |
+| | coverlet.mtp.appsettings.json | |
 | Default Format | JSON | Cobertura |
 
 ## Known Limitations
@@ -221,11 +209,13 @@ The `coverlet.MTP` extension integrates with the Microsoft Testing Platform usin
 > **Merging coverage files from multiple test runs:**
 >
 > Use `dotnet-coverage` tool:
+>
 > ```bash
 > dotnet-coverage merge coverage/**/coverage.cobertura.xml -f cobertura -o coverage/merged.xml
 > ```
 >
 > Or use `reportgenerator`:
+>
 > ```bash
 > reportgenerator -reports:"**/*.cobertura.xml" -targetdir:"coverage/report" -reporttypes:"HtmlInline_AzurePipelines_Dark;Cobertura"
 > ```
@@ -260,4 +250,3 @@ set COVERLET_MTP_DEBUG=1 dotnet exec TestProject.dll --coverlet
 - [MSBuild Integration](MSBuildIntegration.md) - For MSBuild-based coverage collection
 - [Global Tool](GlobalTool.md) - For standalone coverage collection
 - [Known Issues](KnownIssues.md) - Common issues and workarounds
-

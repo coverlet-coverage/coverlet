@@ -23,6 +23,8 @@ steps:
       **/coverlet.core.tests/**/*.diag
       **/coverlet.core.tests/**/*.log
       **/*.diag
+      !**/coverlet.core.coverage.tests/debug/testgen*.log
+      !**/coverlet.core.coverage.tests/**/*.html
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: CopyFiles@2

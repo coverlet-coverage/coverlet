@@ -7,7 +7,6 @@ internal static class CoverletOptionNames
 {
   public const string Coverage = "coverlet";
   public const string Formats = "coverlet-output-format";
-  public const string Output = "coverlet-output";
   public const string Include = "coverlet-include";
   public const string Exclude = "coverlet-exclude";
   public const string ExcludeByFile = "coverlet-exclude-by-file";
@@ -18,5 +17,4 @@ internal static class CoverletOptionNames
   public const string SkipAutoProps = "coverlet-skip-auto-props";
   public const string DoesNotReturnAttribute = "coverlet-does-not-return-attribute";
   public const string ExcludeAssembliesWithoutSources = "coverlet-exclude-assemblies-without-sources";
-  public const string SourceMappingFile = "coverlet-source-mapping-file";
 }

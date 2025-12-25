@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics.CodeAnalysis;
@@ -60,7 +60,6 @@ namespace coverlet.MTP.unit.tests.CommandLine
     [InlineData(CoverletOptionNames.IncludeDirectory)]
     [InlineData(CoverletOptionNames.ExcludeByAttribute)]
     [InlineData(CoverletOptionNames.DoesNotReturnAttribute)]
-    [InlineData(CoverletOptionNames.SourceMappingFile)]
     public async Task IsValid_For_NonValidated_Options(string optionName)
     {
       CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
@@ -94,7 +93,6 @@ namespace coverlet.MTP.unit.tests.CommandLine
       {
           CoverletOptionNames.Coverage,
           CoverletOptionNames.Formats,
-          CoverletOptionNames.Output,
           CoverletOptionNames.Include,
           CoverletOptionNames.IncludeDirectory,
           CoverletOptionNames.Exclude,
@@ -105,7 +103,6 @@ namespace coverlet.MTP.unit.tests.CommandLine
           CoverletOptionNames.SkipAutoProps,
           CoverletOptionNames.DoesNotReturnAttribute,
           CoverletOptionNames.ExcludeAssembliesWithoutSources,
-          CoverletOptionNames.SourceMappingFile,
        };
 
       Assert.Equal(expectedOptions.Length, options.Count);

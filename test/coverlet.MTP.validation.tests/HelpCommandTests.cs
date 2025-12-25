@@ -23,13 +23,17 @@ public class HelpCommandTests
   private string[] _testProjectTfms = [];
   private static readonly string s_projectName = "coverlet.MTP.validation.tests";
   private const string SutName = "BasicTestProject";
-  private readonly string _projectOutputPath = TestUtils.GetTestBinaryPath(s_projectName);
+  private readonly string _projectOutputPath;
   private readonly string _testProjectPath;
   private readonly string _repoRoot ;
 
   public HelpCommandTests()
   {
+#if DEBUG
     _buildConfiguration = "Debug";
+#else
+    _buildConfiguration = "Release";
+#endif
     _buildTargetFramework = "net8.0";
 
     // Get repository root
@@ -339,24 +343,6 @@ public class HelpCommandTests
   }
 
   [Fact]
-  public async Task Help_ShowsSourceMappingFileOption()
-  {
-    // Arrange
-    await EnsureTestProjectBuilt();
-
-    // Act
-    TestResult result = await RunTestsWithHelp();
-
-    TestContext.Current.AddAttachment(
-     "Test Output",
-     result.CombinedOutput);
-
-    // Assert
-    Assert.Contains("coverlet-source-mapping-file", result.StandardOutput);
-    Assert.Contains("Output path for SourceRootsMappings file", result.StandardOutput);
-  }
-
-  [Fact]
   public async Task Info_ShowsCoverletMtpExtension()
   {
     // Arrange
@@ -499,7 +485,7 @@ public class HelpCommandTests
   private string GetSUTBinaryPath()
   {
     string binTestProjectPath = Path.Combine(_repoRoot, "artifacts", "bin", SutName);
-    string binPath = Path.Combine(binTestProjectPath, _buildConfiguration);
+    string binPath = Path.Combine(binTestProjectPath, _buildConfiguration.ToLowerInvariant());
     return binPath;
   }
 

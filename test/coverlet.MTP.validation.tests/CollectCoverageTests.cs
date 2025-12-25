@@ -27,7 +27,11 @@ public class CollectCoverageTests
 
   public CollectCoverageTests()
   {
+#if DEBUG
     _buildConfiguration = "Debug";
+#else
+    _buildConfiguration = "Release";
+#endif
 
     // Get local packages path (adjust based on your build output)
     _repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
@@ -491,6 +495,12 @@ public class CollectCoverageTests
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
+    <DebugType>portable</DebugType>
+    <Deterministic>false</Deterministic>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
+    </RestoreSources>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include=""{relativeSutPath}"" />
@@ -972,10 +982,13 @@ public class StringHelperTests
 
     string solutionDir = Path.GetDirectoryName(testProject.SolutionPath)!;
 
+    // Exclude coverlet assemblies and test framework assemblies from instrumentation
+    string excludeFilters = "--coverlet-exclude \"[coverlet.*]*\" --coverlet-exclude \"[xunit.*]*\" --coverlet-exclude \"[Microsoft.Testing.*]*\"";
+
     var processStartInfo = new ProcessStartInfo
     {
       FileName = "dotnet",
-      Arguments = $"exec \"{testExecutable}\" {arguments} --diagnostic --diagnostic-verbosity trace --diagnostic-output-directory \"{solutionDir}\" --diagnostic-file-prefix {testName} --coverlet-output \"{solutionDir}{Path.DirectorySeparatorChar}\"",
+      Arguments = $"exec \"{testExecutable}\" {arguments} {excludeFilters} --diagnostic --diagnostic-verbosity trace --diagnostic-output-directory \"{solutionDir}\" --diagnostic-file-prefix {testName}\"",
       RedirectStandardOutput = true,
       RedirectStandardError = true,
       UseShellExecute = false,
