@@ -10,10 +10,19 @@ using Xunit;
 namespace Coverlet.MTP.validation.tests;
 
 /// <summary>
+/// Defines a test collection that runs tests serially (no parallelization).
+/// </summary>
+[CollectionDefinition(nameof(MtpValidationTests), DisableParallelization = true)]
+public class MtpValidationTests
+{
+}
+
+/// <summary>
 /// Tests to verify coverlet.MTP extension is properly loaded and command-line options are available.
 /// These tests check the --help output to ensure the extension is registered with Microsoft Testing Platform.
 /// Uses a dedicated test project in the TestProjects subdirectory for easier troubleshooting.
 /// </summary>
+[Collection(nameof(MtpValidationTests))]
 public class HelpCommandTests
 {
   private readonly string _buildConfiguration;
