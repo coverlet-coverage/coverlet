@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>$(NetMinimum);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(NetMinimum);$(NetCurrent);netstandard2.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);IDE0057</NoWarn>
   </PropertyGroup>
@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="NuGet.Versioning" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 

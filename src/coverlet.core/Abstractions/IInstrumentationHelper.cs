@@ -8,7 +8,7 @@ namespace Coverlet.Core.Abstractions
 {
   internal interface IInstrumentationHelper
   {
-    void BackupOriginalModule(string module, string identifier);
+    void BackupOriginalModule(string module, string identifier, bool disableManagedInstrumentationRestore);
     void DeleteHitsFile(string path);
     string[] GetCoverableModules(string module, string[] directories, bool includeTestAssembly);
     bool HasPdb(string module, out bool embedded);

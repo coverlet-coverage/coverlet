@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- This test project does NOT need MTP runner itself -->
+  <!-- It tests a SEPARATE BasicTestProject that uses MTP -->
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <IsPackable>false</IsPackable>
+    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+    <!-- replace the xUnit.net native command line experience with the Microsoft Testing Platform command line experience -->
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <Deterministic>false</Deterministic>
+    </PropertyGroup>
+      
+  <ItemGroup>
+    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)"/>
+    <PackageReference Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectCapability Include="TestingPlatform" />
+    <ProjectCapability Include="TestingPlatformApplication" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Remove="Microsoft.CodeAnalysis.BannedApiAnalyzers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TestProjects\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  
+</Project>

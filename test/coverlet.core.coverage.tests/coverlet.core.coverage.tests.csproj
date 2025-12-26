@@ -22,6 +22,8 @@
     <PackageReference Include="Moq" />
     <PackageReference Include="Tmds.ExecFunction" />
     <PackageReference Include="ReportGenerator.Core" />
+    <PackageReference Include="Microsoft.Testing.Platform" VersionOverride="1.9.1" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" VersionOverride="1.9.1" />
     <PackageReference Include="xunit.v3" VersionOverride="2.0.0"/>
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>

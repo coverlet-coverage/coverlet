@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "nuget": {
+      "type": "stdio",
+      "command": "dnx",
+      "args": [
+        "NuGet.Mcp.Server",
+        "--prerelease",
+        "--yes"
+      ]
+    }
+  }
+}

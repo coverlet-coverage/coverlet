@@ -739,7 +739,7 @@ public class SampleClass
       var instrumenter = new Instrumenter(Path.Combine(directory.FullName, Path.GetFileName(module)), "_coverlet_tests_projectsample_vbmynamespace", parameters,
           loggerMock.Object, instrumentationHelper, new FileSystem(), new SourceRootTranslator(Path.Combine(directory.FullName, Path.GetFileName(module)), loggerMock.Object, new FileSystem(), new AssemblyAdapter()), new CecilSymbolHelper());
 
-      instrumentationHelper.BackupOriginalModule(Path.Combine(directory.FullName, Path.GetFileName(module)), "_coverlet_tests_projectsample_vbmynamespace");
+      instrumentationHelper.BackupOriginalModule(Path.Combine(directory.FullName, Path.GetFileName(module)), "_coverlet_tests_projectsample_vbmynamespace", false);
 
       InstrumenterResult result = instrumenter.Instrument();
 
