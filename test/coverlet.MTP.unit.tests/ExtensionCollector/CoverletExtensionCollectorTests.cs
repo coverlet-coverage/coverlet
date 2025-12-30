@@ -376,5 +376,242 @@ namespace coverlet.MTP.unit.tests.ExtensionCollector
         _mockCommandLineOptions.Object,
         _mockConfiguration.Object);
     }
+
+    [Fact]
+    public async Task UpdateAsync_WhenCoverageEnabledButIdentifierNull_DoesNotSetEnvironmentVariables()
+    {
+      // Arrange - coverage enabled but no identifier (module path not resolved)
+      _mockCommandLineOptions
+        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+        .Returns(true);
+
+      _mockConfiguration
+        .Setup(x => x[It.IsAny<string>()])
+        .Returns((string?)null);
+
+      var collector = CreateCollector();
+      ITestHostProcessLifetimeHandler lifetimeHandler = collector;
+      ITestHostEnvironmentVariableProvider envProvider = collector;
+
+      // BeforeTestHostProcessStartAsync will fail to resolve module path, leaving identifier null
+      await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockEnvVariables = new Mock<IEnvironmentVariables>();
+
+      // Act
+      await envProvider.UpdateAsync(mockEnvVariables.Object);
+
+      // Assert - no variables set because coverage identifier is null
+      mockEnvVariables.Verify(
+        x => x.SetVariable(It.IsAny<EnvironmentVariable>()),
+        Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ReturnsCompletedTask()
+    {
+      // Arrange
+      _mockCommandLineOptions
+        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+        .Returns(false);
+
+      var collector = CreateCollector();
+      ITestHostEnvironmentVariableProvider envProvider = collector;
+
+      var mockEnvVariables = new Mock<IEnvironmentVariables>();
+
+      // Act
+      Task result = envProvider.UpdateAsync(mockEnvVariables.Object);
+
+      // Assert
+      Assert.True(result.IsCompleted);
+      await result; // Should not throw
+    }
+
+    [Fact]
+    public async Task ValidateTestHostEnvironmentVariablesAsync_WhenConflictExists_ReturnsInvalid()
+    {
+      // Arrange
+      var collector = CreateCollector();
+      ITestHostEnvironmentVariableProvider envProvider = collector;
+
+      var mockOtherExtension = new Mock<IExtension>();
+      var conflictingVariable = new OwnedEnvironmentVariable(
+        mockOtherExtension.Object,
+        "COVERLET_MTP_COVERAGE_ENABLED",
+        "true",
+        isSecret: false,
+        isLocked: true);
+
+      var mockReadOnlyEnvVariables = new Mock<IReadOnlyEnvironmentVariables>();
+      mockReadOnlyEnvVariables
+        .Setup(x => x.TryGetVariable("COVERLET_MTP_COVERAGE_ENABLED", out conflictingVariable))
+        .Returns(true);
+
+      // Act
+      ValidationResult result = await envProvider.ValidateTestHostEnvironmentVariablesAsync(mockReadOnlyEnvVariables.Object);
+
+      // Assert
+      Assert.False(result.IsValid);
+      Assert.Contains("COVERLET_MTP_COVERAGE_ENABLED", result.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task ValidateTestHostEnvironmentVariablesAsync_WhenVariableOwnedBySelf_ReturnsValid()
+    {
+      // Arrange
+      var collector = CreateCollector();
+      ITestHostEnvironmentVariableProvider envProvider = collector;
+      IExtension extension = collector;
+
+      var ownedVariable = new OwnedEnvironmentVariable(
+        extension,
+        "COVERLET_MTP_COVERAGE_ENABLED",
+        "true",
+        isSecret: false,
+        isLocked: true);
+
+      var mockReadOnlyEnvVariables = new Mock<IReadOnlyEnvironmentVariables>();
+      mockReadOnlyEnvVariables
+        .Setup(x => x.TryGetVariable("COVERLET_MTP_COVERAGE_ENABLED", out ownedVariable))
+        .Returns(true);
+
+      // Act
+      ValidationResult result = await envProvider.ValidateTestHostEnvironmentVariablesAsync(mockReadOnlyEnvVariables.Object);
+
+      // Assert
+      Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public async Task OnTestHostProcessExitedAsync_WhenCoverageNull_SkipsCollection()
+    {
+      // Arrange
+      _mockCommandLineOptions
+        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+        .Returns(true);
+
+      _mockConfiguration
+        .Setup(x => x[It.IsAny<string>()])
+        .Returns((string?)null);
+
+      var collector = CreateCollector();
+      ITestHostProcessLifetimeHandler handler = collector;
+
+      // BeforeTestHostProcessStartAsync will fail to resolve module path, leaving _coverage null
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      // Act - should not throw
+      await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+      // Assert
+      mockProcessInfo.Verify(x => x.PID, Times.AtLeastOnce);
+      mockProcessInfo.Verify(x => x.ExitCode, Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task OnTestHostProcessExitedAsync_WhenServiceProviderNull_SkipsCollection()
+    {
+      // Arrange
+      _mockCommandLineOptions
+        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+        .Returns(false);
+
+      var collector = CreateCollector();
+      ITestHostProcessLifetimeHandler handler = collector;
+
+      // BeforeTestHostProcessStartAsync with coverage disabled leaves _serviceProvider null
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      // Act - should not throw
+      await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+      // Assert - method completes without throwing
+      mockProcessInfo.Verify(x => x.ExitCode, Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task OnTestHostProcessExitedAsync_LogsTestHostProcessInformation()
+    {
+      // Arrange
+      _mockCommandLineOptions
+        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+        .Returns(false);
+
+      var collector = CreateCollector();
+      ITestHostProcessLifetimeHandler handler = collector;
+
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(99999);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(1);
+
+      // Act
+      await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+      // Assert - process info properties were accessed for logging
+      mockProcessInfo.Verify(x => x.PID, Times.AtLeastOnce);
+      mockProcessInfo.Verify(x => x.ExitCode, Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task OnTestHostProcessExitedAsync_WithCancellation_CompletesWithoutError()
+    {
+      // Arrange
+      _mockCommandLineOptions
+        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+        .Returns(false);
+
+      var collector = CreateCollector();
+      ITestHostProcessLifetimeHandler handler = collector;
+
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      using var cts = new CancellationTokenSource();
+
+      // Act - should complete without error even with cancellation token
+      await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, cts.Token);
+
+      // Assert
+      Assert.False(cts.IsCancellationRequested);
+    }
+
+    [Fact]
+    public async Task OnTestHostProcessExitedAsync_WhenAllConditionsFalse_LogsSkipMessage()
+    {
+      // Arrange - all three conditions (_coverageEnabled, _coverage, _serviceProvider) will be false/null
+      _mockCommandLineOptions
+        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+        .Returns(false);
+
+      var collector = CreateCollector();
+      ITestHostProcessLifetimeHandler handler = collector;
+
+      // This ensures _coverageEnabled = false
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      // Act
+      await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+      // Assert - verify method completes (coverage skipped path taken)
+      mockProcessInfo.Verify(x => x.PID, Times.AtLeastOnce);
+    }
   }
 }

@@ -560,4 +560,220 @@ public class CoverageConfigurationTests
   }
 
   #endregion
+
+  #region LogConfigurationSummary Additional Tests
+
+  [Fact]
+  public void LogConfigurationSummary_WithLogger_LogsAllConfigurationValues()
+  {
+    // Arrange
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(It.IsAny<string>()))
+      .Returns(false);
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    config.LogConfigurationSummary();
+
+    // Assert - verify LogInformation was called for each configuration line
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.Contains("=== Coverlet Coverage Configuration ==="))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Test Assembly:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Output Formats:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Include Filters:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Exclude Filters:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Exclude by File:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Exclude by Attribute:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Include Directories:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Single Hit:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Include Test Assembly:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Skip Auto Properties:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Exclude Assemblies Without Sources:"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.Contains("========================================"))),
+      Times.Once);
+  }
+
+  [Fact]
+  public void LogConfigurationSummary_WithLogger_LogsDefaultFormats()
+  {
+    // Arrange
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(It.IsAny<string>()))
+      .Returns(false);
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    config.LogConfigurationSummary();
+
+    // Assert
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.Contains("json") && s.Contains("cobertura"))),
+      Times.Once);
+  }
+
+  [Fact]
+  public void LogConfigurationSummary_WithEmptyFilters_LogsNone()
+  {
+    // Arrange
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(It.IsAny<string>()))
+      .Returns(false);
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    config.LogConfigurationSummary();
+
+    // Assert - Include Filters should show "(none)" since no filters specified
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Include Filters:") && s.Contains("(none)"))),
+      Times.Once);
+  }
+
+  [Fact]
+  public void LogConfigurationSummary_WithBooleanOptionsSet_LogsTrueValues()
+  {
+    // Arrange
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(CoverletOptionNames.SingleHit))
+      .Returns(true);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(CoverletOptionNames.IncludeTestAssembly))
+      .Returns(true);
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    config.LogConfigurationSummary();
+
+    // Assert
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.Contains("Single Hit: True"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.Contains("Include Test Assembly: True"))),
+      Times.Once);
+  }
+
+  [Fact]
+  public void LogConfigurationSummary_WithBooleanOptionsNotSet_LogsFalseOrDefaultValues()
+  {
+    // Arrange
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(CoverletOptionNames.SingleHit))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(CoverletOptionNames.IncludeTestAssembly))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(CoverletOptionNames.SkipAutoProps))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(CoverletOptionNames.ExcludeAssembliesWithoutSources))
+      .Returns(false);
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    config.LogConfigurationSummary();
+
+    // Assert
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.Contains("Single Hit: False"))),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.Contains("Include Test Assembly: False"))),
+      Times.Once);
+    // SkipAutoProps defaults to true when not set
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.Contains("Skip Auto Properties: True"))),
+      Times.Once);
+    // ExcludeAssembliesWithoutSources defaults to true when not set
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s.Contains("Exclude Assemblies Without Sources: True"))),
+      Times.Once);
+  }
+
+  [Fact]
+  public void LogConfigurationSummary_LogsHeaderAndFooter()
+  {
+    // Arrange
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(It.IsAny<string>()))
+      .Returns(false);
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    config.LogConfigurationSummary();
+
+    // Assert - Verify header and footer separators are logged
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s == "=== Coverlet Coverage Configuration ===")),
+      Times.Once);
+    _mockLogger.Verify(
+      x => x.LogInformation(It.Is<string>(s => s == "========================================")),
+      Times.Once);
+  }
+
+  #endregion
 }

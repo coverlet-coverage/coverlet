@@ -297,6 +297,8 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
     ISourceRootTranslator sourceRootTranslator = _serviceProvider!.GetRequiredService<ISourceRootTranslator>();
     IFileSystem fileSystem = _serviceProvider!.GetRequiredService<IFileSystem>();
 
+    var generatedReports = new List<string>();
+
     foreach (string format in _configuration.formats)
     {
       IReporter reporter = new ReporterFactory(format).CreateReporter();
@@ -313,8 +315,18 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
       {
         string filename = $"coverage.{reporter.Extension}";
         string reportPath = Path.Combine(directory, filename);
-        _logger.LogInformation($"  Generating report '{reportPath}'", important: true);
         await Task.Run(() => fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator)), cancellation);
+        generatedReports.Add(reportPath);
+      }
+    }
+
+    // Output successfully generated reports to console
+    if (generatedReports.Count > 0)
+    {
+      _logger.LogInformation("Coverage reports generated:", important: true);
+      foreach (string reportPath in generatedReports)
+      {
+        _logger.LogInformation($"  {reportPath}", important: true);
       }
     }
   }
