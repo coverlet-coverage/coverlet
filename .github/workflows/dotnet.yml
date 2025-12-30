@@ -15,6 +15,7 @@ env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
 permissions:
+  contents: read  
   checks: write
   pull-requests: write
 

@@ -8,13 +8,12 @@ namespace coverlet.Extension
   public static class TestingPlatformBuilderHook
   {
     /// <summary>
-    /// Adds crash dump support to the Testing Platform Builder.
+    /// Adds Coverlet code coverage extension support to the Testing Platform Builder.
     /// </summary>
     /// <param name="testApplicationBuilder">The test application builder.</param>
-    /// <param name="_">The command line arguments.</param>
+    /// <param name="_">The command line arguments (unused).</param>
     public static void AddExtensions(ITestApplicationBuilder testApplicationBuilder, string[] _)
     {
-      // Ensure AddCoverletCoverageProvider is implemented or accessible
       testApplicationBuilder.AddCoverletExtensionProvider();
     }
   }

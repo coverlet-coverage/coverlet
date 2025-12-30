@@ -238,7 +238,7 @@ namespace Coverlet.Collector.DataCollection
     /// Disable Managed Instrumentation Restore flag
     /// </summary>
     /// <param name="configurationElement">Configuration element</param>
-    /// <returns>Include Test Assembly Flag</returns>
+    /// <returns>Disable Managed Instrumentation Restore flag</returns>
     private static bool ParseDisableManagedInstrumentationRestore(XmlElement configurationElement)
     {
       XmlElement disableManagedInstrumentationRestoreElement = configurationElement[CoverletConstants.DisableManagedInstrumentationRestore];
