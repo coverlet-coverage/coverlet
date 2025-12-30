@@ -2,11 +2,12 @@
 
 [![Build Status](https://dev.azure.com/tonerdo/coverlet/_apis/build/status/coverlet-coverage.coverlet?branchName=master)](https://dev.azure.com/tonerdo/coverlet/_build/latest?definitionId=5&branchName=master) ![Code%20Coverage](https://img.shields.io/azure-devops/coverage/tonerdo/coverlet/5/master?label=Code%20Coverage) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/coverlet-coverage/coverlet/blob/master/LICENSE)
 
-| Driver  |  Current version  | Downloads  |
-|---|---|---|
-|  coverlet.collector  | [![NuGet](https://img.shields.io/nuget/v/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/)    |  [![NuGet](https://img.shields.io/nuget/dt/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/)
-|  coverlet.msbuild |  [![NuGet](https://img.shields.io/nuget/v/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/)   |  [![NuGet](https://img.shields.io/nuget/dt/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/) |
-|  coverlet.console |  [![NuGet](https://img.shields.io/nuget/v/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/)     |  [![NuGet](https://img.shields.io/nuget/dt/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/) |
+| Driver | Current version | Downloads |
+| --- | --- | --- |
+| coverlet.MTP | [![NuGet](https://img.shields.io/nuget/v/coverlet.MTP.svg)](https://www.nuget.org/packages/coverlet.MTP/) | [![NuGet](https://img.shields.io/nuget/dt/coverlet.MTP.svg)](https://www.nuget.org/packages/coverlet.MTP/) |
+| coverlet.collector | [![NuGet](https://img.shields.io/nuget/v/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/) | [![NuGet](https://img.shields.io/nuget/dt/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/)
+| coverlet.msbuild | [![NuGet](https://img.shields.io/nuget/v/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/) | [![NuGet](https://img.shields.io/nuget/dt/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/) |
+| coverlet.console | [![NuGet](https://img.shields.io/nuget/v/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/) | [![NuGet](https://img.shields.io/nuget/dt/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/) |
 
 Coverlet is a cross platform code coverage framework for .NET, with support for line, branch and method coverage. It works with [.NET Framework](Documentation/KnownIssues.md#badimageformatexception-net-framework-47x-48x) on Windows and .NET Core on all supported platforms.
 
@@ -29,13 +30,63 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 
 ## Quick Start
 
-Coverlet can be used through three different *drivers*
+Coverlet can be used through four different *drivers*
 
 * VSTest engine integration
 * MSBuild task integration
 * As a .NET Global tool (supports standalone integration tests)
+* **New** Microsoft Testing Platform integration (coverlet.MTP)
 
-Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk?view=vs-2019
+Coverlet supports only SDK-style projects <https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk?view=vs-2019>
+
+### **NEW** Microsoft Testing Platform Integration (coverlet.MTP)
+
+### Installation (coverlet.MTP)
+
+```bash
+dotnet add package coverlet.MTP
+```
+
+> [!NOTE]
+> Add the `coverlet.MTP` package only to test projects that use the [Microsoft Testing Platform](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-intro). This package is designed for projects using `Microsoft.Testing.Platform` (MTP) as the test runner, not the traditional VSTest runner.
+
+### Usage (coverlet.MTP)
+
+Coverlet integrates with the Microsoft Testing Platform as an extension. To enable coverage collection, run your tests with the `--coverlet` flag:
+
+```bash
+dotnet run --project <your-test-project> -- --coverlet
+```
+
+Or when using `dotnet test` with MTP-enabled projects:
+
+```bash
+dotnet test --coverlet
+```
+
+After the above command is run, coverage report files will be generated in the test results directory. By default, reports are generated in `json` and `cobertura` formats.
+
+#### Additional Options (coverlet.MTP)
+
+| Option | Description |
+| -------- | ------------- |
+| `--coverlet` | Enable code coverage data collection |
+| `--coverlet-output-format` | Output format(s) for coverage report (json, lcov, opencover, cobertura) |
+| `--coverlet-include` | Include assemblies matching filters (e.g., [Assembly]Type) |
+| `--coverlet-exclude` | Exclude assemblies matching filters (e.g., [Assembly]Type) |
+| `--coverlet-include-test-assembly` | Include test assembly in coverage |
+
+Example with options:
+
+```bash
+dotnet run --project <your-test-project> -- --coverlet --coverlet-output-format cobertura --coverlet-exclude "[xunit.]"
+```
+
+#### Requirements (coverlet.MTP)
+
+* *.NET 8.0 SDK or newer*
+* *Test project configured for Microsoft Testing Platform*
+* *Reference to `Microsoft.Testing.Platform` packages*
 
 ### VSTest Integration (preferred due to [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
@@ -44,6 +95,7 @@ Coverlet supports only SDK-style projects https://docs.microsoft.com/en-us/visua
 ```bash
 dotnet add package coverlet.collector
 ```
+
 > [!NOTE]
 > You **MUST** add package only to test projects and if you create xunit test projects (`dotnet new xunit`) you will find the reference already present in `csproj` file because Coverlet is the default coverage tool for every .NET Core and >= *.NET 8* applications, you've only to update to last version if needed. Add `coverlet.collector` *OR* `coverlet.msbuild` package in a test project.
 
@@ -61,8 +113,8 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
 #### Requirements (coverlet.collector)
 
-* _You need to be running .NET 8.0 SDK v8.0.112 or newer_
-* _You need to reference version 17.12.0 and above of Microsoft.NET.Test.Sdk_
+* *You need to be running .NET 8.0 SDK v8.0.112 or newer*
+* *You need to reference version 17.12.0 and above of Microsoft.NET.Test.Sdk*
 
 ```xml
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
@@ -92,7 +144,7 @@ See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 
 #### Requirements (coverlet.msbuild)
 
-Requires a runtime that support _.NET Standard 2.0 and above_
+Requires a runtime that support *.NET Standard 2.0 and above*
 
 ### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), suffers from possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
@@ -112,15 +164,15 @@ The following example shows how to use the familiar `dotnet test` toolchain:
 coverlet /path/to/test-assembly.dll --target "dotnet" --targetargs "test /path/to/test-project --no-build"
 ```
 
-_Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dll` assembly isn't rebuilt_
+*Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dll` assembly isn't rebuilt*
 
 See [documentation](Documentation/GlobalTool.md) for advanced usage.
 
 #### Requirements (coverlet.console)
 
-.NET global tools rely on a .NET Core runtime installed on your machine https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong
+.NET global tools rely on a .NET Core runtime installed on your machine <https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong>
 
-.NET Coverlet global tool requires _.NET 8.0 or above_
+.NET Coverlet global tool requires *.NET 8.0 or above*
 
 ## How It Works
 
@@ -142,11 +194,11 @@ Coverlet generates code coverage information by going through the following proc
 Coverlet supports coverage for deterministic builds. The solution at the moment is not optimal and need a workaround.
 Take a look at [documentation](Documentation/DeterministicBuild.md).
 
-## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)!
+## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)
 
 ## Known Issues
 
-Unfortunately we have some known issues, check it [here](Documentation/KnownIssues.md)
+Unfortunately we have some [known issues](Documentation/KnownIssues.md)
 
 ## Cake Add-In
 
@@ -177,6 +229,7 @@ If you find a bug or have a feature request, please report them at this reposito
 ## Coverlet Team
 
 Author and owner
+
 * [Toni Solarin-Sodara](https://github.com/tonerdo) (Inactive)
 
 Co-maintainers
@@ -195,7 +248,7 @@ For more information, see the [.NET Foundation Code of Conduct](https://dotnetfo
 
 ## Credits
 
-Part of the code is based on work done by OpenCover team https://github.com/OpenCover
+Part of the code is based on work done by OpenCover team <https://github.com/OpenCover>
 
 ## License
 
