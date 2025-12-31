@@ -35,8 +35,8 @@ A sample project file looks like:
       <TargetFramework>net8.0</TargetFramework>
       <OutputType>Exe</OutputType>
       <!-- Enable Microsoft Testing Platform -->
-      <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner> 
-      <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> <!-- not required for .NET 10 and later -->
+      <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+      <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> <!-- not required for .NET SDK 10 or later -->
    </PropertyGroup>
       <ItemGroup>
       <!-- Use xunit.v3.mtp-v2 for MTP v2.x compatibility -->

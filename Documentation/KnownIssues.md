@@ -35,6 +35,7 @@
   +---------+------+--------+--------+
   | Average | 0%   | 0%     | 0%     |
   +---------+------+--------+--------+
+
   ```
 
 The issue is related to VSTest platform <https://github.com/microsoft/vstest/issues/1900#issuecomment-457488472>

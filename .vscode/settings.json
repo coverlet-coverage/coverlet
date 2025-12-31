@@ -1,0 +1,32 @@
+{
+    "cSpell.words": [
+        "appsettings",
+        "autoprops",
+        "binlog",
+        "branchpoint",
+        "buildtransitive",
+        "cecil",
+        "contentfiles",
+        "datacollector",
+        "determisticbuild",
+        "dotnet",
+        "hitfile",
+        "linux",
+        "msbuild",
+        "Nerdbank",
+        "netcoreapp",
+        "netstandard",
+        "Newtonsoft",
+        "opencover",
+        "pdbs",
+        "pkill",
+        "reportgenerator",
+        "reporttypes",
+        "runsettings",
+        "targetdir",
+        "targetframework",
+        "teamcity",
+        "vstest",
+        "xunit"
+    ]
+}

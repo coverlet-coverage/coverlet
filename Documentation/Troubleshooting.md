@@ -178,8 +178,8 @@ To use/debug local collectors build we need to tell to our project to restore an
 
     <ItemGroup>
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-      <PackageReference Include="xunit.v3" Version="2.0.0" />
-      <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0">
+      <PackageReference Include="xunit.v3" Version="3.2.1" />
+      <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       </PackageReference>

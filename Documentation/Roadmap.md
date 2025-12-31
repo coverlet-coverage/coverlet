@@ -25,21 +25,3 @@ Performance issues: <https://github.com/coverlet-coverage/coverlet/issues?q=is%3
 
 Some new features have got a `Discussion` label if we don't have and agreement yet on semantics.
 Discussions: <https://github.com/coverlet-coverage/coverlet/issues?q=is%3Aissue+is%3Aopen+label%3Adiscussion>
-
-## New features roadmap
-
-This is the list of features we should develop soon as possible:
-
-### High priority
-
-- Allow merge reports solution wide on all flavours <https://github.com/coverlet-coverage/coverlet/issues/662> <https://github.com/coverlet-coverage/coverlet/issues/357>
-
-- Some perf improvements <https://github.com/coverlet-coverage/coverlet/issues/836>
-
-### Low priority
-
-- Rethink hits reports strategy <https://github.com/coverlet-coverage/coverlet/issues/808>
-
-## Maintainers discussion channel
-
-[As maintainers we should try to find a way to keep in synch, we could use a chat where we can "take note" of progress and if possible answer to questions/doubt, I know this is OSS, but it's hard keep project at high level without "more ideas".]
