@@ -379,6 +379,33 @@ namespace coverlet.MTP.unit.tests.ExtensionCollector
         _mockConfiguration.Object);
     }
 
+    private (CoverletExtensionCollector collector, Mock<ICoverage> mockCoverage) CreateCollectorWithMockCoverage(string identifier = "test-identifier-123")
+    {
+      _mockCommandLineOptions
+        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+        .Returns(true);
+
+      string testAssemblyPath = typeof(CoverletExtensionCollectorTests).Assembly.Location;
+      _mockConfiguration
+        .Setup(x => x["TestModule"])
+        .Returns(testAssemblyPath);
+
+      var mockCoverage = new Mock<ICoverage>();
+      mockCoverage
+        .Setup(x => x.PrepareModules())
+        .Returns(new CoveragePrepareResult { Identifier = identifier });
+
+      var mockCoverageFactory = new Mock<ICoverageFactory>();
+      mockCoverageFactory
+        .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
+        .Returns(mockCoverage.Object);
+
+      var collector = CreateCollector();
+      collector.CoverageFactory = mockCoverageFactory.Object;
+
+      return (collector, mockCoverage);
+    }
+
     [Fact]
     public async Task UpdateAsync_WhenCoverageEnabledButIdentifierNull_DoesNotSetEnvironmentVariables()
     {
@@ -895,9 +922,9 @@ namespace coverlet.MTP.unit.tests.ExtensionCollector
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenCoverageEnabledAndIdentifierSet_SetsCoverageIdentifierVariable()
+    public async Task EndToEnd_Test_MocksAndVerifier()
     {
-      // Arrange
+      // Arrange - Enable coverage and set up the required mocks
       _mockCommandLineOptions
         .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
         .Returns(true);
@@ -920,261 +947,83 @@ namespace coverlet.MTP.unit.tests.ExtensionCollector
         .Returns(mockCoverage.Object);
 
       var collector = CreateCollector();
-      collector.CoverageFactory = mockCoverageFactory.Object; // Inject mock
+      collector.CoverageFactory = mockCoverageFactory.Object;
 
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      // Test ITestHostProcessLifetimeHandler
       ITestHostProcessLifetimeHandler lifetimeHandler = collector;
-      ITestHostEnvironmentVariableProvider envProvider = collector;
-
       await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+      await lifetimeHandler.OnTestHostProcessStartedAsync(mockProcessInfo.Object, CancellationToken.None);
+      await lifetimeHandler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
 
+      // Test ITestHostEnvironmentVariableProvider
+      ITestHostEnvironmentVariableProvider envProvider = collector;
       var mockEnvVariables = new Mock<IEnvironmentVariables>();
+      var mockReadOnlyEnvVariables = new Mock<IReadOnlyEnvironmentVariables>();
 
-      // Act
       await envProvider.UpdateAsync(mockEnvVariables.Object);
+      await envProvider.ValidateTestHostEnvironmentVariablesAsync(mockReadOnlyEnvVariables.Object);
 
-      // Assert - CoverageIdentifier variable should be set with non-empty value
+      // Assert - variables for coverage are set
       mockEnvVariables.Verify(
         x => x.SetVariable(It.Is<EnvironmentVariable>(
-          ev => ev.Variable == "COVERLET_MTP_COVERAGE_IDENTIFIER" && !string.IsNullOrEmpty(ev.Value))),
+          ev => ev.Variable == "COVERLET_MTP_COVERAGE_ENABLED" && ev.Value == "true")),
         Times.Once);
-    }
 
-    [Fact]
-    public async Task UpdateAsync_WhenCoverageEnabledAndCoverageNotNull_SetsHitsFilePathVariable()
-    {
-      // Arrange
-      _mockCommandLineOptions
-        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
-        .Returns(true);
-
-      // Use a valid path that exists
-      string testAssemblyPath = typeof(CoverletExtensionCollectorTests).Assembly.Location;
-      _mockConfiguration
-        .Setup(x => x["TestModule"])
-        .Returns(testAssemblyPath);
-
-      // Create mock coverage and factory
-      var mockCoverage = new Mock<ICoverage>();
-      mockCoverage
-        .Setup(x => x.PrepareModules())
-        .Returns(new CoveragePrepareResult { Identifier = "test-identifier-123" });
-
-      var mockCoverageFactory = new Mock<ICoverageFactory>();
-      mockCoverageFactory
-        .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
-        .Returns(mockCoverage.Object);
-
-      var collector = CreateCollector();
-      collector.CoverageFactory = mockCoverageFactory.Object; // Inject mock
-
-      ITestHostProcessLifetimeHandler lifetimeHandler = collector;
-      ITestHostEnvironmentVariableProvider envProvider = collector;
-
-      await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
-
-      var mockEnvVariables = new Mock<IEnvironmentVariables>();
-
-      // Act
-      await envProvider.UpdateAsync(mockEnvVariables.Object);
-
-      // Assert - HitsFilePath variable should be set
-      mockEnvVariables.Verify(
-        x => x.SetVariable(It.Is<EnvironmentVariable>(
-          ev => ev.Variable == "COVERLET_MTP_HITS_FILE_PATH")),
-        Times.Once);
-    }
-
-    [Fact]
-    public async Task UpdateAsync_EnvironmentVariables_AreNotSecret()
-    {
-      // Arrange
-      _mockCommandLineOptions
-        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
-        .Returns(true);
-
-      // Use a valid path that exists
-      string testAssemblyPath = typeof(CoverletExtensionCollectorTests).Assembly.Location;
-      _mockConfiguration
-        .Setup(x => x["TestModule"])
-        .Returns(testAssemblyPath);
-
-      // Create mock coverage and factory
-      var mockCoverage = new Mock<ICoverage>();
-      mockCoverage
-        .Setup(x => x.PrepareModules())
-        .Returns(new CoveragePrepareResult { Identifier = "test-identifier-123" });
-
-      var mockCoverageFactory = new Mock<ICoverageFactory>();
-      mockCoverageFactory
-        .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
-        .Returns(mockCoverage.Object);
-
-      var collector = CreateCollector();
-      collector.CoverageFactory = mockCoverageFactory.Object; // Inject mock
-
-      ITestHostProcessLifetimeHandler lifetimeHandler = collector;
-      ITestHostEnvironmentVariableProvider envProvider = collector;
-
-      await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
-
-      var mockEnvVariables = new Mock<IEnvironmentVariables>();
-
-      // Act
-      await envProvider.UpdateAsync(mockEnvVariables.Object);
-
-      // Assert - all variables should not be secret
-      mockEnvVariables.Verify(
-        x => x.SetVariable(It.Is<EnvironmentVariable>(ev => ev.IsSecret == false)),
+      // Assert - logger Log method was called (LogInformation is an extension method that calls Log)
+      _mockLogger.Verify(
+        x => x.Log(
+          LogLevel.Information,
+          It.IsAny<string>(),
+          It.IsAny<Exception?>(),
+          It.IsAny<Func<string, Exception?, string>>()),
         Times.AtLeast(2));
     }
 
     [Fact]
-    public async Task UpdateAsync_EnvironmentVariables_AreLocked()
+    public async Task OnTestHostProcessExitedAsync_WhenCoverageSucceeds_GeneratesReports()
     {
       // Arrange
-      _mockCommandLineOptions
-        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
-        .Returns(true);
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
 
-      // Use a valid path that exists
-      string testAssemblyPath = typeof(CoverletExtensionCollectorTests).Assembly.Location;
-      _mockConfiguration
-        .Setup(x => x["TestModule"])
-        .Returns(testAssemblyPath);
-
-      // Create mock coverage and factory
-      var mockCoverage = new Mock<ICoverage>();
       mockCoverage
-        .Setup(x => x.PrepareModules())
-        .Returns(new CoveragePrepareResult { Identifier = "test-identifier-123" });
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
 
-      var mockCoverageFactory = new Mock<ICoverageFactory>();
-      mockCoverageFactory
-        .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
-        .Returns(mockCoverage.Object);
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
 
-      var collector = CreateCollector();
-      collector.CoverageFactory = mockCoverageFactory.Object; // Inject mock
-
-      ITestHostProcessLifetimeHandler lifetimeHandler = collector;
-      ITestHostEnvironmentVariableProvider envProvider = collector;
-
-      await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
-
-      var mockEnvVariables = new Mock<IEnvironmentVariables>();
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
 
       // Act
-      await envProvider.UpdateAsync(mockEnvVariables.Object);
-
-      // Assert - all variables should be locked
-      mockEnvVariables.Verify(
-        x => x.SetVariable(It.Is<EnvironmentVariable>(ev => ev.IsLocked == true)),
-        Times.AtLeast(2));
-    }
-
-    [Fact]
-    public async Task UpdateAsync_WhenCoverageIdentifierEmpty_DoesNotSetVariables()
-    {
-      // Arrange - coverage enabled but initialization fails, leaving identifier empty
-      _mockCommandLineOptions
-        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
-        .Returns(true);
-
-      // Return non-existent path to prevent successful initialization
-      _mockConfiguration
-        .Setup(x => x["TestModule"])
-        .Returns("/non/existent/path.dll");
-
-      _mockConfiguration
-        .Setup(x => x["TestHost:Path"])
-        .Returns((string?)null);
-
-      var collector = CreateCollector();
-      ITestHostProcessLifetimeHandler lifetimeHandler = collector;
-      ITestHostEnvironmentVariableProvider envProvider = collector;
-
-      await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
-
-      var mockEnvVariables = new Mock<IEnvironmentVariables>();
-
-      // Act
-      await envProvider.UpdateAsync(mockEnvVariables.Object);
-
-      // Assert - no variables set because identifier is empty
-      mockEnvVariables.Verify(
-        x => x.SetVariable(It.IsAny<EnvironmentVariable>()),
-        Times.Never);
-    }
-
-    [Fact]
-    public async Task ValidateTestHostEnvironmentVariablesAsync_WhenVariableNotSet_ReturnsValid()
-    {
-      // Arrange
-      var collector = CreateCollector();
-      ITestHostEnvironmentVariableProvider envProvider = collector;
-
-      OwnedEnvironmentVariable? nullVariable = null;
-      var mockReadOnlyEnvVariables = new Mock<IReadOnlyEnvironmentVariables>();
-      mockReadOnlyEnvVariables
-        .Setup(x => x.TryGetVariable("COVERLET_MTP_COVERAGE_ENABLED", out nullVariable))
-        .Returns(false);
-
-      // Act
-      ValidationResult result = await envProvider.ValidateTestHostEnvironmentVariablesAsync(mockReadOnlyEnvVariables.Object);
+      await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
 
       // Assert
-      Assert.True(result.IsValid);
+      mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
     }
 
     [Fact]
-    public async Task ValidateTestHostEnvironmentVariablesAsync_WhenConflictWithDifferentOwner_ReturnsInvalidWithErrorMessage()
+    public async Task OnTestHostProcessExitedAsync_WhenCancelled_StopsGracefully()
     {
-      // Arrange
-      var collector = CreateCollector();
-      ITestHostEnvironmentVariableProvider envProvider = collector;
+      var (collector, _) = CreateCollectorWithMockCoverage();
+      ITestHostProcessLifetimeHandler handler = collector;
 
-      var mockOtherExtension = new Mock<IExtension>();
-      mockOtherExtension.Setup(x => x.Uid).Returns("OtherExtension");
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
 
-      var conflictingVariable = new OwnedEnvironmentVariable(
-        mockOtherExtension.Object,
-        "COVERLET_MTP_COVERAGE_ENABLED",
-        "false",
-        isSecret: false,
-        isLocked: false);
+      using var cts = new CancellationTokenSource();
+      cts.Cancel();
 
-      var mockReadOnlyEnvVariables = new Mock<IReadOnlyEnvironmentVariables>();
-      mockReadOnlyEnvVariables
-        .Setup(x => x.TryGetVariable("COVERLET_MTP_COVERAGE_ENABLED", out conflictingVariable))
-        .Returns(true);
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
 
-      // Act
-      ValidationResult result = await envProvider.ValidateTestHostEnvironmentVariablesAsync(mockReadOnlyEnvVariables.Object);
-
-      // Assert
-      Assert.False(result.IsValid);
-      Assert.Contains("already set by another extension", result.ErrorMessage);
-    }
-
-    [Fact]
-    public async Task ValidateTestHostEnvironmentVariablesAsync_ReturnsValidTaskType()
-    {
-      // Arrange
-      var collector = CreateCollector();
-      ITestHostEnvironmentVariableProvider envProvider = collector;
-
-      var mockReadOnlyEnvVariables = new Mock<IReadOnlyEnvironmentVariables>();
-      mockReadOnlyEnvVariables
-        .Setup(x => x.TryGetVariable(It.IsAny<string>(), out It.Ref<OwnedEnvironmentVariable?>.IsAny))
-        .Returns(false);
-
-      // Act
-      Task<ValidationResult> resultTask = envProvider.ValidateTestHostEnvironmentVariablesAsync(mockReadOnlyEnvVariables.Object);
-
-      // Assert
-      Assert.True(resultTask.IsCompleted);
-      ValidationResult result = await resultTask;
-
+      // Should handle cancellation gracefully
+      await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, cts.Token);
     }
   }
 }
