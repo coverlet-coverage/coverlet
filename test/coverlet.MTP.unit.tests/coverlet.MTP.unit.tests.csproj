@@ -12,6 +12,7 @@
     <ProjectReference Include="$(RepoRoot)\src\coverlet.MTP\coverlet.MTP.csproj">
       <SetTargetFramework Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) != '.NETCoreApp'">TargetFramework=netstandard2.0</SetTargetFramework>
     </ProjectReference>
+    <ProjectReference Include="$(RepoRoot)\src\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

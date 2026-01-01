@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using Coverlet.Core.Instrumentation;
+using coverlet.Extension;
 using Coverlet.MTP.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Testing.Platform.Extensions.TestHost;
@@ -26,7 +27,7 @@ public class CoverletTestSessionHandler : ITestSessionLifetimeHandler
   }
 
   public string Uid => nameof(CoverletTestSessionHandler);
-  public string Version => "1.0.0";
+  public string Version => typeof(CoverletExtension).Assembly.GetName().Version?.ToString() ?? "1.0.0";
   public string DisplayName => "Coverlet Coverage Session Handler";
   public string Description => "Flushes coverage data at end of test session";
 

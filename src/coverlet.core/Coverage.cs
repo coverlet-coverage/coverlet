@@ -49,7 +49,7 @@ namespace Coverlet.Core
     public bool DisableManagedInstrumentationRestore { get; set; }
   }
 
-  internal class Coverage
+  internal class Coverage : ICoverage
   {
     private readonly string _moduleOrAppDirectory;
     private readonly ILogger _logger;

@@ -17,7 +17,7 @@ public class CoverletTestSessionHandlerTests
 
     // Assert
     Assert.Equal(nameof(CoverletTestSessionHandler), handler.Uid);
-    Assert.Equal("1.0.0", handler.Version);
+    Assert.Equal("8.0.0.0", handler.Version);
     Assert.Equal("Coverlet Coverage Session Handler", handler.DisplayName);
     Assert.NotEmpty(handler.Description);
   }

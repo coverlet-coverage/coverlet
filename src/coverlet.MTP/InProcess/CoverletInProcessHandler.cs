@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using coverlet.Extension;
 using Coverlet.Core.Instrumentation;
 using Coverlet.MTP.Constants;
 using Microsoft.Testing.Platform.Extensions.TestHost;
@@ -22,9 +23,10 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
   private readonly bool _coverageEnabled;
   private readonly string? _coverageIdentifier;
   private readonly bool _enableExceptionLog;
+  private readonly ILogger? _object; // Make nullable
 
   public string Uid => "Coverlet.MTP.InProcess";
-  public string Version => "1.0.0";
+  public string Version => typeof(CoverletExtension).Assembly.GetName().Version?.ToString() ?? "1.0.0";
   public string DisplayName => "Coverlet In-Process Handler";
   public string Description => "Flushes coverage hit data when test session ends";
 
@@ -45,6 +47,13 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
     _enableExceptionLog = Environment.GetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog) == "1";
 
     _logger.LogDebug($"[Coverlet.MTP.InProcess] Initialized - CoverageEnabled={_coverageEnabled}, Identifier={_coverageIdentifier ?? "(null)"}");
+  }
+
+  public CoverletInProcessHandler(ILogger @object)
+  {
+    _logger = @object;
+    _object = @object;
+    // You may want to initialize other fields here as needed
   }
 
   public Task<bool> IsEnabledAsync() => Task.FromResult(_coverageEnabled);

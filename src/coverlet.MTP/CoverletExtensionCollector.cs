@@ -31,7 +31,7 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
   private readonly CoverletExtensionConfiguration _configuration;
   private IServiceProvider? _serviceProvider;
   private readonly IConfiguration? _platformConfiguration;
-  private Coverage? _coverage;
+  private ICoverage? _coverage;
   private readonly ILoggerFactory _loggerFactory;
   private readonly ICommandLineOptions _commandLineOptions;
   private bool _coverageEnabled;
@@ -238,6 +238,10 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
     return Task.FromResult(true);
   }
 
+  // Add internal setter for testing
+  internal ICoverageFactory? CoverageFactory { get; set; }
+
+  // Modify InitializeCoverage to use factory
   private void InitializeCoverage()
   {
     if (_serviceProvider == null || string.IsNullOrEmpty(_testModulePath))
@@ -274,14 +278,22 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
       DisableManagedInstrumentationRestore = _configuration.DisableManagedInstrumentationRestore
     };
 
-    _coverage = new Coverage(
-      _testModulePath,
-      parameters,
-      _logger,
-      instrumentationHelper,
-      fileSystem,
-      sourceRootTranslator,
-      cecilSymbolHelper);
+    // Use factory if available, otherwise create directly
+    if (CoverageFactory != null)
+    {
+      _coverage = CoverageFactory.Create(_testModulePath, parameters);
+    }
+    else
+    {
+      _coverage = new Coverage(
+        _testModulePath,
+        parameters,
+        _logger,
+        instrumentationHelper,
+        fileSystem,
+        sourceRootTranslator,
+        cecilSymbolHelper);
+    }
   }
 
   private async Task GenerateReportsAsync(CoverageResult result, CancellationToken cancellation)
