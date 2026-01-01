@@ -21,15 +21,6 @@
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <!-- disable transitive version update and use versions defined in coverlet.core -->
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
-    <!-- settings for Muse.coverlet.MTP.globalconfig -->
-    <!-- <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
-    <AnalysisMode>Recommended</AnalysisMode>
-    <AnalysisLevel>latest-major</AnalysisLevel>
-    <Deterministic>true</Deterministic>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources> -->
-    
   </PropertyGroup>
 
   <PropertyGroup>
@@ -66,10 +57,6 @@
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="all" />
   </ItemGroup>
-
-  <!-- <ItemGroup>
-    <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)../contentFiles/any/any/Muse.coverlet.MTP.globalconfig"  />
-  </ItemGroup> -->
 
   <!-- NuGet package layout -->
   <!-- NuGet folders https://learn.microsoft.com/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->

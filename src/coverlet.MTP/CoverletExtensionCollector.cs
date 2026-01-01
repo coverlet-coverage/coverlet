@@ -2,19 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
+using coverlet.Extension.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
-using coverlet.Extension.Logging;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
 using Coverlet.MTP.CommandLine;
-using Microsoft.Testing.Platform.Configurations;
-using Microsoft.Testing.Platform.Logging;
-using Microsoft.Testing.Platform.CommandLine;
+using Coverlet.MTP.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
+using Microsoft.Testing.Platform.Logging;
+using Coverlet.MTP.Constants;
 
 namespace coverlet.Extension.Collector;
 
@@ -40,11 +42,6 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
 
   // Default exclude filter matching coverlet.collector
   private const string DefaultExcludeFilter = "[xunit.*]*";
-
-  // Environment variable to pass coverage identifier to test host
-  private const string CoverageIdentifierEnvVar = "COVERLET_MTP_COVERAGE_IDENTIFIER";
-  private const string CoverageEnabledEnvVar = "COVERLET_MTP_COVERAGE_ENABLED";
-  private const string HitsFilePathEnvVar = "COVERLET_MTP_HITS_FILE_PATH";
 
   string IExtension.Uid => _extension.Uid;
   string IExtension.Version => _extension.Version;
@@ -139,14 +136,14 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
 
       // Tell the test host that coverage is enabled
       environmentVariables.SetVariable(new EnvironmentVariable(
-        CoverageEnabledEnvVar,
+        CoverletMtpEnvironmentVariables.CoverageEnabled,
         "true",
         isSecret: false,
         isLocked: true));
 
       // Pass the coverage identifier for result correlation
       environmentVariables.SetVariable(new EnvironmentVariable(
-        CoverageIdentifierEnvVar,
+        CoverletMtpEnvironmentVariables.CoverageIdentifier,
         _coverageIdentifier,
         isSecret: false,
         isLocked: true));
@@ -159,7 +156,7 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
         if (!string.IsNullOrEmpty(hitsPath))
         {
           environmentVariables.SetVariable(new EnvironmentVariable(
-            HitsFilePathEnvVar,
+            CoverletMtpEnvironmentVariables.HitsFilePath,
             hitsPath,
             isSecret: false,
             isLocked: true));
@@ -177,11 +174,11 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
     IReadOnlyEnvironmentVariables environmentVariables)
   {
     // Check for conflicts with our variables
-    if (environmentVariables.TryGetVariable(CoverageEnabledEnvVar, out OwnedEnvironmentVariable? existing) &&
+    if (environmentVariables.TryGetVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, out OwnedEnvironmentVariable? existing) &&
         existing.Owner != this as IExtension)
     {
       return Task.FromResult(ValidationResult.Invalid(
-        $"Environment variable {CoverageEnabledEnvVar} is already set by another extension."));
+        $"Environment variable {CoverletMtpEnvironmentVariables.CoverageEnabled} is already set by another extension."));
     }
 
     return Task.FromResult(ValidationResult.Valid());
@@ -235,7 +232,11 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
     }
   }
 
-  public Task<bool> IsEnabledAsync() => Task.FromResult(true);
+  public Task<bool> IsEnabledAsync()
+  {
+    DebugHelper.HandleDebuggerAttachment(nameof(CoverletExtension));
+    return Task.FromResult(true);
+  }
 
   private void InitializeCoverage()
   {

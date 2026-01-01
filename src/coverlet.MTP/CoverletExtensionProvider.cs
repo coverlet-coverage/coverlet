@@ -2,40 +2,55 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using coverlet.Extension.Collector;
-using Coverlet.MTP.CommandLine;
+using Coverlet.MTP.InProcess;
+using Coverlet.MTP;
 using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Services;
-using Microsoft.Testing.Extensions.Diagnostics;
 
-namespace coverlet.Extension
+namespace coverlet.Extension;
+
+public static class CoverletExtensionProvider
 {
-  public static class CoverletExtensionProvider
+  public static void AddCoverletExtensionProvider(this ITestApplicationBuilder builder, bool ignoreIfNotSupported = false)
   {
-    public static void AddCoverletExtensionProvider(this ITestApplicationBuilder builder, bool ignoreIfNotSupported = false)
-    {
-      CoverletExtension _extension = new();
+    // ============================================================
+    // OUT-OF-PROCESS EXTENSIONS (run in controller process)
+    // These observe the test host from outside
+    // ============================================================
 
-      builder.TestHostControllers.AddEnvironmentVariableProvider(serviceProvider
-          => new CoverletExtensionEnvironmentVariableProvider(
-              serviceProvider.GetConfiguration(),
+    // Environment variable provider - passes configuration to test host
+    builder.TestHostControllers.AddEnvironmentVariableProvider(serviceProvider
+        => new CoverletExtensionEnvironmentVariableProvider(
+            serviceProvider.GetConfiguration(),
+            serviceProvider.GetCommandLineOptions(),
+            serviceProvider.GetLoggerFactory()));
+
+    // Process lifetime handler - instruments before tests, collects after
+    builder.TestHostControllers.AddProcessLifetimeHandler(static serviceProvider
+        =>
+        {
+          IConfiguration configuration = serviceProvider.GetConfiguration();
+          return new CoverletExtensionCollector(
+              serviceProvider.GetLoggerFactory(),
               serviceProvider.GetCommandLineOptions(),
-              serviceProvider.GetLoggerFactory()));
+              configuration) as ITestHostProcessLifetimeHandler;
+        });
 
-      builder.TestHostControllers.AddProcessLifetimeHandler(static serviceProvider
-          =>
-          {
-            // Configuration may be null when coverlet-coverage is not enabled.
-            // The collector checks for --coverlet-coverage flag before using configuration.
-            IConfiguration configuration = serviceProvider.GetConfiguration();
-            return new CoverletExtensionCollector(
-                serviceProvider.GetLoggerFactory(),
-                serviceProvider.GetCommandLineOptions(),
-                configuration) as ITestHostProcessLifetimeHandler;
-          });
+    // ============================================================
+    // IN-PROCESS EXTENSIONS (run inside test host process)
+    // These run in the same process as the tests
+    // ============================================================
 
-      builder.CommandLine.AddProvider(() => new CoverletExtensionCommandLineProvider(_extension));
-    }
+    // Test session lifetime handler - flushes coverage data when session ends
+    builder.TestHost.AddTestSessionLifetimeHandle(static serviceProvider
+        => new CoverletInProcessHandler(serviceProvider.GetLoggerFactory()));
+
+    // ============================================================
+    // COMMAND LINE
+    // ============================================================
+
+    builder.CommandLine.AddProvider(() => new Coverlet.MTP.CommandLine.CoverletExtensionCommandLineProvider(new CoverletExtension()));
   }
 }

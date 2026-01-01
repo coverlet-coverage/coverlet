@@ -128,11 +128,9 @@ public class CollectCoverageTests
     // JSON format: { "Module.dll": { "SourceFile.cs": { "Namespace.Class": { "MethodSignature": { "Lines": {...}, "Branches": [...] } } } } }
     bool foundCoveredMethod = false;
 
-    foreach (var module in coverageData.RootElement.EnumerateObject())
+    foreach (var module in coverageData.RootElement.EnumerateObject()
+      .Where(m => m.Name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
     {
-      if (!module.Name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-        continue;
-
       // Enumerate documents (source files)
       foreach (var document in module.Value.EnumerateObject())
       {
@@ -189,11 +187,9 @@ public class CollectCoverageTests
     // JSON format: { "Module.dll": { "SourceFile.cs": { "Namespace.Class": { "MethodSignature": { "Lines": {...}, "Branches": [{...}] } } } } }
     bool foundBranches = false;
 
-    foreach (var module in coverageData.RootElement.EnumerateObject())
+    foreach (var module in coverageData.RootElement.EnumerateObject()
+      .Where(m => m.Name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
     {
-      if (!module.Name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-        continue;
-
       // Enumerate documents (source files)
       foreach (var document in module.Value.EnumerateObject())
       {
@@ -1129,29 +1125,28 @@ public class StringHelperTests
         return;
 
       // Find and copy coverage files to solution root if they're only in bin
-      foreach (string extension in s_preserveExtensions)
+      foreach (string file in s_preserveExtensions
+        .Select(extension => $"*{extension}")
+        .SelectMany(pattern => Directory.GetFiles(OutputDirectory, pattern, SearchOption.AllDirectories)))
       {
-        string pattern = $"*{extension}";
-        foreach (string file in Directory.GetFiles(OutputDirectory, pattern, SearchOption.AllDirectories))
-        {
-          string fileName = Path.GetFileName(file);
-          string destPath = Path.Combine(SolutionDirectory, fileName);
+        string fileName = Path.GetFileName(file);
+        string destPath = Path.Combine(SolutionDirectory, fileName);
 
-          // Only copy if not already at solution root
-          if (!File.Exists(destPath))
+        // Only copy if not already at solution root
+        if (!File.Exists(destPath))
+        {
+          try
           {
-            try
-            {
-              File.Copy(file, destPath, overwrite: false);
-            }
-            catch
-            {
-              // Ignore copy failures
-            }
+            File.Copy(file, destPath, overwrite: false);
+          }
+          catch
+          {
+            // Ignore copy failures
           }
         }
       }
     }
+  
 
     private static void DeleteDirectoryWithRetry(string path, int maxRetries = 3)
     {

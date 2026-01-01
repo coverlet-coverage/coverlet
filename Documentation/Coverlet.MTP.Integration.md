@@ -220,6 +220,81 @@ The `coverlet.MTP` extension integrates with the Microsoft Testing Platform usin
 > reportgenerator -reports:"**/*.cobertura.xml" -targetdir:"coverage/report" -reporttypes:"HtmlInline_AzurePipelines_Dark;Cobertura"
 > ```
 
+## Architecture
+
+Coverlet.MTP uses a two-process architecture:
+
+```mermaid
+flowchart LR
+    subgraph Controller["CONTROLLER PROCESS"]
+        direction TB
+        THC["builder.TestHostControllers"]
+        PLH["AddProcessLifetimeHandler"]
+        EVP["AddEnvironmentVariableProvider"]
+        THC --> PLH
+        THC --> EVP
+    end
+
+    subgraph TestHost["TEST HOST PROCESS"]
+        direction TB
+        TH["builder.TestHost"]
+        TSLH["AddTestSessionLifetimeHandle"]
+        DC["AddDataConsumer"]
+        TALC["AddTestApplicationLifecycleCallbacks"]
+        TH --> TSLH
+        TH --> DC
+        TH --> TALC
+    end
+
+    Controller -->|"Environment Variables<br/>Process Lifecycle Events"| TestHost
+
+    style Controller fill:#e6f3ff,stroke:#0066cc,stroke-width:2px
+    style TestHost fill:#e6ffe6,stroke:#009900,stroke-width:2px
+```
+
+And here's a sequence diagram showing the coverlet.MTP flow:
+
+```mermaid
+sequenceDiagram
+    participant C as Controller Process<br/>(CoverletExtensionCollector)
+    participant E as Environment Variables
+    participant T as Test Host Process<br/>(CoverletInProcessHandler)
+
+    Note over C: BeforeTestHostProcessStartAsync
+    C->>C: Instrument assemblies
+    C->>E: Set COVERLET_MTP_COVERAGE_ENABLED=true
+    C->>E: Set COVERLET_MTP_COVERAGE_IDENTIFIER
+    C->>E: Set COVERLET_MTP_HITS_FILE_PATH
+
+    Note over C: OnTestHostProcessStartedAsync
+    C->>T: Start test host process
+
+    Note over T: Constructor
+    T->>E: Read environment variables
+    T->>T: Initialize handler
+
+    Note over T: OnTestSessionStartingAsync
+    T->>T: Tests execute...
+
+    Note over T: OnTestSessionFinishingAsync
+    T->>T: FlushCoverageData()
+    T->>T: Call ModuleTrackerTemplate.UnloadModule
+
+    Note over C: OnTestHostProcessExitedAsync
+    C->>C: Read hit files
+    C->>C: Generate coverage reports
+```
+
+### Environment Variables
+
+| Variable | Purpose |
+| -------- | ------- |
+| `COVERLET_MTP_COVERAGE_ENABLED` | Indicates coverage is active |
+| `COVERLET_MTP_COVERAGE_IDENTIFIER` | Unique ID for result correlation |
+| `COVERLET_MTP_HITS_FILE_PATH` | Directory for hit data files |
+| `COVERLET_MTP_INPROC_DEBUG` | Set to "1" to debug in-process handler |
+| `COVERLET_MTP_INPROC_EXCEPTIONLOG_ENABLED` | Set to "1" for detailed error logging |
+
 ## Troubleshooting
 
 ### Enable Diagnostic Output
@@ -236,6 +311,91 @@ Set the environment variable to attach a debugger:
 
 ```bash
 set COVERLET_MTP_DEBUG=1 dotnet exec TestProject.dll --coverlet
+```
+
+## Debugging and Troubleshooting (*not tested - just defined*)
+
+### Enable Debugger Launch
+
+To launch a debugger when coverlet.MTP initializes:
+
+Windows:
+
+```shell
+set COVERLET_MTP_DEBUG=1
+```
+
+Linux/macOS:
+
+```shell
+export COVERLET_MTP_DEBUG=1
+```
+
+### Wait for Debugger Attach
+
+To make coverlet.MTP wait for a debugger to attach (Windows):
+
+```shell
+set COVERLET_MTP_DEBUG_WAIT=1
+```
+
+The extension will display:
+
+```[Coverlet.MTP] CoverletExtension: Waiting for debugger to attach... [Coverlet.MTP] Process Id: 12345, Name: dotnet```
+
+Use Visual Studio's "Debug > Attach to Process" (Ctrl+Alt+P) to attach.
+
+### Enable Tracker Logging
+
+To collect detailed logs from the injected coverage tracker (Windows):
+
+```shell
+set COVERLET_ENABLETRACKERLOG=1
+```
+
+Log files will be created near the instrumented module location:
+
+- `moduleName.dll_tracker.txt` - Main tracker log
+- `TrackersHitsLog/` folder - Detailed hit information
+
+### Enable Instrumentation Debugging
+
+For detailed instrumentation diagnostics (Windows):
+
+```shell
+set COVERLET_MTP_INSTRUMENTATION_DEBUG=1
+```
+
+### Enable Exception Logging
+
+To capture detailed exception information (Windows):
+
+```shell
+set COVERLET_MTP_EXCEPTIONLOG_ENABLED=1
+```
+
+### Using MTP Built-in Diagnostics
+
+Microsoft Testing Platform provides built-in diagnostic logging (Windows):
+
+```shell
+dotnet test --diagnostic --diagnostic-verbosity Trace
+```
+
+This creates detailed logs in the `TestResults` directory.
+
+### Combined Debugging Example
+
+Enable all debugging features (Windows)
+
+```shell
+set COVERLET_MTP_DEBUG_WAIT=1 set COVERLET_ENABLETRACKERLOG=1 set COVERLET_MTP_EXCEPTIONLOG_ENABLED=1
+```
+
+Run tests with MTP diagnostics
+
+```shell
+dotnet test --coverlet --diagnostic --diagnostic-verbosity Trace
 ```
 
 ## Requirements

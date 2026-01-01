@@ -563,6 +563,40 @@ public class CoverageConfigurationTests
 
   #region LogConfigurationSummary Additional Tests
 
+  // Helper method to verify log calls for Microsoft.Testing.Platform.Logging.ILogger
+  private void VerifyLogInformation(string containsText, Times times)
+  {
+    _mockLogger.Verify(
+      x => x.Log(
+          LogLevel.Information,
+          It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(containsText)),
+          It.IsAny<Exception>(),
+          It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+      times);
+  }
+
+  private void VerifyLogInformationStartsWith(string startsWithText, Times times)
+  {
+    _mockLogger.Verify(
+      x => x.Log(
+          LogLevel.Information,
+          It.Is<It.IsAnyType>((v, t) => v.ToString()!.StartsWith(startsWithText)),
+          It.IsAny<Exception>(),
+          It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+      times);
+  }
+
+  private void VerifyLogInformationMatch(Func<string, bool> predicate, Times times)
+  {
+    _mockLogger.Verify(
+      x => x.Log(
+          LogLevel.Information,
+          It.Is<It.IsAnyType>((v, t) => predicate(v.ToString()!)),
+          It.IsAny<Exception>(),
+          It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+      times);
+  }
+
   [Fact]
   public void LogConfigurationSummary_WithLogger_LogsAllConfigurationValues()
   {
@@ -579,46 +613,20 @@ public class CoverageConfigurationTests
     // Act
     config.LogConfigurationSummary();
 
-    // Assert - verify LogInformation was called for each configuration line
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.Contains("=== Coverlet Coverage Configuration ==="))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Test Assembly:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Output Formats:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Include Filters:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Exclude Filters:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Exclude by File:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Exclude by Attribute:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Include Directories:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Single Hit:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Include Test Assembly:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Skip Auto Properties:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Exclude Assemblies Without Sources:"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.Contains("========================================"))),
-      Times.Once);
+    // Assert - verify Log was called for each configuration line
+    VerifyLogInformation("=== Coverlet Coverage Configuration ===", Times.Once());
+    VerifyLogInformationStartsWith("Test Assembly:", Times.Once());
+    VerifyLogInformationStartsWith("Output Formats:", Times.Once());
+    VerifyLogInformationStartsWith("Include Filters:", Times.Once());
+    VerifyLogInformationStartsWith("Exclude Filters:", Times.Once());
+    VerifyLogInformationStartsWith("Exclude by File:", Times.Once());
+    VerifyLogInformationStartsWith("Exclude by Attribute:", Times.Once());
+    VerifyLogInformationStartsWith("Include Directories:", Times.Once());
+    VerifyLogInformationStartsWith("Single Hit:", Times.Once());
+    VerifyLogInformationStartsWith("Include Test Assembly:", Times.Once());
+    VerifyLogInformationStartsWith("Skip Auto Properties:", Times.Once());
+    VerifyLogInformationStartsWith("Exclude Assemblies Without Sources:", Times.Once());
+    VerifyLogInformation("========================================", Times.Once());
   }
 
   [Fact]
@@ -638,9 +646,7 @@ public class CoverageConfigurationTests
     config.LogConfigurationSummary();
 
     // Assert
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.Contains("json") && s.Contains("cobertura"))),
-      Times.Once);
+    VerifyLogInformationMatch(s => s.Contains("json") && s.Contains("cobertura"), Times.Once());
   }
 
   [Fact]
@@ -675,9 +681,7 @@ public class CoverageConfigurationTests
     config.LogConfigurationSummary();
 
     // Assert - Include Filters should show "(none)" since no filters specified
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.StartsWith("Include Filters:") && s.Contains("(none)"))),
-      Times.Once);
+    VerifyLogInformationMatch(s => s.StartsWith("Include Filters:") && s.Contains("(none)"), Times.Once());
   }
 
   [Fact]
@@ -700,12 +704,8 @@ public class CoverageConfigurationTests
     config.LogConfigurationSummary();
 
     // Assert
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.Contains("Single Hit: True"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.Contains("Include Test Assembly: True"))),
-      Times.Once);
+    VerifyLogInformation("Single Hit: True", Times.Once());
+    VerifyLogInformation("Include Test Assembly: True", Times.Once());
   }
 
   [Fact]
@@ -734,20 +734,12 @@ public class CoverageConfigurationTests
     config.LogConfigurationSummary();
 
     // Assert
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.Contains("Single Hit: False"))),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.Contains("Include Test Assembly: False"))),
-      Times.Once);
+    VerifyLogInformation("Single Hit: False", Times.Once());
+    VerifyLogInformation("Include Test Assembly: False", Times.Once());
     // SkipAutoProps defaults to true when not set
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.Contains("Skip Auto Properties: True"))),
-      Times.Once);
+    VerifyLogInformation("Skip Auto Properties: True", Times.Once());
     // ExcludeAssembliesWithoutSources defaults to true when not set
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s.Contains("Exclude Assemblies Without Sources: True"))),
-      Times.Once);
+    VerifyLogInformation("Exclude Assemblies Without Sources: True", Times.Once());
   }
 
   [Fact]
@@ -767,12 +759,8 @@ public class CoverageConfigurationTests
     config.LogConfigurationSummary();
 
     // Assert - Verify header and footer separators are logged
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s == "=== Coverlet Coverage Configuration ===")),
-      Times.Once);
-    _mockLogger.Verify(
-      x => x.LogInformation(It.Is<string>(s => s == "========================================")),
-      Times.Once);
+    VerifyLogInformation("=== Coverlet Coverage Configuration ===", Times.Once());
+    VerifyLogInformation("========================================", Times.Once());
   }
 
   #endregion
