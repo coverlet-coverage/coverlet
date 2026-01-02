@@ -3,7 +3,7 @@
 
 using Microsoft.Testing.Platform.Extensions;
 
-namespace coverlet.Extension;
+namespace coverlet.MTP;
 
 internal class CoverletExtension : IExtension
 {

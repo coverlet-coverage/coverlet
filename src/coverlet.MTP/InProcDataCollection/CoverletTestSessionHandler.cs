@@ -3,11 +3,11 @@
 
 using System.Reflection;
 using Coverlet.Core.Instrumentation;
-using coverlet.Extension;
 using Coverlet.MTP.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using Microsoft.Testing.Platform.Services;
+using coverlet.MTP;
 
 namespace Coverlet.MTP.InProcDataCollection;
 

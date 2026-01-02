@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 
-namespace Coverlet.MTP.CommandLine;
+namespace coverlet.MTP.CommandLine;
 
 internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptionsProvider
 {

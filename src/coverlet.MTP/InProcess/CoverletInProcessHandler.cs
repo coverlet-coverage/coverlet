@@ -3,9 +3,9 @@
 
 using System.Diagnostics;
 using System.Reflection;
-using coverlet.Extension;
+using coverlet.MTP;
+using coverlet.MTP.EnvironmentVariables;
 using Coverlet.Core.Instrumentation;
-using Coverlet.MTP.Constants;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Services;

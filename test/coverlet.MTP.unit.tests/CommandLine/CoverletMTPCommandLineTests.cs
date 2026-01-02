@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics.CodeAnalysis;
-using coverlet.Extension;
+using coverlet.MTP.CommandLine;
 using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 using Xunit;
