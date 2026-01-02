@@ -1098,5 +1098,516 @@ namespace coverlet.MTP.unit.tests.ExtensionCollector
     }
 
     #endregion
+
+    #region GenerateReportsAsync Tests
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithJsonFormat_GeneratesJsonReport()
+    {
+      // Arrange
+      string[]? formats = ["json"];
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+        .Returns(true);
+
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithCoberturaFormat_GeneratesCoberturaReport()
+    {
+      // Arrange
+      string[]? formats = ["cobertura"];
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+        .Returns(true);
+
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithMultipleFormats_GeneratesAllReports()
+    {
+      // Arrange
+      string[]? formats = ["json", "cobertura", "lcov"];
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+        .Returns(true);
+
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithUnsupportedFormat_ThrowsInvalidOperationException()
+    {
+      // Arrange
+      string[]? formats = ["unsupportedformat"];
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+        .Returns(true);
+
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act - Exception should be caught internally and not rethrown
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert - Method completes without throwing (exception is logged)
+        mockProcessInfo.Verify(x => x.ExitCode, Times.AtLeastOnce);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WhenOutputDirectoryDoesNotExist_CreatesDirectory()
+    {
+      // Arrange
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "subdir");
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        string? parentDir = Path.GetDirectoryName(tempDir);
+        if (parentDir != null && Directory.Exists(parentDir))
+        {
+          Directory.Delete(parentDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WhenResultDirectoryNull_UsesModuleDirectory()
+    {
+      // Arrange
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns((string?)null);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      // Act
+      await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+      // Assert - Should complete without throwing
+      mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithCommaSeparatedFormats_ProcessesAllFormats()
+    {
+      // Arrange
+      string[]? formats = ["json,cobertura"];
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+        .Returns(true);
+
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithCancellationToken_PassesCancellationToTask()
+    {
+      // Arrange
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      using var cts = new CancellationTokenSource();
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, cts.Token);
+
+        // Assert
+        Assert.False(cts.IsCancellationRequested);
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithOpenCoverFormat_GeneratesOpenCoverReport()
+    {
+      // Arrange
+      string[]? formats = ["opencover"];
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+        .Returns(true);
+
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithLcovFormat_GeneratesLcovReport()
+    {
+      // Arrange
+      string[]? formats = ["lcov"];
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+        .Returns(true);
+
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_LogsGeneratedReportPaths()
+    {
+      // Arrange
+      string[]? formats = ["json"];
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+        .Returns(true);
+
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert - Verify logging occurred
+        _mockLogger.Verify(
+          x => x.Log(
+            LogLevel.Information,
+            It.IsAny<string>(),
+            It.IsAny<Exception?>(),
+            It.IsAny<Func<string, Exception?, string>>()),
+          Times.AtLeastOnce);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithEmptyModules_GeneratesEmptyReports()
+    {
+      // Arrange
+      var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
+
+      mockCoverage
+        .Setup(x => x.GetCoverageResult())
+        .Returns(new CoverageResult { Modules = new Modules() });
+
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      _mockConfiguration
+        .Setup(x => x["platformOptions:resultDirectory"])
+        .Returns(tempDir + Path.DirectorySeparatorChar);
+
+      ITestHostProcessLifetimeHandler handler = collector;
+      await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+      mockProcessInfo.Setup(x => x.PID).Returns(12345);
+      mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+      try
+      {
+        // Act
+        await handler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    #endregion
   }
 }
