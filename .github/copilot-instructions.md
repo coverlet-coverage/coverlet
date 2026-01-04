@@ -42,7 +42,7 @@ In addition to the rules enforced by `.editorconfig`, you SHOULD:
 2. **Understand the complete logic flow** - Identify all code paths, edge cases, and error handling
 3. **Design comprehensive test cases** that cover:
    - Happy path scenarios
-   - Edge cases and boundary conditions
+   - Tests for issue resolution shall include edge cases and boundary conditions.
    - Error conditions and exception handling
    - All branches and code paths
 4. **Never generate placeholder or blind tests** - Each test must validate specific, understood behavior

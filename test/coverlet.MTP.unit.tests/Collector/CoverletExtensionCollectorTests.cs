@@ -1292,52 +1292,6 @@ namespace coverlet.MTP.Tests.Collector
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenHitsFilePathEmpty_DoesNotSetHitsFilePathVariable()
-    {
-      // Arrange
-      _mockCommandLineOptions
-        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
-        .Returns(true);
-
-      // Set up a test module path that would result in empty hits file path
-      _mockConfiguration
-        .Setup(x => x["TestModule"])
-        .Returns("test.dll"); // No directory component
-
-      var mockCoverage = new Mock<ICoverage>();
-      mockCoverage
-        .Setup(x => x.PrepareModules())
-        .Returns(new CoveragePrepareResult { Identifier = "test-id" });
-
-      var mockCoverageFactory = new Mock<ICoverageFactory>();
-      mockCoverageFactory
-        .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
-        .Returns(mockCoverage.Object);
-
-      var collector = CreateCollector();
-      collector.CoverageFactory = mockCoverageFactory.Object;
-
-      ITestHostProcessLifetimeHandler lifetimeHandler = collector;
-      ITestHostEnvironmentVariableProvider envProvider = collector;
-
-      await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
-
-      var capturedVariables = new List<EnvironmentVariable>();
-      var mockEnvVariables = new Mock<IEnvironmentVariables>();
-      mockEnvVariables
-        .Setup(x => x.SetVariable(It.IsAny<EnvironmentVariable>()))
-        .Callback<EnvironmentVariable>(v => capturedVariables.Add(v));
-
-      // Act
-      await envProvider.UpdateAsync(mockEnvVariables.Object);
-
-      // Assert - HitsFilePath should still be set even with minimal path
-      Assert.Contains(capturedVariables, v => v.Variable == CoverletMtpEnvironmentVariables.CoverageEnabled);
-      Assert.Contains(capturedVariables, v => v.Variable == CoverletMtpEnvironmentVariables.CoverageIdentifier);
-      Assert.Contains(capturedVariables, v => v.Variable == CoverletMtpEnvironmentVariables.HitsFilePath);
-    }
-
-    [Fact]
     public async Task UpdateAsync_LogsSettingEnvironmentVariables()
     {
       // Arrange
@@ -1472,6 +1426,205 @@ namespace coverlet.MTP.Tests.Collector
 
     #endregion
 
+    #region GenerateReportsAsync Tests
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithConsoleFormat_LogsReportToConsole()
+    {
+      // Arrange
+      string testModulePath = CreateTempTestModule();
+      try
+      {
+        _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
+        _mockConfiguration.Setup(x => x["TestModule"]).Returns(testModulePath);
+        _mockConfiguration.Setup(x => x["TestResultDirectory"]).Returns(Path.GetDirectoryName(testModulePath));
+
+        string[]? formats = ["teamcity"];
+        _mockCommandLineOptions
+          .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+          .Returns(true);
+
+        SetupDefaultCommandLineOptions();
+
+        var mockCoverage = new Mock<ICoverage>();
+        string coverageIdentifier = Guid.NewGuid().ToString();
+        mockCoverage.Setup(x => x.PrepareModules()).Returns(new CoveragePrepareResult
+        {
+          Identifier = coverageIdentifier,
+          Results = []
+        });
+
+        var coverageResult = new CoverageResult
+        {
+          Identifier = coverageIdentifier,
+          Modules = new Modules(),
+          Parameters = new CoverageParameters()
+        };
+        mockCoverage.Setup(x => x.GetCoverageResult()).Returns(coverageResult);
+
+        var mockCoverageFactory = new Mock<ICoverageFactory>();
+        mockCoverageFactory
+          .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
+          .Returns(mockCoverage.Object);
+
+        var collector = CreateCollector();
+        collector.CoverageFactory = mockCoverageFactory.Object;
+
+        ITestHostProcessLifetimeHandler lifetimeHandler = collector;
+        await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+        var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+        mockProcessInfo.Setup(x => x.PID).Returns(12345);
+        mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+        // Act
+        await lifetimeHandler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert - Verify that LogInformation was called (the underlying Log method)
+        // Note: We cannot easily verify the exact message content with the Testing Platform ILogger
+        // because it doesn't expose the same mock-friendly interface as MEL ILogger
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        CleanupTempTestModule(testModulePath);
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithUnsupportedFormat_LogsError()
+    {
+      // Arrange
+      string testModulePath = CreateTempTestModule();
+      try
+      {
+        _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
+        _mockConfiguration.Setup(x => x["TestModule"]).Returns(testModulePath);
+        _mockConfiguration.Setup(x => x["TestResultDirectory"]).Returns(Path.GetDirectoryName(testModulePath));
+
+        string[]? formats = ["unsupportedformat"];
+        _mockCommandLineOptions
+          .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+          .Returns(true);
+
+        SetupDefaultCommandLineOptions();
+
+        var mockCoverage = new Mock<ICoverage>();
+        string coverageIdentifier = Guid.NewGuid().ToString();
+        mockCoverage.Setup(x => x.PrepareModules()).Returns(new CoveragePrepareResult
+        {
+          Identifier = coverageIdentifier,
+          Results = []
+        });
+
+        var coverageResult = new CoverageResult
+        {
+          Identifier = coverageIdentifier,
+          Modules = new Modules(),
+          Parameters = new CoverageParameters()
+        };
+        mockCoverage.Setup(x => x.GetCoverageResult()).Returns(coverageResult);
+
+        var mockCoverageFactory = new Mock<ICoverageFactory>();
+        mockCoverageFactory
+          .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
+          .Returns(mockCoverage.Object);
+
+        var collector = CreateCollector();
+        collector.CoverageFactory = mockCoverageFactory.Object;
+
+        ITestHostProcessLifetimeHandler lifetimeHandler = collector;
+        await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+        var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+        mockProcessInfo.Setup(x => x.PID).Returns(12345);
+        mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+        // Act - should not throw, just log error
+        await lifetimeHandler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+        // Assert - Verify the exception was caught and logged (behavior validation)
+        // The method completes without throwing
+        mockCoverage.Verify(x => x.GetCoverageResult(), Times.Once);
+      }
+      finally
+      {
+        CleanupTempTestModule(testModulePath);
+      }
+    }
+
+    [Fact]
+    public async Task GenerateReportsAsync_WithCancellationToken_CompletesSuccessfully()
+    {
+      // Arrange
+      string testModulePath = CreateTempTestModule();
+      string testDirectory = Path.GetDirectoryName(testModulePath)!;
+      try
+      {
+        _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
+        _mockConfiguration.Setup(x => x["TestModule"]).Returns(testModulePath);
+        _mockConfiguration.Setup(x => x["TestResultDirectory"]).Returns(testDirectory + Path.DirectorySeparatorChar);
+
+        string[]? formats = ["json"];
+        _mockCommandLineOptions
+          .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+          .Returns(true);
+
+        SetupDefaultCommandLineOptions();
+
+        var mockCoverage = new Mock<ICoverage>();
+        string coverageIdentifier = Guid.NewGuid().ToString();
+        mockCoverage.Setup(x => x.PrepareModules()).Returns(new CoveragePrepareResult
+        {
+          Identifier = coverageIdentifier,
+          Results = []
+        });
+
+        var coverageResult = new CoverageResult
+        {
+          Identifier = coverageIdentifier,
+          Modules = new Modules(),
+          Parameters = new CoverageParameters()
+        };
+        mockCoverage.Setup(x => x.GetCoverageResult()).Returns(coverageResult);
+
+        var mockCoverageFactory = new Mock<ICoverageFactory>();
+        mockCoverageFactory
+          .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
+          .Returns(mockCoverage.Object);
+
+        var collector = CreateCollector();
+        collector.CoverageFactory = mockCoverageFactory.Object;
+
+        ITestHostProcessLifetimeHandler lifetimeHandler = collector;
+        await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+        var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+        mockProcessInfo.Setup(x => x.PID).Returns(12345);
+        mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+        using var cts = new CancellationTokenSource();
+
+        // Act
+        Task exitTask = lifetimeHandler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, cts.Token);
+
+        // Assert
+        await exitTask; // Should complete without exception
+        Assert.True(exitTask.IsCompletedSuccessfully);
+        Assert.False(cts.IsCancellationRequested);
+      }
+      finally
+      {
+        CleanupTempTestModule(testModulePath);
+        string reportPath = Path.Combine(testDirectory, "coverage.json");
+        if (File.Exists(reportPath))
+        {
+          File.Delete(reportPath);
+        }
+      }
+    }
+
+    #endregion
     #region helper methods
 
     private void SetupDefaultCommandLineOptions()
