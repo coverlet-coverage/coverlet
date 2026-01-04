@@ -7,7 +7,7 @@ using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 using Xunit;
 
-namespace coverlet.MTP.unit.tests.CommandLine
+namespace coverlet.MTP.Tests.CommandLine
 {
   public class CoverletMTPCommandLineTests
   {

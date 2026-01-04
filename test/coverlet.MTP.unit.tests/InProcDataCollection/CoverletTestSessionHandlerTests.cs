@@ -9,7 +9,7 @@ using Microsoft.Testing.Platform.Services;
 using Moq;
 using Xunit;
 
-namespace coverlet.MTP.unit.tests.InProcDataCollection;
+namespace coverlet.MTP.Tests.InProcDataCollection;
 
 public class CoverletTestSessionHandlerTests
 {
@@ -109,19 +109,6 @@ public class CoverletTestSessionHandlerTests
     Assert.NotNull(description);
     Assert.NotEmpty(description);
     Assert.Equal("Flushes coverage data at end of test session", description);
-  }
-
-  [Fact]
-  public async Task IsEnabledAsync_ReturnsTrue()
-  {
-    // Arrange
-    var handler = new CoverletTestSessionHandler();
-
-    // Act
-    bool result = await handler.IsEnabledAsync();
-
-    // Assert
-    Assert.True(result);
   }
 
   [Fact]

@@ -151,18 +151,14 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
         isLocked: true));
 
       // Pass the hits file path if available
-      if (_coverage != null)
+      string hitsPath = GetHitsFilePath();
+      if (!string.IsNullOrEmpty(hitsPath))
       {
-        // The hits file path is determined during instrumentation
-        string hitsPath = GetHitsFilePath();
-        if (!string.IsNullOrEmpty(hitsPath))
-        {
-          environmentVariables.SetVariable(new EnvironmentVariable(
-            CoverletMtpEnvironmentVariables.HitsFilePath,
-            hitsPath,
-            isSecret: false,
-            isLocked: true));
-        }
+        environmentVariables.SetVariable(new EnvironmentVariable(
+          CoverletMtpEnvironmentVariables.HitsFilePath,
+          hitsPath,
+          isSecret: false,
+          isLocked: true));
       }
     }
 
@@ -246,13 +242,8 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
   // Modify InitializeCoverage to use factory
   private void InitializeCoverage()
   {
-    if (_serviceProvider == null || string.IsNullOrEmpty(_testModulePath))
+    if (string.IsNullOrEmpty(_testModulePath))
       return;
-
-    IFileSystem fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
-    ISourceRootTranslator sourceRootTranslator = _serviceProvider.GetRequiredService<ISourceRootTranslator>();
-    IInstrumentationHelper instrumentationHelper = _serviceProvider.GetRequiredService<IInstrumentationHelper>();
-    ICecilSymbolHelper cecilSymbolHelper = _serviceProvider.GetRequiredService<ICecilSymbolHelper>();
 
     // Add default exclude filter
     string[] excludeFilters = _configuration.ExcludeFilters ?? [];
@@ -280,22 +271,30 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
       DisableManagedInstrumentationRestore = _configuration.DisableManagedInstrumentationRestore
     };
 
-    // Use factory if available, otherwise create directly
-    if (CoverageFactory != null)
+    // Use factory if available (for testing), otherwise create directly
+    if (CoverageFactory is not null)
     {
       _coverage = CoverageFactory.Create(_testModulePath, parameters);
+      return;
     }
-    else
-    {
-      _coverage = new Coverage(
-        _testModulePath,
-        parameters,
-        _logger,
-        instrumentationHelper,
-        fileSystem,
-        sourceRootTranslator,
-        cecilSymbolHelper);
-    }
+
+    // Only resolve services when creating Coverage directly
+    if (_serviceProvider is null)
+      return;
+
+    IFileSystem fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
+    ISourceRootTranslator sourceRootTranslator = _serviceProvider.GetRequiredService<ISourceRootTranslator>();
+    IInstrumentationHelper instrumentationHelper = _serviceProvider.GetRequiredService<IInstrumentationHelper>();
+    ICecilSymbolHelper cecilSymbolHelper = _serviceProvider.GetRequiredService<ICecilSymbolHelper>();
+
+    _coverage = new Coverage(
+      _testModulePath,
+      parameters,
+      _logger,
+      instrumentationHelper,
+      fileSystem,
+      sourceRootTranslator,
+      cecilSymbolHelper);
   }
 
   private async Task GenerateReportsAsync(CoverageResult result, CancellationToken cancellation)

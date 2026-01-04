@@ -26,10 +26,23 @@ steps:
       !**/coverlet.core.coverage.tests/debug/testgen*.log
       !**/coverlet.core.coverage.tests/**/*.html
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
+    
+- task: CopyFiles@2
+  displayName: Copy test code coverage results
+  continueOnError: true
+  condition: always()
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/test'
+    Contents: |
+      **/*.opencover.xml
+      **/*.cobertura.xml
+      **/*.coverage.json
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: CopyFiles@2
   displayName: Copy trx files
   condition: always()
+  enabled: false
   inputs:
     SourceFolder: '$(Agent.TempDirectory)'
     Contents: |

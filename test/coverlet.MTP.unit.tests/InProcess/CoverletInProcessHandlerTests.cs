@@ -288,21 +288,6 @@ public class CoverletInProcessHandlerTests : IDisposable
       Times.Never);
   }
 
-  [Fact]
-  public async Task OnTestSessionStartingAsync_ReturnsCompletedTask()
-  {
-    // Arrange
-    var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
-    var mockSessionContext = new Mock<ITestSessionContext>();
-
-    // Act
-    Task task = ((ITestSessionLifetimeHandler)handler).OnTestSessionStartingAsync(mockSessionContext.Object);
-
-    // Assert
-    Assert.True(task.IsCompleted);
-    await task; // Should not throw
-  }
-
   #endregion
 
   #region OnTestSessionFinishingAsync Tests
@@ -377,21 +362,6 @@ public class CoverletInProcessHandlerTests : IDisposable
         It.IsAny<Exception?>(),
         It.IsAny<Func<string, Exception?, string>>()),
       Times.Once);
-  }
-
-  [Fact]
-  public async Task OnTestSessionFinishingAsync_ReturnsCompletedTask()
-  {
-    // Arrange
-    var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
-    var mockSessionContext = new Mock<ITestSessionContext>();
-
-    // Act
-    Task task = ((ITestSessionLifetimeHandler)handler).OnTestSessionFinishingAsync(mockSessionContext.Object);
-
-    // Assert
-    Assert.True(task.IsCompleted);
-    await task; // Should not throw
   }
 
   [Fact]

@@ -11,9 +11,9 @@ using Microsoft.Testing.Platform.Logging;
 using Moq;
 using Xunit;
 
-namespace Coverlet.MTP.Tests;
+namespace coverlet.MTP.Tests.Environment;
 
-public class CoverletExtensionEnvironmentVariableProviderTests : IDisposable
+public class CoverletExtensionEnvironmentVariableProviderTests
 {
   private readonly Mock<IConfiguration> _mockConfiguration = new();
   private readonly Mock<ICommandLineOptions> _mockCommandLineOptions = new();
@@ -31,16 +31,6 @@ public class CoverletExtensionEnvironmentVariableProviderTests : IDisposable
       _mockConfiguration.Object,
       _mockCommandLineOptions.Object,
       _mockLoggerFactory.Object);
-  }
-
-  public void Dispose()
-  {
-    // Clean up environment variables that may have been set during tests
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, null);
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, null);
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.DebugLaunch, null);
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.DebugWaitForAttach, null);
-    GC.SuppressFinalize(this);
   }
 
   #region Properties Tests
@@ -95,7 +85,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests : IDisposable
   public async Task UpdateAsync_WhenTrackerLogEnabled_SetsEnvironmentVariable()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
     var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
 
     // Re-create provider to pick up the environment variable
@@ -118,7 +108,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests : IDisposable
   public async Task UpdateAsync_WhenTrackerLogDisabled_DoesNotSetEnvironmentVariable()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, null);
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, null);
     var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
 
     // Re-create provider to pick up the environment variable
@@ -141,7 +131,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests : IDisposable
   public async Task UpdateAsync_WhenExceptionLogEnabled_SetsEnvironmentVariable()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, "1");
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, "1");
     var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
 
     // Re-create provider to pick up the environment variable
@@ -164,7 +154,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests : IDisposable
   public async Task UpdateAsync_WhenExceptionLogDisabled_DoesNotSetEnvironmentVariable()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, null);
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, null);
     var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
 
     // Re-create provider to pick up the environment variable
@@ -187,8 +177,8 @@ public class CoverletExtensionEnvironmentVariableProviderTests : IDisposable
   public async Task UpdateAsync_WhenBothTrackerAndExceptionLogEnabled_SetsBothEnvironmentVariables()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, "true");
     var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
 
     // Re-create provider to pick up the environment variables
@@ -229,7 +219,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests : IDisposable
   public async Task UpdateAsync_TrackerLogEnvironmentVariable_IsNotSecret()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
     var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
 
     var provider = new CoverletExtensionEnvironmentVariableProvider(

@@ -31,6 +31,13 @@
     <CoverletVersion Condition="'$(CoverletVersion)'==''">8.0.0</CoverletVersion>
   </PropertyGroup>
 
+  <!-- Default to non-deterministic for local builds -->
+  <PropertyGroup Condition="'$(TF_BUILD)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true'">
+    <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
+    <Deterministic>false</Deterministic>
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
