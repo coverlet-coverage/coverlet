@@ -95,7 +95,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.integration.determ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP", "src\coverlet.MTP\coverlet.MTP.csproj", "{B3F6B18B-AE59-CACC-BEFE-2C9796F51A68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP.unit.tests", "test\coverlet.MTP.unit.tests\coverlet.MTP.unit.tests.csproj", "{E97959B1-73BA-5B91-5795-5602ADC73FB5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP.tests", "test\coverlet.MTP.tests\coverlet.MTP.tests.csproj", "{E97959B1-73BA-5B91-5795-5602ADC73FB5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP.validation.tests", "test\coverlet.MTP.validation.tests\coverlet.MTP.validation.tests.csproj", "{9BB7E3B0-606F-2A58-C4A3-D233519875C5}"
 EndProject

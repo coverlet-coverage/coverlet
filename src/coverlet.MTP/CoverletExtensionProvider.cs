@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using coverlet.MTP.Collector;
+using Coverlet.MTP.Collector;
 using Coverlet.MTP.InProcess;
 using coverlet.MTP.EnvironmentVariables;
 using Microsoft.Testing.Platform.Builder;
@@ -9,7 +9,7 @@ using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Services;
 
-namespace coverlet.MTP;
+namespace Coverlet.MTP;
 
 public static class CoverletExtensionProvider
 {

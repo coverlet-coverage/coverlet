@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using coverlet.MTP.Collector;
-using coverlet.MTP.EnvironmentVariables;
+using Coverlet.MTP.Collector;
+using Coverlet.MTP.EnvironmentVariables;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.MTP.CommandLine;
@@ -1420,7 +1420,7 @@ public class CoverletExtensionCollectorTests
     Assert.NotNull(capturedHitsPath);
     Assert.False(string.IsNullOrWhiteSpace(capturedHitsPath));
     // Should be a valid directory path (may or may not exist) - compare without root folder for test stability
-    string expected = Path.Combine("artifacts", "bin", "coverlet.MTP.unit.tests", _buildConfiguration.ToLower());
+    string expected = Path.Combine("artifacts", "bin", "coverlet.MTP.tests", _buildConfiguration.ToLower());
     Assert.Contains(expected, capturedHitsPath, StringComparison.OrdinalIgnoreCase);
   }
 

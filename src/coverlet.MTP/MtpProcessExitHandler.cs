@@ -3,7 +3,7 @@
 
 using Coverlet.Core.Abstractions;
 
-namespace coverlet.Extension.Collector
+namespace Coverlet.Extension.Collector
 {
   /// <summary>
   /// Implementation of IProcessExitHandler for Microsoft Testing Platform.

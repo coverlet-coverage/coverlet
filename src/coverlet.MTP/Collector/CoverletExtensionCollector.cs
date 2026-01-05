@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
-using coverlet.Extension.Logging;
+using Coverlet.Extension.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
@@ -16,11 +16,11 @@ using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
-using coverlet.Extension.Collector;
-using coverlet.MTP.Configuration;
-using coverlet.MTP.EnvironmentVariables;
+using Coverlet.Extension.Collector;
+using Coverlet.MTP.Configuration;
+using Coverlet.MTP.EnvironmentVariables;
 
-namespace coverlet.MTP.Collector;
+namespace Coverlet.MTP.Collector;
 
 /// <summary>
 /// Implements test host process lifetime handling for coverage collection using the Microsoft Testing Platform.

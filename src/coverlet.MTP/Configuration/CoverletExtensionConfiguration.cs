@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace coverlet.MTP.Configuration
+namespace Coverlet.MTP.Configuration
 {
   /// <summary>
   /// Configuration options for the Coverlet MTP extension.

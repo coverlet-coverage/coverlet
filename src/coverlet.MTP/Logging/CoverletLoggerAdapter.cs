@@ -3,7 +3,7 @@
 
 using Microsoft.Testing.Platform.Logging;
 
-namespace coverlet.Extension.Logging
+namespace Coverlet.Extension.Logging
 {
   internal class CoverletLoggerAdapter : Coverlet.Core.Abstractions.ILogger
   {

@@ -3,8 +3,7 @@
 
 using System.Diagnostics;
 using System.Reflection;
-using coverlet.MTP;
-using coverlet.MTP.EnvironmentVariables;
+using Coverlet.MTP.EnvironmentVariables;
 using Coverlet.Core.Instrumentation;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using Microsoft.Testing.Platform.Logging;

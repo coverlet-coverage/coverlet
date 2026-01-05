@@ -14,8 +14,8 @@ steps:
       **/log.txt
       **/log.datacollector.*.txt
       **/log.host.*.txt
-      **/coverlet.MTP.unit.tests/**/*.diag
-      **/coverlet.MTP.unit.tests/**/*.log
+      **/coverlet.MTP.tests/**/*.diag
+      **/coverlet.MTP.tests/**/*.log
       **/coverlet.MTP.validation.tests/**/*.diag
       **/coverlet.MTP.validation.tests/**/*.log
       **/coverlet.core.coverage.tests/**/*.diag
