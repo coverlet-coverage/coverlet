@@ -31,10 +31,10 @@ public class CoverletInProcessHandlerTests : IDisposable
 
   private static void ClearEnvironmentVariables()
   {
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, null);
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageIdentifier, null);
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessDebug, null);
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, null);
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, null);
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageIdentifier, null);
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessDebug, null);
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, null);
   }
 
   #region Constructor Tests
@@ -43,8 +43,8 @@ public class CoverletInProcessHandlerTests : IDisposable
   public void Constructor_WithCoverageEnabled_SetsCorrectState()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageIdentifier, "test-id-123");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageIdentifier, "test-id-123");
 
     // Act
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
@@ -64,7 +64,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public void Constructor_WithCoverageDisabled_SetsCorrectState()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
 
     // Act
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
@@ -104,8 +104,8 @@ public class CoverletInProcessHandlerTests : IDisposable
   {
     // Arrange
     string expectedIdentifier = "unique-coverage-id-456";
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageIdentifier, expectedIdentifier);
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageIdentifier, expectedIdentifier);
 
     // Act
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
@@ -124,7 +124,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public void Constructor_WithNullCoverageIdentifier_HandlesGracefully()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
     // No identifier set
 
     // Act
@@ -204,7 +204,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task IsEnabledAsync_WhenCoverageEnabled_ReturnsTrue()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
 
     // Act
@@ -218,7 +218,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task IsEnabledAsync_WhenCoverageDisabled_ReturnsFalse()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
 
     // Act
@@ -249,7 +249,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task OnTestSessionStartingAsync_WhenCoverageEnabled_LogsDebugMessage()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();
     mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-session-123"));
@@ -271,7 +271,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task OnTestSessionStartingAsync_WhenCoverageDisabled_DoesNotLogSessionStarting()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();
 
@@ -296,7 +296,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task OnTestSessionFinishingAsync_WhenCoverageDisabled_ReturnsImmediately()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();
 
@@ -317,7 +317,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task OnTestSessionFinishingAsync_WhenCoverageEnabled_LogsDebugMessage()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();
     mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-session-456"));
@@ -346,7 +346,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task OnTestSessionFinishingAsync_WhenCoverageEnabled_LogsFlushedAssembliesCount()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();
     mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-session-789"));
@@ -368,8 +368,8 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task OnTestSessionFinishingAsync_WhenExceptionOccurs_WithExceptionLogEnabled_LogsError()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, "1");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, "1");
 
     // Create a handler that will encounter assemblies
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
@@ -393,8 +393,8 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task OnTestSessionFinishingAsync_WhenExceptionOccurs_WithExceptionLogDisabled_DoesNotLogError()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, "0");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, "0");
 
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();
@@ -421,8 +421,8 @@ public class CoverletInProcessHandlerTests : IDisposable
   public void Constructor_WithExceptionLogEnabled_SetsFlag()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, "1");
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, "1");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
 
     // Act
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
@@ -435,7 +435,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public void Constructor_WithExceptionLogDisabled_DefaultsToFalse()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, "0");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, "0");
 
     // Act
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
@@ -452,8 +452,8 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task FullLifecycle_WhenCoverageEnabled_CompletesSuccessfully()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageIdentifier, "lifecycle-test-id");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageIdentifier, "lifecycle-test-id");
 
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();
@@ -471,7 +471,7 @@ public class CoverletInProcessHandlerTests : IDisposable
   public async Task FullLifecycle_WhenCoverageDisabled_CompletesSuccessfully()
   {
     // Arrange
-    Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "false");
 
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();

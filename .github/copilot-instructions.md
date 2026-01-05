@@ -30,6 +30,7 @@ In addition to the rules enforced by `.editorconfig`, you SHOULD:
 ## Testing Requirements
 
 - **Location**: `test/`
+- **namespace** for tests must have the same root namespace as the code under test, with an additional `.Tests` suffix
 - **Coverage Requirement**: Overall 90% test coverage for all modules
 - **Best Practices**:
   - Follow existing test patterns

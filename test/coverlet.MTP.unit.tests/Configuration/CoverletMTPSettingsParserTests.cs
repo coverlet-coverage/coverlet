@@ -5,7 +5,7 @@ using Coverlet.MTP.Configuration;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
-namespace coverlet.MTP.Tests.Configuration;
+namespace Coverlet.MTP.Tests.Configuration;
 
 public class CoverletMTPSettingsParserTests
 {

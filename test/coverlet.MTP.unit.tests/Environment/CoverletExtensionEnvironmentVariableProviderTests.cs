@@ -11,7 +11,7 @@ using Microsoft.Testing.Platform.Logging;
 using Moq;
 using Xunit;
 
-namespace coverlet.MTP.Tests.Environment;
+namespace Coverlet.MTP.Tests.Environment;
 
 public class CoverletExtensionEnvironmentVariableProviderTests
 {
