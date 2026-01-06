@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 #pragma warning restore IDE0005 // Using directive is unnecessary.
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
-using Coverlet.MTP.Collector;
 using Coverlet.MTP.CommandLine;
 using Coverlet.MTP.EnvironmentVariables;
 using Microsoft.Testing.Platform.CommandLine;
@@ -17,7 +16,7 @@ using Microsoft.Testing.Platform.Logging;
 using Moq;
 using Xunit;
 
-namespace Coverlet.MTP.Tests.Collector;
+namespace Coverlet.MTP.Collector.Tests;
 
 [Collection("Coverlet Extension Collector Tests")]
 public class CoverletExtensionCollectorTests
