@@ -1576,6 +1576,7 @@ public class CoverletExtensionCollectorTests
       _mockConfiguration.Object);
   }
 
+#pragma warning disable IDE0051 //  Private member 'name' is unused.
   private (CoverletExtensionCollector collector, Mock<ICoverage> mockCoverage, string testModulePath) CreateCollectorWithMockCoverage(string identifier = "test-identifier-123")
   {
     string testModulePath = CreateTempTestModule();
@@ -1603,6 +1604,7 @@ public class CoverletExtensionCollectorTests
 
     return (collector, mockCoverage, testModulePath);
   }
+#pragma warning restore IDE0051 //  Private member 'name' is unused.
   #endregion
 }
 
