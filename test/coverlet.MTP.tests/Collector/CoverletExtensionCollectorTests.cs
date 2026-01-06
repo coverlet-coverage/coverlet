@@ -1212,6 +1212,7 @@ public class CoverletExtensionCollectorTests
   }
 #endif
 
+#if Windows
   [Fact]
   public async Task UpdateAsync_WhenCoverageEnabledAndIdentifierSet_SetsCoverageIdentifierVariable()
   {
@@ -1240,6 +1241,7 @@ public class CoverletExtensionCollectorTests
       CleanupTempTestModule(testModulePath);
     }
   }
+#endif
 
 #if Windows
   [Fact]
