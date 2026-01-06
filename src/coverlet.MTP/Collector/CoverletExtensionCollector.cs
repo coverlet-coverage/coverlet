@@ -388,7 +388,7 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
   {
     if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Formats, out string[]? formats) && formats != null)
     {
-      _configuration.formats = formats.SelectMany(f => f.Split(',')).ToArray();
+      _configuration.formats = formats; // No splitting
     }
 
     if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Include, out string[]? includes) && includes != null)

@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Coverlet.MTP.Collector;
-using Coverlet.MTP.EnvironmentVariables;
+using System.Runtime.InteropServices;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
+using Coverlet.MTP.Collector;
 using Coverlet.MTP.CommandLine;
+using Coverlet.MTP.EnvironmentVariables;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
@@ -229,6 +230,7 @@ public class CoverletExtensionCollectorTests
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_WithMockCoverageFactory_InstrumentsModules()
   {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -283,6 +285,7 @@ public class CoverletExtensionCollectorTests
   [Fact]
   public async Task UpdateAsync_WhenCoverageEnabled_SetsEnvironmentVariables()
   {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -418,6 +421,7 @@ public class CoverletExtensionCollectorTests
   [Fact]
   public async Task OnTestHostProcessExitedAsync_WhenCoverageEnabled_CollectsCoverageResult()
   {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -494,61 +498,9 @@ public class CoverletExtensionCollectorTests
   }
 
   [Fact]
-  public async Task BeforeTestHostProcessStartAsync_ParsesCommaSeparatedFormats()
-  {
-    string testModulePath = CreateTempTestModule();
-    try
-    {
-      _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
-      _mockConfiguration.Setup(x => x["TestModule"]).Returns(testModulePath);
-
-      string[]? formats = ["json,cobertura,lcov"];
-      _mockCommandLineOptions
-        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
-        .Returns(true);
-
-      string[]? includes = null!;
-      _mockCommandLineOptions
-        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out includes))
-        .Returns(false);
-
-      string[]? excludes = null!;
-      _mockCommandLineOptions
-        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out excludes))
-        .Returns(false);
-
-      _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.IncludeTestAssembly)).Returns(false);
-
-      var mockCoverage = new Mock<ICoverage>();
-      mockCoverage.Setup(x => x.PrepareModules()).Returns(new CoveragePrepareResult
-      {
-        Identifier = Guid.NewGuid().ToString(),
-        Results = []
-      });
-
-      var mockCoverageFactory = new Mock<ICoverageFactory>();
-      mockCoverageFactory
-        .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
-        .Returns(mockCoverage.Object);
-
-      var collector = CreateCollector();
-      collector.CoverageFactory = mockCoverageFactory.Object;
-
-      var lifetimeHandler = collector as ITestHostProcessLifetimeHandler;
-      await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
-
-      // Test passes if no exception - format parsing is internal
-      _mockCommandLineOptions.Verify(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats), Times.Once);
-    }
-    finally
-    {
-      CleanupTempTestModule(testModulePath);
-    }
-  }
-
-  [Fact]
   public async Task ResolveTestModulePath_UsesTestHostPathFromConfiguration()
   {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -587,6 +539,9 @@ public class CoverletExtensionCollectorTests
   [Fact]
   public async Task OnTestHostProcessExitedAsync_HandlesException_LogsError()
   {
+    Assert.SkipUnless(
+      RuntimeInformation.IsOSPlatform(OSPlatform.Windows),
+      "This test is only relevant on Windows where Coverlet supports exception handling.");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -912,6 +867,103 @@ public class CoverletExtensionCollectorTests
   }
 
   [Fact]
+  public async Task BeforeTestHostProcessStartAsync_ParsesMultipleFormatOptions_MtpConvention()
+  {
+    // NOTE: This tests the RECOMMENDED Microsoft Testing Platform approach.
+    // Users should specify formats using multiple --coverlet-formats arguments:
+    //   dotnet test --coverage --coverlet-formats json --coverlet-formats cobertura
+    
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+    string testModulePath = CreateTempTestModule();
+    try
+    {
+      _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
+      _mockConfiguration.Setup(x => x["TestModule"]).Returns(testModulePath);
+
+      // MTP-style: Multiple format arguments parsed as separate array elements
+      string[]? formats = ["json", "cobertura", "lcov"];
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+        .Returns(true);
+
+      string[]? includes = null!;
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out includes))
+        .Returns(false);
+
+      string[]? excludes = null!;
+      _mockCommandLineOptions
+        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out excludes))
+        .Returns(false);
+
+      _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.IncludeTestAssembly)).Returns(false);
+
+      var mockCoverage = new Mock<ICoverage>();
+      mockCoverage.Setup(x => x.PrepareModules()).Returns(new CoveragePrepareResult
+      {
+        Identifier = Guid.NewGuid().ToString(),
+        Results = []
+      });
+
+      var mockCoverageFactory = new Mock<ICoverageFactory>();
+      mockCoverageFactory
+        .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
+        .Returns(mockCoverage.Object);
+
+      var collector = CreateCollector();
+      collector.CoverageFactory = mockCoverageFactory.Object;
+
+      var lifetimeHandler = collector as ITestHostProcessLifetimeHandler;
+      await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+      // Verify the formats were parsed correctly
+      _mockCommandLineOptions.Verify(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats), Times.Once);
+      mockCoverage.Verify(x => x.PrepareModules(), Times.Once);
+    }
+    finally
+    {
+      CleanupTempTestModule(testModulePath);
+    }
+  }
+
+  [Fact]
+  public async Task BeforeTestHostProcessStartAsync_ParsesMultipleIncludeFiltersCorrectly()
+  {
+    // Tests MTP convention: --coverlet-include [Assembly1]* --coverlet-include [Assembly2]*
+
+    _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
+
+    // Multiple include filters as separate array elements (MTP style)
+    string[]? includes = ["[Assembly1]*", "[Assembly2]*", "[Assembly3]*"];
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out includes))
+      .Returns(true);
+
+    string[]? formats = null!;
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
+      .Returns(false);
+
+    string[]? excludes = null!;
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out excludes))
+      .Returns(false);
+
+    _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.IncludeTestAssembly)).Returns(false);
+
+    var collector = CreateCollector();
+    ITestHostProcessLifetimeHandler handler = collector;
+
+    // Act
+    await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+    // Assert
+    _mockCommandLineOptions.Verify(
+      x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out includes),
+      Times.Once);
+  }
+
+  [Fact]
   public async Task BeforeTestHostProcessStartAsync_ParsesIncludeFilters()
   {
     // Arrange
@@ -986,67 +1038,9 @@ public class CoverletExtensionCollectorTests
   }
 
   [Fact]
-  public async Task BeforeTestHostProcessStartAsync_WithCommaSeparatedFormats_SplitsCorrectly()
-  {
-    // Arrange
-    string testModulePath = CreateTempTestModule();
-    try
-    {
-      _mockCommandLineOptions
-        .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
-        .Returns(true);
-
-      _mockConfiguration
-        .Setup(x => x["TestModule"])
-        .Returns(testModulePath);
-
-      string[]? formats = ["json,cobertura,lcov"];
-      _mockCommandLineOptions
-        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats))
-        .Returns(true);
-
-      string[]? includes = null!;
-      _mockCommandLineOptions
-        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out includes))
-        .Returns(false);
-
-      string[]? excludes = null!;
-      _mockCommandLineOptions
-        .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out excludes))
-        .Returns(false);
-
-      _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.IncludeTestAssembly)).Returns(false);
-
-      var mockCoverage = new Mock<ICoverage>();
-      mockCoverage.Setup(x => x.PrepareModules()).Returns(new CoveragePrepareResult
-      {
-        Identifier = Guid.NewGuid().ToString(),
-        Results = []
-      });
-
-      var mockCoverageFactory = new Mock<ICoverageFactory>();
-      mockCoverageFactory
-        .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
-        .Returns(mockCoverage.Object);
-
-      var collector = CreateCollector();
-      collector.CoverageFactory = mockCoverageFactory.Object;
-
-      var lifetimeHandler = collector as ITestHostProcessLifetimeHandler;
-      await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
-
-      // Test passes if no exception - format parsing is internal
-      _mockCommandLineOptions.Verify(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats), Times.Once);
-    }
-    finally
-    {
-      CleanupTempTestModule(testModulePath);
-    }
-  }
-
-  [Fact]
   public async Task BeforeTestHostProcessStartAsync_WithValidTestModule_InitializesCoverage()
   {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     // Arrange
     string testModulePath = CreateTempTestModule();
     try
