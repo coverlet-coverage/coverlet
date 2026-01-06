@@ -16,6 +16,7 @@ using Xunit;
 
 namespace Coverlet.MTP.Tests.Collector; 
 
+[Collection("Coverlet Extension Collector Tests")]
 public class CoverletExtensionCollectorTests
 {
   private readonly Mock<ILoggerFactory> _mockLoggerFactory;
@@ -1503,4 +1504,10 @@ internal static class ConfigurationExtensions
   {
     return configuration["TestResultDirectory"];
   }
+}
+
+[CollectionDefinition("Coverlet Extension Collector Tests", DisableParallelization = true)]
+public class CoverletExtensionCollectorTestsCollection
+{
+  // Marker class for collection definition
 }
