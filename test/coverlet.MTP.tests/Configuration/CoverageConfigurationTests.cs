@@ -112,7 +112,7 @@ public sealed class CoverageConfigurationTests
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
       {
-        formats = Array.Empty<string>();
+        formats = [];
         return true;
       }));
 

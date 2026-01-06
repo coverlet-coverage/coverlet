@@ -14,20 +14,20 @@ internal sealed class CoverageConfiguration
 
   // Default exclusions matching coverlet.collector behavior
   // See: https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/VSTestIntegration.md
-  private static readonly string[] s_defaultExcludeFilters = new[]
-  {
+  private static readonly string[] s_defaultExcludeFilters =
+  [
     "[xunit.*]*",
     "[Microsoft.Testing.*]*",
     "[coverlet.*]*"
-  };
+  ];
 
-  private static readonly string[] s_defaultExcludeByAttributes = new[]
-  {
+  private static readonly string[] s_defaultExcludeByAttributes =
+  [
     "ExcludeFromCodeCoverage",
     "ExcludeFromCodeCoverageAttribute",
     "GeneratedCodeAttribute",
     "CompilerGeneratedAttribute"
-  };
+  ];
 
   public CoverageConfiguration(ICommandLineOptions commandLineOptions, ILogger? logger = null)
   {
@@ -48,7 +48,7 @@ internal sealed class CoverageConfiguration
       return formats;
     }
 
-    string[] defaultFormats = new[] { "json", "cobertura" };
+    string[] defaultFormats = ["json", "cobertura"];
     LogOptionValue(CoverletOptionNames.Formats, defaultFormats, isExplicit: false);
     return defaultFormats;
   }
@@ -63,7 +63,7 @@ internal sealed class CoverageConfiguration
       return filters;
     }
 
-    return Array.Empty<string>();
+    return [];
   }
 
   public string[] GetExcludeFilters()
@@ -73,7 +73,7 @@ internal sealed class CoverageConfiguration
       out string[]? filters))
     {
       // Merge explicit exclusions with defaults
-      string[] merged = s_defaultExcludeFilters.Concat(filters).Distinct().ToArray();
+      string[] merged = [.. s_defaultExcludeFilters.Concat(filters).Distinct()];
       LogOptionValue(CoverletOptionNames.Exclude, merged, isExplicit: true);
       return merged;
     }
@@ -92,7 +92,7 @@ internal sealed class CoverageConfiguration
       return filters;
     }
 
-    return Array.Empty<string>();
+    return [];
   }
 
   public string[] GetExcludeByAttributeFilters()
@@ -102,7 +102,7 @@ internal sealed class CoverageConfiguration
       out string[]? filters))
     {
       // Merge explicit exclusions with defaults
-      string[] merged = s_defaultExcludeByAttributes.Concat(filters).Distinct().ToArray();
+      string[] merged = [.. s_defaultExcludeByAttributes.Concat(filters).Distinct()];
       LogOptionValue(CoverletOptionNames.ExcludeByAttribute, merged, isExplicit: true);
       return merged;
     }
@@ -121,7 +121,7 @@ internal sealed class CoverageConfiguration
       return directories;
     }
 
-    return Array.Empty<string>();
+    return [];
   }
 
   public bool UseSingleHit =>
@@ -143,7 +143,7 @@ internal sealed class CoverageConfiguration
       return attributes;
     }
 
-    return Array.Empty<string>();
+    return [];
   }
 
   public bool ExcludeAssembliesWithoutSources =>

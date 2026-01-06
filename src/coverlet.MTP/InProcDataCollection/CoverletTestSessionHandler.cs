@@ -21,8 +21,8 @@ public class CoverletTestSessionHandler : ITestSessionLifetimeHandler
 
   public CoverletTestSessionHandler(IConfiguration? configuration, string testModule)
   {
-    var parser = new CoverletMTPSettingsParser();
-    _settings = parser.Parse(configuration, testModule);
+    _ = new CoverletMTPSettingsParser();
+    _settings = CoverletMTPSettingsParser.Parse(configuration, testModule);
   }
 
   public string Uid => nameof(CoverletTestSessionHandler);

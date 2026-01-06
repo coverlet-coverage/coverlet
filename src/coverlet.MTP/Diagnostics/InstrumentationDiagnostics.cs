@@ -145,7 +145,7 @@ internal sealed class InstrumentationDiagnostics
 
   private static string FormatFileSize(long bytes)
   {
-    string[] suffixes = { "B", "KB", "MB", "GB" };
+    string[] suffixes = ["B", "KB", "MB", "GB"];
     int suffixIndex = 0;
     double size = bytes;
 

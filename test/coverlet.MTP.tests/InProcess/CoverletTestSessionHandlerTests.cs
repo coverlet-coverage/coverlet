@@ -152,14 +152,18 @@ public class CoverletTestSessionHandlerTests
   [Fact]
   public void GetInstrumentationClass_WithMultipleAssemblies_HandlesAllCorrectly()
   {
-    // Arrange & Act & Assert
-    foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-    {
-      // Should not throw for any assembly
-      Type? result = CoverletTestSessionHandler.GetInstrumentationClass(assembly);
+    // Arrange
+    Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+    Assert.NotEmpty(assemblies); // Ensure we have assemblies to test
 
-      // Most assemblies won't have instrumentation, so result should be null
-      // This test verifies the method handles all loaded assemblies gracefully
+    // Act & Assert
+    foreach (Assembly assembly in assemblies)
+    {
+      // Assert that GetInstrumentationClass does not throw for any assembly
+      Exception? exception = Record.Exception(() =>
+        CoverletTestSessionHandler.GetInstrumentationClass(assembly));
+
+      Assert.Null(exception);
     }
   }
 
@@ -218,18 +222,39 @@ public class CoverletTestSessionHandlerTests
   [Fact]
   public void GetInstrumentationClass_LooksForCorrectNamespaceAndNamePattern()
   {
-    // Arrange
-    // This test documents the expected behavior:
-    // - Namespace should be "Coverlet.Core.Instrumentation.Tracker"
-    // - Name should start with "{AssemblyName}_"
+    // Arrange - Document the expected pattern
+    // The method should look for types matching these criteria:
+    // - Namespace: "Coverlet.Core.Instrumentation.Tracker"
+    // - Name pattern: "{AssemblyName}_" prefix
+
+    // This test verifies the search pattern by testing against
+    // the current test assembly, which won't have instrumentation
     Assembly testAssembly = typeof(CoverletTestSessionHandlerTests).Assembly;
-    string expectedNamePrefix = testAssembly.GetName().Name + "_";
+    string assemblyName = testAssembly.GetName().Name!;
+
+    // The method should look for a type like:
+    // "Coverlet.Core.Instrumentation.Tracker.coverlet.MTP.tests_..."
+    string expectedNamespace = "Coverlet.Core.Instrumentation.Tracker";
+    string expectedNamePrefix = $"{assemblyName}_";
 
     // Act
     Type? result = CoverletTestSessionHandler.GetInstrumentationClass(testAssembly);
 
-    // Assert - No instrumentation class exists in test assembly
+    // Assert
+    // No instrumentation class exists in test assembly, so result should be null
     Assert.Null(result);
+
+    // Verify that IF a type existed with the expected pattern, 
+    // it would be in the correct namespace
+    // (This is documentation through code - we can't test the actual search
+    // without creating a mock type, which isn't practical)
+
+    // Alternative: Look for any types in that namespace to verify none exist
+    Type[] typesInExpectedNamespace = [.. testAssembly.GetTypes()
+      .Where(t => t.Namespace == expectedNamespace &&
+                  t.Name.StartsWith(expectedNamePrefix))];
+
+    Assert.Empty(typesInExpectedNamespace);
   }
 
   [Fact]

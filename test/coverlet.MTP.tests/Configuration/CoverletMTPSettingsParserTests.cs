@@ -9,13 +9,13 @@ namespace Coverlet.MTP.Tests.Configuration;
 
 public class CoverletMTPSettingsParserTests
 {
-  private readonly CoverletMTPSettingsParser _parser = new();
+  //private readonly CoverletMTPSettingsParser _parser = new();
 
   [Fact]
   public void Parse_WithNullConfiguration_ReturnsDefaultSettings()
   {
     // Act
-    CoverletMTPSettings settings = _parser.Parse(null, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(null, "test.dll");
 
     // Assert
     Assert.Equal("test.dll", settings.TestModule);
@@ -46,7 +46,7 @@ public class CoverletMTPSettingsParserTests
         .Build();
 
     // Act
-    CoverletMTPSettings settings = _parser.Parse(configuration, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
 
     // Assert
     Assert.Equal("test.dll", settings.TestModule);
@@ -80,7 +80,7 @@ public class CoverletMTPSettingsParserTests
         .Build();
 
     // Act
-    CoverletMTPSettings settings = _parser.Parse(configuration, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
 
     // Assert
     Assert.Equal(expected, settings.IncludeFilters);
@@ -102,7 +102,7 @@ public class CoverletMTPSettingsParserTests
         .Build();
 
     // Act
-    CoverletMTPSettings settings = _parser.Parse(configuration, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
 
     // Assert
     Assert.Equal(expected, settings.ReportFormats);
@@ -124,7 +124,7 @@ public class CoverletMTPSettingsParserTests
         .Build();
 
     // Act
-    CoverletMTPSettings settings = _parser.Parse(configuration, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
 
     // Assert
     Assert.Single(settings.ReportFormats);
@@ -150,7 +150,7 @@ public class CoverletMTPSettingsParserTests
         .Build();
 
     // Act
-    CoverletMTPSettings settings = _parser.Parse(configuration, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
 
     // Assert
     Assert.Equal(expected, settings.UseSourceLink);
@@ -168,7 +168,7 @@ public class CoverletMTPSettingsParserTests
         .Build();
 
     // Act
-    CoverletMTPSettings settings = _parser.Parse(configuration, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
 
     // Assert
     Assert.Contains("[coverlet.*]*", settings.ExcludeFilters);
@@ -185,7 +185,7 @@ public class CoverletMTPSettingsParserTests
         .Build();
 
     // Act
-    CoverletMTPSettings settings = _parser.Parse(configuration, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
 
     // Assert
     Assert.Equal("[MyApp.*]*", settings.IncludeFilters[0]);
@@ -199,11 +199,11 @@ public class CoverletMTPSettingsParserTests
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()
-        .AddInMemoryCollection(new Dictionary<string, string?>())
+        .AddInMemoryCollection([])
         .Build();
 
     // Act
-    CoverletMTPSettings settings = _parser.Parse(configuration, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
 
     // Assert
     Assert.Equal("MissingAll", settings.ExcludeAssembliesWithoutSources);
@@ -224,7 +224,7 @@ public class CoverletMTPSettingsParserTests
         .Build();
 
     // Act
-    CoverletMTPSettings settings = _parser.Parse(configuration, "test.dll");
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
 
     // Assert
     Assert.Equal(value, settings.ExcludeAssembliesWithoutSources);

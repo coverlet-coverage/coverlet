@@ -18,6 +18,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   private readonly string _tempDirectory;
   private readonly CultureInfo _originalCulture;
   private readonly CultureInfo _originalUICulture;
+  private static readonly string[] s_sourceArray = ["Module1.dll", "Module2.dll"];
 
   public InstrumentationDiagnosticsTests()
   {
@@ -327,7 +328,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
     _mockLogger.Verify(
       x => x.LogAsync(
         It.Is<LogLevel>(l => l == LogLevel.Information),
-        It.Is<string>(s => s.Contains(reportPath) && s.Contains("B")),
+        It.Is<string>(s => s.Contains(reportPath) && s.Contains('B')),
         It.IsAny<Exception?>(),
         It.IsAny<Func<string, Exception?, string>>()),
       Times.Once());
@@ -444,7 +445,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
     // Arrange
     InstrumenterResult result = CreateInstrumenterResultWithDocuments(
       "TestModule",
-      new Dictionary<string, Document>(),
+      [],
       null);
 
     // Act
@@ -686,7 +687,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
     // Arrange
     var results = new List<InstrumenterResult>
     {
-      CreateInstrumenterResultWithDocuments(@"C:\path\to\Module1.dll", new Dictionary<string, Document>(), null)
+      CreateInstrumenterResultWithDocuments(@"C:\path\to\Module1.dll", [], null)
     };
 
     // Act
@@ -706,7 +707,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   public async Task LogExcludedModulesAsync_HandlesNullModuleNames()
   {
     // Arrange
-    IEnumerable<string> allModules = new[] { "Module1.dll", "Module2.dll" }.Where(m => m is not null);
+    IEnumerable<string> allModules = s_sourceArray.Where(m => m is not null);
     var instrumentedModules = new[] { "Module1.dll" };
     var excludeFilters = Array.Empty<string>();
 
@@ -776,5 +777,5 @@ public class InstrumentationDiagnosticsTests : IDisposable
       times);
   }
 
-#endregion
+  #endregion
 }

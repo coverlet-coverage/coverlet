@@ -16,7 +16,7 @@ internal class CoverletMTPSettingsParser
   /// <param name="configuration">Configuration source</param>
   /// <param name="testModule">Test module path</param>
   /// <returns>Parsed settings</returns>
-  public CoverletMTPSettings Parse(IConfiguration? configuration, string testModule)
+  public static CoverletMTPSettings Parse(IConfiguration? configuration, string testModule)
   {
     var settings = new CoverletMTPSettings
     {
@@ -65,16 +65,12 @@ internal class CoverletMTPSettingsParser
   private static string[] ParseArrayValue(IConfigurationSection section, string key)
   {
     string? value = section[key];
-    if (string.IsNullOrWhiteSpace(value))
-    {
-      return [];
-    }
-
-    return value!
+    return string.IsNullOrWhiteSpace(value)
+      ? []
+      : [.. value!
         .Split(',', (char)StringSplitOptions.RemoveEmptyEntries)
         .Select(v => v.Trim())
-        .Where(v => !string.IsNullOrWhiteSpace(v))
-        .ToArray();
+        .Where(v => !string.IsNullOrWhiteSpace(v))];
   }
 
   private static bool ParseBoolValue(IConfigurationSection section, string key)

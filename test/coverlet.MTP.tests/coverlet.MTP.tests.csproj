@@ -7,6 +7,10 @@
     <Nullable>enable</Nullable>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>preview-recommended</AnalysisLevel>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AnalysisLevelInteroperability>true</AnalysisLevelInteroperability>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsWindows)'=='true'">
