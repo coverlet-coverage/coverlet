@@ -7,6 +7,7 @@ using Coverlet.Core.Abstractions;
 using Coverlet.MTP.Collector;
 using Coverlet.MTP.CommandLine;
 using Coverlet.MTP.EnvironmentVariables;
+using Coverlet.MTP.Tests.Helpers;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
@@ -227,10 +228,9 @@ public class CoverletExtensionCollectorTests
     }
   }
 
-  [Fact]
+  [WindowsOnlyFact]
   public async Task BeforeTestHostProcessStartAsync_WithMockCoverageFactory_InstrumentsModules()
   {
-    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -282,10 +282,9 @@ public class CoverletExtensionCollectorTests
     }
   }
 
-  [Fact]
+  [WindowsOnlyFact]
   public async Task UpdateAsync_WhenCoverageEnabled_SetsEnvironmentVariables()
   {
-    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -418,10 +417,9 @@ public class CoverletExtensionCollectorTests
     mockProcessInfo.Verify(x => x.PID, Times.AtLeastOnce);
   }
 
-  [Fact]
+  [WindowsOnlyFact]
   public async Task OnTestHostProcessExitedAsync_WhenCoverageEnabled_CollectsCoverageResult()
   {
-    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -536,12 +534,9 @@ public class CoverletExtensionCollectorTests
     }
   }
 
-  [Fact]
+  [WindowsOnlyFact]
   public async Task OnTestHostProcessExitedAsync_HandlesException_LogsError()
   {
-    Assert.SkipUnless(
-      RuntimeInformation.IsOSPlatform(OSPlatform.Windows),
-      "This test is only relevant on Windows where Coverlet supports exception handling.");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -866,14 +861,13 @@ public class CoverletExtensionCollectorTests
       Times.Once);
   }
 
-  [Fact]
+  [WindowsOnlyFact]
   public async Task BeforeTestHostProcessStartAsync_ParsesMultipleFormatOptions_MtpConvention()
   {
     // NOTE: This tests the RECOMMENDED Microsoft Testing Platform approach.
     // Users should specify formats using multiple --coverlet-formats arguments:
     //   dotnet test --coverage --coverlet-formats json --coverlet-formats cobertura
     
-    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -1037,10 +1031,9 @@ public class CoverletExtensionCollectorTests
       Times.Once);
   }
 
-  [Fact]
+  [WindowsOnlyFact]
   public async Task BeforeTestHostProcessStartAsync_WithValidTestModule_InitializesCoverage()
   {
-    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     // Arrange
     string testModulePath = CreateTempTestModule();
     try
