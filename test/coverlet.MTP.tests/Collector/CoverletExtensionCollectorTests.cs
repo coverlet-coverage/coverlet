@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#pragma warning disable IDE0005 // Using directive is unnecessary.
 using System.Runtime.InteropServices;
+#pragma warning restore IDE0005 // Using directive is unnecessary.
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.MTP.Collector;
@@ -1522,6 +1524,7 @@ public class CoverletExtensionCollectorTests
   #endregion
   #region helper methods
 
+#pragma warning disable IDE0051 //  Private member 'name' is unused.
   private void SetupDefaultCommandLineOptions()
   {
     string[]? formats = null!;
@@ -1541,7 +1544,7 @@ public class CoverletExtensionCollectorTests
 
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.IncludeTestAssembly)).Returns(false);
   }
-
+#pragma warning restore IDE0051 // Private member 'name' is unused.
   private static string CreateTempTestModule()
   {
     string tempPath = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.dll");
