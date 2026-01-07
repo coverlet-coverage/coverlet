@@ -50,7 +50,6 @@ public class CollectorExtensionTests
       .Returns((string?)null);
   }
 
-#if Windows
   [Fact]
   public void Constructor_ThrowsArgumentNullException_WhenLoggerFactoryIsNull()
   {
@@ -71,7 +70,7 @@ public class CollectorExtensionTests
     Assert.Throws<ArgumentNullException>(() =>
       new CollectorExtension(_mockLoggerFactory.Object, _mockCommandLineOptions.Object, null!));
   }
-#endif
+
   [Fact]
   public void Constructor_InitializesSuccessfully_WithValidParameters()
   {
@@ -190,8 +189,6 @@ public class CollectorExtensionTests
     }
   }
 
-#if Windows
-
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_ParsesFormatsOption()
   {
@@ -230,9 +227,7 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
-#if Windows
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_WithMockCoverageFactory_InstrumentsModules()
   {
@@ -335,7 +330,6 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
   [Fact]
   public async Task ValidateTestHostEnvironmentVariablesAsync_ReturnsValid_WhenNoConflict()
@@ -423,7 +417,6 @@ public class CollectorExtensionTests
     mockProcessInfo.Verify(x => x.PID, Times.AtLeastOnce);
   }
 
-#if Windows
   [Fact]
   public async Task OnTestHostProcessExitedAsync_WhenCoverageEnabled_CollectsCoverageResult()
   {
@@ -474,9 +467,7 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
-#if Windows
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_HandlesException_DisablesCoverage()
   {
@@ -503,8 +494,7 @@ public class CollectorExtensionTests
 
     mockEnvironmentVariables.Verify(x => x.SetVariable(It.IsAny<EnvironmentVariable>()), Times.Never);
   }
-#endif
-#if Windows
+
   [Fact]
   public async Task ResolveTestModulePath_UsesTestHostPathFromConfiguration()
   {
@@ -543,9 +533,7 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
-#if Windows
   [Fact]
   public async Task OnTestHostProcessExitedAsync_HandlesException_LogsError()
   {
@@ -589,7 +577,6 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
   #region Constructor Tests
 
@@ -613,7 +600,6 @@ public class CollectorExtensionTests
     Assert.Equal("commandLineOptions", exception.ParamName);
   }
 
-#if Windows
   [Fact]
   public void Constructor_WithNullConfiguration_ThrowsArgumentNullException()
   {
@@ -621,7 +607,6 @@ public class CollectorExtensionTests
     Assert.Throws<ArgumentNullException>(() =>
       new CollectorExtension(_mockLoggerFactory.Object, _mockCommandLineOptions.Object, null!));
   }
-#endif
 
   [Fact]
   public void Constructor_WithValidParameters_CreatesInstance()
@@ -771,7 +756,6 @@ public class CollectorExtensionTests
     _mockCommandLineOptions.Verify(x => x.IsOptionSet(CoverletOptionNames.Coverage), Times.Once);
   }
 
-#if Windows
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_WhenCoverageEnabled_ChecksForModulePath()
   {
@@ -789,7 +773,6 @@ public class CollectorExtensionTests
     // Assert
     _mockCommandLineOptions.Verify(x => x.IsOptionSet(CoverletOptionNames.Coverage), Times.Once);
   }
-#endif
 
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_WhenCoverageEnabledButNoModulePath_DisablesCoverage()
@@ -813,7 +796,6 @@ public class CollectorExtensionTests
     _mockCommandLineOptions.Verify(x => x.IsOptionSet(CoverletOptionNames.Coverage), Times.Once);
   }
 
-#if Windows
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_WhenExceptionThrown_DisablesCoverage()
   {
@@ -842,7 +824,6 @@ public class CollectorExtensionTests
       x => x.SetVariable(It.IsAny<EnvironmentVariable>()),
       Times.Never);
   }
-#endif
 
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_ParsesFormatOptions()
@@ -881,7 +862,6 @@ public class CollectorExtensionTests
       Times.Once);
   }
 
-#if Windows
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_ParsesMultipleFormatOptions_MtpConvention()
   {
@@ -940,9 +920,6 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
-
-#if Windows
 
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_ParsesMultipleIncludeFiltersCorrectly()
@@ -980,7 +957,6 @@ public class CollectorExtensionTests
       x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out includes),
       Times.Once);
   }
-#endif
 
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_ParsesIncludeFilters()
@@ -1032,7 +1008,6 @@ public class CollectorExtensionTests
       Times.Once);
   }
 
-#if Windows
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_ParsesIncludeTestAssemblyOption()
   {
@@ -1056,9 +1031,7 @@ public class CollectorExtensionTests
       x => x.IsOptionSet(CoverletOptionNames.IncludeTestAssembly),
       Times.Once);
   }
-#endif
 
-#if Windows
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_WithValidTestModule_InitializesCoverage()
   {
@@ -1099,7 +1072,6 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
   [Fact]
   public async Task BeforeTestHostProcessStartAsync_WithCancellationToken_CompletesSuccessfully()
@@ -1150,7 +1122,6 @@ public class CollectorExtensionTests
       Times.Never);
   }
 
-#if Windows
   [Fact]
   public async Task UpdateAsync_WhenCoverageEnabledButIdentifierNull_DoesNotSetEnvironmentVariables()
   {
@@ -1179,8 +1150,7 @@ public class CollectorExtensionTests
       x => x.SetVariable(It.IsAny<EnvironmentVariable>()),
       Times.Never);
   }
-#endif
-#if Windows
+
   [Fact]
   public async Task UpdateAsync_WhenCoverageEnabledAndIdentifierSet_SetsCoverageEnabledVariable()
   {
@@ -1209,9 +1179,7 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
-#if Windows
   [Fact]
   public async Task UpdateAsync_WhenCoverageEnabledAndIdentifierSet_SetsCoverageIdentifierVariable()
   {
@@ -1240,9 +1208,7 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
-#if Windows
   [Fact]
   public async Task UpdateAsync_WhenCoverageEnabledAndIdentifierSet_SetsHitsFilePathVariable()
   {
@@ -1271,7 +1237,6 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
   [Fact]
   public async Task UpdateAsync_WhenCoverageEnabledButIdentifierEmpty_DoesNotSetEnvironmentVariables()
@@ -1353,7 +1318,6 @@ public class CollectorExtensionTests
       Times.Never);
   }
 
-#if Windows
   [Fact]
   public async Task UpdateAsync_LogsSettingEnvironmentVariables()
   {
@@ -1385,9 +1349,7 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
-#if Windows
   [Fact]
   public async Task UpdateAsync_CalledMultipleTimes_SetsSameVariablesEachTime()
   {
@@ -1423,8 +1385,7 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
-#if Windows
+
   [Fact]
   public async Task UpdateAsync_WhenCoverageEnabledAndAllConditionsMet_CompletesSuccessfully()
   {
@@ -1451,8 +1412,7 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
-#if Windows
+
   [Fact]
   public async Task UpdateAsync_SetsVariablesInCorrectOrder()
   {
@@ -1485,8 +1445,7 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
-#if Windows
+
   [Fact]
   public async Task UpdateAsync_HitsFilePathContainsValidDirectoryPath()
   {
@@ -1520,7 +1479,6 @@ public class CollectorExtensionTests
       CleanupTempTestModule(testModulePath);
     }
   }
-#endif
 
   #endregion
   #region helper methods
