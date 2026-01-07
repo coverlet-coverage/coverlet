@@ -8,7 +8,6 @@ using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.MTP.CommandLine;
 using Coverlet.MTP.EnvironmentVariables;
-using Coverlet.MTP.Tests.Helpers;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
@@ -283,7 +282,7 @@ public class CollectorExtensionTests
     }
   }
 
-  [SkipOnLinuxFact]
+  [Fact]
   public async Task UpdateAsync_WhenCoverageEnabled_SetsEnvironmentVariables()
   {
     string testModulePath = CreateTempTestModule();
@@ -418,7 +417,7 @@ public class CollectorExtensionTests
     mockProcessInfo.Verify(x => x.PID, Times.AtLeastOnce);
   }
 
-  [SkipOnLinuxFact]
+  [Fact]
   public async Task OnTestHostProcessExitedAsync_WhenCoverageEnabled_CollectsCoverageResult()
   {
     string testModulePath = CreateTempTestModule();
@@ -862,7 +861,7 @@ public class CollectorExtensionTests
       Times.Once);
   }
 
-  [SkipOnLinuxFact]
+  [Fact]
   public async Task BeforeTestHostProcessStartAsync_ParsesMultipleFormatOptions_MtpConvention()
   {
     // NOTE: This tests the RECOMMENDED Microsoft Testing Platform approach.
@@ -1032,7 +1031,7 @@ public class CollectorExtensionTests
       Times.Once);
   }
 
-  [SkipOnLinuxFact]
+  [Fact]
   public async Task BeforeTestHostProcessStartAsync_WithValidTestModule_InitializesCoverage()
   {
     // Arrange
@@ -1047,6 +1046,7 @@ public class CollectorExtensionTests
         .Setup(x => x["TestModule"])
         .Returns(testModulePath);
 
+      // ✅ CRITICAL: Mock the coverage to prevent real instrumentation
       var mockCoverage = new Mock<ICoverage>();
       mockCoverage
         .Setup(x => x.PrepareModules())
@@ -1055,10 +1055,11 @@ public class CollectorExtensionTests
       var mockCoverageFactory = new Mock<ICoverageFactory>();
       mockCoverageFactory
         .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
-        .Returns(mockCoverage.Object);
+        .Returns(mockCoverage.Object); // ✅ Return mock, not real coverage
 
       var collector = CreateCollector();
-      collector.CoverageFactory = mockCoverageFactory.Object;
+      collector.CoverageFactory = mockCoverageFactory.Object; // ✅ Inject mock factory
+
       ITestHostProcessLifetimeHandler handler = collector;
 
       // Act
