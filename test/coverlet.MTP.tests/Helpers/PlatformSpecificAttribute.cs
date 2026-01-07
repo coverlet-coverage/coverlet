@@ -40,3 +40,37 @@ public sealed class WindowsOnlyTheoryAttribute(
     set => base.Skip = value;
   }
 }
+
+/// <summary>
+/// Marks a test that should skip on Linux (runs on Windows and macOS).
+/// </summary>
+public sealed class SkipOnLinuxFactAttribute(
+  [CallerFilePath] string? sourceFilePath = null,
+  [CallerLineNumber] int sourceLineNumber = -1)
+    : FactAttribute(sourceFilePath, sourceLineNumber)
+{
+  public new string? Skip
+  {
+    get => !RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+      ? base.Skip
+      : "This test is skipped on Linux";
+    set => base.Skip = value;
+  }
+}
+
+/// <summary>
+/// Marks a theory that should skip on Linux (runs on Windows and macOS).
+/// </summary>
+public sealed class SkipOnLinuxTheoryAttribute(
+  [CallerFilePath] string? sourceFilePath = null,
+  [CallerLineNumber] int sourceLineNumber = -1)
+    : TheoryAttribute(sourceFilePath, sourceLineNumber)
+{
+  public new string? Skip
+  {
+    get => !RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+      ? base.Skip
+      : "This test is skipped on Linux";
+    set => base.Skip = value;
+  }
+}

@@ -8,6 +8,7 @@ using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.MTP.CommandLine;
 using Coverlet.MTP.EnvironmentVariables;
+using Coverlet.MTP.Tests.Helpers;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
@@ -282,7 +283,7 @@ public class CollectorExtensionTests
     }
   }
 
-  [Fact]
+  [SkipOnLinuxFact]
   public async Task UpdateAsync_WhenCoverageEnabled_SetsEnvironmentVariables()
   {
     string testModulePath = CreateTempTestModule();
@@ -417,7 +418,7 @@ public class CollectorExtensionTests
     mockProcessInfo.Verify(x => x.PID, Times.AtLeastOnce);
   }
 
-  [Fact]
+  [SkipOnLinuxFact]
   public async Task OnTestHostProcessExitedAsync_WhenCoverageEnabled_CollectsCoverageResult()
   {
     string testModulePath = CreateTempTestModule();
@@ -498,7 +499,6 @@ public class CollectorExtensionTests
   [Fact]
   public async Task ResolveTestModulePath_UsesTestHostPathFromConfiguration()
   {
-    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     string testModulePath = CreateTempTestModule();
     try
     {
@@ -862,7 +862,7 @@ public class CollectorExtensionTests
       Times.Once);
   }
 
-  [Fact]
+  [SkipOnLinuxFact]
   public async Task BeforeTestHostProcessStartAsync_ParsesMultipleFormatOptions_MtpConvention()
   {
     // NOTE: This tests the RECOMMENDED Microsoft Testing Platform approach.
@@ -1032,7 +1032,7 @@ public class CollectorExtensionTests
       Times.Once);
   }
 
-  [Fact]
+  [SkipOnLinuxFact]
   public async Task BeforeTestHostProcessStartAsync_WithValidTestModule_InitializesCoverage()
   {
     // Arrange
@@ -1093,7 +1093,7 @@ public class CollectorExtensionTests
     Assert.False(cts.IsCancellationRequested);
   }
 
-  #endregion
+#endregion
 
   #region UpdateAsync Tests
 
@@ -1564,14 +1564,6 @@ public class CollectorExtensionTests
   }
 #pragma warning restore IDE0051 //  Private member 'name' is unused.
   #endregion
-}
-
-internal static class ConfigurationExtensions
-{
-  public static string? GetTestResultDirectory(this IConfiguration configuration)
-  {
-    return configuration["TestResultDirectory"];
-  }
 }
 
 [CollectionDefinition("Coverlet Extension Collector Tests", DisableParallelization = true)]

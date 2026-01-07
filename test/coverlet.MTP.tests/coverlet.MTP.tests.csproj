@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>preview-recommended</AnalysisLevel>
     <InvariantGlobalization>true</InvariantGlobalization>
@@ -15,6 +16,10 @@
 
   <PropertyGroup Condition="'$(IsWindows)'=='true'">
     <DefineConstants>Windows</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsLinux)'=='false'">
+    <DefineConstants>NotLinux</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

@@ -10,6 +10,8 @@ using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
 using Coverlet.MTP.CommandLine;
 using Coverlet.MTP.Diagnostics;
+using Coverlet.MTP.Configuration;
+using Coverlet.MTP.EnvironmentVariables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
@@ -17,8 +19,6 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
 using Coverlet.Extension.Collector;
-using Coverlet.MTP.Configuration;
-using Coverlet.MTP.EnvironmentVariables;
 
 namespace Coverlet.MTP.Collector;
 
@@ -431,4 +431,13 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     return services.BuildServiceProvider();
   }
+}
+
+internal static class ConfigurationExtensions
+{
+  public static string? GetTestResultDirectory(this IConfiguration configuration)
+  {
+    return configuration["TestResultDirectory"];
+  }
+
 }
