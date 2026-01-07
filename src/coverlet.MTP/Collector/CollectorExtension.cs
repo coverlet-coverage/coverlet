@@ -30,6 +30,7 @@ namespace Coverlet.MTP.Collector;
 internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITestHostEnvironmentVariableProvider
 {
   private readonly CoverletLoggerAdapter _logger;
+  private readonly IFileSystem _fileSystem;
   private readonly CoverletExtensionConfiguration _configuration;
   private IServiceProvider? _serviceProvider;
   private readonly IConfiguration? _platformConfiguration;
@@ -53,11 +54,13 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   public CollectorExtension(
     Microsoft.Testing.Platform.Logging.ILoggerFactory loggerFactory,
     Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions,
-    Microsoft.Testing.Platform.Configurations.IConfiguration? configuration)
+    Microsoft.Testing.Platform.Configurations.IConfiguration? configuration,
+    IFileSystem? fileSystem = null)  // Add optional parameter for backward compatibility
   {
     _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
     _commandLineOptions = commandLineOptions ?? throw new ArgumentNullException(nameof(commandLineOptions));
-    _platformConfiguration = configuration ?? throw new ArgumentNullException(nameof(loggerFactory));
+    _platformConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    _fileSystem = fileSystem ?? new FileSystem();  // Use provided or create default
     _configuration = new CoverletExtensionConfiguration();
     _logger = new CoverletLoggerAdapter(_loggerFactory);
 
@@ -172,14 +175,11 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     IReadOnlyEnvironmentVariables environmentVariables)
   {
     // Check for conflicts with our variables
-    if (environmentVariables.TryGetVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, out OwnedEnvironmentVariable? existing) &&
-        existing.Owner != this as IExtension)
-    {
-      return Task.FromResult(ValidationResult.Invalid(
-        $"Environment variable {CoverletMtpEnvironmentVariables.CoverageEnabled} is already set by another extension."));
-    }
-
-    return Task.FromResult(ValidationResult.Valid());
+    return environmentVariables.TryGetVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, out OwnedEnvironmentVariable? existing) &&
+        existing.Owner != this as IExtension
+      ? Task.FromResult(ValidationResult.Invalid(
+        $"Environment variable {CoverletMtpEnvironmentVariables.CoverageEnabled} is already set by another extension."))
+      : Task.FromResult(ValidationResult.Valid());
   }
 
   /// <summary>
@@ -243,7 +243,9 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   private void InitializeCoverage()
   {
     if (string.IsNullOrEmpty(_testModulePath))
+    {
       return;
+    }
 
     // Add default exclude filter
     string[] excludeFilters = _configuration.ExcludeFilters ?? [];
@@ -280,7 +282,9 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     // Only resolve services when creating Coverage directly
     if (_serviceProvider is null)
+    {
       return;
+    }
 
     IFileSystem fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
     ISourceRootTranslator sourceRootTranslator = _serviceProvider.GetRequiredService<ISourceRootTranslator>();
@@ -303,9 +307,11 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       Path.GetDirectoryName(_testModulePath) + Path.DirectorySeparatorChar;
 
     string directory = Path.GetDirectoryName(outputDirectory)!;
-    if (!Directory.Exists(directory))
+
+    // Use injected file system for directory check
+    if (!_fileSystem.Exists(directory))
     {
-      Directory.CreateDirectory(directory);
+      Directory.CreateDirectory(directory);  // ⚠️ This still uses static Directory - may need abstraction
     }
 
     ISourceRootTranslator sourceRootTranslator = _serviceProvider!.GetRequiredService<ISourceRootTranslator>();
@@ -315,11 +321,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     foreach (string format in _configuration.formats)
     {
-      IReporter reporter = new ReporterFactory(format).CreateReporter();
-      if (reporter == null)
-      {
+      IReporter reporter = new ReporterFactory(format).CreateReporter() ??
         throw new InvalidOperationException($"Specified output format '{format}' is not supported");
-      }
 
       if (reporter.OutputType == ReporterOutputType.Console)
       {
@@ -349,7 +352,9 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   {
     // The hits file is in the same directory as the instrumented module
     if (string.IsNullOrEmpty(_testModulePath))
+    {
       return string.Empty;
+    }
 
     string? directory = Path.GetDirectoryName(_testModulePath);
     return directory ?? string.Empty;
@@ -361,17 +366,21 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     if (_platformConfiguration != null)
     {
       string? testModule = _platformConfiguration["TestModule"];
-      if (!string.IsNullOrEmpty(testModule) && File.Exists(testModule))
+      if (!string.IsNullOrEmpty(testModule) && _fileSystem.Exists(testModule))  // Use injected file system
+      {
         return testModule;
+      }
 
       testModule = _platformConfiguration["TestHost:Path"];
-      if (!string.IsNullOrEmpty(testModule) && File.Exists(testModule))
+      if (!string.IsNullOrEmpty(testModule) && _fileSystem.Exists(testModule))  // Use injected file system
+      {
         return testModule;
+      }
     }
 
     // Try entry assembly
     string? entryAssembly = System.Reflection.Assembly.GetEntryAssembly()?.Location;
-    if (!string.IsNullOrEmpty(entryAssembly) && File.Exists(entryAssembly))
+    if (!string.IsNullOrEmpty(entryAssembly) && _fileSystem.Exists(entryAssembly))  // Use injected file system
     {
       string fileName = Path.GetFileName(entryAssembly);
       if (!fileName.StartsWith("testhost", StringComparison.OrdinalIgnoreCase) &&
@@ -412,7 +421,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     var services = new ServiceCollection();
 
     services.AddSingleton<Coverlet.Core.Abstractions.ILogger>(_logger);
-    services.AddSingleton<IFileSystem, FileSystem>();
+    services.AddSingleton<IFileSystem>(_fileSystem);  // Use the injected file system instance
     services.AddSingleton<IAssemblyAdapter, AssemblyAdapter>();
     services.AddSingleton<IRetryHelper, RetryHelper>();
 
