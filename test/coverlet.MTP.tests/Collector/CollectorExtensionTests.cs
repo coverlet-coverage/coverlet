@@ -1093,7 +1093,7 @@ public class CollectorExtensionTests
     Assert.False(cts.IsCancellationRequested);
   }
 
-#endregion
+  #endregion
 
   #region UpdateAsync Tests
 
