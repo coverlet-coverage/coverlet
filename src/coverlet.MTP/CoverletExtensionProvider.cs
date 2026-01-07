@@ -32,7 +32,7 @@ public static class CoverletExtensionProvider
         =>
         {
           IConfiguration configuration = serviceProvider.GetConfiguration();
-          return new CoverletExtensionCollector(
+          return new CollectorExtension(
               serviceProvider.GetLoggerFactory(),
               serviceProvider.GetCommandLineOptions(),
               configuration) as ITestHostProcessLifetimeHandler;

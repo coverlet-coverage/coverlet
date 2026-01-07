@@ -27,7 +27,7 @@ namespace Coverlet.MTP.Collector;
 /// This extension runs in a SEPARATE CONTROLLER PROCESS, not the test host process.
 /// It instruments assemblies BEFORE the test host starts, avoiding file lock issues.
 /// </summary>
-internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandler, ITestHostEnvironmentVariableProvider
+internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITestHostEnvironmentVariableProvider
 {
   private readonly CoverletLoggerAdapter _logger;
   private readonly CoverletExtensionConfiguration _configuration;
@@ -50,7 +50,7 @@ internal sealed class CoverletExtensionCollector : ITestHostProcessLifetimeHandl
   string IExtension.DisplayName => _extension.DisplayName;
   string IExtension.Description => _extension.Description;
 
-  public CoverletExtensionCollector(
+  public CollectorExtension(
     Microsoft.Testing.Platform.Logging.ILoggerFactory loggerFactory,
     Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions,
     Microsoft.Testing.Platform.Configurations.IConfiguration? configuration)

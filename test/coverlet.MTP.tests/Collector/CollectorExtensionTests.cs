@@ -19,14 +19,14 @@ using Xunit;
 namespace Coverlet.MTP.Collector.Tests;
 
 [Collection("Coverlet Extension Collector Tests")]
-public class CoverletExtensionCollectorTests
+public class CollectorExtensionTests
 {
   private readonly Mock<ILoggerFactory> _mockLoggerFactory;
   private readonly Mock<Microsoft.Testing.Platform.Logging.ILogger> _mockLogger;
   private readonly Mock<ICommandLineOptions> _mockCommandLineOptions;
   private readonly Mock<IConfiguration> _mockConfiguration;
 
-  public CoverletExtensionCollectorTests()
+  public CollectorExtensionTests()
   {
     _mockLoggerFactory = new Mock<ILoggerFactory>();
     _mockLogger = new Mock<Microsoft.Testing.Platform.Logging.ILogger>();
@@ -55,27 +55,27 @@ public class CoverletExtensionCollectorTests
   public void Constructor_ThrowsArgumentNullException_WhenLoggerFactoryIsNull()
   {
     Assert.Throws<ArgumentNullException>(() =>
-      new CoverletExtensionCollector(null!, _mockCommandLineOptions.Object, _mockConfiguration.Object));
+      new CollectorExtension(null!, _mockCommandLineOptions.Object, _mockConfiguration.Object));
   }
 
   [Fact]
   public void Constructor_ThrowsArgumentNullException_WhenCommandLineOptionsIsNull()
   {
     Assert.Throws<ArgumentNullException>(() =>
-      new CoverletExtensionCollector(_mockLoggerFactory.Object, null!, _mockConfiguration.Object));
+      new CollectorExtension(_mockLoggerFactory.Object, null!, _mockConfiguration.Object));
   }
 
   [Fact]
   public void Constructor_ThrowsArgumentNullException_WhenConfigurationIsNull()
   {
     Assert.Throws<ArgumentNullException>(() =>
-      new CoverletExtensionCollector(_mockLoggerFactory.Object, _mockCommandLineOptions.Object, null!));
+      new CollectorExtension(_mockLoggerFactory.Object, _mockCommandLineOptions.Object, null!));
   }
 #endif
   [Fact]
   public void Constructor_InitializesSuccessfully_WithValidParameters()
   {
-    var collector = new CoverletExtensionCollector(
+    var collector = new CollectorExtension(
       _mockLoggerFactory.Object,
       _mockCommandLineOptions.Object,
       _mockConfiguration.Object);
@@ -598,7 +598,7 @@ public class CoverletExtensionCollectorTests
   {
     // Act & Assert
     ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
-      new CoverletExtensionCollector(null!, _mockCommandLineOptions.Object, _mockConfiguration.Object));
+      new CollectorExtension(null!, _mockCommandLineOptions.Object, _mockConfiguration.Object));
 
     Assert.Equal("loggerFactory", exception.ParamName);
   }
@@ -608,7 +608,7 @@ public class CoverletExtensionCollectorTests
   {
     // Act & Assert
     ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
-      new CoverletExtensionCollector(_mockLoggerFactory.Object, null!, _mockConfiguration.Object));
+      new CollectorExtension(_mockLoggerFactory.Object, null!, _mockConfiguration.Object));
 
     Assert.Equal("commandLineOptions", exception.ParamName);
   }
@@ -619,7 +619,7 @@ public class CoverletExtensionCollectorTests
   {
     // Act & Assert
     Assert.Throws<ArgumentNullException>(() =>
-      new CoverletExtensionCollector(_mockLoggerFactory.Object, _mockCommandLineOptions.Object, null!));
+      new CollectorExtension(_mockLoggerFactory.Object, _mockCommandLineOptions.Object, null!));
   }
 #endif
 
@@ -1568,16 +1568,16 @@ public class CoverletExtensionCollectorTests
     }
   }
 
-  private CoverletExtensionCollector CreateCollector()
+  private CollectorExtension CreateCollector()
   {
-    return new CoverletExtensionCollector(
+    return new CollectorExtension(
       _mockLoggerFactory.Object,
       _mockCommandLineOptions.Object,
       _mockConfiguration.Object);
   }
 
 #pragma warning disable IDE0051 //  Private member 'name' is unused.
-  private (CoverletExtensionCollector collector, Mock<ICoverage> mockCoverage, string testModulePath) CreateCollectorWithMockCoverage(string identifier = "test-identifier-123")
+  private (CollectorExtension collector, Mock<ICoverage> mockCoverage, string testModulePath) CreateCollectorWithMockCoverage(string identifier = "test-identifier-123")
   {
     string testModulePath = CreateTempTestModule();
 
