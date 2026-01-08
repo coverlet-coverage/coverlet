@@ -4,12 +4,11 @@
 using System.Globalization;
 using System.Reflection;
 using Coverlet.Core.Instrumentation;
-using Coverlet.MTP.Diagnostics;
 using Microsoft.Testing.Platform.Logging;
 using Moq;
 using Xunit;
 
-namespace Coverlet.MTP.Tests.Diagnostics;
+namespace Coverlet.MTP.Diagnostics.Tests;
 
 public class InstrumentationDiagnosticsTests : IDisposable
 {

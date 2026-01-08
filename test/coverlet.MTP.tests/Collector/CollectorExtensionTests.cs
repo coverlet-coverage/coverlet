@@ -524,4 +524,3 @@ public class CollectorExtensionTests
   #endregion
 }
 
-

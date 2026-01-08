@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Coverlet.MTP.Configuration;
 using Xunit;
 
-namespace Coverlet.MTP.Tests.Configuration;
+namespace Coverlet.MTP.Configuration.Tests;
 
 public class CoverletMTPSettingsTests
 {

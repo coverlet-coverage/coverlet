@@ -1,13 +1,12 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 using Moq;
 using Xunit;
 
-namespace Coverlet.MTP.Tests.CommandLine;
+namespace Coverlet.MTP.CommandLine.Tests;
 
 public class CoverletExtensionCommandLineProviderTests
 {

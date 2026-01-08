@@ -9,7 +9,7 @@ using Microsoft.Testing.Platform.Services;
 using Moq;
 using Xunit;
 
-namespace Coverlet.MTP.Tests.InProcess;
+namespace Coverlet.MTP.InProcess.Tests;
 
 public class CoverletTestSessionHandlerTests
 {

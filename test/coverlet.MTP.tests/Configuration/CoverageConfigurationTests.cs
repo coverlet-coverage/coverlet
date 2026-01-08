@@ -2,13 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Coverlet.MTP.CommandLine;
-using Coverlet.MTP.Configuration;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Logging;
 using Moq;
 using Xunit;
 
-namespace Coverlet.MTP.UnitTests.Configuration;
+namespace Coverlet.MTP.Configuration.Tests;
 
 public sealed class CoverageConfigurationTests
 {
@@ -611,9 +610,37 @@ public sealed class CoverageConfigurationTests
   {
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, null);
 
-    var exception = Record.Exception(() => config.LogConfigurationSummary());
+    var exception = Record.Exception(config.LogConfigurationSummary);
 
     Assert.Null(exception);
+  }
+
+  [Fact]
+  public void LogConfigurationSummary_WithValidLogger_LogsAllConfiguration()
+  {
+    // Arrange
+    _mockCommandLineOptions.Setup(x => x.IsOptionSet(It.IsAny<string>())).Returns(false);
+    _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
+      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? value) =>
+      {
+        value = null;
+        return false;
+      }));
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    config.LogConfigurationSummary();
+
+    // Assert - Verify the underlying Log method was called for LogInformation
+    // Microsoft.Testing.Platform.Logging.ILogger.LogInformation extension method calls Log<TState>
+    _mockLogger.Verify(
+      x => x.Log(
+        It.IsAny<LogLevel>(),
+        It.Is<string>(s => s.Contains("Coverlet Coverage Configuration")),
+        It.IsAny<Exception?>(),
+        It.IsAny<Func<string, Exception?, string>>()),
+      Times.Once);
   }
 
   #endregion

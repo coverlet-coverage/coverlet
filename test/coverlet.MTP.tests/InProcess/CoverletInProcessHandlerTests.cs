@@ -2,14 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Coverlet.MTP.EnvironmentVariables;
-using Coverlet.MTP.InProcess;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Services;
 using Moq;
 using Xunit;
 
-namespace Coverlet.MTP.Tests.InProcess;
+namespace Coverlet.MTP.InProcess.Tests;
 
 public class CoverletInProcessHandlerTests : IDisposable
 {
