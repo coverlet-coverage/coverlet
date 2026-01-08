@@ -1,0 +1,95 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(NetMinimum);netstandard2.0</TargetFrameworks>
+    <AssemblyTitle>Coverlet.MTP</AssemblyTitle>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn)</NoWarn>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+
+    <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);CopyProjectReferencesToPackage</TargetsForTfmSpecificContentInPackage>
+
+    <EnablePackageValidation>false</EnablePackageValidation>
+    <!--<IsTestProject>true</IsTestProject>-->
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+    <IsPackable>true</IsPackable>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <!-- disable transitive version update and use versions defined in coverlet.core -->
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>preview-recommended</AnalysisLevel>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AnalysisLevelInteroperability>true</AnalysisLevelInteroperability>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Title>coverlet.MTP</Title>
+    <PackageId>coverlet.MTP</PackageId>
+    <Authors>tonerdo</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/coverlet-coverage/coverlet</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
+    <PackageIcon>coverlet-icon.png</PackageIcon>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Description>coverage code coverage for Microsoft Testing Platform</Description>
+    <PackageTags>coverage;microsoft-testing-platform;code-coverage</PackageTags>
+    <PackageReadmeFile>Coverlet.MTP.Integration.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md</PackageReleaseNotes>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\Documentation\Coverlet.MTP.Integration.md" Link="Coverlet.MTP.Integration.md" Pack="true" PackagePath="\">
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Testing.Platform" />
+    <PackageReference Include="System.Buffers" />
+    <PackageReference Include="System.Memory" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- NuGet package layout -->
+  <!-- NuGet folders https://learn.microsoft.com/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->
+  <ItemGroup>
+    <Content Include="buildMultiTargeting/**" Pack="true">
+      <PackagePath>buildMultiTargeting</PackagePath>
+    </Content>
+    <TfmSpecificPackageFile Include="buildTransitive/**">
+      <PackagePath>buildTransitive/$(TargetFramework)</PackagePath>
+    </TfmSpecificPackageFile>
+    <TfmSpecificPackageFile Include="build/**">
+      <PackagePath>build/$(TargetFramework)</PackagePath>
+    </TfmSpecificPackageFile>
+  </ItemGroup>
+
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <!-- 1. Main assembly, deps.json, and PDB -->
+      <TfmSpecificPackageFile Include="$(TargetPath);$(ProjectDepsFilePath);@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="lib\$(TargetFramework)" />
+
+      <!-- 2. coverlet.core.dll -->
+      <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="lib\$(TargetFramework)" />
+
+      <!-- 3. ALL transitive dependencies (System.*.dll, etc.) EXCEPT framework references -->
+      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="lib\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubDirectory)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' != 'Microsoft.Testing.Platform' AND '%(ReferenceCopyLocalPaths.NuGetPackageId)' != 'Microsoft.Extensions.DependencyInjection'" />
+    </ItemGroup>
+    <!-- Print batches for debug purposes -->
+    <Message Text="Batch for .nupkg: ReferenceCopyLocalPaths = @(_ReferenceCopyLocalPaths), ReferenceCopyLocalPaths.DestinationSubDirectory = %(_ReferenceCopyLocalPaths.DestinationSubDirectory) Filename = %(_ReferenceCopyLocalPaths.Filename) Extension = %(_ReferenceCopyLocalPaths.Extension)" Importance="High" Condition="'@(_ReferenceCopyLocalPaths)' != ''" />
+
+  </Target>
+
+</Project>

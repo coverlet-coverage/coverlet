@@ -50,7 +50,8 @@
       SkipAutoProps="$(SkipAutoProps)"
       DeterministicReport="$(DeterministicReport)"
       DoesNotReturnAttribute="$(DoesNotReturnAttribute)"
-      ExcludeAssembliesWithoutSources="$(ExcludeAssembliesWithoutSources)">
+      ExcludeAssembliesWithoutSources="$(ExcludeAssembliesWithoutSources)"
+      DisableManagedInstrumentationRestore="$(DisableManagedInstrumentationRestore)">
       <Output TaskParameter="InstrumenterState" PropertyName="InstrumenterState"/>
     </Coverlet.MSbuild.Tasks.InstrumentationTask>
   </Target>

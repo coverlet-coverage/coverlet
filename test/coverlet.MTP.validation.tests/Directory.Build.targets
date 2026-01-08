@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  
+  <!-- Clear VSTest properties AFTER all imports -->
+  <PropertyGroup>
+    <VSTestLogger></VSTestLogger>
+    <VSTestResultsDirectory></VSTestResultsDirectory>
+    <VSTestNoBuild></VSTestNoBuild>
+    <VSTestArtifactsProcessingMode></VSTestArtifactsProcessingMode>
+    <VSTestSessionCorrelationId></VSTestSessionCorrelationId>
+    <VSTestTestCaseFilter></VSTestTestCaseFilter>
+  </PropertyGroup>
+
+</Project>

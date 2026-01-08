@@ -1,0 +1,10 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
+[assembly: AssemblyKeyFile("coverlet.MTP.snk")]
+
+[assembly: InternalsVisibleTo("coverlet.MTP.tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100cd2d5ae566fc3eb2d1837ec8706f78606b38d3bef1cdd80fc0c5f82cf9f2f221c60424274cbc70850c71e67f8695a74d26aad15395fa7473ecaa07c3048f32f5b83003eb9a927d9b0b688ebc423954dd883800b63a51091e355d1758d6360f7085a34606a18236a85f085cad80ec388ac340bb22770c3a01f39fcd7fa4d53cc6")]
+[assembly: InternalsVisibleTo("coverlet.MTP.validation.tests, PublicKey=00240000048000009400000006020000002400005253413100040000010001001575e172562f7b3ca4e105ef1539802ddf92de5f3d3a76937f99c73b1c64f46ec6ed1c5de46f2d39bc8916050376f749507bb5082958890e6e3ba9c68b4c6e4a56f16c1401f21f908c437a2b0b4dc263ef3bc1bc15d6a02a8e6cbf26a077f1590f91e248cf5ccd4642b7493b31cfa2bd9f921b662cd2cb8bcc66fc2cb533e2a8")]

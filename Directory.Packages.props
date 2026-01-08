@@ -8,32 +8,51 @@
   </ItemGroup>
   <PropertyGroup>
     <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion> <!-- .NET 8.0 support -->
-    <MicrosoftCodeAnalysisVersion>4.12.0</MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisVersion>4.13.0</MicrosoftCodeAnalysisVersion>
+    <!-- .NET 8.0 support -->
     <NugetPackageVersion>6.14.0</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
-    <MicrosoftNETTestSdkVersion>17.14.1</MicrosoftNETTestSdkVersion>
-    <XunitV3Version>3.0.0</XunitV3Version>
+    <MicrosoftNETTestSdkVersion>18.0.1</MicrosoftNETTestSdkVersion>
+    <XunitV3Version>3.2.1</XunitV3Version>
     <XunitRunnerVisualstudioVersion>3.1.5</XunitRunnerVisualstudioVersion>
+    <MicrosoftTestingPlatformVersion>2.0.2</MicrosoftTestingPlatformVersion>
+    <MoqVersion>4.20.72</MoqVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DotNetConfig" Version="1.2.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
-    <PackageVersion Include="Microsoft.Build.Locator" Version="1.10.2" />
+    <PackageVersion Include="Microsoft.Build.Locator" Version="1.11.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.0.0-1.25277.114" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" />
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftNETTestSdkVersion)" />
+    <!--<PackageVersion Include="MSTest.TestFramework" Version="3.9.1" />-->
+    <!-- Microsoft Testing Platform-->
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="$(MicrosoftTestingPlatformVersion)" />
+    <!--<PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSTest" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSTest.Extensions" Version="$(MicrosoftTestingPlatformVersion)" />-->
+    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="MSTest" Version="3.9.1" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.9.1" />
+    <!-- Nuget -->
     <PackageVersion Include="NuGet.Frameworks" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
-    <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="Moq" Version="$(MoqVersion)" />
     <PackageVersion Include="ReportGenerator.Core" Version="5.3.11" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="8.1.8" />
@@ -41,24 +60,34 @@
     <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
     <!-- latest Tmds.ExecFunction package uses EnvDTE V17.8.37221 -->
     <PackageVersion Include="Tmds.ExecFunction" Version="0.8.0" />
+    <!-- <PackageVersion Include="xunit" Version="2.9.3" /> -->
     <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
+    <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
+    <PackageVersion Include="xunit.v3.runner.msbuild" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
     <PackageVersion Include="System.Buffers" Version="4.6.1" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
     <PackageVersion Include="System.Diagnostics.EventLog" Version="8.0.2" />
-    <PackageVersion Include="System.Formats.Asn1" Version="8.0.2" />
+    <PackageVersion Include="System.Formats.Asn1" Version="10.0.0" />
     <PackageVersion Include="System.IO.Pipelines" Version="8.0.0" />
-    <PackageVersion Include="System.Linq.Async" Version="6.0.3" />
+    <PackageVersion Include="System.Linq.Async" Version="7.0.0" />
     <PackageVersion Include="System.Memory" Version="4.6.3" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reflection.Metadata" Version="8.0.1" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
     <PackageVersion Include="System.Security.AccessControl" Version="6.0.1" />
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.1" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.0" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageVersion Include="System.Text.Json" Version="8.0.6" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+    <!-- Could be removed - just used in Playground -->
+    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="MSTest.Analyzers" Version="3.9.1" />
+    <PackageVersion Include="StreamJsonRpc" Version="2.20.20" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.1" />
+    <PackageVersion Include="Microsoft.TestPlatform" Version="17.14.1" />
+    <PackageVersion Include="System.Collections.Concurrent" Version="4.3.0" />
   </ItemGroup>
 </Project>

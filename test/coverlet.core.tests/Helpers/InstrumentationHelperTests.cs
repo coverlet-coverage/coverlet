@@ -103,6 +103,7 @@ namespace Coverlet.Core.Tests.Helpers
       string module = typeof(InstrumentationHelperTests).Assembly.Location;
       string identifier = Guid.NewGuid().ToString();
 
+      // Ensure the backup list is used to restore the original module
       _instrumentationHelper.BackupOriginalModule(module, identifier, false);
 
       string backupPath = Path.Combine(
@@ -343,8 +344,8 @@ namespace Coverlet.Core.Tests.Helpers
     }
 
     public static IEnumerable<object[]> ValidModuleFilterData =>
-        new List<object[]>
-            {
+           new List<object[]>
+               {
                     new object[] { "[Module]*" },
                     new object[] { "[Module*]*" },
                     new object[] { "[Mod*ule]*" },
@@ -353,7 +354,7 @@ namespace Coverlet.Core.Tests.Helpers
                     new object[] { "[Module?]*" },
                     new object[] { "[ModuleX?]*" },
                     new object[] { "[*]*" }
-            };
+               };
 
     public static IEnumerable<object[]> ValidModuleAndNamespaceFilterData =>
         new List<object[]>
@@ -365,5 +366,400 @@ namespace Coverlet.Core.Tests.Helpers
                         new object[] { "[Module]*b.*" },
                 }
             .Concat(ValidModuleFilterData);
+
+    #region RestoreOriginalModules Tests
+
+    [Fact]
+    public void TestRestoreOriginalModules_WhenBackupListIsEmpty_ReturnsEarly()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+
+      var instrumentationHelper = new InstrumentationHelper(
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      // Act - RestoreOriginalModules should return early without any file operations
+      instrumentationHelper.RestoreOriginalModules();
+
+      // Assert - No file operations should occur
+      mockFileSystem.Verify(x => x.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+      mockFileSystem.Verify(x => x.Delete(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public void TestRestoreOriginalModules_WithBackedUpModule_RestoresModule()
+    {
+      // Arrange
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      Directory.CreateDirectory(tempDir);
+
+      // Use the actual test assembly as source to copy (valid DLL)
+      string sourceAssembly = typeof(InstrumentationHelperTests).Assembly.Location;
+      string modulePath = Path.Combine(tempDir, "TestModule.dll");
+      string identifier = Guid.NewGuid().ToString();
+
+      try
+      {
+        // Copy a valid assembly to the temp location
+        File.Copy(sourceAssembly, modulePath, true);
+        string originalContent = File.ReadAllBytes(modulePath).Length.ToString();
+
+        var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+        var instrumentationHelper = new InstrumentationHelper(
+          new ProcessExitHandler(),
+          new RetryHelper(),
+          new FileSystem(),
+          new Mock<ILogger>().Object,
+          mockSourceRootTranslator.Object);
+
+        // Backup the module
+        instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+        // Modify the original (append some bytes)
+        File.AppendAllText(modulePath, "modified");
+        string modifiedLength = File.ReadAllBytes(modulePath).Length.ToString();
+        Assert.NotEqual(originalContent, modifiedLength);
+
+        // Act
+        instrumentationHelper.RestoreOriginalModules();
+
+        // Assert - Module should be restored to original content
+        Assert.Equal(originalContent, File.ReadAllBytes(modulePath).Length.ToString());
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public void TestRestoreOriginalModules_WhenBackupFileNotFound_LogsWarningAndRemovesFromList()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+
+      string modulePath = Path.Combine(Path.GetTempPath(), "NonExistent.dll");
+      string identifier = Guid.NewGuid().ToString();
+
+      // Setup file system to simulate backup exists initially but not during restore
+      mockFileSystem.SetupSequence(x => x.Exists(It.IsAny<string>()))
+        .Returns(true)  // For backup creation check
+        .Returns(false); // For backup file exists check during restore
+
+      mockFileSystem.Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()));
+
+      var instrumentationHelper = new InstrumentationHelper(
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      // Backup the module (will add to backup list)
+      instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+      // Act
+      instrumentationHelper.RestoreOriginalModules();
+
+      // Assert - Warning should be logged
+      mockLogger.Verify(x => x.LogWarning(It.Is<string>(s => s.Contains("Backup file not found"))), Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public void TestRestoreOriginalModules_SkipsCurrentlyRunningAssembly()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+      string currentAssembly = typeof(InstrumentationHelperTests).Assembly.Location;
+      string identifier = Guid.NewGuid().ToString();
+
+      var instrumentationHelper = new InstrumentationHelper(
+        new ProcessExitHandler(),
+        new RetryHelper(),
+        new FileSystem(),
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      // Backup the current assembly (which is running)
+      instrumentationHelper.BackupOriginalModule(currentAssembly, identifier, false);
+
+      // Act
+      instrumentationHelper.RestoreOriginalModules();
+
+      // Assert - Should log that it's skipping the running assembly
+      mockLogger.Verify(x => x.LogVerbose(It.Is<string>(s => s.Contains("Skipping restore of currently running assembly"))), Times.AtLeastOnce);
+    }
+
+    #endregion
+
+    #region RestoreOriginalModule Tests
+
+    [Fact]
+    public void TestRestoreOriginalModule_WhenModuleNotInBackupList_LogsAndReturns()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+
+      var instrumentationHelper = new InstrumentationHelper(
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      // Act - Try to restore a module that was never backed up
+      instrumentationHelper.RestoreOriginalModule("NonExistentModule.dll", "some-identifier");
+
+      // Assert
+      mockLogger.Verify(x => x.LogVerbose(It.Is<string>(s => s.Contains("Module not in backup list"))), Times.Once);
+      mockFileSystem.Verify(x => x.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Fact]
+    public void TestRestoreOriginalModule_WhenBackupFileNotFound_LogsWarning()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+
+      string modulePath = Path.Combine(Path.GetTempPath(), "TestModule.dll");
+      string identifier = Guid.NewGuid().ToString();
+
+      // Setup to allow backup but not find backup during restore
+      mockFileSystem.SetupSequence(x => x.Exists(It.IsAny<string>()))
+        .Returns(false)  // pdb check during backup
+        .Returns(false); // backup file check during restore
+
+      mockFileSystem.Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()));
+
+      var instrumentationHelper = new InstrumentationHelper(
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      // Backup first to add to list
+      instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+      // Act
+      instrumentationHelper.RestoreOriginalModule(modulePath, identifier);
+
+      // Assert
+      mockLogger.Verify(x => x.LogWarning(It.Is<string>(s => s.Contains("Backup file not found"))), Times.Once);
+    }
+
+    [Fact]
+    public void TestRestoreOriginalModule_WithValidBackup_RestoresSuccessfully()
+    {
+      // Arrange
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      Directory.CreateDirectory(tempDir);
+
+      // Use the actual test assembly as source to copy (valid DLL)
+      string sourceAssembly = typeof(InstrumentationHelperTests).Assembly.Location;
+      string modulePath = Path.Combine(tempDir, "TestModule.dll");
+      string identifier = Guid.NewGuid().ToString();
+
+      try
+      {
+        // Copy a valid assembly to the temp location
+        File.Copy(sourceAssembly, modulePath, true);
+        long originalSize = new FileInfo(modulePath).Length;
+
+        var mockLogger = new Mock<ILogger>();
+        var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+        var instrumentationHelper = new InstrumentationHelper(
+          new ProcessExitHandler(),
+          new RetryHelper(),
+          new FileSystem(),
+          mockLogger.Object,
+          mockSourceRootTranslator.Object);
+
+        // Backup
+        instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+        // Modify original (append data to change size)
+        File.AppendAllText(modulePath, "modified data");
+        Assert.NotEqual(originalSize, new FileInfo(modulePath).Length);
+
+        // Act
+        instrumentationHelper.RestoreOriginalModule(modulePath, identifier);
+
+        // Assert
+        Assert.Equal(originalSize, new FileInfo(modulePath).Length);
+        mockLogger.Verify(x => x.LogVerbose(It.Is<string>(s => s.Contains("Restored module from backup"))), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    [Fact]
+    public void TestRestoreOriginalModule_WithSymbolFile_RestoresBothModuleAndSymbols()
+    {
+      // Arrange
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      Directory.CreateDirectory(tempDir);
+
+      // Use the actual test assembly as source to copy (valid DLL)
+      string sourceAssembly = typeof(InstrumentationHelperTests).Assembly.Location;
+      string sourcePdb = Path.ChangeExtension(sourceAssembly, ".pdb");
+      string modulePath = Path.Combine(tempDir, "TestModule.dll");
+      string symbolPath = Path.Combine(tempDir, "TestModule.pdb");
+      string identifier = Guid.NewGuid().ToString();
+
+      try
+      {
+        // Copy valid assembly and pdb to the temp location
+        File.Copy(sourceAssembly, modulePath, true);
+        if (File.Exists(sourcePdb))
+        {
+          File.Copy(sourcePdb, symbolPath, true);
+        }
+        else
+        {
+          // Create a dummy pdb file if source doesn't exist
+          File.WriteAllText(symbolPath, "original pdb content");
+        }
+
+        long originalDllSize = new FileInfo(modulePath).Length;
+        long originalPdbSize = new FileInfo(symbolPath).Length;
+
+        var mockLogger = new Mock<ILogger>();
+        var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+        var instrumentationHelper = new InstrumentationHelper(
+          new ProcessExitHandler(),
+          new RetryHelper(),
+          new FileSystem(),
+          mockLogger.Object,
+          mockSourceRootTranslator.Object);
+
+        // Backup
+        instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+        // Modify originals
+        File.AppendAllText(modulePath, "modified dll data");
+        File.AppendAllText(symbolPath, "modified pdb data");
+
+        Assert.NotEqual(originalDllSize, new FileInfo(modulePath).Length);
+        Assert.NotEqual(originalPdbSize, new FileInfo(symbolPath).Length);
+
+        // Act
+        instrumentationHelper.RestoreOriginalModule(modulePath, identifier);
+
+        // Assert
+        Assert.Equal(originalDllSize, new FileInfo(modulePath).Length);
+        Assert.Equal(originalPdbSize, new FileInfo(symbolPath).Length);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    #endregion
+
+    #region BackupOriginalModule Tests
+
+    [Fact]
+    public void TestBackupOriginalModule_WhenDisableManagedInstrumentationRestoreIsTrue_DoesNotBackup()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+
+      var instrumentationHelper = new InstrumentationHelper(
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      // Act
+      instrumentationHelper.BackupOriginalModule("SomeModule.dll", "identifier", disableManagedInstrumentationRestore: true);
+
+      // Assert - No copy operations should occur
+      mockFileSystem.Verify(x => x.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Fact]
+    public void TestBackupOriginalModule_WhenModuleAlreadyBackedUp_SkipsAndLogs()
+    {
+      // Arrange
+      string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+      Directory.CreateDirectory(tempDir);
+
+      // Use the actual test assembly as source to copy (valid DLL)
+      string sourceAssembly = typeof(InstrumentationHelperTests).Assembly.Location;
+      string modulePath = Path.Combine(tempDir, "TestModule.dll");
+      string identifier = Guid.NewGuid().ToString();
+
+      try
+      {
+        // Copy a valid assembly to the temp location
+        File.Copy(sourceAssembly, modulePath, true);
+
+        var mockLogger = new Mock<ILogger>();
+        var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+        var instrumentationHelper = new InstrumentationHelper(
+          new ProcessExitHandler(),
+          new RetryHelper(),
+          new FileSystem(),
+          mockLogger.Object,
+          mockSourceRootTranslator.Object);
+
+        // Backup first time
+        instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+        // Act - Backup same module again
+        instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+        // Assert
+        mockLogger.Verify(x => x.LogVerbose(It.Is<string>(s => s.Contains("Module already in backup list"))), Times.Once);
+      }
+      finally
+      {
+        if (Directory.Exists(tempDir))
+        {
+          Directory.Delete(tempDir, true);
+        }
+      }
+    }
+
+    #endregion
   }
 }

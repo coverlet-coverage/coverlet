@@ -49,6 +49,8 @@ namespace Coverlet.MSbuild.Tasks
 
     public string ExcludeAssembliesWithoutSources { get; set; }
 
+    public bool DisableManagedInstrumentationRestore { get; set; }
+
     [Output]
     public ITaskItem InstrumenterState { get; set; }
 
@@ -103,7 +105,8 @@ namespace Coverlet.MSbuild.Tasks
           SkipAutoProps = SkipAutoProps,
           DeterministicReport = DeterministicReport,
           ExcludeAssembliesWithoutSources = ExcludeAssembliesWithoutSources,
-          DoesNotReturnAttributes = DoesNotReturnAttribute?.Split(',')
+          DoesNotReturnAttributes = DoesNotReturnAttribute?.Split(','),
+          DisableManagedInstrumentationRestore = DisableManagedInstrumentationRestore
         };
 
         var coverage = new Coverage(Path,
