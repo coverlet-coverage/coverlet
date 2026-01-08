@@ -11,6 +11,9 @@
 
 Coverlet is a cross platform code coverage framework for .NET, with support for line, branch and method coverage. It works with [.NET Framework](Documentation/KnownIssues.md#badimageformatexception-net-framework-47x-48x) on Windows and .NET Core on all supported platforms.
 
+> [!NOTE]
+> Coverlet only supports modern .NET [SDK-style](https://learn.microsoft.com/en-us/dotnet/core/project-sdk/overview) projects.
+
 **Coverlet documentation reflect the current repository state of the features, not the released ones.**
 **Check the [changelog](Documentation/Changelog.md) to understand if the documented feature you want to use has been officially released.**
 
