@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
-using Coverlet.Extension.Logging;
+using Coverlet.MTP.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
@@ -18,7 +18,6 @@ using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
-using Coverlet.Extension.Collector;
 
 namespace Coverlet.MTP.Collector;
 

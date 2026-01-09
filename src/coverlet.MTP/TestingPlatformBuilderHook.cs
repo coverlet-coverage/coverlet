@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Coverlet.MTP;
 using Microsoft.Testing.Platform.Builder;
 
-namespace Coverlet.Extension
+namespace Coverlet.MTP
 {
   public static class TestingPlatformBuilderHook
   {

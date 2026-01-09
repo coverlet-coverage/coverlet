@@ -7,7 +7,7 @@
     -->
     <TestingPlatformBuilderHook Include="6C751FC6-00AA-43AD-8265-79C3FED21943" >
       <DisplayName>Coverlet Code Coverage</DisplayName>
-      <TypeFullName>Coverlet.Extension.TestingPlatformBuilderHook</TypeFullName>
+      <TypeFullName>Coverlet.MTP.TestingPlatformBuilderHook</TypeFullName>
     </TestingPlatformBuilderHook>
   </ItemGroup>
 

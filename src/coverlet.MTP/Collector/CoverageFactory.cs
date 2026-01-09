@@ -4,7 +4,7 @@
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 
-namespace coverlet.Extension.Collector;
+namespace coverlet.MTP.Collector;
 
 /// <summary>
 /// Default factory for creating Coverage instances.
