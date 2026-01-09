@@ -35,7 +35,7 @@ find . -name "coverage.opencover.xml" -delete 2>/dev/null || true
 find . -name "coverage.net8.0.opencover.xml" -delete 2>/dev/null || true
 
 # Delete binlog files in integration tests
-rm -f test/coverlet.integration.determisticbuild/*.binlog 2>/dev/null || true
+find . -name "*.binlog" -delete 2>/dev/null || true
 
 # Remove artifacts directory
 rm -rf artifacts
