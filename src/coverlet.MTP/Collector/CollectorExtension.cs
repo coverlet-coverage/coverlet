@@ -18,7 +18,6 @@ using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
-using Coverlet.Extension.Collector;
 
 namespace Coverlet.MTP.Collector;
 

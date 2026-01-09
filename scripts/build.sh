@@ -53,29 +53,43 @@ find "$HOME/.nuget/packages" -type d \( -path "*/coverlet.msbuild/8.0.0-preview*
 echo "Cleanup complete. Starting build..."
 
 # Pack initial packages (Debug)
-dotnet pack -c Debug src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj /p:ContinuousIntegrationBuild=true
-dotnet pack -c Debug src/coverlet.collector/coverlet.collector.csproj /p:ContinuousIntegrationBuild=true
+dotnet pack -c Debug src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack -c Debug src/coverlet.collector/coverlet.collector.csproj
 
 # Restore packages fresh on Linux
 dotnet restore
 
 # Build individual projects with binlog
-dotnet build src/coverlet.core/coverlet.core.csproj -bl:build.core.binlog /p:ContinuousIntegrationBuild=true
-dotnet build src/coverlet.collector/coverlet.collector.csproj -bl:build.collector.binlog /p:ContinuousIntegrationBuild=true
-dotnet build src/coverlet.console/coverlet.console.csproj -bl:build.console.binlog /p:ContinuousIntegrationBuild=true
-dotnet build src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj -bl:build.msbuild.tasks.binlog /p:ContinuousIntegrationBuild=true
-dotnet build src/coverlet.MTP/coverlet.MTP.csproj -bl:build.msbuild.tasks.binlog /p:ContinuousIntegrationBuild=true
+dotnet build src/coverlet.core/coverlet.core.csproj -bl:build.core.binlog
+dotnet build src/coverlet.collector/coverlet.collector.csproj -bl:build.collector.binlog
+dotnet build src/coverlet.console/coverlet.console.csproj -bl:build.console.binlog
+dotnet build src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj -bl:build.msbuild.tasks.binlog
+dotnet build src/coverlet.MTP/coverlet.MTP.csproj -bl:build.msbuild.tasks.binlog
+
+# Create NuGet packages (Debug)
+dotnet pack -c Debug src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack -c Debug src/coverlet.collector/coverlet.collector.csproj
+dotnet pack -c Debug src/coverlet.console/coverlet.console.csproj
+dotnet pack -c Debug src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack -c Debug src/coverlet.MTP/coverlet.MTP.csproj
+
+# Create NuGet packages (Release)
+dotnet pack src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack src/coverlet.collector/coverlet.collector.csproj
+dotnet pack src/coverlet.console/coverlet.console.csproj
+dotnet pack src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack src/coverlet.MTP/coverlet.MTP.csproj
 
 # Build test projects with binlog
-dotnet restore
-dotnet build test/coverlet.tests.utils/coverlet.tests.utils.csproj --no-restore /p:ContinuousIntegrationBuild=true
-dotnet build test/coverlet.collector.tests/coverlet.collector.tests.csproj -bl:build.collector.tests.binlog /p:ContinuousIntegrationBuild=true
-dotnet build test/coverlet.core.tests/coverlet.core.tests.csproj -bl:build.coverlet.core.tests.binlog /p:ContinuousIntegrationBuild=true
-dotnet build test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -bl:build.core.coverage.tests.binlog /p:ContinuousIntegrationBuild=true
-dotnet build test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -bl:build.coverlet.msbuild.tasks.tests.binlog /p:ContinuousIntegrationBuild=true
+dotnet build test/coverlet.tests.utils/coverlet.tests.utils.csproj
+dotnet build test/coverlet.collector.tests/coverlet.collector.tests.csproj -bl:build.collector.tests.binlog
+dotnet build test/coverlet.core.tests/coverlet.core.tests.csproj -bl:build.coverlet.core.tests.binlog
+# coverlet.core.coverage.tests !!!! does not build on Linux (Dev Container) VS debugger assemblies not available !!!!
+# dotnet build test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -bl:build.core.coverage.tests.binlog
+dotnet build test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -bl:build.coverlet.msbuild.tasks.tests.binlog
 dotnet build test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net8.0 -bl:build.coverlet.integration.tests.8.0.binlog /p:ContinuousIntegrationBuild=true
-dotnet build test/coverlet.MTP.unit.tests/coverlet.MTP.unit.tests.csproj -bl:build.MTP.unit.tests.8.0.binlog /p:ContinuousIntegrationBuild=true
-dotnet build test/coverlet.MTP.validation.tests/coverlet.validation.tests.csproj -bl:build.coverlet.validation.tests.8.0.binlog /p:ContinuousIntegrationBuild=true
+dotnet build test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -bl:build.MTP.tests.8.0.binlog
+dotnet build test/coverlet.MTP.validation.tests/coverlet.validation.tests.csproj -bl:build.coverlet.validation.tests.8.0.binlog
 
 # Get the SDK version from global.json
 SDK_VERSION=$(grep -oP '"version"\s*:\s*"\K[^"]+' global.json)
@@ -84,20 +98,8 @@ SDK_MAJOR_VERSION=$(echo "$SDK_VERSION" | cut -d'.' -f1)
 # Check if the SDK version is 9.0.* or higher (9.0.*, 10.0.*, etc.)
 if [[ "$SDK_MAJOR_VERSION" -ge 9 ]]; then
     echo "Executing command for SDK version $SDK_VERSION (9.0+ detected)..."
-    dotnet build test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net9.0 -bl:build.coverlet.core.tests.9.9.binlog /p:ContinuousIntegrationBuild=true
+    dotnet build test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net9.0 -bl:build.coverlet.core.tests.9.0.binlog /p:ContinuousIntegrationBuild=true
 fi
-
-# Create NuGet packages (Debug)
-dotnet pack -c Debug src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj /p:ContinuousIntegrationBuild=true
-dotnet pack -c Debug src/coverlet.collector/coverlet.collector.csproj /p:ContinuousIntegrationBuild=true
-dotnet pack -c Debug src/coverlet.console/coverlet.console.csproj /p:ContinuousIntegrationBuild=true
-dotnet pack -c Debug src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj /p:ContinuousIntegrationBuild=true
-
-# Create NuGet packages (Release)
-dotnet pack src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj /p:ContinuousIntegrationBuild=true
-dotnet pack src/coverlet.collector/coverlet.collector.csproj /p:ContinuousIntegrationBuild=true
-dotnet pack src/coverlet.console/coverlet.console.csproj /p:ContinuousIntegrationBuild=true
-dotnet pack src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj /p:ContinuousIntegrationBuild=true
 
 dotnet build-server shutdown
 

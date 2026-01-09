@@ -16,7 +16,7 @@ pkill -f "coverlet.integration.tests.dll" 2>/dev/null || true
 
 # coverlet.core.tests
 dotnet build-server shutdown
-dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c Debug --no-build -bl:test.core.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$WORKSPACE_ROOT/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.tests.trx" --diag:"$WORKSPACE_ROOT/artifacts/log/coverlet.core.tests.diag;tracelevel=verbose"
+dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c Debug -f net8.0 -bl:test.core.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$WORKSPACE_ROOT/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.tests.trx" --diag:"$WORKSPACE_ROOT/artifacts/log/coverlet.core.tests.diag;tracelevel=verbose"
 
 # coverlet.core.coverage.tests !!!! does not work on Linux (Dev Container) VS debugger assemblies not available !!!!
 # dotnet build-server shutdown
@@ -24,23 +24,23 @@ dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c Debug --no-bu
 
 # coverlet.msbuild.tasks.tests
 dotnet build-server shutdown
-dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -c Debug --no-build -bl:test.msbuild.binlog --results-directory:"$WORKSPACE_ROOT/artifacts/reports" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*%2c[testgen_]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$WORKSPACE_ROOT/artifacts/log/Debug/coverlet.msbuild.test.diag.log;tracelevel=verbose"
+dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -c Debug -f net8.0 -bl:test.msbuild.binlog --results-directory:"$WORKSPACE_ROOT/artifacts/reports" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*%2c[testgen_]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$WORKSPACE_ROOT/artifacts/log/Debug/coverlet.msbuild.test.diag.log;tracelevel=verbose"
 
 # coverlet.collector.tests
 dotnet build-server shutdown
-dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c Debug --no-build -bl:test.collector.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$WORKSPACE_ROOT/artifacts/log/Debug/coverlet.collector.test.diag.log;tracelevel=verbose"
-
-# coverlet.integration.tests (default net8.0)
-dotnet build-server shutdown
-dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c Debug -f net8.0 --no-build -bl:test.integration.binlog --results-directory "$WORKSPACE_ROOT/artifacts/reports/" --logger "trx;LogFileName=coverlet.integration.tests.net8.0.trx" --diag:"$WORKSPACE_ROOT/artifacts/log/coverlet.integration.tests.net8.0.diag;tracelevel=verbose"
+dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c Debug -f net8.0 -bl:test.collector.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$WORKSPACE_ROOT/artifacts/log/Debug/coverlet.collector.test.diag.log;tracelevel=verbose"
 
 # coverlet.MTP.tests
 dotnet build-server shutdown
-dotnet test test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -c Debug --no-build -bl:test.MTP.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$WORKSPACE_ROOT/artifacts/reports/" --logger "trx;LogFileName=coverlet.MTP.tests.trx" --diag:"$WORKSPACE_ROOT/artifacts/log/coverlet.MTP.tests.diag;tracelevel=verbose"
+dotnet test test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -c Debug -f net8.0 -bl:test.MTP.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$WORKSPACE_ROOT/artifacts/reports/" --logger "trx;LogFileName=coverlet.MTP.tests.trx" --diag:"$WORKSPACE_ROOT/artifacts/log/coverlet.MTP.tests.diag;tracelevel=verbose"
 
 # coverlet.MTP.validation.tests
 dotnet build-server shutdown
-dotnet exec "$WORKSPACE_ROOT/artifacts/bin/coverlet.MTP.validation.tests/$(BuildConfiguration)/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic-output-directory "$WORKSPACE_ROOT/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.validation.tests_" --results-directory "$WORKSPACE_ROOT/artifacts/reports/"
+dotnet exec "$WORKSPACE_ROOT/artifacts/bin/coverlet.MTP.validation.tests/debug/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.trx" --diagnostic-output-directory "$WORKSPACE_ROOT/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.validation.tests_" --results-directory "$WORKSPACE_ROOT/artifacts/reports/"
+
+# coverlet.integration.tests (default net8.0)
+dotnet build-server shutdown
+dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c Debug -f net8.0 --no-build -bl:test.integration.binlog --results-directory "$WORKSPACE_ROOT/artifacts/reports/" --logger "trx;LogFileName=coverlet.integration.tests.net8.0.trx" --diag:"$WORKSPACE_ROOT/artifacts/log/coverlet.integration.tests.net8.0.diag;tracelevel=verbose" /p:ContinuousIntegrationBuild=true
 
 # Get the SDK version from global.json
 SDK_VERSION=$(grep -oP '"version"\s*:\s*"\K[^"]+' global.json)
@@ -51,7 +51,7 @@ if [[ "$SDK_MAJOR_VERSION" -ge 9 ]]; then
     # Check if the net9.0 test dll exists
     if [ -f "$WORKSPACE_ROOT/artifacts/bin/coverlet.integration.tests/debug_net9.0/coverlet.integration.tests.dll" ]; then
         echo "Executing command for SDK version $SDK_VERSION (9.0+ detected)..."
-        dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c Debug -f net9.0 --no-build -bl:test.integration.binlog --results-directory "$WORKSPACE_ROOT/artifacts/reports/" --logger "trx;LogFileName=coverlet.integration.tests.net9.0.trx" --diag:"$WORKSPACE_ROOT/artifacts/log/coverlet.integration.tests.net9.0.diag;tracelevel=verbose"
+        dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c Debug -f net9.0 --no-build -bl:test.integration.binlog --results-directory "$WORKSPACE_ROOT/artifacts/reports/" --logger "trx;LogFileName=coverlet.integration.tests.net9.0.trx" --diag:"$WORKSPACE_ROOT/artifacts/log/coverlet.integration.tests.net9.0.diag;tracelevel=verbose" /p:ContinuousIntegrationBuild=true
     else
         echo "Skipping command execution. Required file does not exist."
     fi
