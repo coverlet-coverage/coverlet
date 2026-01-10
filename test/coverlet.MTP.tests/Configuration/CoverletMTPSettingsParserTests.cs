@@ -11,7 +11,7 @@ public class CoverletMTPSettingsParserTests
   //private readonly CoverletMTPSettingsParser _parser = new();
 
   [Fact]
-  public void Parse_WithNullConfiguration_ReturnsDefaultSettings()
+  public void ParseWithNullConfigurationReturnsDefaultSettings()
   {
     // Act
     CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(null, "test.dll");
@@ -26,7 +26,7 @@ public class CoverletMTPSettingsParserTests
   }
 
   [Fact]
-  public void Parse_WithValidConfiguration_ReturnsCorrectSettings()
+  public void ParseWithValidConfigurationReturnsCorrectSettings()
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()
@@ -68,7 +68,7 @@ public class CoverletMTPSettingsParserTests
   [InlineData(" [*]* , [coverlet]* ", new[] { "[*]*", "[coverlet]*" })]
   [InlineData("[*]*,,[coverlet]*", new[] { "[*]*", "[coverlet]*" })]
   [InlineData("[*]*, ,[coverlet]*", new[] { "[*]*", "[coverlet]*" })]
-  public void Parse_WithVariousDelimiters_ParsesCorrectly(string includeValue, string[] expected)
+  public void ParseWithVariousDelimitersParsesCorrectly(string includeValue, string[] expected)
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()
@@ -90,7 +90,7 @@ public class CoverletMTPSettingsParserTests
   [InlineData("json, cobertura", 2, new[] { "json", "cobertura" })]
   [InlineData(" , json,, cobertura ", 2, new[] { "json", "cobertura" })]
   [InlineData("opencover", 1, new[] { "opencover" })]
-  public void Parse_WithMultipleFormats_ParsesCorrectly(string formats, int count, string[] expected)
+  public void ParseWithMultipleFormatsParsesCorrectly(string formats, int count, string[] expected)
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()
@@ -112,7 +112,7 @@ public class CoverletMTPSettingsParserTests
   [InlineData(null)]
   [InlineData("")]
   [InlineData("   ")]
-  public void Parse_WithEmptyOrNullFormat_ReturnsDefaultFormat(string? formatValue)
+  public void ParseWithEmptyOrNullFormatReturnsDefaultFormat(string? formatValue)
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()
@@ -138,7 +138,7 @@ public class CoverletMTPSettingsParserTests
   [InlineData("False", false)]
   [InlineData("", false)]
   [InlineData("invalid", false)]
-  public void Parse_BooleanValues_ParsesCorrectly(string value, bool expected)
+  public void ParseBooleanValuesParsesCorrectly(string value, bool expected)
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()
@@ -156,7 +156,7 @@ public class CoverletMTPSettingsParserTests
   }
 
   [Fact]
-  public void Parse_ExcludeFilters_AlwaysIncludesDefault()
+  public void ParseExcludeFiltersAlwaysIncludesDefault()
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()
@@ -176,7 +176,7 @@ public class CoverletMTPSettingsParserTests
   }
 
   [Fact]
-  public void Parse_FromJsonFile_LoadsCorrectly()
+  public void ParseFromJsonFileLoadsCorrectly()
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()
@@ -194,7 +194,7 @@ public class CoverletMTPSettingsParserTests
   }
 
   [Fact]
-  public void Parse_ExcludeAssembliesWithoutSources_DefaultsToMissingAll()
+  public void ParseExcludeAssembliesWithoutSourcesDefaultsToMissingAll()
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()
@@ -212,7 +212,7 @@ public class CoverletMTPSettingsParserTests
   [InlineData("MissingAll")]
   [InlineData("MissingAny")]
   [InlineData("None")]
-  public void Parse_ExcludeAssembliesWithoutSources_AcceptsValidValues(string value)
+  public void ParseExcludeAssembliesWithoutSourcesAcceptsValidValues(string value)
   {
     // Arrange
     IConfiguration configuration = new ConfigurationBuilder()

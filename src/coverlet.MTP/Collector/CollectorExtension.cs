@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Diagnostics;
 using Coverlet.MTP.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
@@ -64,7 +63,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     _logger = new CoverletLoggerAdapter(_loggerFactory);
 
     _logger.LogVerbose("[DIAG] CoverletExtensionCollector constructor - running in controller process");
-    _logger.LogVerbose($"[DIAG]   Process ID: {Process.GetCurrentProcess().Id}");
+    _logger.LogVerbose($"[DIAG]   Process ID: {Environment.ProcessId}");
   }
 
   /// <summary>
@@ -74,7 +73,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   Task ITestHostProcessLifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken cancellationToken)
   {
     _logger.LogVerbose("=== BeforeTestHostProcessStartAsync START ===");
-    _logger.LogVerbose($"Controller PID: {Process.GetCurrentProcess().Id}");
+    _logger.LogVerbose($"Controller PID: {Environment.ProcessId}");
 
     try
     {
@@ -418,7 +417,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     }
   }
 
-  private IServiceProvider CreateServiceProvider(string testModule)
+  private ServiceProvider CreateServiceProvider(string testModule)
   {
     var services = new ServiceCollection();
 

@@ -131,7 +131,7 @@ public class CollectorExtensionTests
   #region Constructor Tests
 
   [Fact]
-  public void Constructor_ThrowsArgumentNullException_WhenLoggerFactoryIsNull()
+  public void ConstructorThrowsArgumentNullExceptionWhenLoggerFactoryIsNull()
   {
     ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
       new CollectorExtension(null!, _mockCommandLineOptions.Object, _mockConfiguration.Object));
@@ -140,7 +140,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public void Constructor_ThrowsArgumentNullException_WhenCommandLineOptionsIsNull()
+  public void ConstructorThrowsArgumentNullExceptionWhenCommandLineOptionsIsNull()
   {
     ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
       new CollectorExtension(_mockLoggerFactory.Object, null!, _mockConfiguration.Object));
@@ -149,14 +149,14 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public void Constructor_ThrowsArgumentNullException_WhenConfigurationIsNull()
+  public void ConstructorThrowsArgumentNullExceptionWhenConfigurationIsNull()
   {
     Assert.Throws<ArgumentNullException>(() =>
       new CollectorExtension(_mockLoggerFactory.Object, _mockCommandLineOptions.Object, null!));
   }
 
   [Fact]
-  public void Constructor_InitializesSuccessfully_WithValidParameters()
+  public void ConstructorInitializesSuccessfullyWithValidParameters()
   {
     var collector = CreateCollector();
 
@@ -173,7 +173,7 @@ public class CollectorExtensionTests
   [InlineData(nameof(IExtension.Version))]
   [InlineData(nameof(IExtension.DisplayName))]
   [InlineData(nameof(IExtension.Description))]
-  public void Extension_Property_ReturnsNonEmptyString(string propertyName)
+  public void ExtensionPropertyReturnsNonEmptyString(string propertyName)
   {
     var collector = CreateCollector();
     IExtension extension = collector;
@@ -195,7 +195,7 @@ public class CollectorExtensionTests
   #region IsEnabledAsync Tests
 
   [Fact]
-  public async Task IsEnabledAsync_ReturnsTrue()
+  public async Task IsEnabledAsyncReturnsTrue()
   {
     var collector = CreateCollector();
 
@@ -209,7 +209,7 @@ public class CollectorExtensionTests
   #region BeforeTestHostProcessStartAsync Tests
 
   [Fact]
-  public async Task BeforeTestHostProcessStartAsync_WhenCoverageNotEnabled_ReturnsWithoutInstrumentation()
+  public async Task BeforeTestHostProcessStartAsyncWhenCoverageNotEnabledReturnsWithoutInstrumentation()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(false);
 
@@ -222,7 +222,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public async Task BeforeTestHostProcessStartAsync_WhenCoverageEnabledButNoModulePath_DisablesCoverage()
+  public async Task BeforeTestHostProcessStartAsyncWhenCoverageEnabledButNoModulePathDisablesCoverage()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
     _mockConfiguration.Setup(x => x[It.IsAny<string>()]).Returns((string?)null);
@@ -241,7 +241,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public async Task BeforeTestHostProcessStartAsync_WithValidTestModule_InitializesCoverage()
+  public async Task BeforeTestHostProcessStartAsyncWithValidTestModuleInitializesCoverage()
   {
     // No real file created - uses mocked coverage
     var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
@@ -253,7 +253,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public async Task BeforeTestHostProcessStartAsync_WhenExceptionThrown_DisablesCoverage()
+  public async Task BeforeTestHostProcessStartAsyncWhenExceptionThrownDisablesCoverage()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
     SetupTestModuleConfiguration();
@@ -283,7 +283,7 @@ public class CollectorExtensionTests
   [InlineData("json")]
   [InlineData("cobertura")]
   [InlineData("lcov")]
-  public async Task BeforeTestHostProcessStartAsync_ParsesMultipleFormats(string formats)
+  public async Task BeforeTestHostProcessStartAsyncParsesMultipleFormats(string formats)
   {
     // MTP is not supporting array out parameters directly, so we simulate with multiple calls
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
@@ -320,7 +320,7 @@ public class CollectorExtensionTests
   #region UpdateAsync Tests
 
   [Fact]
-  public async Task UpdateAsync_WhenCoverageNotEnabled_DoesNotSetEnvironmentVariables()
+  public async Task UpdateAsyncWhenCoverageNotEnabledDoesNotSetEnvironmentVariables()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(false);
 
@@ -337,7 +337,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public async Task UpdateAsync_WhenCoverageEnabled_SetsAllRequiredEnvironmentVariables()
+  public async Task UpdateAsyncWhenCoverageEnabledSetsAllRequiredEnvironmentVariables()
   {
     var (collector, _) = CreateCollectorWithMockCoverage("my-test-identifier");
 
@@ -363,7 +363,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public async Task UpdateAsync_SetsVariablesInCorrectOrder()
+  public async Task UpdateAsyncSetsVariablesInCorrectOrder()
   {
     var (collector, _) = CreateCollectorWithMockCoverage();
 
@@ -391,7 +391,7 @@ public class CollectorExtensionTests
   #region ValidateTestHostEnvironmentVariablesAsync Tests
 
   [Fact]
-  public async Task ValidateTestHostEnvironmentVariablesAsync_WhenNoConflict_ReturnsValid()
+  public async Task ValidateTestHostEnvironmentVariablesAsyncWhenNoConflictReturnsValid()
   {
     var collector = CreateCollector();
     ITestHostEnvironmentVariableProvider envProvider = collector;
@@ -408,7 +408,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public async Task ValidateTestHostEnvironmentVariablesAsync_WhenConflictExists_ReturnsInvalid()
+  public async Task ValidateTestHostEnvironmentVariablesAsyncWhenConflictExistsReturnsInvalid()
   {
     var collector = CreateCollector();
     ITestHostEnvironmentVariableProvider envProvider = collector;
@@ -433,7 +433,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public async Task ValidateTestHostEnvironmentVariablesAsync_WhenVariableOwnedBySelf_ReturnsValid()
+  public async Task ValidateTestHostEnvironmentVariablesAsyncWhenVariableOwnedBySelfReturnsValid()
   {
     var collector = CreateCollector();
     ITestHostEnvironmentVariableProvider envProvider = collector;
@@ -461,7 +461,7 @@ public class CollectorExtensionTests
   #region OnTestHostProcessStartedAsync Tests
 
   [Fact]
-  public async Task OnTestHostProcessStartedAsync_LogsProcessStarted()
+  public async Task OnTestHostProcessStartedAsyncLogsProcessStarted()
   {
     var collector = CreateCollector();
     ITestHostProcessLifetimeHandler lifetimeHandler = collector;
@@ -479,7 +479,7 @@ public class CollectorExtensionTests
   #region OnTestHostProcessExitedAsync Tests
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsync_WhenCoverageEnabled_CollectsCoverageResult()
+  public async Task OnTestHostProcessExitedAsyncWhenCoverageEnabledCollectsCoverageResult()
   {
     var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
 
@@ -503,7 +503,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsync_WhenExceptionThrown_DoesNotRethrow()
+  public async Task OnTestHostProcessExitedAsyncWhenExceptionThrownDoesNotRethrow()
   {
     var (collector, mockCoverage) = CreateCollectorWithMockCoverage();
 

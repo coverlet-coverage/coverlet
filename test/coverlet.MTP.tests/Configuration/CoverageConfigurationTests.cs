@@ -23,14 +23,14 @@ public sealed class CoverageConfigurationTests
   #region Constructor Tests
 
   [Fact]
-  public void Constructor_WithNullLogger_DoesNotThrow()
+  public void ConstructorWithNullLoggerDoesNotThrow()
   {
     var exception = Record.Exception(() => new CoverageConfiguration(_mockCommandLineOptions.Object, null));
     Assert.Null(exception);
   }
 
   [Fact]
-  public void Constructor_WithValidParameters_InitializesSuccessfully()
+  public void ConstructorWithValidParametersInitializesSuccessfully()
   {
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     Assert.NotNull(config);
@@ -43,7 +43,7 @@ public sealed class CoverageConfigurationTests
   [Theory]
   [InlineData(true)]
   [InlineData(false)]
-  public void IsCoverageEnabled_ReturnsExpectedValue(bool isEnabled)
+  public void IsCoverageEnabledReturnsExpectedValue(bool isEnabled)
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(isEnabled);
 
@@ -53,7 +53,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void IsCoverageEnabled_CalledMultipleTimes_ReturnsSameValue()
+  public void IsCoverageEnabledCalledMultipleTimesReturnsSameValue()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
@@ -70,7 +70,7 @@ public sealed class CoverageConfigurationTests
   #region GetOutputFormats Tests
 
   [Fact]
-  public void GetOutputFormats_WhenFormatsOptionSet_ReturnsCustomFormats()
+  public void GetOutputFormatsWhenFormatsOptionSetReturnsCustomFormats()
   {
     string[] expectedFormats = ["json", "lcov", "opencover"];
     _mockCommandLineOptions
@@ -88,7 +88,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetOutputFormats_WhenFormatsOptionNotSet_ReturnsDefaultFormats()
+  public void GetOutputFormatsWhenFormatsOptionNotSetReturnsDefaultFormats()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
@@ -106,7 +106,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetOutputFormats_WithEmptyArray_ReturnsDefaultFormats()
+  public void GetOutputFormatsWithEmptyArrayReturnsDefaultFormats()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
@@ -122,7 +122,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetOutputFormats_WithSingleFormat_ReturnsSingleFormat()
+  public void GetOutputFormatsWithSingleFormatReturnsSingleFormat()
   {
     string[] expectedFormats = ["cobertura"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
@@ -144,7 +144,7 @@ public sealed class CoverageConfigurationTests
   #region GetIncludeFilters Tests
 
   [Fact]
-  public void GetIncludeFilters_WhenOptionSet_ReturnsFilters()
+  public void GetIncludeFiltersWhenOptionSetReturnsFilters()
   {
     string[] expectedFilters = ["[MyAssembly]*", "[AnotherAssembly]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
@@ -161,7 +161,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetIncludeFilters_WhenOptionNotSet_ReturnsEmptyArray()
+  public void GetIncludeFiltersWhenOptionNotSetReturnsEmptyArray()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
@@ -177,7 +177,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetIncludeFilters_WithSpecialCharacters_ReturnsFiltersUnmodified()
+  public void GetIncludeFiltersWithSpecialCharactersReturnsFiltersUnmodified()
   {
     string[] expectedFilters = ["[My.Assembly*]*", "[Another+Assembly]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
@@ -198,7 +198,7 @@ public sealed class CoverageConfigurationTests
   #region GetExcludeFilters Tests
 
   [Fact]
-  public void GetExcludeFilters_WhenOptionSet_MergesWithDefaults()
+  public void GetExcludeFiltersWhenOptionSetMergesWithDefaults()
   {
     string[] customFilters = ["[CustomExclude]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
@@ -218,7 +218,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetExcludeFilters_WhenOptionNotSet_ReturnsDefaults()
+  public void GetExcludeFiltersWhenOptionNotSetReturnsDefaults()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
@@ -237,7 +237,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetExcludeFilters_RemovesDuplicates()
+  public void GetExcludeFiltersRemovesDuplicates()
   {
     string[] customFilters = ["[xunit.*]*", "[CustomExclude]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
@@ -255,7 +255,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetExcludeFilters_WithMultipleDuplicates_RemovesAllDuplicates()
+  public void GetExcludeFiltersWithMultipleDuplicatesRemovesAllDuplicates()
   {
     string[] customFilters = ["[xunit.*]*", "[Microsoft.Testing.*]*", "[CustomExclude]*", "[xunit.*]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
@@ -278,7 +278,7 @@ public sealed class CoverageConfigurationTests
   #region GetExcludeByFileFilters Tests
 
   [Fact]
-  public void GetExcludeByFileFilters_WhenOptionSet_ReturnsFilters()
+  public void GetExcludeByFileFiltersWhenOptionSetReturnsFilters()
   {
     string[] expectedFilters = ["**/Migrations/**", "**/Generated/**"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
@@ -295,7 +295,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetExcludeByFileFilters_WhenOptionNotSet_ReturnsEmptyArray()
+  public void GetExcludeByFileFiltersWhenOptionNotSetReturnsEmptyArray()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
@@ -311,7 +311,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetExcludeByFileFilters_WithGlobPatterns_ReturnsFiltersUnmodified()
+  public void GetExcludeByFileFiltersWithGlobPatternsReturnsFiltersUnmodified()
   {
     string[] expectedFilters = ["**/*.Designer.cs", "obj/**/*", "bin/**/*.g.cs"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
@@ -332,7 +332,7 @@ public sealed class CoverageConfigurationTests
   #region GetExcludeByAttributeFilters Tests
 
   [Fact]
-  public void GetExcludeByAttributeFilters_WhenOptionSet_MergesWithDefaults()
+  public void GetExcludeByAttributeFiltersWhenOptionSetMergesWithDefaults()
   {
     string[] customAttributes = ["CustomExcludeAttribute"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
@@ -353,7 +353,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetExcludeByAttributeFilters_WhenOptionNotSet_ReturnsDefaults()
+  public void GetExcludeByAttributeFiltersWhenOptionNotSetReturnsDefaults()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
@@ -373,7 +373,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetExcludeByAttributeFilters_RemovesDuplicates()
+  public void GetExcludeByAttributeFiltersRemovesDuplicates()
   {
     string[] customAttributes = ["GeneratedCodeAttribute", "CustomAttribute"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
@@ -391,7 +391,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetExcludeByAttributeFilters_WithFullyQualifiedNames_MergesCorrectly()
+  public void GetExcludeByAttributeFiltersWithFullyQualifiedNamesMergesCorrectly()
   {
     string[] customAttributes = ["System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
@@ -413,7 +413,7 @@ public sealed class CoverageConfigurationTests
   #region GetIncludeDirectories Tests
 
   [Fact]
-  public void GetIncludeDirectories_WhenOptionSet_ReturnsDirectories()
+  public void GetIncludeDirectoriesWhenOptionSetReturnsDirectories()
   {
     string[] expectedDirectories = [@"C:\MyDir", @"C:\AnotherDir"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
@@ -430,7 +430,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetIncludeDirectories_WhenOptionNotSet_ReturnsEmptyArray()
+  public void GetIncludeDirectoriesWhenOptionNotSetReturnsEmptyArray()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? directories) =>
@@ -446,7 +446,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetIncludeDirectories_WithRelativePaths_ReturnsUnmodified()
+  public void GetIncludeDirectoriesWithRelativePathsReturnsUnmodified()
   {
     string[] expectedDirectories = [@"..\src", @"./lib"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
@@ -469,7 +469,7 @@ public sealed class CoverageConfigurationTests
   [Theory]
   [InlineData(true)]
   [InlineData(false)]
-  public void UseSingleHit_ReturnsExpectedValue(bool isEnabled)
+  public void UseSingleHitReturnsExpectedValue(bool isEnabled)
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.SingleHit)).Returns(isEnabled);
 
@@ -481,7 +481,7 @@ public sealed class CoverageConfigurationTests
   [Theory]
   [InlineData(true)]
   [InlineData(false)]
-  public void IncludeTestAssembly_ReturnsExpectedValue(bool isEnabled)
+  public void IncludeTestAssemblyReturnsExpectedValue(bool isEnabled)
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.IncludeTestAssembly)).Returns(isEnabled);
 
@@ -491,7 +491,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void SkipAutoProps_WhenOptionSet_ReturnsTrue()
+  public void SkipAutoPropsWhenOptionSetReturnsTrue()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.SkipAutoProps)).Returns(true);
 
@@ -501,7 +501,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void SkipAutoProps_WhenOptionNotSet_ReturnsDefaultTrue()
+  public void SkipAutoPropsWhenOptionNotSetReturnsDefaultTrue()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.SkipAutoProps)).Returns(false);
 
@@ -511,7 +511,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void ExcludeAssembliesWithoutSources_WhenOptionSet_ReturnsTrue()
+  public void ExcludeAssembliesWithoutSourcesWhenOptionSetReturnsTrue()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.ExcludeAssembliesWithoutSources)).Returns(true);
 
@@ -521,7 +521,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void ExcludeAssembliesWithoutSources_WhenOptionNotSet_ReturnsDefaultTrue()
+  public void ExcludeAssembliesWithoutSourcesWhenOptionNotSetReturnsDefaultTrue()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.ExcludeAssembliesWithoutSources)).Returns(false);
 
@@ -535,7 +535,7 @@ public sealed class CoverageConfigurationTests
   #region GetDoesNotReturnAttributes Tests
 
   [Fact]
-  public void GetDoesNotReturnAttributes_WhenOptionSet_ReturnsAttributes()
+  public void GetDoesNotReturnAttributesWhenOptionSetReturnsAttributes()
   {
     string[] expectedAttributes = ["DoesNotReturnAttribute", "ThrowsAttribute"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.DoesNotReturnAttribute, out It.Ref<string[]?>.IsAny))
@@ -552,7 +552,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetDoesNotReturnAttributes_WhenOptionNotSet_ReturnsEmptyArray()
+  public void GetDoesNotReturnAttributesWhenOptionNotSetReturnsEmptyArray()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.DoesNotReturnAttribute, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
@@ -572,7 +572,7 @@ public sealed class CoverageConfigurationTests
   #region GetTestAssemblyPath Tests
 
   [Fact]
-  public void GetTestAssemblyPath_ReturnsNonNullString()
+  public void GetTestAssemblyPathReturnsNonNullString()
   {
     string result = CoverageConfiguration.GetTestAssemblyPath();
 
@@ -581,7 +581,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetTestAssemblyPath_ReturnsValidPath()
+  public void GetTestAssemblyPathReturnsValidPath()
   {
     string result = CoverageConfiguration.GetTestAssemblyPath();
 
@@ -593,7 +593,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void GetTestAssemblyPath_CalledMultipleTimes_ReturnsConsistentValue()
+  public void GetTestAssemblyPathCalledMultipleTimesReturnsConsistentValue()
   {
     string result1 = CoverageConfiguration.GetTestAssemblyPath();
     string result2 = CoverageConfiguration.GetTestAssemblyPath();
@@ -606,7 +606,7 @@ public sealed class CoverageConfigurationTests
   #region Logging Tests
 
   [Fact]
-  public void LogConfigurationSummary_WithNullLogger_DoesNotThrow()
+  public void LogConfigurationSummaryWithNullLoggerDoesNotThrow()
   {
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, null);
 
@@ -616,7 +616,7 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void LogConfigurationSummary_WithValidLogger_LogsAllConfiguration()
+  public void LogConfigurationSummaryWithValidLoggerLogsAllConfiguration()
   {
     // Arrange
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(It.IsAny<string>())).Returns(false);

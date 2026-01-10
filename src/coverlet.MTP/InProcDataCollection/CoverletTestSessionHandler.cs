@@ -52,7 +52,7 @@ public class CoverletTestSessionHandler : ITestSessionLifetimeHandler
     throw new NotImplementedException();
   }
 
-  private Task OnTestSessionStartingAsync_Impl(ITestSessionContext testSessionContext)
+  private static Task OnTestSessionStartingAsync_Impl(ITestSessionContext testSessionContext)
   {
     return Task.CompletedTask;
   }

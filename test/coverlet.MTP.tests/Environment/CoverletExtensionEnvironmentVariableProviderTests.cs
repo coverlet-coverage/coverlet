@@ -36,28 +36,28 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   #region Properties Tests
 
   [Fact]
-  public void Uid_ReturnsExpectedValue()
+  public void UidReturnsExpectedValue()
   {
     // Assert
     Assert.Equal(nameof(CoverletExtensionEnvironmentVariableProvider), _provider.Uid);
   }
 
   [Fact]
-  public void Version_ReturnsNonEmptyString()
+  public void VersionReturnsNonEmptyString()
   {
     // Assert
     Assert.False(string.IsNullOrEmpty(_provider.Version));
   }
 
   [Fact]
-  public void DisplayName_ReturnsExpectedValue()
+  public void DisplayNameReturnsExpectedValue()
   {
     // Assert
     Assert.Equal("Coverlet Environment Variable Provider", _provider.DisplayName);
   }
 
   [Fact]
-  public void Description_ReturnsExpectedValue()
+  public void DescriptionReturnsExpectedValue()
   {
     // Assert
     Assert.Equal("Provides environment variables for Coverlet coverage collection", _provider.Description);
@@ -68,7 +68,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   #region IsEnabledAsync Tests
 
   [Fact]
-  public async Task IsEnabledAsync_ReturnsTrue()
+  public async Task IsEnabledAsyncReturnsTrue()
   {
     // Act
     bool result = await _provider.IsEnabledAsync();
@@ -82,7 +82,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   #region UpdateAsync Tests
 
   [Fact]
-  public async Task UpdateAsync_WhenTrackerLogEnabled_SetsEnvironmentVariable()
+  public async Task UpdateAsyncWhenTrackerLogEnabledSetsEnvironmentVariable()
   {
     // Arrange
     System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
@@ -105,7 +105,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   }
 
   [Fact]
-  public async Task UpdateAsync_WhenTrackerLogDisabled_DoesNotSetEnvironmentVariable()
+  public async Task UpdateAsyncWhenTrackerLogDisabledDoesNotSetEnvironmentVariable()
   {
     // Arrange
     System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, null);
@@ -128,7 +128,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   }
 
   [Fact]
-  public async Task UpdateAsync_WhenExceptionLogEnabled_SetsEnvironmentVariable()
+  public async Task UpdateAsyncWhenExceptionLogEnabledSetsEnvironmentVariable()
   {
     // Arrange
     System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, "1");
@@ -151,7 +151,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   }
 
   [Fact]
-  public async Task UpdateAsync_WhenExceptionLogDisabled_DoesNotSetEnvironmentVariable()
+  public async Task UpdateAsyncWhenExceptionLogDisabledDoesNotSetEnvironmentVariable()
   {
     // Arrange
     System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, null);
@@ -174,7 +174,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   }
 
   [Fact]
-  public async Task UpdateAsync_WhenBothTrackerAndExceptionLogEnabled_SetsBothEnvironmentVariables()
+  public async Task UpdateAsyncWhenBothTrackerAndExceptionLogEnabledSetsBothEnvironmentVariables()
   {
     // Arrange
     System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
@@ -202,7 +202,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   }
 
   [Fact]
-  public async Task UpdateAsync_ReturnsCompletedTask()
+  public async Task UpdateAsyncReturnsCompletedTask()
   {
     // Arrange
     var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
@@ -216,7 +216,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   }
 
   [Fact]
-  public async Task UpdateAsync_TrackerLogEnvironmentVariable_IsNotSecret()
+  public async Task UpdateAsyncTrackerLogEnvironmentVariableIsNotSecret()
   {
     // Arrange
     System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
@@ -242,7 +242,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   #region ValidateTestHostEnvironmentVariablesAsync Tests
 
   [Fact]
-  public async Task ValidateTestHostEnvironmentVariablesAsync_ReturnsValidResult()
+  public async Task ValidateTestHostEnvironmentVariablesAsyncReturnsValidResult()
   {
     // Arrange
     var mockReadOnlyEnvironmentVariables = new Mock<IReadOnlyEnvironmentVariables>();

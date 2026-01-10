@@ -8,7 +8,7 @@ namespace Coverlet.MTP.Configuration.Tests;
 public class CoverletMTPSettingsTests
 {
   [Fact]
-  public void DefaultValues_AreCorrect()
+  public void DefaultValuesAreCorrect()
   {
     // Act
     var settings = new CoverletMTPSettings();
@@ -32,7 +32,7 @@ public class CoverletMTPSettingsTests
   }
 
   [Fact]
-  public void ToString_ReturnsCorrectFormat()
+  public void ToStringReturnsCorrectFormat()
   {
     // Arrange
     var settings = new CoverletMTPSettings

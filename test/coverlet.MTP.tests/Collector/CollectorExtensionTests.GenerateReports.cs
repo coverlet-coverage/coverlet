@@ -70,7 +70,7 @@ public class CollectorExtensionGenerateReportsTests
       .Returns(true);
   }
 
-  private CoverageResult CreateTestCoverageResult()
+  private static CoverageResult CreateTestCoverageResult()
   {
     var lines = new Lines { { 1, 1 }, { 2, 1 } };
     var branches = new Branches
@@ -150,7 +150,7 @@ public class CollectorExtensionGenerateReportsTests
   #region GenerateReportsAsync - Console Reporter Tests
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsync_WithTeamCityFormat_LogsConsoleOutput()
+  public async Task OnTestHostProcessExitedAsyncWithTeamCityFormatLogsConsoleOutput()
   {
     // Arrange
     string[] formats = ["teamcity"];
@@ -183,7 +183,7 @@ public class CollectorExtensionGenerateReportsTests
   #region GenerateReportsAsync - Report Content Tests
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsync_WithNoFileReports_DoesNotWriteFiles()
+  public async Task OnTestHostProcessExitedAsyncWithNoFileReportsDoesNotWriteFiles()
   {
     // Arrange - Only console format
     string[] formats = ["teamcity"];
@@ -210,7 +210,7 @@ public class CollectorExtensionGenerateReportsTests
   }
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsync_WithJsonFormat_WritesReportAndLogsGeneratedPaths()
+  public async Task OnTestHostProcessExitedAsyncWithJsonFormatWritesReportAndLogsGeneratedPaths()
   {
     // Arrange - Use file-based format
     string[] formats = ["json"];
@@ -301,7 +301,7 @@ public class CollectorExtensionGenerateReportsTests
   #region GenerateReportsAsync - Error Handling Tests
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsync_WhenReporterFactoryReturnsNull_CatchesException()
+  public async Task OnTestHostProcessExitedAsyncWhenReporterFactoryReturnsNullCatchesException()
   {
     // Arrange - Use invalid format
     string[] formats = ["invalid-format"];
