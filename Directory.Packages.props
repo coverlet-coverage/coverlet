@@ -12,7 +12,7 @@
     <!-- .NET 8.0 support -->
     <NugetPackageVersion>6.14.0</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
-    <MicrosoftNETTestSdkVersion>18.0.1</MicrosoftNETTestSdkVersion>
+    <MicrosoftNETTestSdkVersion>17.14.1</MicrosoftNETTestSdkVersion>
     <XunitV3Version>3.2.1</XunitV3Version>
     <XunitRunnerVisualstudioVersion>3.1.5</XunitRunnerVisualstudioVersion>
     <MicrosoftTestingPlatformVersion>2.0.2</MicrosoftTestingPlatformVersion>
