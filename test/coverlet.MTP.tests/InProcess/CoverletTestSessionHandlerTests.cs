@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System.Reflection;
 using Coverlet.MTP.InProcDataCollection;
 using Microsoft.Extensions.Configuration;
@@ -14,7 +13,7 @@ namespace Coverlet.MTP.InProcess.Tests;
 public class CoverletTestSessionHandlerTests
 {
   [Fact]
-  public void Constructor_Default_CreatesInstance()
+  public void ConstructorDefaultCreatesInstance()
   {
     // Act
     var handler = new CoverletTestSessionHandler();
@@ -24,7 +23,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void Constructor_WithConfiguration_CreatesInstance()
+  public void ConstructorWithConfigurationCreatesInstance()
   {
     // Arrange
     var mockConfiguration = new Mock<IConfiguration>();
@@ -42,7 +41,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void Constructor_WithNullConfiguration_CreatesInstance()
+  public void ConstructorWithNullConfigurationCreatesInstance()
   {
     // Arrange
     string testModule = "TestModule.dll";
@@ -55,7 +54,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void Uid_ReturnsClassName()
+  public void UidReturnsClassName()
   {
     // Arrange
     var handler = new CoverletTestSessionHandler();
@@ -68,7 +67,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void Version_ReturnsAssemblyVersion()
+  public void VersionReturnsAssemblyVersion()
   {
     // Arrange
     var handler = new CoverletTestSessionHandler();
@@ -84,7 +83,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void DisplayName_ReturnsExpectedValue()
+  public void DisplayNameReturnsExpectedValue()
   {
     // Arrange
     var handler = new CoverletTestSessionHandler();
@@ -97,7 +96,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void Description_ReturnsNonEmptyString()
+  public void DescriptionReturnsNonEmptyString()
   {
     // Arrange
     var handler = new CoverletTestSessionHandler();
@@ -112,7 +111,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void GetInstrumentationClass_WithNonInstrumentedAssembly_ReturnsNull()
+  public void GetInstrumentationClassWithNonInstrumentedAssemblyReturnsNull()
   {
     // Arrange - Use a .NET runtime assembly that will never be instrumented
     Assembly runtimeAssembly = typeof(System.Text.Json.JsonSerializer).Assembly;
@@ -125,7 +124,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void GetInstrumentationClass_WithSystemAssembly_ReturnsNull()
+  public void GetInstrumentationClassWithSystemAssemblyReturnsNull()
   {
     // Arrange
     Assembly mscorlib = typeof(object).Assembly;
@@ -138,7 +137,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public async Task OnTestSessionFinishingAsync_ThrowsNotImplementedException()
+  public async Task OnTestSessionFinishingAsyncThrowsNotImplementedException()
   {
     // Arrange
     var handler = new CoverletTestSessionHandler();
@@ -150,7 +149,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void GetInstrumentationClass_WithMultipleAssemblies_HandlesAllCorrectly()
+  public void GetInstrumentationClassWithMultipleAssembliesHandlesAllCorrectly()
   {
     // Arrange
     Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -168,7 +167,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void GetInstrumentationClass_WithDynamicAssembly_HandlesGracefully()
+  public void GetInstrumentationClassWithDynamicAssemblyHandlesGracefully()
   {
     // Arrange
     // Get a dynamic assembly that might throw on GetTypes()
@@ -189,7 +188,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void Properties_AllReturnExpectedValues()
+  public void PropertiesAllReturnExpectedValues()
   {
     // Arrange
     var handler = new CoverletTestSessionHandler();
@@ -202,7 +201,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void Constructor_WithEmptyTestModule_CreatesInstance()
+  public void ConstructorWithEmptyTestModuleCreatesInstance()
   {
     // Arrange
     var mockConfiguration = new Mock<IConfiguration>();
@@ -220,7 +219,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void GetInstrumentationClass_LooksForCorrectNamespaceAndNamePattern()
+  public void GetInstrumentationClassLooksForCorrectNamespaceAndNamePattern()
   {
     // Arrange - Document the expected pattern
     // The method should look for types matching these criteria:
@@ -258,7 +257,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public async Task IsEnabledAsync_AlwaysReturnsTrue_RegardlessOfConfiguration()
+  public async Task IsEnabledAsyncAlwaysReturnsTrueRegardlessOfConfiguration()
   {
     // Arrange
     var mockConfiguration = new Mock<IConfiguration>();
@@ -279,7 +278,7 @@ public class CoverletTestSessionHandlerTests
   }
 
   [Fact]
-  public void Version_ReturnsValidVersionFormat()
+  public void VersionReturnsValidVersionFormat()
   {
     // Arrange
     var handler = new CoverletTestSessionHandler();
@@ -289,12 +288,13 @@ public class CoverletTestSessionHandlerTests
 
     // Assert
     Assert.NotEqual("1.0.0", version); // Should get actual assembly version, not fallback
-    Version.TryParse(version, out Version? parsedVersion);
+    bool v = Version.TryParse(version, out Version? parsedVersion);
+    Assert.True(v);
     Assert.NotNull(parsedVersion);
   }
 
   [Fact]
-  public void Handler_ImplementsITestSessionLifetimeHandler()
+  public void HandlerImplementsITestSessionLifetimeHandler()
   {
     // Arrange
     var handler = new CoverletTestSessionHandler();

@@ -21,7 +21,7 @@ public class CoverletMTPCommandLineTests
   [InlineData(CoverletOptionNames.Formats, "invalid", "The value 'invalid' is not a valid option for 'coverlet-output-format'.")]
   [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "invalid", "The value 'invalid' is not a valid option for 'coverlet-exclude-assemblies-without-sources'.")]
   [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "", "At least one value must be specified for 'coverlet-exclude-assemblies-without-sources'.")]
-  public async Task IsInvalid_When_Option_Has_InvalidValue(string optionName, string value, string expectedError)
+  public async Task IsInvalidWhenOptionHasInvalidValue(string optionName, string value, string expectedError)
   {
     CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
     var arguments = string.IsNullOrEmpty(value) ? Array.Empty<string>() : [value];
@@ -41,7 +41,7 @@ public class CoverletMTPCommandLineTests
   [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "MissingAll")]
   [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "MissingAny")]
   [InlineData(CoverletOptionNames.ExcludeAssembliesWithoutSources, "None")]
-  public async Task IsValid_When_Option_Has_ValidValue(string optionName, string value)
+  public async Task IsValidWhenOptionHasValidValue(string optionName, string value)
   {
     CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
 
@@ -58,7 +58,7 @@ public class CoverletMTPCommandLineTests
   [InlineData(CoverletOptionNames.IncludeDirectory)]
   [InlineData(CoverletOptionNames.ExcludeByAttribute)]
   [InlineData(CoverletOptionNames.DoesNotReturnAttribute)]
-  public async Task IsValid_For_NonValidated_Options(string optionName)
+  public async Task IsValidForNonValidatedOptions(string optionName)
   {
     CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
 
@@ -72,7 +72,7 @@ public class CoverletMTPCommandLineTests
   [InlineData(CoverletOptionNames.IncludeTestAssembly)]
   [InlineData(CoverletOptionNames.SingleHit)]
   [InlineData(CoverletOptionNames.SkipAutoProps)]
-  public async Task IsValid_For_FlagOptions(string optionName)
+  public async Task IsValidForFlagOptions(string optionName)
   {
     CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
 
@@ -83,7 +83,7 @@ public class CoverletMTPCommandLineTests
   }
 
   [Fact]
-  public void GetCommandLineOptions_Returns_AllExpectedOptions()
+  public void GetCommandLineOptionsReturnsAllExpectedOptions()
   {
     var options = _provider.GetCommandLineOptions();
 
@@ -108,7 +108,7 @@ public class CoverletMTPCommandLineTests
   }
 
   [Fact]
-  public async Task ValidateCommandLineOptions_IsAlwaysValid()
+  public async Task ValidateCommandLineOptionsIsAlwaysValid()
   {
     var validateOptionsResult = await _provider.ValidateCommandLineOptionsAsync(new TestCommandLineOptions([]));
     Assert.True(validateOptionsResult.IsValid);

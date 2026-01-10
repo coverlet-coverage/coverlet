@@ -27,7 +27,7 @@ public class CoverletExtensionCommandLineProviderTests
   // ===== Property Tests (New Coverage) =====
 
   [Fact]
-  public void Uid_ShouldReturnExtensionUid()
+  public void UidShouldReturnExtensionUid()
   {
     // Act
     string uid = _provider.Uid;
@@ -38,7 +38,7 @@ public class CoverletExtensionCommandLineProviderTests
   }
 
   [Fact]
-  public void Version_ShouldReturnExtensionVersion()
+  public void VersionShouldReturnExtensionVersion()
   {
     // Act
     string version = _provider.Version;
@@ -49,7 +49,7 @@ public class CoverletExtensionCommandLineProviderTests
   }
 
   [Fact]
-  public void DisplayName_ShouldReturnExtensionDisplayName()
+  public void DisplayNameShouldReturnExtensionDisplayName()
   {
     // Act
     string displayName = _provider.DisplayName;
@@ -60,7 +60,7 @@ public class CoverletExtensionCommandLineProviderTests
   }
 
   [Fact]
-  public void Description_ShouldReturnExtensionDescription()
+  public void DescriptionShouldReturnExtensionDescription()
   {
     // Act
     string description = _provider.Description;
@@ -73,7 +73,7 @@ public class CoverletExtensionCommandLineProviderTests
   // ===== IsEnabledAsync Test (New Coverage) =====
 
   [Fact]
-  public async Task IsEnabledAsync_ShouldReturnTrue()
+  public async Task IsEnabledAsyncShouldReturnTrue()
   {
     // Act
     bool result = await _provider.IsEnabledAsync();
@@ -85,7 +85,7 @@ public class CoverletExtensionCommandLineProviderTests
   // ===== Edge Case Tests (Add Unique Value) =====
 
   [Fact]
-  public async Task ValidateOptionArgumentsAsync_Formats_WithEmptyArray_ShouldReturnValid()
+  public async Task ValidateOptionArgumentsAsyncFormatsWithEmptyArrayShouldReturnValid()
   {
     // Arrange
     var commandOption = new CommandLineOption(CoverletOptionNames.Formats, "Format option description", ArgumentArity.OneOrMore, false);
@@ -99,7 +99,7 @@ public class CoverletExtensionCommandLineProviderTests
   }
 
   [Fact]
-  public async Task ValidateOptionArgumentsAsync_Formats_WithWhitespaceArgument_ShouldReturnValid()
+  public async Task ValidateOptionArgumentsAsyncFormatsWithWhitespaceArgumentShouldReturnValid()
   {
     // Arrange
     var commandOption = new CommandLineOption(CoverletOptionNames.Formats, "Format option description", ArgumentArity.OneOrMore, false);
@@ -113,7 +113,7 @@ public class CoverletExtensionCommandLineProviderTests
   }
 
   [Fact]
-  public async Task ValidateOptionArgumentsAsync_Formats_WithMixedValidAndInvalidFormats_ShouldReturnInvalid()
+  public async Task ValidateOptionArgumentsAsyncFormatsWithMixedValidAndInvalidFormatsShouldReturnInvalid()
   {
     // Arrange
     var commandOption = new CommandLineOption(CoverletOptionNames.Formats, "Format option description", ArgumentArity.OneOrMore, false);
@@ -128,7 +128,7 @@ public class CoverletExtensionCommandLineProviderTests
   }
 
   [Fact]
-  public async Task ValidateOptionArgumentsAsync_ExcludeAssembliesWithoutSources_WithMultipleValues_ShouldReturnInvalid()
+  public async Task ValidateOptionArgumentsAsyncExcludeAssembliesWithoutSourcesWithMultipleValuesShouldReturnInvalid()
   {
     // Arrange
     var commandOption = new CommandLineOption(CoverletOptionNames.ExcludeAssembliesWithoutSources, "Exclude assemblies without sources option description", ArgumentArity.ZeroOrOne, false);

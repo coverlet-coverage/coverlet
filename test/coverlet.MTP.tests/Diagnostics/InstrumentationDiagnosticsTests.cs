@@ -51,7 +51,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   #region LogInstrumentationResultsAsync Tests
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_LogsModuleInfo()
+  public async Task LogInstrumentationResultsAsyncLogsModuleInfo()
   {
     // Arrange
     InstrumenterResult result = CreateInstrumenterResult("TestModule.dll", documentsCount: 5);
@@ -65,7 +65,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithSourceLink_LogsEnabled()
+  public async Task LogInstrumentationResultsAsyncWithSourceLinkLogsEnabled()
   {
     // Arrange
     InstrumenterResult result = CreateInstrumenterResult("TestModule.dll", documentsCount: 1, hasSourceLink: true);
@@ -78,7 +78,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithoutSourceLink_LogsDisabled()
+  public async Task LogInstrumentationResultsAsyncWithoutSourceLinkLogsDisabled()
   {
     // Arrange
     InstrumenterResult result = CreateInstrumenterResult("TestModule.dll", documentsCount: 1, hasSourceLink: false);
@@ -91,7 +91,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithDocuments_LogsDocumentNames()
+  public async Task LogInstrumentationResultsAsyncWithDocumentsLogsDocumentNames()
   {
     // Arrange
     InstrumenterResult result = CreateInstrumenterResult("TestModule.dll", documentsCount: 3);
@@ -104,7 +104,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithNoDocuments_DoesNotLogDocuments()
+  public async Task LogInstrumentationResultsAsyncWithNoDocumentsDoesNotLogDocuments()
   {
     // Arrange
     InstrumenterResult result = CreateInstrumenterResult("TestModule.dll", documentsCount: 0);
@@ -117,7 +117,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithMoreThan10Documents_LogsTruncationMessage()
+  public async Task LogInstrumentationResultsAsyncWithMoreThan10DocumentsLogsTruncationMessage()
   {
     // Arrange
     InstrumenterResult result = CreateInstrumenterResult("TestModule.dll", documentsCount: 15);
@@ -130,7 +130,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_With10OrFewerDocuments_DoesNotLogTruncationMessage()
+  public async Task LogInstrumentationResultsAsyncWith10OrFewerDocumentsDoesNotLogTruncationMessage()
   {
     // Arrange
     InstrumenterResult result = CreateInstrumenterResult("TestModule.dll", documentsCount: 10);
@@ -147,7 +147,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   #region LogInstrumentationSummaryAsync Tests
 
   [Fact]
-  public async Task LogInstrumentationSummaryAsync_LogsSummaryHeader()
+  public async Task LogInstrumentationSummaryAsyncLogsSummaryHeader()
   {
     // Arrange
     var results = new List<InstrumenterResult>
@@ -165,7 +165,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationSummaryAsync_WithNoResults_LogsWarning()
+  public async Task LogInstrumentationSummaryAsyncWithNoResultsLogsWarning()
   {
     // Arrange
     var results = Enumerable.Empty<InstrumenterResult>();
@@ -178,7 +178,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationSummaryAsync_WithResults_LogsModuleList()
+  public async Task LogInstrumentationSummaryAsyncWithResultsLogsModuleList()
   {
     // Arrange
     var results = new List<InstrumenterResult>
@@ -195,7 +195,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationSummaryAsync_LogsFooter()
+  public async Task LogInstrumentationSummaryAsyncLogsFooter()
   {
     // Arrange
     var results = new List<InstrumenterResult>
@@ -215,7 +215,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   #region LogExcludedModulesAsync Tests
 
   [Fact]
-  public async Task LogExcludedModulesAsync_WithExcludedModules_LogsExclusionInfo()
+  public async Task LogExcludedModulesAsyncWithExcludedModulesLogsExclusionInfo()
   {
     // Arrange
     var allModules = new[] { "Module1.dll", "Module2.dll", "Module3.dll" };
@@ -231,7 +231,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogExcludedModulesAsync_WithNoExcludedModules_DoesNotLog()
+  public async Task LogExcludedModulesAsyncWithNoExcludedModulesDoesNotLog()
   {
     // Arrange
     var allModules = new[] { "Module1.dll" };
@@ -246,7 +246,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogExcludedModulesAsync_LogsExcludeFilters()
+  public async Task LogExcludedModulesAsyncLogsExcludeFilters()
   {
     // Arrange
     var allModules = new[] { "Module1.dll", "Module2.dll" };
@@ -265,7 +265,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   #region LogCoverageResultGenerationAsync Tests
 
   [Fact]
-  public async Task LogCoverageResultGenerationAsync_LogsOutputPath()
+  public async Task LogCoverageResultGenerationAsyncLogsOutputPath()
   {
     // Arrange
     string outputPath = "/path/to/coverage";
@@ -280,7 +280,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogCoverageResultGenerationAsync_LogsFormats()
+  public async Task LogCoverageResultGenerationAsyncLogsFormats()
   {
     // Arrange
     string outputPath = "/path/to/coverage";
@@ -294,7 +294,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogCoverageResultGenerationAsync_LogsFooter()
+  public async Task LogCoverageResultGenerationAsyncLogsFooter()
   {
     // Arrange
     string outputPath = "/path/to/coverage";
@@ -312,7 +312,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   #region LogGeneratedReportsAsync Tests
 
   [Fact]
-  public async Task LogGeneratedReportsAsync_WithExistingFiles_LogsFileInfo()
+  public async Task LogGeneratedReportsAsyncWithExistingFilesLogsFileInfo()
   {
     // Arrange
     string reportPath = Path.Combine(_tempDirectory, "report.xml");
@@ -334,7 +334,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogGeneratedReportsAsync_WithMissingFile_LogsWarning()
+  public async Task LogGeneratedReportsAsyncWithMissingFileLogsWarning()
   {
     // Arrange
     string missingPath = Path.Combine(_tempDirectory, "missing.xml");
@@ -352,7 +352,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   #region LogErrorAsync Tests
 
   [Fact]
-  public async Task LogErrorAsync_LogsErrorMessage()
+  public async Task LogErrorAsyncLogsErrorMessage()
   {
     // Arrange
     var exception = new InvalidOperationException("Test error");
@@ -365,7 +365,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogErrorAsync_LogsStackTrace()
+  public async Task LogErrorAsyncLogsStackTrace()
   {
     // Arrange
     Exception exception;
@@ -386,7 +386,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogErrorAsync_WithInnerException_LogsInnerExceptionMessage()
+  public async Task LogErrorAsyncWithInnerExceptionLogsInnerExceptionMessage()
   {
     // Arrange
     var innerException = new ArgumentException("Inner error");
@@ -400,7 +400,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogErrorAsync_WithoutInnerException_DoesNotLogInnerException()
+  public async Task LogErrorAsyncWithoutInnerExceptionDoesNotLogInnerException()
   {
     // Arrange
     var exception = new InvalidOperationException("Test error");
@@ -417,7 +417,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   #region Additional Integration Tests
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithValidResult_LogsModuleInformation()
+  public async Task LogInstrumentationResultsAsyncWithValidResultLogsModuleInformation()
   {
     // Arrange
     InstrumenterResult result = CreateInstrumenterResultWithDocuments(
@@ -439,7 +439,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithNoSourceLink_LogsDisabled()
+  public async Task LogInstrumentationResultsAsyncWithNoSourceLinkLogsDisabled()
   {
     // Arrange
     InstrumenterResult result = CreateInstrumenterResultWithDocuments(
@@ -455,7 +455,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithMoreThan10Documents_LogsTruncatedList()
+  public async Task LogInstrumentationResultsAsyncWithMoreThan10DocumentsLogsTruncatedList()
   {
     // Arrange
     var documents = Enumerable.Range(1, 15)
@@ -479,7 +479,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithExactly10Documents_DoesNotLogMoreMessage()
+  public async Task LogInstrumentationResultsAsyncWithExactly10DocumentsDoesNotLogMoreMessage()
   {
     // Arrange
     var documents = Enumerable.Range(1, 10)
@@ -495,7 +495,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationSummaryAsync_WithResults_LogsSummary()
+  public async Task LogInstrumentationSummaryAsyncWithResultsLogsSummary()
   {
     // Arrange
     var results = new List<InstrumenterResult>
@@ -517,7 +517,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogExcludedModulesAsync_WithExcludedModules_LogsExclusions()
+  public async Task LogExcludedModulesAsyncWithExcludedModulesLogsExclusions()
   {
     // Arrange
     var allModules = new[] { "Module1.dll", "Module2.dll", "Module3.dll" };
@@ -537,7 +537,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogExcludedModulesAsync_WithNoExclusions_DoesNotLog()
+  public async Task LogExcludedModulesAsyncWithNoExclusionsDoesNotLog()
   {
     // Arrange
     var allModules = new[] { "Module1.dll", "Module2.dll" };
@@ -552,7 +552,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogCoverageResultGenerationAsync_WithFormats_LogsDetails()
+  public async Task LogCoverageResultGenerationAsyncWithFormatsLogsDetails()
   {
     // Arrange
     string outputPath = "/output/path";
@@ -569,7 +569,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogGeneratedReportsAsync_WithNonExistingFiles_LogsWarning()
+  public async Task LogGeneratedReportsAsyncWithNonExistingFilesLogsWarning()
   {
     // Arrange
     string nonExistingFile = Path.Combine(Path.GetTempPath(), "nonexisting.json");
@@ -584,7 +584,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogErrorAsync_WithException_LogsErrorDetails()
+  public async Task LogErrorAsyncWithExceptionLogsErrorDetails()
   {
     // Arrange
     string context = "instrumentation";
@@ -605,7 +605,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogErrorAsync_WithInnerException_LogsInnerException()
+  public async Task LogErrorAsyncWithInnerExceptionLogsInnerException()
   {
     // Arrange
     string context = "coverage collection";
@@ -628,7 +628,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   [InlineData(1048576, "1.00 MB")]
   [InlineData(1572864, "1.50 MB")]
   [InlineData(1073741824, "1.00 GB")]
-  public async Task LogGeneratedReportsAsync_FormatsFileSizeCorrectly(long fileSize, string expectedFormat)
+  public async Task LogGeneratedReportsAsyncFormatsFileSizeCorrectly(long fileSize, string expectedFormat)
   {
     // Arrange
     string tempFile = Path.GetTempFileName();
@@ -661,7 +661,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationResultsAsync_WithPathSeparators_LogsFileNameOnly()
+  public async Task LogInstrumentationResultsAsyncWithPathSeparatorsLogsFileNameOnly()
   {
     // Arrange
     var documents = new Dictionary<string, Document>
@@ -681,7 +681,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogInstrumentationSummaryAsync_ExtractsModuleNameFromPath()
+  public async Task LogInstrumentationSummaryAsyncExtractsModuleNameFromPath()
   {
     // Arrange
     var results = new List<InstrumenterResult>
@@ -703,7 +703,7 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   [Fact]
-  public async Task LogExcludedModulesAsync_HandlesNullModuleNames()
+  public async Task LogExcludedModulesAsyncHandlesNullModuleNames()
   {
     // Arrange
     IEnumerable<string> allModules = s_sourceArray.Where(m => m is not null);
@@ -770,9 +770,9 @@ public class InstrumentationDiagnosticsTests : IDisposable
     _mockLogger.Verify(
       x => x.LogAsync(
         It.Is<LogLevel>(l => l == level),
-        It.Is<string>(s => s.Contains(messageContains)),
+        It.Is<It.IsAnyType>((v, t) => v != null && v.ToString()!.Contains(messageContains)),
         It.IsAny<Exception?>(),
-        It.IsAny<Func<string, Exception?, string>>()),
+        It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
       times);
   }
 

@@ -4,6 +4,7 @@
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.MTP.CommandLine;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
@@ -69,7 +70,7 @@ public class CollectorExtensionGenerateReportsTests
       .Returns(true);
   }
 
-  private CoverageResult CreateTestCoverageResult()
+  private static CoverageResult CreateTestCoverageResult()
   {
     var lines = new Lines { { 1, 1 }, { 2, 1 } };
     var branches = new Branches
@@ -149,7 +150,7 @@ public class CollectorExtensionGenerateReportsTests
   #region GenerateReportsAsync - Console Reporter Tests
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsync_WithTeamCityFormat_LogsConsoleOutput()
+  public async Task OnTestHostProcessExitedAsyncWithTeamCityFormatLogsConsoleOutput()
   {
     // Arrange
     string[] formats = ["teamcity"];
@@ -182,7 +183,7 @@ public class CollectorExtensionGenerateReportsTests
   #region GenerateReportsAsync - Report Content Tests
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsync_WithNoFileReports_DoesNotWriteFiles()
+  public async Task OnTestHostProcessExitedAsyncWithNoFileReportsDoesNotWriteFiles()
   {
     // Arrange - Only console format
     string[] formats = ["teamcity"];
@@ -208,12 +209,99 @@ public class CollectorExtensionGenerateReportsTests
     _mockFileSystem.Verify(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
   }
 
+  [Fact]
+  public async Task OnTestHostProcessExitedAsyncWithJsonFormatWritesReportAndLogsGeneratedPaths()
+  {
+    // Arrange - Use file-based format
+    string[] formats = ["json"];
+    _mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formats!))
+      .Returns(true);
+
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+      .Returns(true);
+
+    _mockConfiguration
+      .Setup(x => x["TestModule"])
+      .Returns(SimulatedTestModulePath);
+
+    _mockConfiguration
+      .Setup(x => x["TestResultDirectory"])
+      .Returns(SimulatedReportDirectory);
+
+    // Setup file system mock
+    _mockFileSystem
+      .Setup(x => x.Exists(It.IsAny<string>()))
+      .Returns(true);
+
+    var writtenFiles = new List<(string path, string content)>();
+    _mockFileSystem
+      .Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+      .Callback<string, string>((path, content) => writtenFiles.Add((path, content)));
+
+    // Create mocked service provider (similar to CoverletCoverageDataCollectorTests pattern)
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    mockSourceRootTranslator
+      .Setup(x => x.ResolveFilePath(It.IsAny<string>()))
+      .Returns<string>(path => path);
+
+    IServiceCollection serviceCollection = new ServiceCollection();
+    serviceCollection.AddSingleton(_mockFileSystem.Object);
+    serviceCollection.AddSingleton(mockSourceRootTranslator.Object);
+    IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+
+    // Create mock coverage
+    var mockCoverage = new Mock<ICoverage>();
+    mockCoverage
+      .Setup(x => x.PrepareModules())
+      .Returns(new CoveragePrepareResult { Identifier = "test-id" });
+    mockCoverage
+      .Setup(x => x.GetCoverageResult())
+      .Returns(CreateTestCoverageResult());
+
+    var mockCoverageFactory = new Mock<ICoverageFactory>();
+    mockCoverageFactory
+      .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
+      .Returns(mockCoverage.Object);
+
+    var collector = new CollectorExtension(
+      _mockLoggerFactory.Object,
+      _mockCommandLineOptions.Object,
+      _mockConfiguration.Object,
+      _mockFileSystem.Object)
+    {
+      CoverageFactory = mockCoverageFactory.Object,
+      ServiceProviderOverride = serviceProvider
+    };
+
+    ITestHostProcessLifetimeHandler lifetimeHandler = collector;
+    await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+    var mockProcessInfo = new Mock<ITestHostProcessInformation>();
+    mockProcessInfo.Setup(x => x.PID).Returns(12345);
+    mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
+
+    // Act
+    await lifetimeHandler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
+
+    // Assert - File should be written with JSON content
+    _mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("coverage.json")),
+        It.IsAny<string>()),
+      Times.Once);
+
+    Assert.Single(writtenFiles);
+    Assert.EndsWith("coverage.json", writtenFiles[0].path);
+  }
+
   #endregion
 
   #region GenerateReportsAsync - Error Handling Tests
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsync_WhenReporterFactoryReturnsNull_CatchesException()
+  public async Task OnTestHostProcessExitedAsyncWhenReporterFactoryReturnsNullCatchesException()
   {
     // Arrange - Use invalid format
     string[] formats = ["invalid-format"];
