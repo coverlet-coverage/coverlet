@@ -770,9 +770,9 @@ public class InstrumentationDiagnosticsTests : IDisposable
     _mockLogger.Verify(
       x => x.LogAsync(
         It.Is<LogLevel>(l => l == level),
-        It.Is<string>(s => s.Contains(messageContains)),
+        It.Is<It.IsAnyType>((v, t) => v != null && v.ToString()!.Contains(messageContains)),
         It.IsAny<Exception?>(),
-        It.IsAny<Func<string, Exception?, string>>()),
+        It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
       times);
   }
 

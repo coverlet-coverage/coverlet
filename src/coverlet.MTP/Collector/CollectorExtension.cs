@@ -103,7 +103,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       ParseCommandLineOptions();
 
       // Create service provider for coverage
-      _serviceProvider = CreateServiceProvider(_testModulePath!);
+      _serviceProvider = ServiceProviderOverride ?? CreateServiceProvider(_testModulePath!);
 
       // Initialize Coverage instance
       InitializeCoverage();
@@ -237,6 +237,9 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
   // Add internal setter for testing
   internal ICoverageFactory? CoverageFactory { get; set; }
+
+  // Add internal setter for service provider (for testing)
+  internal IServiceProvider? ServiceProviderOverride { get; set; }
 
   // Modify InitializeCoverage to use factory
   private void InitializeCoverage()
