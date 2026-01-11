@@ -50,7 +50,7 @@ jobs:
     parameters:
       sourcePath: '$(Build.SourcesDirectory)/src'
       breakBuild: false
-    condition: and(succeeded(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
+      condition: and(succeeded(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
 
 - job: macOS
   displayName: macOS
