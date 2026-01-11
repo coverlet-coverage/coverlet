@@ -64,9 +64,16 @@ steps:
 
 - template: publish-coverlet-result-files.yml
 
+- script: |
+    dir /s /B *.xml
+    del coverlet.integration.determisticbuild\coverage.net8.0.cobertura.xml
+  displayName: List XML files for test folder
+  workingDirectory: "$(Build.SourcesDirectory)/test"
+  condition: and(succeededORFailed(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
+
 - template: publish-coverage-results.yml
   parameters:
-    reports: $(Build.SourcesDirectory)\test\**\*.cobertura.xml
+    reports: "$(Build.SourcesDirectory)/test/**/*.cobertura.xml"
     condition: and(succeededORFailed(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
     minimumLineCoverage: 80
     assemblyfilters: '-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverletsamplelib.integration.template;-coverlet.tests.utils;-coverletsample.integration.determisticbuild'
