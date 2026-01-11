@@ -20,9 +20,6 @@ on:
   schedule:
     - cron: '23 17 * * 1'
 
-env:
-  AZURE_ARTIFACTS_FEED_URL: https://pkgs.dev.azure.com/bertk0374/_packaging/intern/nuget/v3/index.json
-
 permissions:
   contents: read
 

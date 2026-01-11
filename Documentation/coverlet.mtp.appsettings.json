@@ -1,0 +1,15 @@
+{
+  "Coverlet": {
+    "Include": "[MyApp.*]*",
+    "Exclude": "[*.Tests]*",
+    "ExcludeByAttribute": "GeneratedCode,ExcludeFromCodeCoverage",
+    "ExcludeByFile": "**/Migrations/*.cs",
+    "Format": "cobertura,json",
+    "UseSourceLink": false,
+    "SingleHit": false,
+    "IncludeTestAssembly": false,
+    "SkipAutoProps": true,
+    "DeterministicReport": false,
+    "ExcludeAssembliesWithoutSources": "MissingAll"
+  }
+}

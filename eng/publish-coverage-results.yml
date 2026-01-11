@@ -19,7 +19,7 @@ steps:
     script: |
       dotnet tool restore --add-source https://api.nuget.org/v3/index.json
       dotnet tool list
-      dotnet reportgenerator -reports:"${{parameters.reports}}" -targetdir:"$(Build.SourcesDirectory)\artifacts\CoverageReport" -reporttypes:"HtmlInline_AzurePipelines_Dark;Cobertura" -assemblyfilters:"${{parameters.assemblyfilters}}" -classfilters:"${{parameters.classfilters}}" -verbosity:Verbose --minimumCoverageThresholds:lineCoverage=${{parameters.minimumLineCoverage}}
+      dotnet reportgenerator -reports:"${{parameters.reports}}" -targetdir:"$(Build.SourcesDirectory)\artifacts\CoverageReport" -reporttypes:"HtmlInline_AzurePipelines_Dark;Cobertura;Markdown" -assemblyfilters:"${{parameters.assemblyfilters}}" -classfilters:"${{parameters.classfilters}}" -verbosity:Verbose --minimumCoverageThresholds:lineCoverage=${{parameters.minimumLineCoverage}}
 
 - publish: '$(Build.SourcesDirectory)/artifacts/CoverageReport'
   displayName: 'Publish CoverageReport Artifact'

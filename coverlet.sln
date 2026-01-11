@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.2.32208.508
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}"
 EndProject
@@ -38,6 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		eng\azure-pipelines-nightly.yml = eng\azure-pipelines-nightly.yml
 		eng\azure-pipelines.yml = eng\azure-pipelines.yml
 		eng\build.yml = eng\build.yml
+		.github\copilot-instructions.md = .github\copilot-instructions.md
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		Directory.Packages.props = Directory.Packages.props
@@ -91,6 +92,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.core.coverage.tests", "test\coverlet.core.coverage.tests\coverlet.core.coverage.tests.csproj", "{F74AD549-EFE0-4CD9-AD10-B2189E3FD5BB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.integration.determisticbuild", "test\coverlet.integration.determisticbuild\coverlet.integration.determisticbuild.csproj", "{C80BF6A9-63EE-6D36-8913-627A7E2EA459}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP", "src\coverlet.MTP\coverlet.MTP.csproj", "{B3F6B18B-AE59-CACC-BEFE-2C9796F51A68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP.tests", "test\coverlet.MTP.tests\coverlet.MTP.tests.csproj", "{E97959B1-73BA-5B91-5795-5602ADC73FB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP.validation.tests", "test\coverlet.MTP.validation.tests\coverlet.MTP.validation.tests.csproj", "{9BB7E3B0-606F-2A58-C4A3-D233519875C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -202,6 +209,18 @@ Global
 		{C80BF6A9-63EE-6D36-8913-627A7E2EA459}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C80BF6A9-63EE-6D36-8913-627A7E2EA459}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C80BF6A9-63EE-6D36-8913-627A7E2EA459}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3F6B18B-AE59-CACC-BEFE-2C9796F51A68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3F6B18B-AE59-CACC-BEFE-2C9796F51A68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3F6B18B-AE59-CACC-BEFE-2C9796F51A68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3F6B18B-AE59-CACC-BEFE-2C9796F51A68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E97959B1-73BA-5B91-5795-5602ADC73FB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E97959B1-73BA-5B91-5795-5602ADC73FB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E97959B1-73BA-5B91-5795-5602ADC73FB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E97959B1-73BA-5B91-5795-5602ADC73FB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BB7E3B0-606F-2A58-C4A3-D233519875C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BB7E3B0-606F-2A58-C4A3-D233519875C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BB7E3B0-606F-2A58-C4A3-D233519875C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BB7E3B0-606F-2A58-C4A3-D233519875C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -234,6 +253,9 @@ Global
 		{71004336-9896-4AE5-8367-B29BB1680542} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F74AD549-EFE0-4CD9-AD10-B2189E3FD5BB} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{C80BF6A9-63EE-6D36-8913-627A7E2EA459} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{B3F6B18B-AE59-CACC-BEFE-2C9796F51A68} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
+		{E97959B1-73BA-5B91-5795-5602ADC73FB5} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{9BB7E3B0-606F-2A58-C4A3-D233519875C5} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}

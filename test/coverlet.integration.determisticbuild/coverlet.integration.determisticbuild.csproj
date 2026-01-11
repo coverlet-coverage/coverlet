@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" Condition="Exists('$(MSBuildThisFileDirectory)\DeterministicTest.props')" />
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsample.integration.determisticbuild</AssemblyName>
     <MSBuildWarningsAsMessages>NU1604;NU1701</MSBuildWarningsAsMessages>
@@ -22,6 +22,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+		<!-- Microsoft.TestPlatform.TestHost (v18.0.1) dependens of Newtonsoft.Json -->
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="coverlet.msbuild" Version="$(coverletMsbuildVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,7 +32,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="xunit.v3" Version="$(XunitV3Version)" />
+    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

@@ -52,7 +52,7 @@ dotnet test /p:CollectCoverage=true /p:CoverletOutput='./results/'
 
 _Note: escape characters might produce some unexpected results._
 
-|status| msbuild parameter |
+|status|msbuild parameter|
 |---|---|
 |:heavy_check_mark:|`/p:CoverletOutput="C:/GitHub/coverlet/artifacts/Reports/coverlet.core/"`|
 |:heavy_check_mark:|`/p:CoverletOutput="C:\\GitHub\\coverlet\\artifacts\\Reports\\coverlet.core\\"`|
@@ -253,7 +253,7 @@ The heuristic coverlet uses to determine if an assembly is a third-party depende
 This parameter has three different values to control the automatic assembly exclusion.
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | MissingAll | Includes the assembly if at least one document is matching. In case the `ExcludeAssembliesWithoutSources` parameter is not specified the default value is `MissingAll`. |
 | MissingAny | Includes the assembly only if all documents can be matched to corresponding source files. |
 | None | No assembly is excluded. |
@@ -263,3 +263,30 @@ Here is an example of how to specify the parameter:
 ```shell
 /p:ExcludeAssembliesWithoutSources="MissingAny"
 ```
+
+## Enable Restore of instrumented assembly
+
+The DisableManagedInstrumentationRestore property controls whether Coverlet should restore (revert) an assembly to its original state after instrumentation. By _default_, this is set to **false**, meaning:
+
+ 1. Coverlet instruments (modifies) the assembly to track code coverage
+ 1. After coverage collection, it restores the assembly back to its original state
+
+When set to **true**:
+
+* The assembly remains in its instrumented state
+* This can help avoid file access conflicts
+* Useful for testing/debugging instrumentation without restoration
+
+Example use case:
+
+```xml
+<PropertyGroup>
+  <!-- Prevent Coverlet from reverting instrumentation changes -->
+  <DisableManagedInstrumentationRestore>true</DisableManagedInstrumentationRestore>
+</PropertyGroup>
+```
+
+This setting is particularly helpful when troubleshooting instrumentation issues or when dealing with file locking problems during coverage collection.
+
+> [!NOTE]
+> Make sure instrumented binaries are not deployed into production.

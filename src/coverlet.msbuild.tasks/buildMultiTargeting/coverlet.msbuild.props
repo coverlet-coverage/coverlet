@@ -24,6 +24,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
     <CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)../tasks/net8.0/</CoverletToolsPath>
-    <CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)../tasks/netstandard2.0/</CoverletToolsPath>
+    <!--<CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)../tasks/netstandard2.0/</CoverletToolsPath>-->
   </PropertyGroup>
 </Project>

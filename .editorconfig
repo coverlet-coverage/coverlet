@@ -136,6 +136,16 @@ dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
 dotnet_diagnostic.IDE1006.severity = warning
 # IDE0090: Use 'new(...)'
 dotnet_diagnostic.IDE0090.severity = warning
+# IDE0130: Namespace does not match folder structure
+dotnet_diagnostic.IDE0130.severity = none
+# IDE0060: Remove unused parameter
+dotnet_diagnostic.IDE0060.severity = none
+# IDE0160: Use block-scoped namespace
+dotnet_diagnostic.IDE0160.severity = none
+# IDE0022: Use block body for method
+dotnet_diagnostic.IDE0022.severity = none
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = none
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 tab_width = 2
 end_of_line = crlf

@@ -1,0 +1,258 @@
+﻿// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using coverlet.MTP.EnvironmentVariables;
+using Coverlet.MTP.Diagnostics;
+using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Configurations;
+using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.TestHostControllers;
+using Microsoft.Testing.Platform.Logging;
+using Moq;
+using Xunit;
+
+namespace Coverlet.MTP.Environment.Tests;
+
+public class CoverletExtensionEnvironmentVariableProviderTests
+{
+  private readonly Mock<IConfiguration> _mockConfiguration = new();
+  private readonly Mock<ICommandLineOptions> _mockCommandLineOptions = new();
+  private readonly Mock<ILoggerFactory> _mockLoggerFactory = new();
+  private readonly Mock<ILogger> _mockLogger = new();
+  private readonly CoverletExtensionEnvironmentVariableProvider _provider;
+
+  public CoverletExtensionEnvironmentVariableProviderTests()
+  {
+    _mockLoggerFactory.As<ILoggerFactory>()
+      .Setup(f => f.CreateLogger(It.IsAny<string>()))
+      .Returns(_mockLogger.Object);
+
+    _provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      _mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+  }
+
+  #region Properties Tests
+
+  [Fact]
+  public void UidReturnsExpectedValue()
+  {
+    // Assert
+    Assert.Equal(nameof(CoverletExtensionEnvironmentVariableProvider), _provider.Uid);
+  }
+
+  [Fact]
+  public void VersionReturnsNonEmptyString()
+  {
+    // Assert
+    Assert.False(string.IsNullOrEmpty(_provider.Version));
+  }
+
+  [Fact]
+  public void DisplayNameReturnsExpectedValue()
+  {
+    // Assert
+    Assert.Equal("Coverlet Environment Variable Provider", _provider.DisplayName);
+  }
+
+  [Fact]
+  public void DescriptionReturnsExpectedValue()
+  {
+    // Assert
+    Assert.Equal("Provides environment variables for Coverlet coverage collection", _provider.Description);
+  }
+
+  #endregion
+
+  #region IsEnabledAsync Tests
+
+  [Fact]
+  public async Task IsEnabledAsyncReturnsTrue()
+  {
+    // Act
+    bool result = await _provider.IsEnabledAsync();
+
+    // Assert
+    Assert.True(result);
+  }
+
+  #endregion
+
+  #region UpdateAsync Tests
+
+  [Fact]
+  public async Task UpdateAsyncWhenTrackerLogEnabledSetsEnvironmentVariable()
+  {
+    // Arrange
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
+    var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+
+    // Re-create provider to pick up the environment variable
+    var provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      _mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+
+    // Act
+    await provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+    // Assert
+    mockEnvironmentVariables.Verify(
+      x => x.SetVariable(It.Is<EnvironmentVariable>(
+        ev => ev.Variable == CoverletMtpDebugConstants.EnableTrackerLog && ev.Value == "1")),
+      Times.Once());
+  }
+
+  [Fact]
+  public async Task UpdateAsyncWhenTrackerLogDisabledDoesNotSetEnvironmentVariable()
+  {
+    // Arrange
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, null);
+    var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+
+    // Re-create provider to pick up the environment variable
+    var provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      _mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+
+    // Act
+    await provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+    // Assert
+    mockEnvironmentVariables.Verify(
+      x => x.SetVariable(It.Is<EnvironmentVariable>(
+        ev => ev.Variable == CoverletMtpDebugConstants.EnableTrackerLog)),
+      Times.Never());
+  }
+
+  [Fact]
+  public async Task UpdateAsyncWhenExceptionLogEnabledSetsEnvironmentVariable()
+  {
+    // Arrange
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, "1");
+    var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+
+    // Re-create provider to pick up the environment variable
+    var provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      _mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+
+    // Act
+    await provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+    // Assert
+    mockEnvironmentVariables.Verify(
+      x => x.SetVariable(It.Is<EnvironmentVariable>(
+        ev => ev.Variable == CoverletMtpDebugConstants.ExceptionLogEnabled && ev.Value == "1")),
+      Times.Once());
+  }
+
+  [Fact]
+  public async Task UpdateAsyncWhenExceptionLogDisabledDoesNotSetEnvironmentVariable()
+  {
+    // Arrange
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, null);
+    var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+
+    // Re-create provider to pick up the environment variable
+    var provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      _mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+
+    // Act
+    await provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+    // Assert
+    mockEnvironmentVariables.Verify(
+      x => x.SetVariable(It.Is<EnvironmentVariable>(
+        ev => ev.Variable == CoverletMtpDebugConstants.ExceptionLogEnabled)),
+      Times.Never());
+  }
+
+  [Fact]
+  public async Task UpdateAsyncWhenBothTrackerAndExceptionLogEnabledSetsBothEnvironmentVariables()
+  {
+    // Arrange
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, "true");
+    var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+
+    // Re-create provider to pick up the environment variables
+    var provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      _mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+
+    // Act
+    await provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+    // Assert
+    mockEnvironmentVariables.Verify(
+      x => x.SetVariable(It.Is<EnvironmentVariable>(
+        ev => ev.Variable == CoverletMtpDebugConstants.EnableTrackerLog)),
+      Times.Once());
+    mockEnvironmentVariables.Verify(
+      x => x.SetVariable(It.Is<EnvironmentVariable>(
+        ev => ev.Variable == CoverletMtpDebugConstants.ExceptionLogEnabled)),
+      Times.Once());
+  }
+
+  [Fact]
+  public async Task UpdateAsyncReturnsCompletedTask()
+  {
+    // Arrange
+    var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+
+    // Act
+    Task task = _provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+    // Assert
+    Assert.True(task.IsCompleted);
+    await task; // Ensure no exceptions
+  }
+
+  [Fact]
+  public async Task UpdateAsyncTrackerLogEnvironmentVariableIsNotSecret()
+  {
+    // Arrange
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
+    var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+
+    var provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      _mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+
+    // Act
+    await provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+    // Assert
+    mockEnvironmentVariables.Verify(
+      x => x.SetVariable(It.Is<EnvironmentVariable>(
+        ev => ev.Variable == CoverletMtpDebugConstants.EnableTrackerLog && !ev.IsSecret && !ev.IsLocked)),
+      Times.Once());
+  }
+
+  #endregion
+
+  #region ValidateTestHostEnvironmentVariablesAsync Tests
+
+  [Fact]
+  public async Task ValidateTestHostEnvironmentVariablesAsyncReturnsValidResult()
+  {
+    // Arrange
+    var mockReadOnlyEnvironmentVariables = new Mock<IReadOnlyEnvironmentVariables>();
+
+    // Act
+    ValidationResult result = await _provider.ValidateTestHostEnvironmentVariablesAsync(mockReadOnlyEnvironmentVariables.Object);
+
+    // Assert
+    Assert.True(result.IsValid);
+  }
+
+  #endregion
+}

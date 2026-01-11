@@ -1,0 +1,233 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  BuildConfiguration: debug
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+permissions:
+  contents: read  
+  checks: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    timeout-minutes: 30
+    permissions:
+      pull-requests: write
+      contents: read
+      checks: write
+
+    steps:
+    - uses: actions/checkout@v6.0.1
+      with:
+          fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+    - name: Setup .NET 9.0
+      uses: actions/setup-dotnet@v5.0.1
+      with:
+        dotnet-version: 9.0.x
+#        source-url: https://pkgs.dev.azure.com/tonerdo/coverlet/_packaging/coverlet-nightly/nuget/v3/index.json
+#      env:
+#         NUGET_AUTH_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+
+    - name: Setup .NET 8.0
+      uses: actions/setup-dotnet@v5.0.1
+      with:
+        dotnet-version: 8.0.x
+#        source-url: https://pkgs.dev.azure.com/tonerdo/coverlet/_packaging/coverlet-nightly/nuget/v3/index.json
+#      env:
+#          NUGET_AUTH_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+
+    - name: create folders for artifacts
+      run: |
+        mkdir -p ./artifacts/bin
+        mkdir -p ./artifacts/package
+        mkdir -p ./artifacts/package/debug
+        mkdir -p ./artifacts/package/release
+        mkdir -p ./artifacts/log
+        mkdir -p ./artifacts/publish
+        mkdir -p ./artifacts/reports
+
+
+    - name: Restore dependencies
+      run: dotnet restore coverlet.sln
+
+    - name: Build
+      run: |
+        dotnet build coverlet.sln --no-restore -bl:build.binlog -c ${{env.BuildConfiguration}}
+        dotnet build coverlet.sln --no-restore -bl:build.binlog -c release
+        dotnet pack -c ${{env.BuildConfiguration}}
+        dotnet pack -c release
+
+    # - name: Archive production artifacts
+    #   uses: actions/upload-artifact@v5
+    #   with:
+    #     name: dist-bin-and-packages
+    #     retention-days: 5
+    #     path: |
+    #       artifacts/bin
+    #       artifacts/package
+    #       artifacts/publish
+    #       artifacts/log
+    #       *.binlog
+
+  # Fail if there are any failed tests
+  #
+  # We support all current LTS versions of .NET and Windows, Mac and Linux.
+  #
+  # To check for failing tests locally run `dotnet test`.
+
+  # test:
+  #     name: Tests for .net core ${{ matrix.framework }} on ${{ matrix.os }}
+  #     needs: build
+  #     runs-on: ${{ matrix.os }}
+  #     strategy:
+  #       matrix:
+  #         os: [ubuntu-latest, windows-latest, macos-latest]
+  #         framework: ['net9.0', 'net8.0']
+  #     timeout-minutes: 30
+  #     permissions:
+  #       pull-requests: write
+  #     steps:
+  #       - name: Checkout
+  #         uses: actions/checkout@v6.0.1
+  #         with:
+  #           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+  #       - name: Setup .NET 9.0
+  #         uses: actions/setup-dotnet@v5.0.1
+  #         with:
+  #           dotnet-version: 9.0.x
+
+  #       - name: Setup dotnet 8.0
+  #         uses: actions/setup-dotnet@v5.0.1
+  #         with:
+  #           dotnet-version: '8.0.x'
+
+  #       - name: Download packages and artifacts
+  #         uses: actions/download-artifact@v5
+  #         with:
+  #           name: dist-bin-and-packages
+
+    - run: |
+        echo "Test using script"
+        dotnet build-server shutdown
+        dotnet test ./test/coverlet.core.tests/coverlet.core.tests.csproj -c ${{env.BuildConfiguration}} --no-build  -bl:test.core.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" -- --results-directory "./artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.core.tests.trx" --diagnostic --diagnostic-output-directory "./artifacts/log/${{env.BuildConfiguration}}" --diagnostic-output-fileprefix "coverlet.core.tests"
+        dotnet build-server shutdown
+        dotnet test ./test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -c ${{env.BuildConfiguration}} --no-build -bl:test.msbuild.binlog --results-directory:"./artifacts/reports" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*%2c[coverlet.tests.projectsample]*%2c[testgen_]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"./artifacts/log/${{env.BuildConfiguration}}/coverlet.msbuild.test.diag.log;tracelevel=verbose"
+        dotnet build-server shutdown
+        dotnet test ./test/coverlet.collector.tests/coverlet.collector.tests.csproj -c ${{env.BuildConfiguration}} --no-build -bl:test.collector.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"./artifacts/log/${{env.BuildConfiguration}}/coverlet.collector.test.diag.log;tracelevel=verbose"
+        dotnet build-server shutdown
+        dotnet test ./test/coverlet.integration.tests/coverlet.integration.tests.csproj -c ${{env.BuildConfiguration}} --no-build -bl:test.integration.binlog -- --results-directory "./artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.tests.trx" --diagnostic --diagnostic-output-directory "./artifacts/log/${{env.BuildConfiguration}}"
+      name: Run unit tests with coverage
+      env:
+        MSBUILDDISABLENODEREUSE: 1
+
+    # - run: |
+    #     echo "Test using script"
+    #     dotnet build-server shutdown
+    #     dotnet test ./test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -c ${{env.BuildConfiguration}} --no-build -bl:test.core.coverage.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" -- --results-directory "./artifacts/reports" --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.trx" --diagnostic --diagnostic-output-directory "./artifacts/log/${{env.BuildConfiguration}}" --diagnostic-output-fileprefix "coverlet.core.coverage.tests"
+    #   name: Run unit test coverlet.core.coverage.tests
+    #   if: success() && matrix.os  == 'windows-latest'
+    #   env:
+    #     MSBUILDDISABLENODEREUSE: 1
+
+    - name: ReportGenerator
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
+      if: success() && matrix.os  == 'windows-latest'
+      with:
+        reports: ./artifacts/reports/**/*.cobertura.xml
+        assemblyfilters: -xunit*
+        targetdir: ./artifacts/reports
+        reporttypes: HtmlInline;Cobertura;MarkdownSummaryGithub;lcov
+
+    - name: Add Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2.9.4
+      if: success() && matrix.os  == 'windows-latest' && github.event_name == 'pull_request'
+      with:
+        recreate: true
+        path: ./artifacts/reports/SummaryGithub.md
+
+    - name: Write to Job Summary
+      if: matrix.os  == 'windows-latest'
+      run: cat ./artifacts/reports/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+      shell: bash
+
+    - name: Upload Test Result Files
+      uses: actions/upload-artifact@v5
+      if: always()
+      with:
+        name: test-results-${{ matrix.os }}
+        path: ${{ github.workspace }}/artifacts/reports/**/*
+        retention-days: 5
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/linux@v2
+      if: ${{ !cancelled() && matrix.os == 'ubuntu-latest' }}
+      with:
+        files: |
+             ${{ github.workspace }}/artifacts/reports/**/*.trx
+             ${{ github.workspace }}/test/**/*.trx
+        check_name: "Unit Tests ${{ matrix.os }}"
+        comment_mode: failures
+        compare_to_earlier_commit: false
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/macos@v2.21.0
+      if: ${{ !cancelled() && matrix.os == 'macos-latest' }}
+      with:
+        files: |
+             ${{ github.workspace }}/artifacts/reports/**/*.trx
+             ${{ github.workspace }}/test/**/*.trx
+        check_name: "Unit Tests ${{ matrix.os }}"
+        comment_mode: failures
+        compare_to_earlier_commit: false
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/windows@v2.21.0
+      if: ${{ !cancelled() && matrix.os  == 'windows-latest' }}
+      with:
+        files: |
+             ${{ github.workspace }}/artifacts/reports/**/*.trx
+             ${{ github.workspace }}/test/**/*.trx
+        check_name: "Unit Tests ${{ matrix.os }}"
+        comment_mode: failures
+        compare_to_earlier_commit: false
+
+    # - uses: bibipkins/dotnet-test-reporter@v1.6.1
+    #   with:
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    #     comment-title: 'Unit Test Results ${{ matrix.os }}'
+    #     results-path: |
+    #       ./artifacts/reports/**/*.trx
+    #       ./test/**/*.trx
+    #     coverage-path: |
+    #       ./artifacts/bin/**/*.cobertura.xml
+    #       ./artifacts/reports/**/*.cobertura.xml
+    #       ./test/**/*.cobertura.xml
+    #     coverage-threshold: 80
+    #     coverage-type: cobertura
+    #     show-failed-tests-only: true
+    #     show-test-output: true
+
+    # - name: Upload coverage report artifact
+    #   if: success() && matrix.os  == 'windows-latest'
+    #   uses: actions/upload-artifact@v5
+    #   with:
+    #     name: CoverageReport.${{matrix.os}}.${{matrix.framework}} # Artifact name
+    #     path: ./artifacts/CoverageReport # Directory containing files to upload
+    #     overwrite: true

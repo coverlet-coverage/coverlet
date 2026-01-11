@@ -237,34 +237,28 @@ namespace Coverlet.Core.Helpers
     /// </summary>
     /// <param name="module">The path to the module to be backed up.</param>
     /// <param name="identifier">A unique identifier to distinguish the backup file.</param>
-    public void BackupOriginalModule(string module, string identifier)
-    {
-      BackupOriginalModule(module, identifier, true);
-    }
-
-    /// <summary>
-    /// Backs up the original module to a specified location.
-    /// </summary>
-    /// <param name="module">The path to the module to be backed up.</param>
-    /// <param name="identifier">A unique identifier to distinguish the backup file.</param>
-    /// <param name="withBackupList">Indicates whether to add the backup to the backup list. Required for test TestBackupOriginalModule</param>
-    public void BackupOriginalModule(string module, string identifier, bool withBackupList)
+    /// <param name="disableManagedInstrumentationRestore"></param>
+    public void BackupOriginalModule(string module, string identifier, bool disableManagedInstrumentationRestore)
     {
       string backupPath = GetBackupPath(module, identifier);
       string backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
-      _fileSystem.Copy(module, backupPath, true);
-      if (withBackupList && !_backupList.TryAdd(module, backupPath))
+      if (!disableManagedInstrumentationRestore)
       {
-        throw new ArgumentException($"Key already added '{module}'");
-      }
-
-      string symbolFile = Path.ChangeExtension(module, ".pdb");
-      if (_fileSystem.Exists(symbolFile))
-      {
-        _fileSystem.Copy(symbolFile, backupSymbolPath, true);
-        if (withBackupList && !_backupList.TryAdd(symbolFile, backupSymbolPath))
+        _fileSystem.Copy(module, backupPath, true);
+        if (!_backupList.TryAdd(module, backupPath))
         {
-          throw new ArgumentException($"Key already added '{module}'");
+          _logger.LogVerbose($"Module already in backup list, skipping: '{module}'");
+          return;
+        }
+
+        string symbolFile = Path.ChangeExtension(module, ".pdb");
+        if (_fileSystem.Exists(symbolFile))
+        {
+          _fileSystem.Copy(symbolFile, backupSymbolPath, true);
+          if (!_backupList.TryAdd(symbolFile, backupSymbolPath))
+          {
+            _logger.LogVerbose($"Symbol file already in backup list, skipping: '{symbolFile}'");
+          }
         }
       }
     }
@@ -279,6 +273,20 @@ namespace Coverlet.Core.Helpers
       string backupPath = GetBackupPath(module, identifier);
       string backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
 
+      // Guard: Check if module is in backup list and backup file exists
+      if (!_backupList.ContainsKey(module))
+      {
+        _logger.LogVerbose($"Module not in backup list (already restored or never backed up): '{module}'");
+        return;
+      }
+
+      if (!_fileSystem.Exists(backupPath))
+      {
+        _logger.LogWarning($"Backup file not found, cannot restore module: '{backupPath}'");
+        _backupList.TryRemove(module, out _);
+        return;
+      }
+
       // Restore the original module - retry up to 10 times, since the destination file could be locked
       // See: https://github.com/tonerdo/coverlet/issues/25
       Func<TimeSpan> retryStrategy = CreateRetryStrategy();
@@ -287,35 +295,65 @@ namespace Coverlet.Core.Helpers
       {
         _fileSystem.Copy(backupPath, module, true);
         _fileSystem.Delete(backupPath);
-        _backupList.TryRemove(module, out string _);
+        _backupList.TryRemove(module, out _);
+        _logger.LogVerbose($"Restored module from backup: '{module}'");
       }, retryStrategy, RetryAttempts);
 
       _retryHelper.Retry(() =>
       {
+        string symbolFile = Path.ChangeExtension(module, ".pdb");
         if (_fileSystem.Exists(backupSymbolPath))
         {
-          string symbolFile = Path.ChangeExtension(module, ".pdb");
           _fileSystem.Copy(backupSymbolPath, symbolFile, true);
           _fileSystem.Delete(backupSymbolPath);
-          _backupList.TryRemove(symbolFile, out string _);
+          _backupList.TryRemove(symbolFile, out _);
+          _logger.LogVerbose($"Restored symbol file from backup: '{symbolFile}'");
         }
       }, retryStrategy, RetryAttempts);
     }
 
     public virtual void RestoreOriginalModules()
     {
+      // Early exit if nothing to restore
+      if (_backupList.IsEmpty)
+      {
+        return;
+      }
+
+      _logger.LogVerbose($"RestoreOriginalModules: {_backupList.Count} modules to restore");
+
       // Restore the original module - retry up to 10 times, since the destination file could be locked
       // See: https://github.com/tonerdo/coverlet/issues/25
       Func<TimeSpan> retryStrategy = CreateRetryStrategy();
 
       foreach (string key in _backupList.Keys.ToList())
       {
-        string backupPath = _backupList[key];
+        // Skip the currently running assembly - it cannot be restored while running
+        if (IsCurrentlyRunningAssembly(key))
+        {
+          _logger.LogVerbose($"Skipping restore of currently running assembly: '{key}'");
+          _backupList.TryRemove(key, out _);
+          continue;
+        }
+
+        if (!_backupList.TryGetValue(key, out string backupPath))
+        {
+          continue;
+        }
+
+        if (!_fileSystem.Exists(backupPath))
+        {
+          _logger.LogWarning($"Backup file not found during bulk restore: '{backupPath}'");
+          _backupList.TryRemove(key, out _);
+          continue;
+        }
+
         _retryHelper.Retry(() =>
         {
           _fileSystem.Copy(backupPath, key, true);
           _fileSystem.Delete(backupPath);
-          _backupList.TryRemove(key, out string _);
+          _backupList.TryRemove(key, out _);
+          _logger.LogVerbose($"Restored from backup (ProcessExit): '{key}'");
         }, retryStrategy, RetryAttempts);
       }
     }
@@ -523,6 +561,46 @@ namespace Coverlet.Core.Helpers
       {
         AssemblyName.GetAssemblyName(filePath);
         return true;
+      }
+      catch
+      {
+        return false;
+      }
+    }
+
+    /// <summary>
+    /// Determines whether the specified module path corresponds to the currently running assembly.
+    /// </summary>
+    /// <param name="modulePath">The file path of the module to check.</param>
+    /// <returns>
+    /// <c>true</c> if the specified module path matches the currently running assembly's location;
+    /// otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method first attempts to get the entry assembly's location. If that is not available
+    /// (e.g., in certain hosting scenarios), it falls back to using the current process's main module filename.
+    /// The comparison is case-insensitive and uses full paths to ensure accurate matching.
+    /// Any exceptions during the check are caught and result in returning <c>false</c>.
+    /// </remarks>
+    private static bool IsCurrentlyRunningAssembly(string modulePath)
+    {
+      try
+      {
+        string currentAssembly = System.Reflection.Assembly.GetEntryAssembly()?.Location;
+        if (string.IsNullOrEmpty(currentAssembly))
+        {
+          currentAssembly = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+        }
+
+        if (string.IsNullOrEmpty(currentAssembly))
+        {
+          return false;
+        }
+
+        return string.Equals(
+          Path.GetFullPath(modulePath),
+          Path.GetFullPath(currentAssembly),
+          StringComparison.OrdinalIgnoreCase);
       }
       catch
       {

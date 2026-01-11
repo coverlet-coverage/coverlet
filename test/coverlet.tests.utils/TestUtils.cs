@@ -45,24 +45,46 @@ namespace Coverlet.Tests.Utils
       throw new NotSupportedException($"Build configuration not supported");
     }
 
+    public static string GetBuildConfigurationString()
+    {
+      // Returns lowercase configuration string to match MSBuild output paths on case-sensitive filesystems
+      return GetAssemblyBuildConfiguration().ToString().ToLower();
+    }
+
     public static string GetTestProjectPath(string directoryName)
     {
+#if NETSTANDARD2_0
+      return Path.Combine(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, s_rel4Parents)), "test", directoryName);
+#else
       return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel4Parents)), "test", directoryName);
+#endif
     }
 
     public static string GetTestBinaryPath(string directoryName)
     {
+#if NETSTANDARD2_0
+      return Path.Combine(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, s_rel2Parents)), directoryName);
+#else
       return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel2Parents)), directoryName);
+#endif
     }
 
     public static string GetPackagePath(string buildConfiguration)
     {
+#if NETSTANDARD2_0
+      return Path.Combine(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, s_rel3Parents)), "package", buildConfiguration);
+#else
       return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel3Parents)), "package", buildConfiguration);
+#endif
     }
 
     public static string GetTestResultsPath()
     {
+#if NETSTANDARD2_0
+      return Path.Combine(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, s_rel3Parents)), "reports");
+#else
       return Path.Join(Path.GetFullPath(Path.Join(AppContext.BaseDirectory, s_rel3Parents)), "reports");
+#endif
     }
 
   }
