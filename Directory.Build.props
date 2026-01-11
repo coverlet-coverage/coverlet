@@ -7,6 +7,7 @@
     <FullFrameworkTFM>net472</FullFrameworkTFM>
     <!-- enforce CamelCase case string-->
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Copyright>(c) 2018 tonerdo</Copyright>
     <!-- SourceLink Setup -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
