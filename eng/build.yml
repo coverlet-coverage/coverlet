@@ -66,8 +66,10 @@ steps:
 
 - script: |
     dir /s /B *.xml
+    del test\coverlet.integration.determisticbuild\coverage.net8.0.cobertura.xml
   displayName: List XML files for test folder
   workingDirectory: "$(Build.SourcesDirectory)/test"
+  condition: and(succeededORFailed(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
 
 - template: publish-coverage-results.yml
   parameters:
