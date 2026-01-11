@@ -25,6 +25,8 @@
     <AnalysisLevel>preview-recommended</AnalysisLevel>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AnalysisLevelInteroperability>true</AnalysisLevelInteroperability>
+    <!-- create SBOM for CI build-->
+    <GenerateSBOM>true</GenerateSBOM>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -56,6 +58,10 @@
     <PackageReference Include="Microsoft.Testing.Platform" />
     <PackageReference Include="System.Buffers" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="Microsoft.Sbom.Targets">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
