@@ -1,22 +1,25 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Coverlet.MTP.Logging;
+using System.Text;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
 using Coverlet.MTP.CommandLine;
-using Coverlet.MTP.Diagnostics;
 using Coverlet.MTP.Configuration;
+using Coverlet.MTP.Diagnostics;
 using Coverlet.MTP.EnvironmentVariables;
+using Coverlet.MTP.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.OutputDevice;
 
 namespace Coverlet.MTP.Collector;
 
@@ -25,13 +28,14 @@ namespace Coverlet.MTP.Collector;
 /// This extension runs in a SEPARATE CONTROLLER PROCESS, not the test host process.
 /// It instruments assemblies BEFORE the test host starts, avoiding file lock issues.
 /// </summary>
-internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITestHostEnvironmentVariableProvider
+internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITestHostEnvironmentVariableProvider, IOutputDeviceDataProducer
 {
   private readonly CoverletLoggerAdapter _logger;
   private readonly IFileSystem _fileSystem;
   private readonly CoverletExtensionConfiguration _configuration;
   private IServiceProvider? _serviceProvider;
   private readonly IConfiguration? _platformConfiguration;
+  private readonly IOutputDevice _outputDisplay;
   private ICoverage? _coverage;
   private readonly ILoggerFactory _loggerFactory;
   private readonly ICommandLineOptions _commandLineOptions;
@@ -41,9 +45,6 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
   private readonly CoverletExtension _extension = new();
 
-  // Default exclude filter matching coverlet.collector
-  private const string DefaultExcludeFilter = "[xunit.*]*";
-
   string IExtension.Uid => _extension.Uid;
   string IExtension.Version => _extension.Version;
   string IExtension.DisplayName => _extension.DisplayName;
@@ -52,16 +53,17 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   public CollectorExtension(
     Microsoft.Testing.Platform.Logging.ILoggerFactory loggerFactory,
     Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions,
+    Microsoft.Testing.Platform.OutputDevice.IOutputDevice? outputDevice,
     Microsoft.Testing.Platform.Configurations.IConfiguration? configuration,
     IFileSystem? fileSystem = null)  // Add optional parameter for backward compatibility
   {
     _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
     _commandLineOptions = commandLineOptions ?? throw new ArgumentNullException(nameof(commandLineOptions));
     _platformConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    _outputDisplay = outputDevice ?? throw new ArgumentNullException(nameof(outputDevice));
     _fileSystem = fileSystem ?? new FileSystem();  // Use provided or create default
     _configuration = new CoverletExtensionConfiguration();
     _logger = new CoverletLoggerAdapter(_loggerFactory);
-
     _logger.LogVerbose("[DIAG] CoverletExtensionCollector constructor - running in controller process");
     _logger.LogVerbose($"[DIAG]   Process ID: {Environment.ProcessId}");
   }
@@ -97,9 +99,6 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       }
 
       _logger.LogVerbose($"Test module path: {_testModulePath}");
-
-      // Parse command line options
-      ParseCommandLineOptions();
 
       // Create service provider for coverage
       _serviceProvider = ServiceProviderOverride ?? CreateServiceProvider(_testModulePath!);
@@ -248,19 +247,12 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       return;
     }
 
-    // Add default exclude filter
-    string[] excludeFilters = _configuration.ExcludeFilters ?? [];
-    if (!excludeFilters.Contains(DefaultExcludeFilter))
-    {
-      excludeFilters = [.. excludeFilters, DefaultExcludeFilter];
-    }
-
     var parameters = new CoverageParameters
     {
       Module = _testModulePath,
       IncludeFilters = _configuration.IncludeFilters,
       IncludeDirectories = _configuration.IncludeDirectories ?? [],
-      ExcludeFilters = excludeFilters,
+      ExcludeFilters = _configuration.ExcludeFilters ?? [],
       ExcludedSourceFiles = _configuration.ExcludedSourceFiles,
       ExcludeAttributes = _configuration.ExcludeAttributes,
       IncludeTestAssembly = _configuration.IncludeTestAssembly,
@@ -304,15 +296,17 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
   private async Task GenerateReportsAsync(CoverageResult result, CancellationToken cancellation)
   {
-    string outputDirectory = _platformConfiguration!.GetTestResultDirectory() ??
-      Path.GetDirectoryName(_testModulePath) + Path.DirectorySeparatorChar;
+    // Use the results directory captured during initialization, or fall back to test module directory
+    string outputDirectory = _platformConfiguration?.GetTestResultDirectory()
+      ?? Path.GetDirectoryName(_testModulePath)
+      ?? Environment.CurrentDirectory;
 
-    string directory = Path.GetDirectoryName(outputDirectory)!;
+    _logger.LogVerbose($"Coverage output directory: {outputDirectory}");
 
-    // Use injected file system for directory check
-    if (!_fileSystem.Exists(directory))
+    // Ensure directory exists
+    if (!_fileSystem.Exists(outputDirectory))
     {
-      Directory.CreateDirectory(directory);  // ⚠️ This still uses static Directory - may need abstraction
+      Directory.CreateDirectory(outputDirectory);
     }
 
     ISourceRootTranslator sourceRootTranslator = _serviceProvider!.GetRequiredService<ISourceRootTranslator>();
@@ -325,27 +319,28 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       IReporter reporter = new ReporterFactory(format).CreateReporter() ??
         throw new InvalidOperationException($"Specified output format '{format}' is not supported");
 
-      if (reporter.OutputType == ReporterOutputType.Console)
-      {
-        _logger.LogInformation(reporter.Report(result, sourceRootTranslator), important: true);
-      }
-      else
-      {
-        string filename = $"coverage.{reporter.Extension}";
-        string reportPath = Path.Combine(directory, filename);
-        await Task.Run(() => fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator)), cancellation);
-        generatedReports.Add(reportPath);
-      }
+      string filename = $"coverage.{reporter.Extension}";
+      string reportPath = Path.Combine(outputDirectory, filename);
+      await Task.Run(() => fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator)), cancellation);
+      generatedReports.Add(reportPath);
     }
 
-    // Output successfully generated reports to console
+    // Output successfully generated reports to console (like TRX report extension does)
     if (generatedReports.Count > 0)
     {
-      _logger.LogInformation("Coverage reports generated:", important: true);
+      // Use FormattedTextOutputDeviceData for proper display like TRX extension
+      var outputBuilder = new StringBuilder();
+      outputBuilder.AppendLine();
+      outputBuilder.AppendLine("  Out of process file artifacts produced:");
       foreach (string reportPath in generatedReports)
       {
-        _logger.LogInformation($"  {reportPath}", important: true);
+        outputBuilder.AppendLine($"    - {reportPath}");
       }
+
+      await _outputDisplay.DisplayAsync(
+        this,
+        new FormattedTextOutputDeviceData(outputBuilder.ToString()),
+        cancellation).ConfigureAwait(false);
     }
   }
 
@@ -394,29 +389,6 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     return null;
   }
 
-  private void ParseCommandLineOptions()
-  {
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Formats, out string[]? formats) && formats != null)
-    {
-      _configuration.formats = formats; // No splitting
-    }
-
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Include, out string[]? includes) && includes != null)
-    {
-      _configuration.IncludeFilters = includes;
-    }
-
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out string[]? excludes) && excludes != null)
-    {
-      _configuration.ExcludeFilters = excludes;
-    }
-
-    if (_commandLineOptions.IsOptionSet(CoverletOptionNames.IncludeTestAssembly))
-    {
-      _configuration.IncludeTestAssembly = true;
-    }
-  }
-
   private ServiceProvider CreateServiceProvider(string testModule)
   {
     var services = new ServiceCollection();
@@ -441,13 +413,4 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     return services.BuildServiceProvider();
   }
-}
-
-internal static class ConfigurationExtensions
-{
-  public static string? GetTestResultDirectory(this IConfiguration configuration)
-  {
-    return configuration["TestResultDirectory"];
-  }
-
 }

@@ -246,6 +246,55 @@ public class CollectCoverageTests
     Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageLcovFileName, SearchOption.AllDirectories));
   }
 
+  [Fact]
+  public async Task MultipleCoverageFormats_WithResultsDirectory()
+  {
+    // Arrange
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProject(testName, includeSimpleTest: true);
+    await BuildProject(testProject.SolutionPath);
+
+    // Create a specific results directory
+    string resultsDirectory = Path.GetFullPath(Path.Combine(testProject.SolutionDirectory, _repoRoot, "artifacts", "tmp", "TestResults"));
+    Directory.CreateDirectory(resultsDirectory);
+
+    // Act
+    var result = await RunTestsWithCoverage(
+      testProject,
+      $"--coverlet --coverlet-output-format json --coverlet-output-format cobertura --coverlet-output-format lcov --report-xunit-trx --results-directory \"{resultsDirectory}\"",
+      testName);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert - Test should pass
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+
+    // Verify coverage files are generated in the specified results directory
+    string[] jsonFiles = Directory.GetFiles(resultsDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
+    string[] coberturaFiles = Directory.GetFiles(resultsDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories);
+    string[] lcovFiles = Directory.GetFiles(resultsDirectory, CoverageLcovFileName, SearchOption.AllDirectories);
+
+    Assert.True(jsonFiles.Length > 0,
+      $"No {CoverageJsonFileName} found in results directory: {resultsDirectory}\n" +
+      $"Files in directory: {string.Join(", ", Directory.GetFiles(resultsDirectory, "*", SearchOption.AllDirectories))}\n\n" +
+      $"Test Output:\n{result.CombinedOutput}");
+
+    Assert.True(coberturaFiles.Length > 0,
+      $"No {CoverageCoberturaFileName} found in results directory: {resultsDirectory}\n" +
+      $"Files in directory: {string.Join(", ", Directory.GetFiles(resultsDirectory, "*", SearchOption.AllDirectories))}\n\n" +
+      $"Test Output:\n{result.CombinedOutput}");
+
+    Assert.True(lcovFiles.Length > 0,
+      $"No {CoverageLcovFileName} found in results directory: {resultsDirectory}\n" +
+      $"Files in directory: {string.Join(", ", Directory.GetFiles(resultsDirectory, "*", SearchOption.AllDirectories))}\n\n" +
+      $"Test Output:\n{result.CombinedOutput}");
+
+    // Verify console output contains "Coverage reports generated:" message
+    //Assert.Contains("Coverage reports generated:", result.StandardOutput);
+    //Assert.Contains(CoverageJsonFileName, result.StandardOutput);
+    //Assert.Contains(CoverageCoberturaFileName.Replace(".cobertura.xml", ""), result.StandardOutput);
+  }
+
   private static void CheckCoverageResult(TestProjectInfo testProject, TestResult result, string filename)
   {
     // Check if output directory exists before searching for coverage files
@@ -465,7 +514,7 @@ public class CollectCoverageTests
     File.WriteAllText(Path.Combine(sutProjectPath, "SampleClasses.cs"), sutCode);
   }
 
-  private void CreateTestProjectFiles(string testProjectPath, string coverletMtpVersion,
+  private static void CreateTestProjectFiles(string testProjectPath, string coverletMtpVersion,
     bool includeSimpleTest,
     bool includeMethodTests,
     bool includeCalculatorTest,
@@ -954,7 +1003,7 @@ public class StringHelperTests
     return process.ExitCode;
   }
 
-  private async Task<TestResult> RunTestsWithCoverage(TestProjectInfo testProject, string arguments, string testName)
+  private static async Task<TestResult> RunTestsWithCoverage(TestProjectInfo testProject, string arguments, string testName)
   {
     string testExecutable = Path.Combine(testProject.OutputDirectory, $"{TestProjectName}.dll");
 
