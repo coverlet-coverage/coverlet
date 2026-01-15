@@ -339,7 +339,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
       await _outputDisplay.DisplayAsync(
         this,
-        new FormattedTextOutputDeviceData(outputBuilder.ToString()),
+        new TextOutputDeviceData(outputBuilder.ToString()),
         cancellation).ConfigureAwait(false);
     }
   }
