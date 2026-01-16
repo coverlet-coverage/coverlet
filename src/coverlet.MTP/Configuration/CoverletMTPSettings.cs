@@ -14,7 +14,7 @@ public class CoverletMTPSettings
   public string[] ReportFormats { get; set; } = ["cobertura"];
   public string[] IncludeFilters { get; set; } = [];
   public string[] IncludeDirectories { get; set; } = [];
-  public string[] ExcludeFilters { get; set; } = ["[coverlet.*]*"];
+  public string[] ExcludeFilters { get; set; } = ["[coverlet.*]*"]; // Exclude types in Coverlet namespaces by default
   public string[] ExcludeSourceFiles { get; set; } = [];
   public string[] ExcludeAttributes { get; set; } = [];
   public string? MergeWith { get; set; }
