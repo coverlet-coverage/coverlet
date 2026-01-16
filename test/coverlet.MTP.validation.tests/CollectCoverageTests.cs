@@ -290,9 +290,9 @@ public class CollectCoverageTests
       $"Test Output:\n{result.CombinedOutput}");
 
     // Verify console output contains "Coverage reports generated:" message
-    //Assert.Contains("Coverage reports generated:", result.StandardOutput);
-    //Assert.Contains(CoverageJsonFileName, result.StandardOutput);
-    //Assert.Contains(CoverageCoberturaFileName.Replace(".cobertura.xml", ""), result.StandardOutput);
+    Assert.Contains("Out of process file artifacts produced:", result.StandardOutput);
+    Assert.Contains(CoverageJsonFileName, result.StandardOutput);
+    Assert.Contains(CoverageCoberturaFileName.Replace(".cobertura.xml", ""), result.StandardOutput);
   }
 
   private static void CheckCoverageResult(TestProjectInfo testProject, TestResult result, string filename)
