@@ -8,6 +8,7 @@ using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.OutputDevice;
 using Moq;
 using Xunit;
 
@@ -22,6 +23,7 @@ public class CollectorExtensionGenerateReportsTests
   private readonly Mock<Microsoft.Testing.Platform.Logging.ILogger> _mockLogger;
   private readonly Mock<ICommandLineOptions> _mockCommandLineOptions;
   private readonly Mock<IConfiguration> _mockConfiguration;
+  private readonly Mock<IOutputDevice> _mockOutputDevice;
   private readonly Mock<IFileSystem> _mockFileSystem;
 
   private const string SimulatedTestModulePath = "/fake/path/test.dll";
@@ -35,6 +37,7 @@ public class CollectorExtensionGenerateReportsTests
     _mockCommandLineOptions = new Mock<ICommandLineOptions>();
     _mockConfiguration = new Mock<IConfiguration>();
     _mockFileSystem = new Mock<IFileSystem>();
+    _mockOutputDevice = new Mock<IOutputDevice>();
 
     _mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>()))
       .Returns(_mockLogger.Object);
@@ -137,6 +140,7 @@ public class CollectorExtensionGenerateReportsTests
     var collector = new CollectorExtension(
       _mockLoggerFactory.Object,
       _mockCommandLineOptions.Object,
+      _mockOutputDevice.Object,
       _mockConfiguration.Object,
       _mockFileSystem.Object)
     {

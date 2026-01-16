@@ -1,22 +1,25 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Coverlet.MTP.Logging;
+using System.Text;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
 using Coverlet.MTP.CommandLine;
-using Coverlet.MTP.Diagnostics;
 using Coverlet.MTP.Configuration;
+using Coverlet.MTP.Diagnostics;
 using Coverlet.MTP.EnvironmentVariables;
+using Coverlet.MTP.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.OutputDevice;
 
 namespace Coverlet.MTP.Collector;
 
@@ -25,13 +28,14 @@ namespace Coverlet.MTP.Collector;
 /// This extension runs in a SEPARATE CONTROLLER PROCESS, not the test host process.
 /// It instruments assemblies BEFORE the test host starts, avoiding file lock issues.
 /// </summary>
-internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITestHostEnvironmentVariableProvider
+internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITestHostEnvironmentVariableProvider, IOutputDeviceDataProducer
 {
   private readonly CoverletLoggerAdapter _logger;
   private readonly IFileSystem _fileSystem;
   private readonly CoverletExtensionConfiguration _configuration;
   private IServiceProvider? _serviceProvider;
   private readonly IConfiguration? _platformConfiguration;
+  private readonly IOutputDevice _outputDisplay;
   private ICoverage? _coverage;
   private readonly ILoggerFactory _loggerFactory;
   private readonly ICommandLineOptions _commandLineOptions;
@@ -49,12 +53,14 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   public CollectorExtension(
     Microsoft.Testing.Platform.Logging.ILoggerFactory loggerFactory,
     Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions,
+    Microsoft.Testing.Platform.OutputDevice.IOutputDevice? outputDevice,
     Microsoft.Testing.Platform.Configurations.IConfiguration? configuration,
     IFileSystem? fileSystem = null)  // Add optional parameter for backward compatibility
   {
     _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
     _commandLineOptions = commandLineOptions ?? throw new ArgumentNullException(nameof(commandLineOptions));
     _platformConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    _outputDisplay = outputDevice ?? throw new ArgumentNullException(nameof(outputDevice));
     _fileSystem = fileSystem ?? new FileSystem();  // Use provided or create default
     _configuration = new CoverletExtensionConfiguration();
     _logger = new CoverletLoggerAdapter(_loggerFactory);
@@ -336,6 +342,20 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       {
         _logger.LogInformation($"  {reportPath}", important: true);
       }
+      // Output successfully generated reports to console (like TRX report extension does)
+      // Use FormattedTextOutputDeviceData for proper display like TRX extension
+      var outputBuilder = new StringBuilder();
+      outputBuilder.AppendLine();
+      outputBuilder.AppendLine("  Out of process file artifacts produced:");
+      foreach (string reportPath in generatedReports)
+      {
+        outputBuilder.AppendLine($"    - {reportPath}");
+      }
+
+      await _outputDisplay.DisplayAsync(
+        this,
+        new TextOutputDeviceData(outputBuilder.ToString()),
+        cancellation).ConfigureAwait(false);
     }
   }
 

@@ -35,6 +35,7 @@ public static class CoverletExtensionProvider
           return new CollectorExtension(
               serviceProvider.GetLoggerFactory(),
               serviceProvider.GetCommandLineOptions(),
+              serviceProvider.GetOutputDevice(),
               configuration) as ITestHostProcessLifetimeHandler;
         });
 
