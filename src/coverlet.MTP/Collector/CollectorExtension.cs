@@ -101,9 +101,6 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
       _logger.LogVerbose($"Test module path: {_testModulePath}");
 
-      // Parse command line options
-      ParseCommandLineOptions();
-
       // Create service provider for coverage
       _serviceProvider = ServiceProviderOverride ?? CreateServiceProvider(_testModulePath!);
 
@@ -402,29 +399,6 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     }
 
     return null;
-  }
-
-  private void ParseCommandLineOptions()
-  {
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Formats, out string[]? formats) && formats != null)
-    {
-      _configuration.formats = formats; // No splitting
-    }
-
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Include, out string[]? includes) && includes != null)
-    {
-      _configuration.IncludeFilters = includes;
-    }
-
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out string[]? excludes) && excludes != null)
-    {
-      _configuration.ExcludeFilters = excludes;
-    }
-
-    if (_commandLineOptions.IsOptionSet(CoverletOptionNames.IncludeTestAssembly))
-    {
-      _configuration.IncludeTestAssembly = true;
-    }
   }
 
   private ServiceProvider CreateServiceProvider(string testModule)
