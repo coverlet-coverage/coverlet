@@ -41,9 +41,6 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
   private readonly CoverletExtension _extension = new();
 
-  // Default exclude filter matching coverlet.collector
-  private const string DefaultExcludeFilter = "[xunit.*]*";
-
   string IExtension.Uid => _extension.Uid;
   string IExtension.Version => _extension.Version;
   string IExtension.DisplayName => _extension.DisplayName;
@@ -248,19 +245,12 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       return;
     }
 
-    // Add default exclude filter
-    string[] excludeFilters = _configuration.ExcludeFilters ?? [];
-    if (!excludeFilters.Contains(DefaultExcludeFilter))
-    {
-      excludeFilters = [.. excludeFilters, DefaultExcludeFilter];
-    }
-
     var parameters = new CoverageParameters
     {
       Module = _testModulePath,
       IncludeFilters = _configuration.IncludeFilters,
-      IncludeDirectories = _configuration.IncludeDirectories ?? [],
-      ExcludeFilters = excludeFilters,
+      IncludeDirectories = _configuration.IncludeDirectories,
+      ExcludeFilters = _configuration.ExcludeFilters,
       ExcludedSourceFiles = _configuration.ExcludedSourceFiles,
       ExcludeAttributes = _configuration.ExcludeAttributes,
       IncludeTestAssembly = _configuration.IncludeTestAssembly,
@@ -307,12 +297,12 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     string outputDirectory = _platformConfiguration!.GetTestResultDirectory() ??
       Path.GetDirectoryName(_testModulePath) + Path.DirectorySeparatorChar;
 
-    string directory = Path.GetDirectoryName(outputDirectory)!;
+    _logger.LogVerbose($"Coverage output directory: {outputDirectory}");
 
-    // Use injected file system for directory check
-    if (!_fileSystem.Exists(directory))
+    // Ensure directory exists
+    if (!_fileSystem.Exists(outputDirectory))
     {
-      Directory.CreateDirectory(directory);  // ⚠️ This still uses static Directory - may need abstraction
+      Directory.CreateDirectory(outputDirectory);
     }
 
     ISourceRootTranslator sourceRootTranslator = _serviceProvider!.GetRequiredService<ISourceRootTranslator>();
@@ -332,7 +322,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       else
       {
         string filename = $"coverage.{reporter.Extension}";
-        string reportPath = Path.Combine(directory, filename);
+        string reportPath = Path.Combine(outputDirectory, filename);
         await Task.Run(() => fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator)), cancellation);
         generatedReports.Add(reportPath);
       }
@@ -441,13 +431,4 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     return services.BuildServiceProvider();
   }
-}
-
-internal static class ConfigurationExtensions
-{
-  public static string? GetTestResultDirectory(this IConfiguration configuration)
-  {
-    return configuration["TestResultDirectory"];
-  }
-
 }

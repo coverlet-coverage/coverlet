@@ -125,10 +125,10 @@ internal sealed class CoverageConfiguration
   }
 
   public bool UseSingleHit =>
-    _commandLineOptions.IsOptionSet(CoverletOptionNames.SingleHit);
+    GetBoolOptionWithDefault(CoverletOptionNames.SingleHit, defaultValue: false);
 
   public bool IncludeTestAssembly =>
-    _commandLineOptions.IsOptionSet(CoverletOptionNames.IncludeTestAssembly);
+    GetBoolOptionWithDefault(CoverletOptionNames.IncludeTestAssembly, defaultValue: false);
 
   public bool SkipAutoProps =>
     GetBoolOptionWithDefault(CoverletOptionNames.SkipAutoProps, defaultValue: true);

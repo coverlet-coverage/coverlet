@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improvements
 
 - Coverlet MTP extension feature [#1788](https://github.com/coverlet-coverage/coverlet/pull/1788)
+- Generate SBOM for nuget packages [#1752](https://github.com/coverlet-coverage/coverlet/pull/1752)
 - Use multi targets projects for coverlet.collector, coverlet.msbuild.tasks packages [#1742](https://github.com/coverlet-coverage/coverlet/pull/1742)
 - Use .NET 8.0 target framework for coverlet.core and remove Newtonsoft.Json [#1733](https://github.com/coverlet-coverage/coverlet/pull/1733)
 - Use latest System.CommandLine version [#1660](https://github.com/coverlet-coverage/coverlet/pull/1660)
