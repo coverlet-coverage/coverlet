@@ -10,6 +10,7 @@ using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.OutputDevice;
 using Moq;
 using Xunit;
 
@@ -22,6 +23,7 @@ public class CollectorExtensionTests
   private readonly Mock<ICommandLineOptions> _mockCommandLineOptions;
   private readonly Mock<IConfiguration> _mockConfiguration;
   private readonly Mock<IFileSystem> _mockFileSystem;
+  private readonly Mock<IOutputDevice> _mockOutputDevice;
 
   // Simulated test module path - no real file created
   private const string SimulatedTestModulePath = "/fake/path/test.dll";
@@ -34,6 +36,7 @@ public class CollectorExtensionTests
     _mockCommandLineOptions = new Mock<ICommandLineOptions>();
     _mockConfiguration = new Mock<IConfiguration>();
     _mockFileSystem = new Mock<IFileSystem>();
+    _mockOutputDevice = new Mock<IOutputDevice>();
 
     _mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>()))
       .Returns(_mockLogger.Object);
@@ -122,6 +125,7 @@ public class CollectorExtensionTests
     return new CollectorExtension(
       _mockLoggerFactory.Object,
       _mockCommandLineOptions.Object,
+      _mockOutputDevice.Object,
       _mockConfiguration.Object,
       _mockFileSystem.Object);  // Inject the mock file system
   }
@@ -134,7 +138,7 @@ public class CollectorExtensionTests
   public void ConstructorThrowsArgumentNullExceptionWhenLoggerFactoryIsNull()
   {
     ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
-      new CollectorExtension(null!, _mockCommandLineOptions.Object, _mockConfiguration.Object));
+      new CollectorExtension(null!, _mockCommandLineOptions.Object, _mockOutputDevice.Object, _mockConfiguration.Object));
 
     Assert.Equal("loggerFactory", exception.ParamName);
   }
@@ -143,7 +147,7 @@ public class CollectorExtensionTests
   public void ConstructorThrowsArgumentNullExceptionWhenCommandLineOptionsIsNull()
   {
     ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
-      new CollectorExtension(_mockLoggerFactory.Object, null!, _mockConfiguration.Object));
+      new CollectorExtension(_mockLoggerFactory.Object, null!, _mockOutputDevice.Object, _mockConfiguration.Object));
 
     Assert.Equal("commandLineOptions", exception.ParamName);
   }
@@ -152,7 +156,7 @@ public class CollectorExtensionTests
   public void ConstructorThrowsArgumentNullExceptionWhenConfigurationIsNull()
   {
     Assert.Throws<ArgumentNullException>(() =>
-      new CollectorExtension(_mockLoggerFactory.Object, _mockCommandLineOptions.Object, null!));
+      new CollectorExtension(_mockLoggerFactory.Object, _mockCommandLineOptions.Object, _mockOutputDevice.Object, null!));
   }
 
   [Fact]
