@@ -34,8 +34,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   private readonly IFileSystem _fileSystem;
   private readonly CoverletExtensionConfiguration _configuration;
   private IServiceProvider? _serviceProvider;
-  private readonly IConfiguration? _platformConfiguration;
-  private readonly IOutputDevice _outputDisplay;
+  private readonly Microsoft.Testing.Platform.Configurations.IConfiguration? _platformConfiguration;
+  private readonly Microsoft.Testing.Platform.OutputDevice.IOutputDevice _outputDisplay;
   private ICoverage? _coverage;
   private readonly ILoggerFactory _loggerFactory;
   private readonly ICommandLineOptions _commandLineOptions;
@@ -99,7 +99,25 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
         return Task.CompletedTask;
       }
 
+      var config = new CoverageConfiguration(_commandLineOptions, _loggerFactory.CreateLogger(nameof(CollectorExtension)));
+      _configuration.DeterministicReport = false;
+      _configuration.DisableManagedInstrumentationRestore = false;
+      _configuration.DoesNotReturnAttributes = config.GetDoesNotReturnAttributes();
+      _configuration.ExcludeAssembliesWithoutSources = config.GetExcludeAssembliesWithoutSources();
+      _configuration.ExcludeAttributes = config.GetExcludeByAttributeFilters();
+      _configuration.ExcludeFilters = config.GetExcludeFilters();
+      _configuration.ExcludedSourceFiles = config.GetExcludeByFileFilters();
+      _configuration.IncludeDirectories = config.GetIncludeDirectories();
+      _configuration.IncludeFilters = config.GetIncludeFilters();
+      _configuration.IncludeTestAssembly = config.IncludeTestAssembly;
+      _configuration.MergeWith = "";
+      _configuration.SingleHit = config.UseSingleHit;
+      _configuration.SkipAutoProps = config.SkipAutoProps;
+      _configuration.formats = config.GetOutputFormats();
+      _configuration.UseSourceLink = false;
+
       _logger.LogVerbose($"Test module path: {_testModulePath}");
+      _configuration.TestModule = _testModulePath;
 
       // Create service provider for coverage
       _serviceProvider = ServiceProviderOverride ?? CreateServiceProvider(_testModulePath!);
@@ -250,22 +268,24 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     var parameters = new CoverageParameters
     {
-      Module = _testModulePath,
-      IncludeFilters = _configuration.IncludeFilters,
-      IncludeDirectories = _configuration.IncludeDirectories,
+      Module = _configuration.TestModule,
+      DeterministicReport = _configuration.DeterministicReport,
+      DisableManagedInstrumentationRestore = _configuration.DisableManagedInstrumentationRestore,
+      DoesNotReturnAttributes = _configuration.DoesNotReturnAttributes,
+      ExcludeAssembliesWithoutSources = _configuration.ExcludeAssembliesWithoutSources,
+      ExcludeAttributes = _configuration.ExcludeAttributes,
       ExcludeFilters = _configuration.ExcludeFilters,
       ExcludedSourceFiles = _configuration.ExcludedSourceFiles,
-      ExcludeAttributes = _configuration.ExcludeAttributes,
+      IncludeDirectories = _configuration.IncludeDirectories,
+      IncludeFilters = _configuration.IncludeFilters,
       IncludeTestAssembly = _configuration.IncludeTestAssembly,
-      SingleHit = _configuration.SingleHit,
       MergeWith = _configuration.MergeWith,
-      UseSourceLink = _configuration.UseSourceLink,
-      DoesNotReturnAttributes = _configuration.DoesNotReturnAttributes,
+      SingleHit = _configuration.SingleHit,
       SkipAutoProps = _configuration.SkipAutoProps,
-      DeterministicReport = _configuration.DeterministicReport,
-      ExcludeAssembliesWithoutSources = _configuration.ExcludeAssembliesWithoutSources,
-      DisableManagedInstrumentationRestore = _configuration.DisableManagedInstrumentationRestore
+      UseSourceLink = _configuration.UseSourceLink
     };
+
+    _logger.LogVerbose($"Coverlet configuration: {_configuration.ToString}");
 
     // Use factory if available (for testing), otherwise create directly
     if (CoverageFactory is not null)

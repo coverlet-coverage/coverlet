@@ -78,7 +78,7 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet` | Enable code coverage data collection. |
 | `--coverlet-output-format <format>` | Output format(s) for coverage report. Supported formats: `json`, `lcov`, `opencover`, `cobertura`, `teamcity`. Can be specified multiple times. |
 | `--coverlet-include <filter>` | Include assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. |
-| `--coverlet-include-directory <path>` | Include additional directories for instrumentation. Can be specified multiple times. |
+| `--coverlet-include-directory <path>` | Include additional directories for sources. Can be specified multiple times. |
 | `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. |
 | `--coverlet-exclude-by-file <pattern>` | Exclude source files matching glob patterns. Can be specified multiple times. |
 | `--coverlet-exclude-by-attribute <attribute>` | Exclude methods/classes decorated with attributes. Can be specified multiple times. |

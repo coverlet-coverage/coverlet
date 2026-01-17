@@ -9,6 +9,10 @@ namespace Coverlet.MTP.Configuration;
 internal class CoverletExtensionConfiguration
 {
   public string[] formats { get; set; } = ["json"];
+  /// <summary>
+  /// Test module
+  /// </summary>
+  public string? TestModule { get; set; }
 
   // Coverage parameters
   public string[]? IncludeFilters { get; set; }
