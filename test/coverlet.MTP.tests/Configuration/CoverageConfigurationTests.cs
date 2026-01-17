@@ -511,23 +511,30 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void ExcludeAssembliesWithoutSourcesWhenOptionSetReturnsTrue()
+  public void ExcludeAssembliesWithoutSourcesWhenOptionSetReturnsAll()
   {
-    _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.ExcludeAssembliesWithoutSources)).Returns(true);
+    string expectedOption = "All";
+    _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeAssembliesWithoutSources, out It.Ref<string[]?>.IsAny))
+      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      {
+        filters = [expectedOption];
+        return true;
+      }));
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
-
-    Assert.True(config.ExcludeAssembliesWithoutSources);
+    string result = config.GetExcludeAssembliesWithoutSources();
+    Assert.Equal(expectedOption, result);
   }
 
   [Fact]
-  public void ExcludeAssembliesWithoutSourcesWhenOptionNotSetReturnsDefaultTrue()
+  public void ExcludeAssembliesWithoutSourcesWhenOptionNotSetReturnsReturnsAll()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.ExcludeAssembliesWithoutSources)).Returns(false);
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
 
-    Assert.True(config.ExcludeAssembliesWithoutSources);
+    string result = config.GetExcludeAssembliesWithoutSources();
+    Assert.Equal("None", result);
   }
 
   #endregion

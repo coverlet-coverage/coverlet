@@ -13,12 +13,10 @@ using Coverlet.MTP.Diagnostics;
 using Coverlet.MTP.EnvironmentVariables;
 using Coverlet.MTP.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
-using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
 
 namespace Coverlet.MTP.Collector;
@@ -31,14 +29,14 @@ namespace Coverlet.MTP.Collector;
 internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITestHostEnvironmentVariableProvider, IOutputDeviceDataProducer
 {
   private readonly CoverletLoggerAdapter _logger;
-  private readonly IFileSystem _fileSystem;
+  private readonly Coverlet.Core.Abstractions.IFileSystem _fileSystem;
   private readonly CoverletExtensionConfiguration _configuration;
   private IServiceProvider? _serviceProvider;
-  private readonly IConfiguration? _platformConfiguration;
-  private readonly IOutputDevice _outputDisplay;
+  private readonly Microsoft.Testing.Platform.Configurations.IConfiguration? _platformConfiguration;
+  private readonly Microsoft.Testing.Platform.OutputDevice.IOutputDevice _outputDisplay;
   private ICoverage? _coverage;
-  private readonly ILoggerFactory _loggerFactory;
-  private readonly ICommandLineOptions _commandLineOptions;
+  private readonly Microsoft.Testing.Platform.Logging.ILoggerFactory _loggerFactory;
+  private readonly Microsoft.Testing.Platform.CommandLine.ICommandLineOptions _commandLineOptions;
   private bool _coverageEnabled;
   private string? _testModulePath;
   private string? _coverageIdentifier;
@@ -99,10 +97,25 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
         return Task.CompletedTask;
       }
 
-      _logger.LogVerbose($"Test module path: {_testModulePath}");
+      var config = new CoverageConfiguration(_commandLineOptions, _loggerFactory.CreateLogger(nameof(CollectorExtension)));
+      _configuration.DeterministicReport = false;
+      _configuration.DisableManagedInstrumentationRestore = false;
+      _configuration.DoesNotReturnAttributes = config.GetDoesNotReturnAttributes();
+      _configuration.ExcludeAssembliesWithoutSources = config.GetExcludeAssembliesWithoutSources();
+      _configuration.ExcludeAttributes = config.GetExcludeByAttributeFilters();
+      _configuration.ExcludeFilters = config.GetExcludeFilters();
+      _configuration.ExcludedSourceFiles = config.GetExcludeByFileFilters();
+      _configuration.IncludeDirectories = config.GetIncludeDirectories();
+      _configuration.IncludeFilters = config.GetIncludeFilters();
+      _configuration.IncludeTestAssembly = config.IncludeTestAssembly;
+      _configuration.MergeWith = "";
+      _configuration.SingleHit = config.UseSingleHit;
+      _configuration.SkipAutoProps = config.SkipAutoProps;
+      _configuration.formats = config.GetOutputFormats();
+      _configuration.UseSourceLink = false;
 
-      // Parse command line options
-      ParseCommandLineOptions();
+      _logger.LogVerbose($"Test module path: {_testModulePath}");
+      _configuration.TestModule = _testModulePath;
 
       // Create service provider for coverage
       _serviceProvider = ServiceProviderOverride ?? CreateServiceProvider(_testModulePath!);
@@ -253,22 +266,24 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     var parameters = new CoverageParameters
     {
-      Module = _testModulePath,
-      IncludeFilters = _configuration.IncludeFilters,
-      IncludeDirectories = _configuration.IncludeDirectories,
+      Module = _configuration.TestModule,
+      DeterministicReport = _configuration.DeterministicReport,
+      DisableManagedInstrumentationRestore = _configuration.DisableManagedInstrumentationRestore,
+      DoesNotReturnAttributes = _configuration.DoesNotReturnAttributes,
+      ExcludeAssembliesWithoutSources = _configuration.ExcludeAssembliesWithoutSources,
+      ExcludeAttributes = _configuration.ExcludeAttributes,
       ExcludeFilters = _configuration.ExcludeFilters,
       ExcludedSourceFiles = _configuration.ExcludedSourceFiles,
-      ExcludeAttributes = _configuration.ExcludeAttributes,
+      IncludeDirectories = _configuration.IncludeDirectories,
+      IncludeFilters = _configuration.IncludeFilters,
       IncludeTestAssembly = _configuration.IncludeTestAssembly,
-      SingleHit = _configuration.SingleHit,
       MergeWith = _configuration.MergeWith,
-      UseSourceLink = _configuration.UseSourceLink,
-      DoesNotReturnAttributes = _configuration.DoesNotReturnAttributes,
+      SingleHit = _configuration.SingleHit,
       SkipAutoProps = _configuration.SkipAutoProps,
-      DeterministicReport = _configuration.DeterministicReport,
-      ExcludeAssembliesWithoutSources = _configuration.ExcludeAssembliesWithoutSources,
-      DisableManagedInstrumentationRestore = _configuration.DisableManagedInstrumentationRestore
+      UseSourceLink = _configuration.UseSourceLink
     };
+
+    _logger.LogVerbose($"Coverlet configuration: {_configuration.ToString}");
 
     // Use factory if available (for testing), otherwise create directly
     if (CoverageFactory is not null)
@@ -402,29 +417,6 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     }
 
     return null;
-  }
-
-  private void ParseCommandLineOptions()
-  {
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Formats, out string[]? formats) && formats != null)
-    {
-      _configuration.formats = formats; // No splitting
-    }
-
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Include, out string[]? includes) && includes != null)
-    {
-      _configuration.IncludeFilters = includes;
-    }
-
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out string[]? excludes) && excludes != null)
-    {
-      _configuration.ExcludeFilters = excludes;
-    }
-
-    if (_commandLineOptions.IsOptionSet(CoverletOptionNames.IncludeTestAssembly))
-    {
-      _configuration.IncludeTestAssembly = true;
-    }
   }
 
   private ServiceProvider CreateServiceProvider(string testModule)

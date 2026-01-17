@@ -111,6 +111,17 @@ internal sealed class CoverageConfiguration
     return s_defaultExcludeByAttributes;
   }
 
+  public string GetExcludeAssembliesWithoutSources()
+  {
+    if (_commandLineOptions.TryGetOptionArgumentList(
+      CoverletOptionNames.ExcludeAssembliesWithoutSources,
+      out string[]? options))
+    {
+      LogOptionValue(CoverletOptionNames.ExcludeAssembliesWithoutSources, options, isExplicit: true);
+      return options[0];
+    }
+    return "None";
+  }
   public string[] GetIncludeDirectories()
   {
     if (_commandLineOptions.TryGetOptionArgumentList(
@@ -145,9 +156,6 @@ internal sealed class CoverageConfiguration
 
     return [];
   }
-
-  public bool ExcludeAssembliesWithoutSources =>
-    GetBoolOptionWithDefault(CoverletOptionNames.ExcludeAssembliesWithoutSources, defaultValue: true);
 
   /// <summary>
   /// Gets the test assembly path using multiple fallback strategies.
@@ -205,7 +213,7 @@ internal sealed class CoverageConfiguration
     _logger.LogInformation($"Single Hit: {UseSingleHit}");
     _logger.LogInformation($"Include Test Assembly: {IncludeTestAssembly}");
     _logger.LogInformation($"Skip Auto Properties: {SkipAutoProps}");
-    _logger.LogInformation($"Exclude Assemblies Without Sources: {ExcludeAssembliesWithoutSources}");
+    _logger.LogInformation($"Exclude Assemblies Without Sources: {GetExcludeAssembliesWithoutSources()}");
     //_logger.LogInformation($"Output directory for source mapping file: {GetOutputSourceMappingDirectory()}");
     _logger.LogInformation("========================================");
   }
