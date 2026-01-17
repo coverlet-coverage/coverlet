@@ -13,12 +13,10 @@ using Coverlet.MTP.Diagnostics;
 using Coverlet.MTP.EnvironmentVariables;
 using Coverlet.MTP.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
-using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
 
 namespace Coverlet.MTP.Collector;
@@ -31,14 +29,14 @@ namespace Coverlet.MTP.Collector;
 internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITestHostEnvironmentVariableProvider, IOutputDeviceDataProducer
 {
   private readonly CoverletLoggerAdapter _logger;
-  private readonly IFileSystem _fileSystem;
+  private readonly Coverlet.Core.Abstractions.IFileSystem _fileSystem;
   private readonly CoverletExtensionConfiguration _configuration;
   private IServiceProvider? _serviceProvider;
   private readonly Microsoft.Testing.Platform.Configurations.IConfiguration? _platformConfiguration;
   private readonly Microsoft.Testing.Platform.OutputDevice.IOutputDevice _outputDisplay;
   private ICoverage? _coverage;
-  private readonly ILoggerFactory _loggerFactory;
-  private readonly ICommandLineOptions _commandLineOptions;
+  private readonly Microsoft.Testing.Platform.Logging.ILoggerFactory _loggerFactory;
+  private readonly Microsoft.Testing.Platform.CommandLine.ICommandLineOptions _commandLineOptions;
   private bool _coverageEnabled;
   private string? _testModulePath;
   private string? _coverageIdentifier;
