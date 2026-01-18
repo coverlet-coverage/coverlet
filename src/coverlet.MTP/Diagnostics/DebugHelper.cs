@@ -27,7 +27,13 @@ internal static class DebugHelper
     // Check for wait-for-attach loop
     if (IsEnvironmentVariableEnabled(CoverletMtpDebugConstants.DebugWaitForAttach))
     {
+#pragma warning disable IDE0055
+#if NETSTANDARD2_0
+    int processId = Process.GetCurrentProcess().Id;
+#else
       int processId = Environment.ProcessId;
+#endif
+#pragma warning restore IDE0055
       Console.WriteLine($"[Coverlet.MTP] {componentName}: Waiting for debugger to attach...");
       Console.WriteLine($"[Coverlet.MTP] Process Id: {processId}, Name: {Process.GetCurrentProcess().ProcessName}");
 

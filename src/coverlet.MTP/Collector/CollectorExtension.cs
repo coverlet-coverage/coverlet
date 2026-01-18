@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if NETSTANDARD2_0
+using System.Diagnostics;
+#endif
 using System.Text;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
@@ -64,7 +67,11 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     _logger = new CoverletLoggerAdapter(_loggerFactory);
 
     _logger.LogVerbose("[DIAG] CoverletExtensionCollector constructor - running in controller process");
+#if NETSTANDARD2_0
+    _logger.LogVerbose($"[DIAG]   .NET Version: {Process.GetCurrentProcess().Id}");
+#else
     _logger.LogVerbose($"[DIAG]   Process ID: {Environment.ProcessId}");
+#endif
   }
 
   /// <summary>
@@ -74,7 +81,11 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   Task ITestHostProcessLifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken cancellationToken)
   {
     _logger.LogVerbose("=== BeforeTestHostProcessStartAsync START ===");
+#if NETSTANDARD2_0
+    _logger.LogVerbose($"Controller PID: {Process.GetCurrentProcess().Id}");
+#else
     _logger.LogVerbose($"Controller PID: {Environment.ProcessId}");
+#endif
 
     try
     {
@@ -283,7 +294,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       UseSourceLink = _configuration.UseSourceLink
     };
 
-    _logger.LogVerbose($"Coverlet configuration: {_configuration.ToString}");
+    _logger.LogVerbose($"Coverlet configuration: {_configuration}");
 
     // Use factory if available (for testing), otherwise create directly
     if (CoverageFactory is not null)
