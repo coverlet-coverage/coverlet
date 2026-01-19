@@ -18,7 +18,7 @@
     <EnablePackageValidation>true</EnablePackageValidation>
     <GenerateDependencyFile>true</GenerateDependencyFile>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
-    <NoWarn>$(NoWarn);NU5100;NU5129;NU5127</NoWarn>
+    <NoWarn>$(NoWarn);NU5100</NoWarn>
     <!-- create SBOM for CI build-->
     <GenerateSBOM>true</GenerateSBOM>
   </PropertyGroup>
