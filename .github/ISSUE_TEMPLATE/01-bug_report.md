@@ -21,7 +21,7 @@ Provide a description of the actual behavior observed. If applicable please incl
 
 **Configuration (please complete the following information):**
 Please provide more information on your .NET configuration:
-    * Which coverlet package and version was used?
+    * Which coverlet package (collector, console, msbuild, ...) and version was used?
     * Which version of .NET is the code running on?
     * What OS and version, and what distro if applicable?
     * What is the architecture (x64, x86, ARM, ARM64)?
