@@ -5,6 +5,17 @@
     "^refs/heads/master$"
   ],
   "nugetPackageVersion":{
-    "semVer": 2
+    "semVer": 2,
+    "precision": "build"
+  },
+    "cloudBuild": {
+    "setVersionVariables": true,
+    "buildNumber": {
+      "enabled": true,
+      "includeCommitId": {
+        "when": "nonPublicReleaseOnly",
+        "where": "buildMetadata"
+      }
+    }
   }
 }

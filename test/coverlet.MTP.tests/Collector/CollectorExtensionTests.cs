@@ -283,42 +283,6 @@ public class CollectorExtensionTests
     mockEnvVariables.Verify(x => x.SetVariable(It.IsAny<EnvironmentVariable>()), Times.Never);
   }
 
-  //[Theory]
-  //[InlineData("json")]
-  //[InlineData("cobertura")]
-  //[InlineData("lcov")]
-  //public async Task BeforeTestHostProcessStartAsyncParsesMultipleFormats(string formats)
-  //{
-  //  // MTP is not supporting array out parameters directly, so we simulate with multiple calls
-  //  _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
-  //  SetupTestModuleConfiguration();
-
-  //  string[]? formatsOut = [formats];
-  //  _mockCommandLineOptions
-  //    .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formatsOut))
-  //    .Returns(true);
-
-  //  SetupDefaultCommandLineOptions();
-
-  //  var mockCoverage = new Mock<ICoverage>();
-  //  mockCoverage.Setup(x => x.PrepareModules()).Returns(new CoveragePrepareResult { Identifier = "test-id" });
-
-  //  var mockCoverageFactory = new Mock<ICoverageFactory>();
-  //  mockCoverageFactory
-  //    .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
-  //    .Returns(mockCoverage.Object);
-
-  //  var collector = CreateCollector();
-  //  collector.CoverageFactory = mockCoverageFactory.Object;
-
-  //  ITestHostProcessLifetimeHandler handler = collector;
-  //  await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
-
-  //  _mockCommandLineOptions.Verify(
-  //    x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out formatsOut),
-  //    Times.Once);
-  //}
-
   #endregion
 
   #region UpdateAsync Tests
