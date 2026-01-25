@@ -30,6 +30,8 @@
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
     <CoverletVersion Condition="'$(CoverletVersion)'==''">8.0.0</CoverletVersion>
+    <!-- Breaking change NET 8.0 InformationalVersion with SourceRevisionId -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <!-- Default to non-deterministic for local builds -->
