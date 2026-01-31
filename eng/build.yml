@@ -24,14 +24,6 @@ steps:
 - script: dotnet restore -v n -s "https://api.nuget.org/v3/index.json"
   displayName: Restore packages
 
-# - task: DotNetCoreCLI@2
-#   displayName: Restore packages
-#   inputs:
-#     command: restore
-#     projects: 'coverlet.sln'
-#     feedsToUse: 'config'
-#     nugetConfigPath: 'nuget.config'
-
 - script: dotnet build -c $(BuildConfiguration) --no-restore -bl:build.msbuild.binlog
   displayName: Build
 
@@ -39,6 +31,7 @@ steps:
   displayName: Pack
 
 - script: |
+    dotnet build-server shutdown
     dotnet test test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.MTP.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.MTP.tests.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.MTP.tests.diag;tracelevel=verbose"
     dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.core.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.tests.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.core.tests.diag;tracelevel=verbose"
     dotnet test test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -c $(BuildConfiguration) --no-build -bl:test.core.coverage.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.coverage.tests.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.core.coverage.tests.diag;tracelevel=verbose"
