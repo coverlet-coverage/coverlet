@@ -158,38 +158,17 @@ internal sealed class CoverageConfiguration
   }
 
   /// <summary>
-  /// Gets the test assembly path using multiple fallback strategies.
+  /// Gets the test assembly path.
   /// </summary>
   public static string GetTestAssemblyPath()
   {
-    // Try multiple methods to get the test assembly path
-    // 1. Entry assembly (most reliable for test scenarios)
+    // In test scenarios, the entry assembly is always the test assembly
     string? path = System.Reflection.Assembly.GetEntryAssembly()?.Location;
-    if (!string.IsNullOrEmpty(path) && File.Exists(path))
-    {
-      return path!;
-    }
 
-    // 2. Current process main module
-    path = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
-    if (!string.IsNullOrEmpty(path) && File.Exists(path))
-    {
-      return path!;
-    }
-
-    // 3. Base directory + first command line argument
-    string[] args = Environment.GetCommandLineArgs();
-    if (args.Length > 0)
-    {
-      string fullPath = Path.GetFullPath(args[0]);
-      if (File.Exists(fullPath))
-      {
-        return fullPath;
-      }
-    }
-
-    // 4. Fallback to base directory
-    return AppContext.BaseDirectory;
+    return string.IsNullOrEmpty(path)
+      ? throw new InvalidOperationException(
+        "Unable to determine test assembly path. Entry assembly location is not available.")
+      : path!;
   }
 
   /// <summary>
