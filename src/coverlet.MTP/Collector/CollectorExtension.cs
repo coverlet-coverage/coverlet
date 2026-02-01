@@ -8,7 +8,6 @@ using System.Text;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
 using Coverlet.MTP.CommandLine;
 using Coverlet.MTP.Configuration;
@@ -45,6 +44,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   private string? _coverageIdentifier;
 
   private readonly CoverletExtension _extension = new();
+  private readonly IReporterFactory _reporterFactory;
 
   string IExtension.Uid => _extension.Uid;
   string IExtension.Version => _extension.Version;
@@ -56,13 +56,15 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions,
     Microsoft.Testing.Platform.OutputDevice.IOutputDevice? outputDevice,
     Microsoft.Testing.Platform.Configurations.IConfiguration? configuration,
-    IFileSystem? fileSystem = null)  // Add optional parameter for backward compatibility
+    IFileSystem? fileSystem = null,
+    IReporterFactory? reporterFactory = null)
   {
     _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
     _commandLineOptions = commandLineOptions ?? throw new ArgumentNullException(nameof(commandLineOptions));
     _platformConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     _outputDisplay = outputDevice ?? throw new ArgumentNullException(nameof(outputDevice));
     _fileSystem = fileSystem ?? new FileSystem();  // Use provided or create default
+    _reporterFactory = reporterFactory ?? new DefaultReporterFactory();
     _configuration = new CoverletExtensionConfiguration();
     _logger = new CoverletLoggerAdapter(_loggerFactory);
 
@@ -324,27 +326,26 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       cecilSymbolHelper);
   }
 
-  private async Task GenerateReportsAsync(CoverageResult result, CancellationToken cancellation)
+  // Add internal property for testing
+  internal IReporterFactory? ReporterFactoryOverride { get; set; }
+
+  /// <summary>
+  /// Generates coverage report files. Separated for testability.
+  /// </summary>
+  internal List<string> GenerateCoverageReportFiles(
+    CoverageResult result,
+    ISourceRootTranslator sourceRootTranslator,
+    IFileSystem fileSystem,
+    string outputDirectory,
+    string[] formats)
   {
-    string outputDirectory = _platformConfiguration!.GetTestResultDirectory() ??
-      Path.GetDirectoryName(_testModulePath) + Path.DirectorySeparatorChar;
-
-    _logger.LogVerbose($"Coverage output directory: {outputDirectory}");
-
-    // Ensure directory exists
-    if (!_fileSystem.Exists(outputDirectory))
-    {
-      Directory.CreateDirectory(outputDirectory);
-    }
-
-    ISourceRootTranslator sourceRootTranslator = _serviceProvider!.GetRequiredService<ISourceRootTranslator>();
-    IFileSystem fileSystem = _serviceProvider!.GetRequiredService<IFileSystem>();
-
     var generatedReports = new List<string>();
 
-    foreach (string format in _configuration.formats)
+    foreach (string format in formats)
     {
-      IReporter reporter = new ReporterFactory(format).CreateReporter() ??
+      // Use override if set (for testing), otherwise use injected factory
+      IReporterFactory factory = ReporterFactoryOverride ?? _reporterFactory;
+      IReporter reporter = factory.CreateReporter(format) ??
         throw new InvalidOperationException($"Specified output format '{format}' is not supported");
 
       if (reporter.OutputType == ReporterOutputType.Console)
@@ -355,34 +356,71 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       {
         string filename = $"coverage.{reporter.Extension}";
         string reportPath = Path.Combine(outputDirectory, filename);
-        await Task.Run(() => fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator)), cancellation);
+        fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator));
         generatedReports.Add(reportPath);
       }
     }
 
-    // Output successfully generated reports to console
-    if (generatedReports.Count > 0)
-    {
-      _logger.LogInformation("Coverage reports generated:", important: true);
-      foreach (string reportPath in generatedReports)
-      {
-        _logger.LogInformation($"  {reportPath}", important: true);
-      }
-      // Output successfully generated reports to console (like TRX report extension does)
-      // Use FormattedTextOutputDeviceData for proper display like TRX extension
-      var outputBuilder = new StringBuilder();
-      outputBuilder.AppendLine();
-      outputBuilder.AppendLine("  Out of process file artifacts produced:");
-      foreach (string reportPath in generatedReports)
-      {
-        outputBuilder.AppendLine($"    - {reportPath}");
-      }
+    return generatedReports;
+  }
 
-      await _outputDisplay.DisplayAsync(
-        this,
-        new TextOutputDeviceData(outputBuilder.ToString()),
-        cancellation).ConfigureAwait(false);
+  /// <summary>
+  /// Displays generated report paths to output device.
+  /// </summary>
+  private async Task DisplayGeneratedReportsAsync(List<string> generatedReports, CancellationToken cancellation)
+  {
+    if (generatedReports.Count == 0)
+    {
+      return;
     }
+
+    _logger.LogInformation("Coverage reports generated:", important: true);
+    foreach (string reportPath in generatedReports)
+    {
+      _logger.LogInformation($"  {reportPath}", important: true);
+    }
+
+    var outputBuilder = new StringBuilder();
+    outputBuilder.AppendLine();
+    outputBuilder.AppendLine("  Out of process file artifacts produced:");
+    foreach (string reportPath in generatedReports)
+    {
+      outputBuilder.AppendLine($"    - {reportPath}");
+    }
+
+    await _outputDisplay.DisplayAsync(
+      this,
+      new TextOutputDeviceData(outputBuilder.ToString()),
+      cancellation).ConfigureAwait(false);
+  }
+
+  // Refactor GenerateReportsAsync to use extracted methods
+  private async Task GenerateReportsAsync(CoverageResult result, CancellationToken cancellation)
+  {
+    string outputDirectory = _platformConfiguration!.GetTestResultDirectory() ??
+      Path.GetDirectoryName(_testModulePath) + Path.DirectorySeparatorChar;
+
+    _logger.LogVerbose($"Coverage output directory: {outputDirectory}");
+
+    // Ensure directory exists
+    if (!_fileSystem.Exists(outputDirectory))
+    {
+      _fileSystem.CreateDirectory(outputDirectory);
+    }
+
+    ISourceRootTranslator sourceRootTranslator = _serviceProvider!.GetRequiredService<ISourceRootTranslator>();
+    IFileSystem fileSystem = _serviceProvider!.GetRequiredService<IFileSystem>();
+
+    // Generate reports (now testable separately)
+    List<string> generatedReports = GenerateCoverageReportFiles(
+      result,
+      sourceRootTranslator,
+      fileSystem,
+      outputDirectory,
+      _configuration.formats);
+
+    // Display results
+    await DisplayGeneratedReportsAsync(generatedReports, cancellation);
   }
 
   private string GetHitsFilePath()

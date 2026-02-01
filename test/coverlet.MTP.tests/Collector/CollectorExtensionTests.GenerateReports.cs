@@ -244,4 +244,142 @@ public class CollectorExtensionGenerateReportsTests
   }
 
   #endregion
+
+  #region GenerateCoverageReportFiles Tests
+
+  [Fact]
+  public void GenerateCoverageReportFiles_WithJsonFormat_CreatesJsonReport()
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+    var mockReporter = new Mock<IReporter>();
+
+    // Setup mocks
+    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockReporter.Setup(x => x.Extension).Returns("json");
+    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("{\"coverage\":\"data\"}");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("json")).Returns(mockReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string outputDirectory = "/fake/reports";
+    string[] formats = ["json"];
+
+    // Act
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      outputDirectory,
+      formats);
+
+    // Assert
+    Assert.Single(generatedReports);
+    Assert.EndsWith("coverage.json", generatedReports[0]);
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("coverage.json")),
+        It.Is<string>(content => content.Contains("coverage"))),
+      Times.Once);
+  }
+
+  [Fact]
+  public void GenerateCoverageReportFiles_WithMultipleFormats_CreatesMultipleReports()
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+
+    var mockJsonReporter = CreateMockReporter("json", "{\"coverage\":\"data\"}");
+    var mockCoberturaReporter = CreateMockReporter("cobertura", "<coverage></coverage>");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("json")).Returns(mockJsonReporter.Object);
+    mockReporterFactory.Setup(x => x.CreateReporter("cobertura")).Returns(mockCoberturaReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string[] formats = ["json", "cobertura"];
+
+    // Act
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      "/fake/reports",
+      formats);
+
+    // Assert
+    Assert.Equal(2, generatedReports.Count);
+    Assert.Contains(generatedReports, r => r.EndsWith("coverage.json"));
+    Assert.Contains(generatedReports, r => r.EndsWith("coverage.cobertura"));
+
+    mockFileSystem.Verify(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+  }
+
+  private static Mock<IReporter> CreateMockReporter(string extension, string reportContent)
+  {
+    var mockReporter = new Mock<IReporter>();
+    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockReporter.Setup(x => x.Extension).Returns(extension);
+    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns(reportContent);
+    return mockReporter;
+  }
+
+  /// <summary>
+  /// Creates a CollectorExtension instance for testing with minimal setup.
+  /// </summary>
+  private static CollectorExtension CreateCollectorForTesting(
+    IFileSystem? fileSystem = null,
+    IReporterFactory? reporterFactory = null)
+  {
+    // Setup minimal command line options
+    var mockCommandLineOptions = new Mock<ICommandLineOptions>();
+    mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(It.IsAny<string>()))
+      .Returns(false);
+    mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+
+    // Setup minimal configuration
+    var mockConfiguration = new Mock<IConfiguration>();
+    mockConfiguration
+      .Setup(x => x[It.IsAny<string>()])
+      .Returns((string?)null);
+
+    // Setup minimal output device
+    var mockOutputDevice = new Mock<IOutputDevice>();
+
+    // Setup minimal logger factory
+    var mockLoggerFactory = new Mock<ILoggerFactory>();
+    var mockLogger = new Mock<Microsoft.Testing.Platform.Logging.ILogger>();
+    mockLoggerFactory
+      .Setup(x => x.CreateLogger(It.IsAny<string>()))
+      .Returns(mockLogger.Object);
+
+    // Use provided or create default mocks
+    IFileSystem testFileSystem = fileSystem ?? new Mock<IFileSystem>().Object;
+    IReporterFactory testReporterFactory = reporterFactory ?? new Mock<IReporterFactory>().Object;
+
+    return new CollectorExtension(
+      mockLoggerFactory.Object,
+      mockCommandLineOptions.Object,
+      mockOutputDevice.Object,
+      mockConfiguration.Object,
+      testFileSystem,
+      testReporterFactory);
+  }
+  #endregion
 }
+

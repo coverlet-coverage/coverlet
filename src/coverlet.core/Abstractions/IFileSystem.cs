@@ -7,6 +7,7 @@ namespace Coverlet.Core.Abstractions
 {
   internal interface IFileSystem
   {
+    void CreateDirectory(string path); // Add this method
     bool Exists(string path);
 
     void WriteAllText(string path, string contents);
