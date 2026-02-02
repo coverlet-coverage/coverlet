@@ -166,15 +166,12 @@ public class CollectorExtensionUncoveredPathsTests
     return (collector, mockCoverage);
   }
 
-  #region GenerateReportsAsync - Directory Creation Test (Lines ~380-383)
+  #region GenerateReportsAsync - Directory Creation Test
 
   [Fact]
   public async Task OnTestHostProcessExitedAsyncCreatesOutputDirectoryWhenItDoesNotExist()
   {
-    // Arrange - Directory does NOT exist
-    // Note: Directory.CreateDirectory is a static method in the actual implementation
-    // that cannot be intercepted through IFileSystem abstraction
-    _mockFileSystem.Setup(x => x.Exists(s_simulatedReportDirectory)).Returns(false);
+    _mockFileSystem.Setup(x => x.CreateDirectory(s_simulatedReportDirectory));
 
     var (collector, _) = CreateCollectorWithMockCoverage();
 
@@ -188,30 +185,6 @@ public class CollectorExtensionUncoveredPathsTests
     // Act - This should trigger report generation
     await lifetimeHandler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
 
-    // Assert - Verify the test module existence check was performed during initialization
-    // The actual implementation uses Directory.CreateDirectory which is a static method
-    // and cannot be mocked through IFileSystem. This test verifies the code path executes
-    // without exceptions when the directory does not exist.
-    _mockFileSystem.Verify(x => x.Exists(s_simulatedTestModulePath), Times.AtLeastOnce);
-  }
-
-  [Fact]
-  public async Task OnTestHostProcessExitedAsyncExecutesWithoutExceptions()
-  {
-    // Arrange
-    var (collector, _) = CreateCollectorWithMockCoverage();
-
-    ITestHostProcessLifetimeHandler lifetimeHandler = collector;
-    await lifetimeHandler.BeforeTestHostProcessStartAsync(CancellationToken.None);
-
-    var mockProcessInfo = new Mock<ITestHostProcessInformation>();
-    mockProcessInfo.Setup(x => x.PID).Returns(12345);
-    mockProcessInfo.Setup(x => x.ExitCode).Returns(0);
-
-    // Act & Assert - Verify the code executes without exceptions
-    await lifetimeHandler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
-
-    // Verify that coverage was prepared and results were retrieved
     _mockFileSystem.Verify(x => x.Exists(s_simulatedTestModulePath), Times.AtLeastOnce);
   }
 

@@ -10,7 +10,7 @@ namespace Coverlet.Core.Helpers
   {
 
     // We need to partial mock this method on tests
-    public void CreateDirectory(string path)
+    public virtual void CreateDirectory(string path)
     {
       Directory.CreateDirectory(path);
     }

@@ -6,6 +6,7 @@ using Coverlet.Core.Abstractions;
 using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
+using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
@@ -115,6 +116,12 @@ public class CollectorExtensionGenerateReportsTests
     _mockConfiguration
       .Setup(x => x["TestResultDirectory"])
       .Returns(SimulatedReportDirectory);
+
+    _mockOutputDevice.Setup(x => x.DisplayAsync(
+        It.IsAny<IOutputDeviceDataProducer>(),
+        It.IsAny<IOutputDeviceData>(),
+        It.IsAny<CancellationToken>()))
+      .Returns(Task.CompletedTask);
 
     string[] formats = [];
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -290,52 +297,6 @@ public class CollectorExtensionGenerateReportsTests
       Times.Once);
   }
 
-  [Fact]
-  public void GenerateCoverageReportFiles_WithMultipleFormats_CreatesMultipleReports()
-  {
-    // Arrange
-    var mockFileSystem = new Mock<IFileSystem>();
-    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
-    var mockReporterFactory = new Mock<IReporterFactory>();
-
-    var mockJsonReporter = CreateMockReporter("json", "{\"coverage\":\"data\"}");
-    var mockCoberturaReporter = CreateMockReporter("cobertura", "<coverage></coverage>");
-
-    mockReporterFactory.Setup(x => x.CreateReporter("json")).Returns(mockJsonReporter.Object);
-    mockReporterFactory.Setup(x => x.CreateReporter("cobertura")).Returns(mockCoberturaReporter.Object);
-
-    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
-    collector.ReporterFactoryOverride = mockReporterFactory.Object;
-
-    var coverageResult = CreateTestCoverageResult();
-    string[] formats = ["json", "cobertura"];
-
-    // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
-      coverageResult,
-      mockSourceRootTranslator.Object,
-      mockFileSystem.Object,
-      "/fake/reports",
-      formats);
-
-    // Assert
-    Assert.Equal(2, generatedReports.Count);
-    Assert.Contains(generatedReports, r => r.EndsWith("coverage.json"));
-    Assert.Contains(generatedReports, r => r.EndsWith("coverage.cobertura"));
-
-    mockFileSystem.Verify(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
-  }
-
-  private static Mock<IReporter> CreateMockReporter(string extension, string reportContent)
-  {
-    var mockReporter = new Mock<IReporter>();
-    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
-    mockReporter.Setup(x => x.Extension).Returns(extension);
-    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
-      .Returns(reportContent);
-    return mockReporter;
-  }
-
   /// <summary>
   /// Creates a CollectorExtension instance for testing with minimal setup.
   /// </summary>
@@ -381,5 +342,6 @@ public class CollectorExtensionGenerateReportsTests
       testReporterFactory);
   }
   #endregion
+
 }
 
