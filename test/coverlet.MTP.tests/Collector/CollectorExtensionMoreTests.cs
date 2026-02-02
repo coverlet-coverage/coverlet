@@ -26,8 +26,21 @@ public class CollectorExtensionUncoveredPathsTests
   private readonly Mock<IFileSystem> _mockFileSystem;
   private readonly Mock<IOutputDevice> _mockOutputDevice;
 
-  private const string SimulatedTestModulePath = "/fake/path/test.dll";
-  private const string SimulatedReportDirectory = "/fake/reports";
+  private static readonly string s_simulatedTestModulePath = CreatePlatformPath("fake", "path", "test.dll");
+  private static readonly string s_simulatedReportDirectory = CreatePlatformPath("fake", "reports");
+
+  /// <summary>
+  /// Creates a platform-specific path from path segments.
+  /// This ensures paths work correctly on Windows, Linux, and macOS.
+  /// </summary>
+  /// <param name="segments">Path segments to combine</param>
+  /// <returns>Platform-specific path</returns>
+  private static string CreatePlatformPath(params string[] segments)
+  {
+    // For simulated/fake paths, start with directory separator to make it absolute
+    string basePath = Path.DirectorySeparatorChar.ToString();
+    return Path.Combine(basePath, Path.Combine(segments));
+  }
 
   public CollectorExtensionUncoveredPathsTests()
   {
@@ -59,7 +72,7 @@ public class CollectorExtensionUncoveredPathsTests
       .Returns((string?)null);
 
     _mockFileSystem
-      .Setup(x => x.Exists(SimulatedTestModulePath))
+      .Setup(x => x.Exists(s_simulatedTestModulePath))
       .Returns(true);
   }
 
@@ -81,7 +94,7 @@ public class CollectorExtensionUncoveredPathsTests
 
     var classes = new Classes { { "TestNamespace.TestClass", methods } };
     var documents = new Documents { { "TestFile.cs", classes } };
-    var modules = new Modules { { SimulatedTestModulePath, documents } };
+    var modules = new Modules { { s_simulatedTestModulePath, documents } };
 
     return new CoverageResult
     {
@@ -99,12 +112,12 @@ public class CollectorExtensionUncoveredPathsTests
 
     _mockConfiguration
       .Setup(x => x["TestModule"])
-      .Returns(SimulatedTestModulePath);
+      .Returns(s_simulatedTestModulePath);
 
     // Mock the underlying configuration property instead of the extension method
     _mockConfiguration
       .Setup(x => x["TestResultDirectory"])
-      .Returns(SimulatedReportDirectory);
+      .Returns(s_simulatedReportDirectory);
 
     // Setup json format (file-based reporter)
     string[] formats = ["json"];
@@ -161,7 +174,7 @@ public class CollectorExtensionUncoveredPathsTests
     // Arrange - Directory does NOT exist
     // Note: Directory.CreateDirectory is a static method in the actual implementation
     // that cannot be intercepted through IFileSystem abstraction
-    _mockFileSystem.Setup(x => x.Exists(SimulatedReportDirectory)).Returns(false);
+    _mockFileSystem.Setup(x => x.Exists(s_simulatedReportDirectory)).Returns(false);
 
     var (collector, _) = CreateCollectorWithMockCoverage();
 
@@ -179,7 +192,7 @@ public class CollectorExtensionUncoveredPathsTests
     // The actual implementation uses Directory.CreateDirectory which is a static method
     // and cannot be mocked through IFileSystem. This test verifies the code path executes
     // without exceptions when the directory does not exist.
-    _mockFileSystem.Verify(x => x.Exists(SimulatedTestModulePath), Times.AtLeastOnce);
+    _mockFileSystem.Verify(x => x.Exists(s_simulatedTestModulePath), Times.AtLeastOnce);
   }
 
   [Fact]
@@ -199,7 +212,7 @@ public class CollectorExtensionUncoveredPathsTests
     await lifetimeHandler.OnTestHostProcessExitedAsync(mockProcessInfo.Object, CancellationToken.None);
 
     // Verify that coverage was prepared and results were retrieved
-    _mockFileSystem.Verify(x => x.Exists(SimulatedTestModulePath), Times.AtLeastOnce);
+    _mockFileSystem.Verify(x => x.Exists(s_simulatedTestModulePath), Times.AtLeastOnce);
   }
 
   #endregion
