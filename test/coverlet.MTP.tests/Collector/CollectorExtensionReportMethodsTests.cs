@@ -4,7 +4,6 @@
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.MTP.CommandLine;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
@@ -140,35 +139,6 @@ public class CollectorExtensionReportMethodsTests
       _mockOutputDevice.Object,
       _mockConfiguration.Object,
       _mockFileSystem.Object);
-  }
-
-  /// <summary>
-  /// Creates a mock service provider with required dependencies for report generation.
-  /// </summary>
-  private IServiceProvider CreateMockServiceProvider()
-  {
-    var services = new ServiceCollection();
-    services.AddSingleton(_mockFileSystem.Object);
-    services.AddSingleton(_mockSourceRootTranslator.Object);
-    return services.BuildServiceProvider();
-  }
-
-  /// <summary>
-  /// Creates a mock reporter factory that returns a file-based reporter.
-  /// </summary>
-  private Mock<IReporterFactory> CreateMockReporterFactory(CoverageResult result)
-  {
-    var mockReporter = new Mock<IReporter>();
-    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
-    mockReporter.Setup(x => x.Extension).Returns("json");
-    mockReporter.Setup(x => x.Report(result, It.IsAny<ISourceRootTranslator>()))
-      .Returns("{\"coverage\":\"data\"}");
-
-    var mockReporterFactory = new Mock<IReporterFactory>();
-    mockReporterFactory.Setup(x => x.CreateReporter(It.IsAny<string>()))
-      .Returns(mockReporter.Object);
-
-    return mockReporterFactory;
   }
 
   #region GenerateCoverageReportFiles Tests
