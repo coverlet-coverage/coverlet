@@ -8,6 +8,13 @@ namespace Coverlet.Core.Helpers
 {
   internal class FileSystem : IFileSystem
   {
+
+    // We need to partial mock this method on tests
+    public virtual void CreateDirectory(string path)
+    {
+      Directory.CreateDirectory(path);
+    }
+
     // We need to partial mock this method on tests
     public virtual bool Exists(string path)
     {

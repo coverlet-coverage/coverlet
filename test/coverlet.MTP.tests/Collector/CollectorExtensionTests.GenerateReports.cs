@@ -6,6 +6,7 @@ using Coverlet.Core.Abstractions;
 using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
+using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
@@ -115,6 +116,12 @@ public class CollectorExtensionGenerateReportsTests
     _mockConfiguration
       .Setup(x => x["TestResultDirectory"])
       .Returns(SimulatedReportDirectory);
+
+    _mockOutputDevice.Setup(x => x.DisplayAsync(
+        It.IsAny<IOutputDeviceDataProducer>(),
+        It.IsAny<IOutputDeviceData>(),
+        It.IsAny<CancellationToken>()))
+      .Returns(Task.CompletedTask);
 
     string[] formats = [];
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -244,4 +251,97 @@ public class CollectorExtensionGenerateReportsTests
   }
 
   #endregion
+
+  #region GenerateCoverageReportFiles Tests
+
+  [Fact]
+  public void GenerateCoverageReportFiles_WithJsonFormat_CreatesJsonReport()
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+    var mockReporter = new Mock<IReporter>();
+
+    // Setup mocks
+    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockReporter.Setup(x => x.Extension).Returns("json");
+    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("{\"coverage\":\"data\"}");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("json")).Returns(mockReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string outputDirectory = "/fake/reports";
+    string[] formats = ["json"];
+
+    // Act
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      outputDirectory,
+      formats);
+
+    // Assert
+    Assert.Single(generatedReports);
+    Assert.EndsWith("coverage.json", generatedReports[0]);
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("coverage.json")),
+        It.Is<string>(content => content.Contains("coverage"))),
+      Times.Once);
+  }
+
+  /// <summary>
+  /// Creates a CollectorExtension instance for testing with minimal setup.
+  /// </summary>
+  private static CollectorExtension CreateCollectorForTesting(
+    IFileSystem? fileSystem = null,
+    IReporterFactory? reporterFactory = null)
+  {
+    // Setup minimal command line options
+    var mockCommandLineOptions = new Mock<ICommandLineOptions>();
+    mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(It.IsAny<string>()))
+      .Returns(false);
+    mockCommandLineOptions
+      .Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
+      .Returns(false);
+
+    // Setup minimal configuration
+    var mockConfiguration = new Mock<IConfiguration>();
+    mockConfiguration
+      .Setup(x => x[It.IsAny<string>()])
+      .Returns((string?)null);
+
+    // Setup minimal output device
+    var mockOutputDevice = new Mock<IOutputDevice>();
+
+    // Setup minimal logger factory
+    var mockLoggerFactory = new Mock<ILoggerFactory>();
+    var mockLogger = new Mock<Microsoft.Testing.Platform.Logging.ILogger>();
+    mockLoggerFactory
+      .Setup(x => x.CreateLogger(It.IsAny<string>()))
+      .Returns(mockLogger.Object);
+
+    // Use provided or create default mocks
+    IFileSystem testFileSystem = fileSystem ?? new Mock<IFileSystem>().Object;
+    IReporterFactory testReporterFactory = reporterFactory ?? new Mock<IReporterFactory>().Object;
+
+    return new CollectorExtension(
+      mockLoggerFactory.Object,
+      mockCommandLineOptions.Object,
+      mockOutputDevice.Object,
+      mockConfiguration.Object,
+      testFileSystem,
+      testReporterFactory);
+  }
+  #endregion
+
 }
+
