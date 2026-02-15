@@ -7,10 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Release date 2026-02-15
+### Packages
+coverlet.msbuild 8.0.0
+coverlet.console 8.0.0
+coverlet.collector 8.0.0
+coverlet.MTP 8.0.0
+
+**Special Thanks:** A huge thank you to [@Bertk](https://github.com/Bertk) for driving the majority of the work in this release! 🎉
+
 ### Fixed
 - Fix System.CommandLine 2.0 release is available [#1776](https://github.com/coverlet-coverage/coverlet/issues/1776)
 - Fix Excluding From Coverage bad defaults from given example [#1764](https://github.com/coverlet-coverage/coverlet/issues/1764)
 - Fix branchpoint exclusion for sdk 8.0.407 [#1741](https://github.com/coverlet-coverage/coverlet/issues/1741)
+- Fix missing copyright information in NuGet [#1794](https://github.com/coverlet-coverage/coverlet/issues/1794)
+- Fix bad default values in documentation [#1764](https://github.com/coverlet-coverage/coverlet/issues/1764) by <https://github.com/cboudereau>
 
 ### Improvements
 
