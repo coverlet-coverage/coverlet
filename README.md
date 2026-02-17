@@ -147,7 +147,8 @@ See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 
 #### Requirements (coverlet.msbuild)
 
-Requires a runtime that support *.NET Standard 2.0 and above*
+* Requires a runtime that support *.NET Standard 2.0 and above*
+* *You need to be running .NET 8.0 SDK v8.0.112 or newer*
 
 ### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), suffers from possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
