@@ -88,8 +88,7 @@ dotnet run --project <your-test-project> -- --coverlet --coverlet-output-format 
 #### Requirements (coverlet.MTP)
 
 * *.NET 8.0 SDK or newer*
-* *Test project configured for Microsoft Testing Platform*
-* *Reference to `Microsoft.Testing.Platform` packages*
+* *Test project configured for [Microsoft Testing Platform](https://www.nuget.org/packages/Microsoft.Testing.Platform)*
 
 ### VSTest Integration (preferred due to [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
@@ -116,8 +115,8 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 
 #### Requirements (coverlet.collector)
 
-* *You need to be running .NET 8.0 SDK v8.0.112 or newer*
-* *You need to reference version 17.12.0 and above of Microsoft.NET.Test.Sdk*
+* **.NET 8.0 SDK is required** (version 8.0.112 or higher)
+* **Microsoft.NET.Test.Sdk version 17.12.0** or higher
 
 ```xml
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
@@ -147,7 +146,8 @@ See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 
 #### Requirements (coverlet.msbuild)
 
-Requires a runtime that support *.NET Standard 2.0 and above*
+* **.NET 8.0 SDK is required** (version 8.0.112 or higher)
+* **.NET Framework** that supports .NET Standard 2.0
 
 ### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), suffers from possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
@@ -173,9 +173,8 @@ See [documentation](Documentation/GlobalTool.md) for advanced usage.
 
 #### Requirements (coverlet.console)
 
-.NET global tools rely on a .NET Core runtime installed on your machine <https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong>
-
-.NET Coverlet global tool requires *.NET 8.0 or above*
+* .NET global tools rely on a .NET Core runtime installed on your machine <https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong>
+* .NET Coverlet global tool requires *.NET 8.0 or above*
 
 ## How It Works
 
