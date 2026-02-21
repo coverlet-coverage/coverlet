@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" />
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>$(NetMinimum);net9.0;$(NetCurrent)</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <IsTestProject>true</IsTestProject>
@@ -69,9 +69,11 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="copy $(ArtifactsPath)\$(ArtifactsBinOutputName)\coverlet.tests.projectsample.excludedbyattribute\$(Configuration) $(TargetDir)TestAssets /Y" />
-    <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) OR $([MSBuild]::IsOSPlatform('Linux'))" Command="cp -r $(ArtifactsPath)/$(ArtifactsBinOutputName)/coverlet.tests.projectsample.excludedbyattribute/$(ArtifactsPivots) $(TargetDir)TestAssets" />
+  <Target Name="CopyExcludedByAttributeAssets" AfterTargets="Build">
+    <ItemGroup>
+      <ExcludedByAttributeFiles Include="$(RepoRoot)artifacts\$(ArtifactsBinOutputName)\coverlet.tests.projectsample.excludedbyattribute\debug\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ExcludedByAttributeFiles)" DestinationFolder="$(OutputPath)TestAssets" SkipUnchangedFiles="true" />
   </Target>
 
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" />
