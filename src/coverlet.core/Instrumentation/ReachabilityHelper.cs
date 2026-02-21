@@ -122,8 +122,6 @@ namespace Coverlet.Core.Instrumentation.Reachability
         }
       }
 
-      private readonly ImmutableArray<int> _targetOffsets;
-
       /// <summary>
       /// Targets of the branch, assuming it has multiple targets.
       /// 
@@ -138,7 +136,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
             throw new InvalidOperationException($"{HasMultiTargets} is false");
           }
 
-          return _targetOffsets;
+          return field;
         }
       }
 
@@ -146,7 +144,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
       {
         Offset = offset;
         _targetOffset = targetOffset;
-        _targetOffsets = ImmutableArray<int>.Empty;
+        TargetOffsets = ImmutableArray<int>.Empty;
       }
 
       public BranchInstruction(int offset, ImmutableArray<int> targetOffset)
@@ -158,7 +156,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
         Offset = offset;
         _targetOffset = -1;
-        _targetOffsets = targetOffset;
+        TargetOffsets = targetOffset;
       }
 
       public override string ToString()

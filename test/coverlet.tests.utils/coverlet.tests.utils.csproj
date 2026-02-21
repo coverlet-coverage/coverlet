@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetMinimum);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(NetMinimum);net9.0;$(NetCurrent);netstandard2.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
     <SignAssembly>False</SignAssembly>
