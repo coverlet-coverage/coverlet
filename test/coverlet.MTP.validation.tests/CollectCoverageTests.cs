@@ -552,10 +552,10 @@ public class CollectCoverageTests
   </ItemGroup>
   <ItemGroup>
     <!-- Use xunit.v3.mtp-v2 which is designed for MTP v2.x -->
-    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.1"" />
-    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.0.2"" />
+    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
+    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.1.0"" />
     <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.0.2"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.1.0"" />
   </ItemGroup>
 </Project>");
 

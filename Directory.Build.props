@@ -2,7 +2,7 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <NetCurrent>net9.0</NetCurrent>
+    <NetCurrent>net10.0</NetCurrent>
     <NetMinimum>net8.0</NetMinimum>
     <FullFrameworkTFM>net472</FullFrameworkTFM>
     <!-- enforce CamelCase case string-->
@@ -18,7 +18,7 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>latest</LangVersion>
     <NoWarn>$(NoWarn);NU1507;NU5105;CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RestoreSources>
@@ -29,6 +29,7 @@
     <!-- C:\Program Files\dotnet\sdk\8.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.DefaultOutputPaths.targets -->
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+    <ArtifactsBinOutputName>bin</ArtifactsBinOutputName>
     <CoverletVersion Condition="'$(CoverletVersion)'==''">8.0.0</CoverletVersion>
     <!-- Breaking change NET 8.0 InformationalVersion with SourceRevisionId -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
