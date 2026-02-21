@@ -7,8 +7,6 @@ namespace Coverlet.Core
 {
   internal class CoverageDetails
   {
-    private double _averageModulePercent;
-
     public Modules Modules { get; internal set; }
     public double Covered { get; internal set; }
     public int Total { get; internal set; }
@@ -23,8 +21,8 @@ namespace Coverlet.Core
 
     public double AverageModulePercent
     {
-      get { return Math.Floor(_averageModulePercent * 100) / 100; }
-      internal set { _averageModulePercent = value; }
+      get { return Math.Floor(field * 100) / 100; }
+      internal set;
     }
   }
 }

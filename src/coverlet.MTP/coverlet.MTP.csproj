@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;$(NetMinimum)</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;$(NetMinimum);$(NetCurrent)</TargetFrameworks>
     <AssemblyTitle>Coverlet.MTP</AssemblyTitle>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>

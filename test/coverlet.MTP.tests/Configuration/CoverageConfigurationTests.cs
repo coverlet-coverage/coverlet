@@ -75,7 +75,7 @@ public sealed class CoverageConfigurationTests
     string[] expectedFormats = ["json", "lcov", "opencover"];
     _mockCommandLineOptions
       .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out formats) =>
       {
         formats = expectedFormats;
         return true;
@@ -91,7 +91,7 @@ public sealed class CoverageConfigurationTests
   public void GetOutputFormatsWhenFormatsOptionNotSetReturnsDefaultFormats()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out formats) =>
       {
         formats = null;
         return false;
@@ -109,7 +109,7 @@ public sealed class CoverageConfigurationTests
   public void GetOutputFormatsWithEmptyArrayReturnsDefaultFormats()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out formats) =>
       {
         formats = [];
         return true;
@@ -126,7 +126,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] expectedFormats = ["cobertura"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out formats) =>
       {
         formats = expectedFormats;
         return true;
@@ -148,7 +148,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] expectedFilters = ["[MyAssembly]*", "[AnotherAssembly]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = expectedFilters;
         return true;
@@ -164,7 +164,7 @@ public sealed class CoverageConfigurationTests
   public void GetIncludeFiltersWhenOptionNotSetReturnsEmptyArray()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = null;
         return false;
@@ -181,7 +181,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] expectedFilters = ["[My.Assembly*]*", "[Another+Assembly]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = expectedFilters;
         return true;
@@ -202,7 +202,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] customFilters = ["[CustomExclude]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = customFilters;
         return true;
@@ -221,7 +221,7 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeFiltersWhenOptionNotSetReturnsDefaults()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = null;
         return false;
@@ -241,7 +241,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] customFilters = ["[xunit.*]*", "[CustomExclude]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = customFilters;
         return true;
@@ -259,7 +259,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] customFilters = ["[xunit.*]*", "[Microsoft.Testing.*]*", "[CustomExclude]*", "[xunit.*]*"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = customFilters;
         return true;
@@ -282,7 +282,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] expectedFilters = ["**/Migrations/**", "**/Generated/**"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = expectedFilters;
         return true;
@@ -298,7 +298,7 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeByFileFiltersWhenOptionNotSetReturnsEmptyArray()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = null;
         return false;
@@ -315,7 +315,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] expectedFilters = ["**/*.Designer.cs", "obj/**/*", "bin/**/*.g.cs"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = expectedFilters;
         return true;
@@ -336,7 +336,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] customAttributes = ["CustomExcludeAttribute"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out attributes) =>
       {
         attributes = customAttributes;
         return true;
@@ -356,7 +356,7 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeByAttributeFiltersWhenOptionNotSetReturnsDefaults()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out attributes) =>
       {
         attributes = null;
         return false;
@@ -377,7 +377,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] customAttributes = ["GeneratedCodeAttribute", "CustomAttribute"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out attributes) =>
       {
         attributes = customAttributes;
         return true;
@@ -395,7 +395,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] customAttributes = ["System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out attributes) =>
       {
         attributes = customAttributes;
         return true;
@@ -417,7 +417,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] expectedDirectories = [@"C:\MyDir", @"C:\AnotherDir"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? directories) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out directories) =>
       {
         directories = expectedDirectories;
         return true;
@@ -433,7 +433,7 @@ public sealed class CoverageConfigurationTests
   public void GetIncludeDirectoriesWhenOptionNotSetReturnsEmptyArray()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? directories) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out directories) =>
       {
         directories = null;
         return false;
@@ -450,7 +450,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] expectedDirectories = [@"..\src", @"./lib"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? directories) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out directories) =>
       {
         directories = expectedDirectories;
         return true;
@@ -515,7 +515,7 @@ public sealed class CoverageConfigurationTests
   {
     string expectedOption = "All";
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeAssembliesWithoutSources, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out filters) =>
       {
         filters = [expectedOption];
         return true;
@@ -546,7 +546,7 @@ public sealed class CoverageConfigurationTests
   {
     string[] expectedAttributes = ["DoesNotReturnAttribute", "ThrowsAttribute"];
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.DoesNotReturnAttribute, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out attributes) =>
       {
         attributes = expectedAttributes;
         return true;
@@ -562,7 +562,7 @@ public sealed class CoverageConfigurationTests
   public void GetDoesNotReturnAttributesWhenOptionNotSetReturnsEmptyArray()
   {
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.DoesNotReturnAttribute, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out attributes) =>
       {
         attributes = null;
         return false;
@@ -628,7 +628,7 @@ public sealed class CoverageConfigurationTests
     // Arrange
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(It.IsAny<string>())).Returns(false);
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? value) =>
+      .Returns(new TryGetOptionArgumentListDelegate((optionName, out value) =>
       {
         value = null;
         return false;
