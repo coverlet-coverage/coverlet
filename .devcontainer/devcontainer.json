@@ -1,51 +1,51 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
-	"name": "C# (.NET) Coverlet",
+  "name": "C# (.NET) Coverlet",
     "build": {
         "dockerfile": "./Dockerfile",
         "context": "."
     },
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"ms-dotnettools.csharp",
-				"ms-dotnettools.csdevkit",
-				"humao.rest-client",
-				"42Crunch.vscode-openapi",
-				"stoplight.spectral",
-				"ms-dotnettools.dotnet-interactive-vscode",
-				"ms-dotnettools.vscode-dotnet-runtime",
-				"GitHub.vscode-pull-request-github",
-				"ms-vscode.powershell",
-				"ms-azure-devops.azure-pipelines",
-				"GitHub.copilot-chat",
-				"GitHub.copilot",
-				"github.vscode-github-actions",
-				"bierner.markdown-preview-github-styles",
-				"mhutchie.git-graph",
-				"streetsidesoftware.code-spell-checker",
-				"streetsidesoftware.code-spell-checker-german",
-				"streetsidesoftware.code-spell-checker-english",
-				"fernandoescolar.vscode-solution-explorer"
+    "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "humao.rest-client",
+        "42Crunch.vscode-openapi",
+        "stoplight.spectral",
+        "ms-dotnettools.dotnet-interactive-vscode",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "GitHub.vscode-pull-request-github",
+        "ms-vscode.powershell",
+        "ms-azure-devops.azure-pipelines",
+        "GitHub.copilot-chat",
+        "GitHub.copilot",
+        "github.vscode-github-actions",
+        "bierner.markdown-preview-github-styles",
+        "mhutchie.git-graph",
+        "streetsidesoftware.code-spell-checker",
+        "streetsidesoftware.code-spell-checker-german",
+        "streetsidesoftware.code-spell-checker-english",
+        "fernandoescolar.vscode-solution-explorer"
 
-			]
-		}
-	}
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+      ]
+    }
+  }
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [5000, 5001],
-	// "portsAttributes": {
-	//		"5001": {
-	//			"protocol": "https"
-	//		}
-	// }
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [5000, 5001],
+  // "portsAttributes": {
+  //    "5001": {
+  //      "protocol": "https"
+  //    }
+  // }
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "dotnet restore",
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "dotnet restore",
 
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
 }
