@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.VisualStudio.TestPlatform;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using Moq;
 using Xunit;
 
@@ -108,7 +109,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       InstrumenterResult result = instrumenter.Instrument();
       Assert.NotNull(result);
       Assert.Equal(1052, result.Documents.Count);
-      foreach ((string docName, Document _) in result.Documents)
+      foreach ((string docName, Coverlet.Core.Instrumentation.Document _) in result.Documents)
       {
         Assert.False(docName.EndsWith(@"System.Private.CoreLib\src\System\Threading\Interlocked.cs"));
       }
@@ -153,7 +154,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       InstrumenterTest instrumenterTest = CreateInstrumentor();
       InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-      Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+      Coverlet.Core.Instrumentation.Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
       Assert.NotNull(doc);
 
       bool found = doc.Lines.Values.Any(l => l.Class == excludedType.FullName);
@@ -170,7 +171,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
       InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-      Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+      Coverlet.Core.Instrumentation.Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
       Assert.NotNull(doc);
 
       bool found = doc.Lines.Values.Any(l => l.Class == excludedType.FullName);
@@ -188,7 +189,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
       InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-      Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+      Coverlet.Core.Instrumentation.Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
       Assert.NotNull(doc);
 #pragma warning disable CS0612 // Type or member is obsolete
       bool found = doc.Lines.Values.Any(l => l.Class.Equals(typeof(ClassExcludedByObsoleteAttr).FullName));
@@ -208,7 +209,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
       InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-      Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+      Coverlet.Core.Instrumentation.Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
       Assert.NotNull(doc);
       bool found = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::Method(System.String)"));
       Assert.False(found, "Method decorated with with exclude attribute should be excluded");
@@ -225,7 +226,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { excludedAttribute });
       InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-      Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+      Coverlet.Core.Instrumentation.Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
       Assert.NotNull(doc);
       bool getFound = doc.Lines.Values.Any(l => l.Method.Equals($"System.String Coverlet.Core.Samples.Tests.{testClassName}::get_Property()"));
       Assert.False(getFound, "Property getter decorated with with exclude attribute should be excluded");
@@ -708,7 +709,7 @@ public class SampleClass
       InstrumenterTest instrumenterTest = CreateInstrumentor();
       InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
 
-      Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.DoesNotReturn.cs");
+      Coverlet.Core.Instrumentation.Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Instrumentation.DoesNotReturn.cs");
 
       // check for instrumented lines
       doc.AssertNonInstrumentedLines(BuildConfiguration.Debug, notReachableLines);
@@ -772,6 +773,166 @@ public class SampleClass
       Assert.Equal("8.0.0", referencedFrameworks[0].Version);
       Assert.Equal("Microsoft.AspNetCore.App", referencedFrameworks[1].Name);
       Assert.Equal("8.0.0", referencedFrameworks[1].Version);
+    }
+
+    /// <summary>
+    /// Regression test for https://github.com/coverlet-coverage/coverlet/issues/1818
+    /// When instrumenting a .NET Framework assembly, the injected Tracker class should not
+    /// reference System.Runtime. All type references should point to mscorlib.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "NetFramework")]
+    public void TestInstrument_NetFrameworkAssembly_TrackerUsesCorlibNotSystemRuntime()
+    {
+      // Skip on non-Windows or if .NET Framework sample not built
+      if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+      {
+        return;
+      }
+
+      // Arrange - Find the .NET Framework sample assembly
+      string netFrameworkProjectPath = TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.netframework");
+      string netFrameworkAssemblyPath = Path.Combine(
+          netFrameworkProjectPath,
+          TestUtils.GetBuildConfigurationString(),
+          "coverlet.tests.projectsample.netframework.dll");
+
+      if (!File.Exists(netFrameworkAssemblyPath))
+      {
+        // Skip if the .NET Framework sample hasn't been built
+        return;
+      }
+
+      // Create a temp directory for instrumentation
+      string identifier = Guid.NewGuid().ToString();
+      DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
+      string destModule = "coverlet.tests.projectsample.netframework.dll";
+      string destPdb = "coverlet.tests.projectsample.netframework.pdb";
+
+      try
+      {
+        // Copy the assembly and PDB to temp directory
+        File.Copy(netFrameworkAssemblyPath, Path.Combine(directory.FullName, destModule), true);
+        string pdbPath = Path.ChangeExtension(netFrameworkAssemblyPath, ".pdb");
+        if (File.Exists(pdbPath))
+        {
+          File.Copy(pdbPath, Path.Combine(directory.FullName, destPdb), true);
+        }
+
+        string modulePath = Path.Combine(directory.FullName, destModule);
+
+        var instrumentationHelper = new InstrumentationHelper(
+            new ProcessExitHandler(),
+            new RetryHelper(),
+            new FileSystem(),
+            _mockLogger.Object,
+            new SourceRootTranslator(_mockLogger.Object, new FileSystem()));
+
+        var parameters = new CoverageParameters();
+        var instrumenter = new Instrumenter(
+            modulePath,
+            identifier,
+            parameters,
+            _mockLogger.Object,
+            instrumentationHelper,
+            new FileSystem(),
+            new SourceRootTranslator(_mockLogger.Object, new FileSystem()),
+            new CecilSymbolHelper());
+
+        // Act - Instrument the assembly
+        if (!instrumenter.CanInstrument())
+        {
+          // Skip if cannot instrument (e.g., no PDB)
+          return;
+        }
+
+        InstrumenterResult result = instrumenter.Instrument();
+        Assert.NotNull(result);
+
+        // Assert - Read the instrumented assembly and verify Tracker type references
+        using var instrumentedModule = ModuleDefinition.ReadModule(modulePath);
+
+        // Find the injected Tracker type
+        TypeDefinition trackerType = instrumentedModule.Types.FirstOrDefault(
+            t => t.Namespace.StartsWith("Coverlet.Core.Instrumentation.Tracker"));
+
+        Assert.NotNull(trackerType);
+
+        // Verify the module's CoreLibrary is mscorlib (confirms it's a .NET Framework assembly)
+        Assert.Equal("mscorlib", instrumentedModule.TypeSystem.CoreLibrary.Name);
+
+        // Verify no type references in the Tracker class point to System.Runtime
+        foreach (FieldDefinition field in trackerType.Fields)
+        {
+          AssertTypeNotSystemRuntime(field.FieldType, "Field: " + field.Name);
+        }
+
+        foreach (MethodDefinition method in trackerType.Methods)
+        {
+          // Check return type
+          AssertTypeNotSystemRuntime(method.ReturnType, $"Method return: {method.Name}");
+
+          // Check parameter types
+          foreach (ParameterDefinition param in method.Parameters)
+          {
+            AssertTypeNotSystemRuntime(param.ParameterType, $"Method param: {method.Name}.{param.Name}");
+          }
+
+          // Check local variable types
+          if (method.HasBody)
+          {
+            foreach (VariableDefinition variable in method.Body.Variables)
+            {
+              AssertTypeNotSystemRuntime(variable.VariableType, $"Method local: {method.Name}");
+            }
+
+            // Check method references in instructions
+            foreach (Instruction instr in method.Body.Instructions)
+            {
+              if (instr.Operand is MethodReference methodRef)
+              {
+                AssertTypeNotSystemRuntime(methodRef.DeclaringType, $"Instruction method ref: {methodRef.FullName}");
+              }
+              else if (instr.Operand is TypeReference typeRef)
+              {
+                AssertTypeNotSystemRuntime(typeRef, $"Instruction type ref: {typeRef.FullName}");
+              }
+            }
+          }
+        }
+      }
+      finally
+      {
+        // Cleanup
+        try
+        {
+          directory.Delete(true);
+        }
+        catch
+        {
+          // Ignore cleanup errors
+        }
+      }
+    }
+
+    private static void AssertTypeNotSystemRuntime(TypeReference typeRef, string context)
+    {
+      if (typeRef is null)
+        return;
+
+      // Get the element type (handle arrays, generics, etc.)
+      TypeReference elementType = typeRef.GetElementType();
+
+      // Check the scope
+      IMetadataScope scope = elementType.Scope;
+      if (scope is AssemblyNameReference assemblyRef)
+      {
+        // xUnit v3 doesn't support custom messages in Assert.NotEqual
+        // Use Assert.False with condition instead
+        Assert.False(
+            assemblyRef.Name == "System.Runtime",
+            $"Type '{typeRef.FullName}' in {context} should not reference System.Runtime, but found scope: {assemblyRef.Name}");
+      }
     }
   }
 }

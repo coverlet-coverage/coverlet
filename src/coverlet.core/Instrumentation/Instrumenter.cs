@@ -340,7 +340,7 @@ namespace Coverlet.Core.Instrumentation
         {
           var fieldClone = new FieldDefinition(fieldDef.Name, fieldDef.Attributes, fieldDef.FieldType)
           {
-            FieldType = module.ImportReference(fieldDef.FieldType)
+            FieldType = ImportToCoreLibrary(module, fieldDef.FieldType)
           };
 
           _customTrackerTypeDef.Fields.Add(fieldClone);
@@ -361,12 +361,12 @@ namespace Coverlet.Core.Instrumentation
 
           foreach (ParameterDefinition parameter in methodDef.Parameters)
           {
-            methodOnCustomType.Parameters.Add(new ParameterDefinition(module.ImportReference(parameter.ParameterType)));
+            methodOnCustomType.Parameters.Add(new ParameterDefinition(ImportToCoreLibrary(module, parameter.ParameterType)));
           }
 
           foreach (VariableDefinition variable in methodDef.Body.Variables)
           {
-            methodOnCustomType.Body.Variables.Add(new VariableDefinition(module.ImportReference(variable.VariableType)));
+            methodOnCustomType.Body.Variables.Add(new VariableDefinition(ImportToCoreLibrary(module, variable.VariableType)));
           }
 
           methodOnCustomType.Body.InitLocals = methodDef.Body.InitLocals;
@@ -382,14 +382,14 @@ namespace Coverlet.Core.Instrumentation
               if (!methodReference.FullName.Contains(moduleTrackerTemplate.Namespace))
               {
                 // External method references, just import then
-                instr.Operand = module.ImportReference(methodReference);
+                instr.Operand = ImportMethodToCoreLibrary(module, methodReference);
               }
               else
               {
                 // Move to the custom type
                 var updatedMethodReference = new MethodReference(methodReference.Name, methodReference.ReturnType, _customTrackerTypeDef);
                 foreach (ParameterDefinition parameter in methodReference.Parameters)
-                  updatedMethodReference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, module.ImportReference(parameter.ParameterType)));
+                  updatedMethodReference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, ImportToCoreLibrary(module, parameter.ParameterType)));
 
                 instr.Operand = updatedMethodReference;
               }
@@ -400,7 +400,7 @@ namespace Coverlet.Core.Instrumentation
             }
             else if (instr.Operand is TypeReference typeReference)
             {
-              instr.Operand = module.ImportReference(typeReference);
+              instr.Operand = ImportToCoreLibrary(module, typeReference);
             }
 
             ilProcessor.Append(instr);
@@ -410,7 +410,7 @@ namespace Coverlet.Core.Instrumentation
           {
             if (handler.CatchType != null)
             {
-              handler.CatchType = module.ImportReference(handler.CatchType);
+              handler.CatchType = ImportToCoreLibrary(module, handler.CatchType);
             }
 
             methodOnCustomType.Body.ExceptionHandlers.Add(handler);
@@ -424,6 +424,67 @@ namespace Coverlet.Core.Instrumentation
 
       Debug.Assert(_customTrackerHitsArray != null);
       Debug.Assert(_customTrackerClassConstructorIl != null);
+    }
+
+    /// <summary>
+    /// Determines if the target module uses mscorlib as its core library (i.e., targets .NET Framework).
+    /// For .NET Framework, CoreLibrary.Name is "mscorlib".
+    /// For .NET Core/.NET 5+, CoreLibrary.Name is typically "System.Runtime" or "System.Private.CoreLib".
+    /// </summary>
+    private static bool IsNetFrameworkTarget(ModuleDefinition module)
+    {
+      return module.TypeSystem.CoreLibrary.Name == "mscorlib";
+    }
+
+    /// <summary>
+    /// Imports a type reference. For .NET Framework targets, redirects the scope to mscorlib.
+    /// This is necessary because the coverlet assembly (built for .NET 8) references types through
+    /// System.Runtime, but .NET Framework doesn't have System.Runtime - these types are in mscorlib.
+    /// For .NET Core targets, the original scope is preserved (the original behavior worked correctly).
+    /// </summary>
+    private static TypeReference ImportToCoreLibrary(ModuleDefinition module, TypeReference type)
+    {
+      TypeReference importedRef = module.ImportReference(type);
+
+      // Only redirect scope for .NET Framework targets where System.Runtime doesn't exist
+      if (IsNetFrameworkTarget(module))
+      {
+        importedRef.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+      }
+
+      return importedRef;
+    }
+
+    /// <summary>
+    /// Imports a method reference. For .NET Framework targets, redirects all type scopes to mscorlib.
+    /// See ImportToCoreLibrary for rationale.
+    /// </summary>
+    private static MethodReference ImportMethodToCoreLibrary(ModuleDefinition module, MethodReference method)
+    {
+      MethodReference importedRef = module.ImportReference(method);
+
+      // Only redirect scopes for .NET Framework targets where System.Runtime doesn't exist
+      if (IsNetFrameworkTarget(module))
+      {
+        importedRef.DeclaringType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+
+        foreach (ParameterDefinition parameter in importedRef.Parameters)
+        {
+          if (parameter.ParameterType.Scope == module.TypeSystem.CoreLibrary)
+          {
+            continue;
+          }
+
+          parameter.ParameterType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+        }
+
+        if (importedRef.ReturnType.Scope != module.TypeSystem.CoreLibrary)
+        {
+          importedRef.ReturnType.GetElementType().Scope = module.TypeSystem.CoreLibrary;
+        }
+      }
+
+      return importedRef;
     }
 
     private bool IsMethodOfCompilerGeneratedClassOfAsyncStateMachineToBeExcluded(MethodDefinition method)
