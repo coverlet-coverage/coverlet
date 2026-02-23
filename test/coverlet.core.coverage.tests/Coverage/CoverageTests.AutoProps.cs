@@ -16,19 +16,20 @@ namespace Coverlet.CoreCoverage.Tests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void SkipAutoProps(bool skipAutoProps)
+    public void SkipClassWithAutoProps(bool skipAutoProps)
     {
       string path = Path.GetTempFileName();
       try
       {
         FunctionExecutor.Run(async (string[] parameters) =>
         {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoProps>(instance =>
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithAutoProps>(instance =>
                   {
                     instance.AutoPropsNonInit = 10;
                     instance.AutoPropsInit = 20;
                     int readValue = instance.AutoPropsNonInit;
                     readValue = instance.AutoPropsInit;
+                    readValue = instance.AutoPropsInitKeyword;
                     return Task.CompletedTask;
                   },
                   persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
@@ -40,8 +41,8 @@ namespace Coverlet.CoreCoverage.Tests
         {
           TestInstrumentationHelper.GetCoverageResult(path)
               .Document("Instrumentation.AutoProps.cs")
-              .AssertNonInstrumentedLines(BuildConfiguration.Debug, 12, 13)
-              .AssertNonInstrumentedLines(BuildConfiguration.Release, 12, 13)
+              .AssertNonInstrumentedLines(BuildConfiguration.Debug, 12, 14)
+              .AssertNonInstrumentedLines(BuildConfiguration.Release, 12, 14)
               .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 9, 11)
               .AssertLinesCovered(BuildConfiguration.Debug, (7, 1))
               .AssertLinesCovered(BuildConfiguration.Release, (10, 1));
@@ -50,9 +51,9 @@ namespace Coverlet.CoreCoverage.Tests
         {
           TestInstrumentationHelper.GetCoverageResult(path)
               .Document("Instrumentation.AutoProps.cs")
-              .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 7, 13)
+              .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 7, 14)
               .AssertLinesCoveredFromTo(BuildConfiguration.Release, 10, 10)
-              .AssertLinesCoveredFromTo(BuildConfiguration.Release, 12, 13);
+              .AssertLinesCoveredFromTo(BuildConfiguration.Release, 12, 14);
         }
       }
       finally
@@ -64,103 +65,14 @@ namespace Coverlet.CoreCoverage.Tests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void SkipAutoPropsInRecords(bool skipAutoProps)
+    public void SkipClassWithAutoPropsPrimaryConstructor(bool skipAutoProps)
     {
       string path = Path.GetTempFileName();
       try
       {
         FunctionExecutor.Run(async (string[] parameters) =>
         {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordWithPropertyInit>(instance =>
-                      {
-                        instance.RecordAutoPropsNonInit = string.Empty;
-                        instance.RecordAutoPropsInit = string.Empty;
-                        string readValue = instance.RecordAutoPropsInit;
-                        readValue = instance.RecordAutoPropsNonInit;
-                        return Task.CompletedTask;
-                      },
-                  persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
-
-          return 0;
-        }, [path, skipAutoProps.ToString()]);
-
-        if (skipAutoProps)
-        {
-          TestInstrumentationHelper.GetCoverageResult(path)
-              .Document("Instrumentation.AutoProps.cs")
-              .AssertNonInstrumentedLines(BuildConfiguration.Debug, 23, 24)
-              .AssertNonInstrumentedLines(BuildConfiguration.Release, 23, 24)
-              .AssertLinesCovered(BuildConfiguration.Debug, (18, 1), (20, 1), (21, 1), (22, 1))
-              .AssertLinesCovered(BuildConfiguration.Release, (21, 1));
-        }
-        else
-        {
-          TestInstrumentationHelper.GetCoverageResult(path)
-              .Document("Instrumentation.AutoProps.cs")
-              .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 18, 24)
-              .AssertLinesCoveredFromTo(BuildConfiguration.Release, 21, 21)
-              .AssertLinesCoveredFromTo(BuildConfiguration.Release, 23, 24);
-        }
-      }
-      finally
-      {
-        File.Delete(path);
-      }
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void SkipRecordWithProperties(bool skipAutoProps)
-    {
-      string path = Path.GetTempFileName();
-      try
-      {
-        FunctionExecutor.Run(async (string[] parameters) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithRecordsAutoProperties>(instance =>
-                      {
-                        return Task.CompletedTask;
-                      },
-                      persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
-
-          return 0;
-        }, [path, skipAutoProps.ToString()]);
-
-        if (skipAutoProps)
-        {
-          TestInstrumentationHelper.GetCoverageResult(path)
-              .Document("Instrumentation.AutoProps.cs")
-              .AssertNonInstrumentedLines(BuildConfiguration.Debug, 29, 29)
-              .AssertNonInstrumentedLines(BuildConfiguration.Release, 29, 29)
-              .AssertLinesCovered(BuildConfiguration.Debug, (32, 1), (33, 1), (34, 1))
-              .AssertLinesCovered(BuildConfiguration.Release, (33, 1));
-        }
-        else
-        {
-          TestInstrumentationHelper.GetCoverageResult(path)
-              .Document("Instrumentation.AutoProps.cs")
-              .AssertLinesCovered(BuildConfiguration.Debug, (29, 1), (31, 1), (32, 1), (33, 1), (34, 1))
-              .AssertLinesCovered(BuildConfiguration.Release, (29, 1), (31, 1), (33, 1));
-        }
-      }
-      finally
-      {
-        File.Delete(path);
-      }
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void SkipInheritingRecordsWithProperties(bool skipAutoProps)
-    {
-      string path = Path.GetTempFileName();
-      try
-      {
-        FunctionExecutor.Run(async (string[] parameters) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithInheritingRecordsAndAutoProperties>(instance =>
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithAutoPropsPrimaryConstructor>(instance =>
             {
               return Task.CompletedTask;
             },
@@ -173,18 +85,150 @@ namespace Coverlet.CoreCoverage.Tests
         {
           TestInstrumentationHelper.GetCoverageResult(path)
             .Document("Instrumentation.AutoProps.cs")
-            .AssertNonInstrumentedLines(BuildConfiguration.Debug, 39, 39)
-            .AssertNonInstrumentedLines(BuildConfiguration.Release, 39, 39)
-            .AssertLinesCovered(BuildConfiguration.Debug, (41, 1), (44, 1), (45, 1), (46, 1))
-            .AssertLinesCovered(BuildConfiguration.Release, (45, 1));
-
+            .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 28, 28)
+            .AssertLinesCoveredFromTo(BuildConfiguration.Release, 28, 28)
+            .AssertNonInstrumentedLines(BuildConfiguration.Debug, 30, 31, 32)
+            .AssertNonInstrumentedLines(BuildConfiguration.Release, 30, 31, 32);
         }
         else
         {
           TestInstrumentationHelper.GetCoverageResult(path)
             .Document("Instrumentation.AutoProps.cs")
-            .AssertLinesCovered(BuildConfiguration.Debug, (39, 1), (41, 1), (44, 1), (45, 1), (46, 1))
-            .AssertLinesCovered(BuildConfiguration.Release, (39, 1), (41, 1), (45, 1));
+            .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 28, 28)
+            .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 30, 32)
+            .AssertLinesCoveredFromTo(BuildConfiguration.Release, 28, 28)
+            .AssertLinesCoveredFromTo(BuildConfiguration.Release, 30, 32);
+        }
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SkipRecordWithAutoProps(bool skipAutoProps)
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] parameters) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordWithAutoProps>(instance =>
+            {
+              instance.AutoPropsNonInit = 10;
+              instance.AutoPropsInit = 20;
+              int readValue = instance.AutoPropsNonInit;
+              readValue = instance.AutoPropsInit;
+              readValue = instance.AutoPropsInitKeyword;
+              return Task.CompletedTask;
+            },
+            persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
+
+          return 0;
+        }, [path, skipAutoProps.ToString()]);
+
+        if (skipAutoProps)
+        {
+          TestInstrumentationHelper.GetCoverageResult(path)
+            .Document("Instrumentation.AutoProps.cs")
+            .AssertNonInstrumentedLines(BuildConfiguration.Debug, 43, 45)
+            .AssertNonInstrumentedLines(BuildConfiguration.Release, 43, 45)
+            .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 40, 42)
+            .AssertLinesCovered(BuildConfiguration.Debug, (39, 1))
+            .AssertLinesCovered(BuildConfiguration.Release, (39, 1));
+        }
+        else
+        {
+          TestInstrumentationHelper.GetCoverageResult(path)
+            .Document("Instrumentation.AutoProps.cs")
+            .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 38, 45)  // go on here
+            .AssertLinesCoveredFromTo(BuildConfiguration.Release, 39, 39)
+            .AssertLinesCoveredFromTo(BuildConfiguration.Release, 41, 45);
+        }
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SkipRecordWithAutoPropsPrimaryConstructor(bool skipAutoProps)
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] parameters) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordsWithPrimaryConstructor>(instance =>
+            {
+              return Task.CompletedTask;
+            },
+            persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
+
+          return 0;
+        }, [path, skipAutoProps.ToString()]);
+
+        if (skipAutoProps)
+        {
+          TestInstrumentationHelper.GetCoverageResult(path)
+            .Document("Instrumentation.AutoProps.cs")
+            .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 50, 50)
+            .AssertLinesCoveredFromTo(BuildConfiguration.Release, 50, 50);
+        }
+        else
+        {
+          TestInstrumentationHelper.GetCoverageResult(path)
+            .Document("Instrumentation.AutoProps.cs")
+            .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 50, 50)
+            .AssertLinesCoveredFromTo(BuildConfiguration.Release, 50, 50);
+        }
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SkipRecordWithAutoPropsPrimaryConstructorMultiline(bool skipAutoProps)
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] parameters) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordsWithPrimaryConstructor>(instance =>
+            {
+              return Task.CompletedTask;
+            },
+            persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
+
+          return 0;
+        }, [path, skipAutoProps.ToString()]);
+
+        if (skipAutoProps)
+        {
+          TestInstrumentationHelper.GetCoverageResult(path)
+            .Document("Instrumentation.AutoProps.cs")
+            .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 52, 55)
+            .AssertLinesCoveredFromTo(BuildConfiguration.Debug, 52, 55);
+        }
+        else
+        {
+          TestInstrumentationHelper.GetCoverageResult(path)
+            .Document("Instrumentation.AutoProps.cs")
+            .AssertLinesCovered(BuildConfiguration.Debug, 52, 55)
+            .AssertLinesNotCovered(BuildConfiguration.Debug, 53, 54)
+            .AssertLinesCovered(BuildConfiguration.Release, 52, 55)
+            .AssertLinesNotCovered(BuildConfiguration.Release, 53, 54);
         }
       }
       finally
