@@ -10,12 +10,10 @@ namespace Coverlet.Integration.Tests
 {
   public class DotnetGlobalTools : BaseTest
   {
-    private readonly ITestOutputHelper _output;
     private readonly string _buildTargetFramework;
 
-    public DotnetGlobalTools(ITestOutputHelper output)
+    public DotnetGlobalTools(ITestOutputHelper output) : base(output)
     {
-      _output = output;
       _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
     }
     private string InstallTool(string projectPath)
@@ -52,7 +50,7 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      int cmdExitCode = RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} --no-build\"  --include-test-assembly --output \"{outputPath}\"", out string standardOutput, out string standardError);
+      int cmdExitCode = RunCommand(coverletToolCommandPath, $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} -f {_buildTargetFramework} --no-build\"  --include-test-assembly --output \"{outputPath}\"", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);

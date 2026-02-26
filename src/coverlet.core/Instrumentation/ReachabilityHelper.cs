@@ -61,7 +61,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
       /// <summary>
       /// If an exception is raised in this block, where control might branch to.
-      /// 
+      ///
       /// Note that this can happen even if the block's end is unreachable.
       /// </summary>
       public ImmutableArray<int> ExceptionBranchesTo { get; }
@@ -86,7 +86,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
     /// <summary>
     /// Represents an Instruction that transitions control flow (ie. branches).
-    /// 
+    ///
     /// This is _different_ from other branch types, like Branch and BranchPoint
     /// because it includes unconditional branches too.
     /// </summary>
@@ -106,7 +106,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
       /// <summary>
       /// Target of the branch, assuming it has a single target.
-      /// 
+      ///
       /// It is illegal to access this if there are multiple targets.
       /// </summary>
       public int TargetOffset
@@ -122,9 +122,14 @@ namespace Coverlet.Core.Instrumentation.Reachability
         }
       }
 
+#pragma warning disable IDE0032 // Use auto property
+
+      private readonly ImmutableArray<int> _targetOffsets;
+#pragma warning restore IDE0032 // Use auto property
+
       /// <summary>
       /// Targets of the branch, assuming it has multiple targets.
-      /// 
+      ///
       /// It is illegal to access this if there is a single target.
       /// </summary>
       public ImmutableArray<int> TargetOffsets
@@ -136,7 +141,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
             throw new InvalidOperationException($"{HasMultiTargets} is false");
           }
 
-          return field;
+          return _targetOffsets;
         }
       }
 
@@ -144,7 +149,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
       {
         Offset = offset;
         _targetOffset = targetOffset;
-        TargetOffsets = ImmutableArray<int>.Empty;
+        _targetOffsets = ImmutableArray<int>.Empty;
       }
 
       public BranchInstruction(int offset, ImmutableArray<int> targetOffset)
@@ -156,7 +161,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
         Offset = offset;
         _targetOffset = -1;
-        TargetOffsets = targetOffset;
+        _targetOffsets = targetOffset;
       }
 
       public override string ToString()
@@ -242,8 +247,8 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
     /// <summary>
     /// Build a ReachabilityHelper for the given module.
-    /// 
-    /// Predetermines methods that will not return, as 
+    ///
+    /// Predetermines methods that will not return, as
     /// indicated by the presense of the given attributes.
     /// </summary>
     public static ReachabilityHelper CreateForModule(ModuleDefinition module, string[] doesNotReturnAttributes, ILogger logger)
@@ -341,7 +346,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
     /// <summary>
     /// Calculates which IL instructions are reachable given an instruction stream and branch points extracted from a method.
-    /// 
+    ///
     /// The algorithm works like so:
     ///  1. determine the "blocks" that make up a function
     ///     * A block starts with either the start of the method, or a branch _target_
@@ -349,7 +354,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
     ///     * blocks end with either another branch, another branch target, or the end of the method
     ///     * this means blocks contain no control flow, except (maybe) as the very last instruction
     ///  2. blocks have head and tail reachability
-    ///     * a block has head reachablility if some other block that is reachable can branch to it 
+    ///     * a block has head reachablility if some other block that is reachable can branch to it
     ///     * a block has tail reachability if it contains no calls to methods that never return
     ///  4. push the first block onto a stack
     ///  5. while the stack is not empty
@@ -575,7 +580,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
     /// <summary>
     /// Process all the blocks and determine if their first instruction is reachable,
     /// that is if they have "head reachability".
-    /// 
+    ///
     /// "Tail reachability" will have already been determined in CreateBlocks.
     /// </summary>
     private static void DetermineHeadReachability(ImmutableArray<BasicBlock> blocks)
@@ -621,10 +626,10 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
     /// <summary>
     /// Create BasicBlocks from an instruction stream, exception blocks, and branches.
-    /// 
+    ///
     /// Each block starts either at the start of the method, immediately after a branch or at a target for a branch,
     /// and ends with another branch, another branch target, or the end of the method.
-    /// 
+    ///
     /// "Tail reachability" is also calculated, which is whether the block can ever actually get past its last instruction.
     /// </summary>
     private ImmutableArray<BasicBlock> CreateBasicBlocks(Collection<Instruction> instrs, Collection<ExceptionHandler> exceptionHandlers, ImmutableArray<BranchInstruction> branches)
@@ -779,7 +784,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
     }
 
     /// <summary>
-    /// Returns true if the given instruction will never return, 
+    /// Returns true if the given instruction will never return,
     /// and thus subsequent instructions will never be run.
     /// </summary>
     private bool DoesNotReturn(Instruction instr)
@@ -794,7 +799,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
     /// <summary>
     /// Returns true if the given instruction is a Call or Callvirt.
-    /// 
+    ///
     /// If it is a call, extracts the MethodReference that is being called.
     /// </summary>
     private static bool IsCall(Instruction instr, out MethodReference mtd)

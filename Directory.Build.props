@@ -2,7 +2,8 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <NetCurrent>net10.0</NetCurrent>
+    <NetCurrent Condition="'$(LEGACY)' == ''">net10.0</NetCurrent>
+    <NetCurrent Condition="'$(LEGACY)' != ''">net9.0</NetCurrent>
     <NetMinimum>net8.0</NetMinimum>
     <FullFrameworkTFM>net472</FullFrameworkTFM>
     <!-- enforce CamelCase case string-->

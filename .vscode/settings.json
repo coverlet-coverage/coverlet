@@ -28,5 +28,6 @@
         "teamcity",
         "vstest",
         "xunit"
-    ]
+    ],
+    "codeQL.githubDatabase.update": "never"
 }

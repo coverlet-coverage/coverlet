@@ -7,6 +7,10 @@ namespace Coverlet.Core
 {
   internal class CoverageDetails
   {
+#pragma warning disable IDE0032 // Use auto property
+    private double _averageModulePercent;
+#pragma warning restore IDE0032 // Use auto property
+
     public Modules Modules { get; internal set; }
     public double Covered { get; internal set; }
     public int Total { get; internal set; }
@@ -21,8 +25,8 @@ namespace Coverlet.Core
 
     public double AverageModulePercent
     {
-      get { return Math.Floor(field * 100) / 100; }
-      internal set;
+      get { return Math.Floor(_averageModulePercent * 100) / 100; }
+      internal set { _averageModulePercent = value; }
     }
   }
 }

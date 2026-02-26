@@ -3,7 +3,8 @@
   <Import Project="$(MSBuildThisFileDirectory)\DeterministicTest.props" Condition="Exists('$(MSBuildThisFileDirectory)\DeterministicTest.props')" />
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' == ''">net10.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' != ''">net9.0;net8.0</TargetFrameworks>
     <!-- <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks> -->
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsample.integration.determisticbuild</AssemblyName>
@@ -13,6 +14,8 @@
       https://api.nuget.org/v3/index.json;
       $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
     </RestoreSources>
+    <!-- Testing with VSTest target is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later.-->
+    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <!-- Define default values if props file doesn't exist -->
