@@ -1,5 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
@@ -54,5 +54,5 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" />
+  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' "/>
 </Project>

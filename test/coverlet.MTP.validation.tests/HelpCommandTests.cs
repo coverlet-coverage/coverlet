@@ -434,7 +434,13 @@ public class HelpCommandTests
     };
 
     using var process = Process.Start(processStartInfo);
-    await process!.WaitForExitAsync();
+
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
+    await process.WaitForExitAsync();
+    await outputTask;
+    await errorTask;
   }
 
   private async Task RestoreProject(string projectPath)
@@ -451,10 +457,12 @@ public class HelpCommandTests
 
     using var process = Process.Start(processStartInfo);
 
-    string output = await process!.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
-
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
+    string output = await outputTask;
+    string error = await errorTask;
 
     if (process.ExitCode != 0)
     {
@@ -528,10 +536,12 @@ private async Task<int> BuildProject(string projectPath)
 
     using var process = Process.Start(processStartInfo);
 
-    string output = await process!.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
-
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
+    string output = await outputTask;
+    string error = await errorTask;
 
     if (process.ExitCode != 0)
     {
@@ -566,10 +576,12 @@ private async Task<int> BuildProject(string projectPath)
 
     using var process = Process.Start(processStartInfo);
 
-    string output = await process!.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
-
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
+    string output = await outputTask;
+    string error = await errorTask;
 
     return new TestResult
     {
@@ -597,10 +609,12 @@ private async Task<int> BuildProject(string projectPath)
 
     using var process = Process.Start(processStartInfo);
 
-    string output = await process!.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
-
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
+    string output = await outputTask;
+    string error = await errorTask;
 
     return new TestResult
     {

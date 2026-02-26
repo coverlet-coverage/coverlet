@@ -27,8 +27,8 @@
     <PackageVersion Include="Microsoft.Build.Locator" Version="1.11.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.0.0-1.25277.114" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="9.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.13" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.13" />
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.13" />
@@ -84,12 +84,5 @@
     <PackageVersion Include="System.Text.Json" Version="9.0.13" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
-    <!-- Could be removed - just used in Playground -->
-    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="MSTest.Analyzers" Version="3.9.1" />
-    <PackageVersion Include="StreamJsonRpc" Version="2.20.20" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.1" />
-    <PackageVersion Include="Microsoft.TestPlatform" Version="17.14.1" />
-    <PackageVersion Include="System.Collections.Concurrent" Version="4.3.0" />
   </ItemGroup>
 </Project>

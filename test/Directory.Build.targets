@@ -13,9 +13,10 @@
         <!-- Ensure that the built tools can be found at build time.
              This is required when the coverlet.msbuild imports are made in their src directory
              (so that msbuild eval works even before they are built)
-             so that they can still find the tooling that will be built by the build. -->
-        <CoverletToolsPath>$(RepoRoot)artifacts\bin\coverlet.msbuild.tasks\$(Configuration.ToLowerInvariant())_$(NetMinimum)\</CoverletToolsPath>
-        <!--<CoverletToolsPath>$(RepoRoot)artifacts\bin\coverlet.msbuild.tasks\$(Configuration.ToLower())\</CoverletToolsPath>-->
+             so that they can still find the tooling that will be built by the build.
+             Select the TFM matching the SDK version, mirroring the logic in src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props. -->
+        <CoverletToolsPath>$(RepoRoot)artifacts\bin\coverlet.msbuild.tasks\$(Configuration.ToLowerInvariant())_net8.0\</CoverletToolsPath>
+        <CoverletToolsPath Condition="'$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '10.0'))">$(RepoRoot)artifacts\bin\coverlet.msbuild.tasks\$(Configuration.ToLowerInvariant())_net10.0\</CoverletToolsPath>
       </PropertyGroup>
     </When>
   </Choose>

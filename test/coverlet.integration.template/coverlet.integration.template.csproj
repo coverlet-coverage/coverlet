@@ -1,13 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <!--<TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>-->
+    <TargetFrameworks Condition="'$(LEGACY)' == ''">net10.0;net9.0;net8.0</TargetFrameworks>
+		<TargetFrameworks Condition="'$(LEGACY)' != ''">net9.0;net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsamplelib.integration.template</AssemblyName>
     <IsTestProject>false</IsTestProject>
     <OutputType>Exe</OutputType>
     <GenerateProgramFile>false</GenerateProgramFile>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <!-- Testing with VSTest target is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later. -->
+    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <ItemGroup>
