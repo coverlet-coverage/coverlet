@@ -326,3 +326,4 @@ current.diff
 /test/coverlet.MTP.validation.tests/TestProjects/BasicTestProject/MTPTest.props
 /test/coverlet.MTP.unit.tests/Collector/Before-Update.txt
 Documentation/Plans/
+test/coverlet.core.performancetest/dotnet-install.sh

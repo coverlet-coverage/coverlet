@@ -27,9 +27,7 @@ steps:
   displayName: Restore packages
 
 - pwsh: |
-        foreach ($fw in @("net8.0", "net9.0")){
-          dotnet build -c $(BuildConfiguration) -f $fw --no-restore -bl:build.$fw.binlog
-        }
+    dotnet build -c $(BuildConfiguration) --no-restore -bl:build.legacy.binlog
   displayName: Build
 
 - pwsh: |
