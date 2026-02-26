@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFrameworks>net9.0-windows;net8.0-windows</TargetFrameworks>
     <Nullable>enable</Nullable>
     <UseWpf>true</UseWpf>
     <IsTestProject>false</IsTestProject>

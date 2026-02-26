@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="9.0.11" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />

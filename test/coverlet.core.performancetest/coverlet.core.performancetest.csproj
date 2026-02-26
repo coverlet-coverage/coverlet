@@ -2,7 +2,7 @@
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(NetCurrent)</TargetFramework>
     <IsPackable>false</IsPackable>
 		<ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
