@@ -21,23 +21,24 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DotNetConfig" Version="1.2.0" />
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.13" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.3" /> <!-- latest stable version netstandard2.0, netstandard2.1, net462 -->
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="1.11.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.0.0-1.25277.114" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="9.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" /> <!-- latest stable version net10.0, net9.0, net8.0 -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" /> <!-- latest stable version net10.0, net9.0, net8.0 -->
+     <!-- For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext -->
+    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="10.0.3" />
     <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageVersion Include="Microsoft.Sbom.Targets" Version="4.1.5" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftNETTestSdkVersion)" />
-    <!--<PackageVersion Include="MSTest.TestFramework" Version="3.9.1" />-->
     <!-- Microsoft Testing Platform-->
     <PackageVersion Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="$(MicrosoftTestingPlatformVersion)" />
@@ -55,9 +56,9 @@
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Moq" Version="$(MoqVersion)" />
-    <PackageVersion Include="ReportGenerator.Core" Version="5.3.11" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.5.1" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
-    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="9.0.11" />
+    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.11" />
     <PackageVersion Include="System.CommandLine" Version="2.0.3" />
     <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
     <!-- latest Tmds.ExecFunction package uses EnvDTE V17.8.37221 -->
@@ -68,20 +69,20 @@
     <PackageVersion Include="xunit.v3.runner.msbuild" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
     <PackageVersion Include="System.Buffers" Version="4.6.1" />
-    <PackageVersion Include="System.Collections.Immutable" Version="9.0.13" />
-    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="9.0.13" />
-    <PackageVersion Include="System.Diagnostics.EventLog" Version="9.0.13" />
-    <PackageVersion Include="System.Formats.Asn1" Version="10.0.0" />
-    <PackageVersion Include="System.IO.Pipelines" Version="9.0.13" />
+    <PackageVersion Include="System.Collections.Immutable" Version="10.0.3" />
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.3" />
+    <PackageVersion Include="System.Diagnostics.EventLog" Version="10.0.3" />
+    <PackageVersion Include="System.Formats.Asn1" Version="10.0.3" />
+    <PackageVersion Include="System.IO.Pipelines" Version="10.0.3" />
     <PackageVersion Include="System.Linq.Async" Version="7.0.0" />
     <PackageVersion Include="System.Memory" Version="4.6.3" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
-    <PackageVersion Include="System.Reflection.Metadata" Version="9.0.13" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="10.0.3" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
     <PackageVersion Include="System.Security.AccessControl" Version="6.0.1" />
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.13" />
-    <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.13" />
-    <PackageVersion Include="System.Text.Json" Version="9.0.13" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.3" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="10.0.3" />
+    <PackageVersion Include="System.Text.Json" Version="10.0.3" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
   </ItemGroup>
