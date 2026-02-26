@@ -20,6 +20,12 @@ namespace Coverlet.Integration.Tests
   public abstract class BaseTest
   {
     private static int s_folderSuffix;
+    private protected readonly ITestOutputHelper _output;
+
+    protected BaseTest(ITestOutputHelper output)
+    {
+      _output = output;
+    }
 
     private protected string GetPackageVersion(string filter)
     {
@@ -104,6 +110,7 @@ namespace Coverlet.Integration.Tests
 
     private protected int DotnetCli(string arguments, out string standardOutput, out string standardError, string workingDirectory = "")
     {
+      _output.WriteLine($"dotnet {arguments}");
       return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
     }
 

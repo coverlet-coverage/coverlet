@@ -16,6 +16,10 @@ namespace Coverlet.Integration.Tests
 {
   public class WpfResolverTests : BaseTest
   {
+    public WpfResolverTests(ITestOutputHelper output) : base(output)
+    {
+    }
+
     [Fact]
     public void TestInstrument_NetCoreSharedFrameworkResolver()
     {
