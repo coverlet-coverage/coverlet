@@ -47,6 +47,7 @@
     <PackageVersion Include="Microsoft.Testing.Platform.MSTest.Extensions" Version="$(MicrosoftTestingPlatformVersion)" />-->
     <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="MSTest" Version="3.9.1" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.9.1" />
