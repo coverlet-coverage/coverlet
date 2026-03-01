@@ -1,6 +1,6 @@
 steps:
-- script: copy global-legacy.json global.json
-  displayName: copy global.json
+- script: copy src\legacy\global.json global.json
+  displayName: copy global.json from src/legacy
 
 - task: UseDotNet@2
   inputs:
