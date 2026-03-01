@@ -255,7 +255,7 @@ public class CollectorExtensionGenerateReportsTests
   #region GenerateCoverageReportFiles Tests
 
   [Fact]
-  public void GenerateCoverageReportFiles_WithJsonFormat_CreatesJsonReport()
+  public void GenerateCoverageReportFilesWithJsonFormatCreatesJsonReport()
   {
     // Arrange
     var mockFileSystem = new Mock<IFileSystem>();

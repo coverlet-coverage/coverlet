@@ -25,17 +25,15 @@ namespace Coverlet.Integration.Tests
     private readonly string _testResultsPath = TestUtils.GetTestResultsPath();
     private const string PropsFileName = "DeterministicTest.props";
     private readonly string _buildConfiguration;
-    private readonly ITestOutputHelper _output;
     private readonly Type _type;
     private readonly FieldInfo? _testMember;
     private readonly string _artifactsPivot;
 
-    public DeterministicBuild(ITestOutputHelper output)
+    public DeterministicBuild(ITestOutputHelper output) : base(output)
     {
       _buildConfiguration = TestUtils.GetBuildConfigurationString();
       _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
       _artifactsPivot = _buildConfiguration + "_" + _buildTargetFramework;
-      _output = output;
       _type = output.GetType();
       _testMember = _type.GetField("test", BindingFlags.Instance | BindingFlags.NonPublic);
     }

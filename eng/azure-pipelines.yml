@@ -6,6 +6,7 @@ trigger:
 
 variables:
   system.debug: false
+  frameworks: 'net8.0,net10.0'
 
 jobs:
 - job: Windows
@@ -51,6 +52,23 @@ jobs:
       sourcePath: '$(Build.SourcesDirectory)/src'
       breakBuild: false
       condition: and(succeeded(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
+
+- job: Legacy
+  displayName:  Legacy Windows
+  continueOnError: 'true'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "debug"
+  pool:
+    vmImage: 'windows-latest'
+  variables:
+    frameworks: 'net8.0,net9.0'
+    LEGACY: 'true'
+  steps:
+  - template: build-legacy.yml
 
 - job: macOS
   displayName: macOS

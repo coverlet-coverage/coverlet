@@ -1,0 +1,112 @@
+steps:
+- script: copy src\legacy\global.json global.json
+  displayName: copy global.json from src/legacy
+
+- task: UseDotNet@2
+  inputs:
+    version: 8.0.417
+  displayName: Install .NET Core SDK 8.0.417
+
+- task: UseDotNet@2
+  inputs:
+    useGlobalJson: true
+  displayName: Install .NET Core SDK 9.0.311 (global.json)
+
+# create artifact/package folder
+- pwsh: |
+    New-Item -ItemType Directory -Path artifacts/package/debug -Force
+  displayName: create folder artifacts/package/$(BuildConfiguration)
+
+# Authenticate Azure DevOps NuGet feed
+- task: NuGetAuthenticate@1
+  displayName: 'Authenticate Azure DevOps NuGet feed'
+  inputs:
+    forceReinstallCredentialProvider: true
+
+- script: dotnet restore -v n -s "https://api.nuget.org/v3/index.json"
+  displayName: Restore packages
+
+- pwsh: |
+    dotnet build -c $(BuildConfiguration) --no-restore -bl:build.legacy.binlog
+  displayName: Build
+
+- pwsh: |
+     dotnet pack -c $(BuildConfiguration) --no-restore
+  displayName: Pack
+
+- pwsh: |
+    $frameworks = "$(frameworks)".Split(",")
+      foreach ($fw in $frameworks) {
+        Write-Host "Testing $fw"
+        dotnet build-server shutdown
+        dotnet test test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -f $fw -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.MTP.tests.$fw.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.MTP.tests.$fw.diag;tracelevel=verbose"
+        dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -f $fw -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.tests.$fw.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.core.tests.$fw.diag;tracelevel=verbose"
+        dotnet test test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -f $fw -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.coverage.tests.$fw.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.core.coverage.tests.$fw.diag;tracelevel=verbose"
+        dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -f $fw -c $(BuildConfiguration) --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.msbuild.tasks.tests.$fw.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.msbuild.tasks.tests.$fw.diag;tracelevel=verbose"
+        dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -f $fw -c $(BuildConfiguration) --no-build p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.collector.tests.$fw.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.collector.tests.$fw.diag;tracelevel=verbose"
+        dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -f $fw -c $(BuildConfiguration) --no-build --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.integration.tests.$fw.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.integration.tests.$fw.diag;tracelevel=verbose"
+        dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.MTP.validation.tests/$(BuildConfiguration)/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.$fw.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.validation.tests_$fw" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/"
+      }
+  displayName: Run unit tests with coverage
+  env:
+    MSBUILDDISABLENODEREUSE: 1
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '**/*.trx'
+    searchFolder: '$(Build.SourcesDirectory)'
+    mergeTestResults: true
+    publishRunAttachments: true
+    failTaskOnFailedTests: true
+    testRunTitle: $(Agent.OS)_$(BuildConfiguration)
+  condition:  succeededOrFailed()
+
+- task: CopyFiles@2
+  displayName: Copy test code coverage results
+  continueOnError: true
+  condition: always()
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/test'
+    Contents: |
+      **/*.opencover.xml
+      **/*.cobertura.xml
+      **/*.coverage.json
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
+
+- task: CopyFiles@2
+  displayName: Copy trx files
+  condition: always()
+  enabled: false
+  inputs:
+    SourceFolder: '$(Agent.TempDirectory)'
+    Contents: |
+        **/*.trx
+        **/coverage.opencover.xml
+        **/coverage.cobertura.xml
+        **/coverage.json
+    TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
+
+- task: PublishPipelineArtifact@1
+  displayName: Publish Coverlet logs
+  continueOnError: true
+  condition: always()
+  inputs:
+    path: artifacts/TestLogs
+    artifactName: TestLogs_legacy_$(Agent.Os)_$(BuildConfiguration)
+
+- script: |
+    dir /s /B *.xml
+    del coverlet.integration.determisticbuild\coverage.net8.0.cobertura.xml
+    del coverlet.integration.determisticbuild\coverage.net9.0.cobertura.xml
+  displayName: List XML files for test folder
+  workingDirectory: "$(Build.SourcesDirectory)/test"
+  condition: and(succeededOrFailed(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
+
+- template: publish-coverage-results.yml
+  parameters:
+    reports: "$(Build.SourcesDirectory)\\test\\**\\*.cobertura.xml"
+    condition: and(succeededOrFailed(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
+    minimumLineCoverage: 80
+    assemblyfilters: '-xunit;-testgen_*;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverletsamplelib.integration.template;-coverlet.tests.utils;-coverletsample.integration.determisticbuild'
+

@@ -73,13 +73,15 @@ public sealed class CoverageConfigurationTests
   public void GetOutputFormatsWhenFormatsOptionSetReturnsCustomFormats()
   {
     string[] expectedFormats = ["json", "lcov", "opencover"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions
-      .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
-      {
-        formats = expectedFormats;
-        return true;
-      }));
+   .Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
+   .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
+   {
+     formats = expectedFormats;
+     return true;
+   }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetOutputFormats();
@@ -90,12 +92,14 @@ public sealed class CoverageConfigurationTests
   [Fact]
   public void GetOutputFormatsWhenFormatsOptionNotSetReturnsDefaultFormats()
   {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
-      {
-        formats = null;
-        return false;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
+  {
+    formats = null;
+    return false;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetOutputFormats();
@@ -108,12 +112,14 @@ public sealed class CoverageConfigurationTests
   [Fact]
   public void GetOutputFormatsWithEmptyArrayReturnsDefaultFormats()
   {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
-      {
-        formats = [];
-        return true;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
+  {
+    formats = [];
+    return true;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetOutputFormats();
@@ -125,12 +131,14 @@ public sealed class CoverageConfigurationTests
   public void GetOutputFormatsWithSingleFormatReturnsSingleFormat()
   {
     string[] expectedFormats = ["cobertura"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Formats, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
-      {
-        formats = expectedFormats;
-        return true;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? formats) =>
+  {
+    formats = expectedFormats;
+    return true;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetOutputFormats();
@@ -147,12 +155,14 @@ public sealed class CoverageConfigurationTests
   public void GetIncludeFiltersWhenOptionSetReturnsFilters()
   {
     string[] expectedFilters = ["[MyAssembly]*", "[AnotherAssembly]*"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
-      {
-        filters = expectedFilters;
-        return true;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+  {
+    filters = expectedFilters;
+    return true;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetIncludeFilters();
@@ -163,12 +173,14 @@ public sealed class CoverageConfigurationTests
   [Fact]
   public void GetIncludeFiltersWhenOptionNotSetReturnsEmptyArray()
   {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
-      {
-        filters = null;
-        return false;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+  {
+    filters = null;
+    return false;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetIncludeFilters();
@@ -180,12 +192,14 @@ public sealed class CoverageConfigurationTests
   public void GetIncludeFiltersWithSpecialCharactersReturnsFiltersUnmodified()
   {
     string[] expectedFilters = ["[My.Assembly*]*", "[Another+Assembly]*"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Include, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
-      {
-        filters = expectedFilters;
-        return true;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+  {
+    filters = expectedFilters;
+    return true;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetIncludeFilters();
@@ -201,12 +215,14 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeFiltersWhenOptionSetMergesWithDefaults()
   {
     string[] customFilters = ["[CustomExclude]*"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
-      {
-        filters = customFilters;
-        return true;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+  {
+    filters = customFilters;
+    return true;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
@@ -220,12 +236,14 @@ public sealed class CoverageConfigurationTests
   [Fact]
   public void GetExcludeFiltersWhenOptionNotSetReturnsDefaults()
   {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
-      {
-        filters = null;
-        return false;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+  {
+    filters = null;
+    return false;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
@@ -240,12 +258,14 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeFiltersRemovesDuplicates()
   {
     string[] customFilters = ["[xunit.*]*", "[CustomExclude]*"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
-      {
-        filters = customFilters;
-        return true;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+  {
+    filters = customFilters;
+    return true;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
@@ -258,12 +278,14 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeFiltersWithMultipleDuplicatesRemovesAllDuplicates()
   {
     string[] customFilters = ["[xunit.*]*", "[Microsoft.Testing.*]*", "[CustomExclude]*", "[xunit.*]*"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
-      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
-      {
-        filters = customFilters;
-        return true;
-      }));
+  .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+  {
+    filters = customFilters;
+    return true;
+  }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
@@ -281,12 +303,14 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeByFileFiltersWhenOptionSetReturnsFilters()
   {
     string[] expectedFilters = ["**/Migrations/**", "**/Generated/**"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
       {
         filters = expectedFilters;
         return true;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeByFileFilters();
@@ -297,12 +321,14 @@ public sealed class CoverageConfigurationTests
   [Fact]
   public void GetExcludeByFileFiltersWhenOptionNotSetReturnsEmptyArray()
   {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
       {
         filters = null;
         return false;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeByFileFilters();
@@ -314,12 +340,14 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeByFileFiltersWithGlobPatternsReturnsFiltersUnmodified()
   {
     string[] expectedFilters = ["**/*.Designer.cs", "obj/**/*", "bin/**/*.g.cs"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
       {
         filters = expectedFilters;
         return true;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeByFileFilters();
@@ -335,12 +363,14 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeByAttributeFiltersWhenOptionSetMergesWithDefaults()
   {
     string[] customAttributes = ["CustomExcludeAttribute"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
       {
         attributes = customAttributes;
         return true;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeByAttributeFilters();
@@ -355,12 +385,14 @@ public sealed class CoverageConfigurationTests
   [Fact]
   public void GetExcludeByAttributeFiltersWhenOptionNotSetReturnsDefaults()
   {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
       {
         attributes = null;
         return false;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeByAttributeFilters();
@@ -376,12 +408,14 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeByAttributeFiltersRemovesDuplicates()
   {
     string[] customAttributes = ["GeneratedCodeAttribute", "CustomAttribute"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
       {
         attributes = customAttributes;
         return true;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeByAttributeFilters();
@@ -394,12 +428,14 @@ public sealed class CoverageConfigurationTests
   public void GetExcludeByAttributeFiltersWithFullyQualifiedNamesMergesCorrectly()
   {
     string[] customAttributes = ["System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
       {
         attributes = customAttributes;
         return true;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeByAttributeFilters();
@@ -416,12 +452,14 @@ public sealed class CoverageConfigurationTests
   public void GetIncludeDirectoriesWhenOptionSetReturnsDirectories()
   {
     string[] expectedDirectories = [@"C:\MyDir", @"C:\AnotherDir"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? directories) =>
       {
         directories = expectedDirectories;
         return true;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetIncludeDirectories();
@@ -432,12 +470,14 @@ public sealed class CoverageConfigurationTests
   [Fact]
   public void GetIncludeDirectoriesWhenOptionNotSetReturnsEmptyArray()
   {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? directories) =>
       {
         directories = null;
         return false;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetIncludeDirectories();
@@ -449,12 +489,14 @@ public sealed class CoverageConfigurationTests
   public void GetIncludeDirectoriesWithRelativePathsReturnsUnmodified()
   {
     string[] expectedDirectories = [@"..\src", @"./lib"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? directories) =>
       {
         directories = expectedDirectories;
         return true;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetIncludeDirectories();
@@ -514,12 +556,14 @@ public sealed class CoverageConfigurationTests
   public void ExcludeAssembliesWithoutSourcesWhenOptionSetReturnsAll()
   {
     string expectedOption = "All";
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeAssembliesWithoutSources, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
       {
         filters = [expectedOption];
         return true;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string result = config.GetExcludeAssembliesWithoutSources();
@@ -545,12 +589,14 @@ public sealed class CoverageConfigurationTests
   public void GetDoesNotReturnAttributesWhenOptionSetReturnsAttributes()
   {
     string[] expectedAttributes = ["DoesNotReturnAttribute", "ThrowsAttribute"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.DoesNotReturnAttribute, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
       {
         attributes = expectedAttributes;
         return true;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetDoesNotReturnAttributes();
@@ -561,12 +607,14 @@ public sealed class CoverageConfigurationTests
   [Fact]
   public void GetDoesNotReturnAttributesWhenOptionNotSetReturnsEmptyArray()
   {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.DoesNotReturnAttribute, out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
       {
         attributes = null;
         return false;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetDoesNotReturnAttributes();
@@ -627,12 +675,14 @@ public sealed class CoverageConfigurationTests
   {
     // Arrange
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(It.IsAny<string>())).Returns(false);
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(It.IsAny<string>(), out It.Ref<string[]?>.IsAny))
       .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? value) =>
       {
         value = null;
         return false;
       }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
 

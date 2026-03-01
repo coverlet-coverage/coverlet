@@ -1,5 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" />
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -16,13 +16,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="9.0.11" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
     <PackageReference Include="Tmds.ExecFunction" />
     <PackageReference Include="ReportGenerator.Core" />
     <PackageReference Include="Microsoft.Testing.Platform" VersionOverride="1.9.1" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" VersionOverride="1.9.1" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" VersionOverride="1.9.1" />
     <PackageReference Include="xunit.v3" VersionOverride="2.0.0"/>
     <PackageReference Include="xunit.runner.visualstudio">
@@ -39,5 +40,5 @@
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
   </ItemGroup>
   
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" />
+  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' " />
 </Project>
