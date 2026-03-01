@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
@@ -23,6 +23,7 @@
     <PackageReference Include="Tmds.ExecFunction" />
     <PackageReference Include="ReportGenerator.Core" />
     <PackageReference Include="Microsoft.Testing.Platform" VersionOverride="1.9.1" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" VersionOverride="1.9.1" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" VersionOverride="1.9.1" />
     <PackageReference Include="xunit.v3" VersionOverride="2.0.0"/>
     <PackageReference Include="xunit.runner.visualstudio">
@@ -39,5 +40,5 @@
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
   </ItemGroup>
   
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' "/>
+  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' " />
 </Project>
