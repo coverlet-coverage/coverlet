@@ -314,30 +314,30 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
       xml.Save(project.ProjectFileNamePath);
     }
 
-    private protected void PinSDK(ClonedTemplateProject project, string sdkVersion)
-    {
-      if (project is null)
-      {
-        throw new ArgumentNullException(nameof(project));
-      }
+    //private protected void PinSDK(ClonedTemplateProject project, string sdkVersion)
+    //{
+    //  if (project is null)
+    //  {
+    //    throw new ArgumentNullException(nameof(project));
+    //  }
 
-      if (string.IsNullOrEmpty(sdkVersion))
-      {
-        throw new ArgumentException("Invalid sdkVersion", nameof(sdkVersion));
-      }
+    //  if (string.IsNullOrEmpty(sdkVersion))
+    //  {
+    //    throw new ArgumentException("Invalid sdkVersion", nameof(sdkVersion));
+    //  }
 
-      if (!File.Exists(project.ProjectFileNamePath))
-      {
-        throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
-      }
+    //  if (!File.Exists(project.ProjectFileNamePath))
+    //  {
+    //    throw new FileNotFoundException("coverlet.integration.template.csproj not found", "coverlet.integration.template.csproj");
+    //  }
 
-      if (project.ProjectRootPath is null || !Directory.Exists(project.ProjectRootPath))
-      {
-        throw new ArgumentException("Invalid ProjectRootPath");
-      }
+    //  if (project.ProjectRootPath is null || !Directory.Exists(project.ProjectRootPath))
+    //  {
+    //    throw new ArgumentException("Invalid ProjectRootPath");
+    //  }
 
-      File.WriteAllText(Path.Combine(project.ProjectRootPath, "global.json"), $"{{ \"sdk\": {{ \"version\": \"{sdkVersion}\" }} }}");
-    }
+    //  File.WriteAllText(Path.Combine(project.ProjectRootPath, "global.json"), $"{{ \"sdk\": {{ \"version\": \"{sdkVersion}\" }}, \"test\": {{ \"runner\": \"Microsoft.Testing.Platform\" }} }}");
+    //}
   }
 
   class ClonedTemplateProject : IDisposable

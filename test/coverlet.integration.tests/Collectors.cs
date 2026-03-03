@@ -79,6 +79,7 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestVsTest_Test()
     {
+      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
@@ -100,9 +101,10 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestVsTest_Test_Settings()
     {
+      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError);
+      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} --project \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);

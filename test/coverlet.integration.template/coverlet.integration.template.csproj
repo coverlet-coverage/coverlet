@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <!--<TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>-->
@@ -11,7 +11,8 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <!-- Testing with VSTest target is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later. -->
-    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
+    <TestingPlatformDotnetTestSupport Condition="'$(LEGACY)' == ''">true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformDotnetTestSupport Condition="'$(LEGACY)' != ''">false</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +21,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Text.Json" Version="10.0.3"/>
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

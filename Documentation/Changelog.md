@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Fixed
+- Fix [BUG] TypeInitializationException when targeting .NET Framework [#1818](https://github.com/coverlet-coverage/coverlet/issues/1818)
+
+### Improvements
+- Additional improvements needed for .NET Framework instrumentation type import [#1825](https://github.com/coverlet-coverage/coverlet/issues/1825)
 
 ## Release date 2026-02-15
 ### Packages
