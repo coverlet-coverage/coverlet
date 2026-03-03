@@ -1,6 +1,6 @@
 steps:
-- script: copy global-legacy.json global.json
-  displayName: copy global.json
+- script: copy src\legacy\global.json global.json
+  displayName: copy global.json from src/legacy
 
 - task: UseDotNet@2
   inputs:
@@ -27,9 +27,7 @@ steps:
   displayName: Restore packages
 
 - pwsh: |
-        foreach ($fw in @("net8.0", "net9.0")){
-          dotnet build -c $(BuildConfiguration) -f $fw --no-restore -bl:build.$fw.binlog
-        }
+    dotnet build -c $(BuildConfiguration) --no-restore -bl:build.legacy.binlog
   displayName: Build
 
 - pwsh: |
@@ -107,8 +105,8 @@ steps:
 
 - template: publish-coverage-results.yml
   parameters:
-    reports: "$(Build.SourcesDirectory)/test/**/*.cobertura.xml"
+    reports: "$(Build.SourcesDirectory)\\test\\**\\*.cobertura.xml"
     condition: and(succeededOrFailed(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
     minimumLineCoverage: 80
-    assemblyfilters: '-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverletsamplelib.integration.template;-coverlet.tests.utils;-coverletsample.integration.determisticbuild'
+    assemblyfilters: '-xunit;-testgen_*;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverletsamplelib.integration.template;-coverlet.tests.utils;-coverletsample.integration.determisticbuild'
 
