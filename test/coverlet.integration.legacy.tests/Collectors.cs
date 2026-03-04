@@ -15,7 +15,7 @@ namespace Coverlet.Integration.Tests
     {
       TestSDKVersion = "17.13.0";
     }
-  
+
     private protected override void AssertCollectorsInjection(ClonedTemplateProject clonedTemplateProject)
     {
       // Check out/in process collectors injection
@@ -79,7 +79,7 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestVsTest_Test()
     {
-      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
@@ -92,16 +92,16 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       AssertCollectorsInjection(clonedTemplateProject);
-
     }
 
     [Fact]
     public void TestVsTest_Test_Settings()
     {
-      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} --project \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError);
@@ -113,6 +113,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       AssertCoverage(clonedTemplateProject);
@@ -133,6 +134,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish"));
       Assert.NotNull(publishedTestFile);
@@ -147,6 +149,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       AssertCollectorsInjection(clonedTemplateProject);
@@ -166,6 +169,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish"));
       Assert.NotNull(publishedTestFile);
@@ -178,6 +182,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       AssertCoverage(clonedTemplateProject);

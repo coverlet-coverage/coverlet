@@ -4,9 +4,9 @@ Contributions are highly welcome, however, except for very small changes, kindly
 
 ## Requirements
 
-STS version [.NET SDK 9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) for development environment
+[.NET SDK 10.0](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) (or later) for development environment
 
-LTS version [.NET SDK 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) for runtime environment
+LTS version [.NET SDK 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) for runtime environment (legacy tests)
 
 ## Building the Project
 

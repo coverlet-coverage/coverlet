@@ -12,6 +12,7 @@
     <AnalysisLevel>preview-recommended</AnalysisLevel>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AnalysisLevelInteroperability>true</AnalysisLevelInteroperability>
+    <MSBuildWarningsAsMessages>NU1510</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsWindows)'=='true'">

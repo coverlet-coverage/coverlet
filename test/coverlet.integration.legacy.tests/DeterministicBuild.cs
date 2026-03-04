@@ -79,7 +79,7 @@ namespace Coverlet.Integration.Tests
         foreach (string coverageFile in Directory.GetFiles(GetReportDirectory(standardOutput, reportName), reportName, SearchOption.AllDirectories))
         {
           Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
-          if (document != null)
+          if (document is not null)
           {
             document.Class("Coverlet.Integration.DeterministicBuild.DeepThought")
                 .Method("System.Int32 Coverlet.Integration.DeterministicBuild.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
@@ -88,6 +88,7 @@ namespace Coverlet.Integration.Tests
             reportFilePath = coverageFile;
           }
         }
+
         Assert.True(coverageChecked, $"Coverage check fail\n{standardOutput}");
         File.Delete(reportFilePath);
         Assert.False(File.Exists(reportFilePath));
@@ -108,7 +109,7 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Msbuild()
     {
-      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
+      // This test requires VSTest mode which is only available on .NET 8/9
       string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
       CreateDeterministicTestPropsFile();
@@ -122,6 +123,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(buildOutput);
       }
+
       Assert.Contains("Build succeeded.", buildOutput);
       string sourceRootMappingFilePath = GetSourceRootMappingFilePath(buildOutput, $"CoverletSourceRootsMapping_{s_sutName}");
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
@@ -140,6 +142,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       Assert.Contains($"| {s_sutName} | 100% | 100%   | 100%   |", standardOutput);
@@ -154,7 +157,7 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Msbuild_SourceLink()
     {
-      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
+      // This test requires VSTest mode which is only available on .NET 8/9
       string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
       CreateDeterministicTestPropsFile();
@@ -168,6 +171,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(buildOutput);
       }
+
       Assert.Contains("Build succeeded.", buildOutput);
       string sourceRootMappingFilePath = GetSourceRootMappingFilePath(buildOutput, $"CoverletSourceRootsMapping_{s_sutName}");
 
@@ -186,6 +190,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       Assert.Contains($"| {s_sutName} | 100% | 100%   | 100%   |", standardOutput);
@@ -201,7 +206,7 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Collectors()
     {
-      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
+      // This test requires VSTest mode which is only available on .NET 8/9
       string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
       string testLogFilesPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}", "log");
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
@@ -219,6 +224,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(buildOutput);
       }
+
       Assert.Contains("Build succeeded.", buildOutput);
       string sourceRootMappingFilePath = GetSourceRootMappingFilePath(buildOutput, $"CoverletSourceRootsMapping_{s_sutName}");
 
@@ -238,6 +244,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       AssertCoverage(standardOutput, "coverage.json");
@@ -257,7 +264,7 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Collectors_SourceLink()
     {
-      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
+      // This test requires VSTest mode which is only available on .NET 8/9
       string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
       string testLogFilesPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}", "log");
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
@@ -275,6 +282,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(buildOutput);
       }
+
       Assert.Contains("Build succeeded.", buildOutput);
       string sourceRootMappingFilePath = GetSourceRootMappingFilePath(buildOutput, $"CoverletSourceRootsMapping_{s_sutName}");
 
@@ -294,6 +302,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
       AssertCoverage(standardOutput, "coverage.json", checkDeterministicReport: false);
@@ -327,7 +336,7 @@ namespace Coverlet.Integration.Tests
     {
       if (Directory.Exists(testResultsPath))
       {
-        DirectoryInfo hdDirectory = new (testResultsPath);
+        DirectoryInfo hdDirectory = new(testResultsPath);
 
         // search for directory "In" which has second copy e.g. '_fv-az365-374_2023-10-10_14_26_42\In\fv-az365-374\coverage.json'
         DirectoryInfo[] intermediateFolder = hdDirectory.GetDirectories("In", SearchOption.AllDirectories);
@@ -343,7 +352,7 @@ namespace Coverlet.Integration.Tests
     {
       if (Directory.Exists(directory))
       {
-        DirectoryInfo hdDirectory = new (directory);
+        DirectoryInfo hdDirectory = new(directory);
         FileInfo[] filesInDir = hdDirectory.GetFiles("log.*.txt");
 
         foreach (FileInfo foundFile in filesInDir)
@@ -352,8 +361,8 @@ namespace Coverlet.Integration.Tests
           File.Delete(fullName);
         }
       }
-
     }
+
     private void CleanupBuildOutput()
     {
       if (Directory.Exists(_testBinaryPath))
@@ -367,11 +376,12 @@ namespace Coverlet.Integration.Tests
         Directory.Delete(intermediateBuildOutput, recursive: true);
       }
     }
+
     private static void DeleteCoverageFiles(string directory)
     {
       if (Directory.Exists(directory))
       {
-        DirectoryInfo hdDirectory = new (directory);
+        DirectoryInfo hdDirectory = new(directory);
         FileInfo[] filesInDir = hdDirectory.GetFiles("coverage.cobertura.xml");
 
         foreach (FileInfo foundFile in filesInDir)
@@ -402,6 +412,7 @@ namespace Coverlet.Integration.Tests
         reportPath = reportPath[reportPath.IndexOf(Directory.GetDirectoryRoot(_testProjectPath))..];
         reportPath = reportPath[..reportPath.IndexOf(reportFileName)];
       }
+
       return reportPath;
     }
 
@@ -421,10 +432,11 @@ namespace Coverlet.Integration.Tests
         else
         {
           string? directory = Path.GetDirectoryName(lines.FirstOrDefault(static line => line.Contains($"{s_sutName}.dll"))?.TrimStart());
-          if (directory == null)
+          if (directory is null)
           {
             throw new InvalidOperationException($"Directory is null. {s_sutName}.dll not found.");
           }
+
           // actual directory value "coverlet.integration.determisticbuild -> C:\GitHub\coverlet\artifacts\bin\coverlet.integration.determisticbuild\debug
           // remove everything before '->' 
           directory = directory[(directory.IndexOf("->") + 2)..].Trim();
@@ -438,13 +450,16 @@ namespace Coverlet.Integration.Tests
           }
         }
       }
+
       return sourceRootMappingFilePath;
     }
+
     public void Dispose()
     {
       File.Delete(Path.Combine(_testProjectPath, PropsFileName));
     }
   }
+
   [CollectionDefinition("DeterministicBuild Collection", DisableParallelization = true)]
   public class DeterministicBuildCollection
   {
