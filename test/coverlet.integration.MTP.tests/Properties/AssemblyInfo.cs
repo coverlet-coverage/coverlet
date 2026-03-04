@@ -3,4 +3,4 @@
 
 using System.Reflection;
 
-[assembly: AssemblyKeyFile("coverlet.integration.tests.snk")]
+[assembly: AssemblyKeyFile("coverlet.integration.MTP.tests.snk")]
