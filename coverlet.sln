@@ -6,7 +6,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E877EBA4-E78
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core", "src\coverlet.core\coverlet.core.csproj", "{31084026-D563-4B91-BE71-174C4270CCF4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.msbuild.tasks", "src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj", "{FA73E423-9790-4F35-B018-3C4E3CA338BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.msbuild.tasks", "src\legacy\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj", "{FA73E423-9790-4F35-B018-3C4E3CA338BA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}"
 EndProject
@@ -22,7 +22,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.testsubject", "tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.core.performancetest", "test\coverlet.core.performancetest\coverlet.core.performancetest.csproj", "{C68CF6DE-F86C-4BCF-BAB9-7A60C320E1F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.collector", "src\coverlet.collector\coverlet.collector.csproj", "{F5B2C45B-274B-43D6-9565-8B50659CFE56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.collector", "src\legacy\coverlet.collector\coverlet.collector.csproj", "{F5B2C45B-274B-43D6-9565-8B50659CFE56}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.collector.tests", "test\coverlet.collector.tests\coverlet.collector.tests.csproj", "{5ED4FA81-8F8C-4211-BA88-7573BD63262E}"
 	ProjectSection(ProjectDependencies) = postProject

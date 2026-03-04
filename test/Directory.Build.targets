@@ -5,7 +5,7 @@
     <When Condition=" '$(ThresholdType)' != '' ">
       <ItemGroup>
         <!-- Arrange for the project that builds the build tools has built first. -->
-        <ProjectReference Include="$(RepoRoot)src\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj">
+        <ProjectReference Include="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\coverlet.msbuild.tasks.csproj">
           <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
         </ProjectReference>
       </ItemGroup>

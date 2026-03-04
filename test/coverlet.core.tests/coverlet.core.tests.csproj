@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
+  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
     <TargetFrameworks>$(NetMinimum);$(NetCurrent)</TargetFrameworks>
@@ -79,10 +79,10 @@
 
   <Target Name="CopyExcludedByAttributeAssets" AfterTargets="Build">
     <ItemGroup>
-      <ExcludedByAttributeFiles Include="$(RepoRoot)artifacts\$(ArtifactsBinOutputName)\coverlet.tests.projectsample.excludedbyattribute\$(Configuration.ToLowerInvariant())\*.*" />
+      <ExcludedByAttributeFiles Include="$(RepoRoot)artifacts\$(ArtifactsBinOutputName)\coverlet.tests.projectsample.excludedbyattribute\$(Configuration.ToLowerInvariant())_$(TargetFramework)\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(ExcludedByAttributeFiles)" DestinationFolder="$(OutputPath)TestAssets" SkipUnchangedFiles="true" />
   </Target>
 
-  <Import Project="$(RepoRoot)src\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' " />
+  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' " />
 </Project>
