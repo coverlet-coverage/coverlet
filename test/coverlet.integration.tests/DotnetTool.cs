@@ -18,7 +18,7 @@ namespace Coverlet.Integration.Tests
     }
     private string InstallTool(string projectPath)
     {
-      _ = DotnetCli($"tool install coverlet.console --version {GetPackageVersion("*console*.nupkg")} --tool-path \"{Path.Combine(projectPath, "coverletTool")}\"", out string standardOutput, out string standardError, projectPath);
+      _ = DotnetCli($"tool install coverlet.console --version {GetPackageVersion("*console*.nupkg")} --framework {_buildTargetFramework} --tool-path \"{Path.Combine(projectPath, "coverletTool")}\"", out string standardOutput, out string standardError, projectPath);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
