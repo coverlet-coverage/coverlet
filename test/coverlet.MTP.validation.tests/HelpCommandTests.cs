@@ -502,7 +502,7 @@ public class HelpCommandTests
   private string GetSUTBinaryPath()
   {
     string binTestProjectPath = Path.Combine(_repoRoot, "artifacts", "bin", SutName);
-    string binPath = Path.Combine(binTestProjectPath, _buildConfiguration.ToLowerInvariant());
+    string binPath = Path.Combine(binTestProjectPath, _buildConfiguration.ToLowerInvariant() + "_" + TestUtils.GetAssemblyTargetFramework());
     return binPath;
   }
 

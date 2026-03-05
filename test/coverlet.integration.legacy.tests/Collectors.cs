@@ -104,7 +104,7 @@ namespace Coverlet.Integration.Tests
       // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} --project \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError);
+      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);

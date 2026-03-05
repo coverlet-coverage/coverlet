@@ -33,7 +33,7 @@ namespace Coverlet.Integration.Tests
     {
       // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError);
+      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -56,7 +56,7 @@ namespace Coverlet.Integration.Tests
     {
       // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError);
+      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -79,7 +79,7 @@ namespace Coverlet.Integration.Tests
     {
       // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError);
+      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -102,7 +102,7 @@ namespace Coverlet.Integration.Tests
     {
       // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      Assert.Equal(0, DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError));
+      Assert.Equal(0, DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError));
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.{TestUtils.GetAssemblyTargetFramework()}.ext";
@@ -119,7 +119,7 @@ namespace Coverlet.Integration.Tests
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       Assert.False(clonedTemplateProject.IsMultipleTargetFramework());
       string framework = clonedTemplateProject.GetTargetFrameworks().Single();
-      DotnetCli($"test -c {_buildConfiguration} -f {framework} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError);
+      DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -131,8 +131,9 @@ namespace Coverlet.Integration.Tests
 
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
-      Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext")));
-      AssertCoverage(clonedTemplateProject, "file.ext");
+      string fileName = "file." + TestUtils.GetAssemblyTargetFramework() + ".ext";
+      Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, fileName)));
+      AssertCoverage(clonedTemplateProject, fileName);
     }
 
     [Fact]
@@ -140,7 +141,7 @@ namespace Coverlet.Integration.Tests
     {
       // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError);
+      DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -165,7 +166,7 @@ namespace Coverlet.Integration.Tests
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      DotnetCli($"test -c {_buildConfiguration} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -194,7 +195,7 @@ namespace Coverlet.Integration.Tests
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      int result = DotnetCli($"test -c {_buildConfiguration} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+      int result = DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -225,7 +226,7 @@ namespace Coverlet.Integration.Tests
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      DotnetCli($"test -c {_buildConfiguration} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -258,7 +259,7 @@ namespace Coverlet.Integration.Tests
       string[] frameworks = clonedTemplateProject.GetTargetFrameworks();
       Assert.Equal(2, frameworks.Length);
       string framework = frameworks.FirstOrDefault()!;
-      DotnetCli($"test -c {_buildConfiguration} -f {framework} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+      DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -294,7 +295,7 @@ namespace Coverlet.Integration.Tests
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      DotnetCli($"test -c {_buildConfiguration} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -323,7 +324,7 @@ namespace Coverlet.Integration.Tests
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      DotnetCli($"test -c {_buildConfiguration} --project \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
