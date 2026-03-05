@@ -47,6 +47,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <!-- System.Text.Json version is controlled by coverlet.core for framework-specific compatibility -->
   </ItemGroup>
 
 

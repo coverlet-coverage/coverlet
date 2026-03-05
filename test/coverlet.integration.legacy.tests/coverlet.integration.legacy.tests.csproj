@@ -28,7 +28,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.3"/>
-    <PackageReference Include="System.Text.Json" Version="10.0.3" />
+    <!-- System.Text.Json version is controlled by coverlet.core for framework-specific compatibility -->
   </ItemGroup>
 
   <ItemGroup>
