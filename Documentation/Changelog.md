@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Fixed
 - Fix [BUG] TypeInitializationException when targeting .NET Framework [#1818](https://github.com/coverlet-coverage/coverlet/issues/1818)
+- Fix [BUG] coverlet.MTP build fails with CS0400 due to developmentDependency=true [#1827](https://github.com/coverlet-coverage/coverlet/issues/1827)
 
 ### Improvements
 - Additional improvements needed for .NET Framework instrumentation type import [#1825](https://github.com/coverlet-coverage/coverlet/issues/1825)
