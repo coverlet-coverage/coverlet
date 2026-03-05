@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;$(NetMinimum)</TargetFrameworks>
     <AssemblyTitle>Coverlet.MTP</AssemblyTitle>
-    <DevelopmentDependency>true</DevelopmentDependency>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
