@@ -43,7 +43,7 @@ public class HelpCommandTests
 #else
     _buildConfiguration = "Release";
 #endif
-    _buildTargetFramework = "net8.0";
+    _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
 
     // Get repository root
     _repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
