@@ -1,3 +1,6 @@
+parameters:
+  suffix: ''
+
 steps:
 - task: CopyFiles@2
   displayName: Copy test results
@@ -26,7 +29,7 @@ steps:
       !**/coverlet.core.coverage.tests/debug/testgen*.log
       !**/coverlet.core.coverage.tests/**/*.html
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
-    
+
 - task: CopyFiles@2
   displayName: Copy test code coverage results
   continueOnError: true
@@ -74,4 +77,4 @@ steps:
   condition: always()
   inputs:
     path: artifacts/TestLogs
-    artifactName: TestLogs_$(Agent.Os)_$(BuildConfiguration)
+    artifactName: TestLogs_$(Agent.Os)_$(BuildConfiguration)${{ parameters.suffix }}

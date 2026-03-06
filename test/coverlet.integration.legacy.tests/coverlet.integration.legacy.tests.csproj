@@ -13,11 +13,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <!-- Microsoft.TestPlatform.TestHost depends on Newtonsoft.Json -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.3" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
@@ -27,8 +25,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.3"/>
-    <!-- System.Text.Json version is controlled by coverlet.core for framework-specific compatibility -->
+    <!-- Framework-specific packages are controlled by coverlet.core for compatibility -->
   </ItemGroup>
 
   <ItemGroup>

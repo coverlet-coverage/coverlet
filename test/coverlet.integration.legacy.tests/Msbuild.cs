@@ -115,7 +115,7 @@ namespace Coverlet.Integration.Tests
     {
       // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = ["net8.0"];
+      string[] targetFrameworks = [_buildTargetFramework];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       Assert.False(clonedTemplateProject.IsMultipleTargetFramework());
       string framework = clonedTemplateProject.GetTargetFrameworks().Single();
