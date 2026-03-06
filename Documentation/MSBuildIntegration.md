@@ -10,6 +10,12 @@ To achieve same behavior above using **powershell** you need to use the verbatim
 dotnet test /p:CollectCoverage=true --% /p:CoverletOutputFormat=\"opencover,lcov\"
 ```
 
+⚠️ With **pwsh** you must not escape the quotes
+
+```pwsh
+dotnet test /p:CollectCoverage=true --% /p:CoverletOutputFormat="opencover,lcov"
+```
+
 ## Code Coverage
 
 Enabling code coverage is as simple as setting the `CollectCoverage` property to `true`
