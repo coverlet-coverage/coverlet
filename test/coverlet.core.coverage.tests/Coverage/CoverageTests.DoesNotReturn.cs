@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
+using Coverlet.Core.Tests.Infrastructure;
 using Coverlet.Tests.Utils;
 using Xunit;
 
@@ -50,6 +51,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
@@ -81,6 +83,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
@@ -112,6 +115,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
@@ -143,6 +147,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
@@ -270,6 +275,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void FiltersAndFinally_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {

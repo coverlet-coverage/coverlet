@@ -2,7 +2,8 @@
   <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' == ''">net10.0;net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' != ''">net9.0;net8.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
@@ -32,6 +33,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Linq.Async" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- xunit runner configuration to disable parallel test execution -->
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

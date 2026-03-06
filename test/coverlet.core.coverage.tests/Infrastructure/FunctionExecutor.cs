@@ -28,11 +28,14 @@ public class FunctionExecutor
 
   /// <summary>
   /// Runs a function that takes no arguments.
-  /// The function is executed in the current process.
+  /// The function is executed in the current process on a thread pool thread
+  /// to avoid SynchronizationContext deadlocks in Visual Studio.
   /// </summary>
   public void Run(Func<Task<int>> func)
   {
-    int result = func().GetAwaiter().GetResult();
+    // Use Task.Run to escape any SynchronizationContext (e.g., Visual Studio UI context)
+    // This prevents deadlocks when calling .GetAwaiter().GetResult()
+    int result = Task.Run(async () => await func().ConfigureAwait(false)).GetAwaiter().GetResult();
     if (result != 0)
     {
       throw new InvalidOperationException($"Function returned non-zero exit code: {result}");
@@ -41,11 +44,14 @@ public class FunctionExecutor
 
   /// <summary>
   /// Runs a function with string array arguments.
-  /// The function is executed in the current process.
+  /// The function is executed in the current process on a thread pool thread
+  /// to avoid SynchronizationContext deadlocks in Visual Studio.
   /// </summary>
   public void Run(Func<string[], Task<int>> func, string[] args)
   {
-    int result = func(args).GetAwaiter().GetResult();
+    // Use Task.Run to escape any SynchronizationContext (e.g., Visual Studio UI context)
+    // This prevents deadlocks when calling .GetAwaiter().GetResult()
+    int result = Task.Run(async () => await func(args).ConfigureAwait(false)).GetAwaiter().GetResult();
     if (result != 0)
     {
       throw new InvalidOperationException($"Function returned non-zero exit code: {result}");
