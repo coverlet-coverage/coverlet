@@ -13,10 +13,10 @@ using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
+using Coverlet.Core.Tests.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -319,20 +319,7 @@ namespace Coverlet.Core.Tests
 
   public abstract class ExternalProcessExecutionTest
   {
-    protected FunctionExecutor FunctionExecutor = new(
-    o =>
-    {
-      o.StartInfo.RedirectStandardError = true;
-      o.OnExit = p =>
-          {
-            if (p.ExitCode != 0)
-            {
-              string message = $"Function exit code failed with exit code: {p.ExitCode}" + Environment.NewLine +
-                                    p.StandardError.ReadToEnd();
-              throw new Xunit.Sdk.XunitException(message);
-            }
-          };
-    });
+    protected FunctionExecutor FunctionExecutor = new();
   }
 
   public static class FunctionExecutorExtensions
