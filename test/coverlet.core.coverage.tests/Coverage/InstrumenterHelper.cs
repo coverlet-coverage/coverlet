@@ -14,9 +14,9 @@ using Coverlet.Core.Helpers;
 using Coverlet.Core.Reporters;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
+using Coverlet.Core.Tests.Infrastructure;
 using Moq;
 using Palmmedia.ReportGenerator.Core;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.Core.Tests

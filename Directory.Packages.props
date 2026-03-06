@@ -42,9 +42,6 @@
     <!-- Microsoft Testing Platform-->
     <PackageVersion Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="$(MicrosoftTestingPlatformVersion)" />
-    <!--<PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSTest" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSTest.Extensions" Version="$(MicrosoftTestingPlatformVersion)" />-->
     <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="$(MicrosoftTestingPlatformVersion)" />
@@ -61,10 +58,6 @@
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.11" />
     <PackageVersion Include="System.CommandLine" Version="2.0.3" />
-    <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
-    <!-- latest Tmds.ExecFunction package uses EnvDTE V17.8.37221 -->
-    <PackageVersion Include="Tmds.ExecFunction" Version="0.8.0" />
-    <!-- <PackageVersion Include="xunit" Version="2.9.3" /> -->
     <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.runner.msbuild" Version="$(XunitV3Version)" />
