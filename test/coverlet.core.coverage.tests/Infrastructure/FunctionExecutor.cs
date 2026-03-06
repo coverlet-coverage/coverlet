@@ -11,6 +11,11 @@ namespace Coverlet.Core.Tests.Infrastructure;
 /// Compatibility wrapper that maintains the existing FunctionExecutor API.
 /// This allows minimal changes to existing test code.
 /// Replacement for Tmds.ExecFunction.FunctionExecutor.
+/// 
+/// Note: Unlike Tmds.ExecFunction which executed lambdas in a separate process
+/// via expression tree serialization, this implementation runs lambdas in-process.
+/// For test isolation purposes, the instrumented assembly copy mechanism in
+/// TestInstrumentationHelper.Run already provides the necessary isolation.
 /// </summary>
 public class FunctionExecutor
 {
@@ -22,19 +27,29 @@ public class FunctionExecutor
   }
 
   /// <summary>
-  /// Runs a function that takes no arguments in a separate process.
+  /// Runs a function that takes no arguments.
+  /// The function is executed in the current process.
   /// </summary>
   public void Run(Func<Task<int>> func)
   {
-    ProcessExecutor.Run(func.Method.DeclaringType, func.Method.Name, null);
+    int result = func().GetAwaiter().GetResult();
+    if (result != 0)
+    {
+      throw new InvalidOperationException($"Function returned non-zero exit code: {result}");
+    }
   }
 
   /// <summary>
-  /// Runs a function with string array arguments in a separate process.
+  /// Runs a function with string array arguments.
+  /// The function is executed in the current process.
   /// </summary>
   public void Run(Func<string[], Task<int>> func, string[] args)
   {
-    ProcessExecutor.Run(func.Method.DeclaringType, func.Method.Name, args);
+    int result = func(args).GetAwaiter().GetResult();
+    if (result != 0)
+    {
+      throw new InvalidOperationException($"Function returned non-zero exit code: {result}");
+    }
   }
 }
 

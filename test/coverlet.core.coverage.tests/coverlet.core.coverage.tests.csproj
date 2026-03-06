@@ -22,13 +22,11 @@
     <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="8.1.8" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
     <PackageReference Include="Moq" />
     <!-- Tmds.ExecFunction removed - replaced with custom ProcessExecutor (Issue #1833) -->
     <PackageReference Include="ReportGenerator.Core" />
-    <PackageReference Include="Microsoft.Testing.Platform" />
-    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" />
-    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
-    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.v3.mtp-v2" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

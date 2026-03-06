@@ -12,13 +12,13 @@ if (ProcessExecutor.TryExecute(args))
   return Environment.ExitCode;
 }
 
-// Normal test execution via xunit.v3
-// Check for Microsoft Testing Platform arguments (--server or --internal-msbuild-node)
-if (args.Any(arg => arg == "--server" || arg == "--internal-msbuild-node"))
+// Normal test execution via xunit.v3.mtp-v2
+// Check for automated/inline arguments (used by xunit console runner)
+if (args.Any(arg => arg == "-automated" || arg == "@@"))
 {
-  return await Xunit.MicrosoftTestingPlatform.TestPlatformTestFramework.RunAsync(args, SelfRegisteredExtensions.AddSelfRegisteredExtensions);
+  return await Xunit.Runner.InProc.SystemConsole.ConsoleRunner.Run(args);
 }
 else
 {
-  return await Xunit.Runner.InProc.SystemConsole.ConsoleRunner.Run(args);
+  return await Xunit.MicrosoftTestingPlatform.TestPlatformTestFramework.RunAsync(args, SelfRegisteredExtensions.AddSelfRegisteredExtensions);
 }
