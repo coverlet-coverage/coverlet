@@ -29,5 +29,9 @@
         "vstest",
         "xunit"
     ],
-    "codeQL.githubDatabase.update": "never"
+    "codeQL.githubDatabase.update": "never",
+    "workbench.editor.languageDetection": false,
+    "files.associations": {
+        "eng/*.yml": "azure-pipelines"
+    }
 }
