@@ -81,31 +81,31 @@ Get-ChildItem -Path . -Include 'TestResults', 'bin', 'obj' -Directory -Recurse -
 Write-Host "Cleanup complete. Starting build..."
 
 # Pack initial packages (Debug)
-dotnet pack -c Debug src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
-dotnet pack -c Debug src/coverlet.collector/coverlet.collector.csproj
+dotnet pack -c Debug src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack -c Debug src/legacy/coverlet.collector/coverlet.collector.csproj
 
 # Restore packages using solution file to ensure all dependencies are resolved correctly
 dotnet restore
 
 # Build individual projects with binlog
 dotnet build src/coverlet.core/coverlet.core.csproj -bl:build.core.binlog
-dotnet build src/coverlet.collector/coverlet.collector.csproj -bl:build.collector.binlog
+dotnet build src/legacy/coverlet.collector/coverlet.collector.csproj -bl:build.collector.binlog
 dotnet build src/coverlet.console/coverlet.console.csproj -bl:build.console.binlog
-dotnet build src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj -bl:build.msbuild.tasks.binlog
+dotnet build src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj -bl:build.msbuild.tasks.binlog
 dotnet build src/coverlet.MTP/coverlet.MTP.csproj -bl:build.MTP.binlog
 
 # Create NuGet packages (Debug)
-dotnet pack -c Debug src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
-dotnet pack -c Debug src/coverlet.collector/coverlet.collector.csproj
+dotnet pack -c Debug src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack -c Debug src/legacy/coverlet.collector/coverlet.collector.csproj
 dotnet pack -c Debug src/coverlet.console/coverlet.console.csproj
-dotnet pack -c Debug src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack -c Debug src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
 dotnet pack -c Debug src/coverlet.MTP/coverlet.MTP.csproj
 
 # Create NuGet packages (Release)
-dotnet pack src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
-dotnet pack src/coverlet.collector/coverlet.collector.csproj
+dotnet pack src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack src/legacy/coverlet.collector/coverlet.collector.csproj
 dotnet pack src/coverlet.console/coverlet.console.csproj
-dotnet pack src/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
+dotnet pack src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj
 dotnet pack src/coverlet.MTP/coverlet.MTP.csproj
 
 # Build test projects with binlog
@@ -125,12 +125,12 @@ $globalJson = Get-Content -Path 'global.json' -Raw | ConvertFrom-Json
 $sdkVersion = $globalJson.sdk.version
 $sdkMajorVersion = [int]($sdkVersion -split '\.')[0]
 
-dotnet build test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net8.0 -bl:build.coverlet.integration.tests.8.0.binlog /p:ContinuousIntegrationBuild=true
+dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net8.0 -bl:build.coverlet.integration.legacy.tests.8.0.binlog /p:ContinuousIntegrationBuild=true
 # Check if the SDK version is 10.0.* or higher (10.0.*, 11.0.*, etc.)
 if ($sdkMajorVersion -ge 10) {
     Write-Host "Executing command for SDK version $sdkVersion (10.0+ detected)..."
-    # dotnet build test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net9.0 -bl:build.coverlet.integration.tests.9.0.binlog /p:ContinuousIntegrationBuild=true
-    dotnet build test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net10.0 -bl:build.coverlet.integration.tests.10.0.binlog /p:ContinuousIntegrationBuild=true
+    # dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net9.0 -bl:build.coverlet.integration.legacy.tests.9.0.binlog /p:ContinuousIntegrationBuild=true
+    dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net10.0 -bl:build.coverlet.integration.legacy.tests.10.0.binlog /p:ContinuousIntegrationBuild=true
 }
 
 dotnet build-server shutdown

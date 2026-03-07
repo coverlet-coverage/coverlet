@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!--<TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>-->
     <TargetFrameworks Condition="'$(LEGACY)' == ''">net10.0;net9.0;net8.0</TargetFrameworks>
-		<TargetFrameworks Condition="'$(LEGACY)' != ''">net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' != ''">net9.0;net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsamplelib.integration.template</AssemblyName>
     <IsTestProject>false</IsTestProject>

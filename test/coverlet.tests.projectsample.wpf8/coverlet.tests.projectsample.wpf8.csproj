@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">net9.0-windows;net8.0-windows;net10.0-windows</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' == ''">net10.0-windows;net9.0-windows;net8.0-windows</TargetFrameworks>
     <TargetFrameworks Condition="'$(LEGACY)' != ''">net9.0-windows;net8.0-windows</TargetFrameworks>
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64</RuntimeIdentifiers>
     <Nullable>enable</Nullable>
