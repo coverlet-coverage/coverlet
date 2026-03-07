@@ -80,9 +80,12 @@ public static class ProcessExecutor
     }
 
     using Process process = Process.Start(psi);
-    string stdout = process.StandardOutput.ReadToEnd();
-    string stderr = process.StandardError.ReadToEnd();
+
+    Task<string> stdoutTask = process.StandardOutput.ReadToEndAsync();
+    Task<string> stderrTask = process.StandardError.ReadToEndAsync();
     process.WaitForExit();
+    string stdout = stdoutTask.Result;
+    string stderr = stderrTask.Result;
 
     if (process.ExitCode != 0)
     {
