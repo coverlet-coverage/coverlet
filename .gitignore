@@ -323,3 +323,4 @@ Playground*/
 # ignore copilot agents
 .github/agents/
 /Documentation/Plans/
+/Documentation/Issues/

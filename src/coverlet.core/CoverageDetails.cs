@@ -7,7 +7,9 @@ namespace Coverlet.Core
 {
   internal class CoverageDetails
   {
+#pragma warning disable IDE0032 // Use auto property
     private double _averageModulePercent;
+#pragma warning restore IDE0032 // Use auto property
 
     public Modules Modules { get; internal set; }
     public double Covered { get; internal set; }

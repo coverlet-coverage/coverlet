@@ -18,12 +18,16 @@
     <ThresholdStat Condition="$(ThresholdStat) == ''">minimum</ThresholdStat>
     <ExcludeAssembliesWithoutSources Condition="$(ExcludeAssembliesWithoutSources) == ''"></ExcludeAssembliesWithoutSources>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tasks\net8.0\</CoverletToolsPath>
-    <CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\</CoverletToolsPath>
+  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT'">
+    <!-- Windows -->
+    <CoverletToolsPath>$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\</CoverletToolsPath>
+    <CoverletToolsPath Condition="'$(MSBuildRuntimeType)'=='Core' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '8.0'))">$(MSBuildThisFileDirectory)..\tasks\net8.0\</CoverletToolsPath>
+    <CoverletToolsPath Condition="'$(MSBuildRuntimeType)'=='Core' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '9.0'))">$(MSBuildThisFileDirectory)..\tasks\net9.0\</CoverletToolsPath>
+    <CoverletToolsPath Condition="'$(MSBuildRuntimeType)'=='Core' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '10.0'))">$(MSBuildThisFileDirectory)..\tasks\net10.0\</CoverletToolsPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
-    <CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)../tasks/net8.0/</CoverletToolsPath>
-    <!--<CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)../tasks/netstandard2.0/</CoverletToolsPath>-->
+  <PropertyGroup Condition=" '$(OS)' != 'Windows_NT'">
+    <!-- always Core -->
+    <CoverletToolsPath>$(MSBuildThisFileDirectory)../tasks/net8.0/</CoverletToolsPath>
+    <CoverletToolsPath Condition="'$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '10.0'))">$(MSBuildThisFileDirectory)../tasks/net10.0/</CoverletToolsPath>
   </PropertyGroup>
 </Project>

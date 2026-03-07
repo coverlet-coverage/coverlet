@@ -2,22 +2,47 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>$(NetMinimum);$(NetCurrent);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' == ''">net8.0;net9.0;net10.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' != ''">net8.0;net9.0;netstandard2.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);IDE0057</NoWarn>
   </PropertyGroup>
 
+  <!-- Common packages for all target frameworks -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Mono.Cecil" />
-    <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
-    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' != '.NETCoreApp' ">
+  <!-- Use framework-matching versions of packages with System.Text.Json dependencies to avoid assembly version mismatch at runtime -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1" />
+    <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="9.0.5" />
+    <PackageReference Include="System.Text.Json" VersionOverride="9.0.13" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <!-- System.Text.Json is part of .NET 10 framework - no explicit reference needed -->
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1" />
+    <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' ">
+    <PackageReference Include="NuGet.Versioning" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="NuGet.Versioning" VersionOverride="6.14.0"/>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Memory" />
