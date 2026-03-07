@@ -38,21 +38,21 @@ steps:
 # Run tests without coverage using dotnet exec
 - pwsh: |
     $frameworks = "$(frameworks)".Split(",")
-        foreach ($fw in $frameworks) {
-            dotnet build-server shutdown
-            Write-Host "Testing $fw"
-            dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.MTP.tests/$(BuildConfiguration)_${fw}/coverlet.MTP.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
-            dotnet build-server shutdown
-            dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.core.tests/$(BuildConfiguration)_${fw}/coverlet.core.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.core.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
-            dotnet build-server shutdown
-            dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.core.coverage.tests/$(BuildConfiguration)_${fw}/coverlet.core.coverage.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.core.coverage.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
-            dotnet build-server shutdown
-            dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.msbuild.tasks.tests/$(BuildConfiguration)_${fw}/coverlet.msbuild.tasks.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.msbuild.tasks.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.msbuild.tasks.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
-            dotnet build-server shutdown
-            dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.integration.MTP.tests/$(BuildConfiguration)_${fw}/coverlet.integration.MTP.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.MTP.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.integration.MTP.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
-            dotnet build-server shutdown
-            dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.MTP.validation.tests/$(BuildConfiguration)_${fw}/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.validation.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
-            }
+    foreach ($fw in $frameworks) {
+        dotnet build-server shutdown
+        Write-Host "Testing $fw"
+        dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.MTP.tests/$(BuildConfiguration)_${fw}/coverlet.MTP.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
+        dotnet build-server shutdown
+        dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.core.tests/$(BuildConfiguration)_${fw}/coverlet.core.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.core.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
+        dotnet build-server shutdown
+        dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.core.coverage.tests/$(BuildConfiguration)_${fw}/coverlet.core.coverage.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.core.coverage.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
+        dotnet build-server shutdown
+        dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.msbuild.tasks.tests/$(BuildConfiguration)_${fw}/coverlet.msbuild.tasks.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.msbuild.tasks.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.msbuild.tasks.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
+        dotnet build-server shutdown
+        dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.integration.MTP.tests/$(BuildConfiguration)_${fw}/coverlet.integration.MTP.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.MTP.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.integration.MTP.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
+        dotnet build-server shutdown
+        dotnet exec "$(Build.SourcesDirectory)/artifacts/bin/coverlet.MTP.validation.tests/$(BuildConfiguration)_${fw}/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.${fw}.trx" --diagnostic-output-directory "$(Build.SourcesDirectory)/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.validation.tests.${fw}_" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --no-progress
+    }
   displayName: Run unit tests without coverage
   env:
     MSBUILDDISABLENODEREUSE: 1
