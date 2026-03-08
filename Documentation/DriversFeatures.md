@@ -14,7 +14,7 @@ In the table below we keep track of main differences:
 | Deterministic reports output folder| Yes           | Yes          | No                | No            |
 | Merge reports                      | Yes           | Yes          | No                | No            |
 | Coverage threshold validation      | Yes           | Yes          | No                | No            |
-| Deterministic build support        | Yes           | No           | Yes               | Yes           |
+| Deterministic build support        | Yes           | No           | Yes               | No            |
 
 > [!TIP]
 > The new coverlet.MTP extension should be used for new test projects. This package supports the modern **Microsoft Test Platform** (see [Microsoft.Testing.Platform and VSTest comparison](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-vs-vstest))
