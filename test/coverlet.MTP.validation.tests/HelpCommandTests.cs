@@ -43,7 +43,7 @@ public class HelpCommandTests
 #else
     _buildConfiguration = "Release";
 #endif
-    _buildTargetFramework = "net8.0";
+    _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
 
     // Get repository root
     _repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
@@ -434,7 +434,13 @@ public class HelpCommandTests
     };
 
     using var process = Process.Start(processStartInfo);
-    await process!.WaitForExitAsync();
+
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
+    await process.WaitForExitAsync();
+    await outputTask;
+    await errorTask;
   }
 
   private async Task RestoreProject(string projectPath)
@@ -451,10 +457,12 @@ public class HelpCommandTests
 
     using var process = Process.Start(processStartInfo);
 
-    string output = await process!.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
-
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
+    string output = await outputTask;
+    string error = await errorTask;
 
     if (process.ExitCode != 0)
     {
@@ -494,7 +502,7 @@ public class HelpCommandTests
   private string GetSUTBinaryPath()
   {
     string binTestProjectPath = Path.Combine(_repoRoot, "artifacts", "bin", SutName);
-    string binPath = Path.Combine(binTestProjectPath, _buildConfiguration.ToLowerInvariant());
+    string binPath = Path.Combine(binTestProjectPath, _buildConfiguration.ToLowerInvariant() + "_" + TestUtils.GetAssemblyTargetFramework());
     return binPath;
   }
 
@@ -528,10 +536,12 @@ private async Task<int> BuildProject(string projectPath)
 
     using var process = Process.Start(processStartInfo);
 
-    string output = await process!.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
-
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
+    string output = await outputTask;
+    string error = await errorTask;
 
     if (process.ExitCode != 0)
     {
@@ -566,10 +576,12 @@ private async Task<int> BuildProject(string projectPath)
 
     using var process = Process.Start(processStartInfo);
 
-    string output = await process!.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
-
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
+    string output = await outputTask;
+    string error = await errorTask;
 
     return new TestResult
     {
@@ -597,10 +609,12 @@ private async Task<int> BuildProject(string projectPath)
 
     using var process = Process.Start(processStartInfo);
 
-    string output = await process!.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
-
+    // Read both streams concurrently to avoid deadlock when pipe buffers fill
+    Task<string> outputTask = process!.StandardOutput.ReadToEndAsync();
+    Task<string> errorTask = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
+    string output = await outputTask;
+    string error = await errorTask;
 
     return new TestResult
     {

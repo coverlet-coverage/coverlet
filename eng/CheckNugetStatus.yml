@@ -39,18 +39,18 @@ steps:
             }
             $outdatedList
             $deprecatedList = dotnet list $project package --deprecated --include-transitive --source https://api.nuget.org/v3/index.json
-            if ($deprecatedList.Length -gt 5) {
+            if ($deprecatedList.Length -gt 7) {
                 $deprecatedList
                 $existsDeprecatedPackage = $true
             } else {
-                $deprecatedList[4]
+                $deprecatedList[7]
             }
             $vulnerableList = dotnet list $project package --vulnerable --source https://api.nuget.org/v3/index.json
-            if ($vulnerableList.Length -gt 5) {
+            if ($vulnerableList.Length -gt 7) {
                 $vulnerableList
                 $existsVulnerablePackage = $true
             } else {
-                $vulnerableList[4]
+                $vulnerableList[7]
             }
             } catch { "An error occurred for $($project.PSChildName)" }
         }

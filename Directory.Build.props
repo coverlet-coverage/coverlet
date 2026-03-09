@@ -2,7 +2,8 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <NetCurrent>net9.0</NetCurrent>
+    <NetCurrent Condition="'$(LEGACY)' == ''">net10.0</NetCurrent>
+    <NetCurrent Condition="'$(LEGACY)' != ''">net9.0</NetCurrent>
     <NetMinimum>net8.0</NetMinimum>
     <FullFrameworkTFM>net472</FullFrameworkTFM>
     <!-- enforce CamelCase case string-->
@@ -18,7 +19,7 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>latest</LangVersion>
     <NoWarn>$(NoWarn);NU1507;NU5105;CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RestoreSources>
@@ -29,24 +30,25 @@
     <!-- C:\Program Files\dotnet\sdk\8.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.DefaultOutputPaths.targets -->
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+    <ArtifactsBinOutputName>bin</ArtifactsBinOutputName>
     <CoverletVersion Condition="'$(CoverletVersion)'==''">8.0.0</CoverletVersion>
     <!-- Breaking change NET 8.0 InformationalVersion with SourceRevisionId -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <!-- Default to non-deterministic for local builds -->
-  <PropertyGroup Condition="'$(TF_BUILD)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true'">
+  <PropertyGroup Condition="'$(TF_BUILD)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true' AND '$(LEGACY)' == ''">
     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
     <Deterministic>false</Deterministic>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true' AND '$(LEGACY)' != ''">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' AND '$(LEGACY)' != ''">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
   </PropertyGroup>

@@ -16,13 +16,17 @@ namespace Coverlet.Integration.Tests
 {
   public class WpfResolverTests : BaseTest
   {
+    public WpfResolverTests(ITestOutputHelper output) : base(output)
+    {
+    }
+
     [Fact]
     public void TestInstrument_NetCoreSharedFrameworkResolver()
     {
       Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant();
       string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf8");
-      string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8"), buildConfiguration);
+      string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8"), buildConfiguration + "_" + TestUtils.GetAssemblyTargetFramework() + "-windows");
       Assert.Equal(0, DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
       string assemblyLocation = Directory.GetFiles(testBinaryPath, "coverlet.tests.projectsample.wpf8.dll", SearchOption.AllDirectories).First();
 
@@ -46,10 +50,11 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestInstrument_NetCoreSharedFrameworkResolver_SelfContained()
     {
+      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
       Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant();
       string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf8.selfcontained");
-      string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8.selfcontained"), $"{buildConfiguration}_win-x64");
+      string testBinaryPath = Path.Combine(TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.wpf8.selfcontained"), buildConfiguration + "_" + TestUtils.GetAssemblyTargetFramework() +"-windows_win-x64");
       Assert.Equal(0, DotnetCli($"build \"{wpfProjectPath}\"", out string output, out string error));
       string assemblyLocation = Directory.GetFiles(testBinaryPath, "coverlet.tests.projectsample.wpf8.selfcontained.dll", SearchOption.AllDirectories).First();
 
