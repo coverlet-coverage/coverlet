@@ -37,18 +37,18 @@
   </PropertyGroup>
 
   <!-- Default to non-deterministic for local builds -->
-  <PropertyGroup Condition="'$(TF_BUILD)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true' AND '$(LEGACY)' == ''">
+  <PropertyGroup Condition="'$(TF_BUILD)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true'">
     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
     <Deterministic>false</Deterministic>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TF_BUILD)' == 'true' AND '$(LEGACY)' != ''">
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' AND '$(LEGACY)' != ''">
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
