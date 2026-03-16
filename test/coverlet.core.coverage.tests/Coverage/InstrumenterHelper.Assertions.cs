@@ -32,7 +32,7 @@ namespace Coverlet.CoreCoverage.Tests
       {
         Process.Start("cmd", "/C " + Path.GetFullPath(Path.Combine(directory, "index.htm")));
       }
-
+      
       return coverageResult;
     }
 
