@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Coverlet.Core;
@@ -105,8 +103,6 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void AsyncAwait_Issue_669_2()
     {
-      // fails on CI with Windows OS - unknown reason - successfully executed locally (CLI)
-      Assert.SkipWhen(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "This test is skipped on Windows for CI environment");
       string path = Path.GetTempFileName();
       try
       {
@@ -116,8 +112,7 @@ namespace Coverlet.CoreCoverage.Tests
                   {
                     await (ValueTask<System.Net.Http.HttpResponseMessage>)instance.SendRequest();
                   },
-                  persistPrepareResultToFile: pathSerialize[0],
-                  assemblyLocation: Assembly.GetExecutingAssembly().Location);
+                  persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
         }, [path]);
