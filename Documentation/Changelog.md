@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## Release date 2026-03-17
+### Packages
+coverlet.msbuild 8.0.1
+coverlet.console 8.0.1
+coverlet.collector 8.0.1
+coverlet.MTP 8.0.1
+
 ### Fixed
 - Fix [BUG] TypeInitializationException when targeting .NET Framework [#1818](https://github.com/coverlet-coverage/coverlet/issues/1818)
 - Fix [BUG] coverlet.MTP build fails with CS0400 due to developmentDependency=true [#1827](https://github.com/coverlet-coverage/coverlet/issues/1827)
