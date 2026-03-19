@@ -38,11 +38,8 @@ public class HelpCommandTests
 
   public HelpCommandTests()
   {
-#if DEBUG
-    _buildConfiguration = "Debug";
-#else
-    _buildConfiguration = "Release";
-#endif
+    // Use TestUtils to get runtime configuration instead of compile-time
+    _buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString();
     _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
 
     // Get repository root
@@ -58,7 +55,7 @@ public class HelpCommandTests
       "BasicTestProject");
   }
 
-  private protected string GetPackageVersion(string filter)
+  private protected static string GetPackageVersion(string filter)
   {
     string packagesPath = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant());
 
