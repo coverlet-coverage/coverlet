@@ -16,9 +16,13 @@ internal sealed class CoverageConfiguration
   // See: https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/VSTestIntegration.md
   private static readonly string[] s_defaultExcludeFilters =
   [
+    "[coverlet.*]*",
     "[xunit.*]*",
+    "[NUnit3.*]*",
     "[Microsoft.Testing.*]*",
-    "[coverlet.*]*"
+    "[Microsoft.Testplatform.*]*",
+    "[Microsoft.VisualStudio.TestPlatform.*]*"
+
   ];
 
   private static readonly string[] s_defaultExcludeByAttributes =

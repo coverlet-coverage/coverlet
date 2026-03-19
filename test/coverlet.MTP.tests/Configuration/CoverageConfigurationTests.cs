@@ -248,10 +248,13 @@ public sealed class CoverageConfigurationTests
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(3, result.Length);
+    Assert.Equal(6, result.Length);
     Assert.Contains("[xunit.*]*", result);
     Assert.Contains("[Microsoft.Testing.*]*", result);
     Assert.Contains("[coverlet.*]*", result);
+    Assert.Contains("[Microsoft.Testplatform.*]*", result);
+    Assert.Contains("[Microsoft.VisualStudio.TestPlatform.*]*", result);
+    Assert.Contains("[NUnit3.*]*", result);
   }
 
   [Fact]
@@ -270,7 +273,7 @@ public sealed class CoverageConfigurationTests
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(4, result.Length);
+    Assert.Equal(7, result.Length);
     Assert.Single(result, f => f == "[xunit.*]*");
   }
 
@@ -290,7 +293,7 @@ public sealed class CoverageConfigurationTests
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(4, result.Length); // 3 defaults + 1 custom (all duplicates removed)
+    Assert.Equal(7, result.Length); // 7 defaults + 1 custom (all duplicates removed)
     Assert.Single(result, f => f == "[xunit.*]*");
     Assert.Single(result, f => f == "[Microsoft.Testing.*]*");
   }
