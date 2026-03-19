@@ -118,7 +118,10 @@ namespace Coverlet.Core.Tests
         MergeWith = string.Empty,
         UseSourceLink = false,
         SkipAutoProps = skipAutoProps,
-        DoesNotReturnAttributes = doesNotReturnAttributes?.Invoke(fileName)
+        DoesNotReturnAttributes = doesNotReturnAttributes?.Invoke(fileName),
+        // Bypass source file existence checks in CI builds with deterministic settings
+        // where PDB paths may not match local file paths
+        ExcludeAssembliesWithoutSources = "None"
       };
 
       // Instrument module

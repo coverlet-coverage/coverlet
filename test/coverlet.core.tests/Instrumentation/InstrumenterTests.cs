@@ -477,15 +477,17 @@ namespace Coverlet.Core.Tests.Instrumentation
           new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), loggerMock2.Object,
                                     new SourceRootTranslator(sample, loggerMock2.Object, new FileSystem(), new AssemblyAdapter()));
 
+      // Use ExcludeAssembliesWithoutSources = "None" to bypass source file checks in CI
+      // where deterministic builds may produce PDB paths that don't exist locally
       instrumenter = new Instrumenter(sample, "_coverlet_tests_projectsample_empty",
-          new CoverageParameters(), loggerMock2.Object, instrumentationHelper, new FileSystem(),
+          new CoverageParameters { ExcludeAssembliesWithoutSources = "None" }, loggerMock2.Object, instrumentationHelper, new FileSystem(),
           new SourceRootTranslator(sample, loggerMock2.Object, new FileSystem(), new AssemblyAdapter()),
           new CecilSymbolHelper());
 
-      Assert.True(instrumentationHelper.HasPdb(sample, out embedded));
-      Assert.False(embedded);
-      Assert.True(instrumenter.CanInstrument());
-      // Now VerifyNoOtherCalls could potentially work since we're not reading the test assembly's PDB
+      bool sampleHasPdb = instrumentationHelper.HasPdb(sample, out embedded);
+      Assert.True(sampleHasPdb, "Sample assembly should have a PDB file");
+      Assert.False(embedded, "Sample assembly should not have an embedded PDB");
+      Assert.True(instrumenter.CanInstrument(), "Sample assembly with external PDB and ExcludeAssembliesWithoutSources=None should be instrumentable");
     }
 
     [Fact]

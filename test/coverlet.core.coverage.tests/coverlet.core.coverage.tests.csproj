@@ -39,7 +39,7 @@
 
   <ItemGroup>
     <!-- xunit runner configuration to disable parallel test execution -->
-    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>

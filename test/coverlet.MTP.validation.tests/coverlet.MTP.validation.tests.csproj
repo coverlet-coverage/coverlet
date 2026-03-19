@@ -17,7 +17,7 @@
     </PropertyGroup>
       
   <ItemGroup>
-    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)"/>
+    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
     <PackageReference Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
   </ItemGroup>
@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <None Include="TestProjects\**" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
   
 </Project>
