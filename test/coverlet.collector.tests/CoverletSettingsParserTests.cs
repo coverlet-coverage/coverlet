@@ -94,11 +94,16 @@ namespace Coverlet.Collector.Tests
       Assert.Equal("GeneratedCodeAttribute", coverletSettings.ExcludeAttributes[1]);
       Assert.Equal("CompilerGeneratedAttribute", coverletSettings.ExcludeAttributes[2]);
       Assert.Equal("/path/to/result.json", coverletSettings.MergeWith);
-      Assert.Equal("[coverlet.*]*", coverletSettings.ExcludeFilters[0]);
-      Assert.Equal("[coverlet.*.tests?]*", coverletSettings.ExcludeFilters[1]);
-      Assert.Equal("[coverlet.*.tests.*]*", coverletSettings.ExcludeFilters[2]);
       Assert.Equal("DoesNotReturnAttribute", coverletSettings.DoesNotReturnAttributes[0]);
       Assert.Equal("ThrowsAttribute", coverletSettings.DoesNotReturnAttributes[1]);
+
+      // Verify defaults are included at the start
+      Assert.Equal(CoverletConstants.DefaultExcludeFilters, coverletSettings.ExcludeFilters.Take(CoverletConstants.DefaultExcludeFilters.Length));
+
+      // Verify user-provided filters are appended after defaults
+      int userFilterOffset = CoverletConstants.DefaultExcludeFilters.Length;
+      Assert.Equal("[coverlet.*.tests?]*", coverletSettings.ExcludeFilters[userFilterOffset]);
+      Assert.Equal("[coverlet.*.tests.*]*", coverletSettings.ExcludeFilters[userFilterOffset + 1]);
 
       Assert.False(coverletSettings.UseSourceLink);
       Assert.True(coverletSettings.SingleHit);
@@ -126,7 +131,14 @@ namespace Coverlet.Collector.Tests
       Assert.Empty(coverletSettings.IncludeDirectories);
       Assert.Empty(coverletSettings.ExcludeSourceFiles);
       Assert.Empty(coverletSettings.ExcludeAttributes);
-      Assert.Single(coverletSettings.ExcludeFilters, "[coverlet.*]*");
+      Assert.Collection(coverletSettings.ExcludeFilters,
+          filter => Assert.Equal("[coverlet.*]*", filter),
+          filter => Assert.Equal("[xunit.*]*", filter),
+          filter => Assert.Equal("[NUnit3.*]*", filter),
+          filter => Assert.Equal("[Microsoft.Testing.*]*", filter),
+          filter => Assert.Equal("[Microsoft.Testplatform.*]*", filter),
+          filter => Assert.Equal("[Microsoft.VisualStudio.TestPlatform.*]*", filter)
+      );
     }
 
     [Fact]
@@ -143,7 +155,14 @@ namespace Coverlet.Collector.Tests
       Assert.Null(coverletSettings.IncludeDirectories);
       Assert.Null(coverletSettings.ExcludeSourceFiles);
       Assert.Null(coverletSettings.ExcludeAttributes);
-      Assert.Single(coverletSettings.ExcludeFilters, "[coverlet.*]*");
+      Assert.Collection(coverletSettings.ExcludeFilters,
+          filter => Assert.Equal("[coverlet.*]*", filter),
+          filter => Assert.Equal("[xunit.*]*", filter),
+          filter => Assert.Equal("[NUnit3.*]*", filter),
+          filter => Assert.Equal("[Microsoft.Testing.*]*", filter),
+          filter => Assert.Equal("[Microsoft.Testplatform.*]*", filter),
+          filter => Assert.Equal("[Microsoft.VisualStudio.TestPlatform.*]*", filter)
+          );
     }
 
     [Theory]

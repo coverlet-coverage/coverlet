@@ -12,8 +12,7 @@ internal sealed class CoverageConfiguration
   private readonly ICommandLineOptions _commandLineOptions;
   private readonly ILogger? _logger;
 
-  // Default exclusions matching coverlet.collector behavior
-  // See: https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/VSTestIntegration.md
+  // Default exclusions for user convenience, to avoid common noise in coverage reports. These are merged with any user-specified exclusions.
   private static readonly string[] s_defaultExcludeFilters =
   [
     "[coverlet.*]*",
