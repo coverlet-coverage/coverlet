@@ -11,7 +11,7 @@ namespace Coverlet.Core.Tests.Infrastructure;
 /// Compatibility wrapper that maintains the existing FunctionExecutor API.
 /// This allows minimal changes to existing test code.
 /// Replacement for Tmds.ExecFunction.FunctionExecutor.
-/// 
+///
 /// Note: Unlike Tmds.ExecFunction which executed lambdas in a separate process
 /// via expression tree serialization, this implementation runs lambdas in-process.
 /// For test isolation purposes, the instrumented assembly copy mechanism in
@@ -23,6 +23,7 @@ public class FunctionExecutor
 
   public FunctionExecutor(Action<FunctionExecutorOptions> configure = null)
   {
+    // Store the configuration action for potential future use, even though it's not utilized in this in-process implementation.
     _configure = configure;
   }
 
