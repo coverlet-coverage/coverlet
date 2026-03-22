@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Target only .NET 8 and .NET 9 (no .NET 10) -->
+    <TargetFrameworks>$(NetMinimum);net9.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <!-- Use VSTest mode for legacy tests - xUnit v3 can still use VSTest runner on .NET 8/9 -->
+    <UseMicrosoftTestingPlatformRunner>false</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+    <!-- Microsoft.TestPlatform.TestHost depends on Newtonsoft.Json -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
+    <PackageReference Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
+    <!-- Use xUnit v3 with VSTest runner for legacy tests -->
+    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <!-- Framework-specific packages are controlled by coverlet.core for compatibility -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
+    <ProjectReference Include="$(RepoRoot)test\coverlet.integration.template\coverlet.integration.template.csproj" />
+  </ItemGroup>
+
+  <!-- Link shared files from coverlet.integration.MTP.tests -->
+  <ItemGroup>
+    <Compile Include="..\coverlet.integration.MTP.tests\BaseTest.cs" Link="BaseTest.cs" />
+    <Compile Include="..\coverlet.integration.MTP.tests\AssertHelper.cs" Link="AssertHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Remove="Microsoft.CodeAnalysis.BannedApiAnalyzers" />
+  </ItemGroup>
+
+</Project>

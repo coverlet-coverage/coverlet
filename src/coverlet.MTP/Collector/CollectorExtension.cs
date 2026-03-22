@@ -151,9 +151,75 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       _logger.LogError("Failed to initialize coverage instrumentation");
       _logger.LogError(ex);
       _coverageEnabled = false;
+
+      // Display error to user via IOutputDevice (visible in console output)
+      DisplayErrorToUserAsync(ex).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     return Task.CompletedTask;
+  }
+
+  /// <summary>
+  /// Displays an error message to the user via the output device.
+  /// This ensures the error is visible in console output, not just diagnostic logs.
+  /// </summary>
+  private async Task DisplayErrorToUserAsync(Exception ex)
+  {
+    string errorMessage = FormatErrorForDisplay(ex);
+
+    await _outputDisplay.DisplayAsync(
+      this,
+      new FormattedTextOutputDeviceData($"[Coverlet] Coverage instrumentation failed:")
+      {
+        ForegroundColor = new SystemConsoleColor { ConsoleColor = ConsoleColor.Red }
+      },
+      CancellationToken.None);
+
+    await _outputDisplay.DisplayAsync(
+      this,
+      new FormattedTextOutputDeviceData($"  {errorMessage}")
+      {
+        ForegroundColor = new SystemConsoleColor { ConsoleColor = ConsoleColor.Yellow }
+      },
+      CancellationToken.None);
+
+    await _outputDisplay.DisplayAsync(
+      this,
+      new TextOutputDeviceData("  Use --diagnostic for detailed logs."),
+      CancellationToken.None);
+  }
+
+  /// <summary>
+  /// Formats an exception for user-friendly display.
+  /// </summary>
+  private static string FormatErrorForDisplay(Exception ex)
+  {
+    // Handle AggregateException by extracting inner exceptions
+    if (ex is AggregateException aggEx && aggEx.InnerExceptions.Count > 0)
+    {
+      var distinctMessages = aggEx.InnerExceptions
+        .Select(e => GetConciseErrorMessage(e))
+        .Distinct()
+        .ToList();
+
+      return string.Join(Environment.NewLine + "  ", distinctMessages);
+    }
+
+    return GetConciseErrorMessage(ex);
+  }
+
+  /// <summary>
+  /// Gets a concise error message suitable for console display.
+  /// </summary>
+  private static string GetConciseErrorMessage(Exception ex)
+  {
+    // For IOException (file access issues), include the specific file info
+    if (ex is IOException ioEx)
+    {
+      return ioEx.Message;
+    }
+
+    return ex.Message;
   }
 
   /// <summary>

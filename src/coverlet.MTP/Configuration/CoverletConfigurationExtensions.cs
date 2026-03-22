@@ -17,7 +17,7 @@ public static class CoverletConfigurationExtensions
   public static void AddCoverletCodeCoverage(this ITestApplicationBuilder builder)
   {
     // Register the test session lifetime handler
-    builder.TestHost.AddTestSessionLifetimeHandle(serviceProvider =>
+    builder.TestHost.AddTestSessionLifetimeHandler(serviceProvider =>
         new CoverletTestSessionHandler());
   }
 }

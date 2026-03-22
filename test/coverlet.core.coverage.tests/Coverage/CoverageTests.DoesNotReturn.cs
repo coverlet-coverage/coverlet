@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
+using Coverlet.Core.Tests.Infrastructure;
 using Coverlet.Tests.Utils;
 using Xunit;
 
@@ -24,12 +25,12 @@ namespace Coverlet.CoreCoverage.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
-                  {
-                    try { instance.NoBranches(); }
-                    catch (Exception) { }
-                    return Task.CompletedTask;
+          {
+            try { instance.NoBranches(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
 
-                  }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
+          }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 
@@ -50,18 +51,19 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
-                      {
-                        try { instance.If(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+          {
+            try { instance.If(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0]);
+          }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -81,18 +83,19 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
-                      {
-                        try { instance.Switch(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+          {
+            try { instance.Switch(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0]);
+          }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -112,18 +115,19 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
-                      {
-                        try { instance.Subtle(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+          {
+            try { instance.Subtle(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0]);
+          }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -143,18 +147,19 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
-                      {
-                        try { instance.UnreachableBranch(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+          {
+            try { instance.UnreachableBranch(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0]);
+          }, persistPrepareResultToFile: pathSerialize[0]);
 
           return 0;
 
@@ -180,12 +185,12 @@ namespace Coverlet.CoreCoverage.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
-                      {
-                        try { instance.CallsGenericMethodDoesNotReturn(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+          {
+            try { instance.CallsGenericMethodDoesNotReturn(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
+          }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 
@@ -212,12 +217,12 @@ namespace Coverlet.CoreCoverage.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
-                      {
-                        try { instance.CallsGenericClassDoesNotReturn(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+          {
+            try { instance.CallsGenericClassDoesNotReturn(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
+          }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 
@@ -244,12 +249,12 @@ namespace Coverlet.CoreCoverage.Tests
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
-                      {
-                        try { instance.WithLeave(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+          {
+            try { instance.WithLeave(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
+          }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 
@@ -270,18 +275,19 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void FiltersAndFinally_DoesNotReturnAttribute_InstrumentsCorrect()
     {
+      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
-                      {
-                        try { instance.FiltersAndFinally(); }
-                        catch (Exception) { }
-                        return Task.CompletedTask;
+          {
+            try { instance.FiltersAndFinally(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
 
-                      }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
+          }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
           return 0;
 

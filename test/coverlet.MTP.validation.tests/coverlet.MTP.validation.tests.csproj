@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
@@ -17,7 +17,7 @@
     </PropertyGroup>
       
   <ItemGroup>
-    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)"/>
+    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
     <PackageReference Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
   </ItemGroup>
@@ -37,6 +37,10 @@
 
   <ItemGroup>
     <None Include="TestProjects\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   
 </Project>
