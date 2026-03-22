@@ -147,7 +147,7 @@ jobs:
     #     MSBUILDDISABLENODEREUSE: 1
 
     - name: ReportGenerator
-      uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
       if: success() && matrix.os  == 'windows-latest'
       with:
         reports: ./artifacts/reports/**/*.cobertura.xml
