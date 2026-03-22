@@ -74,7 +74,7 @@ jobs:
         dotnet pack -c release
 
     # - name: Archive production artifacts
-    #   uses: actions/upload-artifact@v5
+    #   uses: actions/upload-artifact@v7
     #   with:
     #     name: dist-bin-and-packages
     #     retention-days: 5
@@ -168,7 +168,7 @@ jobs:
       shell: bash
 
     - name: Upload Test Result Files
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: test-results-${{ matrix.os }}
@@ -226,7 +226,7 @@ jobs:
 
     # - name: Upload coverage report artifact
     #   if: success() && matrix.os  == 'windows-latest'
-    #   uses: actions/upload-artifact@v5
+    #   uses: actions/upload-artifact@v7
     #   with:
     #     name: CoverageReport.${{matrix.os}}.${{matrix.framework}} # Artifact name
     #     path: ./artifacts/CoverageReport # Directory containing files to upload
