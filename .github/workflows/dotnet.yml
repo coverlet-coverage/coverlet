@@ -32,7 +32,7 @@ jobs:
       checks: write
 
     steps:
-    - uses: actions/checkout@v6.0.1
+    - uses: actions/checkout@v6
       with:
           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
@@ -104,7 +104,7 @@ jobs:
   #       pull-requests: write
   #     steps:
   #       - name: Checkout
-  #         uses: actions/checkout@v6.0.1
+  #         uses: actions/checkout@v6
   #         with:
   #           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
