@@ -156,7 +156,7 @@ jobs:
         reporttypes: HtmlInline;Cobertura;MarkdownSummaryGithub;lcov
 
     - name: Add Coverage PR Comment
-      uses: marocchino/sticky-pull-request-comment@v2.9.4
+      uses: marocchino/sticky-pull-request-comment@v3.0.2
       if: success() && matrix.os  == 'windows-latest' && github.event_name == 'pull_request'
       with:
         recreate: true
