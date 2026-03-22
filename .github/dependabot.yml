@@ -16,5 +16,3 @@ updates:
     open-pull-requests-limit: 15
     schedule:
       interval: "monthly"
-    registries:
-      - nuget-azure-devops
