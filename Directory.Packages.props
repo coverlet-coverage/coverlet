@@ -7,7 +7,7 @@
     <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.8.118" />
   </ItemGroup>
   <PropertyGroup>
-    <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion> <!-- .NET 8.0 support -->
+    <MicrosoftBuildVersion>18.4.0</MicrosoftBuildVersion> <!-- .NET 8.0 support -->
     <MicrosoftCodeAnalysisVersion>4.13.0</MicrosoftCodeAnalysisVersion>
     <!-- .NET 8.0 support -->
     <NugetPackageVersion>6.14.0</NugetPackageVersion>
