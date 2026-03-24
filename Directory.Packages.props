@@ -4,7 +4,7 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.8.118" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.9.50" />
   </ItemGroup>
   <PropertyGroup>
     <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion> <!-- .NET 8.0 support -->
