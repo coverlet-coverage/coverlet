@@ -391,6 +391,44 @@ private static bool CanRunOnNET10()
 
 ## Recommended Implementation Plan
 
+### Running Tests on .NET 10 - Correct Commands
+
+**Important**: .NET 10 uses Microsoft Testing Platform (MTP) which has different filter syntax than VSTest.
+
+#### ❌ Incorrect (VSTest syntax - will find 0 tests):
+```powershell
+dotnet test -f net10.0 --filter "FullyQualifiedName=Namespace.Class.Method"
+```
+
+#### ✅ Correct (MTP syntax):
+```powershell
+# Run specific Issue #1843 test
+dotnet test --project test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj `
+  -f net10.0 `
+  --filter-method "Coverlet.CoreCoverage.Tests.CoverageTests.AsyncAwait_Issue_1843_VerifyAllMethodsDiscovered" `
+  --diagnostic --diagnostic-verbosity Debug `
+  --report-xunit-trx --report-xunit-trx-filename "issue1843.net10.0.trx" `
+  --diagnostic-output-directory "./artifacts/log/" `
+  --diagnostic-file-prefix "issue1843.net10.0_" `
+  --results-directory "./artifacts/reports/"
+
+# Run all Issue #1843 tests (wildcard)
+dotnet test --project test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj `
+  -f net10.0 `
+  --filter-method "*Issue_1843*" `
+  --diagnostic --diagnostic-verbosity Debug `
+  --results-directory "./artifacts/reports/"
+```
+
+#### MTP vs VSTest Filter Syntax Comparison
+
+| Purpose | VSTest (Legacy) | MTP (Modern) |
+|---------|----------------|--------------|
+| Filter by method | `--filter "FullyQualifiedName=Ns.Class.Method"` | `--filter-method "Ns.Class.Method"` |
+| Filter by class | `--filter "FullyQualifiedName~Ns.Class"` | `--filter-class "Ns.Class"` |
+| Filter by namespace | `--filter "FullyQualifiedName~Ns"` | `--filter-namespace "Ns"` |
+| Wildcard support | Limited | ✅ Yes: `"*Issue_1843*"` |
+
 ### Immediate Actions (High Priority)
 
 1. **Add Diagnostic Logging** (1 hour)

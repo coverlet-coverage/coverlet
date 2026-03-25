@@ -118,6 +118,8 @@ All tests use:
 2. `test/coverlet.core.coverage.tests/Coverage/CoverageTests.AsyncAwait.cs` - Added 4 new test methods
 
 ## Building and Running
+
+### Using VSTest (.NET 8/9 with build-legacy.yml)
 ```bash
 # Build solution
 dotnet build
@@ -128,6 +130,29 @@ dotnet test --filter "FullyQualifiedName~Issue_1843"
 # Run specific test
 dotnet test --filter "FullyQualifiedName=Coverlet.CoreCoverage.Tests.CoverageTests.AsyncAwait_Issue_1843_ComprehensiveInstrumentation"
 ```
+
+### Using Microsoft Testing Platform (.NET 10 with build.yml)
+```bash
+# Build solution
+dotnet build
+
+# Run all Issue #1843 tests
+dotnet test --project test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj `
+  -f net10.0 `
+  --filter-method "*Issue_1843*"
+
+# Run specific test with diagnostics
+dotnet test --project test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj `
+  -f net10.0 `
+  --filter-method "Coverlet.CoreCoverage.Tests.CoverageTests.AsyncAwait_Issue_1843_VerifyAllMethodsDiscovered" `
+  --diagnostic --diagnostic-verbosity Debug `
+  --report-xunit-trx --report-xunit-trx-filename "issue1843.net10.0.trx" `
+  --diagnostic-output-directory "./artifacts/log/" `
+  --diagnostic-file-prefix "issue1843.net10.0_" `
+  --results-directory "./artifacts/reports/"
+```
+
+**Note**: .NET 10 uses Microsoft Testing Platform (MTP) which has different filter syntax than VSTest. Use `--filter-method`, `--filter-class`, or `--filter-namespace` instead of VSTest's `--filter` with `FullyQualifiedName=`.
 
 ## Notes
 - Tests follow coverlet coding guidelines (no direct file I/O in tests, using `IFileSystem` abstraction)
