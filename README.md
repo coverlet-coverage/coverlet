@@ -35,14 +35,14 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 
 Coverlet can be used through four different *drivers*
 
+* Microsoft Testing Platform integration (coverlet.MTP)
+* As a .NET Global tool (supports standalone integration tests)
 * VSTest engine integration
 * MSBuild task integration
-* As a .NET Global tool (supports standalone integration tests)
-* **New** Microsoft Testing Platform integration (coverlet.MTP)
 
 Coverlet supports only SDK-style projects <https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk?view=vs-2019>
 
-### **NEW** Microsoft Testing Platform Integration (coverlet.MTP)
+## Microsoft Testing Platform Integration ([guide](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Coverlet.MTP.Integration.md))
 
 ### Installation (coverlet.MTP)
 
@@ -82,7 +82,7 @@ After the above command is run, coverage report files will be generated in the t
 Example with options:
 
 ```bash
-dotnet run --project <your-test-project> -- --coverlet --coverlet-output-format cobertura --coverlet-exclude "[xunit.]"
+dotnet run --project <your-test-project> --coverlet --coverlet-output-format cobertura --coverlet-exclude "[xunit.]"
 ```
 
 #### Requirements (coverlet.MTP)
@@ -90,7 +90,50 @@ dotnet run --project <your-test-project> -- --coverlet --coverlet-output-format 
 * *.NET 8.0 SDK or newer*
 * *Test project configured for [Microsoft Testing Platform](https://www.nuget.org/packages/Microsoft.Testing.Platform)*
 
-### VSTest Integration (preferred due to [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
+## .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
+
+### Installation (coverlet.console)
+
+```bash
+dotnet tool install --global coverlet.console
+```
+
+### Usage (coverlet.console)
+
+The `coverlet` tool is invoked by specifying the path to the assembly that contains the unit tests. You also need to specify the test runner and the arguments to pass to the test runner using the `--target` and `--targetargs` options respectively. The invocation of the test runner with the supplied arguments **must not** involve a recompilation of the unit test assembly or no coverage result will be generated.
+
+The following example shows how to use the familiar `dotnet test` toolchain:
+
+```bash
+coverlet /path/to/test-assembly.dll --target "dotnet" --targetargs "test /path/to/test-project --no-build"
+```
+
+*Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dll` assembly isn't rebuilt*
+
+See [documentation](Documentation/GlobalTool.md) for advanced usage.
+
+#### Requirements (coverlet.console)
+
+* .NET global tools rely on a .NET Core runtime installed on your machine <https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong>
+* .NET Coverlet global tool requires *.NET 8.0 or above*
+
+> [!WARNING]
+> **`coverlet.collector` and `coverlet.msbuild` cannot be used with the Microsoft Testing Platform (MTP).**
+> This is especially relevant when using the native `dotnet test` integration introduced with **.NET 10**.
+>
+> Both packages rely on the **VSTest infrastructure**, while the **Microsoft Testing Platform uses a different test execution architecture**, which makes these integrations incompatible. ([Use Microsoft.Testing.Platform in the VSTest mode of dotnet test](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-integration-dotnet-test))
+>
+> If your test project runs on **Microsoft Testing Platform**, you must remove these packages:
+>
+> ```xml
+> <PackageReference Include="coverlet.collector" />
+> <PackageReference Include="coverlet.msbuild" />
+> ```
+>
+> Instead, use the **coverlet.MTP extension designed for Microsoft Testing Platform**:
+> The `coverlet.MTP` package provides the equivalent functionality of `coverlet.collector` but is implemented as a **native extension for Microsoft Testing Platform**.
+
+## VSTest Integration ([guide](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/VSTestIntegration.md), [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation (coverlet.collector)
 
@@ -122,7 +165,7 @@ See [documentation](Documentation/VSTestIntegration.md) for advanced usage.
 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 ```
 
-### MSBuild Integration (suffers of possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
+## MSBuild Integration ([guide](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/MSBuildIntegration.md), [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
 ### Installation (coverlet.msbuild)
 
@@ -148,33 +191,6 @@ See [documentation](Documentation/MSBuildIntegration.md) for advanced usage.
 
 * **.NET 8.0 SDK is required** (version 8.0.112 or higher)
 * **.NET Framework** that supports .NET Standard 2.0
-
-### .NET Global Tool ([guide](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), suffers from possible [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
-
-### Installation (coverlet.console)
-
-```bash
-dotnet tool install --global coverlet.console
-```
-
-### Usage (coverlet.console)
-
-The `coverlet` tool is invoked by specifying the path to the assembly that contains the unit tests. You also need to specify the test runner and the arguments to pass to the test runner using the `--target` and `--targetargs` options respectively. The invocation of the test runner with the supplied arguments **must not** involve a recompilation of the unit test assembly or no coverage result will be generated.
-
-The following example shows how to use the familiar `dotnet test` toolchain:
-
-```bash
-coverlet /path/to/test-assembly.dll --target "dotnet" --targetargs "test /path/to/test-project --no-build"
-```
-
-*Note: The `--no-build` flag is specified so that the `/path/to/test-assembly.dll` assembly isn't rebuilt*
-
-See [documentation](Documentation/GlobalTool.md) for advanced usage.
-
-#### Requirements (coverlet.console)
-
-* .NET global tools rely on a .NET Core runtime installed on your machine <https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong>
-* .NET Coverlet global tool requires *.NET 8.0 or above*
 
 ## How It Works
 

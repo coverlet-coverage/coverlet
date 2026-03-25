@@ -13,13 +13,11 @@ namespace Coverlet.Integration.Tests
   {
     private readonly string _buildConfiguration;
     private readonly string _buildTargetFramework;
-    private readonly ITestOutputHelper _output;
 
-    public Msbuild(ITestOutputHelper output)
+    public Msbuild(ITestOutputHelper output) : base(output)
     {
       _buildConfiguration = TestUtils.GetBuildConfigurationString();
       _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
-      _output = output;
     }
 
     private ClonedTemplateProject PrepareTemplateProject()
@@ -33,6 +31,7 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -43,17 +42,19 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"coverage.json";
+      string coverageFileName = $"coverage.{TestUtils.GetAssemblyTargetFramework()}.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }
 
     [Fact]
-    public void TestMsbuild_NoCoverletOutput()
+    public void TestMsbuild_NoCoverletOutput_Folder()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -64,10 +65,11 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"coverage.json";
+      string coverageFileName = $"coverage.{TestUtils.GetAssemblyTargetFramework()}.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }
@@ -75,6 +77,7 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameWithoutExtension()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -85,10 +88,11 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"file.json";
+      string coverageFileName = $"file.{TestUtils.GetAssemblyTargetFramework()}.json";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }
@@ -96,11 +100,12 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameExtension()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       Assert.Equal(0, DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError));
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"file.ext";
+      string coverageFileName = $"file.{TestUtils.GetAssemblyTargetFramework()}.ext";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }
@@ -108,8 +113,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameExtension_SpecifyFramework()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net8.0" };
+      string[] targetFrameworks = [_buildTargetFramework];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       Assert.False(clonedTemplateProject.IsMultipleTargetFramework());
       string framework = clonedTemplateProject.GetTargetFrameworks().Single();
@@ -122,15 +128,18 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
-      Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, "file.ext")));
-      AssertCoverage(clonedTemplateProject, "file.ext");
+      string fileName = "file." + TestUtils.GetAssemblyTargetFramework() + ".ext";
+      Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, fileName)));
+      AssertCoverage(clonedTemplateProject, fileName);
     }
 
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameWithDoubleExtension()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -141,9 +150,10 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
-      string coverageFileName = $"file.ext1.ext2";
+      string coverageFileName = $"file.ext1.{TestUtils.GetAssemblyTargetFramework()}.ext2";
       Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, coverageFileName)));
       AssertCoverage(clonedTemplateProject, coverageFileName);
     }
@@ -151,8 +161,10 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_NoCoverletOutput()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net9.0", "net8.0" };
+      // Use only .NET 8/9 frameworks for legacy tests
+      string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -163,6 +175,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
 
@@ -177,8 +190,10 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net9.0", "net8.0" };
+      // Use only .NET 8/9 frameworks for legacy tests
+      string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       int result = DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -189,6 +204,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
@@ -205,8 +221,10 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithoutExtension()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net9.0", "net8.0" };
+      // Use only .NET 8/9 frameworks for legacy tests
+      string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -217,6 +235,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
 
@@ -231,8 +250,10 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension_SpecifyFramework()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net9.0", "net8.0" };
+      // Use only .NET 8/9 frameworks for legacy tests
+      string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       Assert.True(clonedTemplateProject.IsMultipleTargetFramework());
       string[] frameworks = clonedTemplateProject.GetTargetFrameworks();
@@ -247,6 +268,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
 
@@ -261,14 +283,17 @@ namespace Coverlet.Integration.Tests
           Assert.False(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.ext")));
         }
       }
+
       AssertCoverage(clonedTemplateProject, "file.*.ext");
     }
 
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net9.0", "net8.0" };
+      // Use only .NET 8/9 frameworks for legacy tests
+      string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -279,6 +304,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
 
@@ -293,8 +319,10 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithDoubleExtension()
     {
+      // This test requires VSTest mode which is only available on .NET 8/9
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      string[] targetFrameworks = new string[] { "net9.0", "net8.0" };
+      // Use only .NET 8/9 frameworks for legacy tests
+      string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
@@ -305,6 +333,7 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
 

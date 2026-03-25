@@ -127,7 +127,7 @@ namespace Coverlet.Collector.DataCollection
     /// <returns>Filters to exclude</returns>
     private static string[] ParseExcludeFilters(XmlElement configurationElement)
     {
-      var excludeFilters = new List<string> { CoverletConstants.DefaultExcludeFilter };
+      var excludeFilters = new List<string>(CoverletConstants.DefaultExcludeFilters);
 
       if (configurationElement != null)
       {

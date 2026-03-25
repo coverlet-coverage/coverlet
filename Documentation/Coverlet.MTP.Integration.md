@@ -89,6 +89,9 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-does-not-return-attribute <attribute>` | Attributes that mark methods as not returning. Can be specified multiple times. |
 | `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. |
 
+> [!NOTE]
+> Coverage report files will be stored in `--results-directory` folder.
+
 ### Examples
 
 **Generate coverage in JSON format (default):**

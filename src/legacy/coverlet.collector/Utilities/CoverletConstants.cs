@@ -21,12 +21,22 @@ namespace Coverlet.Collector.Utilities
     public const string IncludeTestAssemblyElementName = "IncludeTestAssembly";
     public const string TestSourcesPropertyName = "TestSources";
     public const string ReportFormatElementName = "Format";
-    public const string DefaultExcludeFilter = "[coverlet.*]*";
+    // extending the default exclude filters to include Microsoft.VisualStudio.TestPlatform.* as well, to cover the case of users using older versions of test platform with newer versions of test framework
+    public static readonly string[] DefaultExcludeFilters =
+    {
+        "[coverlet.*]*",
+        "[xunit.*]*",
+        "[NUnit3.*]*",
+        "[Microsoft.Testing.*]*",
+        "[Microsoft.Testplatform.*]*",
+        "[Microsoft.VisualStudio.TestPlatform.*]*"
+    };
     public const string InProcDataCollectorName = "CoverletInProcDataCollector";
     public const string SkipAutoProps = "SkipAutoProps";
     public const string DoesNotReturnAttributesElementName = "DoesNotReturnAttribute";
     public const string DeterministicReport = "DeterministicReport";
     public const string ExcludeAssembliesWithoutSources = "ExcludeAssembliesWithoutSources";
     public const string DisableManagedInstrumentationRestore = "DisableManagedInstrumentationRestore";
+
   }
 }

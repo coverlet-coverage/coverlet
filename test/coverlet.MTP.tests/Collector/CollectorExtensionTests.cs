@@ -8,6 +8,7 @@ using Coverlet.MTP.EnvironmentVariables;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
@@ -281,6 +282,41 @@ public class CollectorExtensionTests
     await envProvider.UpdateAsync(mockEnvVariables.Object);
 
     mockEnvVariables.Verify(x => x.SetVariable(It.IsAny<EnvironmentVariable>()), Times.Never);
+  }
+
+  [Fact]
+  public async Task BeforeTestHostProcessStartAsyncWhenExceptionThrownDisplaysErrorToUser()
+  {
+    _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
+    SetupTestModuleConfiguration();
+    SetupDefaultCommandLineOptions();
+
+    var mockCoverageFactory = new Mock<ICoverageFactory>();
+    mockCoverageFactory
+      .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<CoverageParameters>()))
+      .Throws(new InvalidOperationException("Coverage initialization failed"));
+
+    _mockOutputDevice.Setup(x => x.DisplayAsync(
+      It.IsAny<IOutputDeviceDataProducer>(),
+      It.IsAny<IOutputDeviceData>(),
+      It.IsAny<CancellationToken>()))
+      .Returns(Task.CompletedTask);
+
+    var collector = CreateCollector();
+    collector.CoverageFactory = mockCoverageFactory.Object;
+
+    ITestHostProcessLifetimeHandler handler = collector;
+
+    // Act
+    await handler.BeforeTestHostProcessStartAsync(CancellationToken.None);
+
+    // Assert - verify error was displayed to user via IOutputDevice
+    _mockOutputDevice.Verify(
+      x => x.DisplayAsync(
+        It.IsAny<IOutputDeviceDataProducer>(),
+        It.Is<FormattedTextOutputDeviceData>(data => data.Text.Contains("Coverage instrumentation failed")),
+        It.IsAny<CancellationToken>()),
+      Times.Once);
   }
 
   #endregion

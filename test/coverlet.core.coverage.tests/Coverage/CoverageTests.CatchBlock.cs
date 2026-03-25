@@ -7,7 +7,6 @@ using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
 using Coverlet.Tests.Utils;
-using Tmds.Utils;
 using Xunit;
 
 namespace Coverlet.CoreCoverage.Tests

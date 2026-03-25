@@ -45,7 +45,7 @@ public static class CoverletExtensionProvider
     // ============================================================
 
     // Test session lifetime handler - flushes coverage data when session ends
-    builder.TestHost.AddTestSessionLifetimeHandle(static serviceProvider
+    builder.TestHost.AddTestSessionLifetimeHandler(static serviceProvider
         => new CoverletInProcessHandler(serviceProvider.GetLoggerFactory()));
 
     // ============================================================

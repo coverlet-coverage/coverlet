@@ -616,4 +616,240 @@ public class CollectorExtensionReportMethodsTests
   }
 
   #endregion
+
+  #region DisplayErrorToUserAsync Tests
+
+  [Fact]
+  public async Task DisplayErrorToUserAsyncDisplaysFormattedErrorMessage()
+  {
+    // Arrange
+    var collector = CreateCollectorWithCoverageEnabled();
+    var testException = new InvalidOperationException("Test error message");
+
+    _mockOutputDevice.Setup(x => x.DisplayAsync(
+      It.IsAny<IOutputDeviceDataProducer>(),
+      It.IsAny<IOutputDeviceData>(),
+      It.IsAny<CancellationToken>()))
+      .Returns(Task.CompletedTask);
+
+    // Use reflection to call private method
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("DisplayErrorToUserAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+    Assert.NotNull(method);
+
+    // Act
+    await (Task)method.Invoke(collector, [testException])!;
+
+    // Assert - should display 3 messages: error header (red), error message (yellow), and diagnostic hint
+    _mockOutputDevice.Verify(
+      x => x.DisplayAsync(
+        It.Is<IOutputDeviceDataProducer>(p => p == collector),
+        It.Is<FormattedTextOutputDeviceData>(data => data.Text.Contains("Coverage instrumentation failed")),
+        It.IsAny<CancellationToken>()),
+      Times.Once);
+
+    _mockOutputDevice.Verify(
+      x => x.DisplayAsync(
+        It.Is<IOutputDeviceDataProducer>(p => p == collector),
+        It.Is<FormattedTextOutputDeviceData>(data => data.Text.Contains("Test error message")),
+        It.IsAny<CancellationToken>()),
+      Times.Once);
+
+    _mockOutputDevice.Verify(
+      x => x.DisplayAsync(
+        It.Is<IOutputDeviceDataProducer>(p => p == collector),
+        It.Is<TextOutputDeviceData>(data => data.Text.Contains("--diagnostic")),
+        It.IsAny<CancellationToken>()),
+      Times.Once);
+  }
+
+  [Fact]
+  public async Task DisplayErrorToUserAsyncHandlesIOException()
+  {
+    // Arrange
+    var collector = CreateCollectorWithCoverageEnabled();
+    var testException = new IOException("The file is in use by another process");
+
+    _mockOutputDevice.Setup(x => x.DisplayAsync(
+      It.IsAny<IOutputDeviceDataProducer>(),
+      It.IsAny<IOutputDeviceData>(),
+      It.IsAny<CancellationToken>()))
+      .Returns(Task.CompletedTask);
+
+    // Use reflection to call private method
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("DisplayErrorToUserAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+    Assert.NotNull(method);
+
+    // Act
+    await (Task)method.Invoke(collector, [testException])!;
+
+    // Assert - verify the IOException message is displayed
+    _mockOutputDevice.Verify(
+      x => x.DisplayAsync(
+        It.Is<IOutputDeviceDataProducer>(p => p == collector),
+        It.Is<FormattedTextOutputDeviceData>(data => data.Text.Contains("file is in use")),
+        It.IsAny<CancellationToken>()),
+      Times.Once);
+  }
+
+  [Fact]
+  public async Task DisplayErrorToUserAsyncHandlesAggregateException()
+  {
+    // Arrange
+    var collector = CreateCollectorWithCoverageEnabled();
+    var aggException = new AggregateException(
+      new InvalidOperationException("First error"),
+      new IOException("Second error"));
+
+    _mockOutputDevice.Setup(x => x.DisplayAsync(
+      It.IsAny<IOutputDeviceDataProducer>(),
+      It.IsAny<IOutputDeviceData>(),
+      It.IsAny<CancellationToken>()))
+      .Returns(Task.CompletedTask);
+
+    // Use reflection to call private method
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("DisplayErrorToUserAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+    Assert.NotNull(method);
+
+    // Act
+    await (Task)method.Invoke(collector, [aggException])!;
+
+    // Assert - should display both inner exception messages
+    _mockOutputDevice.Verify(
+      x => x.DisplayAsync(
+        It.Is<IOutputDeviceDataProducer>(p => p == collector),
+        It.Is<FormattedTextOutputDeviceData>(data => data.Text.Contains("First error")),
+        It.IsAny<CancellationToken>()),
+      Times.Once);
+  }
+
+  #endregion
+
+  #region FormatErrorForDisplay Tests
+
+  [Fact]
+  public void FormatErrorForDisplayReturnsMessageForSimpleException()
+  {
+    // Arrange - use reflection to call private static method
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("FormatErrorForDisplay", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+    Assert.NotNull(method);
+
+    var testException = new InvalidOperationException("Simple error message");
+
+    // Act
+    string? result = (string?)method.Invoke(null, [testException]);
+
+    // Assert
+    Assert.NotNull(result);
+    Assert.Equal("Simple error message", result);
+  }
+
+  [Fact]
+  public void FormatErrorForDisplayExtractsDistinctMessagesFromAggregateException()
+  {
+    // Arrange
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("FormatErrorForDisplay", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+    Assert.NotNull(method);
+
+    var aggException = new AggregateException(
+      new InvalidOperationException("Error A"),
+      new InvalidOperationException("Error B"),
+      new InvalidOperationException("Error A")); // Duplicate
+
+    // Act
+    string? result = (string?)method.Invoke(null, [aggException]);
+
+    // Assert
+    Assert.NotNull(result);
+    Assert.Contains("Error A", result);
+    Assert.Contains("Error B", result);
+    // Duplicate "Error A" should be filtered out (Distinct)
+    int countA = result.Split(["Error A"], StringSplitOptions.None).Length - 1;
+    Assert.Equal(1, countA);
+  }
+
+  [Fact]
+  public void FormatErrorForDisplayHandlesEmptyAggregateException()
+  {
+    // Arrange
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("FormatErrorForDisplay", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+    Assert.NotNull(method);
+
+    // Create AggregateException with empty inner exceptions via reflection
+    // Note: Normally AggregateException requires at least one inner exception,
+    // but the code handles InnerExceptions.Count > 0 check
+    var aggException = new AggregateException("Aggregate error with no inner");
+
+    // Act
+    string? result = (string?)method.Invoke(null, [aggException]);
+
+    // Assert - when no inner exceptions, it should return the aggregate message
+    Assert.NotNull(result);
+  }
+
+  #endregion
+
+  #region GetConciseErrorMessage Tests
+
+  [Fact]
+  public void GetConciseErrorMessageReturnsMessageForGenericException()
+  {
+    // Arrange
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("GetConciseErrorMessage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+    Assert.NotNull(method);
+
+    var testException = new InvalidOperationException("Generic error occurred");
+
+    // Act
+    string? result = (string?)method.Invoke(null, [testException]);
+
+    // Assert
+    Assert.NotNull(result);
+    Assert.Equal("Generic error occurred", result);
+  }
+
+  [Fact]
+  public void GetConciseErrorMessageReturnsMessageForIOException()
+  {
+    // Arrange
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("GetConciseErrorMessage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+    Assert.NotNull(method);
+
+    var ioException = new IOException("File not found: test.dll");
+
+    // Act
+    string? result = (string?)method.Invoke(null, [ioException]);
+
+    // Assert
+    Assert.NotNull(result);
+    Assert.Equal("File not found: test.dll", result);
+  }
+
+  [Fact]
+  public void GetConciseErrorMessageReturnsMessageForFileNotFoundException()
+  {
+    // Arrange
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("GetConciseErrorMessage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+    Assert.NotNull(method);
+
+    // FileNotFoundException is a subclass of IOException
+    var fileNotFound = new FileNotFoundException("Could not find file", "assembly.dll");
+
+    // Act
+    string? result = (string?)method.Invoke(null, [fileNotFound]);
+
+    // Assert
+    Assert.NotNull(result);
+    Assert.Contains("Could not find file", result);
+  }
+
+  #endregion
 }
