@@ -65,7 +65,6 @@ namespace Coverlet.Core
     readonly JsonSerializerOptions _options = new()
     {
       PropertyNameCaseInsensitive = true,
-      DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
       IncludeFields = true,
       WriteIndented = true
     };

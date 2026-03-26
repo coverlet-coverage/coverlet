@@ -166,13 +166,32 @@ namespace Coverlet.Core.Instrumentation
       for (TypeDefinition current = type; current != null; current = current.DeclaringType)
       {
         // Check exclude attribute and filters
-        if (current.CustomAttributes.Any(IsExcludeAttribute) || _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _parameters.ExcludeFilters))
+        // Issue #1843: Don't exclude async state machine types even if they have [CompilerGenerated]
+        // Async state machines implement IAsyncStateMachine and their coverage is important
+        if (current.CustomAttributes.Any(attr => IsExcludeAttribute(attr) && !IsAsyncStateMachineType(current)) ||
+            _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _parameters.ExcludeFilters))
         {
           return true;
         }
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Determines if a type is a compiler-generated state machine that should be instrumented.
+    /// Issue #1843: Async and iterator state machines should NOT be excluded from instrumentation
+    /// even though they have [CompilerGenerated] attribute.
+    /// </summary>
+    private static bool IsAsyncStateMachineType(TypeDefinition type)
+    {
+      // Async state machines implement IAsyncStateMachine interface
+      // Iterator state machines implement IEnumerator or IAsyncEnumerator interfaces
+      return type.Interfaces.Any(i =>
+        i.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine" ||
+        i.InterfaceType.FullName == "System.Collections.IEnumerator" ||
+        i.InterfaceType.FullName.StartsWith("System.Collections.Generic.IEnumerator`") ||
+        i.InterfaceType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator`"));
     }
 
     // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.

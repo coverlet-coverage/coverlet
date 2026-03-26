@@ -611,7 +611,10 @@ public class CollectCoverageTests
 </Project>");
 
     // Generate SUT with MULTIPLE classes ALL having async methods
-    string sutCode = @"// Issue #1843: Test SUT with multiple async classes
+    string sutCode = @"// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Issue #1843: Test SUT with multiple async classes
 namespace SampleLibrary;
 
 /// <summary>
@@ -703,7 +706,10 @@ public class AsyncDataFetcher
   </ItemGroup>
 </Project>");
 
-    string testCode = @"// Issue #1843: Test async methods coverage
+    string testCode = @"// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Issue #1843: Test async methods coverage
 using Xunit;
 using SampleLibrary;
 
@@ -778,7 +784,10 @@ public class AsyncDataFetcherTests
 </Project>");
 
     // Exact Issue #1843 scenario: StringLengthCalculator and IntegerFormatter both with async methods
-    string sutCode = @"// Issue #1843 Exact Repro: Both classes have async methods
+    string sutCode = @"// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Issue #1843 Exact Repro: Both classes have async methods
 namespace SampleLibrary;
 
 /// <summary>
@@ -846,7 +855,10 @@ public class IntegerFormatter
   </ItemGroup>
 </Project>");
 
-    string testCode = @"// Issue #1843 Exact Repro Test
+    string testCode = @"// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Issue #1843 Exact Repro Test
 using Xunit;
 using SampleLibrary;
 

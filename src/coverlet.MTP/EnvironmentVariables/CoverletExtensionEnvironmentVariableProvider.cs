@@ -1,18 +1,21 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Coverlet.MTP.CommandLine;
 using Coverlet.MTP.Diagnostics;
 using Coverlet.MTP;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
 using Microsoft.Testing.Platform.Logging;
+using Coverlet.MTP.EnvironmentVariables;
 
 namespace coverlet.MTP.EnvironmentVariables;
 
 internal sealed class CoverletExtensionEnvironmentVariableProvider : ITestHostEnvironmentVariableProvider
 {
   private readonly ILogger _logger;
+  private readonly Microsoft.Testing.Platform.CommandLine.ICommandLineOptions _commandLineOptions;
 
   public CoverletExtensionEnvironmentVariableProvider(
     IConfiguration configuration,
@@ -20,6 +23,7 @@ internal sealed class CoverletExtensionEnvironmentVariableProvider : ITestHostEn
     ILoggerFactory loggerFactory)
   {
     _logger = loggerFactory.CreateLogger<CoverletExtensionEnvironmentVariableProvider>();
+    _commandLineOptions = commandLineOptions;
 
     // Handle debugger attachment for this component
     DebugHelper.HandleDebuggerAttachment(nameof(CoverletExtensionEnvironmentVariableProvider));
@@ -34,6 +38,22 @@ internal sealed class CoverletExtensionEnvironmentVariableProvider : ITestHostEn
 
   public Task UpdateAsync(IEnvironmentVariables environmentVariables)
   {
+    // Check if --coverlet flag was provided
+    bool coverageEnabled = _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
+
+    if (coverageEnabled)
+    {
+      // Tell the test host that coverage is enabled
+      environmentVariables.SetVariable(
+        new EnvironmentVariable(
+          CoverletMtpEnvironmentVariables.CoverageEnabled,
+          "true",
+          isSecret: false,
+          isLocked: true));
+
+      _logger.LogDebug($"[CoverletEnvVarProvider] Set {CoverletMtpEnvironmentVariables.CoverageEnabled}=true");
+    }
+
     // Propagate tracker log setting to test host process
     if (DebugHelper.IsTrackerLogEnabled)
     {
