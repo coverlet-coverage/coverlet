@@ -18,6 +18,7 @@ internal sealed class CoverageConfiguration
     "[coverlet.*]*",
     "[xunit.*]*",
     "[NUnit3.*]*",
+    "[nunit.*]*",
     "[Microsoft.Testing.*]*",
     "[Microsoft.Testplatform.*]*",
     "[Microsoft.VisualStudio.TestPlatform.*]*"

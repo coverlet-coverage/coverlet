@@ -77,20 +77,57 @@ dotnet exec <test-assembly.dll> --help
 | Option | Description |
 | :------- | :------------ |
 | `--coverlet` | Enable code coverage data collection. |
-| `--coverlet-output-format <format>` | Output format(s) for coverage report. Supported formats: `json`, `lcov`, `opencover`, `cobertura`, `teamcity`. Can be specified multiple times. |
-| `--coverlet-include <filter>` | Include assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. |
-| `--coverlet-include-directory <path>` | Include additional directories for sources. Can be specified multiple times. |
-| `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. |
-| `--coverlet-exclude-by-file <pattern>` | Exclude source files matching glob patterns. Can be specified multiple times. |
-| `--coverlet-exclude-by-attribute <attribute>` | Exclude methods/classes decorated with attributes. Can be specified multiple times. |
-| `--coverlet-include-test-assembly` | Include test assembly in coverage. |
-| `--coverlet-single-hit` | Limit the number of hits to one for each location. |
-| `--coverlet-skip-auto-props` | Skip auto-implemented properties. |
-| `--coverlet-does-not-return-attribute <attribute>` | Attributes that mark methods as not returning. Can be specified multiple times. |
-| `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. |
+| `--coverlet-output-format <format>` | Output format(s) for coverage report. Supported formats: `json`, `lcov`, `opencover`, `cobertura`, `teamcity`. Can be specified multiple times. (default: `json`, `cobertura`) |
+| `--coverlet-include <filter>` | Include assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. (default: none) |
+| `--coverlet-include-directory <path>` | Include additional directories for sources. Can be specified multiple times. (default: none) |
+| `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. User-specified filters are merged with defaults. (default: `[coverlet.*]*`, `[xunit.*]*`, `[NUnit3.*]*`, `[nunit.*]*`, `[Microsoft.Testing.*]*`, `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`) |
+| `--coverlet-exclude-by-file <pattern>` | Exclude source files matching glob patterns. Can be specified multiple times. (default: none) |
+| `--coverlet-exclude-by-attribute <attribute>` | Exclude methods/classes decorated with attributes. Can be specified multiple times. User-specified attributes are merged with defaults. (default: `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`) |
+| `--coverlet-include-test-assembly` | Include test assembly in coverage. (default: `false`) |
+| `--coverlet-single-hit` | Limit the number of hits to one for each location. (default: `false`) |
+| `--coverlet-skip-auto-props` | Skip auto-implemented properties. (default: `true`) |
+| `--coverlet-does-not-return-attribute <attribute>` | Attributes that mark methods as not returning. Can be specified multiple times. (default: none) |
+| `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. (default: `None`) |
 
 > [!NOTE]
 > Coverage report files will be stored in `--results-directory` folder.
+
+### Default Exclusions Behavior
+
+Coverlet.MTP applies sensible default exclusions to reduce noise in coverage reports. These defaults are **always merged** with any user-specified exclusions—they cannot be disabled via command line options.
+
+**Default Exclude Filters:**
+
+- `[coverlet.*]*` - Coverlet assemblies
+- `[xunit.*]*` - xUnit assemblies
+- `[NUnit3.*]*`, `[nunit.*]*` - NUnit assemblies
+- `[Microsoft.Testing.*]*` - Microsoft Testing Platform assemblies
+- `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*` - VSTest assemblies
+
+**Default Exclude by Attributes:**
+
+- `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute` - Standard .NET exclusion attribute
+- `GeneratedCodeAttribute` - Generated code marker
+- `CompilerGeneratedAttribute` - Compiler-generated code marker
+
+### Running Without Default Exclusions
+
+If you need full control over exclusions (e.g., for debugging coverlet itself or measuring test framework coverage), you can use `coverlet.mtp.appsettings.json` configuration file.
+
+Create a `coverlet.mtp.appsettings.json` file in your test project directory:
+
+```json
+{
+  "coverlet": {
+    "useDefaultExclusions": false,
+    "excludeFilters": [],
+    "excludeByAttributes": []
+  }
+}
+```
+
+> [!WARNING]
+> Disabling default exclusions will include test framework assemblies and compiler-generated code in coverage reports, which may significantly increase report size and reduce clarity.
 
 ### Examples
 
