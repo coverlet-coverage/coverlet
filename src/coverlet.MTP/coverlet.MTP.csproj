@@ -37,7 +37,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>coverage code coverage for Microsoft Testing Platform</Description>
+    <Description>Coverlet code coverage for Microsoft Testing Platform</Description>
     <PackageTags>coverage;microsoft-testing-platform;code-coverage</PackageTags>
     <PackageReadmeFile>Coverlet.MTP.Integration.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md</PackageReleaseNotes>
