@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Coverlet.Core;
@@ -204,6 +206,312 @@ namespace Coverlet.CoreCoverage.Tests
         document.AssertLinesCoveredFromTo(BuildConfiguration.Debug, 170, 176);
         document.AssertBranchesCovered(BuildConfiguration.Debug, (171, 0, 1), (171, 1, 1));
         Assert.DoesNotContain(document.Branches, x => x.Key.Line == 176);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_Issue_1843_ComprehensiveInstrumentation()
+    {
+      // GOAL: Verify ALL async methods are instrumented and reported
+      // This test should FAIL if methods are silently skipped during instrumentation
+      // Addresses issue #1843 where MTP reported only 35% of methods compared to MSBuild
+
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1843_ComprehensiveAsync>(async instance =>
+          {
+            // Execute ALL methods to ensure they're instrumented and hit
+            await instance.SimpleAsyncMethod();
+            await instance.AsyncWithIntReturn();
+            await instance.AsyncWithStringReturn();
+
+            await instance.SimpleValueTask();
+            await instance.ValueTaskWithReturn();
+
+            await instance.WithConfigureAwaitTrue();
+            await instance.WithConfigureAwaitFalse();
+
+            await instance.NestedAsyncCalls();
+
+            // Test branching - both paths
+            await instance.AsyncWithBranching(1);
+            await instance.AsyncWithBranching(-1);
+
+            await instance.AsyncWithTryCatch();
+
+            await instance.AsyncWithLinq();
+
+            await instance.ParallelAsyncCalls();
+
+            // Multiple await points with different counts
+            await instance.MultipleAwaitPoints(1);
+            await instance.MultipleAwaitPoints(3);
+
+            await instance.AsyncWithSwitchExpression(1);
+            await instance.AsyncWithSwitchExpression(2);
+            await instance.AsyncWithSwitchExpression(99);
+
+            await instance.AsyncWithNullCoalescing("input");
+            await instance.AsyncWithNullCoalescing(null);
+
+            // Consume async enumerable
+            using var cts = new CancellationTokenSource();
+            var enumerable = instance.AsyncEnumerable(cts.Token);
+            await foreach (var item in (System.Collections.Generic.IAsyncEnumerable<int>)enumerable)
+            {
+              // Process items
+            }
+          },
+          persistPrepareResultToFile: pathSerialize[0]);
+
+          // CRITICAL: Verify instrumentation result before execution
+          Assert.NotNull(coveragePrepareResult);
+          Assert.NotEmpty(coveragePrepareResult.Results);
+
+          return 0;
+        }, [path]);
+
+        var coverageResult = TestInstrumentationHelper.GetCoverageResult(path);
+        var document = coverageResult.Document("Instrumentation.AsyncAwait.cs");
+
+        // ASSERTION 1: Verify expected number of unique methods were instrumented
+        // This catches if methods are being silently skipped (issue #1843 symptom)
+        var uniqueMethods = document.Lines.Values
+          .Select(l => l.Method)
+          .Where(m => m.Contains("Issue_1843_ComprehensiveAsync"))
+          .Distinct()
+          .ToList();
+
+        int expectedMinimumMethods = 13; // We defined 13 async methods in Issue_1843_ComprehensiveAsync
+        Assert.True(uniqueMethods.Count >= expectedMinimumMethods,
+          $"Expected at least {expectedMinimumMethods} methods in Issue_1843_ComprehensiveAsync, but found {uniqueMethods.Count}. " +
+          $"Methods found: {string.Join(", ", uniqueMethods)}. " +
+          "Some async methods may not be instrumented! This is similar to issue #1843.");
+
+        // ASSERTION 2: Verify lines are covered (sampling key methods)
+        Assert.True(document.Lines.Count > 0, "No lines were instrumented in the document");
+
+        // ASSERTION 3: Verify branches exist for methods with branching logic
+        Assert.True(document.Branches.Count > 0, "No branches were recorded, but AsyncWithBranching should create branches");
+
+        // ASSERTION 4: Verify async state machines were created
+        // Compiler generates <MethodName>d__X types for async methods
+        var allClasses = coverageResult.Modules.Values
+          .SelectMany(m => m.Values)
+          .SelectMany(d => d.Keys);
+
+        int stateMachineCount = allClasses.Count(className =>
+          className.Contains("Issue_1843_ComprehensiveAsync") && className.Contains(">d__"));
+
+        Assert.True(stateMachineCount > 0,
+          $"Expected async state machines for Issue_1843_ComprehensiveAsync, but found {stateMachineCount}. " +
+          "Some async methods may be missing their state machines!");
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_Issue_1843_VerifyAllMethodsDiscovered()
+    {
+      // This test verifies that the instrumentation process discovers
+      // ALL methods BEFORE execution, catching silent skipping issues
+      // This addresses the core problem in issue #1843
+
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult prepareResult = await TestInstrumentationHelper.Run<Issue_1843_ComprehensiveAsync>(
+            async instance =>
+            {
+              // Execute minimal code - just one method
+              await instance.SimpleAsyncMethod();
+            },
+            persistPrepareResultToFile: pathSerialize[0]);
+
+          // Verify instrumentation results BEFORE full execution
+          Assert.NotNull(prepareResult);
+          Assert.NotEmpty(prepareResult.Results);
+
+          Core.Instrumentation.InstrumenterResult instrumentedResult = prepareResult.Results[0];
+
+          // Check that documents contain methods from Issue_1843_ComprehensiveAsync
+          Assert.True(instrumentedResult.Documents.Count > 0,
+            "No documents were instrumented!");
+
+          // Note: We don't verify file existence here because:
+          // 1. Instrumented modules might be cleaned up immediately after use
+          // 2. .NET 10+ might use in-memory assemblies
+          // 3. The critical check is method discovery, not file persistence
+          // The real validation happens below when we check discovered methods
+
+          return 0;
+        }, [path]);
+
+        // Check coverage result to verify methods were discovered
+        var coverageResult = TestInstrumentationHelper.GetCoverageResult(path);
+        var document = coverageResult.Document("Instrumentation.AsyncAwait.cs");
+
+        // Count unique methods from Issue_1843_ComprehensiveAsync class
+        var discoveredMethods = document.Lines.Values
+          .Select(l => l.Method)
+          .Where(m => m.Contains("Issue_1843_ComprehensiveAsync"))
+          .Distinct()
+          .ToList();
+
+        Assert.True(discoveredMethods.Count > 0,
+          "No methods from Issue_1843_ComprehensiveAsync were discovered during instrumentation. " +
+          "This indicates a failure in method discovery.");
+
+        // Even though we only executed SimpleAsyncMethod, ALL methods should be instrumented
+        // This is the key insight from issue #1843 - methods missing from instrumentation, not just execution
+        int expectedMethods = 13;
+        Assert.True(discoveredMethods.Count >= expectedMethods,
+          $"Only {discoveredMethods.Count} out of {expectedMethods} methods were discovered. " +
+          $"Methods found: {string.Join(", ", discoveredMethods)}. " +
+          "Method discovery is incomplete - this is the issue #1843 symptom!");
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(5)]
+    [InlineData(10)]
+    public void AsyncAwait_Issue_1843_MultipleAwaitPoints(int awaitCount)
+    {
+      // Verify methods with varying numbers of await points are fully instrumented
+      // This catches issues with state machine complexity affecting instrumentation
+
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1843_ComprehensiveAsync>(
+            async instance =>
+            {
+              await instance.MultipleAwaitPoints(awaitCount);
+            },
+            persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        var coverageResult = TestInstrumentationHelper.GetCoverageResult(path);
+        var document = coverageResult.Document("Instrumentation.AsyncAwait.cs");
+
+        // Verify the MultipleAwaitPoints method was instrumented and executed
+        var multipleAwaitMethodLines = document.Lines.Values
+          .Where(l => l.Method.Contains("MultipleAwaitPoints"))
+          .ToList();
+
+        Assert.NotEmpty(multipleAwaitMethodLines);
+        Assert.True(multipleAwaitMethodLines.Any(l => l.Hits > 0),
+          $"MultipleAwaitPoints with {awaitCount} awaits was not covered. " +
+          "Complex async methods may not be properly instrumented.");
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_Issue_1843_VerifyMetricsNotRegressed()
+    {
+      // This test ensures we don't regress on the coverage completeness
+      // reported in issue #1843 (MTP had only 35% of methods compared to MSBuild)
+
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1843_ComprehensiveAsync>(async instance =>
+          {
+            // Execute all methods
+            await instance.SimpleAsyncMethod();
+            await instance.AsyncWithIntReturn();
+            await instance.AsyncWithStringReturn();
+            await instance.SimpleValueTask();
+            await instance.ValueTaskWithReturn();
+            await instance.WithConfigureAwaitTrue();
+            await instance.WithConfigureAwaitFalse();
+            await instance.NestedAsyncCalls();
+            await instance.AsyncWithBranching(1);
+            await instance.AsyncWithTryCatch();
+            await instance.AsyncWithLinq();
+            await instance.ParallelAsyncCalls();
+            await instance.MultipleAwaitPoints(2);
+            await instance.AsyncWithSwitchExpression(1);
+            await instance.AsyncWithNullCoalescing(null);
+
+            using var cts = new CancellationTokenSource();
+            var enumerable = instance.AsyncEnumerable(cts.Token);
+            await foreach (var item in (System.Collections.Generic.IAsyncEnumerable<int>)enumerable)
+            {
+              // Consume items
+            }
+          },
+          persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        var coverageResult = TestInstrumentationHelper.GetCoverageResult(path);
+        var document = coverageResult.Document("Instrumentation.AsyncAwait.cs");
+
+        // Get unique methods from our test class
+        var allMethods = document.Lines.Values
+          .Where(l => l.Method.Contains("Issue_1843_ComprehensiveAsync"))
+          .Select(l => l.Method)
+          .Distinct()
+          .ToList();
+
+        // Determine which methods have at least one hit
+        var coveredMethods = document.Lines.Values
+          .Where(l => l.Method.Contains("Issue_1843_ComprehensiveAsync") && l.Hits > 0)
+          .Select(l => l.Method)
+          .Distinct()
+          .ToList();
+
+        int totalMethods = allMethods.Count;
+        int coveredMethodsCount = coveredMethods.Count;
+
+        // Verify ratio of covered methods to total methods is high
+        // In issue #1843, only 35% of files appeared, meaning ~65% were missing
+        // We should have near 100% since we executed all methods
+        double coverageRatio = totalMethods > 0 ? (double)coveredMethodsCount / totalMethods : 0;
+
+        Assert.True(totalMethods > 0, "No methods were instrumented for Issue_1843_ComprehensiveAsync");
+
+        Assert.True(coverageRatio > 0.9,
+          $"Only {coverageRatio:P} of methods were covered (expected >90%). " +
+          $"Covered: {coveredMethodsCount}, Total: {totalMethods}. " +
+          $"Covered methods: {string.Join(", ", coveredMethods)}. " +
+          "This indicates methods are being skipped during instrumentation or execution - " +
+          "similar to issue #1843 where only 35% of expected coverage was reported!");
+
+        // Verify sequence points exist
+        int totalSequencePoints = document.Lines.Count(l => l.Value.Method.Contains("Issue_1843_ComprehensiveAsync"));
+        Assert.True(totalSequencePoints > 0,
+          "Sequence points should be greater than zero. " +
+          "Issue #1843 reported dramatic drop in sequence points (25080 -> 2596)");
       }
       finally
       {

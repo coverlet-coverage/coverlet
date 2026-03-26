@@ -411,6 +411,481 @@ public class CollectCoverageTests
 
   #region Helper Methods
 
+  /// <summary>
+  /// Issue #1843: Test that async methods in SUT classes generate proper coverage data.
+  /// When both classes have async methods, coverage should NOT be empty.
+  /// </summary>
+  [Fact]
+  public async Task Issue1843_AsyncMethods_CoverageDataNotEmpty()
+  {
+    // Arrange - Create test project with MULTIPLE classes that ALL have async methods
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateAsyncTestProject(testName);
+    await BuildProject(testProject.SolutionPath);
+
+    // Act - Run with cobertura format to match repro
+    var result = await RunTestsWithCoverage(testProject, "--coverlet --coverlet-output-format cobertura", testName);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert test passed
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+
+    // Find cobertura coverage file
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories);
+    Assert.NotEmpty(coverageFiles);
+
+    // Parse coverage XML
+    string xmlContent = File.ReadAllText(coverageFiles[0]);
+    XDocument coberturaDoc = XDocument.Parse(xmlContent);
+
+    // CRITICAL ASSERTION for Issue #1843:
+    // Coverage must contain classes - when both SUT classes have async methods,
+    // the coverage was becoming completely empty (<classes />)
+    var classElements = coberturaDoc.Descendants("class").ToList();
+    Assert.True(classElements.Count > 0,
+      $"[Issue #1843] CRITICAL: Coverage data is EMPTY! No <class> elements found.\n" +
+      $"This is the exact issue #1843 symptom: when both SUT classes have async methods, coverage becomes empty.\n" +
+      $"Coverage file: {coverageFiles[0]}\n\n" +
+      $"XML Content:\n{xmlContent}\n\n" +
+      $"Test Output:\n{result.CombinedOutput}");
+
+    // Verify we have line coverage data
+    var lineElements = coberturaDoc.Descendants("line").ToList();
+    Assert.True(lineElements.Count > 0,
+      $"[Issue #1843] Coverage has classes but no <line> elements.\n" +
+      $"Found {classElements.Count} class(es), but 0 line coverage.\n" +
+      $"Coverage file: {coverageFiles[0]}\n\n" +
+      $"XML Content:\n{xmlContent}");
+
+    // Verify specific async methods are covered
+    var methods = coberturaDoc.Descendants("method").ToList();
+    bool foundAsyncMethod = methods.Any(m =>
+    {
+      var name = m.Attribute("name")?.Value ?? "";
+      return name.Contains("Async") || name.Contains("MoveNext");
+    });
+
+    // Log all found methods for debugging
+    string foundMethods = string.Join("\n", methods.Select(m => $"  - {m.Attribute("name")?.Value}"));
+
+    Assert.True(foundAsyncMethod || methods.Count > 0,
+      $"[Issue #1843] Expected to find async methods in coverage.\n" +
+      $"Found {methods.Count} method(s):\n{foundMethods}\n\n" +
+      $"Coverage file: {coverageFiles[0]}");
+  }
+
+  /// <summary>
+  /// Issue #1843: Specifically tests the scenario where StringLengthCalculator is async
+  /// and IntegerFormatter is also async - this combination was causing empty coverage.
+  /// </summary>
+  [Fact]
+  public async Task Issue1843_BothClassesAsync_CoverageNotEmpty()
+  {
+    // Arrange - Reproduce exact issue #1843 scenario
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateIssue1843ExactReproProject(testName);
+    await BuildProject(testProject.SolutionPath);
+
+    // Act
+    var result = await RunTestsWithCoverage(testProject, "--coverlet --coverlet-output-format cobertura", testName);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert
+    Assert.True(result.ExitCode == 0, $"Test run failed with exit code {result.ExitCode}.\n\n{result.CombinedOutput}");
+
+    // Find and parse coverage
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories);
+    Assert.NotEmpty(coverageFiles);
+
+    string xmlContent = File.ReadAllText(coverageFiles[0]);
+    XDocument doc = XDocument.Parse(xmlContent);
+
+    // Verify both classes appear in coverage
+    var classElements = doc.Descendants("class").ToList();
+    var classNames = classElements.Select(c => c.Attribute("name")?.Value).ToList();
+
+    Assert.True(classElements.Count >= 2,
+      $"[Issue #1843 REPRO] Expected at least 2 classes in coverage, but found {classElements.Count}.\n" +
+      $"Classes found: {string.Join(", ", classNames)}\n" +
+      $"This reproduces Issue #1843: 'both methods are async' scenario causes empty coverage.\n\n" +
+      $"XML Content:\n{xmlContent}");
+
+    // Verify line coverage exists
+    bool hasLineCoverage = doc.Descendants("line").Any();
+    Assert.True(hasLineCoverage,
+      $"[Issue #1843 REPRO] Classes found but no line coverage data.\n" +
+      $"This is the exact symptom: <classes /> is empty or has no line data.\n\n" +
+      $"XML Content:\n{xmlContent}");
+  }
+
+  private TestProjectInfo CreateAsyncTestProject(string testName)
+  {
+    // Use repository artifacts folder
+    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    Directory.CreateDirectory(artifactsTemp);
+
+    string sanitizedTestName = SanitizePathName(testName);
+    string solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}");
+
+    if (Directory.Exists(solutionPath))
+    {
+      try { Directory.Delete(solutionPath, recursive: true); }
+      catch (IOException) { solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}"); }
+    }
+
+    Directory.CreateDirectory(solutionPath);
+
+    string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
+    string testProjectPath = Path.Combine(solutionPath, TestProjectName);
+    Directory.CreateDirectory(sutProjectPath);
+    Directory.CreateDirectory(testProjectPath);
+
+    CreateNugetConfig(solutionPath);
+    string coverletMtpVersion = GetCoverletMtpPackageVersion();
+
+    // Create SUT with async methods
+    CreateAsyncSutLibraryProject(sutProjectPath);
+
+    // Create test project
+    CreateAsyncTestProjectFiles(testProjectPath, coverletMtpVersion);
+
+    // Create solution
+    string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
+    CreateSolutionFile(solutionFile);
+
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
+  }
+
+  private TestProjectInfo CreateIssue1843ExactReproProject(string testName)
+  {
+    // Reproduce exact Issue #1843 scenario
+    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    Directory.CreateDirectory(artifactsTemp);
+
+    string sanitizedTestName = SanitizePathName(testName);
+    string solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}");
+
+    if (Directory.Exists(solutionPath))
+    {
+      try { Directory.Delete(solutionPath, recursive: true); }
+      catch (IOException) { solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}"); }
+    }
+
+    Directory.CreateDirectory(solutionPath);
+
+    string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
+    string testProjectPath = Path.Combine(solutionPath, TestProjectName);
+    Directory.CreateDirectory(sutProjectPath);
+    Directory.CreateDirectory(testProjectPath);
+
+    CreateNugetConfig(solutionPath);
+    string coverletMtpVersion = GetCoverletMtpPackageVersion();
+
+    // Create Issue #1843 exact repro SUT
+    CreateIssue1843SutProject(sutProjectPath);
+    CreateIssue1843TestProject(testProjectPath, coverletMtpVersion);
+
+    string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
+    CreateSolutionFile(solutionFile);
+
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
+  }
+
+  private static void CreateAsyncSutLibraryProject(string sutProjectPath)
+  {
+    string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
+    File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+</Project>");
+
+    // Generate SUT with MULTIPLE classes ALL having async methods
+    string sutCode = @"// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Issue #1843: Test SUT with multiple async classes
+namespace SampleLibrary;
+
+/// <summary>
+/// First class with async methods - async calculator
+/// </summary>
+public class AsyncCalculator
+{
+    public async Task<int> AddAsync(int a, int b)
+    {
+        await Task.Delay(1);
+        return a + b;
+    }
+
+    public async Task<int> MultiplyAsync(int a, int b)
+    {
+        await Task.Delay(1);
+        return a * b;
+    }
+}
+
+/// <summary>
+/// Second class with async methods - async string processor
+/// Issue #1843: When BOTH classes have async methods, coverage becomes empty
+/// </summary>
+public class AsyncStringProcessor
+{
+    public async Task<string> ProcessAsync(string input)
+    {
+        await Task.Delay(1);
+        return input.ToUpper();
+    }
+
+    public async Task<int> GetLengthAsync(string input)
+    {
+        await Task.Delay(1);
+        return input.Length;
+    }
+}
+
+/// <summary>
+/// Third async class to ensure the issue is reproducible with multiple async classes
+/// </summary>
+public class AsyncDataFetcher
+{
+    public async Task<string> FetchDataAsync(string key)
+    {
+        await Task.Delay(1);
+        return $""Data for {key}"";
+    }
+}
+";
+    File.WriteAllText(Path.Combine(sutProjectPath, "AsyncClasses.cs"), sutCode);
+  }
+
+  private static void CreateAsyncTestProjectFiles(string testProjectPath, string coverletMtpVersion)
+  {
+    string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
+
+    string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
+    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <OutputType>Exe</OutputType>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
+    <DebugType>portable</DebugType>
+    <Deterministic>false</Deterministic>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
+    </RestoreSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include=""{relativeSutPath}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
+    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.1.0"" />
+    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.1.0"" />
+  </ItemGroup>
+</Project>");
+
+    string testCode = @"// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Issue #1843: Test async methods coverage
+using Xunit;
+using SampleLibrary;
+
+namespace TestProject;
+
+public class AsyncCalculatorTests
+{
+    [Fact]
+    public async Task AddAsync_TwoNumbers_ReturnsSum()
+    {
+        var calc = new AsyncCalculator();
+        int result = await calc.AddAsync(2, 3);
+        Assert.Equal(5, result);
+    }
+
+    [Fact]
+    public async Task MultiplyAsync_TwoNumbers_ReturnsProduct()
+    {
+        var calc = new AsyncCalculator();
+        int result = await calc.MultiplyAsync(4, 5);
+        Assert.Equal(20, result);
+    }
+}
+
+public class AsyncStringProcessorTests
+{
+    [Fact]
+    public async Task ProcessAsync_String_ReturnsUpperCase()
+    {
+        var processor = new AsyncStringProcessor();
+        string result = await processor.ProcessAsync(""hello"");
+        Assert.Equal(""HELLO"", result);
+    }
+
+    [Fact]
+    public async Task GetLengthAsync_String_ReturnsLength()
+    {
+        var processor = new AsyncStringProcessor();
+        int result = await processor.GetLengthAsync(""test"");
+        Assert.Equal(4, result);
+    }
+}
+
+public class AsyncDataFetcherTests
+{
+    [Fact]
+    public async Task FetchDataAsync_Key_ReturnsData()
+    {
+        var fetcher = new AsyncDataFetcher();
+        string result = await fetcher.FetchDataAsync(""mykey"");
+        Assert.Contains(""mykey"", result);
+    }
+}
+";
+    File.WriteAllText(Path.Combine(testProjectPath, "AsyncTests.cs"), testCode);
+  }
+
+  private static void CreateIssue1843SutProject(string sutProjectPath)
+  {
+    // Exact repro of Issue #1843 scenario
+    string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
+    File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+</Project>");
+
+    // Exact Issue #1843 scenario: StringLengthCalculator and IntegerFormatter both with async methods
+    string sutCode = @"// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Issue #1843 Exact Repro: Both classes have async methods
+namespace SampleLibrary;
+
+/// <summary>
+/// Issue #1843 Case 2: StringLengthCalculator with async method
+/// </summary>
+public class StringLengthCalculator
+{
+    public async Task<int> CalculateLengthAsync(string input)
+    {
+        await Task.Delay(1);
+        return input?.Length ?? 0;
+    }
+}
+
+/// <summary>
+/// Issue #1843 Case 2: IntegerFormatter with async method
+/// When BOTH classes have async methods, coverage was becoming EMPTY
+/// </summary>
+public class IntegerFormatter
+{
+    public async Task<string> FormatToStringAsync(int value)
+    {
+        await Task.Delay(1);
+        return value.ToString();
+    }
+}
+";
+    File.WriteAllText(Path.Combine(sutProjectPath, "Issue1843Classes.cs"), sutCode);
+  }
+
+  private static void CreateIssue1843TestProject(string testProjectPath, string coverletMtpVersion)
+  {
+    string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
+
+    string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
+    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <OutputType>Exe</OutputType>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
+    <DebugType>portable</DebugType>
+    <Deterministic>false</Deterministic>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
+    </RestoreSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include=""{relativeSutPath}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
+    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.1.0"" />
+    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.1.0"" />
+  </ItemGroup>
+</Project>");
+
+    string testCode = @"// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Issue #1843 Exact Repro Test
+using Xunit;
+using SampleLibrary;
+
+namespace TestProject;
+
+public class Issue1843Tests
+{
+    [Fact]
+    public async Task StringLengthCalculator_CalculateLengthAsync_ReturnsLength()
+    {
+        var calc = new StringLengthCalculator();
+        int result = await calc.CalculateLengthAsync(""test"");
+        Assert.Equal(4, result);
+    }
+
+    [Fact]
+    public async Task IntegerFormatter_FormatToStringAsync_ReturnsString()
+    {
+        var formatter = new IntegerFormatter();
+        string result = await formatter.FormatToStringAsync(42);
+        Assert.Equal(""42"", result);
+    }
+}
+";
+    File.WriteAllText(Path.Combine(testProjectPath, "Issue1843Tests.cs"), testCode);
+  }
+
   private TestProjectInfo CreateTestProject(
     string testName,
     bool includeSimpleTest = false,

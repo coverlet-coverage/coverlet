@@ -166,13 +166,49 @@ namespace Coverlet.Core.Instrumentation
       for (TypeDefinition current = type; current != null; current = current.DeclaringType)
       {
         // Check exclude attribute and filters
-        if (current.CustomAttributes.Any(IsExcludeAttribute) || _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _parameters.ExcludeFilters))
+        // Issue #1843: For compiler-generated state machine types, only ignore CompilerGeneratedAttribute
+        // and GeneratedCodeAttribute, but still honor other user-configured exclusion attributes.
+        // State machines (async, iterator, async iterator) implement specific interfaces and their coverage is important.
+        if (current.CustomAttributes.Any(attr => IsExcludeAttribute(attr) &&
+                (!IsCompilerGeneratedStateMachineType(current) || !IsCompilerGeneratedOrGeneratedCodeAttribute(attr))) ||
+            _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _parameters.ExcludeFilters))
         {
           return true;
         }
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Determines if an attribute is <see cref="CompilerGeneratedAttribute"/> or <see cref="System.CodeDom.Compiler.GeneratedCodeAttribute"/>.
+    /// These attributes are specifically ignored for state machine types (Issue #1843) while other
+    /// user-configured exclusion attributes are still honored.
+    /// </summary>
+    private static bool IsCompilerGeneratedOrGeneratedCodeAttribute(CustomAttribute attr)
+    {
+      return attr.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName ||
+             attr.AttributeType.FullName == "System.CodeDom.Compiler.GeneratedCodeAttribute";
+    }
+
+    /// <summary>
+    /// Determines if a type is a compiler-generated state machine by checking for known state machine interfaces.
+    /// Issue #1843: Compiler-generated state machines should NOT be excluded from instrumentation
+    /// even though they have [CompilerGenerated] attribute.
+    /// </summary>
+    /// <remarks>
+    /// Checks for the following state machine interfaces:
+    /// - <c>IAsyncStateMachine</c>: async method state machines
+    /// - <c>IEnumerator</c>/<c>IEnumerator&lt;T&gt;</c>: iterator (yield) state machines
+    /// - <c>IAsyncEnumerator&lt;T&gt;</c>: async iterator state machines
+    /// </remarks>
+    private static bool IsCompilerGeneratedStateMachineType(TypeDefinition type)
+    {
+      return type.Interfaces.Any(i =>
+        i.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine" ||
+        i.InterfaceType.FullName == "System.Collections.IEnumerator" ||
+        i.InterfaceType.FullName.StartsWith("System.Collections.Generic.IEnumerator`") ||
+        i.InterfaceType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator`"));
     }
 
     // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.

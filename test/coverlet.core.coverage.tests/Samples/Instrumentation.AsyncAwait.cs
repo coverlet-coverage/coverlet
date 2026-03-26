@@ -175,4 +175,143 @@ namespace Coverlet.Core.CoverageSamples.Tests
       }
     }
   }
+
+  // Issue #1843: Comprehensive async method coverage validation
+  // Tests multiple async patterns to ensure all methods are properly instrumented
+  public class Issue_1843_ComprehensiveAsync
+  {
+    // 1. Simple async Task methods
+    public async Task SimpleAsyncMethod()
+    {
+      await Task.Delay(1);
+    }
+
+    // 2. Async Task<T> with different return types
+    public async Task<int> AsyncWithIntReturn()
+    {
+      await Task.Delay(1);
+      return 42;
+    }
+
+    public async Task<string> AsyncWithStringReturn()
+    {
+      await Task.Delay(1);
+      return "test";
+    }
+
+    // 3. ValueTask variants
+    public async ValueTask SimpleValueTask()
+    {
+      await Task.Delay(1);
+    }
+
+    public async ValueTask<int> ValueTaskWithReturn()
+    {
+      await Task.Delay(1);
+      return 100;
+    }
+
+    // 4. Async methods with ConfigureAwait
+    public async Task WithConfigureAwaitTrue()
+    {
+      await Task.Delay(1).ConfigureAwait(true);
+    }
+
+    public async Task WithConfigureAwaitFalse()
+    {
+      await Task.Delay(1).ConfigureAwait(false);
+    }
+
+    // 5. Nested async calls
+    public async Task NestedAsyncCalls()
+    {
+      await SimpleAsyncMethod();
+      await AsyncWithIntReturn();
+      await ValueTaskWithReturn();
+    }
+
+    // 6. Async methods with branching
+    public async Task<int> AsyncWithBranching(int value)
+    {
+      if (value > 0)
+      {
+        await Task.Delay(1);
+        return value;
+      }
+      else
+      {
+        await Task.Delay(1);
+        return 0;
+      }
+    }
+
+    // 7. Async methods with exception handling
+    public async Task AsyncWithTryCatch()
+    {
+      try
+      {
+        await Task.Delay(1);
+      }
+      catch
+      {
+        await Task.Delay(1);
+      }
+    }
+
+    // 8. Async methods with LINQ and lambdas
+    public async Task<System.Collections.Generic.List<int>> AsyncWithLinq()
+    {
+      var data = System.Linq.Enumerable.Range(1, 10);
+      await Task.Delay(1);
+      return System.Linq.Enumerable.ToList(System.Linq.Enumerable.Where(data, x => x % 2 == 0));
+    }
+
+    // 9. Async method calling other async methods in parallel
+    public async Task ParallelAsyncCalls()
+    {
+      await Task.WhenAll(
+        SimpleAsyncMethod(),
+        AsyncWithIntReturn(),
+        ValueTaskWithReturn().AsTask()
+      );
+    }
+
+    // 10. Async method with multiple await points
+    public async Task MultipleAwaitPoints(int count)
+    {
+      for (int i = 0; i < count; i++)
+      {
+        await Task.Delay(1);
+      }
+    }
+
+    // 11. Async method with switch expression
+    public async Task<string> AsyncWithSwitchExpression(int value)
+    {
+      await Task.Delay(1);
+      return value switch
+      {
+        1 => "one",
+        2 => "two",
+        _ => "other"
+      };
+    }
+
+    // 12. Async method with null coalescing
+    public async Task<string> AsyncWithNullCoalescing(string input)
+    {
+      await Task.Delay(1);
+      return input ?? "default";
+    }
+
+    // 13. Async IEnumerable
+    public async System.Collections.Generic.IAsyncEnumerable<int> AsyncEnumerable([System.Runtime.CompilerServices.EnumeratorCancellation] System.Threading.CancellationToken cancellationToken = default)
+    {
+      for (int i = 0; i < 5; i++)
+      {
+        await Task.Delay(1, cancellationToken);
+        yield return i;
+      }
+    }
+  }
 }
