@@ -150,7 +150,7 @@ You can configure coverlet.MTP using a `coverlet.mtp.appsettings.json` file in y
 ```
 
 > [!NOTE]
-> - The section name must be `Coverlet` (case-sensitive).
+> - The configuration section is named `Coverlet`. With `Microsoft.Extensions.Configuration`, keys are case-insensitive (so `Coverlet`, `coverlet`, etc. all work).
 > - Array values are specified as comma-separated strings, not JSON arrays.
 > - The default exclude filter `[coverlet.*]*` is always prepended to the `Exclude` value.
 
