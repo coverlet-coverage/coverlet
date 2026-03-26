@@ -56,8 +56,11 @@ Location: `test/coverlet.core.coverage.tests/Coverage/CoverageTests.AsyncAwait.c
 
 **Validations**:
 - Documents are instrumented
-- Instrumented assembly exists
+- Instrumented methods are discoverable from the instrumented module (no file-existence assertion)
 - All 13 methods discovered even when only 1 is executed
+
+#### Implementation Note
+Tests are implemented as integration-style tests that exercise the real filesystem (e.g., using temp files via `Path.GetTempFileName()`, `File.WriteAllText()`, `File.Delete()`, etc.), rather than mocking `IFileSystem`. This approach is appropriate here because these tests validate end-to-end instrumentation and coverage collection behavior that depends on actual module I/O and assembly loading.
 
 **What it catches**: The core issue #1843 symptom - incomplete method discovery
 

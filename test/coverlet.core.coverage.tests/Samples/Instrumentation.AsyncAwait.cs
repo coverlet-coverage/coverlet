@@ -227,7 +227,7 @@ namespace Coverlet.Core.CoverageSamples.Tests
     {
       await SimpleAsyncMethod();
       await AsyncWithIntReturn();
-      int value = await ValueTaskWithReturn();
+      await ValueTaskWithReturn();
     }
 
     // 6. Async methods with branching

@@ -166,9 +166,11 @@ namespace Coverlet.Core.Instrumentation
       for (TypeDefinition current = type; current != null; current = current.DeclaringType)
       {
         // Check exclude attribute and filters
-        // Issue #1843: Don't exclude async state machine types even if they have [CompilerGenerated]
-        // Async state machines implement IAsyncStateMachine and their coverage is important
-        if (current.CustomAttributes.Any(attr => IsExcludeAttribute(attr) && !IsAsyncStateMachineType(current)) ||
+        // Issue #1843: For compiler-generated state machine types, only ignore CompilerGeneratedAttribute
+        // and GeneratedCodeAttribute, but still honor other user-configured exclusion attributes.
+        // State machines (async, iterator, async iterator) implement specific interfaces and their coverage is important.
+        if (current.CustomAttributes.Any(attr => IsExcludeAttribute(attr) &&
+                (!IsCompilerGeneratedStateMachineType(current) || !IsCompilerGeneratedOrGeneratedCodeAttribute(attr))) ||
             _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _parameters.ExcludeFilters))
         {
           return true;
@@ -179,14 +181,29 @@ namespace Coverlet.Core.Instrumentation
     }
 
     /// <summary>
-    /// Determines if a type is a compiler-generated state machine that should be instrumented.
-    /// Issue #1843: Async and iterator state machines should NOT be excluded from instrumentation
+    /// Determines if an attribute is <see cref="CompilerGeneratedAttribute"/> or <see cref="System.CodeDom.Compiler.GeneratedCodeAttribute"/>.
+    /// These attributes are specifically ignored for state machine types (Issue #1843) while other
+    /// user-configured exclusion attributes are still honored.
+    /// </summary>
+    private static bool IsCompilerGeneratedOrGeneratedCodeAttribute(CustomAttribute attr)
+    {
+      return attr.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName ||
+             attr.AttributeType.FullName == "System.CodeDom.Compiler.GeneratedCodeAttribute";
+    }
+
+    /// <summary>
+    /// Determines if a type is a compiler-generated state machine by checking for known state machine interfaces.
+    /// Issue #1843: Compiler-generated state machines should NOT be excluded from instrumentation
     /// even though they have [CompilerGenerated] attribute.
     /// </summary>
-    private static bool IsAsyncStateMachineType(TypeDefinition type)
+    /// <remarks>
+    /// Checks for the following state machine interfaces:
+    /// - <c>IAsyncStateMachine</c>: async method state machines
+    /// - <c>IEnumerator</c>/<c>IEnumerator&lt;T&gt;</c>: iterator (yield) state machines
+    /// - <c>IAsyncEnumerator&lt;T&gt;</c>: async iterator state machines
+    /// </remarks>
+    private static bool IsCompilerGeneratedStateMachineType(TypeDefinition type)
     {
-      // Async state machines implement IAsyncStateMachine interface
-      // Iterator state machines implement IEnumerator or IAsyncEnumerator interfaces
       return type.Interfaces.Any(i =>
         i.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine" ||
         i.InterfaceType.FullName == "System.Collections.IEnumerator" ||

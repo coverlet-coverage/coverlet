@@ -229,11 +229,11 @@ namespace Coverlet.CoreCoverage.Tests
           {
             // Execute ALL methods to ensure they're instrumented and hit
             await instance.SimpleAsyncMethod();
-            int intResult = await instance.AsyncWithIntReturn();
-            string stringResult = await instance.AsyncWithStringReturn();
+            await instance.AsyncWithIntReturn();
+            await instance.AsyncWithStringReturn();
 
             await instance.SimpleValueTask();
-            int valueTaskResult = await instance.ValueTaskWithReturn();
+            await instance.ValueTaskWithReturn();
 
             await instance.WithConfigureAwaitTrue();
             await instance.WithConfigureAwaitFalse();
@@ -246,7 +246,7 @@ namespace Coverlet.CoreCoverage.Tests
 
             await instance.AsyncWithTryCatch();
 
-            var linqResult = await instance.AsyncWithLinq();
+            await instance.AsyncWithLinq();
 
             await instance.ParallelAsyncCalls();
 
@@ -254,12 +254,12 @@ namespace Coverlet.CoreCoverage.Tests
             await instance.MultipleAwaitPoints(1);
             await instance.MultipleAwaitPoints(3);
 
-            string switchResult1 = await instance.AsyncWithSwitchExpression(1);
-            string switchResult2 = await instance.AsyncWithSwitchExpression(2);
-            string switchResult3 = await instance.AsyncWithSwitchExpression(99);
+            await instance.AsyncWithSwitchExpression(1);
+            await instance.AsyncWithSwitchExpression(2);
+            await instance.AsyncWithSwitchExpression(99);
 
-            string nullResult1 = await instance.AsyncWithNullCoalescing("input");
-            string nullResult2 = await instance.AsyncWithNullCoalescing(null);
+            await instance.AsyncWithNullCoalescing("input");
+            await instance.AsyncWithNullCoalescing(null);
 
             // Consume async enumerable
             using var cts = new CancellationTokenSource();
