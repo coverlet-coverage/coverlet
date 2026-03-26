@@ -94,40 +94,65 @@ dotnet exec <test-assembly.dll> --help
 
 ### Default Exclusions Behavior
 
-Coverlet.MTP applies sensible default exclusions to reduce noise in coverage reports. These defaults are **always merged** with any user-specified exclusions—they cannot be disabled via command line options.
+Coverlet.MTP applies sensible default exclusions to reduce noise in coverage reports.
 
-**Default Exclude Filters:**
+**Command Line Defaults (via `CoverageConfiguration`):**
 
-- `[coverlet.*]*` - Coverlet assemblies
-- `[xunit.*]*` - xUnit assemblies
-- `[NUnit3.*]*`, `[nunit.*]*` - NUnit assemblies
-- `[Microsoft.Testing.*]*` - Microsoft Testing Platform assemblies
-- `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*` - VSTest assemblies
+When using command line options, the following defaults are **always merged** with user-specified exclusions:
 
-**Default Exclude by Attributes:**
+- **Default Exclude Filters:** `[coverlet.*]*`, `[xunit.*]*`, `[NUnit3.*]*`, `[nunit.*]*`, `[Microsoft.Testing.*]*`, `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`
+- **Default Exclude by Attributes:** `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`
 
-- `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute` - Standard .NET exclusion attribute
-- `GeneratedCodeAttribute` - Generated code marker
-- `CompilerGeneratedAttribute` - Compiler-generated code marker
+**Configuration File Defaults (via `coverlet.mtp.appsettings.json`):**
 
-### Running Without Default Exclusions
+When using the configuration file, only `[coverlet.*]*` is automatically prepended to exclude filters.
 
-If you need full control over exclusions (e.g., for debugging coverlet itself or measuring test framework coverage), you can use `coverlet.mtp.appsettings.json` configuration file.
+### Configuration File
 
-Create a `coverlet.mtp.appsettings.json` file in your test project directory:
+You can configure coverlet.MTP using a `coverlet.mtp.appsettings.json` file in your test project directory. This provides an alternative to command line options.
+
+**Supported Configuration Keys:**
+
+| Key | Type | Description |
+| :--- | :--- | :---------- |
+| `Include` | string | Comma-separated include filters (e.g., `[MyApp.*]*`) |
+| `IncludeDirectory` | string | Comma-separated additional directories for sources |
+| `Exclude` | string | Comma-separated exclude filters (e.g., `[*.Tests]*,[*.Generated]*`) |
+| `ExcludeByFile` | string | Comma-separated glob patterns for source file exclusion |
+| `ExcludeByAttribute` | string | Comma-separated attributes to exclude |
+| `Format` | string | Comma-separated output formats (default: `cobertura`) |
+| `UseSourceLink` | bool | Enable SourceLink support |
+| `SingleHit` | bool | Limit hits to one per location |
+| `IncludeTestAssembly` | bool | Include test assembly in coverage |
+| `SkipAutoProps` | bool | Skip auto-implemented properties |
+| `DoesNotReturnAttribute` | string | Comma-separated attributes marking non-returning methods |
+| `DeterministicReport` | bool | Generate deterministic reports |
+| `ExcludeAssembliesWithoutSources` | string | Values: `MissingAll`, `MissingAny`, `None` (default: `MissingAll`) |
+
+**Example `coverlet.mtp.appsettings.json`:**
 
 ```json
 {
-  "coverlet": {
-    "useDefaultExclusions": false,
-    "excludeFilters": [],
-    "excludeByAttributes": []
+  "Coverlet": {
+    "Include": "[MyApp.*]*",
+    "Exclude": "[*.Tests]*,[*.Generated]*",
+    "ExcludeByAttribute": "GeneratedCode,ExcludeFromCodeCoverage",
+    "ExcludeByFile": "**/Migrations/*.cs",
+    "Format": "cobertura,json",
+    "UseSourceLink": false,
+    "SingleHit": false,
+    "IncludeTestAssembly": false,
+    "SkipAutoProps": true,
+    "DeterministicReport": false,
+    "ExcludeAssembliesWithoutSources": "MissingAll"
   }
 }
 ```
 
-> [!WARNING]
-> Disabling default exclusions will include test framework assemblies and compiler-generated code in coverage reports, which may significantly increase report size and reduce clarity.
+> [!NOTE]
+> - The section name must be `Coverlet` (case-sensitive).
+> - Array values are specified as comma-separated strings, not JSON arrays.
+> - The default exclude filter `[coverlet.*]*` is always prepended to the `Exclude` value.
 
 ### Examples
 
