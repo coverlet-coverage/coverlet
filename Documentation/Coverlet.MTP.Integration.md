@@ -78,6 +78,7 @@ dotnet exec <test-assembly.dll> --help
 | :------- | :------------ |
 | `--coverlet` | Enable code coverage data collection. |
 | `--coverlet-output-format <format>` | Output format(s) for coverage report. Supported formats: `json`, `lcov`, `opencover`, `cobertura`, `teamcity`. Can be specified multiple times. (default: `json`, `cobertura`) |
+| `--coverlet-file-prefix <prefix>` | Prefix for coverage report filenames to prevent overwrites when multiple test projects write to the same directory. When specified, files are named `<prefix>.coverage.<extension>` instead of `coverage.<extension>`. (default: `none`) |
 | `--coverlet-include <filter>` | Include assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. (default: `none`) |
 | `--coverlet-include-directory <path>` | Include additional directories for sources. Can be specified multiple times. (default: `none`) |
 | `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. User-specified filters are merged with defaults. (default: `[coverlet.*]*`, `[xunit.*]*`, `[NUnit3.*]*`, `[nunit.*]*`, `[Microsoft.Testing.*]*`, `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`) |
@@ -191,6 +192,14 @@ dotnet exec TestProject.dll --coverlet --coverlet-exclude "[.Tests]" --coverlet-
 ```bash
 dotnet exec TestProject.dll --coverlet --coverlet-exclude-by-attribute "Obsolete" --coverlet-exclude-by-attribute "GeneratedCode"
 ```
+
+**Use file prefix to prevent overwrites in multi-project solutions:**
+
+```bash
+dotnet exec TestProject.dll --coverlet --coverlet-file-prefix "MyProject.UnitTests"
+```
+
+This generates files named `MyProject.UnitTests.coverage.json` and `MyProject.UnitTests.coverage.cobertura.xml` instead of overwriting the default `coverage.json` and `coverage.cobertura.xml`.
 
 ## Coverage Output
 

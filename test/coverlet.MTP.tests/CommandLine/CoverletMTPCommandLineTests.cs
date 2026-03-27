@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 using Xunit;
 
@@ -83,6 +84,179 @@ public class CoverletMTPCommandLineTests
   }
 
   [Fact]
+  public async Task IsValidForFilePrefixWithValue()
+  {
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == CoverletOptionNames.FilePrefix);
+
+    var result = await _provider.ValidateOptionArgumentsAsync(option, ["MyProject"]);
+
+    Assert.True(result.IsValid);
+    Assert.True(string.IsNullOrEmpty(result.ErrorMessage));
+  }
+
+  [Theory]
+  [InlineData("MyProject")]
+  [InlineData("My-Project_v1.0")]
+  [InlineData("test.unit")]
+  [InlineData("ProjectA.Tests")]
+  public async Task IsValidForFilePrefixWithSafeValues(string prefix)
+  {
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == CoverletOptionNames.FilePrefix);
+
+    var result = await _provider.ValidateOptionArgumentsAsync(option, [prefix]);
+
+    Assert.True(result.IsValid);
+    Assert.True(string.IsNullOrEmpty(result.ErrorMessage));
+  }
+
+  [Theory]
+  [InlineData("../malicious", "contains invalid character")]
+  [InlineData("..\\malicious", "must not contain directory separators")]
+  [InlineData("/absolute/path", "must not be a rooted path")]
+  [InlineData("path/to/file", "contains invalid character")]
+  [InlineData("path\\to\\file", "must not contain directory separators")]
+  [InlineData("..", "must not contain path traversal patterns")]
+  [InlineData("..test", "must not contain path traversal patterns")]
+  public async Task IsInvalidForFilePrefixWithPathTraversal(string prefix, string expectedErrorPart)
+  {
+    // expectedErrorPart is different for Linux or MacOS because of the different invalid character (directory separator vs null char)
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == CoverletOptionNames.FilePrefix);
+
+    var result = await _provider.ValidateOptionArgumentsAsync(option, [prefix]);
+
+    Assert.False(result.IsValid);
+    Assert.Contains(expectedErrorPart, result.ErrorMessage);
+  }
+
+  [Theory]
+  [InlineData("../malicious", "must not contain directory separators")]
+  [InlineData("..\\malicious", "must not contain path traversal patterns")]
+  [InlineData("/absolute/path", "must not be a rooted path")]
+  [InlineData("path/to/file", "must not contain directory separators")]
+  [InlineData("..", "must not contain path traversal patterns")]
+  [InlineData("..test", "must not contain path traversal patterns")]
+  public async Task IsInvalidForFilePrefixWithPathTraversalLinux(string prefix, string expectedErrorPart)
+  {
+    // expectedErrorPart is different for Linux or MacOS because of the different invalid character (directory separator vs null char)
+    Assert.SkipWhen(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Linux or MacOS");
+
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == CoverletOptionNames.FilePrefix);
+
+    var result = await _provider.ValidateOptionArgumentsAsync(option, [prefix]);
+
+    //Assert.False(result.IsValid);
+    Assert.Contains(expectedErrorPart, result.ErrorMessage);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsNullForValidPrefix()
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("MyProject");
+
+    Assert.Null(result);
+  }
+
+  [Theory]
+  [InlineData("../evil")]
+  [InlineData("..\\evil")]
+  [InlineData("path/traversal")]
+  [InlineData("..")]
+  [InlineData("..hidden")]
+  public void ValidateFilePrefixReturnsErrorForDangerousPrefix(string prefix)
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix(prefix);
+
+    Assert.NotNull(result);
+  }
+
+  [Theory]
+  [InlineData("path\\traversal")]
+
+  public void ValidateFilePrefixReturnsErrorForDangerousPrefixWindows(string prefix)
+  {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix(prefix);
+
+    Assert.NotNull(result);
+  }
+
+  [Theory]
+  [InlineData("test\"file")]
+  [InlineData("test>")]
+  [InlineData("<test")]
+  [InlineData("test|file")]
+  [InlineData("test*file")]
+  [InlineData("test?file")]
+  [InlineData("test:file")]
+  [InlineData("test\0file")]
+  public void ValidateFilePrefixReturnsErrorForInvalidFilenameCharacters(string prefix)
+  {
+
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix(prefix);
+
+    Assert.NotNull(result);
+    Assert.Contains("invalid character", result);
+  }
+
+  [Theory]
+  [InlineData("")]
+  [InlineData("MyProject")]
+  [InlineData("My-Project_v1.0")]
+  [InlineData("test.unit")]
+  [InlineData("123")]
+  [InlineData("a")]
+  public void ValidateFilePrefixReturnsNullForValidPrefixes(string prefix)
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix(prefix);
+
+    Assert.Null(result);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsErrorForDirectorySeparator()
+  {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("path/file");
+
+    Assert.NotNull(result);
+    Assert.Contains("contains invalid character", result);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsErrorForDirectorySeparatorLinux()
+  {
+    Assert.SkipWhen(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Linux or MacOS");
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("path/file");
+
+    Assert.NotNull(result);
+    Assert.Contains("must not contain directory separators", result);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsErrorForPathTraversal()
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("..");
+
+    Assert.NotNull(result);
+    Assert.Contains("path traversal", result);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsErrorForPathTraversalWithSuffix()
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("..hidden");
+
+    Assert.NotNull(result);
+    Assert.Contains("path traversal", result);
+  }
+
+  [Fact]
   public void GetCommandLineOptionsReturnsAllExpectedOptions()
   {
     var options = _provider.GetCommandLineOptions();
@@ -91,6 +265,7 @@ public class CoverletMTPCommandLineTests
     {
         CoverletOptionNames.Coverage,
         CoverletOptionNames.Formats,
+        CoverletOptionNames.FilePrefix,
         CoverletOptionNames.Include,
         CoverletOptionNames.IncludeDirectory,
         CoverletOptionNames.Exclude,

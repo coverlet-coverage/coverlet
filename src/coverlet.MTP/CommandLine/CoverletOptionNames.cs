@@ -7,6 +7,7 @@ internal static class CoverletOptionNames
 {
   public const string Coverage = "coverlet";
   public const string Formats = "coverlet-output-format";
+  public const string FilePrefix = "coverlet-file-prefix";
   public const string Include = "coverlet-include";
   public const string Exclude = "coverlet-exclude";
   public const string ExcludeByFile = "coverlet-exclude-by-file";

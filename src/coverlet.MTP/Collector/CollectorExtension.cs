@@ -125,6 +125,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       _configuration.SingleHit = config.UseSingleHit;
       _configuration.SkipAutoProps = config.SkipAutoProps;
       _configuration.formats = config.GetOutputFormats();
+      _configuration.FilePrefix = config.GetFilePrefix();
       _configuration.UseSourceLink = false;
 
       _logger.LogVerbose($"Test module path: {_testModulePath}");
@@ -403,7 +404,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     ISourceRootTranslator sourceRootTranslator,
     IFileSystem fileSystem,
     string outputDirectory,
-    string[] formats)
+    string[] formats,
+    string? filePrefix = null)
   {
     var generatedReports = new List<string>();
 
@@ -420,7 +422,11 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       }
       else
       {
-        string filename = $"coverage.{reporter.Extension}";
+        // Defensive validation of filePrefix to prevent path traversal
+        string? sanitizedPrefix = SanitizeFilePrefix(filePrefix);
+        string filename = string.IsNullOrEmpty(sanitizedPrefix)
+          ? $"coverage.{reporter.Extension}"
+          : $"{sanitizedPrefix}.coverage.{reporter.Extension}";
         string reportPath = Path.Combine(outputDirectory, filename);
         fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator));
         generatedReports.Add(reportPath);
@@ -483,7 +489,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       sourceRootTranslator,
       fileSystem,
       outputDirectory,
-      _configuration.formats);
+      _configuration.formats,
+      _configuration.FilePrefix);
 
     // Display results
     await DisplayGeneratedReportsAsync(generatedReports, cancellation);
@@ -499,6 +506,48 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     string? directory = Path.GetDirectoryName(_testModulePath);
     return directory ?? string.Empty;
+  }
+
+  /// <summary>
+  /// Sanitizes the file prefix to ensure it's a safe filename segment.
+  /// Returns null if the prefix is invalid or empty.
+  /// </summary>
+  private static string? SanitizeFilePrefix(string? filePrefix)
+  {
+    if (string.IsNullOrWhiteSpace(filePrefix))
+    {
+      return null;
+    }
+
+    // At this point, filePrefix is guaranteed to be non-null and non-whitespace
+    string prefix = filePrefix!;
+
+    // Reject directory separators (path traversal prevention)
+    if (prefix.Contains('/') || prefix.Contains('\\'))
+    {
+      return null;
+    }
+
+    // Reject rooted paths
+    if (Path.IsPathRooted(prefix))
+    {
+      return null;
+    }
+
+    // Reject path traversal patterns
+    if (prefix.Equals("..", StringComparison.Ordinal) || prefix.StartsWith("..", StringComparison.Ordinal))
+    {
+      return null;
+    }
+
+    // Reject invalid filename characters
+    char[] invalidChars = Path.GetInvalidFileNameChars();
+    if (prefix.IndexOfAny(invalidChars) >= 0)
+    {
+      return null;
+    }
+
+    return prefix;
   }
 
   private string? ResolveTestModulePath()

@@ -162,6 +162,30 @@ internal sealed class CoverageConfiguration
   }
 
   /// <summary>
+  /// Gets the file prefix for coverage report filenames.
+  /// Returns null if the prefix is empty or whitespace.
+  /// </summary>
+  public string? GetFilePrefix()
+  {
+    if (_commandLineOptions.TryGetOptionArgumentList(
+      CoverletOptionNames.FilePrefix,
+      out string[]? prefix) && prefix.Length > 0)
+    {
+      string? rawPrefix = prefix[0];
+      string? trimmedPrefix = rawPrefix?.Trim();
+      if (string.IsNullOrWhiteSpace(trimmedPrefix))
+      {
+        return null;
+      }
+
+      LogOptionValue(CoverletOptionNames.FilePrefix, [trimmedPrefix!], isExplicit: true);
+      return trimmedPrefix;
+    }
+
+    return null;
+  }
+
+  /// <summary>
   /// Gets the test assembly path.
   /// </summary>
   public static string GetTestAssemblyPath()

@@ -10,6 +10,10 @@ internal class CoverletExtensionConfiguration
 {
   public string[] formats { get; set; } = ["json"];
   /// <summary>
+  /// Optional prefix for coverage report filenames to prevent overwrites.
+  /// </summary>
+  public string? FilePrefix { get; set; }
+  /// <summary>
   /// Test module
   /// </summary>
   public string? TestModule { get; set; }
