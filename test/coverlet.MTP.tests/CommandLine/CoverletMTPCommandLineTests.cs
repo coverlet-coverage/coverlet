@@ -133,7 +133,7 @@ public class CoverletMTPCommandLineTests
   [Theory]
   [InlineData("../malicious", "must not contain directory separators")]
   [InlineData("..\\malicious", "must not contain path traversal patterns")]
-  [InlineData("/absolute/path", "\"must not be a rooted path")]
+  [InlineData("/absolute/path", "must not be a rooted path")]
   [InlineData("path/to/file", "must not contain directory separators")]
   [InlineData("..", "must not contain path traversal patterns")]
   [InlineData("..test", "must not contain path traversal patterns")]
