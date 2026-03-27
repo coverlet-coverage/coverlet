@@ -82,16 +82,16 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
   /// <returns>An error message if invalid, or null if valid.</returns>
   internal static string? ValidateFilePrefix(string filePrefix)
   {
-    // Check for directory separators (path traversal)
-    if (filePrefix.Contains(Path.DirectorySeparatorChar))
-    {
-      return $"The file prefix '{filePrefix}' must not contain directory separators.";
-    }
-
     // Check for rooted paths (e.g., "C:" on Windows or starting with "/")
     if (Path.IsPathRooted(filePrefix))
     {
       return $"The file prefix '{filePrefix}' must not be a rooted path.";
+    }
+
+    // Check for directory separators (path traversal)
+    if (filePrefix.Contains(Path.DirectorySeparatorChar))
+    {
+      return $"The file prefix '{filePrefix}' must not contain directory separators.";
     }
 
     // Check for invalid filename characters
