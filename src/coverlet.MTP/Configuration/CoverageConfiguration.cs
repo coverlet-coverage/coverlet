@@ -162,6 +162,22 @@ internal sealed class CoverageConfiguration
   }
 
   /// <summary>
+  /// Gets the file prefix for coverage report filenames.
+  /// </summary>
+  public string? GetFilePrefix()
+  {
+    if (_commandLineOptions.TryGetOptionArgumentList(
+      CoverletOptionNames.FilePrefix,
+      out string[]? prefix) && prefix.Length > 0)
+    {
+      LogOptionValue(CoverletOptionNames.FilePrefix, prefix, isExplicit: true);
+      return prefix[0];
+    }
+
+    return null;
+  }
+
+  /// <summary>
   /// Gets the test assembly path.
   /// </summary>
   public static string GetTestAssemblyPath()

@@ -83,6 +83,17 @@ public class CoverletMTPCommandLineTests
   }
 
   [Fact]
+  public async Task IsValidForFilePrefixWithValue()
+  {
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == CoverletOptionNames.FilePrefix);
+
+    var result = await _provider.ValidateOptionArgumentsAsync(option, ["MyProject"]);
+
+    Assert.True(result.IsValid);
+    Assert.True(string.IsNullOrEmpty(result.ErrorMessage));
+  }
+
+  [Fact]
   public void GetCommandLineOptionsReturnsAllExpectedOptions()
   {
     var options = _provider.GetCommandLineOptions();
@@ -91,6 +102,7 @@ public class CoverletMTPCommandLineTests
     {
         CoverletOptionNames.Coverage,
         CoverletOptionNames.Formats,
+        CoverletOptionNames.FilePrefix,
         CoverletOptionNames.Include,
         CoverletOptionNames.IncludeDirectory,
         CoverletOptionNames.Exclude,

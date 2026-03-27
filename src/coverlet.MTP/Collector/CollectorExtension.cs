@@ -125,6 +125,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       _configuration.SingleHit = config.UseSingleHit;
       _configuration.SkipAutoProps = config.SkipAutoProps;
       _configuration.formats = config.GetOutputFormats();
+      _configuration.FilePrefix = config.GetFilePrefix();
       _configuration.UseSourceLink = false;
 
       _logger.LogVerbose($"Test module path: {_testModulePath}");
@@ -403,7 +404,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     ISourceRootTranslator sourceRootTranslator,
     IFileSystem fileSystem,
     string outputDirectory,
-    string[] formats)
+    string[] formats,
+    string? filePrefix = null)
   {
     var generatedReports = new List<string>();
 
@@ -420,7 +422,9 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       }
       else
       {
-        string filename = $"coverage.{reporter.Extension}";
+        string filename = string.IsNullOrEmpty(filePrefix)
+          ? $"coverage.{reporter.Extension}"
+          : $"{filePrefix}.coverage.{reporter.Extension}";
         string reportPath = Path.Combine(outputDirectory, filename);
         fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator));
         generatedReports.Add(reportPath);
@@ -483,7 +487,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       sourceRootTranslator,
       fileSystem,
       outputDirectory,
-      _configuration.formats);
+      _configuration.formats,
+      _configuration.FilePrefix);
 
     // Display results
     await DisplayGeneratedReportsAsync(generatedReports, cancellation);

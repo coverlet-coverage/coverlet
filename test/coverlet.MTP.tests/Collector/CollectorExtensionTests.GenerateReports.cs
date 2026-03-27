@@ -297,6 +297,197 @@ public class CollectorExtensionGenerateReportsTests
       Times.Once);
   }
 
+  [Fact]
+  public void GenerateCoverageReportFilesWithFilePrefixCreatesReportWithPrefix()
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+    var mockReporter = new Mock<IReporter>();
+
+    // Setup mocks
+    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockReporter.Setup(x => x.Extension).Returns("json");
+    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("{\"coverage\":\"data\"}");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("json")).Returns(mockReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string outputDirectory = "/fake/reports";
+    string[] formats = ["json"];
+    string filePrefix = "MyProject";
+
+    // Act
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      outputDirectory,
+      formats,
+      filePrefix);
+
+    // Assert
+    Assert.Single(generatedReports);
+    Assert.EndsWith("MyProject.coverage.json", generatedReports[0]);
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("MyProject.coverage.json")),
+        It.Is<string>(content => content.Contains("coverage"))),
+      Times.Once);
+  }
+
+  [Fact]
+  public void GenerateCoverageReportFilesWithNullFilePrefixCreatesReportWithoutPrefix()
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+    var mockReporter = new Mock<IReporter>();
+
+    // Setup mocks
+    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockReporter.Setup(x => x.Extension).Returns("cobertura.xml");
+    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("<coverage />");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("cobertura")).Returns(mockReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string outputDirectory = "/fake/reports";
+    string[] formats = ["cobertura"];
+
+    // Act
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      outputDirectory,
+      formats,
+      filePrefix: null);
+
+    // Assert
+    Assert.Single(generatedReports);
+    Assert.EndsWith("coverage.cobertura.xml", generatedReports[0]);
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("coverage.cobertura.xml")),
+        It.IsAny<string>()),
+      Times.Once);
+  }
+
+  [Fact]
+  public void GenerateCoverageReportFilesWithEmptyFilePrefixCreatesReportWithoutPrefix()
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+    var mockReporter = new Mock<IReporter>();
+
+    // Setup mocks
+    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockReporter.Setup(x => x.Extension).Returns("lcov.info");
+    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("TN:coverage");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("lcov")).Returns(mockReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string outputDirectory = "/fake/reports";
+    string[] formats = ["lcov"];
+
+    // Act
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      outputDirectory,
+      formats,
+      filePrefix: "");
+
+    // Assert
+    Assert.Single(generatedReports);
+    Assert.EndsWith("coverage.lcov.info", generatedReports[0]);
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("coverage.lcov.info")),
+        It.IsAny<string>()),
+      Times.Once);
+  }
+
+  [Fact]
+  public void GenerateCoverageReportFilesWithFilePrefixAndMultipleFormatsCreatesAllReportsWithPrefix()
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+
+    var mockJsonReporter = new Mock<IReporter>();
+    mockJsonReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockJsonReporter.Setup(x => x.Extension).Returns("json");
+    mockJsonReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("{\"coverage\":\"data\"}");
+
+    var mockCoberturaReporter = new Mock<IReporter>();
+    mockCoberturaReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockCoberturaReporter.Setup(x => x.Extension).Returns("cobertura.xml");
+    mockCoberturaReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("<coverage />");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("json")).Returns(mockJsonReporter.Object);
+    mockReporterFactory.Setup(x => x.CreateReporter("cobertura")).Returns(mockCoberturaReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string outputDirectory = "/fake/reports";
+    string[] formats = ["json", "cobertura"];
+    string filePrefix = "UnitTests";
+
+    // Act
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      outputDirectory,
+      formats,
+      filePrefix);
+
+    // Assert
+    Assert.Equal(2, generatedReports.Count);
+    Assert.Contains(generatedReports, r => r.EndsWith("UnitTests.coverage.json"));
+    Assert.Contains(generatedReports, r => r.EndsWith("UnitTests.coverage.cobertura.xml"));
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("UnitTests.coverage.json")),
+        It.IsAny<string>()),
+      Times.Once);
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("UnitTests.coverage.cobertura.xml")),
+        It.IsAny<string>()),
+      Times.Once);
+  }
+
   /// <summary>
   /// Creates a CollectorExtension instance for testing with minimal setup.
   /// </summary>
