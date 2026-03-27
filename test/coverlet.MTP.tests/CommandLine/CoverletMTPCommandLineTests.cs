@@ -93,6 +93,61 @@ public class CoverletMTPCommandLineTests
     Assert.True(string.IsNullOrEmpty(result.ErrorMessage));
   }
 
+  [Theory]
+  [InlineData("MyProject")]
+  [InlineData("My-Project_v1.0")]
+  [InlineData("test.unit")]
+  [InlineData("ProjectA.Tests")]
+  public async Task IsValidForFilePrefixWithSafeValues(string prefix)
+  {
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == CoverletOptionNames.FilePrefix);
+
+    var result = await _provider.ValidateOptionArgumentsAsync(option, [prefix]);
+
+    Assert.True(result.IsValid);
+    Assert.True(string.IsNullOrEmpty(result.ErrorMessage));
+  }
+
+  [Theory]
+  [InlineData("../malicious", "must not contain directory separators")]
+  [InlineData("..\\malicious", "must not contain directory separators")]
+  [InlineData("/absolute/path", "must not contain directory separators")]
+  [InlineData("path/to/file", "must not contain directory separators")]
+  [InlineData("path\\to\\file", "must not contain directory separators")]
+  [InlineData("..", "must not contain path traversal patterns")]
+  [InlineData("..test", "must not contain path traversal patterns")]
+  public async Task IsInvalidForFilePrefixWithPathTraversal(string prefix, string expectedErrorPart)
+  {
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == CoverletOptionNames.FilePrefix);
+
+    var result = await _provider.ValidateOptionArgumentsAsync(option, [prefix]);
+
+    Assert.False(result.IsValid);
+    Assert.Contains(expectedErrorPart, result.ErrorMessage);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsNullForValidPrefix()
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("MyProject");
+
+    Assert.Null(result);
+  }
+
+  [Theory]
+  [InlineData("../evil")]
+  [InlineData("..\\evil")]
+  [InlineData("path/traversal")]
+  [InlineData("path\\traversal")]
+  [InlineData("..")]
+  [InlineData("..hidden")]
+  public void ValidateFilePrefixReturnsErrorForDangerousPrefix(string prefix)
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix(prefix);
+
+    Assert.NotNull(result);
+  }
+
   [Fact]
   public void GetCommandLineOptionsReturnsAllExpectedOptions()
   {

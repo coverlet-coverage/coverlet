@@ -422,9 +422,11 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       }
       else
       {
-        string filename = string.IsNullOrEmpty(filePrefix)
+        // Defensive validation of filePrefix to prevent path traversal
+        string? sanitizedPrefix = SanitizeFilePrefix(filePrefix);
+        string filename = string.IsNullOrEmpty(sanitizedPrefix)
           ? $"coverage.{reporter.Extension}"
-          : $"{filePrefix}.coverage.{reporter.Extension}";
+          : $"{sanitizedPrefix}.coverage.{reporter.Extension}";
         string reportPath = Path.Combine(outputDirectory, filename);
         fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator));
         generatedReports.Add(reportPath);
@@ -504,6 +506,48 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     string? directory = Path.GetDirectoryName(_testModulePath);
     return directory ?? string.Empty;
+  }
+
+  /// <summary>
+  /// Sanitizes the file prefix to ensure it's a safe filename segment.
+  /// Returns null if the prefix is invalid or empty.
+  /// </summary>
+  private static string? SanitizeFilePrefix(string? filePrefix)
+  {
+    if (string.IsNullOrWhiteSpace(filePrefix))
+    {
+      return null;
+    }
+
+    // At this point, filePrefix is guaranteed to be non-null and non-whitespace
+    string prefix = filePrefix!;
+
+    // Reject directory separators (path traversal prevention)
+    if (prefix.Contains('/') || prefix.Contains('\\'))
+    {
+      return null;
+    }
+
+    // Reject rooted paths
+    if (Path.IsPathRooted(prefix))
+    {
+      return null;
+    }
+
+    // Reject path traversal patterns
+    if (prefix.Equals("..", StringComparison.Ordinal) || prefix.StartsWith("..", StringComparison.Ordinal))
+    {
+      return null;
+    }
+
+    // Reject invalid filename characters
+    char[] invalidChars = Path.GetInvalidFileNameChars();
+    if (prefix.IndexOfAny(invalidChars) >= 0)
+    {
+      return null;
+    }
+
+    return prefix;
   }
 
   private string? ResolveTestModulePath()

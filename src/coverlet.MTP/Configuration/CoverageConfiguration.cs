@@ -163,6 +163,7 @@ internal sealed class CoverageConfiguration
 
   /// <summary>
   /// Gets the file prefix for coverage report filenames.
+  /// Returns null if the prefix is empty or whitespace.
   /// </summary>
   public string? GetFilePrefix()
   {
@@ -170,8 +171,15 @@ internal sealed class CoverageConfiguration
       CoverletOptionNames.FilePrefix,
       out string[]? prefix) && prefix.Length > 0)
     {
-      LogOptionValue(CoverletOptionNames.FilePrefix, prefix, isExplicit: true);
-      return prefix[0];
+      string? rawPrefix = prefix[0];
+      string? trimmedPrefix = rawPrefix?.Trim();
+      if (string.IsNullOrWhiteSpace(trimmedPrefix))
+      {
+        return null;
+      }
+
+      LogOptionValue(CoverletOptionNames.FilePrefix, [trimmedPrefix!], isExplicit: true);
+      return trimmedPrefix;
     }
 
     return null;

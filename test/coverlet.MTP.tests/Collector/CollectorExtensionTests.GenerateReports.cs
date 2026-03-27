@@ -488,6 +488,56 @@ public class CollectorExtensionGenerateReportsTests
       Times.Once);
   }
 
+  [Theory]
+  [InlineData("../malicious")]
+  [InlineData("..\\malicious")]
+  [InlineData("path/traversal")]
+  [InlineData("path\\traversal")]
+  [InlineData("..")]
+  [InlineData("..hidden")]
+  public void GenerateCoverageReportFilesWithPathTraversalPrefixFallsBackToDefault(string maliciousPrefix)
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+    var mockReporter = new Mock<IReporter>();
+
+    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockReporter.Setup(x => x.Extension).Returns("json");
+    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("{\"coverage\":\"data\"}");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("json")).Returns(mockReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string outputDirectory = "/fake/reports";
+    string[] formats = ["json"];
+
+    // Act - Pass a malicious prefix that should be rejected
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      outputDirectory,
+      formats,
+      maliciousPrefix);
+
+    // Assert - Should fall back to default filename without the malicious prefix
+    Assert.Single(generatedReports);
+    Assert.EndsWith("coverage.json", generatedReports[0]);
+    Assert.DoesNotContain(maliciousPrefix, generatedReports[0]);
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("coverage.json") && !path.Contains(maliciousPrefix)),
+        It.IsAny<string>()),
+      Times.Once);
+  }
+
   /// <summary>
   /// Creates a CollectorExtension instance for testing with minimal setup.
   /// </summary>

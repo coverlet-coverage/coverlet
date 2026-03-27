@@ -704,6 +704,48 @@ public sealed class CoverageConfigurationTests
     Assert.Equal("My-Project_v1.0", result);
   }
 
+  [Theory]
+  [InlineData("")]
+  [InlineData("   ")]
+  [InlineData("\t")]
+  [InlineData("\n")]
+  public void GetFilePrefixWithEmptyOrWhitespaceReturnsNull(string whitespaceValue)
+  {
+    string[] prefixArray = [whitespaceValue];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
+    _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.FilePrefix, out It.Ref<string[]?>.IsAny))
+      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? prefix) =>
+      {
+        prefix = prefixArray;
+        return true;
+      }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+    string? result = config.GetFilePrefix();
+
+    Assert.Null(result);
+  }
+
+  [Fact]
+  public void GetFilePrefixWithLeadingTrailingWhitespaceReturnsTrimmed()
+  {
+    string[] expectedPrefix = ["  MyProject  "];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
+    _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.FilePrefix, out It.Ref<string[]?>.IsAny))
+      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? prefix) =>
+      {
+        prefix = expectedPrefix;
+        return true;
+      }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+    string? result = config.GetFilePrefix();
+
+    Assert.Equal("MyProject", result);
+  }
+
   #endregion
 
   #region GetTestAssemblyPath Tests
