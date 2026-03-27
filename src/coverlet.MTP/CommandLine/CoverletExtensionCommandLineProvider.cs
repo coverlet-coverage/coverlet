@@ -83,7 +83,7 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
   internal static string? ValidateFilePrefix(string filePrefix)
   {
     // Check for directory separators (path traversal)
-    if (filePrefix.Contains('/') || filePrefix.Contains('\\'))
+    if (filePrefix.Contains(Path.DirectorySeparatorChar))
     {
       return $"The file prefix '{filePrefix}' must not contain directory separators.";
     }

@@ -109,10 +109,10 @@ public class CoverletMTPCommandLineTests
   }
 
   [Theory]
-  [InlineData("../malicious", "must not contain directory separators")]
+  [InlineData("../malicious", "contains invalid character")]
   [InlineData("..\\malicious", "must not contain directory separators")]
-  [InlineData("/absolute/path", "must not contain directory separators")]
-  [InlineData("path/to/file", "must not contain directory separators")]
+  [InlineData("/absolute/path", "must not be a rooted path")]
+  [InlineData("path/to/file", "contains invalid character")]
   [InlineData("path\\to\\file", "must not contain directory separators")]
   [InlineData("..", "must not contain path traversal patterns")]
   [InlineData("..test", "must not contain path traversal patterns")]
@@ -185,7 +185,7 @@ public class CoverletMTPCommandLineTests
     string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("path/file");
 
     Assert.NotNull(result);
-    Assert.Contains("directory separators", result);
+    Assert.Contains("contains invalid character", result);
   }
 
   [Fact]
