@@ -148,6 +148,64 @@ public class CoverletMTPCommandLineTests
     Assert.NotNull(result);
   }
 
+  [Theory]
+  [InlineData("<test")]
+  [InlineData("test>")]
+  [InlineData("test|file")]
+  [InlineData("test*file")]
+  [InlineData("test?file")]
+  [InlineData("test\"file")]
+  [InlineData("test:file")]
+  [InlineData("test\0file")]
+  public void ValidateFilePrefixReturnsErrorForInvalidFilenameCharacters(string prefix)
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix(prefix);
+
+    Assert.NotNull(result);
+    Assert.Contains("invalid character", result);
+  }
+
+  [Theory]
+  [InlineData("")]
+  [InlineData("MyProject")]
+  [InlineData("My-Project_v1.0")]
+  [InlineData("test.unit")]
+  [InlineData("123")]
+  [InlineData("a")]
+  public void ValidateFilePrefixReturnsNullForValidPrefixes(string prefix)
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix(prefix);
+
+    Assert.Null(result);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsErrorForDirectorySeparator()
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("path/file");
+
+    Assert.NotNull(result);
+    Assert.Contains("directory separators", result);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsErrorForPathTraversal()
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("..");
+
+    Assert.NotNull(result);
+    Assert.Contains("path traversal", result);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsErrorForPathTraversalWithSuffix()
+  {
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("..hidden");
+
+    Assert.NotNull(result);
+    Assert.Contains("path traversal", result);
+  }
+
   [Fact]
   public void GetCommandLineOptionsReturnsAllExpectedOptions()
   {

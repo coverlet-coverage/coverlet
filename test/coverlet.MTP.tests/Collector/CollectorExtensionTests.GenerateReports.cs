@@ -538,6 +538,102 @@ public class CollectorExtensionGenerateReportsTests
       Times.Once);
   }
 
+  [Theory]
+  [InlineData("<test")]
+  [InlineData("test>")]
+  [InlineData("test|file")]
+  [InlineData("test*file")]
+  [InlineData("test?file")]
+  [InlineData("test\"file")]
+  public void GenerateCoverageReportFilesWithInvalidFilenameCharsFallsBackToDefault(string invalidPrefix)
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+    var mockReporter = new Mock<IReporter>();
+
+    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockReporter.Setup(x => x.Extension).Returns("json");
+    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("{\"coverage\":\"data\"}");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("json")).Returns(mockReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string outputDirectory = "/fake/reports";
+    string[] formats = ["json"];
+
+    // Act - Pass a prefix with invalid filename characters that should be rejected
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      outputDirectory,
+      formats,
+      invalidPrefix);
+
+    // Assert - Should fall back to default filename without the invalid prefix
+    Assert.Single(generatedReports);
+    Assert.EndsWith("coverage.json", generatedReports[0]);
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("coverage.json")),
+        It.IsAny<string>()),
+      Times.Once);
+  }
+
+  [Theory]
+  [InlineData(" ")]
+  [InlineData("   ")]
+  [InlineData("\t")]
+  [InlineData("\n")]
+  public void GenerateCoverageReportFilesWithWhitespaceOnlyPrefixFallsBackToDefault(string whitespacePrefix)
+  {
+    // Arrange
+    var mockFileSystem = new Mock<IFileSystem>();
+    var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+    var mockReporterFactory = new Mock<IReporterFactory>();
+    var mockReporter = new Mock<IReporter>();
+
+    mockReporter.Setup(x => x.OutputType).Returns(ReporterOutputType.File);
+    mockReporter.Setup(x => x.Extension).Returns("json");
+    mockReporter.Setup(x => x.Report(It.IsAny<CoverageResult>(), It.IsAny<ISourceRootTranslator>()))
+      .Returns("{\"coverage\":\"data\"}");
+
+    mockReporterFactory.Setup(x => x.CreateReporter("json")).Returns(mockReporter.Object);
+
+    var collector = CreateCollectorForTesting(fileSystem: mockFileSystem.Object);
+    collector.ReporterFactoryOverride = mockReporterFactory.Object;
+
+    var coverageResult = CreateTestCoverageResult();
+    string outputDirectory = "/fake/reports";
+    string[] formats = ["json"];
+
+    // Act - Pass whitespace-only prefix that should be rejected
+    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+      coverageResult,
+      mockSourceRootTranslator.Object,
+      mockFileSystem.Object,
+      outputDirectory,
+      formats,
+      whitespacePrefix);
+
+    // Assert - Should fall back to default filename without prefix
+    Assert.Single(generatedReports);
+    Assert.EndsWith("coverage.json", generatedReports[0]);
+
+    mockFileSystem.Verify(
+      x => x.WriteAllText(
+        It.Is<string>(path => path.EndsWith("coverage.json")),
+        It.IsAny<string>()),
+      Times.Once);
+  }
+
   /// <summary>
   /// Creates a CollectorExtension instance for testing with minimal setup.
   /// </summary>
