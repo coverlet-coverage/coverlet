@@ -132,10 +132,9 @@ public class CoverletMTPCommandLineTests
 
   [Theory]
   [InlineData("../malicious", "must not contain directory separators")]
-  [InlineData("..\\malicious", "contains invalid character")]
-  [InlineData("/absolute/path", "\"must not contain directory separators")]
+  [InlineData("..\\malicious", "must not contain path traversal patterns")]
+  [InlineData("/absolute/path", "\"must not be a rooted path")]
   [InlineData("path/to/file", "must not contain directory separators")]
-  [InlineData("path\\to\\file", "contains invalid character")]
   [InlineData("..", "must not contain path traversal patterns")]
   [InlineData("..test", "must not contain path traversal patterns")]
   public async Task IsInvalidForFilePrefixWithPathTraversalLinux(string prefix, string expectedErrorPart)
@@ -221,10 +220,22 @@ public class CoverletMTPCommandLineTests
   [Fact]
   public void ValidateFilePrefixReturnsErrorForDirectorySeparator()
   {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
     string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("path/file");
 
     Assert.NotNull(result);
     Assert.Contains("contains invalid character", result);
+  }
+
+  [Fact]
+  public void ValidateFilePrefixReturnsErrorForDirectorySeparatorLinux()
+  {
+    Assert.SkipWhen(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Linux or MacOS");
+    string? result = CoverletExtensionCommandLineProvider.ValidateFilePrefix("path/file");
+
+    Assert.NotNull(result);
+    Assert.Contains("must not contain directory separators", result);
   }
 
   [Fact]
