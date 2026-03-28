@@ -121,9 +121,7 @@ public class CollectCoverageTests
 
     CheckCoverageResult(testProject, result, CoverageJsonFileName);
 
-    string searchPattern = CoverageJsonFileName.Insert(CoverageJsonFileName.LastIndexOf('.'), ".*");
-
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, searchPattern, SearchOption.AllDirectories);
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName.Insert(CoverageJsonFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
 
     // Verify method-level coverage tracking
@@ -182,9 +180,7 @@ public class CollectCoverageTests
 
     CheckCoverageResult(testProject, result, CoverageJsonFileName);
 
-    string searchPattern = CoverageJsonFileName.Insert(CoverageJsonFileName.LastIndexOf('.'), ".*");
-
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, searchPattern, SearchOption.AllDirectories);
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName.Insert(CoverageJsonFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
 
     // Verify branch coverage is tracked
@@ -260,7 +256,10 @@ public class CollectCoverageTests
 
     // Create a specific results directory
     string resultsDirectory = Path.GetFullPath(Path.Combine(testProject.SolutionDirectory, _repoRoot, "artifacts", "tmp", "TestResults"));
-    Directory.Delete(resultsDirectory, recursive: true);
+    if (Directory.Exists(resultsDirectory))
+    {
+      Directory.Delete(resultsDirectory, recursive: true);
+    }
     Directory.CreateDirectory(resultsDirectory);
 
     // Act
@@ -309,9 +308,7 @@ public class CollectCoverageTests
       $"This may indicate that coverage collection failed or the test executable was not built correctly.\n\n" +
       $"Test Output:\n{result.CombinedOutput}");
 
-    string searchPattern = filename.Insert(filename.LastIndexOf('.'), ".*");
-
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, searchPattern, SearchOption.AllDirectories);
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, filename.Insert(filename.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
     Assert.True(
       coverageFiles.Length > 0,
       $"No coverage file '{filename}' found in '{testProject.OutputDirectory}'.\n" +
@@ -531,7 +528,10 @@ public class CollectCoverageTests
   {
     // Use repository artifacts folder
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
-    Directory.Delete(artifactsTemp, recursive: true);
+    if (Directory.Exists(artifactsTemp))
+    {
+      Directory.Delete(artifactsTemp, recursive: true);
+    }
     Directory.CreateDirectory(artifactsTemp);
 
     string sanitizedTestName = SanitizePathName(testName);
@@ -571,6 +571,10 @@ public class CollectCoverageTests
   {
     // Reproduce exact Issue #1843 scenario
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    if (Directory.Exists(artifactsTemp))
+    {
+      Directory.Delete(artifactsTemp, recursive: true);
+    }
     Directory.CreateDirectory(artifactsTemp);
 
     string sanitizedTestName = SanitizePathName(testName);
@@ -905,6 +909,10 @@ public class Issue1843Tests
   {
     // Use repository artifacts folder instead of user temp
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    if (Directory.Exists(artifactsTemp))
+    {
+      Directory.Delete(artifactsTemp, recursive: true);
+    }
     Directory.CreateDirectory(artifactsTemp);
 
     // Use test method name for folder naming (sanitize invalid path characters)
