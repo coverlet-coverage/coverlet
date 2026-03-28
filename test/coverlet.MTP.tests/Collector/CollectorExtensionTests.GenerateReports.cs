@@ -288,11 +288,11 @@ public class CollectorExtensionGenerateReportsTests
 
     // Assert
     Assert.Single(generatedReports);
-    Assert.EndsWith("coverage.json", generatedReports[0]);
+    Assert.EndsWith("coverage.json", RemoveTimestamp(generatedReports[0]));
 
     mockFileSystem.Verify(
       x => x.WriteAllText(
-        It.Is<string>(path => path.EndsWith("coverage.json")),
+        It.Is<string>(path => System.Text.RegularExpressions.Regex.IsMatch(path, @"coverage\.\d{15}\.json$")),
         It.Is<string>(content => content.Contains("coverage"))),
       Times.Once);
   }
@@ -333,11 +333,11 @@ public class CollectorExtensionGenerateReportsTests
 
     // Assert
     Assert.Single(generatedReports);
-    Assert.EndsWith("MyProject.coverage.json", generatedReports[0]);
+    Assert.EndsWith("MyProject.coverage.json", RemoveTimestamp(generatedReports[0]));
 
     mockFileSystem.Verify(
       x => x.WriteAllText(
-        It.Is<string>(path => path.EndsWith("MyProject.coverage.json")),
+        It.Is<string>(path => System.Text.RegularExpressions.Regex.IsMatch(path, @"MyProject\.coverage\.\d{15}\.json$")),
         It.Is<string>(content => content.Contains("coverage"))),
       Times.Once);
   }
@@ -377,11 +377,11 @@ public class CollectorExtensionGenerateReportsTests
 
     // Assert
     Assert.Single(generatedReports);
-    Assert.EndsWith("coverage.cobertura.xml", generatedReports[0]);
+    Assert.EndsWith("coverage.cobertura.xml", RemoveTimestamp(generatedReports[0]));
 
     mockFileSystem.Verify(
       x => x.WriteAllText(
-        It.Is<string>(path => path.EndsWith("coverage.cobertura.xml")),
+        It.Is<string>(path => System.Text.RegularExpressions.Regex.IsMatch(path, @"coverage\.cobertura\.\d{15}\.xml")),
         It.IsAny<string>()),
       Times.Once);
   }
@@ -421,11 +421,11 @@ public class CollectorExtensionGenerateReportsTests
 
     // Assert
     Assert.Single(generatedReports);
-    Assert.EndsWith("coverage.lcov.info", generatedReports[0]);
+    Assert.EndsWith("coverage.lcov.info", RemoveTimestamp(generatedReports[0]));
 
     mockFileSystem.Verify(
       x => x.WriteAllText(
-        It.Is<string>(path => path.EndsWith("coverage.lcov.info")),
+        It.Is<string>(path => System.Text.RegularExpressions.Regex.IsMatch(path, @"coverage.lcov\.\d{15}\.info$")),
         It.IsAny<string>()),
       Times.Once);
   }
@@ -472,18 +472,18 @@ public class CollectorExtensionGenerateReportsTests
 
     // Assert
     Assert.Equal(2, generatedReports.Count);
-    Assert.Contains(generatedReports, r => r.EndsWith("UnitTests.coverage.json"));
-    Assert.Contains(generatedReports, r => r.EndsWith("UnitTests.coverage.cobertura.xml"));
+    Assert.Contains(generatedReports, r => System.Text.RegularExpressions.Regex.IsMatch(r, @"UnitTests\.coverage\.\d{15}\.json$"));
+    Assert.Contains(generatedReports, r => System.Text.RegularExpressions.Regex.IsMatch(r, @"UnitTests\.coverage.cobertura\.\d{15}\.xml"));
 
     mockFileSystem.Verify(
       x => x.WriteAllText(
-        It.Is<string>(path => path.EndsWith("UnitTests.coverage.json")),
+        It.Is<string>(path => System.Text.RegularExpressions.Regex.IsMatch(path, @"UnitTests\.coverage\.\d{15}\.json$")),
         It.IsAny<string>()),
       Times.Once);
 
     mockFileSystem.Verify(
       x => x.WriteAllText(
-        It.Is<string>(path => path.EndsWith("UnitTests.coverage.cobertura.xml")),
+        It.Is<string>(path => System.Text.RegularExpressions.Regex.IsMatch(path, @"UnitTests\.coverage.cobertura\.\d{15}\.xml")),
         It.IsAny<string>()),
       Times.Once);
   }
@@ -528,12 +528,12 @@ public class CollectorExtensionGenerateReportsTests
 
     // Assert - Should fall back to default filename without the malicious prefix
     Assert.Single(generatedReports);
-    Assert.EndsWith("coverage.json", generatedReports[0]);
+    Assert.EndsWith("coverage.json", RemoveTimestamp(generatedReports[0]));
     Assert.DoesNotContain(maliciousPrefix, generatedReports[0]);
 
     mockFileSystem.Verify(
       x => x.WriteAllText(
-        It.Is<string>(path => path.EndsWith("coverage.json") && !path.Contains(maliciousPrefix)),
+        It.Is<string>(path => System.Text.RegularExpressions.Regex.IsMatch(path, @"coverage\.\d{15}\.json$") && !path.Contains(maliciousPrefix)),
         It.IsAny<string>()),
       Times.Once);
   }
@@ -578,11 +578,11 @@ public class CollectorExtensionGenerateReportsTests
 
     // Assert - Should fall back to default filename without the invalid prefix
     Assert.Single(generatedReports);
-    Assert.EndsWith("coverage.json", generatedReports[0]);
+    Assert.EndsWith("coverage.json", RemoveTimestamp(generatedReports[0]));
 
     mockFileSystem.Verify(
       x => x.WriteAllText(
-        It.Is<string>(path => path.EndsWith("coverage.json")),
+        It.Is<string>(path => System.Text.RegularExpressions.Regex.IsMatch(path, @"coverage\.\d{15}\.json$")),
         It.IsAny<string>()),
       Times.Once);
   }
@@ -625,11 +625,11 @@ public class CollectorExtensionGenerateReportsTests
 
     // Assert - Should fall back to default filename without prefix
     Assert.Single(generatedReports);
-    Assert.EndsWith("coverage.json", generatedReports[0]);
+    Assert.EndsWith("coverage.json", RemoveTimestamp(generatedReports[0]));
 
     mockFileSystem.Verify(
       x => x.WriteAllText(
-        It.Is<string>(path => path.EndsWith("coverage.json")),
+        It.Is<string>(path => System.Text.RegularExpressions.Regex.IsMatch(path, @"coverage\.\d{15}\.json$")),
         It.IsAny<string>()),
       Times.Once);
   }
@@ -677,6 +677,12 @@ public class CollectorExtensionGenerateReportsTests
       mockConfiguration.Object,
       testFileSystem,
       testReporterFactory);
+  }
+
+  private static string RemoveTimestamp(string filename)
+  {
+    // Matches a dot, 15 digits, and a dot (e.g., .280326084634246.)
+    return System.Text.RegularExpressions.Regex.Replace(filename, @"\.\d{15}\.", ".");
   }
   #endregion
 

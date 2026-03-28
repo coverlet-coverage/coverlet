@@ -427,13 +427,23 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
         string filename = string.IsNullOrEmpty(sanitizedPrefix)
           ? $"coverage.{reporter.Extension}"
           : $"{sanitizedPrefix}.coverage.{reporter.Extension}";
-        string reportPath = Path.Combine(outputDirectory, filename);
+        string filenameWithTimestamp = InjectTimestamp(filename, DateTime.UtcNow);
+        string reportPath = Path.Combine(outputDirectory, filenameWithTimestamp);
         fileSystem.WriteAllText(reportPath, reporter.Report(result, sourceRootTranslator));
         generatedReports.Add(reportPath);
       }
     }
 
     return generatedReports;
+  }
+
+  private static string InjectTimestamp(string filename, DateTime utcNow)
+  {
+    string timestamp = utcNow.ToString("ddMMyyHHmmssfff");
+    int lastDot = filename.LastIndexOf('.');
+    if (lastDot > 0)
+      return filename.Insert(lastDot, $".{timestamp}");
+    return $"{filename}.{timestamp}";
   }
 
   /// <summary>

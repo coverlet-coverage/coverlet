@@ -155,6 +155,20 @@ public class HelpCommandTests
   }
 
   [Fact]
+  public async Task Help_ShowsFilePrefixOption()
+  {
+    // Arrange
+    await EnsureTestProjectBuilt();
+
+    // Act
+    TestResult result = await RunTestsWithHelp();
+
+    // Assert - Check for file-prefix option from CoverletExtensionCommandLineProvider
+    Assert.Contains("--coverlet-file-prefix", result.StandardOutput);
+    Assert.Contains("Prefix for coverage report filenames to prevent overwrites when multiple test projects write to the same directory.", result.StandardOutput);
+  }
+
+  [Fact]
   public async Task Help_ShowsFormatsOption()
   {
     // Arrange
