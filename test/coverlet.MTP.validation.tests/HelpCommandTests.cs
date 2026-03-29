@@ -15,6 +15,7 @@ namespace Coverlet.MTP.validation.tests;
 [CollectionDefinition(nameof(MtpValidationTests), DisableParallelization = true)]
 public class MtpValidationTests
 {
+  // no code needed unless you're using fixtures
 }
 
 /// <summary>

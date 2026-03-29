@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Improvements
+
+- Unique Report Filenames (coverlet.MTP and AzDO) [#1866](https://github.com/coverlet-coverage/coverlet/issues/1866)
+- Add `--coverlet-file-prefix` option for unique report files [#1869](https://github.com/coverlet-coverage/coverlet/pull/1869)
+- Introduce .NET 10 support [#1823](https://github.com/coverlet-coverage/coverlet/pull/1823)
+
+## Fixed
+
+- Fix [BUG] Missing Coverage after moving to MTP [#1843](https://github.com/coverlet-coverage/coverlet/issues/1843)
+- Fix [BUG] No coverage reported when targeting .NET Framework with 8.0.1 [#1842](https://github.com/coverlet-coverage/coverlet/issues/1842)
+
+## Maintenance
+
+- Add comprehensive async method tests and documentation for issue [#1864](https://github.com/coverlet-coverage/coverlet/pull/1864)
+- Replace Tmds.ExecFunction Package in coverlet.core.coverage.tests [#1833](https://github.com/coverlet-coverage/coverlet/issues/1833)
+- Add net9.0 and net10.0 targets [#1822](https://github.com/coverlet-coverage/coverlet/issues/1822)
+
 ## Release date 2026-03-17
 ### Packages
 coverlet.msbuild 8.0.1

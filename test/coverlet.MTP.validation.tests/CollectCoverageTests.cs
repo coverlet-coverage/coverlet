@@ -14,6 +14,9 @@ namespace Coverlet.MTP.validation.tests;
 /// Similar to coverlet.integration.tests.Collectors but for Microsoft Testing Platform instead of VSTest.
 /// Uses a separate library project (SUT) referenced by the test project - the typical real-world scenario.
 /// </summary>
+///
+
+[Collection(nameof(MtpValidationTests))]
 public class CollectCoverageTests
 {
   private readonly string _buildConfiguration;
