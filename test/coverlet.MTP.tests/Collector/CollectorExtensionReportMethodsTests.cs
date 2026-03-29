@@ -174,9 +174,9 @@ public class CollectorExtensionReportMethodsTests
 
     // Assert
     Assert.Single(generatedReports);
-    Assert.Equal(expectedReportPath, generatedReports[0]);
+    Assert.Equal(expectedReportPath, RemoveTimestamp(generatedReports[0]));
     _mockFileSystem.Verify(
-      x => x.WriteAllText(expectedReportPath, "{\"coverage\":\"data\"}"),
+      x => x.WriteAllText(generatedReports[0], "{\"coverage\":\"data\"}"),
       Times.Once);
   }
 
@@ -223,9 +223,11 @@ public class CollectorExtensionReportMethodsTests
 
     // Assert
     Assert.Equal(3, generatedReports.Count);
-    Assert.Contains(Path.Combine(s_simulatedReportDirectory, "coverage.json"), generatedReports);
-    Assert.Contains(Path.Combine(s_simulatedReportDirectory, "coverage.info"), generatedReports);
-    Assert.Contains(Path.Combine(s_simulatedReportDirectory, "coverage.xml"), generatedReports);
+    //update list and remove timestamp from names before assertion since timestamp is generated at runtime and cannot be predicted in test
+    var normalizedReports = generatedReports.Select(RemoveTimestamp).ToList();
+    Assert.Contains(Path.Combine(s_simulatedReportDirectory, "coverage.json"), normalizedReports);
+    Assert.Contains(Path.Combine(s_simulatedReportDirectory, "coverage.info"), normalizedReports);
+    Assert.Contains(Path.Combine(s_simulatedReportDirectory, "coverage.xml"), normalizedReports);
 
     _mockFileSystem.Verify(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(3));
   }
@@ -851,5 +853,10 @@ public class CollectorExtensionReportMethodsTests
     Assert.Contains("Could not find file", result);
   }
 
+  private static string RemoveTimestamp(string filename)
+  {
+    // Matches a dot, 15 digits, and a dot (e.g., .280326084634246.)
+    return System.Text.RegularExpressions.Regex.Replace(filename, @"\.\d{15}\.", ".");
+  }
   #endregion
 }

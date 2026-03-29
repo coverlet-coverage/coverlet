@@ -15,6 +15,7 @@ namespace Coverlet.MTP.validation.tests;
 [CollectionDefinition(nameof(MtpValidationTests), DisableParallelization = true)]
 public class MtpValidationTests
 {
+  // no code needed unless you're using fixtures
 }
 
 /// <summary>
@@ -152,6 +153,20 @@ public class HelpCommandTests
 
     // Verify coverlet.MTP is loaded and shows its options
     Assert.Contains("--coverlet-output-format", result.StandardOutput);
+  }
+
+  [Fact]
+  public async Task Help_ShowsFilePrefixOption()
+  {
+    // Arrange
+    await EnsureTestProjectBuilt();
+
+    // Act
+    TestResult result = await RunTestsWithHelp();
+
+    // Assert - Check for file-prefix option from CoverletExtensionCommandLineProvider
+    Assert.Contains("--coverlet-file-prefix", result.StandardOutput);
+    Assert.Contains("Prefix for coverage report filenames to prevent overwrites when multiple test projects write to the same directory.", result.StandardOutput);
   }
 
   [Fact]

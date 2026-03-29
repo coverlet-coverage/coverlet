@@ -91,7 +91,7 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. (default: `None`) |
 
 > [!NOTE]
-> Coverage report files will be stored in `--results-directory` folder.
+> Coverage report files will be stored in `--results-directory` folder and a time stamp `{DateTime.UtcNow:ddMMyyHHmmssfff}` is used for generated code coverage files name e.g. `coverage.280326122803612.json` or `coverage.cobertura.280326122803612.xml`
 
 ### Default Exclusions Behavior
 

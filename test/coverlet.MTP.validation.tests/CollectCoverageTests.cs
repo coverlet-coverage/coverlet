@@ -14,6 +14,9 @@ namespace Coverlet.MTP.validation.tests;
 /// Similar to coverlet.integration.tests.Collectors but for Microsoft Testing Platform instead of VSTest.
 /// Uses a separate library project (SUT) referenced by the test project - the typical real-world scenario.
 /// </summary>
+///
+
+[Collection(nameof(MtpValidationTests))]
 public class CollectCoverageTests
 {
   private readonly string _buildConfiguration;
@@ -121,7 +124,7 @@ public class CollectCoverageTests
 
     CheckCoverageResult(testProject, result, CoverageJsonFileName);
 
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName.Insert(CoverageJsonFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
 
     // Verify method-level coverage tracking
@@ -180,7 +183,7 @@ public class CollectCoverageTests
 
     CheckCoverageResult(testProject, result, CoverageJsonFileName);
 
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName.Insert(CoverageJsonFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
     var coverageData = ParseCoverageJson(coverageFiles[0]);
 
     // Verify branch coverage is tracked
@@ -241,9 +244,9 @@ public class CollectCoverageTests
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
     // Verify all formats are generated
-    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName, SearchOption.AllDirectories));
-    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories));
-    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageLcovFileName, SearchOption.AllDirectories));
+    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageJsonFileName.Insert(CoverageJsonFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories));
+    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName.Insert(CoverageCoberturaFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories));
+    Assert.NotEmpty(Directory.GetFiles(testProject.OutputDirectory, CoverageLcovFileName.Insert(CoverageLcovFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories));
   }
 
   [Fact]
@@ -256,6 +259,10 @@ public class CollectCoverageTests
 
     // Create a specific results directory
     string resultsDirectory = Path.GetFullPath(Path.Combine(testProject.SolutionDirectory, _repoRoot, "artifacts", "tmp", "TestResults"));
+    if (Directory.Exists(resultsDirectory))
+    {
+      Directory.Delete(resultsDirectory, recursive: true);
+    }
     Directory.CreateDirectory(resultsDirectory);
 
     // Act
@@ -270,9 +277,9 @@ public class CollectCoverageTests
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
     // Verify coverage files are generated in the specified results directory
-    string[] jsonFiles = Directory.GetFiles(resultsDirectory, CoverageJsonFileName, SearchOption.AllDirectories);
-    string[] coberturaFiles = Directory.GetFiles(resultsDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories);
-    string[] lcovFiles = Directory.GetFiles(resultsDirectory, CoverageLcovFileName, SearchOption.AllDirectories);
+    string[] jsonFiles = Directory.GetFiles(resultsDirectory, CoverageJsonFileName.Insert(CoverageJsonFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
+    string[] coberturaFiles = Directory.GetFiles(resultsDirectory, CoverageCoberturaFileName.Insert(CoverageCoberturaFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
+    string[] lcovFiles = Directory.GetFiles(resultsDirectory, CoverageLcovFileName.Insert(CoverageLcovFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
 
     Assert.True(jsonFiles.Length > 0,
       $"No {CoverageJsonFileName} found in results directory: {resultsDirectory}\n" +
@@ -291,8 +298,8 @@ public class CollectCoverageTests
 
     // Verify console output contains "Coverage reports generated:" message
     Assert.Contains("Out of process file artifacts produced:", result.StandardOutput);
-    Assert.Contains(CoverageJsonFileName, result.StandardOutput);
-    Assert.Contains(CoverageCoberturaFileName.Replace(".cobertura.xml", ""), result.StandardOutput);
+    Assert.Contains(jsonFiles[0], result.StandardOutput);
+    Assert.Contains(coberturaFiles[0], result.StandardOutput);
   }
 
   private static void CheckCoverageResult(TestProjectInfo testProject, TestResult result, string filename)
@@ -304,7 +311,7 @@ public class CollectCoverageTests
       $"This may indicate that coverage collection failed or the test executable was not built correctly.\n\n" +
       $"Test Output:\n{result.CombinedOutput}");
 
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, filename, SearchOption.AllDirectories);
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, filename.Insert(filename.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
     Assert.True(
       coverageFiles.Length > 0,
       $"No coverage file '{filename}' found in '{testProject.OutputDirectory}'.\n" +
@@ -432,7 +439,7 @@ public class CollectCoverageTests
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
     // Find cobertura coverage file
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories);
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName.Insert(CoverageCoberturaFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
     Assert.NotEmpty(coverageFiles);
 
     // Parse coverage XML
@@ -496,7 +503,7 @@ public class CollectCoverageTests
     Assert.True(result.ExitCode == 0, $"Test run failed with exit code {result.ExitCode}.\n\n{result.CombinedOutput}");
 
     // Find and parse coverage
-    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName, SearchOption.AllDirectories);
+    string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName.Insert(CoverageCoberturaFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
     Assert.NotEmpty(coverageFiles);
 
     string xmlContent = File.ReadAllText(coverageFiles[0]);
@@ -524,6 +531,10 @@ public class CollectCoverageTests
   {
     // Use repository artifacts folder
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    if (Directory.Exists(artifactsTemp))
+    {
+      Directory.Delete(artifactsTemp, recursive: true);
+    }
     Directory.CreateDirectory(artifactsTemp);
 
     string sanitizedTestName = SanitizePathName(testName);
@@ -563,6 +574,10 @@ public class CollectCoverageTests
   {
     // Reproduce exact Issue #1843 scenario
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    if (Directory.Exists(artifactsTemp))
+    {
+      Directory.Delete(artifactsTemp, recursive: true);
+    }
     Directory.CreateDirectory(artifactsTemp);
 
     string sanitizedTestName = SanitizePathName(testName);
@@ -897,6 +912,10 @@ public class Issue1843Tests
   {
     // Use repository artifacts folder instead of user temp
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    if (Directory.Exists(artifactsTemp))
+    {
+      Directory.Delete(artifactsTemp, recursive: true);
+    }
     Directory.CreateDirectory(artifactsTemp);
 
     // Use test method name for folder naming (sanitize invalid path characters)
