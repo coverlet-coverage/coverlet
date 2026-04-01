@@ -31,4 +31,21 @@ namespace Coverlet.Core.CoverageSamples.Tests
       }
     }
   }
+
+  /// <summary>
+  /// Reproduction case for Issue #1836: Wrong branch rate on IAsyncEnumerable
+  /// This class is from PR https://github.com/daveMueller/coverlet/pull/31
+  /// </summary>
+  public class Issue1836
+  {
+    public async IAsyncEnumerable<int> GetNumbersAsync([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+      int[] items = [1, 2];
+      foreach (var item in items)
+      {
+        await Task.CompletedTask;
+        yield return !cancellationToken.IsCancellationRequested ? item : throw new OperationCanceledException();
+      }
+    }
+  }
 }

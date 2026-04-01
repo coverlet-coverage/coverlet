@@ -367,4 +367,54 @@ namespace Coverlet.Core.Samples.Tests
             return false;
         }
     }
+
+    /// <summary>
+    /// Issue #1335: Reproduction case for combined await foreach + yield return.
+    /// This pattern creates a method that is both an async iterator (produces IAsyncEnumerable)
+    /// AND consumes another IAsyncEnumerable via await foreach.
+    /// </summary>
+    public class AsyncIteratorWithAwaitForeach
+    {
+        public async IAsyncEnumerable<int> CreateSequenceAsync(int count)
+        {
+            for (int i = 1; i <= count; i++)
+            {
+                await Task.CompletedTask;
+                yield return i;
+            }
+        }
+
+        /// <summary>
+        /// This method is both an async iterator (yield return) and an async consumer (await foreach).
+        /// The compiler generates a complex state machine that combines patterns from both.
+        /// </summary>
+        public async IAsyncEnumerable<List<int>> BatchAsync(IAsyncEnumerable<int> source, int batchSize)
+        {
+            List<int> batch = new(batchSize);
+            await foreach (int item in source)
+            {
+                batch.Add(item);
+                if (batch.Count >= batchSize)
+                {
+                    yield return batch;
+                    batch = new List<int>(batchSize);
+                }
+            }
+            if (batch.Count > 0)
+            {
+                yield return batch;
+            }
+        }
+
+        /// <summary>
+        /// Simpler case: transform each item (await foreach + yield return, no conditional yield)
+        /// </summary>
+        public async IAsyncEnumerable<int> TransformAsync(IAsyncEnumerable<int> source)
+        {
+            await foreach (int item in source)
+            {
+                yield return item * 2;
+            }
+        }
+    }
 }
