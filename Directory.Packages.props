@@ -63,7 +63,7 @@
     <PackageVersion Include="xunit.v3.runner.msbuild" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
     <PackageVersion Include="System.Buffers" Version="4.6.1" />
-    <PackageVersion Include="System.Collections.Immutable" Version="10.0.3" />
+    <PackageVersion Include="System.Collections.Immutable" Version="10.0.5" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.3" />
     <PackageVersion Include="System.Diagnostics.EventLog" Version="10.0.3" />
     <PackageVersion Include="System.Formats.Asn1" Version="10.0.3" />
