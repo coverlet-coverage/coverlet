@@ -57,7 +57,7 @@
     <PackageVersion Include="ReportGenerator.Core" Version="5.5.1" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.11" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.3" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.5" />
     <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.runner.msbuild" Version="$(XunitV3Version)" />
