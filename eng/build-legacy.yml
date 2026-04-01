@@ -76,7 +76,7 @@ steps:
     Contents: |
       **/*opencover*.xml
       **/*cobertura*.xml
-      **/coverage*.json
+      **/*coverage*.json
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 
 - task: CopyFiles@2
@@ -87,9 +87,9 @@ steps:
     SourceFolder: '$(Agent.TempDirectory)'
     Contents: |
         **/*.trx
-        **/coverage.*opencover*.xml
-        **/coverage.*cobertura*.xml
-        **/coverage*.json
+        **/*coverage.*opencover*.xml
+        **/*coverage.*cobertura*.xml
+        **/*coverage*.json
 
     TargetFolder: '$(Build.SourcesDirectory)/artifacts/TestLogs'
 

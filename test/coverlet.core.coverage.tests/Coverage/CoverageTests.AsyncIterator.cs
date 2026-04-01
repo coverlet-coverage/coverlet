@@ -76,7 +76,7 @@ namespace Coverlet.CoreCoverage.Tests
                     await foreach (int item in (IAsyncEnumerable<int>)instance.GetNumbersAsync()) { }
 
                     // Cancelled iteration covering the throw branch of the ternary
-                    var cts = new CancellationTokenSource();
+                    using var cts = new CancellationTokenSource();
                     cts.Cancel();
                     try
                     {
