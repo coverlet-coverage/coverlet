@@ -9,7 +9,7 @@
   <PropertyGroup>
     <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion>
     <!-- .NET 8.0 support -->
-    <MicrosoftCodeAnalysisVersion>5.0.0</MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisVersion>5.3.0</MicrosoftCodeAnalysisVersion>
     <!-- .NET 8.0 support -->
     <NugetPackageVersion>7.3.0</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
