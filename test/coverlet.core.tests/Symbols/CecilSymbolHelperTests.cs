@@ -448,5 +448,82 @@ namespace Coverlet.Core.Tests.Symbols
 
       Assert.Empty(points);
     }
+
+    /// <summary>
+    /// Issue #1335: Tests combined await foreach + yield return pattern.
+    /// The TransformAsync method is both an async iterator (produces IAsyncEnumerable)
+    /// and consumes another IAsyncEnumerable via await foreach.
+    /// </summary>
+    [Fact]
+    public void GetBranchPoints_Issue1335_AsyncIteratorWithAwaitForeach_Transform()
+    {
+      // arrange - get the nested state machine type for TransformAsync
+      TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncIteratorWithAwaitForeach).FullName);
+      Assert.NotNull(type);
+
+      // Find the compiler-generated state machine for TransformAsync
+      TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.Contains("<TransformAsync>"));
+      Assert.NotNull(nestedType);
+
+      MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+      Assert.NotNull(method);
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      // TransformAsync has one user branch: the await foreach (loop or exit)
+      // All other branches should be filtered out as compiler-generated
+      // Expected: 2 branch points (the await foreach continue/exit condition)
+      Assert.NotNull(points);
+
+      // Output diagnostic info for debugging
+      foreach (BranchPoint bp in points)
+      {
+        System.Diagnostics.Debug.WriteLine($"BranchPoint: Line={bp.StartLine}, Offset={bp.Offset}, Path={bp.Path}, Ordinal={bp.Ordinal}");
+      }
+
+      // The TransformAsync method should have only 2 branch points (await foreach loop condition)
+      // If this fails with more than 2, we have phantom branches that need to be filtered
+      Assert.Equal(2, points.Count);
+    }
+
+    /// <summary>
+    /// Issue #1335: Tests the more complex BatchAsync pattern with conditional yield return.
+    /// </summary>
+    [Fact]
+    public void GetBranchPoints_Issue1335_AsyncIteratorWithAwaitForeach_Batch()
+    {
+      // arrange - get the nested state machine type for BatchAsync
+      TypeDefinition type = _module.Types.FirstOrDefault(x => x.FullName == typeof(AsyncIteratorWithAwaitForeach).FullName);
+      Assert.NotNull(type);
+
+      // Find the compiler-generated state machine for BatchAsync
+      TypeDefinition nestedType = type.NestedTypes.FirstOrDefault(x => x.FullName.Contains("<BatchAsync>"));
+      Assert.NotNull(nestedType);
+
+      MethodDefinition method = nestedType.Methods.First(x => x.FullName.EndsWith("::MoveNext()"));
+      Assert.NotNull(method);
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      // BatchAsync has three user branches:
+      // 1. await foreach (loop or exit) - 2 branch points
+      // 2. if (batch.Count >= batchSize) - 2 branch points
+      // 3. if (batch.Count > 0) - 2 branch points
+      // Total expected: 6 branch points
+      Assert.NotNull(points);
+
+      // Output diagnostic info for debugging
+      foreach (BranchPoint bp in points)
+      {
+        System.Diagnostics.Debug.WriteLine($"BranchPoint: Line={bp.StartLine}, Offset={bp.Offset}, Path={bp.Path}, Ordinal={bp.Ordinal}");
+      }
+
+      // If this fails with more than 6, we have phantom branches that need to be filtered
+      Assert.Equal(6, points.Count);
+    }
   }
 }
