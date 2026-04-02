@@ -65,7 +65,6 @@
   <!-- NuGet package layout -->
   <!-- NuGet folders https://learn.microsoft.com/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->
   <ItemGroup>
-    <PackageReference Include="System.Reflection.Metadata" />
     <TfmSpecificPackageFile Include="build/**">
       <PackagePath>build/$(TargetFramework)</PackagePath>
     </TfmSpecificPackageFile>
