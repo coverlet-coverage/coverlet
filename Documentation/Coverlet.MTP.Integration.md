@@ -114,7 +114,7 @@ You can configure coverlet.MTP using a `coverlet.mtp.appsettings.json` file in y
 
 To use the configuration file, you must:
 
-1. **Create the configuration file** in your test project (e.g., in a `TestAssets` folder or project root)
+1. **Create the configuration file** in your test project (e.g. in test project root folder)
 2. **Ensure it's copied to the output directory** by adding the following to your `.csproj` file:
 
 ```xml
@@ -125,25 +125,14 @@ To use the configuration file, you must:
 </ItemGroup>
 ```
 
-Or if you place it in a subfolder:
-
-```xml
-<ItemGroup>
-  <None Update="TestAssets\coverlet.mtp.appsettings.json">
-    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-  </None>
-</ItemGroup>
-```
-
 > [!IMPORTANT]
 > The configuration file must be present in the **output directory** at runtime (next to the test assembly). If the file is not copied, coverlet.MTP will use default settings or command line options only.
 
 #### Configuration File Location
 
-Coverlet.MTP looks for the configuration file in the following location:
+The Microsoft Testing Platform configuration system loads configuration for the extension from the following location at runtime:
 - Same directory as the test assembly (output directory)
-
-The file must be named exactly `coverlet.mtp.appsettings.json`.
+Use the filename `coverlet.mtp.appsettings.json` in that location so the configuration can be discovered and its settings provided to `coverlet.MTP`.
 
 **Supported Configuration Keys:**
 
