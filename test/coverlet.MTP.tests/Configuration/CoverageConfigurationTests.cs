@@ -547,13 +547,13 @@ public sealed class CoverageConfigurationTests
   }
 
   [Fact]
-  public void SkipAutoPropsWhenOptionNotSetReturnsDefaultTrue()
+  public void SkipAutoPropsWhenOptionNotSetReturnsDefaultFalse()
   {
     _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.SkipAutoProps)).Returns(false);
 
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
 
-    Assert.True(config.SkipAutoProps);
+    Assert.False(config.SkipAutoProps);
   }
 
   [Fact]

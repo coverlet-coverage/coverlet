@@ -146,7 +146,7 @@ internal sealed class CoverageConfiguration
     GetBoolOptionWithDefault(CoverletOptionNames.IncludeTestAssembly, defaultValue: false);
 
   public bool SkipAutoProps =>
-    GetBoolOptionWithDefault(CoverletOptionNames.SkipAutoProps, defaultValue: true);
+    GetBoolOptionWithDefault(CoverletOptionNames.SkipAutoProps, defaultValue: false);
 
   public string[] GetDoesNotReturnAttributes()
   {

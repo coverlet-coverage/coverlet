@@ -86,7 +86,7 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-exclude-by-attribute <attribute>` | Exclude methods/classes decorated with attributes. Can be specified multiple times. User-specified attributes are merged with defaults. (default: `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`) |
 | `--coverlet-include-test-assembly` | Include test assembly in coverage. (default: `false`) |
 | `--coverlet-single-hit` | Limit the number of hits to one for each location. (default: `false`) |
-| `--coverlet-skip-auto-props` | Skip auto-implemented properties. (default: `true`) |
+| `--coverlet-skip-auto-props` | Skip auto-implemented properties. (default: `false`) |
 | `--coverlet-does-not-return-attribute <attribute>` | Attributes that mark methods as not returning. Can be specified multiple times. (default: `none`) |
 | `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. (default: `None`) |
 
