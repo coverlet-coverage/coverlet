@@ -26,8 +26,6 @@ Add the `coverlet.MTP` package to your test project:
 dotnet add package coverlet.MTP
 ```
 
-ToDo: Usage details
-
 A sample project file looks like:
 
 ```xml
@@ -112,6 +110,30 @@ When using the configuration file, only `[coverlet.*]*` is automatically prepend
 
 You can configure coverlet.MTP using a `coverlet.mtp.appsettings.json` file in your test project directory. This provides an alternative to command line options.
 
+#### Project Setup
+
+To use the configuration file, you must:
+
+1. **Create the configuration file** in your test project (e.g. in test project root folder)
+2. **Ensure it's copied to the output directory** by adding the following to your `.csproj` file:
+
+```xml
+<ItemGroup>
+  <None Update="coverlet.mtp.appsettings.json">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+```
+
+> [!IMPORTANT]
+> The configuration file must be present in the **output directory** at runtime (next to the test assembly). If the file is not copied, coverlet.MTP will use default settings or command line options only.
+
+#### Configuration File Location
+
+The Microsoft Testing Platform configuration system loads configuration for the extension from the following location at runtime:
+- Same directory as the test assembly (output directory)
+Use the filename `coverlet.mtp.appsettings.json` in that location so the configuration can be discovered and its settings provided to `coverlet.MTP`.
+
 **Supported Configuration Keys:**
 
 | Key | Type | Description |
@@ -154,6 +176,36 @@ You can configure coverlet.MTP using a `coverlet.mtp.appsettings.json` file in y
 > - The configuration section is named `Coverlet`. With `Microsoft.Extensions.Configuration`, keys are case-insensitive (so `Coverlet`, `coverlet`, etc. all work).
 > - Array values are specified as comma-separated strings, not JSON arrays.
 > - The default exclude filter `[coverlet.*]*` is always prepended to the `Exclude` value.
+
+#### Configuration Precedence
+
+When both command line options and configuration file settings are present, **command line options take precedence**. This allows you to override configuration file settings for specific test runs.
+
+#### Alternative: MSBuild Property for Command Line Arguments
+
+If you prefer to define coverlet options in your `.csproj` file and leverage MSBuild variables (like `$(AssemblyName)`), you can use the `TestingPlatformCommandLineArguments` property:
+
+```xml
+<PropertyGroup>
+  <!-- Pass coverlet options via MSBuild - allows using MSBuild variables -->
+  <TestingPlatformCommandLineArguments>--coverlet --coverlet-file-prefix $(AssemblyName) --coverlet-output-format opencover</TestingPlatformCommandLineArguments>
+</PropertyGroup>
+```
+
+This approach is useful when you want to:
+- Use MSBuild variables like `$(AssemblyName)`, `$(MSBuildProjectName)`, or `$(Configuration)`
+- Define configuration at the solution level via `Directory.Build.props`
+- Ensure each test project uses its assembly name as the file prefix automatically
+
+**Example `Directory.Build.props` for solution-wide configuration:**
+
+```xml
+<Project>
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <TestingPlatformCommandLineArguments>--coverlet --coverlet-file-prefix $(MSBuildProjectName)</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+</Project>
+```
 
 ### Examples
 
