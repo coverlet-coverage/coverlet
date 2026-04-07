@@ -233,7 +233,7 @@ public class ConfigurationFileTests
   ""Coverlet"": {
     ""Format"": ""cobertura"",
     ""ExcludeByAttribute"": ""GeneratedCode,ExcludeFromCodeCoverage,CustomExcludeAttribute"",
-    ""IncludeTestAssembly"": true
+    ""IncludeTestAssembly"": false
   }
 }");
     await BuildProject(testProject.SolutionPath);
@@ -302,7 +302,7 @@ public class ConfigurationFileTests
   ""Coverlet"": {
     ""Format"": ""cobertura"",
     ""ExcludeAssembliesWithoutSources"": ""None"",
-    ""IncludeTestAssembly"": true
+    ""IncludeTestAssembly"": false
   }
 }");
     await BuildProject(testProject.SolutionPath);
@@ -330,7 +330,7 @@ public class ConfigurationFileTests
     using var testProject = CreateTestProjectWithConfigFile(testName, configContent: @"{
   ""Coverlet"": {
     ""Format"": ""cobertura,json"",
-    ""IncludeTestAssembly"": true,
+    ""IncludeTestAssembly"": false,
     ""SingleHit"": true
   }
 }");
@@ -366,7 +366,7 @@ public class ConfigurationFileTests
     ""Exclude"": ""[*.Tests]*,[*.Generated]*"",
     ""ExcludeByAttribute"": ""GeneratedCode,ExcludeFromCodeCoverage"",
     ""Format"": ""cobertura,json"",
-    ""IncludeTestAssembly"": true
+    ""IncludeTestAssembly"": false
   }
 }");
     await BuildProject(testProject.SolutionPath);
@@ -394,7 +394,7 @@ public class ConfigurationFileTests
   ""Coverlet"": {
     ""Format"": ""cobertura"",
     ""DeterministicReport"": true,
-    ""IncludeTestAssembly"": true
+    ""IncludeTestAssembly"": false
   }
 }");
     await BuildProject(testProject.SolutionPath);
