@@ -11,6 +11,7 @@ internal sealed class CoverageConfiguration
 {
   private readonly ICommandLineOptions _commandLineOptions;
   private readonly ILogger? _logger;
+  private readonly CoverletMTPSettings? _configFileSettings;
 
   // Default exclusions for user convenience, to avoid common noise in coverage reports. These are merged with any user-specified exclusions.
   private static readonly string[] s_defaultExcludeFilters =
@@ -33,9 +34,25 @@ internal sealed class CoverageConfiguration
     "CompilerGeneratedAttribute"
   ];
 
+  /// <summary>
+  /// Initializes a new instance of CoverageConfiguration using only command-line options.
+  /// </summary>
   public CoverageConfiguration(ICommandLineOptions commandLineOptions, ILogger? logger = null)
+    : this(commandLineOptions, configFileSettings: null, logger)
+  {
+  }
+
+  /// <summary>
+  /// Initializes a new instance of CoverageConfiguration with both command-line options and config file settings.
+  /// Configuration precedence (highest to lowest):
+  /// 1. Explicit command-line options
+  /// 2. Configuration file settings (coverlet.mtp.appsettings.json)
+  /// 3. Built-in defaults
+  /// </summary>
+  public CoverageConfiguration(ICommandLineOptions commandLineOptions, CoverletMTPSettings? configFileSettings, ILogger? logger = null)
   {
     _commandLineOptions = commandLineOptions;
+    _configFileSettings = configFileSettings;
     _logger = logger;
   }
 
@@ -44,6 +61,7 @@ internal sealed class CoverageConfiguration
 
   public string[] GetOutputFormats()
   {
+    // Priority 1: Explicit command-line option
     if (_commandLineOptions.TryGetOptionArgumentList(
       CoverletOptionNames.Formats,
       out string[]? formats))
@@ -52,6 +70,14 @@ internal sealed class CoverageConfiguration
       return formats;
     }
 
+    // Priority 2: Configuration file setting
+    if (_configFileSettings?.ReportFormats is { Length: > 0 } configFormats)
+    {
+      LogOptionValue(CoverletOptionNames.Formats, configFormats, isExplicit: false, source: "config file");
+      return configFormats;
+    }
+
+    // Priority 3: Built-in default
     string[] defaultFormats = ["json", "cobertura"];
     LogOptionValue(CoverletOptionNames.Formats, defaultFormats, isExplicit: false);
     return defaultFormats;
@@ -59,6 +85,7 @@ internal sealed class CoverageConfiguration
 
   public string[] GetIncludeFilters()
   {
+    // Priority 1: Explicit command-line option
     if (_commandLineOptions.TryGetOptionArgumentList(
       CoverletOptionNames.Include,
       out string[]? filters))
@@ -67,11 +94,19 @@ internal sealed class CoverageConfiguration
       return filters;
     }
 
+    // Priority 2: Configuration file setting
+    if (_configFileSettings?.IncludeFilters is { Length: > 0 } configFilters)
+    {
+      LogOptionValue(CoverletOptionNames.Include, configFilters, isExplicit: false, source: "config file");
+      return configFilters;
+    }
+
     return [];
   }
 
   public string[] GetExcludeFilters()
   {
+    // Priority 1: Explicit command-line option
     if (_commandLineOptions.TryGetOptionArgumentList(
       CoverletOptionNames.Exclude,
       out string[]? filters))
@@ -82,12 +117,22 @@ internal sealed class CoverageConfiguration
       return merged;
     }
 
+    // Priority 2: Configuration file setting
+    // Config file filters already include [coverlet.*]* prepended by CoverletMTPSettingsParser
+    if (_configFileSettings?.ExcludeFilters is { Length: > 0 } configFilters)
+    {
+      LogOptionValue(CoverletOptionNames.Exclude, configFilters, isExplicit: false, source: "config file");
+      return configFilters;
+    }
+
+    // Priority 3: Built-in defaults
     LogOptionValue(CoverletOptionNames.Exclude, s_defaultExcludeFilters, isExplicit: false);
     return s_defaultExcludeFilters;
   }
 
   public string[] GetExcludeByFileFilters()
   {
+    // Priority 1: Explicit command-line option
     if (_commandLineOptions.TryGetOptionArgumentList(
       CoverletOptionNames.ExcludeByFile,
       out string[]? filters))
@@ -96,11 +141,19 @@ internal sealed class CoverageConfiguration
       return filters;
     }
 
+    // Priority 2: Configuration file setting
+    if (_configFileSettings?.ExcludeSourceFiles is { Length: > 0 } configFilters)
+    {
+      LogOptionValue(CoverletOptionNames.ExcludeByFile, configFilters, isExplicit: false, source: "config file");
+      return configFilters;
+    }
+
     return [];
   }
 
   public string[] GetExcludeByAttributeFilters()
   {
+    // Priority 1: Explicit command-line option
     if (_commandLineOptions.TryGetOptionArgumentList(
       CoverletOptionNames.ExcludeByAttribute,
       out string[]? filters))
@@ -111,12 +164,23 @@ internal sealed class CoverageConfiguration
       return merged;
     }
 
+    // Priority 2: Configuration file setting
+    if (_configFileSettings?.ExcludeAttributes is { Length: > 0 } configFilters)
+    {
+      // Merge with defaults to ensure essential attributes are always excluded
+      string[] merged = [.. s_defaultExcludeByAttributes.Concat(configFilters).Distinct()];
+      LogOptionValue(CoverletOptionNames.ExcludeByAttribute, merged, isExplicit: false, source: "config file");
+      return merged;
+    }
+
+    // Priority 3: Built-in defaults
     LogOptionValue(CoverletOptionNames.ExcludeByAttribute, s_defaultExcludeByAttributes, isExplicit: false);
     return s_defaultExcludeByAttributes;
   }
 
   public string GetExcludeAssembliesWithoutSources()
   {
+    // Priority 1: Explicit command-line option
     if (_commandLineOptions.TryGetOptionArgumentList(
       CoverletOptionNames.ExcludeAssembliesWithoutSources,
       out string[]? options))
@@ -124,10 +188,20 @@ internal sealed class CoverageConfiguration
       LogOptionValue(CoverletOptionNames.ExcludeAssembliesWithoutSources, options, isExplicit: true);
       return options[0];
     }
+
+    // Priority 2: Configuration file setting
+    if (!string.IsNullOrWhiteSpace(_configFileSettings?.ExcludeAssembliesWithoutSources))
+    {
+      LogOptionValue(CoverletOptionNames.ExcludeAssembliesWithoutSources, [_configFileSettings!.ExcludeAssembliesWithoutSources], isExplicit: false, source: "config file");
+      return _configFileSettings.ExcludeAssembliesWithoutSources;
+    }
+
     return "None";
   }
+
   public string[] GetIncludeDirectories()
   {
+    // Priority 1: Explicit command-line option
     if (_commandLineOptions.TryGetOptionArgumentList(
       CoverletOptionNames.IncludeDirectory,
       out string[]? directories))
@@ -136,26 +210,41 @@ internal sealed class CoverageConfiguration
       return directories;
     }
 
+    // Priority 2: Configuration file setting
+    if (_configFileSettings?.IncludeDirectories is { Length: > 0 } configDirs)
+    {
+      LogOptionValue(CoverletOptionNames.IncludeDirectory, configDirs, isExplicit: false, source: "config file");
+      return configDirs;
+    }
+
     return [];
   }
 
   public bool UseSingleHit =>
-    GetBoolOptionWithDefault(CoverletOptionNames.SingleHit, defaultValue: false);
+    GetBoolOptionWithDefault(CoverletOptionNames.SingleHit, _configFileSettings?.SingleHit ?? false);
 
   public bool IncludeTestAssembly =>
-    GetBoolOptionWithDefault(CoverletOptionNames.IncludeTestAssembly, defaultValue: false);
+    GetBoolOptionWithDefault(CoverletOptionNames.IncludeTestAssembly, _configFileSettings?.IncludeTestAssembly ?? false);
 
   public bool SkipAutoProps =>
-    GetBoolOptionWithDefault(CoverletOptionNames.SkipAutoProps, defaultValue: false);
+    GetBoolOptionWithDefault(CoverletOptionNames.SkipAutoProps, _configFileSettings?.SkipAutoProps ?? false);
 
   public string[] GetDoesNotReturnAttributes()
   {
+    // Priority 1: Explicit command-line option
     if (_commandLineOptions.TryGetOptionArgumentList(
       CoverletOptionNames.DoesNotReturnAttribute,
       out string[]? attributes))
     {
       LogOptionValue(CoverletOptionNames.DoesNotReturnAttribute, attributes, isExplicit: true);
       return attributes;
+    }
+
+    // Priority 2: Configuration file setting
+    if (_configFileSettings?.DoesNotReturnAttributes is { Length: > 0 } configAttrs)
+    {
+      LogOptionValue(CoverletOptionNames.DoesNotReturnAttribute, configAttrs, isExplicit: false, source: "config file");
+      return configAttrs;
     }
 
     return [];
@@ -167,6 +256,7 @@ internal sealed class CoverageConfiguration
   /// </summary>
   public string? GetFilePrefix()
   {
+    // Priority 1: Explicit command-line option
     if (_commandLineOptions.TryGetOptionArgumentList(
       CoverletOptionNames.FilePrefix,
       out string[]? prefix) && prefix.Length > 0)
@@ -182,8 +272,15 @@ internal sealed class CoverageConfiguration
       return trimmedPrefix;
     }
 
+    // Note: File prefix is not typically set via config file
     return null;
   }
+
+  /// <summary>
+  /// Gets whether to generate deterministic reports.
+  /// </summary>
+  public bool DeterministicReport =>
+    GetBoolOptionWithDefault("coverlet-deterministic-report", _configFileSettings?.DeterministicReport ?? false);
 
   /// <summary>
   /// Gets the test assembly path.
@@ -234,13 +331,22 @@ internal sealed class CoverageConfiguration
       return true;
     }
 
-    _logger?.LogDebug($"[Default] {optionName}: {defaultValue}");
+    // Check if config file has a non-default value
+    if (defaultValue)
+    {
+      _logger?.LogDebug($"[Config file] {optionName}: {defaultValue}");
+    }
+    else
+    {
+      _logger?.LogDebug($"[Default] {optionName}: {defaultValue}");
+    }
+
     return defaultValue;
   }
 
-  private void LogOptionValue(string optionName, string[] values, bool isExplicit)
+  private void LogOptionValue(string optionName, string[] values, bool isExplicit, string? source = null)
   {
-    string prefix = isExplicit ? "[Explicitly set]" : "[Default]";
+    string prefix = isExplicit ? "[Explicitly set]" : (source is not null ? $"[{source}]" : "[Default]");
     string valuesStr = values.Length == 0 ? "(empty)" : string.Join(", ", values);
     _logger?.LogDebug($"{prefix} {optionName}: {valuesStr}");
   }
