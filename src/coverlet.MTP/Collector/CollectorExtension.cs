@@ -14,6 +14,7 @@ using Coverlet.MTP.Configuration;
 using Coverlet.MTP.Diagnostics;
 using Coverlet.MTP.EnvironmentVariables;
 using Coverlet.MTP.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
@@ -110,8 +111,12 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
         return Task.CompletedTask;
       }
 
-      var config = new CoverageConfiguration(_commandLineOptions, _loggerFactory.CreateLogger(nameof(CollectorExtension)));
-      _configuration.DeterministicReport = false;
+      // Load configuration file settings (coverlet.mtp.appsettings.json)
+      CoverletMTPSettings? configFileSettings = LoadConfigurationFileSettings(_testModulePath!);
+
+      // Create merged configuration: command-line options take precedence over config file
+      var config = new CoverageConfiguration(_commandLineOptions, configFileSettings, _loggerFactory.CreateLogger(nameof(CollectorExtension)));
+      _configuration.DeterministicReport = config.DeterministicReport;
       _configuration.DisableManagedInstrumentationRestore = false;
       _configuration.DoesNotReturnAttributes = config.GetDoesNotReturnAttributes();
       _configuration.ExcludeAssembliesWithoutSources = config.GetExcludeAssembliesWithoutSources();
@@ -591,6 +596,49 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     }
 
     return null;
+  }
+
+  /// <summary>
+  /// Loads configuration file settings from coverlet.mtp.appsettings.json.
+  /// The config file is expected to be in the same directory as the test module.
+  /// </summary>
+  /// <param name="testModulePath">Path to the test assembly</param>
+  /// <returns>Parsed settings, or null if config file not found</returns>
+  private CoverletMTPSettings? LoadConfigurationFileSettings(string testModulePath)
+  {
+    try
+    {
+      string? directory = Path.GetDirectoryName(testModulePath);
+      if (string.IsNullOrEmpty(directory))
+      {
+        return null;
+      }
+
+      string configFilePath = Path.Combine(directory, CoverletMTPConstants.ConfigFileName);
+      if (!_fileSystem.Exists(configFilePath))
+      {
+        _logger.LogVerbose($"Configuration file not found: {configFilePath}");
+        return null;
+      }
+
+      _logger.LogInformation($"Loading configuration from: {configFilePath}");
+
+      // Build configuration from the JSON file using Microsoft.Extensions.Configuration
+      var configBuilder = new ConfigurationBuilder();
+      configBuilder.SetBasePath(directory);
+      configBuilder.AddJsonFile(CoverletMTPConstants.ConfigFileName, optional: true, reloadOnChange: false);
+      Microsoft.Extensions.Configuration.IConfiguration configuration = configBuilder.Build();
+
+      CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, testModulePath);
+      _logger.LogVerbose($"Configuration file settings loaded: Format={string.Join(",", settings.ReportFormats)}, IncludeTestAssembly={settings.IncludeTestAssembly}");
+
+      return settings;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogWarning($"Failed to load configuration file: {ex.Message}");
+      return null;
+    }
   }
 
   private ServiceProvider CreateServiceProvider(string testModule)

@@ -12,6 +12,7 @@ internal static class CoverletMTPConstants
   public const string DefaultReportFormat = "cobertura";
   public const string DefaultFileName = "coverage";
   public const string DefaultExcludeFilter = "[coverlet.*]*";
+  public const string ConfigFileName = "coverlet.mtp.appsettings.json";
 
   // Configuration keys for IConfiguration binding
   public const string ConfigSectionName = "Coverlet";
