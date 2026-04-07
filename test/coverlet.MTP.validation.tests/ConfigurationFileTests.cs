@@ -338,20 +338,33 @@ public class ConfigurationFileTests
 
   private TestProjectInfo CreateTestProjectWithConfigFile(string testName, string configContent)
   {
+    // Use a unique subfolder per test to avoid file lock conflicts with other tests
+    // Do NOT delete the parent temp directory as it may contain files locked by other processes
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
-    if (Directory.Exists(artifactsTemp))
-    {
-      Directory.Delete(artifactsTemp, recursive: true);
-    }
     Directory.CreateDirectory(artifactsTemp);
 
     string sanitizedTestName = SanitizePathName(testName);
-    string solutionPath = Path.Combine(artifactsTemp, $"MTP_Config_{sanitizedTestName}");
+    // Add timestamp to ensure uniqueness and avoid conflicts with parallel test runs
+    string uniqueSuffix = $"{DateTime.Now:yyyyMMddHHmmssfff}_{Environment.ProcessId}";
+    string solutionPath = Path.Combine(artifactsTemp, $"MTP_Config_{sanitizedTestName}_{uniqueSuffix}");
 
+    // Only try to delete the specific test folder, not the entire temp directory
     if (Directory.Exists(solutionPath))
     {
-      try { Directory.Delete(solutionPath, recursive: true); }
-      catch (IOException) { solutionPath = Path.Combine(artifactsTemp, $"MTP_Config_{sanitizedTestName}_{DateTime.Now:HHmmss}"); }
+      try
+      {
+        Directory.Delete(solutionPath, recursive: true);
+      }
+      catch (IOException)
+      {
+        // If deletion fails, use an alternative path
+        solutionPath = Path.Combine(artifactsTemp, $"MTP_Config_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
+      }
+      catch (UnauthorizedAccessException)
+      {
+        // If files are locked, use an alternative path
+        solutionPath = Path.Combine(artifactsTemp, $"MTP_Config_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
+      }
     }
 
     Directory.CreateDirectory(solutionPath);
