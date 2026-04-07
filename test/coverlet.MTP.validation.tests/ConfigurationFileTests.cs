@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Xunit;
@@ -97,6 +98,7 @@ public class ConfigurationFileTests
   [Fact]
   public async Task ConfigurationFile_Format_CanBeChangedViaConfig()
   {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     // Arrange
     string testName = TestContext.Current.TestCase!.TestMethodName!;
     using var testProject = CreateTestProjectWithConfigFile(testName, configContent: @"{
@@ -296,6 +298,7 @@ public class ConfigurationFileTests
   [Fact]
   public async Task ConfigurationFile_ExcludeAssembliesWithoutSources_CanBeConfigured()
   {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     // Arrange
     string testName = TestContext.Current.TestCase!.TestMethodName!;
     using var testProject = CreateTestProjectWithConfigFile(testName, configContent: @"{
