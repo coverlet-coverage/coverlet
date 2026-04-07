@@ -623,10 +623,13 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
       _logger.LogInformation($"Loading configuration from: {configFilePath}");
 
-      // Build configuration from the JSON file using Microsoft.Extensions.Configuration
+      // Read file content via IFileSystem to honor the abstraction end-to-end (enables unit testing/mocking)
+      string jsonContent = _fileSystem.ReadAllText(configFilePath);
+
+      // Build configuration from the JSON content using a MemoryStream
       var configBuilder = new ConfigurationBuilder();
-      configBuilder.SetBasePath(directory);
-      configBuilder.AddJsonFile(CoverletMTPConstants.ConfigFileName, optional: true, reloadOnChange: false);
+      using var stream = new MemoryStream(Encoding.UTF8.GetBytes(jsonContent));
+      configBuilder.AddJsonStream(stream);
       Microsoft.Extensions.Configuration.IConfiguration configuration = configBuilder.Build();
 
       CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, testModulePath);
@@ -636,7 +639,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     }
     catch (Exception ex)
     {
-      _logger.LogWarning($"Failed to load configuration file: {ex.Message}");
+      _logger.LogWarning($"Failed to load configuration file '{CoverletMTPConstants.ConfigFileName}': {ex}");
       return null;
     }
   }

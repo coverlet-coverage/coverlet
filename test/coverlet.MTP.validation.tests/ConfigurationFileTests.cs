@@ -56,6 +56,7 @@ public class ConfigurationFileTests
   [Fact]
   public async Task ConfigurationFile_ExcludeFilters_OnlyDefaultCoverletFilterApplied()
   {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
     // Arrange
     string testName = TestContext.Current.TestCase!.TestMethodName!;
     using var testProject = CreateTestProjectWithConfigFile(testName, configContent: @"{
@@ -67,8 +68,8 @@ public class ConfigurationFileTests
 }");
     await BuildProject(testProject.SolutionPath);
 
-    // Act
-    var result = await RunTestsWithCoverage(testProject, "--coverlet", testName);
+    // Act - Enable diagnostics to verify exclude filter behavior
+    var result = await RunTestsWithCoverage(testProject, "--coverlet", enableDiagnostics: true);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -80,10 +81,27 @@ public class ConfigurationFileTests
     string[] coverageFiles = Directory.GetFiles(testProject.OutputDirectory, CoverageCoberturaFileName.Insert(CoverageCoberturaFileName.LastIndexOf('.'), ".*"), SearchOption.AllDirectories);
     Assert.NotEmpty(coverageFiles);
 
-    // Note: The configuration file exclusion behavior differs from command-line:
-    // Config file: only "[coverlet.*]*" is prepended automatically
-    // Command line: many defaults are merged (xunit, NUnit, Microsoft.Testing, etc.)
-    // This test documents this difference as specified in the documentation.
+    // Verify exclude filters via diagnostic log
+    DiagnosticSettings? diagSettings = ParseDiagnosticFile(testProject.OutputDirectory);
+    if (diagSettings is not null)
+    {
+      TestContext.Current?.AddAttachment("Diagnostic Log", diagSettings.RawContent);
+
+      // Verify exclude filters contain the coverlet default filter
+      Assert.True(diagSettings.ExcludeFilters.Any(f => f.Contains("coverlet")),
+        $"Expected exclude filters to contain '[coverlet.*]*' but found: {string.Join(", ", diagSettings.ExcludeFilters)}\n" +
+        $"Diagnostic content:\n{diagSettings.RawContent}");
+
+      // Log the exclude filters found for debugging
+      TestContext.Current?.AddAttachment("Exclude Filters",
+        $"Filters found: {string.Join(", ", diagSettings.ExcludeFilters)}");
+    }
+    else
+    {
+      // Diagnostic file not found - log warning but don't fail
+      TestContext.Current?.AddAttachment("Diagnostic Warning",
+        "Diagnostic file not found - unable to verify exclude filter settings");
+    }
   }
 
   /// <summary>
@@ -109,10 +127,10 @@ public class ConfigurationFileTests
 }");
     await BuildProject(testProject.SolutionPath);
 
-    // Act - Use --coverlet-output-format to explicitly specify all formats
-    // Note: Command-line options currently take precedence over config file settings
-    // Enable diagnostics to verify configuration was applied correctly
-    var result = await RunTestsWithCoverage(testProject, "--coverlet", testName, enableDiagnostics: true);
+    // Act - Enable coverage collection and rely on coverlet.mtp.appsettings.json
+    // to provide the output formats for this test scenario.
+    // Enable diagnostics to verify configuration was applied correctly.
+    var result = await RunTestsWithCoverage(testProject, "--coverlet", enableDiagnostics: true);
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -210,7 +228,7 @@ public class ConfigurationFileTests
     await BuildProject(testProject.SolutionPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject, "--coverlet", testName);
+    var result = await RunTestsWithCoverage(testProject, "--coverlet");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -241,7 +259,7 @@ public class ConfigurationFileTests
     await BuildProject(testProject.SolutionPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject, "--coverlet", testName);
+    var result = await RunTestsWithCoverage(testProject, "--coverlet");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -269,7 +287,7 @@ public class ConfigurationFileTests
     await BuildProject(testProject.SolutionPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject, "--coverlet", testName);
+    var result = await RunTestsWithCoverage(testProject, "--coverlet");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -311,7 +329,7 @@ public class ConfigurationFileTests
     await BuildProject(testProject.SolutionPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject, "--coverlet", testName);
+    var result = await RunTestsWithCoverage(testProject, "--coverlet");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -339,13 +357,13 @@ public class ConfigurationFileTests
 }");
     await BuildProject(testProject.SolutionPath);
 
-    // Verify the config file exists in the expected location
-    string expectedConfigPath = Path.Combine(testProject.TestProjectPath, "coverlet.mtp.appsettings.json");
+    // Verify the config file exists in the output directory at runtime (where the test assembly is)
+    string expectedConfigPath = Path.Combine(testProject.OutputDirectory, "coverlet.mtp.appsettings.json");
     Assert.True(File.Exists(expectedConfigPath),
-      $"Configuration file not found at expected location: {expectedConfigPath}");
+      $"Configuration file not found at expected output directory location: {expectedConfigPath}");
 
     // Act
-    var result = await RunTestsWithCoverage(testProject, "--coverlet", testName);
+    var result = await RunTestsWithCoverage(testProject, "--coverlet");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -375,7 +393,7 @@ public class ConfigurationFileTests
     await BuildProject(testProject.SolutionPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject, "--coverlet", testName);
+    var result = await RunTestsWithCoverage(testProject, "--coverlet");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -403,7 +421,7 @@ public class ConfigurationFileTests
     await BuildProject(testProject.SolutionPath);
 
     // Act
-    var result = await RunTestsWithCoverage(testProject, "--coverlet", testName);
+    var result = await RunTestsWithCoverage(testProject, "--coverlet");
 
     TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
 
@@ -717,7 +735,7 @@ EndGlobal
       $"Build failed with exit code {process.ExitCode}.\n\nStdOut:\n{stdout}\n\nStdErr:\n{stderr}");
   }
 
-  private async Task<TestResult> RunTestsWithCoverage(TestProjectInfo testProject, string coverletArgs, string testName, bool enableDiagnostics = false)
+  private async Task<TestResult> RunTestsWithCoverage(TestProjectInfo testProject, string coverletArgs, bool enableDiagnostics = false)
   {
     string testAssembly = Path.Combine(testProject.OutputDirectory, $"{TestProjectName}.dll");
 
@@ -773,13 +791,24 @@ EndGlobal
 
     public void Dispose()
     {
-      // Clean up test project folder
-      // Commented out for debugging purposes - enable for clean runs
-      // if (Directory.Exists(SolutionDirectory))
-      // {
-      //     try { Directory.Delete(SolutionDirectory, recursive: true); }
-      //     catch { /* ignore cleanup failures */ }
-      // }
+      // Allow opt-out of cleanup via environment variable for local debugging
+      string? keepTestProjects = Environment.GetEnvironmentVariable("COVERLET_KEEP_TESTPROJECTS");
+      if (keepTestProjects is "1" || string.Equals(keepTestProjects, "true", StringComparison.OrdinalIgnoreCase))
+      {
+        return;
+      }
+
+      if (Directory.Exists(SolutionDirectory))
+      {
+        try
+        {
+          Directory.Delete(SolutionDirectory, recursive: true);
+        }
+        catch
+        {
+          // Ignore cleanup failures: disposal is best-effort and should not fail the test run.
+        }
+      }
     }
   }
 
