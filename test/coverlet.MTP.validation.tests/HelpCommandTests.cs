@@ -45,7 +45,7 @@ public class HelpCommandTests
 
     // Get repository root
     _repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
-    _localPackagesPath = Path.Combine(_repoRoot, "artifacts", "packages", _buildConfiguration.ToLowerInvariant(), "Shipping");
+    _localPackagesPath = Path.Combine(_repoRoot, "artifacts", "package", _buildConfiguration.ToLowerInvariant());
 
     _projectOutputPath = Path.Combine(_repoRoot, "artifacts", "bin", s_projectName, _buildConfiguration.ToLowerInvariant()); 
 
