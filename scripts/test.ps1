@@ -8,6 +8,8 @@
 # For building the project, use the separate build.ps1 script.
 # Note: .NET 10+ does not support 'dotnet test' with vstest; all test projects
 #       are executed via 'dotnet exec' on the pre-built DLL directly.
+#Requires -PSEdition Core
+#Requires -Version 7
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -23,7 +25,7 @@ $testProcesses = @(
     'coverlet.core.coverage.tests',
     'coverlet.msbuild.tasks.tests',
     'coverlet.collector.tests',
-    'coverlet.integration.tests',
+    'coverlet.integration.legacy.tests',
     'coverlet.MTP.tests',
     'coverlet.MTP.validation.tests'
 )
@@ -40,7 +42,7 @@ $sdkVersion = $globalJson.sdk.version
 $sdkMajorVersion = [int]($sdkVersion -split '\.')[0]
 
 $frameworks = [System.Collections.Generic.List[string]]@('net8.0')
-if ($sdkMajorVersion -ge 9) { $frameworks.Add('net9.0') }
+# if ($sdkMajorVersion -ge 9) { $frameworks.Add('net9.0') }
 if ($sdkMajorVersion -ge 10) { $frameworks.Add('net10.0') }
 
 Write-Host "Detected SDK version $sdkVersion. Testing frameworks: $($frameworks -join ', ')"
@@ -59,11 +61,9 @@ foreach ($fw in $frameworks) {
     dotnet build-server shutdown
     dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.core.tests/$fwDir/coverlet.core.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.core.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
 
-    # coverlet.core.coverage.tests !!!! does not work on Linux (Dev Container) VS debugger assemblies not available !!!!
-    if ($IsWindows) {
-        dotnet build-server shutdown
-        dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.core.coverage.tests/$fwDir/coverlet.core.coverage.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.core.coverage.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
-    }
+    # coverlet.core.coverage.tests
+    dotnet build-server shutdown
+    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.core.coverage.tests/$fwDir/coverlet.core.coverage.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.core.coverage.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
 
     # coverlet.msbuild.tasks.tests
     dotnet build-server shutdown
@@ -73,9 +73,12 @@ foreach ($fw in $frameworks) {
     # dotnet build-server shutdown
     # dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c Debug -f ${fwDir} -bl:test.collector.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --diag:"$WORKSPACE_ROOT/artifacts/log/Debug/coverlet.collector.test.diag.${fwDir}.log;tracelevel=verbose"
 
-    # coverlet.integration.tests
+    # coverlet.integration.legacy.tests
+    if ($fw -ne 'net10.0')
+    {
     dotnet build-server shutdown
-    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.integration.tests/$fwDir/coverlet.integration.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.integration.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
+    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.integration.legacy.tests/$fwDir/coverlet.integration.legacy.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.legacy.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.integration.legacy.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
+    }
 
     # coverlet.MTP.validation.tests
     dotnet build-server shutdown

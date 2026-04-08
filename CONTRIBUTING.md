@@ -47,3 +47,78 @@ Change to the directory of the library and run the msbuild code coverage command
 To run with a development version of coverlet call `dotnet run` instead of the installed coverlet version, e.g.:
 
     dotnet test /p:Coverage=true /p:CoverageExecutablePath="dotnet run -p C:\...\coverlet\src\coverlet.console\coverlet.console.csproj"
+
+## Debugging of Tests in a Separate Process for coverlet.core.coverage.tests
+
+The `coverlet.core.coverage.tests` project uses a custom infrastructure for running certain tests in isolated processes. This is necessary for code coverage instrumentation tests that require complete process isolation.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     Test Execution Flow                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────┐      ┌─────────────────────────────────────┐  │
+│  │  Test Runner │      │           Program.cs                │  │
+│  │  (VS / CLI)  │─────>│  Entry Point                        │  │
+│  └──────────────┘      └──────────────┬──────────────────────┘  │
+│                                       │                         │
+│                    ┌──────────────────┴──────────────────┐      │
+│                    │                                     │      │
+│                    ▼                                     ▼      │
+│  ┌─────────────────────────────┐    ┌────────────────────────┐  │
+│  │  ProcessExecutor.TryExecute │    │  Normal Test Execution │  │
+│  │  (Child Process Mode)       │    │  (xUnit / MTP)         │  │
+│  │  --exec-method args         │    │                        │  │
+│  └─────────────────────────────┘    └────────────────────────┘  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Usage:
+
+**PowerShell:**
+
+```pwsh
+$env:COVERLET_DEBUG_CHILD_PROCESS = "1"
+dotnet test --filter "FullyQualifiedName~YourTestName"
+```
+
+**Command Prompt:**
+
+```cmd
+set COVERLET_DEBUG_CHILD_PROCESS=1
+dotnet test --filter "FullyQualifiedName~YourTestName"
+```
+
+**Visual Studio launchSettings.json:**
+
+```json
+{
+  "profiles": {
+    "Debug Child Process": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "COVERLET_DEBUG_CHILD_PROCESS": "1"
+      }
+    }
+  }
+}
+```
+
+### Quick Reference Commands
+
+```pwsh
+# Enable child process debugging
+$env:COVERLET_DEBUG_CHILD_PROCESS = "1"
+
+# Run specific test with debugging enabled
+dotnet test --filter "FullyQualifiedName~Coverage_SkippedInstrumentedMethod"
+
+# Disable debugging
+$env:COVERLET_DEBUG_CHILD_PROCESS = $null
+
+# Run all coverage tests from CLI (skips VS-problematic tests)
+dotnet test test/coverlet.core.coverage.tests/
+```

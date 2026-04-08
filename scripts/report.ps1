@@ -20,4 +20,4 @@ Set-Location $WorkspaceRoot
 
 dotnet tool restore --add-source https://api.nuget.org/v3/index.json
 dotnet tool list
-dotnet reportgenerator "-reports:$WorkspaceRoot/test/**/*.cobertura.xml" "-targetdir:$WorkspaceRoot/artifacts/CoverageReport" '-reporttypes:HtmlInline_AzurePipelines;Cobertura;Markdown' '-assemblyfilters:-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverletsamplelib.integration.template;-coverlet.tests.utils;-coverletsample.integration.determisticbuild' -verbosity:Verbose
+dotnet reportgenerator "-reports:$WorkspaceRoot/test/**/*.coverage.cobertura.xml" "-targetdir:$WorkspaceRoot/artifacts/CoverageReport" '-reporttypes:HtmlInline_AzurePipelines;Cobertura;Markdown' '-assemblyfilters:-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverletsamplelib.integration.template;-coverlet.tests.utils;-coverletsample.integration.determisticbuild' -verbosity:Verbose
