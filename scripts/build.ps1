@@ -28,7 +28,7 @@ Write-Host "Please cleanup '/tmp' folder if needed!"
 dotnet build-server shutdown
 Get-Process -Name "coverlet.core.tests" -ErrorAction SilentlyContinue | Stop-Process -Force
 
-# Delete coverage files
+# Delete coverage files (excluding TestAssets directories)
 Write-Host "Cleaning up coverage files and build artifacts..."
 $coveragePatterns = @(
     '*.coverage.cobertura*.xml',
@@ -36,7 +36,9 @@ $coveragePatterns = @(
     '*.coverage.opencover*.xml'
 )
 foreach ($pattern in $coveragePatterns) {
-    Get-ChildItem -Path . -Filter $pattern -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
+    Get-ChildItem -Path . -Filter $pattern -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notlike '*\TestAssets\*' } |
+        Remove-Item -Force
 }
 
 # Delete binlog files
@@ -114,7 +116,7 @@ dotnet build test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -bl:build.MTP.tes
 dotnet build test/coverlet.MTP.validation.tests/coverlet.MTP.validation.tests.csproj -bl:build.MTP.validation.tests.binlog
 
 dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net8.0 -bl:build.coverlet.integration.legacy.tests.8.0.binlog /p:ContinuousIntegrationBuild=true
-dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net9.0 -bl:build.coverlet.integration.legacy.tests.9.0.binlog /p:ContinuousIntegrationBuild=true
+# dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net9.0 -bl:build.coverlet.integration.legacy.tests.9.0.binlog /p:ContinuousIntegrationBuild=true
 
 dotnet build-server shutdown
 

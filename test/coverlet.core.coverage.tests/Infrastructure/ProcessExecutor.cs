@@ -123,7 +123,22 @@ public static class ProcessExecutor
     {
       Console.WriteLine($"[DEBUG] Child process started. PID: {Environment.ProcessId}");
       Console.WriteLine($"[DEBUG] Executing: {args[1]}.{args[2]}");
-      Debugger.Launch();
+
+      if (!Debugger.IsAttached)
+      {
+        try
+        {
+          bool debuggerLaunched = Debugger.Launch();
+          if (!debuggerLaunched)
+          {
+            Console.WriteLine("[DEBUG] Debugger launch was declined or unavailable. Continuing execution.");
+          }
+        }
+        catch (Exception ex)
+        {
+          Console.WriteLine($"[DEBUG] Failed to launch debugger: {ex.Message}. Continuing execution.");
+        }
+      }
     }
 
     string typeName = args[1];
