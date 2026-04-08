@@ -11,6 +11,8 @@
 #
 # Note: Ensure that the .NET SDK is installed and available in the system PATH.
 # For running tests, use the separate test.ps1 script.
+#Requires -PSEdition Core
+#Requires -Version 7
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -26,21 +28,17 @@ Write-Host "Please cleanup '/tmp' folder if needed!"
 dotnet build-server shutdown
 Get-Process -Name "coverlet.core.tests" -ErrorAction SilentlyContinue | Stop-Process -Force
 
-# Delete coverage files
+# Delete coverage files (excluding TestAssets directories)
 Write-Host "Cleaning up coverage files and build artifacts..."
 $coveragePatterns = @(
-    'coverage.cobertura.xml',
-    'coverage.json',
-    'coverage.net8.0.json',
-    'coverage.net9.0.json',
-    'coverage.net10.0.json',
-    'coverage.opencover.xml',
-    'coverage.net8.0.opencover.xml',
-    'coverage.net9.0.opencover.xml',
-    'coverage.net10.0.opencover.xml'
+    '*.coverage.cobertura*.xml',
+    '*.coverage*.json',
+    '*.coverage.opencover*.xml'
 )
 foreach ($pattern in $coveragePatterns) {
-    Get-ChildItem -Path . -Filter $pattern -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
+    Get-ChildItem -Path . -Filter $pattern -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notlike '*\TestAssets\*' } |
+        Remove-Item -Force
 }
 
 # Delete binlog files
@@ -52,10 +50,10 @@ if (Test-Path 'artifacts') {
 }
 
 # Clean up local NuGet packages
-$nugetPackagesRoot = Join-Path $HOME '.nuget' 'packages'
+$nugetPackagesRoot = (Join-Path (Join-Path $HOME  '.nuget') 'packages')
 $nugetCleanPaths = @(
-    (Join-Path $nugetPackagesRoot 'coverlet.msbuild' 'V1.0.0'),
-    (Join-Path $nugetPackagesRoot 'coverlet.collector' 'V1.0.0')
+    (Join-Path (Join-Path $nugetPackagesRoot 'coverlet.msbuild') 'V1.0.0'),
+    (Join-Path (Join-Path $nugetPackagesRoot 'coverlet.collector') 'V1.0.0')
 )
 foreach ($path in $nugetCleanPaths) {
     if (Test-Path $path) {
@@ -112,26 +110,13 @@ dotnet pack src/coverlet.MTP/coverlet.MTP.csproj
 dotnet build test/coverlet.tests.utils/coverlet.tests.utils.csproj
 dotnet build test/coverlet.collector.tests/coverlet.collector.tests.csproj -bl:build.collector.tests.binlog
 dotnet build test/coverlet.core.tests/coverlet.core.tests.csproj -bl:build.coverlet.core.tests.binlog
-# coverlet.core.coverage.tests !!!! does not build on Linux (Dev Container) VS debugger assemblies not available !!!!
-if ($IsWindows) {
-    dotnet build test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -bl:build.core.coverage.tests.binlog
-}
+dotnet build test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -bl:build.core.coverage.tests.binlog
 dotnet build test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -bl:build.coverlet.msbuild.tasks.tests.binlog
 dotnet build test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -bl:build.MTP.tests.binlog
 dotnet build test/coverlet.MTP.validation.tests/coverlet.MTP.validation.tests.csproj -bl:build.MTP.validation.tests.binlog
 
-# Get the SDK version from global.json
-$globalJson = Get-Content -Path 'global.json' -Raw | ConvertFrom-Json
-$sdkVersion = $globalJson.sdk.version
-$sdkMajorVersion = [int]($sdkVersion -split '\.')[0]
-
 dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net8.0 -bl:build.coverlet.integration.legacy.tests.8.0.binlog /p:ContinuousIntegrationBuild=true
-# Check if the SDK version is 10.0.* or higher (10.0.*, 11.0.*, etc.)
-if ($sdkMajorVersion -ge 10) {
-    Write-Host "Executing command for SDK version $sdkVersion (10.0+ detected)..."
-    # dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net9.0 -bl:build.coverlet.integration.legacy.tests.9.0.binlog /p:ContinuousIntegrationBuild=true
-    dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net10.0 -bl:build.coverlet.integration.legacy.tests.10.0.binlog /p:ContinuousIntegrationBuild=true
-}
+# dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net9.0 -bl:build.coverlet.integration.legacy.tests.9.0.binlog /p:ContinuousIntegrationBuild=true
 
 dotnet build-server shutdown
 

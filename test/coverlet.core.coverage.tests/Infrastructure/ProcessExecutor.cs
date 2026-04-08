@@ -116,6 +116,31 @@ public static class ProcessExecutor
       return false;
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // DEBUG SUPPORT: Set COVERLET_DEBUG_CHILD_PROCESS=1 to debug
+    // ═══════════════════════════════════════════════════════════════
+    if (Environment.GetEnvironmentVariable("COVERLET_DEBUG_CHILD_PROCESS") == "1")
+    {
+      Console.WriteLine($"[DEBUG] Child process started. PID: {Environment.ProcessId}");
+      Console.WriteLine($"[DEBUG] Executing: {args[1]}.{args[2]}");
+
+      if (!Debugger.IsAttached)
+      {
+        try
+        {
+          bool debuggerLaunched = Debugger.Launch();
+          if (!debuggerLaunched)
+          {
+            Console.WriteLine("[DEBUG] Debugger launch was declined or unavailable. Continuing execution.");
+          }
+        }
+        catch (Exception ex)
+        {
+          Console.WriteLine($"[DEBUG] Failed to launch debugger: {ex.Message}. Continuing execution.");
+        }
+      }
+    }
+
     string typeName = args[1];
     string methodName = args[2];
     string[] methodArgs = args.Length > 3 ? args[3..] : Array.Empty<string>();
