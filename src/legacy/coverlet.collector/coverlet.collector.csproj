@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>$(NetMinimum);$(NetCurrent)</TargetFrameworks>
     <TargetFrameworks Condition="'$(LEGACY)' == ''">$(NetMinimum);net9.0;$(NetCurrent)</TargetFrameworks>
     <TargetFrameworks Condition="'$(LEGACY)' != ''">$(NetMinimum);$(NetCurrent)</TargetFrameworks>
     <AssemblyTitle>coverlet.collector</AssemblyTitle>
