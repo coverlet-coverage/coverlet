@@ -932,7 +932,11 @@ namespace Coverlet.Core.Instrumentation
       // Use HasBody check as accessing Body can throw for some method types.
       if (!methodDefinition.HasBody) yield break;
 
-      foreach (Instruction instruction in methodDefinition.Body.Instructions.ToList())
+      MethodBody body = GetMethodBody(methodDefinition);
+
+      if (body is null) yield break;
+
+      foreach (Instruction instruction in body.Instructions.ToList())
       {
         // Use null-conditional operator for mr.Name as some MethodReferences may have null names
         if (instruction.OpCode == OpCodes.Ldftn && instruction.Operand is MethodReference mr &&
