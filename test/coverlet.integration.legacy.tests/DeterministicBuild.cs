@@ -109,7 +109,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Msbuild()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
       CreateDeterministicTestPropsFile();
@@ -157,7 +159,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Msbuild_SourceLink()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
       CreateDeterministicTestPropsFile();
@@ -206,7 +210,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Collectors()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
       string testLogFilesPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}", "log");
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";
@@ -264,7 +270,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Collectors_SourceLink()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       string testResultPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}");
       string testLogFilesPath = Path.Join(_testResultsPath, $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}", "log");
       string logFilename = $"{TestContext.Current.TestClass?.TestClassName}.{TestContext.Current.TestMethod?.MethodName}.binlog";

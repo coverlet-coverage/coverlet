@@ -31,7 +31,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -54,7 +56,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_NoCoverletOutput_Folder()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -77,7 +81,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameWithoutExtension()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -100,7 +106,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameExtension()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       Assert.Equal(0, DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError));
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
@@ -113,7 +121,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameExtension_SpecifyFramework()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string[] targetFrameworks = [_buildTargetFramework];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
@@ -139,7 +149,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameWithDoubleExtension()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
@@ -161,7 +173,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_NoCoverletOutput()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
@@ -190,7 +204,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
@@ -221,7 +237,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithoutExtension()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
@@ -250,7 +268,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension_SpecifyFramework()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
@@ -290,7 +310,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
@@ -319,7 +341,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithDoubleExtension()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
