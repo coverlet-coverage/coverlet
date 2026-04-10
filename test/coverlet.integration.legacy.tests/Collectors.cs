@@ -79,7 +79,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestVsTest_Test()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
@@ -101,7 +103,9 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestVsTest_Test_Settings()
     {
-      // This test requires VSTest mode which is only available on .NET 8/9
+      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
+      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
       int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError);
