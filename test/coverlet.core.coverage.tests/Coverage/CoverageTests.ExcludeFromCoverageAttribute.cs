@@ -337,5 +337,53 @@ namespace Coverlet.CoreCoverage.Tests
         File.Delete(path);
       }
     }
+
+    /// <summary>
+    /// Regression test for issue #1762: Instrumentation should not throw when processing
+    /// methods without IL bodies (e.g., extern methods from DllImport/LibraryImport) that
+    /// are marked with ExcludeFromCodeCoverage attribute.
+    /// The fix ensures CollectLambdaMethodsInsideLocalFunction safely handles methods
+    /// where HasBody is false.
+    /// </summary>
+    [Fact]
+    public void ExcludeFromCodeCoverage_NativeInteropMethods_Issue1762()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          // This should NOT throw NullReferenceException when instrumenting
+          // the assembly containing extern methods with ExcludeFromCodeCoverage
+          CoveragePrepareResult coveragePrepareResult =
+            await TestInstrumentationHelper.Run<MethodsWithExcludeFromCodeCoverageAttr_NativeInterop>(instance =>
+              {
+                // Call regular methods to verify instrumentation works
+                int result = instance.Test(5);
+                Assert.Equal(16, result); // (5+1) + (5+5) = 6 + 10 = 16
+                return Task.CompletedTask;
+              },
+              persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        // Verify that regular methods are instrumented correctly
+        // and excluded methods (including extern methods) are not instrumented
+        // Line numbers reference Instrumentation.ExcludeFromCoverage.NativeInterop.cs:
+        // - Lines 20, 56, 64: return statements in regular methods (should be covered)
+        // - Lines 30, 34, 35: excluded local function with lambda (should not be instrumented)
+        TestInstrumentationHelper.GetCoverageResult(path)
+          .Document("Instrumentation.ExcludeFromCoverage.NativeInterop.cs")
+          // Regular methods should be covered (return statements)
+          .AssertLinesCovered(BuildConfiguration.Debug, (20, 1), (56, 1), (64, 1))
+          // Excluded local function with lambda should not be instrumented
+          .AssertNonInstrumentedLines(BuildConfiguration.Debug, 30, 34, 35);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
   }
 }

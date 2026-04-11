@@ -928,10 +928,19 @@ namespace Coverlet.Core.Instrumentation
     {
       if (!methodDefinition.Name.Contains(">g__")) yield break;
 
-      foreach (Instruction instruction in methodDefinition.Body.Instructions.ToList())
+      // Fix issue #1762: Methods using LibraryImport/DllImport have no body.
+      // Use HasBody check as accessing Body can throw for some method types.
+      if (!methodDefinition.HasBody) yield break;
+
+      MethodBody body = GetMethodBody(methodDefinition);
+
+      if (body is null) yield break;
+
+      foreach (Instruction instruction in body.Instructions.ToList())
       {
+        // Use null-conditional operator for mr.Name as some MethodReferences may have null names
         if (instruction.OpCode == OpCodes.Ldftn && instruction.Operand is MethodReference mr &&
-            mr.Name.Contains(">b__"))
+            mr.Name?.Contains(">b__") == true)
         {
           yield return mr.FullName;
         }
