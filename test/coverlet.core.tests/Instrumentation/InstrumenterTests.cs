@@ -16,6 +16,7 @@ using Coverlet.Tests.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.VisualStudio.TestPlatform;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -673,6 +674,53 @@ public class SampleClass
       // The deprecated version is not available and replaced by actual published .NET runtime versions. Minimal supported version is 6.0.0.
       AssemblyDefinition asm = netstandardResolver.TryWithCustomResolverOnDotNetCore(new AssemblyNameReference("Microsoft.Extensions.Logging.Abstractions", new Version("2.2.0")));
       Assert.NotNull(asm);
+    }
+
+    [Fact]
+    public void TestInstrument_NetstandardAwareAssemblyResolver_SiblingRuntimeConfigCanResolveSharedFrameworkAssembly()
+    {
+      string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+      Directory.CreateDirectory(tempDirectory);
+      try
+      {
+        string modulePath = Path.Combine(tempDirectory, "copied.project.reference.dll");
+
+        string runtimeVersion = new DirectoryInfo(Path.GetDirectoryName(typeof(object).Assembly.Location)!).Name;
+        var runtimeVersionParts = Version.Parse(runtimeVersion);
+        string runtimeConfigFile = Path.Combine(tempDirectory, "testhost.runtimeconfig.json");
+        File.WriteAllText(runtimeConfigFile,
+            "{\n" +
+            "  \"runtimeOptions\": {\n" +
+            $"    \"tfm\": \"net{runtimeVersionParts.Major}.{runtimeVersionParts.Minor}\",\n" +
+            "    \"framework\": {\n" +
+            "      \"name\": \"Microsoft.NETCore.App\",\n" +
+            $"      \"version\": \"{runtimeVersion}\"\n" +
+            "    }\n" +
+            "  }\n" +
+            "}\n");
+
+        NetCoreSharedFrameworkResolver sharedFrameworkResolver = new NetCoreSharedFrameworkResolver(modulePath, _mockLogger.Object);
+        AssemblyName textJsonAssembly = typeof(System.Text.Json.JsonSerializer).Assembly.GetName();
+        var compilationLibrary = new CompilationLibrary(
+            "package",
+            textJsonAssembly.Name,
+            textJsonAssembly.Version.ToString(),
+            "sha512-not-relevant",
+            Enumerable.Empty<string>(),
+            Enumerable.Empty<Dependency>(),
+            true);
+        var assemblies = new List<string>();
+        bool resolved = sharedFrameworkResolver.TryResolveAssemblyPaths(compilationLibrary, assemblies);
+
+        Assert.True(resolved);
+        Assert.NotEmpty(assemblies);
+        AssemblyDefinition asm = AssemblyDefinition.ReadAssembly(assemblies[0]);
+        Assert.Equal(textJsonAssembly.Name, asm.Name.Name);
+      }
+      finally
+      {
+        Directory.Delete(tempDirectory, true);
+      }
     }
 
     [Fact]
