@@ -226,27 +226,68 @@ namespace Coverlet.Core.Instrumentation
     public NetCoreSharedFrameworkResolver(string modulePath, ILogger logger)
     {
       _logger = logger;
-
-      string runtimeConfigFile = Path.Combine(
-          Path.GetDirectoryName(modulePath)!,
-          Path.GetFileNameWithoutExtension(modulePath) + ".runtimeconfig.json");
-      if (!File.Exists(runtimeConfigFile))
+      string moduleDirectory = Path.GetDirectoryName(modulePath)!;
+      string moduleRuntimeConfigFile = Path.Combine(moduleDirectory, $"{Path.GetFileNameWithoutExtension(modulePath)}.runtimeconfig.json");
+      List<string> runtimeConfigFiles = new List<string>();
+      if (Directory.Exists(moduleDirectory))
       {
-        return;
+        try
+        {
+          runtimeConfigFiles = Directory.GetFiles(moduleDirectory, "*.runtimeconfig.json")
+              .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+              .ToList();
+        }
+        catch (Exception ex)
+        {
+          _logger.LogVerbose($"NetCoreSharedFrameworkResolver exception while enumerating runtimeconfig files from '{moduleDirectory}': {ex}");
+        }
+      }
+      if (File.Exists(moduleRuntimeConfigFile))
+      {
+        for (int i = runtimeConfigFiles.Count - 1; i >= 0; i--)
+        {
+          if (runtimeConfigFiles[i].Equals(moduleRuntimeConfigFile, StringComparison.OrdinalIgnoreCase))
+          {
+            runtimeConfigFiles.RemoveAt(i);
+          }
+        }
+        runtimeConfigFiles.Insert(0, moduleRuntimeConfigFile);
       }
 
-      var reader = new RuntimeConfigurationReader(runtimeConfigFile);
-      IEnumerable<(string Name, string Version)> referencedFrameworks = reader.GetFrameworks();
-      string runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location);
-      string runtimeRootPath = Path.GetFullPath(Path.Combine(runtimePath!, "..", ".."));
-      foreach ((string frameworkName, string frameworkVersion) in referencedFrameworks)
+      string runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
+      string runtimeRootPath = Path.GetFullPath(Path.Combine(runtimePath, "..", ".."));
+
+      foreach (string runtimeConfigFile in runtimeConfigFiles)
       {
-        var semVersion = NuGetVersion.Parse(frameworkVersion);
-        var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
-        string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
-        uint latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
-            .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
-        _aspNetSharedFrameworkDirs.Add(Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0]);
+        try
+        {
+          var reader = new RuntimeConfigurationReader(runtimeConfigFile);
+          IEnumerable<(string Name, string Version)> referencedFrameworks = reader.GetFrameworks();
+          foreach ((string frameworkName, string frameworkVersion) in referencedFrameworks)
+          {
+            try
+            {
+              var semVersion = NuGetVersion.Parse(frameworkVersion);
+              var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
+              string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
+              uint latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
+                  .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
+              string resolvedPath = Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0];
+              if (!_aspNetSharedFrameworkDirs.Any(path => path.Equals(resolvedPath, StringComparison.OrdinalIgnoreCase)))
+              {
+                _aspNetSharedFrameworkDirs.Add(resolvedPath);
+              }
+            }
+            catch (Exception ex)
+            {
+              _logger.LogVerbose($"NetCoreSharedFrameworkResolver exception while processing framework '{frameworkName}' version '{frameworkVersion}' from '{runtimeConfigFile}': {ex}");
+            }
+          }
+        }
+        catch (Exception ex)
+        {
+          _logger.LogVerbose($"NetCoreSharedFrameworkResolver exception while reading '{runtimeConfigFile}': {ex}");
+        }
       }
 
       _logger.LogVerbose("NetCoreSharedFrameworkResolver search paths:");
@@ -259,7 +300,6 @@ namespace Coverlet.Core.Instrumentation
     public bool TryResolveAssemblyPaths(CompilationLibrary library, List<string> assemblies)
     {
       string dllName = $"{library.Name}.dll";
-
       foreach (string sharedFrameworkPath in _aspNetSharedFrameworkDirs)
       {
         if (!Directory.Exists(sharedFrameworkPath))
@@ -267,16 +307,15 @@ namespace Coverlet.Core.Instrumentation
           continue;
         }
 
-        string[] files = Directory.GetFiles(sharedFrameworkPath);
-        foreach (string file in files)
+        string candidatePath = Path.Combine(sharedFrameworkPath, dllName);
+        if (!File.Exists(candidatePath))
         {
-          if (Path.GetFileName(file).Equals(dllName, StringComparison.OrdinalIgnoreCase))
-          {
-            _logger.LogVerbose($"'{dllName}' found in '{file}'");
-            assemblies.Add(file);
-            return true;
-          }
+          continue;
         }
+
+        _logger.LogVerbose($"'{dllName}' found in '{candidatePath}'");
+        assemblies.Add(candidatePath);
+        return true;
       }
 
       return false;
