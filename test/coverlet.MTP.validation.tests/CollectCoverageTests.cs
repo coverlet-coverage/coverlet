@@ -417,6 +417,32 @@ public class CollectCoverageTests
   }
 
   #region Helper Methods
+  private static void DeleteDirectoryWithRetry(string path, int maxRetries = 3)
+  {
+    if (!Directory.Exists(path))
+      return;
+
+    for (int i = 0; i < maxRetries; i++)
+    {
+      try
+      {
+        foreach (string file in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
+        {
+          File.SetAttributes(file, FileAttributes.Normal);
+        }
+        Directory.Delete(path, recursive: true);
+        return;
+      }
+      catch (IOException) when (i < maxRetries - 1)
+      {
+        Thread.Sleep(100 * (i + 1));
+      }
+      catch (UnauthorizedAccessException) when (i < maxRetries - 1)
+      {
+        Thread.Sleep(100 * (i + 1));
+      }
+    }
+  }
 
   /// <summary>
   /// Issue #1843: Test that async methods in SUT classes generate proper coverage data.
@@ -531,10 +557,7 @@ public class CollectCoverageTests
   {
     // Use repository artifacts folder
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
-    if (Directory.Exists(artifactsTemp))
-    {
-      Directory.Delete(artifactsTemp, recursive: true);
-    }
+    DeleteDirectoryWithRetry(artifactsTemp);
     Directory.CreateDirectory(artifactsTemp);
 
     string sanitizedTestName = SanitizePathName(testName);
@@ -574,10 +597,8 @@ public class CollectCoverageTests
   {
     // Reproduce exact Issue #1843 scenario
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
-    if (Directory.Exists(artifactsTemp))
-    {
-      Directory.Delete(artifactsTemp, recursive: true);
-    }
+    DeleteDirectoryWithRetry(artifactsTemp);
+
     Directory.CreateDirectory(artifactsTemp);
 
     string sanitizedTestName = SanitizePathName(testName);
@@ -912,10 +933,8 @@ public class Issue1843Tests
   {
     // Use repository artifacts folder instead of user temp
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
-    if (Directory.Exists(artifactsTemp))
-    {
-      Directory.Delete(artifactsTemp, recursive: true);
-    }
+    DeleteDirectoryWithRetry(artifactsTemp);
+
     Directory.CreateDirectory(artifactsTemp);
 
     // Use test method name for folder naming (sanitize invalid path characters)
@@ -1630,24 +1649,15 @@ public class StringHelperTests
         foreach (string dirName in s_cleanupDirectories)
         {
           string dirPath = Path.Combine(SolutionDirectory, dirName);
-          if (Directory.Exists(dirPath))
-          {
-            DeleteDirectoryWithRetry(dirPath);
-          }
+          DeleteDirectoryWithRetry(dirPath);
         }
 
         // Remove project directories (SampleLibrary, TestProject) but keep files at solution root
         string sutDir = Path.Combine(SolutionDirectory, SutProjectName);
-        if (Directory.Exists(sutDir))
-        {
-          DeleteDirectoryWithRetry(sutDir);
-        }
+        DeleteDirectoryWithRetry(sutDir);
 
         string testDir = Path.Combine(SolutionDirectory, TestProjectName);
-        if (Directory.Exists(testDir))
-        {
-          DeleteDirectoryWithRetry(testDir);
-        }
+        DeleteDirectoryWithRetry(testDir);
 
         // Remove solution file and NuGet.config (keep only coverage/diagnostic files)
         TryDeleteFile(SolutionPath);
@@ -1686,33 +1696,6 @@ public class StringHelperTests
           {
             // Ignore copy failures
           }
-        }
-      }
-    }
-  
-
-    private static void DeleteDirectoryWithRetry(string path, int maxRetries = 3)
-    {
-      for (int i = 0; i < maxRetries; i++)
-      {
-        try
-        {
-          // Clear read-only attributes
-          foreach (string file in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
-          {
-            File.SetAttributes(file, FileAttributes.Normal);
-          }
-
-          Directory.Delete(path, recursive: true);
-          return;
-        }
-        catch (IOException) when (i < maxRetries - 1)
-        {
-          Thread.Sleep(100 * (i + 1));
-        }
-        catch (UnauthorizedAccessException) when (i < maxRetries - 1)
-        {
-          Thread.Sleep(100 * (i + 1));
         }
       }
     }
