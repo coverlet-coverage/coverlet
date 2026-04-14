@@ -714,7 +714,7 @@ public class SampleClass
 
         Assert.True(resolved);
         Assert.NotEmpty(assemblies);
-        AssemblyDefinition asm = AssemblyDefinition.ReadAssembly(assemblies[0]);
+        using AssemblyDefinition asm = AssemblyDefinition.ReadAssembly(assemblies[0]);
         Assert.Equal(textJsonAssembly.Name, asm.Name.Name);
       }
       finally

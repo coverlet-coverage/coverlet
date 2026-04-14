@@ -228,9 +228,20 @@ namespace Coverlet.Core.Instrumentation
       _logger = logger;
       string moduleDirectory = Path.GetDirectoryName(modulePath)!;
       string moduleRuntimeConfigFile = Path.Combine(moduleDirectory, $"{Path.GetFileNameWithoutExtension(modulePath)}.runtimeconfig.json");
-      List<string> runtimeConfigFiles = Directory.Exists(moduleDirectory)
-          ? Directory.GetFiles(moduleDirectory, "*.runtimeconfig.json").ToList()
-          : new List<string>();
+      List<string> runtimeConfigFiles = new List<string>();
+      if (Directory.Exists(moduleDirectory))
+      {
+        try
+        {
+          runtimeConfigFiles = Directory.GetFiles(moduleDirectory, "*.runtimeconfig.json")
+              .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+              .ToList();
+        }
+        catch (Exception ex)
+        {
+          _logger.LogVerbose($"NetCoreSharedFrameworkResolver exception while enumerating runtimeconfig files from '{moduleDirectory}': {ex}");
+        }
+      }
       if (File.Exists(moduleRuntimeConfigFile))
       {
         for (int i = runtimeConfigFiles.Count - 1; i >= 0; i--)
