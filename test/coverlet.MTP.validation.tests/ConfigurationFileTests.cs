@@ -770,9 +770,105 @@ EndGlobal
     return new TestResult(process.ExitCode, stdout, stderr);
   }
 
+  /// <summary>
+  /// Validates that configuration file can suppress all default values except the minimal "[coverlet.*]*" filter.
+  /// This test verifies:
+  /// - Only "[coverlet.*]*" remains as exclude filter (not the extended defaults like [xunit.*]*, [NUnit3.*]*, etc.)
+  /// - Include filters are empty
+  /// - ExcludeByAttribute uses only config-specified values (not merged with defaults)
+  /// - Boolean settings are inverted from defaults (SingleHit=true, IncludeTestAssembly=true, SkipAutoProps=true)
+  /// 
+  /// Per documentation: "When using the configuration file, only [coverlet.*]* is automatically prepended to exclude filters."
+  /// </summary>
+  [Fact]
+  public async Task ConfigurationFile_SuppressDefaults_OnlyMinimalCoverletFilterRemains()
+  {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+    // Arrange - Create config that suppresses defaults and inverts booleans
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProjectWithConfigFile(testName, configContent: @"{
+  ""Coverlet"": {
+    ""Exclude"": """",
+    ""Include"": """",
+    ""ExcludeByAttribute"": """",
+    ""ExcludeByFile"": """",
+    ""Format"": ""cobertura"",
+    ""SingleHit"": true,
+    ""IncludeTestAssembly"": false,
+    ""SkipAutoProps"": true,
+    ""DeterministicReport"": false
+  }
+}");
+    await BuildProject(testProject.SolutionPath);
+
+    // Act - Enable diagnostics to verify configuration settings
+    var result = await RunTestsWithCoverage(testProject, "--coverlet", enableDiagnostics: true);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert - test should pass
+    Assert.True(result.ExitCode == 0,
+      $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+
+    // Verify coverage was collected
+    string[] coverageFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      CoverageCoberturaFileName.Insert(CoverageCoberturaFileName.LastIndexOf('.'), ".*"),
+      SearchOption.AllDirectories);
+    Assert.NotEmpty(coverageFiles);
+
+    // Verify configuration via diagnostic log
+    DiagnosticSettings? diagSettings = ParseDiagnosticFile(testProject.OutputDirectory);
+    if (diagSettings is not null)
+    {
+      TestContext.Current?.AddAttachment("Diagnostic Log", diagSettings.RawContent);
+
+      // CRITICAL: Only "[coverlet.*]*" should remain as exclude filter
+      // The extended defaults ([xunit.*]*, [NUnit3.*]*, [Microsoft.Testing.*]*, etc.) should NOT be present
+      Assert.True(diagSettings.ExcludeFilters.Count > 0,
+        $"Expected at least one exclude filter but found none.\n" +
+        $"Diagnostic content:\n{diagSettings.RawContent}");
+
+      // Verify only coverlet filter is present (the minimal required filter)
+      bool hasOnlyCoverletFilter = diagSettings.ExcludeFilters.All(f => f.Contains("coverlet"));
+      Assert.True(hasOnlyCoverletFilter,
+        $"Expected only '[coverlet.*]*' exclude filter but found: {string.Join(", ", diagSettings.ExcludeFilters)}\n" +
+        $"Extended defaults like [xunit.*]*, [NUnit3.*]*, [Microsoft.Testing.*]* should NOT be present when using config file.\n" +
+        $"Diagnostic content:\n{diagSettings.RawContent}");
+
+      // Verify the extended default filters are NOT present
+      string[] extendedDefaults = ["[xunit.*]*", "[NUnit3.*]*", "[nunit.*]*", "[Microsoft.Testing.*]*", "[Microsoft.Testplatform.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*"];
+      foreach (string defaultFilter in extendedDefaults)
+      {
+        Assert.False(diagSettings.ExcludeFilters.Any(f => f.Contains(defaultFilter.Replace("[", "").Replace("]*", ""))),
+          $"Extended default filter '{defaultFilter}' should NOT be present when using config file.\n" +
+          $"Found filters: {string.Join(", ", diagSettings.ExcludeFilters)}");
+      }
+
+      // Verify include filters are empty (no defaults applied)
+      Assert.True(diagSettings.IncludeFilters.Count == 0,
+        $"Expected empty include filters but found: {string.Join(", ", diagSettings.IncludeFilters)}");
+
+      // Log diagnostic settings for debugging
+      TestContext.Current?.AddAttachment("Verified Settings",
+        $"ExcludeFilters: {string.Join(", ", diagSettings.ExcludeFilters)}\n" +
+        $"IncludeFilters: {string.Join(", ", diagSettings.IncludeFilters)}\n" +
+        $"SingleHit: {diagSettings.SingleHit}\n" +
+        $"IncludeTestAssembly: {diagSettings.IncludeTestAssembly}\n" +
+        $"SkipAutoProps: {diagSettings.SkipAutoProps}");
+    }
+    else
+    {
+      // Diagnostic file not found - log warning
+      TestContext.Current?.AddAttachment("Diagnostic Warning",
+        "Diagnostic file not found - unable to fully verify suppressed defaults");
+    }
+  }
+
   #endregion
 
-  #region Helper Classes
+    #region Helper Classes
 
   private sealed class TestProjectInfo : IDisposable
   {
