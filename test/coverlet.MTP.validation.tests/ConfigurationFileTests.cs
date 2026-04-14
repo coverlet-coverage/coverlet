@@ -896,7 +896,7 @@ EndGlobal
 
   #endregion
 
-  #region Helper Classes
+#region Helper Classes
 
   private sealed class TestProjectInfo : IDisposable
   {
