@@ -35,6 +35,8 @@ internal class CoverletMTPSettingsParser
     settings.ExcludeFilters = ParseExcludeFilters(section);
     settings.ExcludeSourceFiles = ParseArrayValue(section, CoverletMTPConstants.ExcludeByFileKey);
     settings.ExcludeAttributes = ParseArrayValue(section, CoverletMTPConstants.ExcludeByAttributeKey);
+    // Track if ExcludeByAttribute was explicitly set in config (even if empty) to suppress defaults
+    settings.ExcludeByAttributeExplicitlySet = section[CoverletMTPConstants.ExcludeByAttributeKey] is not null;
     settings.MergeWith = section[CoverletMTPConstants.MergeWithKey];
     settings.UseSourceLink = ParseBoolValue(section, CoverletMTPConstants.UseSourceLinkKey);
     settings.SingleHit = ParseBoolValue(section, CoverletMTPConstants.SingleHitKey);

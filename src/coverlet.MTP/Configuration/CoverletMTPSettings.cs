@@ -17,6 +17,12 @@ public class CoverletMTPSettings
   public string[] ExcludeFilters { get; set; } = ["[coverlet.*]*"]; // Exclude types in Coverlet namespaces by default
   public string[] ExcludeSourceFiles { get; set; } = [];
   public string[] ExcludeAttributes { get; set; } = [];
+  /// <summary>
+  /// Indicates whether ExcludeAttributes was explicitly set in the configuration file.
+  /// When true, an empty ExcludeAttributes array means defaults should be suppressed.
+  /// When false, defaults should be applied.
+  /// </summary>
+  public bool ExcludeByAttributeExplicitlySet { get; set; }
   public string? MergeWith { get; set; }
   public bool UseSourceLink { get; set; }
   public bool SingleHit { get; set; }

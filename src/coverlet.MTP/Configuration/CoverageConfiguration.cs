@@ -165,12 +165,14 @@ internal sealed class CoverageConfiguration
     }
 
     // Priority 2: Configuration file setting
-    if (_configFileSettings?.ExcludeAttributes is { Length: > 0 } configFilters)
+    // Check if explicitly set in config file (even if empty)
+    if (_configFileSettings?.ExcludeByAttributeExplicitlySet == true)
     {
-      // Merge with defaults to ensure essential attributes are always excluded
-      string[] merged = [.. s_defaultExcludeByAttributes.Concat(configFilters).Distinct()];
-      LogOptionValue(CoverletOptionNames.ExcludeByAttribute, merged, isExplicit: false, source: "config file");
-      return merged;
+      // Config file explicitly set this value - use it without merging defaults
+      // This allows empty string in config to suppress defaults
+      string[] configFilters = _configFileSettings.ExcludeAttributes;
+      LogOptionValue(CoverletOptionNames.ExcludeByAttribute, configFilters, isExplicit: false, source: "config file");
+      return configFilters;
     }
 
     // Priority 3: Built-in defaults

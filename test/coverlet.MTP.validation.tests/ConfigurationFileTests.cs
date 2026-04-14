@@ -16,7 +16,7 @@ namespace Coverlet.MTP.validation.tests;
 /// - Only "[coverlet.*]*" exclude filter is used from config file (not the extended command-line defaults)
 /// - Values can be changed using the configuration file
 /// - Implementation matches documentation in Coverlet.MTP.Integration.md
-/// 
+///
 /// Note: Current coverlet.MTP implementation primarily uses command-line options via ICommandLineOptions.
 /// Configuration file support via coverlet.mtp.appsettings.json is parsed by CoverletMTPSettingsParser
 /// for scenarios where command-line options are not available.
@@ -46,10 +46,10 @@ public class ConfigurationFileTests
   /// <summary>
   /// Validates that when using coverlet.mtp.appsettings.json, only the minimal exclude filter
   /// "[coverlet.*]*" is applied (not the extended command-line defaults).
-  /// 
+  ///
   /// Per Documentation/Coverlet.MTP.Integration.md:
   /// "When using the configuration file, only [coverlet.*]* is automatically prepended to exclude filters."
-  /// 
+  ///
   /// This contrasts with command-line defaults which include:
   /// [coverlet.*]*, [xunit.*]*, [NUnit3.*]*, [nunit.*]*, [Microsoft.Testing.*]*, etc.
   /// </summary>
@@ -109,7 +109,7 @@ public class ConfigurationFileTests
   /// Per documentation: "Format: Comma-separated output formats (default: cobertura)"
   /// This test verifies that json, cobertura, and lcov format files are actually produced
   /// and validates the configuration settings via diagnostic log.
-  /// 
+  ///
   /// Note: Currently, command-line options take precedence over configuration file settings.
   /// This test uses --coverlet-output-format to explicitly specify formats.
   /// </summary>
@@ -176,8 +176,7 @@ public class ConfigurationFileTests
         $"Expected coverage to be enabled in diagnostic log.\nDiagnostic content:\n{diagSettings.RawContent}");
 
       // Verify include-test-assembly setting was applied
-      Assert.True(diagSettings.IncludeTestAssembly == false,
-        $"Expected IncludeTestAssembly=true from config but got {diagSettings.IncludeTestAssembly}.\n" +
+      Assert.False(diagSettings.IncludeTestAssembly, $"Expected IncludeTestAssembly=true from config but got {diagSettings.IncludeTestAssembly}.\n" +
         $"Diagnostic content:\n{diagSettings.RawContent}");
 
       // Verify excluded module filters are present (default coverlet filters)
@@ -340,7 +339,7 @@ public class ConfigurationFileTests
 
   /// <summary>
   /// Validates that configuration file can be placed in output directory and will be found.
-  /// Per documentation: "The configuration file must be present in the output directory at runtime 
+  /// Per documentation: "The configuration file must be present in the output directory at runtime
   /// (next to the test assembly)."
   /// </summary>
   [Fact]
@@ -515,7 +514,7 @@ public class Calculator
     public int Add(int a, int b) => a + b;
     public int Subtract(int a, int b) => a - b;
     public int Multiply(int a, int b) => a * b;
-    
+
     // Auto-property to test SkipAutoProps setting
     public string Name { get; set; } = ""Calculator"";
 }
@@ -770,9 +769,130 @@ EndGlobal
     return new TestResult(process.ExitCode, stdout, stderr);
   }
 
+  /// <summary>
+  /// Validates that configuration file can suppress all default values except the minimal "[coverlet.*]*" filter.
+  /// This test verifies:
+  /// - Only "[coverlet.*]*" remains as exclude filter (not the extended defaults like [xunit.*]*, [NUnit3.*]*, etc.)
+  /// - Include filters are empty when config specifies empty
+  /// - ExcludeByAttribute defaults are suppressed when config specifies empty (not merged with defaults)
+  /// - Boolean settings can be set via config (SingleHit=true, SkipAutoProps=true)
+  ///
+  /// Per documentation: "When using the configuration file, only [coverlet.*]* is automatically prepended to exclude filters."
+  ///
+  /// Expected behavior: Empty string values in config file should suppress/purge defaults, not fall through to them.
+  /// </summary>
+  [Fact]
+  public async Task ConfigurationFile_SuppressDefaults_OnlyMinimalCoverletFilterRemains()
+  {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+    // Arrange - Create config that suppresses defaults by specifying empty values
+    // Expected: Empty collections should purge defaults, not fall through to them
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProjectWithConfigFile(testName, configContent: @"{
+  ""Coverlet"": {
+    ""Exclude"": """",
+    ""Include"": """",
+    ""ExcludeByAttribute"": """",
+    ""ExcludeByFile"": """",
+    ""Format"": ""cobertura"",
+    ""SingleHit"": true,
+    ""SkipAutoProps"": true
+  }
+}");
+    await BuildProject(testProject.SolutionPath);
+
+    // Act - Enable diagnostics to verify configuration settings
+    var result = await RunTestsWithCoverage(testProject, "--coverlet", enableDiagnostics: true);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert - test should pass
+    Assert.True(result.ExitCode == 0,
+      $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+
+    // Verify coverage was collected
+    string[] coverageFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      CoverageCoberturaFileName.Insert(CoverageCoberturaFileName.LastIndexOf('.'), ".*"),
+      SearchOption.AllDirectories);
+    Assert.NotEmpty(coverageFiles);
+
+    // Verify configuration via diagnostic log
+    DiagnosticSettings? diagSettings = ParseDiagnosticFile(testProject.OutputDirectory);
+
+    Assert.NotNull(diagSettings);
+
+    TestContext.Current?.AddAttachment("Diagnostic Log", diagSettings.RawContent);
+
+    // CRITICAL: Only "[coverlet.*]*" should remain as exclude filter
+    const string expectedExcludeFilter = "[coverlet.*]*";
+
+    // This test specifically validates suppressed defaults via diagnostics.
+    // Since enableDiagnostics: true is passed, the diagnostic file must be present.
+    // Silently passing without diagnostic assertions would undermine the test's purpose.
+
+    Assert.True(diagSettings.ExcludeFilters.Count > 0,
+      $"Expected at least one exclude filter but found none.\n" +
+      $"Diagnostic content:\n{diagSettings.RawContent}");
+
+    // Verify only the minimal required coverlet filter is present
+    Assert.True(diagSettings.ExcludeFilters.Count == 1,
+      $"Expected exactly one exclude filter '{expectedExcludeFilter}' but found: {string.Join(", ", diagSettings.ExcludeFilters)}\n" +
+      $"Extended defaults like [xunit.*]*, [NUnit3.*]*, [Microsoft.Testing.*]* should NOT be present when using config file.\n" +
+      $"Diagnostic content:\n{diagSettings.RawContent}");
+    Assert.Equal(expectedExcludeFilter, diagSettings.ExcludeFilters[0]);
+
+    // Verify the extended default filters are NOT present
+    string[] extendedDefaults = ["xunit", "NUnit3", "nunit", "Microsoft.Testing", "Microsoft.Testplatform", "Microsoft.VisualStudio.TestPlatform"];
+    foreach (string defaultFilter in extendedDefaults)
+    {
+      Assert.False(diagSettings.ExcludeFilters.Any(f => f.Contains(defaultFilter, StringComparison.OrdinalIgnoreCase)),
+        $"Extended default filter containing '{defaultFilter}' should NOT be present when using config file.\n" +
+        $"Found filters: {string.Join(", ", diagSettings.ExcludeFilters)}");
+    }
+
+    // Verify ExcludeByAttribute defaults are suppressed when config specifies empty
+    // Expected: Empty config value should purge defaults (GeneratedCodeAttribute, CompilerGeneratedAttribute, etc.)
+    // Note: ExcludeFromCodeCoverage (without Attribute suffix) is a convenience shorthand,
+    // the actual attribute class is ExcludeFromCodeCoverageAttribute
+    if (diagSettings.ExcludeByAttribute is not null)
+    {
+      // Only check for attributes with 'Attribute' suffix - these are the actual .NET attribute class names
+      string[] defaultAttributes = ["ExcludeFromCodeCoverageAttribute", "GeneratedCodeAttribute", "CompilerGeneratedAttribute"];
+      foreach (string defaultAttr in defaultAttributes)
+      {
+        Assert.False(diagSettings.ExcludeByAttribute.Contains(defaultAttr, StringComparison.OrdinalIgnoreCase),
+          $"Default attribute '{defaultAttr}' should NOT be present when config specifies empty ExcludeByAttribute.\n" +
+          $"Found ExcludeByAttribute: {diagSettings.ExcludeByAttribute}\n" +
+          $"Expected behavior: Empty config value should suppress/purge defaults.\n" +
+          $"Diagnostic content:\n{diagSettings.RawContent}");
+      }
+    }
+
+    // Verify include filters are empty (no defaults applied)
+    Assert.True(diagSettings.IncludeFilters.Count == 0,
+      $"Expected empty include filters but found: {string.Join(", ", diagSettings.IncludeFilters)}");
+
+    // Verify boolean settings from config file are applied
+    Assert.True(diagSettings.SingleHit, $"Expected SingleHit=true from config file but got {diagSettings.SingleHit}.\n" +
+      $"Diagnostic content:\n{diagSettings.RawContent}");
+
+    Assert.True(diagSettings.SkipAutoProps, $"Expected SkipAutoProps=true from config file but got {diagSettings.SkipAutoProps}.\n" +
+      $"Diagnostic content:\n{diagSettings.RawContent}");
+
+    // Log diagnostic settings for debugging
+    TestContext.Current?.AddAttachment("Verified Settings",
+      $"ExcludeFilters: {string.Join(", ", diagSettings.ExcludeFilters)}\n" +
+      $"ExcludeByAttribute: {diagSettings.ExcludeByAttribute ?? "(empty)"}\n" +
+      $"IncludeFilters: {string.Join(", ", diagSettings.IncludeFilters)}\n" +
+      $"SingleHit: {diagSettings.SingleHit}\n" +
+      $"SkipAutoProps: {diagSettings.SkipAutoProps}");
+  }
+
   #endregion
 
-  #region Helper Classes
+#region Helper Classes
 
   private sealed class TestProjectInfo : IDisposable
   {
