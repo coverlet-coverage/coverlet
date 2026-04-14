@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -686,12 +686,12 @@ public class SampleClass
         string modulePath = Path.Combine(tempDirectory, "copied.project.reference.dll");
 
         string runtimeVersion = new DirectoryInfo(Path.GetDirectoryName(typeof(object).Assembly.Location)!).Name;
-        var runtimeVersionParts = Version.Parse(runtimeVersion);
+        var runtimeAssemblyVersion = typeof(object).Assembly.GetName().Version;
         string runtimeConfigFile = Path.Combine(tempDirectory, "testhost.runtimeconfig.json");
         File.WriteAllText(runtimeConfigFile,
             "{\n" +
             "  \"runtimeOptions\": {\n" +
-            $"    \"tfm\": \"net{runtimeVersionParts.Major}.{runtimeVersionParts.Minor}\",\n" +
+            $"    \"tfm\": \"net{runtimeAssemblyVersion.Major}.{runtimeAssemblyVersion.Minor}\",\n" +
             "    \"framework\": {\n" +
             "      \"name\": \"Microsoft.NETCore.App\",\n" +
             $"      \"version\": \"{runtimeVersion}\"\n" +

@@ -228,7 +228,9 @@ namespace Coverlet.Core.Instrumentation
       _logger = logger;
       string moduleDirectory = Path.GetDirectoryName(modulePath)!;
       string moduleRuntimeConfigFile = Path.Combine(moduleDirectory, $"{Path.GetFileNameWithoutExtension(modulePath)}.runtimeconfig.json");
-      List<string> runtimeConfigFiles = Directory.GetFiles(moduleDirectory, "*.runtimeconfig.json").ToList();
+      List<string> runtimeConfigFiles = Directory.Exists(moduleDirectory)
+          ? Directory.GetFiles(moduleDirectory, "*.runtimeconfig.json").ToList()
+          : new List<string>();
       if (File.Exists(moduleRuntimeConfigFile))
       {
         for (int i = runtimeConfigFiles.Count - 1; i >= 0; i--)
@@ -252,21 +254,28 @@ namespace Coverlet.Core.Instrumentation
           IEnumerable<(string Name, string Version)> referencedFrameworks = reader.GetFrameworks();
           foreach ((string frameworkName, string frameworkVersion) in referencedFrameworks)
           {
-            var semVersion = NuGetVersion.Parse(frameworkVersion);
-            var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
-            string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
-            uint latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
-                .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
-            string resolvedPath = Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0];
-            if (!_aspNetSharedFrameworkDirs.Any(path => path.Equals(resolvedPath, StringComparison.OrdinalIgnoreCase)))
+            try
             {
-              _aspNetSharedFrameworkDirs.Add(resolvedPath);
+              var semVersion = NuGetVersion.Parse(frameworkVersion);
+              var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
+              string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
+              uint latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
+                  .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
+              string resolvedPath = Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0];
+              if (!_aspNetSharedFrameworkDirs.Any(path => path.Equals(resolvedPath, StringComparison.OrdinalIgnoreCase)))
+              {
+                _aspNetSharedFrameworkDirs.Add(resolvedPath);
+              }
+            }
+            catch (Exception ex)
+            {
+              _logger.LogVerbose($"NetCoreSharedFrameworkResolver exception while processing framework '{frameworkName}' version '{frameworkVersion}' from '{runtimeConfigFile}': {ex}");
             }
           }
         }
         catch (Exception ex)
         {
-          _logger.LogVerbose($"NetCoreSharedFrameworkResolver exception: {ex}");
+          _logger.LogVerbose($"NetCoreSharedFrameworkResolver exception while reading '{runtimeConfigFile}': {ex}");
         }
       }
 
