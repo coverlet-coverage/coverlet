@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+- Fix [BUG] Wrong branch rate on IAsyncEnumerable for generic type [#1836](https://github.com/coverlet-coverage/coverlet/issues/1836)
 - Fix [BUG] Missing Coverage after moving to MTP [#1843](https://github.com/coverlet-coverage/coverlet/issues/1843)
 - Fix [BUG] No coverage reported when targeting .NET Framework with 8.0.1 [#1842](https://github.com/coverlet-coverage/coverlet/issues/1842)
 - Fix [BUG] Behavior changes between MTP and Legacy (msbuild) [#1878](https://github.com/coverlet-coverage/coverlet/issues/1878)

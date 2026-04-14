@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Coverlet.Core;
@@ -54,14 +55,6 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    /// <summary>
-    /// Test for Issue #1836: Wrong branch rate on IAsyncEnumerable with [EnumeratorCancellation]
-    /// From PR https://github.com/daveMueller/coverlet/pull/31
-    ///
-    /// Key finding: The foreach branches on line 40 are reported at ordinals 2 and 3 (not 0 and 1),
-    /// because the compiler-generated state machine for [EnumeratorCancellation] token-combining
-    /// logic consumes ordinals 0 and 1.
-    /// </summary>
     [Fact]
     public void AsyncIterator_Issue1836()
     {
@@ -70,36 +63,62 @@ namespace Coverlet.CoreCoverage.Tests
       {
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue1836>(async instance =>
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncIteratorIssue1836>(async instance =>
                   {
-                    // Normal iteration covering all items
-                    await foreach (int item in (IAsyncEnumerable<int>)instance.GetNumbersAsync()) { }
+                    await foreach (int item in (IAsyncEnumerable<int>)instance.Issue1836_GenericFunctionWithCancellationThatReturnsIAsyncEnumerable<int>()) { }
 
-                    // Cancelled iteration covering the throw branch of the ternary
                     using var cts = new CancellationTokenSource();
                     cts.Cancel();
                     try
                     {
-                      await foreach (int item in (IAsyncEnumerable<int>)instance.GetNumbersAsync(cts.Token)) { }
+                      await foreach (int item in (IAsyncEnumerable<int>)instance.Issue1836_GenericFunctionWithCancellationThatReturnsIAsyncEnumerable<int>(cts.Token)) { }
                     }
                     catch (OperationCanceledException) { }
                   }, persistPrepareResultToFile: pathSerialize[0]);
           return 0;
         }, [path]);
 
-        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncIterator.cs");
-        // Lines adjusted for the Issue1836 class location:
-        // Line 43: int[] items = [1, 2]
-        // Line 44: foreach (var item in items)
-        // Line 46: await Task.CompletedTask
-        // Line 47: yield return ternary expression
-        document.AssertLinesCoveredFromTo(BuildConfiguration.Debug, 43, 47);
-        document.AssertBranchesCovered(BuildConfiguration.Debug,
-                                       // foreach loop branches (ordinals start at 2 due to [EnumeratorCancellation] state machine code)
-                                       (44, 2, 1), (44, 3, 3),
-                                       // ternary conditional branches: false=throw (cancelled), true=return item (normal)
-                                       (47, 0, 1), (47, 1, 2));
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncIterator.Issue1836.cs");
+        document.AssertLinesCoveredFromTo(BuildConfiguration.Debug, 15, 22);
+        document.AssertBranchesCovered(BuildConfiguration.Debug, (17, 2, 1), (17, 3, 3), (20, 0, 1), (20, 1, 2));
         document.ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 2);
+        document.AssertLinesCovered(BuildConfiguration.Release, 16, 17, 19, 20);
+        document.AssertBranchesCovered(BuildConfiguration.Release, (17, 2, 1), (17, 3, 3), (20, 0, 1), (20, 1, 2));
+        document.ExpectedTotalNumberOfBranches(BuildConfiguration.Release, 2);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncIterator_Issue1335()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncIteratorIssue1335>(async instance =>
+          {
+            var enumerable = AsyncEnumerable.Range(1, 95);
+
+            IAsyncEnumerable<IAsyncEnumerable<int>> batches = instance.ExecuteReproduction(enumerable, 10);
+            await batches.Select(batch => batch.ToArrayAsync()).ToArrayAsync();
+
+          }, persistPrepareResultToFile: pathSerialize[0]);
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).GenerateReport(show: true).Document("Instrumentation.AsyncIterator.Issue1335.cs");
+        document.AssertLinesCoveredFromTo(BuildConfiguration.Debug, 11, 17);
+        document.AssertLinesCoveredFromTo(BuildConfiguration.Debug, 20, 26);
+        document.AssertBranchesCovered(BuildConfiguration.Debug, (13, 0, 1), (13, 1, 10), (22, 0, 86), (22, 1, 95), (22, 2, 10), (22, 3, 85));
+        document.ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 2);
+        document.AssertLinesCovered(BuildConfiguration.Release, 12, 13, 15, 21, 22, 24);
+        document.AssertBranchesCovered(BuildConfiguration.Release, (13, 0, 1), (13, 1, 10), (22, 0, 86), (22, 1, 95), (22, 2, 10), (22, 3, 85));
+        document.ExpectedTotalNumberOfBranches(BuildConfiguration.Release, 2);
       }
       finally
       {
