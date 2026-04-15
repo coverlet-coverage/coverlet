@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <!--<TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>-->
@@ -21,8 +21,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Text.Json" Version="10.0.5"/>
-    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.1.0" />
+    <PackageReference Include="System.Text.Json" Version="10.0.6"/>
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.2.1" />
   </ItemGroup>
 
   <ItemGroup>

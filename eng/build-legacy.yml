@@ -1,16 +1,16 @@
 steps:
-- script: copy src\legacy\global.json global.json
+- script: copy src\legacy\global-legacy.json global.json
   displayName: copy global.json from src/legacy
 
 - task: UseDotNet@2
   inputs:
-    version: 8.0.417
-  displayName: Install .NET Core SDK 8.0.417
+    version: 8.0.420
+  displayName: Install .NET Core SDK 8.0.420
 
 - task: UseDotNet@2
   inputs:
     useGlobalJson: true
-  displayName: Install .NET Core SDK 9.0.311 (global.json)
+  displayName: Install .NET Core SDK 9.0.313 (global.json)
 
 # create artifact/package folder
 - pwsh: |
