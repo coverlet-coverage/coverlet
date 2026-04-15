@@ -563,9 +563,9 @@ public class StringUtils
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
-    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.1.0"" />
+    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.1"" />
     <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.1.0"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.1"" />
   </ItemGroup>
   <!-- Configuration file must be copied to output directory per documentation -->
   <ItemGroup>

@@ -40,7 +40,7 @@ A sample project file looks like:
       <ItemGroup>
       <!-- Use xunit.v3.mtp-v2 for MTP v2.x compatibility -->
       <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.1" />
-      <PackageReference Include="Microsoft.Testing.Platform" Version="2.0.2" />
+      <PackageReference Include="Microsoft.Testing.Platform" Version="2.2.1" />
       <PackageReference Include="coverlet.MTP" Version="8.0.0" />
    </ItemGroup>
 </Project>
