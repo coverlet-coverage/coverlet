@@ -22,9 +22,9 @@
     <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="9.0.5" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="9.0.5" />
-    <PackageReference Include="System.Text.Json" VersionOverride="9.0.13" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="9.0.15" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="9.0.15" />
+    <PackageReference Include="System.Text.Json" VersionOverride="9.0.15" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
