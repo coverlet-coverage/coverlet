@@ -93,29 +93,106 @@ dotnet exec <test-assembly.dll> --help
 
 ### Default Exclusions Behavior
 
-Coverlet.MTP applies sensible default exclusions to reduce noise in coverage reports.
+Coverlet.MTP applies sensible default exclusions to reduce noise in coverage reports. The behavior differs based on whether you use command line options or a configuration file.
 
-**Command Line Defaults (via `CoverageConfiguration`):**
+**Command Line Defaults:**
 
-When using command line options, the following defaults are **always merged** with user-specified exclusions:
+When using command line options **without** a configuration file, the following defaults are **automatically merged** with user-specified exclusions:
 
 - **Default Exclude Filters:** `[coverlet.*]*`, `[xunit.*]*`, `[NUnit3.*]*`, `[nunit.*]*`, `[Microsoft.Testing.*]*`, `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`
 - **Default Exclude by Attributes:** `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`
 
-**Configuration File Defaults (via `coverlet.mtp.appsettings.json`):**
+**Configuration File Behavior (Authoritative Mode):**
 
-When using the configuration file, only `[coverlet.*]*` is automatically prepended to exclude filters.
+When a configuration file is present (`testconfig.json` or `coverlet.mtp.appsettings.json`), the configuration file becomes **authoritative**:
 
-### Configuration File
+- **No defaults are injected** for `Format`, `Exclude`, `ExcludeByAttribute`, or other settings
+- You are responsible for defining all options you need
+- Only the minimal `[coverlet.*]*` exclude filter is always prepended to prevent self-instrumentation
 
-You can configure coverlet.MTP using a `coverlet.mtp.appsettings.json` file in your test project directory. This provides an alternative to command line options.
+This design follows the principle that providing a configuration file represents your complete intent for coverlet settings.
 
-#### Project Setup
+> [!IMPORTANT]
+> **Breaking Change Notice:** In previous versions, defaults were merged even when a configuration file existed. Starting with this version, configuration files are authoritative. If you relied on default exclusions being applied automatically, you must now explicitly add them to your configuration file.
 
-To use the configuration file, you must:
+### Configuration Files
 
-1. **Create the configuration file** in your test project (e.g. in test project root folder)
-2. **Ensure it's copied to the output directory** by adding the following to your `.csproj` file:
+Coverlet.MTP supports two configuration file formats:
+
+1. **`testconfig.json`** - Microsoft Testing Platform standard format (recommended)
+2. **`coverlet.mtp.appsettings.json`** - Legacy format (for backward compatibility)
+
+#### testconfig.json (Recommended)
+
+The `testconfig.json` format is the standard configuration file for Microsoft Testing Platform extensions. Coverlet settings are placed under `platformOptions.Coverlet`:
+
+**File Location Priority:**
+- `[appname].testconfig.json` - App-specific configuration (e.g., `MyTests.testconfig.json`)
+- `testconfig.json` - Generic configuration
+
+**Example `testconfig.json`:**
+
+```json
+{
+  "platformOptions": {
+    "Coverlet": {
+      "include": "[MyApp.*]*",
+      "exclude": "[*.Tests]*,[*.Generated]*",
+      "excludeByAttribute": "GeneratedCode,ExcludeFromCodeCoverage,ExcludeFromCodeCoverageAttribute,CompilerGeneratedAttribute",
+      "excludeByFile": "**/Migrations/*.cs",
+      "format": "cobertura,json",
+      "useSourceLink": false,
+      "singleHit": false,
+      "includeTestAssembly": false,
+      "skipAutoProps": true,
+      "deterministicReport": false,
+      "excludeAssembliesWithoutSources": "MissingAll"
+    }
+  }
+}
+```
+
+**Supported Keys in `platformOptions.Coverlet`:**
+
+| Key | Type | Description |
+| :--- | :--- | :---------- |
+| `include` | string | Comma-separated include filters (e.g., `[MyApp.*]*`) |
+| `includeDirectory` | string | Comma-separated additional directories for sources |
+| `exclude` | string | Comma-separated exclude filters (e.g., `[*.Tests]*`) |
+| `excludeByFile` | string | Comma-separated glob patterns for source file exclusion |
+| `excludeByAttribute` | string | Comma-separated attributes to exclude |
+| `format` | string | Comma-separated output formats (default: `cobertura`) |
+| `useSourceLink` | bool | Enable SourceLink support |
+| `singleHit` | bool | Limit hits to one per location |
+| `includeTestAssembly` | bool | Include test assembly in coverage |
+| `skipAutoProps` | bool | Skip auto-implemented properties |
+| `doesNotReturnAttribute` | string | Comma-separated attributes marking non-returning methods |
+| `deterministicReport` | bool | Generate deterministic reports |
+| `excludeAssembliesWithoutSources` | string | Values: `MissingAll`, `MissingAny`, `None` |
+| `disableManagedInstrumentationRestore` | bool | Disable managed instrumentation restore |
+| `mergeWith` | string | Path to existing coverage file to merge with |
+
+> [!NOTE]
+> Keys in `testconfig.json` use **camelCase** (e.g., `excludeByAttribute`), following the Microsoft Testing Platform convention.
+
+**Project Setup for testconfig.json:**
+
+```xml
+<ItemGroup>
+  <None Update="testconfig.json">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+```
+
+#### coverlet.mtp.appsettings.json (Legacy)
+
+The legacy `coverlet.mtp.appsettings.json` format is still supported for backward compatibility. If both `testconfig.json` and `coverlet.mtp.appsettings.json` exist, `testconfig.json` takes priority.
+
+**Project Setup:**
+
+1. **Create the configuration file** in your test project
+2. **Ensure it's copied to the output directory**:
 
 ```xml
 <ItemGroup>
@@ -126,13 +203,7 @@ To use the configuration file, you must:
 ```
 
 > [!IMPORTANT]
-> The configuration file must be present in the **output directory** at runtime (next to the test assembly). If the file is not copied, coverlet.MTP will use default settings or command line options only.
-
-#### Configuration File Location
-
-The Microsoft Testing Platform configuration system loads configuration for the extension from the following location at runtime:
-- Same directory as the test assembly (output directory)
-Use the filename `coverlet.mtp.appsettings.json` in that location so the configuration can be discovered and its settings provided to `coverlet.MTP`.
+> The configuration file must be present in the **output directory** at runtime (next to the test assembly).
 
 **Supported Configuration Keys:**
 
@@ -179,7 +250,25 @@ Use the filename `coverlet.mtp.appsettings.json` in that location so the configu
 
 #### Configuration Precedence
 
-When both command line options and configuration file settings are present, **command line options take precedence**. This allows you to override configuration file settings for specific test runs.
+Coverlet.MTP uses the following precedence order when determining configuration values:
+
+```
+Priority 1: Command line options (always take precedence)
+Priority 2: testconfig.json (app-specific > generic)
+Priority 3: coverlet.mtp.appsettings.json (legacy)
+Priority 4: Built-in defaults (only when no configuration file exists)
+```
+
+**Key Points:**
+
+- **Command line always wins:** CLI options override all configuration file settings
+- **Configuration files are authoritative:** When a config file exists, only its values are used (no defaults injected)
+- **testconfig.json has priority:** If both `testconfig.json` and `coverlet.mtp.appsettings.json` exist, only `testconfig.json` is used
+- **Defaults apply only without config files:** Built-in defaults are only used when no configuration file is present
+
+**File Priority for testconfig.json:**
+1. `[appname].testconfig.json` (e.g., `MyTests.testconfig.json`)
+2. `testconfig.json`
 
 #### Alternative: MSBuild Property for Command Line Arguments
 
