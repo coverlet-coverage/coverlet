@@ -10,6 +10,13 @@ namespace Coverlet.MTP.Configuration;
 /// </summary>
 public class CoverletMTPSettings
 {
+  /// <summary>
+  /// Indicates whether this settings object was loaded from a configuration file.
+  /// When true, defaults should not be applied - all values are user-defined.
+  /// When false, built-in defaults should be applied for unspecified options.
+  /// </summary>
+  public bool IsFromConfigFile { get; set; }
+
   public string? TestModule { get; set; }
   public string[] ReportFormats { get; set; } = ["cobertura"];
   public string[] IncludeFilters { get; set; } = [];
@@ -17,12 +24,6 @@ public class CoverletMTPSettings
   public string[] ExcludeFilters { get; set; } = ["[coverlet.*]*"]; // Exclude types in Coverlet namespaces by default
   public string[] ExcludeSourceFiles { get; set; } = [];
   public string[] ExcludeAttributes { get; set; } = [];
-  /// <summary>
-  /// Indicates whether ExcludeAttributes was explicitly set in the configuration file.
-  /// When true, an empty ExcludeAttributes array means defaults should be suppressed.
-  /// When false, defaults should be applied.
-  /// </summary>
-  public bool ExcludeByAttributeExplicitlySet { get; set; }
   public string? MergeWith { get; set; }
   public bool UseSourceLink { get; set; }
   public bool SingleHit { get; set; }
