@@ -1128,7 +1128,7 @@ public class StringUtilsTests
     File.WriteAllText(Path.Combine(testProjectPath, $"{TestProjectName}.testconfig.json"), appSpecificContent);
 
     // Create generic testconfig.json (lower priority)
-    File.WriteAllText(Path.Combine(testProjectPath, "coverlet.mtp.appsettings.json"), genericContent);
+    File.WriteAllText(Path.Combine(testProjectPath, "testconfig.json"), genericContent);
 
     CreateTestCode(testProjectPath);
   }
