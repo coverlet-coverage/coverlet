@@ -106,7 +106,9 @@ internal static class TestConfigParser
       .AddInMemoryCollection(BuildCoverletSectionDictionary(coverletSection))
       .Build();
 
-    return CoverletMTPSettingsParser.Parse(wrapperConfiguration, testModulePath);
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(wrapperConfiguration, testModulePath);
+    settings.IsFromConfigFile = true;
+    return settings;
   }
 
   /// <summary>

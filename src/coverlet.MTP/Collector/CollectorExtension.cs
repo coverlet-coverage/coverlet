@@ -676,6 +676,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       Microsoft.Extensions.Configuration.IConfiguration configuration = configBuilder.Build();
 
       CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, testModulePath);
+      settings.IsFromConfigFile = true;
       _logger.LogVerbose($"Configuration file settings loaded: Format={string.Join(",", settings.ReportFormats)}, IncludeTestAssembly={settings.IncludeTestAssembly}");
 
       return settings;

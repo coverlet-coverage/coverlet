@@ -21,9 +21,6 @@ internal class CoverletMTPSettingsParser
     var settings = new CoverletMTPSettings
     {
       TestModule = testModule,
-      // Track whether settings came from a configuration file
-      // When true, defaults should not be applied - all values are user-defined
-      IsFromConfigFile = configuration is not null
     };
 
     if (configuration is null)
