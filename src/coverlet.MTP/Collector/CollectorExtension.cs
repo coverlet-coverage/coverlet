@@ -626,19 +626,12 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   {
     try
     {
-      string? configPath = TestConfigParser.FindTestConfigFile(testModulePath, _fileSystem);
-      if (configPath is null)
+      CoverletMTPSettings? settings = TestConfigParser.Parse(testModulePath, _fileSystem);
+      if (settings is null)
       {
         return null;
       }
-
-      _logger.LogInformation($"Loading configuration from: {configPath}");
-      CoverletMTPSettings? settings = TestConfigParser.Parse(testModulePath, _fileSystem);
-
-      if (settings is not null)
-      {
-        _logger.LogVerbose($"testconfig.json settings loaded: Format={string.Join(",", settings.ReportFormats)}, IncludeTestAssembly={settings.IncludeTestAssembly}");
-      }
+      _logger.LogVerbose($"testconfig.json settings loaded: Format={string.Join(",", settings.ReportFormats)}, IncludeTestAssembly={settings.IncludeTestAssembly}");
 
       return settings;
     }
