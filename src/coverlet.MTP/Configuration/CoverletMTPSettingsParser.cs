@@ -20,7 +20,10 @@ internal class CoverletMTPSettingsParser
   {
     var settings = new CoverletMTPSettings
     {
-      TestModule = testModule
+      TestModule = testModule,
+      // Track whether settings came from a configuration file
+      // When true, defaults should not be applied - all values are user-defined
+      IsFromConfigFile = configuration is not null
     };
 
     if (configuration is null)
@@ -35,8 +38,6 @@ internal class CoverletMTPSettingsParser
     settings.ExcludeFilters = ParseExcludeFilters(section);
     settings.ExcludeSourceFiles = ParseArrayValue(section, CoverletMTPConstants.ExcludeByFileKey);
     settings.ExcludeAttributes = ParseArrayValue(section, CoverletMTPConstants.ExcludeByAttributeKey);
-    // Track if ExcludeByAttribute was explicitly set in config (even if empty) to suppress defaults
-    settings.ExcludeByAttributeExplicitlySet = section[CoverletMTPConstants.ExcludeByAttributeKey] is not null;
     settings.MergeWith = section[CoverletMTPConstants.MergeWithKey];
     settings.UseSourceLink = ParseBoolValue(section, CoverletMTPConstants.UseSourceLinkKey);
     settings.SingleHit = ParseBoolValue(section, CoverletMTPConstants.SingleHitKey);

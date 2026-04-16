@@ -70,14 +70,15 @@ internal sealed class CoverageConfiguration
       return formats;
     }
 
-    // Priority 2: Configuration file setting
-    if (_configFileSettings?.ReportFormats is { Length: > 0 } configFormats)
+    // Priority 2: Configuration file - authoritative when present
+    if (_configFileSettings?.IsFromConfigFile == true)
     {
-      LogOptionValue(CoverletOptionNames.Formats, configFormats, isExplicit: false, source: "config file");
-      return configFormats;
+      // Config file is authoritative - use exactly what user specified
+      LogOptionValue(CoverletOptionNames.Formats, _configFileSettings.ReportFormats, isExplicit: false, source: "config file");
+      return _configFileSettings.ReportFormats;
     }
 
-    // Priority 3: Built-in default
+    // Priority 3: Built-in default - only when no config file
     string[] defaultFormats = ["json", "cobertura"];
     LogOptionValue(CoverletOptionNames.Formats, defaultFormats, isExplicit: false);
     return defaultFormats;
@@ -94,13 +95,14 @@ internal sealed class CoverageConfiguration
       return filters;
     }
 
-    // Priority 2: Configuration file setting
-    if (_configFileSettings?.IncludeFilters is { Length: > 0 } configFilters)
+    // Priority 2: Configuration file - authoritative when present
+    if (_configFileSettings?.IsFromConfigFile == true)
     {
-      LogOptionValue(CoverletOptionNames.Include, configFilters, isExplicit: false, source: "config file");
-      return configFilters;
+      LogOptionValue(CoverletOptionNames.Include, _configFileSettings.IncludeFilters, isExplicit: false, source: "config file");
+      return _configFileSettings.IncludeFilters;
     }
 
+    // Priority 3: Default - only when no config file
     return [];
   }
 
@@ -111,21 +113,21 @@ internal sealed class CoverageConfiguration
       CoverletOptionNames.Exclude,
       out string[]? filters))
     {
-      // Merge explicit exclusions with defaults
+      // Merge explicit exclusions with defaults for CLI convenience
       string[] merged = [.. s_defaultExcludeFilters.Concat(filters).Distinct()];
       LogOptionValue(CoverletOptionNames.Exclude, merged, isExplicit: true);
       return merged;
     }
 
-    // Priority 2: Configuration file setting
+    // Priority 2: Configuration file - authoritative when present
     // Config file filters already include [coverlet.*]* prepended by CoverletMTPSettingsParser
-    if (_configFileSettings?.ExcludeFilters is { Length: > 0 } configFilters)
+    if (_configFileSettings?.IsFromConfigFile == true)
     {
-      LogOptionValue(CoverletOptionNames.Exclude, configFilters, isExplicit: false, source: "config file");
-      return configFilters;
+      LogOptionValue(CoverletOptionNames.Exclude, _configFileSettings.ExcludeFilters, isExplicit: false, source: "config file");
+      return _configFileSettings.ExcludeFilters;
     }
 
-    // Priority 3: Built-in defaults
+    // Priority 3: Built-in defaults - only when no config file
     LogOptionValue(CoverletOptionNames.Exclude, s_defaultExcludeFilters, isExplicit: false);
     return s_defaultExcludeFilters;
   }
@@ -141,13 +143,14 @@ internal sealed class CoverageConfiguration
       return filters;
     }
 
-    // Priority 2: Configuration file setting
-    if (_configFileSettings?.ExcludeSourceFiles is { Length: > 0 } configFilters)
+    // Priority 2: Configuration file - authoritative when present
+    if (_configFileSettings?.IsFromConfigFile == true)
     {
-      LogOptionValue(CoverletOptionNames.ExcludeByFile, configFilters, isExplicit: false, source: "config file");
-      return configFilters;
+      LogOptionValue(CoverletOptionNames.ExcludeByFile, _configFileSettings.ExcludeSourceFiles, isExplicit: false, source: "config file");
+      return _configFileSettings.ExcludeSourceFiles;
     }
 
+    // Priority 3: Default - only when no config file
     return [];
   }
 
@@ -158,24 +161,21 @@ internal sealed class CoverageConfiguration
       CoverletOptionNames.ExcludeByAttribute,
       out string[]? filters))
     {
-      // Merge explicit exclusions with defaults
+      // Merge explicit exclusions with defaults for CLI convenience
       string[] merged = [.. s_defaultExcludeByAttributes.Concat(filters).Distinct()];
       LogOptionValue(CoverletOptionNames.ExcludeByAttribute, merged, isExplicit: true);
       return merged;
     }
 
-    // Priority 2: Configuration file setting
-    // Check if explicitly set in config file (even if empty)
-    if (_configFileSettings?.ExcludeByAttributeExplicitlySet == true)
+    // Priority 2: Configuration file - authoritative when present
+    if (_configFileSettings?.IsFromConfigFile == true)
     {
-      // Config file explicitly set this value - use it without merging defaults
-      // This allows empty string in config to suppress defaults
-      string[] configFilters = _configFileSettings.ExcludeAttributes;
-      LogOptionValue(CoverletOptionNames.ExcludeByAttribute, configFilters, isExplicit: false, source: "config file");
-      return configFilters;
+      // Config file is authoritative - use exactly what user specified, no defaults merged
+      LogOptionValue(CoverletOptionNames.ExcludeByAttribute, _configFileSettings.ExcludeAttributes, isExplicit: false, source: "config file");
+      return _configFileSettings.ExcludeAttributes;
     }
 
-    // Priority 3: Built-in defaults
+    // Priority 3: Built-in defaults - only when no config file
     LogOptionValue(CoverletOptionNames.ExcludeByAttribute, s_defaultExcludeByAttributes, isExplicit: false);
     return s_defaultExcludeByAttributes;
   }
@@ -191,13 +191,14 @@ internal sealed class CoverageConfiguration
       return options[0];
     }
 
-    // Priority 2: Configuration file setting
-    if (!string.IsNullOrWhiteSpace(_configFileSettings?.ExcludeAssembliesWithoutSources))
+    // Priority 2: Configuration file - authoritative when present
+    if (_configFileSettings?.IsFromConfigFile == true)
     {
-      LogOptionValue(CoverletOptionNames.ExcludeAssembliesWithoutSources, [_configFileSettings!.ExcludeAssembliesWithoutSources], isExplicit: false, source: "config file");
+      LogOptionValue(CoverletOptionNames.ExcludeAssembliesWithoutSources, [_configFileSettings.ExcludeAssembliesWithoutSources], isExplicit: false, source: "config file");
       return _configFileSettings.ExcludeAssembliesWithoutSources;
     }
 
+    // Priority 3: Default - only when no config file
     return "None";
   }
 
@@ -212,13 +213,14 @@ internal sealed class CoverageConfiguration
       return directories;
     }
 
-    // Priority 2: Configuration file setting
-    if (_configFileSettings?.IncludeDirectories is { Length: > 0 } configDirs)
+    // Priority 2: Configuration file - authoritative when present
+    if (_configFileSettings?.IsFromConfigFile == true)
     {
-      LogOptionValue(CoverletOptionNames.IncludeDirectory, configDirs, isExplicit: false, source: "config file");
-      return configDirs;
+      LogOptionValue(CoverletOptionNames.IncludeDirectory, _configFileSettings.IncludeDirectories, isExplicit: false, source: "config file");
+      return _configFileSettings.IncludeDirectories;
     }
 
+    // Priority 3: Default - only when no config file
     return [];
   }
 
@@ -242,13 +244,14 @@ internal sealed class CoverageConfiguration
       return attributes;
     }
 
-    // Priority 2: Configuration file setting
-    if (_configFileSettings?.DoesNotReturnAttributes is { Length: > 0 } configAttrs)
+    // Priority 2: Configuration file - authoritative when present
+    if (_configFileSettings?.IsFromConfigFile == true)
     {
-      LogOptionValue(CoverletOptionNames.DoesNotReturnAttribute, configAttrs, isExplicit: false, source: "config file");
-      return configAttrs;
+      LogOptionValue(CoverletOptionNames.DoesNotReturnAttribute, _configFileSettings.DoesNotReturnAttributes, isExplicit: false, source: "config file");
+      return _configFileSettings.DoesNotReturnAttributes;
     }
 
+    // Priority 3: Default - only when no config file
     return [];
   }
 

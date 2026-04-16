@@ -588,8 +588,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     if (!string.IsNullOrEmpty(entryAssembly) && _fileSystem.Exists(entryAssembly))  // Use injected file system
     {
       string fileName = Path.GetFileName(entryAssembly);
-      if (!fileName.StartsWith("testhost", StringComparison.OrdinalIgnoreCase) &&
-          !fileName.StartsWith("dotnet", StringComparison.OrdinalIgnoreCase))
+      if (!fileName.StartsWith("testhost", StringComparison.OrdinalIgnoreCase))
       {
         return entryAssembly;
       }
