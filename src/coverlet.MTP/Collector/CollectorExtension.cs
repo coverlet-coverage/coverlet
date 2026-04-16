@@ -598,12 +598,63 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   }
 
   /// <summary>
-  /// Loads configuration file settings from coverlet.mtp.appsettings.json.
+  /// Loads configuration file settings from testconfig.json or coverlet.mtp.appsettings.json.
+  /// Priority: [appname].testconfig.json > testconfig.json > coverlet.mtp.appsettings.json
   /// The config file is expected to be in the same directory as the test module.
   /// </summary>
   /// <param name="testModulePath">Path to the test assembly</param>
-  /// <returns>Parsed settings, or null if config file not found</returns>
+  /// <returns>Parsed settings, or null if no config file found</returns>
   private CoverletMTPSettings? LoadConfigurationFileSettings(string testModulePath)
+  {
+    // Try testconfig.json first (new MTP standard format)
+    CoverletMTPSettings? settings = LoadTestConfigSettings(testModulePath);
+    if (settings is not null)
+    {
+      return settings;
+    }
+
+    // Fall back to coverlet.mtp.appsettings.json (legacy format)
+    return LoadLegacyAppSettings(testModulePath);
+  }
+
+  /// <summary>
+  /// Loads configuration from testconfig.json (Microsoft Testing Platform standard format).
+  /// </summary>
+  /// <param name="testModulePath">Path to the test assembly</param>
+  /// <returns>Parsed settings if testconfig.json exists with Coverlet section, null otherwise</returns>
+  private CoverletMTPSettings? LoadTestConfigSettings(string testModulePath)
+  {
+    try
+    {
+      string? configPath = TestConfigParser.FindTestConfigFile(testModulePath, _fileSystem);
+      if (configPath is null)
+      {
+        return null;
+      }
+
+      _logger.LogInformation($"Loading configuration from: {configPath}");
+      CoverletMTPSettings? settings = TestConfigParser.Parse(testModulePath, _fileSystem);
+
+      if (settings is not null)
+      {
+        _logger.LogVerbose($"testconfig.json settings loaded: Format={string.Join(",", settings.ReportFormats)}, IncludeTestAssembly={settings.IncludeTestAssembly}");
+      }
+
+      return settings;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogWarning($"Failed to load testconfig.json: {ex}");
+      return null;
+    }
+  }
+
+  /// <summary>
+  /// Loads configuration from coverlet.mtp.appsettings.json (legacy format).
+  /// </summary>
+  /// <param name="testModulePath">Path to the test assembly</param>
+  /// <returns>Parsed settings if config file exists, null otherwise</returns>
+  private CoverletMTPSettings? LoadLegacyAppSettings(string testModulePath)
   {
     try
     {
