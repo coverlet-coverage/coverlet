@@ -429,7 +429,193 @@ public class ConfigurationFileTests
       $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
   }
 
-  #region Helper Methods
+  /// <summary>
+  /// Validates that testconfig.json (MTP standard format) works with authoritative mode.
+  /// When using testconfig.json, the configuration file is authoritative:
+  /// - No defaults are injected for Format, Exclude, ExcludeByAttribute, or other settings
+  /// - Only the minimal "[coverlet.*]*" exclude filter is prepended to prevent self-instrumentation
+  ///
+  /// This test verifies that testconfig.json format is properly parsed and settings are applied.
+  /// Per documentation: "testconfig.json - Microsoft Testing Platform standard format (recommended)"
+  /// </summary>
+  [Fact]
+  public async Task TestConfigJson_AuthoritativeMode_SuppressesDefaults()
+  {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+    // Arrange - Create testconfig.json with minimal settings
+    // Expected: Empty collections should suppress defaults (authoritative mode)
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProjectWithTestConfigJson(testName, configContent: """
+    {
+      "platformOptions": {
+        "Coverlet": {
+          "exclude": "",
+          "include": "",
+          "excludeByAttribute": "",
+          "excludeByFile": "",
+          "format": "cobertura",
+          "singleHit": true,
+          "skipAutoProps": true
+        }
+      }
+    }
+    """);
+    await BuildProject(testProject.SolutionPath);
+
+    // Act - Enable diagnostics to verify configuration settings
+    var result = await RunTestsWithCoverage(testProject, "--coverlet", enableDiagnostics: true);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert - test should pass
+    Assert.True(result.ExitCode == 0,
+      $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+
+    // Verify coverage was collected
+    string[] coverageFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      CoverageCoberturaFileName.Insert(CoverageCoberturaFileName.LastIndexOf('.'), ".*"),
+      SearchOption.AllDirectories);
+    Assert.NotEmpty(coverageFiles);
+
+    // Verify configuration via diagnostic log
+    DiagnosticSettings? diagSettings = ParseDiagnosticFile(testProject.OutputDirectory);
+
+    Assert.NotNull(diagSettings);
+
+    TestContext.Current?.AddAttachment("Diagnostic Log", diagSettings.RawContent);
+
+    // CRITICAL: Only "[coverlet.*]*" should remain as exclude filter (authoritative mode)
+    const string expectedExcludeFilter = "[coverlet.*]*";
+
+    Assert.True(diagSettings.ExcludeFilters.Count > 0,
+      $"Expected at least one exclude filter but found none.\n" +
+      $"Diagnostic content:\n{diagSettings.RawContent}");
+
+    // Verify only the minimal required coverlet filter is present
+    Assert.True(diagSettings.ExcludeFilters.Count == 1,
+      $"Expected exactly one exclude filter '{expectedExcludeFilter}' but found: {string.Join(", ", diagSettings.ExcludeFilters)}\n" +
+      $"Extended defaults like [xunit.*]*, [NUnit3.*]*, [Microsoft.Testing.*]* should NOT be present when using testconfig.json.\n" +
+      $"Diagnostic content:\n{diagSettings.RawContent}");
+    Assert.Equal(expectedExcludeFilter, diagSettings.ExcludeFilters[0]);
+
+    // Verify the extended default filters are NOT present (authoritative mode)
+    string[] extendedDefaults = ["xunit", "NUnit3", "nunit", "Microsoft.Testing", "Microsoft.Testplatform", "Microsoft.VisualStudio.TestPlatform"];
+    foreach (string defaultFilter in extendedDefaults)
+    {
+      Assert.False(diagSettings.ExcludeFilters.Any(f => f.Contains(defaultFilter, StringComparison.OrdinalIgnoreCase)),
+        $"Extended default filter containing '{defaultFilter}' should NOT be present when using testconfig.json.\n" +
+        $"Found filters: {string.Join(", ", diagSettings.ExcludeFilters)}");
+    }
+
+    // Verify ExcludeByAttribute defaults are suppressed when config specifies empty (authoritative mode)
+    if (diagSettings.ExcludeByAttribute is not null)
+    {
+      string[] defaultAttributes = ["ExcludeFromCodeCoverageAttribute", "GeneratedCodeAttribute", "CompilerGeneratedAttribute"];
+      foreach (string defaultAttr in defaultAttributes)
+      {
+        Assert.False(diagSettings.ExcludeByAttribute.Contains(defaultAttr, StringComparison.OrdinalIgnoreCase),
+          $"Default attribute '{defaultAttr}' should NOT be present when testconfig.json specifies empty excludeByAttribute.\n" +
+          $"Found ExcludeByAttribute: {diagSettings.ExcludeByAttribute}\n" +
+          $"Expected behavior: Authoritative mode should suppress/purge defaults.\n" +
+          $"Diagnostic content:\n{diagSettings.RawContent}");
+      }
+    }
+
+    // Verify include filters are empty (no defaults applied in authoritative mode)
+    // Note: The diagnostic log may output "(empty)" for empty filters, which gets parsed as a filter value
+    bool includeFiltersEffectivelyEmpty = diagSettings.IncludeFilters.Count == 0 ||
+      (diagSettings.IncludeFilters.Count == 1 && diagSettings.IncludeFilters[0] == "(empty)");
+    Assert.True(includeFiltersEffectivelyEmpty,
+      $"Expected empty include filters but found {diagSettings.IncludeFilters.Count} filter(s): [{string.Join(", ", diagSettings.IncludeFilters)}]");
+
+    // Verify boolean settings from testconfig.json are applied
+    Assert.True(diagSettings.SingleHit, $"Expected SingleHit=true from testconfig.json but got {diagSettings.SingleHit}.\n" +
+      $"Diagnostic content:\n{diagSettings.RawContent}");
+
+    Assert.True(diagSettings.SkipAutoProps, $"Expected SkipAutoProps=true from testconfig.json but got {diagSettings.SkipAutoProps}.\n" +
+      $"Diagnostic content:\n{diagSettings.RawContent}");
+
+    // Log diagnostic settings for debugging
+    TestContext.Current?.AddAttachment("Verified Settings",
+      $"ExcludeFilters: {string.Join(", ", diagSettings.ExcludeFilters)}\n" +
+      $"ExcludeByAttribute: {diagSettings.ExcludeByAttribute ?? "(empty)"}\n" +
+      $"IncludeFilters: {string.Join(", ", diagSettings.IncludeFilters)}\n" +
+      $"SingleHit: {diagSettings.SingleHit}\n" +
+      $"SkipAutoProps: {diagSettings.SkipAutoProps}");
+  }
+
+  /// <summary>
+  /// Validates that testconfig.json takes priority over coverlet.mtp.appsettings.json
+  /// when both configuration files exist.
+  ///
+  /// Per documentation:
+  /// "Priority 2: testconfig.json (app-specific > generic)"
+  /// "Priority 3: coverlet.mtp.appsettings.json (legacy)"
+  /// </summary>
+  [Fact]
+  public async Task TestConfigJson_TakesPriorityOver_LegacyAppSettings()
+  {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+    // Arrange - Create both testconfig.json and coverlet.mtp.appsettings.json
+    // testconfig.json specifies json format, legacy specifies opencover
+    // If testconfig.json takes priority, we should see json output
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProjectWithBothConfigFiles(
+      testName,
+      testConfigContent: """
+      {
+        "platformOptions": {
+          "Coverlet": {
+            "format": "json",
+            "singleHit": true
+          }
+        }
+      }
+      """,
+      legacyConfigContent: """
+      {
+        "Coverlet": {
+          "Format": "opencover",
+          "SingleHit": false
+        }
+      }
+      """);
+    await BuildProject(testProject.SolutionPath);
+
+    // Act
+    var result = await RunTestsWithCoverage(testProject, "--coverlet", enableDiagnostics: true);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert - test should pass
+    Assert.True(result.ExitCode == 0,
+      $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+
+    // Verify JSON format file was produced (from testconfig.json, not opencover from legacy)
+    string[] jsonCoverageFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      CoverageJsonFileName.Insert(CoverageJsonFileName.LastIndexOf('.'), ".*"),
+      SearchOption.AllDirectories);
+    Assert.True(jsonCoverageFiles.Length > 0,
+      $"Expected JSON coverage file (from testconfig.json priority) but none found.\n" +
+      $"Files found: {string.Join(", ", Directory.GetFiles(testProject.OutputDirectory, "*", SearchOption.AllDirectories).Select(Path.GetFileName))}");
+
+    // Verify diagnostic settings show testconfig.json values
+    DiagnosticSettings? diagSettings = ParseDiagnosticFile(testProject.OutputDirectory);
+    if (diagSettings is not null)
+    {
+      TestContext.Current?.AddAttachment("Diagnostic Log", diagSettings.RawContent);
+
+      // Verify SingleHit=true (from testconfig.json, not false from legacy)
+      Assert.True(diagSettings.SingleHit,
+        $"Expected SingleHit=true from testconfig.json but got {diagSettings.SingleHit}.\n" +
+        $"testconfig.json should take priority over coverlet.mtp.appsettings.json.\n" +
+        $"Diagnostic content:\n{diagSettings.RawContent}");
+    }
+  }
 
   private TestProjectInfo CreateTestProjectWithConfigFile(string testName, string configContent)
   {
@@ -632,6 +818,375 @@ public class StringUtilsTests
     File.WriteAllText(Path.Combine(testProjectPath, "Tests.cs"), testCode);
   }
 
+  /// <summary>
+  /// Creates a test project with testconfig.json (MTP standard format).
+  /// </summary>
+  private TestProjectInfo CreateTestProjectWithTestConfigJson(string testName, string configContent)
+  {
+    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    Directory.CreateDirectory(artifactsTemp);
+
+    string sanitizedTestName = SanitizePathName(testName);
+    string uniqueSuffix = $"{DateTime.Now:yyyyMMddHHmmssfff}_{Environment.ProcessId}";
+    string solutionPath = Path.Combine(artifactsTemp, $"MTP_TestConfig_{sanitizedTestName}_{uniqueSuffix}");
+
+    if (Directory.Exists(solutionPath))
+    {
+      try
+      {
+        Directory.Delete(solutionPath, recursive: true);
+      }
+      catch (IOException)
+      {
+        solutionPath = Path.Combine(artifactsTemp, $"MTP_TestConfig_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
+      }
+      catch (UnauthorizedAccessException)
+      {
+        solutionPath = Path.Combine(artifactsTemp, $"MTP_TestConfig_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
+      }
+    }
+
+    Directory.CreateDirectory(solutionPath);
+
+    string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
+    string testProjectPath = Path.Combine(solutionPath, TestProjectName);
+    Directory.CreateDirectory(sutProjectPath);
+    Directory.CreateDirectory(testProjectPath);
+
+    CreateNugetConfig(solutionPath);
+    string coverletMtpVersion = GetCoverletMtpPackageVersion();
+
+    CreateSutLibraryProject(sutProjectPath);
+    CreateTestProjectWithTestConfigJsonFile(testProjectPath, coverletMtpVersion, configContent);
+
+    string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
+    CreateSolutionFile(solutionFile);
+
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
+  }
+
+  /// <summary>
+  /// Creates a test project with both testconfig.json and coverlet.mtp.appsettings.json
+  /// to test configuration priority.
+  /// </summary>
+  private TestProjectInfo CreateTestProjectWithBothConfigFiles(string testName, string testConfigContent, string legacyConfigContent)
+  {
+    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    Directory.CreateDirectory(artifactsTemp);
+
+    string sanitizedTestName = SanitizePathName(testName);
+    string uniqueSuffix = $"{DateTime.Now:yyyyMMddHHmmssfff}_{Environment.ProcessId}";
+    string solutionPath = Path.Combine(artifactsTemp, $"MTP_BothConfig_{sanitizedTestName}_{uniqueSuffix}");
+
+    if (Directory.Exists(solutionPath))
+    {
+      try
+      {
+        Directory.Delete(solutionPath, recursive: true);
+      }
+      catch (IOException)
+      {
+        solutionPath = Path.Combine(artifactsTemp, $"MTP_BothConfig_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
+      }
+      catch (UnauthorizedAccessException)
+      {
+        solutionPath = Path.Combine(artifactsTemp, $"MTP_BothConfig_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
+      }
+    }
+
+    Directory.CreateDirectory(solutionPath);
+
+    string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
+    string testProjectPath = Path.Combine(solutionPath, TestProjectName);
+    Directory.CreateDirectory(sutProjectPath);
+    Directory.CreateDirectory(testProjectPath);
+
+    CreateNugetConfig(solutionPath);
+    string coverletMtpVersion = GetCoverletMtpPackageVersion();
+
+    CreateSutLibraryProject(sutProjectPath);
+    CreateTestProjectWithBothConfigFilesInternal(testProjectPath, coverletMtpVersion, testConfigContent, legacyConfigContent);
+
+    string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
+    CreateSolutionFile(solutionFile);
+
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
+  }
+
+  /// <summary>
+  /// Creates a test project with both app-specific testconfig.json and generic testconfig.json
+  /// to test file priority.
+  /// </summary>
+  private TestProjectInfo CreateTestProjectWithAppSpecificTestConfig(string testName, string appSpecificContent, string genericContent)
+  {
+    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    Directory.CreateDirectory(artifactsTemp);
+
+    string sanitizedTestName = SanitizePathName(testName);
+    string uniqueSuffix = $"{DateTime.Now:yyyyMMddHHmmssfff}_{Environment.ProcessId}";
+    string solutionPath = Path.Combine(artifactsTemp, $"MTP_AppSpecific_{sanitizedTestName}_{uniqueSuffix}");
+
+    if (Directory.Exists(solutionPath))
+    {
+      try
+      {
+        Directory.Delete(solutionPath, recursive: true);
+      }
+      catch (IOException)
+      {
+        solutionPath = Path.Combine(artifactsTemp, $"MTP_AppSpecific_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
+      }
+      catch (UnauthorizedAccessException)
+      {
+        solutionPath = Path.Combine(artifactsTemp, $"MTP_AppSpecific_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
+      }
+    }
+
+    Directory.CreateDirectory(solutionPath);
+
+    string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
+    string testProjectPath = Path.Combine(solutionPath, TestProjectName);
+    Directory.CreateDirectory(sutProjectPath);
+    Directory.CreateDirectory(testProjectPath);
+
+    CreateNugetConfig(solutionPath);
+    string coverletMtpVersion = GetCoverletMtpPackageVersion();
+
+    CreateSutLibraryProject(sutProjectPath);
+    CreateTestProjectWithAppSpecificTestConfigInternal(testProjectPath, coverletMtpVersion, appSpecificContent, genericContent);
+
+    string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
+    CreateSolutionFile(solutionFile);
+
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
+  }
+
+  private static void CreateTestProjectWithTestConfigJsonFile(string testProjectPath, string coverletMtpVersion, string configContent)
+  {
+    string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
+
+    string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
+    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <OutputType>Exe</OutputType>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
+    <DebugType>portable</DebugType>
+    <Deterministic>false</Deterministic>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
+    </RestoreSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include=""{relativeSutPath}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
+    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.1"" />
+    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.1"" />
+  </ItemGroup>
+  <!-- testconfig.json must be copied to output directory -->
+  <ItemGroup>
+    <None Update=""testconfig.json"">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>");
+
+    // Create testconfig.json (MTP standard format)
+    string configFilePath = Path.Combine(testProjectPath, "testconfig.json");
+    File.WriteAllText(configFilePath, configContent);
+
+    // Create test code
+    CreateTestCode(testProjectPath);
+  }
+
+  private static void CreateTestProjectWithBothConfigFilesInternal(
+    string testProjectPath,
+    string coverletMtpVersion,
+    string testConfigContent,
+    string legacyConfigContent)
+  {
+    string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
+
+    string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
+    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <OutputType>Exe</OutputType>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
+    <DebugType>portable</DebugType>
+    <Deterministic>false</Deterministic>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
+    </RestoreSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include=""{relativeSutPath}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
+    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.1"" />
+    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.1"" />
+  </ItemGroup>
+  <!-- Both config files must be copied to output directory -->
+  <ItemGroup>
+    <None Update=""testconfig.json"">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update=""coverlet.mtp.appsettings.json"">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>");
+
+    // Create testconfig.json (should take priority)
+    File.WriteAllText(Path.Combine(testProjectPath, "testconfig.json"), testConfigContent);
+
+    // Create coverlet.mtp.appsettings.json (legacy, lower priority)
+    File.WriteAllText(Path.Combine(testProjectPath, "coverlet.mtp.appsettings.json"), legacyConfigContent);
+
+    CreateTestCode(testProjectPath);
+  }
+
+  private static void CreateTestProjectWithAppSpecificTestConfigInternal(
+    string testProjectPath,
+    string coverletMtpVersion,
+    string appSpecificContent,
+    string genericContent)
+  {
+    string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
+
+    string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
+    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <OutputType>Exe</OutputType>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
+    <DebugType>portable</DebugType>
+    <Deterministic>false</Deterministic>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
+    </RestoreSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include=""{relativeSutPath}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
+    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.1"" />
+    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.1"" />
+  </ItemGroup>
+  <!-- Both app-specific and generic testconfig.json must be copied -->
+  <ItemGroup>
+    <None Update=""{TestProjectName}.testconfig.json"">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update=""testconfig.json"">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>");
+
+    // Create [appname].testconfig.json (should take priority)
+    File.WriteAllText(Path.Combine(testProjectPath, $"{TestProjectName}.testconfig.json"), appSpecificContent);
+
+    // Create generic testconfig.json (lower priority)
+    File.WriteAllText(Path.Combine(testProjectPath, "coverlet.mtp.appsettings.json"), genericContent);
+
+    CreateTestCode(testProjectPath);
+  }
+
+  private static void CreateTestCode(string testProjectPath)
+  {
+    string testCode = @"// Copyright (c) Toni Solarin-Sodara
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Xunit;
+using SampleLibrary;
+
+namespace TestProject;
+
+public class CalculatorTests
+{
+    [Fact]
+    public void Add_TwoNumbers_ReturnsSum()
+    {
+        var calc = new Calculator();
+        Assert.Equal(5, calc.Add(2, 3));
+    }
+
+    [Fact]
+    public void Subtract_TwoNumbers_ReturnsDifference()
+    {
+        var calc = new Calculator();
+        Assert.Equal(1, calc.Subtract(3, 2));
+    }
+
+    [Fact]
+    public void Multiply_TwoNumbers_ReturnsProduct()
+    {
+        var calc = new Calculator();
+        Assert.Equal(6, calc.Multiply(2, 3));
+    }
+}
+
+public class StringUtilsTests
+{
+    [Fact]
+    public void ToUpper_LowerCaseString_ReturnsUpperCase()
+    {
+        var utils = new StringUtils();
+        Assert.Equal(""HELLO"", utils.ToUpper(""hello""));
+    }
+
+    [Fact]
+    public void GetLength_String_ReturnsLength()
+    {
+        var utils = new StringUtils();
+        Assert.Equal(5, utils.GetLength(""hello""));
+    }
+}
+";
+    File.WriteAllText(Path.Combine(testProjectPath, "Tests.cs"), testCode);
+  }
+
   private void CreateNugetConfig(string solutionPath)
   {
     string localPackagesPath = Path.Combine(_repoRoot, "artifacts", "package", _buildConfiguration.ToLowerInvariant());
@@ -768,8 +1323,6 @@ EndGlobal
 
     return new TestResult(process.ExitCode, stdout, stderr);
   }
-
-  #endregion
 
 #region Helper Classes
 
