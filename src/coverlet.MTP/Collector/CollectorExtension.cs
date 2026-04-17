@@ -626,13 +626,24 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   {
     try
     {
+      // Log which testconfig.json file we're looking for
+      string? configPath = TestConfigParser.FindTestConfigFile(testModulePath, _fileSystem);
+      if (configPath is null)
+      {
+        _logger.LogVerbose($"No testconfig.json found for module: {testModulePath}");
+        return null;
+      }
+
+      _logger.LogVerbose($"Found testconfig.json: {configPath}");
+
       CoverletMTPSettings? settings = TestConfigParser.Parse(testModulePath, _fileSystem);
       if (settings is null)
       {
+        _logger.LogVerbose($"testconfig.json exists but contains no Coverlet section: {configPath}");
         return null;
       }
-      _logger.LogVerbose($"testconfig.json settings loaded: Format={string.Join(",", settings.ReportFormats)}, IncludeTestAssembly={settings.IncludeTestAssembly}");
 
+      _logger.LogVerbose($"testconfig.json settings loaded: Format={string.Join(",", settings.ReportFormats)}, IncludeTestAssembly={settings.IncludeTestAssembly}");
       return settings;
     }
     catch (Exception ex)

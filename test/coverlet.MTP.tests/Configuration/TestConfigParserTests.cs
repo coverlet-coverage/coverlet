@@ -349,5 +349,45 @@ public class TestConfigParserTests
     Assert.Equal(["lcov"], settings.ReportFormats);
   }
 
+  [Fact]
+  public void ParseWithPascalCaseKeysLikeUserJsonFormat()
+  {
+    // This test uses the exact JSON format the user reported as not working
+    // PascalCase keys like "Exclude", "ExcludeByAttribute", "Format", etc.
+    string testDirectory = Path.Combine("C:", "fake", "path");
+    string testModulePath = Path.Combine(testDirectory, "XUnitProject3.Tests.dll");
+    string configPath = Path.Combine(testDirectory, "XUnitProject3.Tests.testconfig.json");
+
+    // This is the exact JSON format from the user's report
+    string jsonContent = """
+    {
+      "platformOptions": {
+        "Coverlet": {
+          "Exclude": "[*.Tests]*,[xunit*]*",
+          "ExcludeByAttribute": "GeneratedCode,ExcludeFromCodeCoverage",
+          "Format": "cobertura,json,lcov,opencover",
+          "SkipAutoProps": true,
+          "ExcludeAssembliesWithoutSources": "MissingAll"
+        }
+      }
+    }
+    """;
+
+    _mockFileSystem.Setup(fs => fs.Exists(configPath)).Returns(true);
+    _mockFileSystem.Setup(fs => fs.ReadAllText(configPath)).Returns(jsonContent);
+
+    // Act
+    CoverletMTPSettings? settings = TestConfigParser.Parse(testModulePath, _mockFileSystem.Object);
+
+    // Assert
+    Assert.NotNull(settings);
+    Assert.Equal(["[coverlet.*]*", "[*.Tests]*", "[xunit*]*"], settings.ExcludeFilters);
+    Assert.Equal(["GeneratedCode", "ExcludeFromCodeCoverage"], settings.ExcludeAttributes);
+    Assert.Equal(["cobertura", "json", "lcov", "opencover"], settings.ReportFormats);
+    Assert.True(settings.SkipAutoProps);
+    Assert.Equal("MissingAll", settings.ExcludeAssembliesWithoutSources);
+    Assert.True(settings.IsFromConfigFile);
+  }
+
   #endregion
 }
