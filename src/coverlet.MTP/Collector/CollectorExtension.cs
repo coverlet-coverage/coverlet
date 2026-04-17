@@ -630,13 +630,18 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       string? configPath = TestConfigParser.FindTestConfigFile(testModulePath, _fileSystem);
       if (configPath is null)
       {
+        // Log both candidate paths so users understand what was searched
+        string? directory = Path.GetDirectoryName(testModulePath);
+        string appName = Path.GetFileNameWithoutExtension(testModulePath);
         _logger.LogVerbose($"No testconfig.json found for module: {testModulePath}");
+        _logger.LogVerbose($"  Searched: {appName}{TestConfigParser.TestConfigFileNameSuffix}, {TestConfigParser.GenericTestConfigFileName}");
         return null;
       }
 
       _logger.LogVerbose($"Found testconfig.json: {configPath}");
 
-      CoverletMTPSettings? settings = TestConfigParser.Parse(testModulePath, _fileSystem);
+      // Use the already-discovered configPath to avoid duplicate filesystem lookups
+      CoverletMTPSettings? settings = TestConfigParser.ParseFromFile(configPath, testModulePath, _fileSystem);
       if (settings is null)
       {
         _logger.LogVerbose($"testconfig.json exists but contains no Coverlet section: {configPath}");

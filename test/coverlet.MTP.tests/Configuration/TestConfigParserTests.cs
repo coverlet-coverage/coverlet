@@ -350,7 +350,7 @@ public class TestConfigParserTests
   }
 
   [Fact]
-  public void ParseWithPascalCaseKeysLikeUserJsonFormat()
+  public void ParseWithPascalCaseKeysMapsCorrectly()
   {
     // This test uses the exact JSON format the user reported as not working
     // PascalCase keys like "Exclude", "ExcludeByAttribute", "Format", etc.

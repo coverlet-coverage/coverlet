@@ -76,12 +76,13 @@ internal static class TestConfigParser
 
   /// <summary>
   /// Parse settings from a specific testconfig.json file.
+  /// Use this overload when the config path is already known to avoid duplicate filesystem lookups.
   /// </summary>
   /// <param name="configPath">Path to the testconfig.json file</param>
   /// <param name="testModulePath">Path to the test assembly</param>
   /// <param name="fileSystem">File system abstraction</param>
   /// <returns>Parsed settings if file contains Coverlet section, null otherwise</returns>
-  private static CoverletMTPSettings? ParseFromFile(string configPath, string testModulePath, IFileSystem fileSystem)
+  internal static CoverletMTPSettings? ParseFromFile(string configPath, string testModulePath, IFileSystem fileSystem)
   {
     string jsonContent = fileSystem.ReadAllText(configPath);
 
