@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Release date 2026-04-17
+### Packages
+coverlet.msbuild 10.0.0
+coverlet.console 10.0.0
+coverlet.collector 10.0.0
+coverlet.MTP 10.0.0
+
 ## Improvements
 
 - Unique Report Filenames (coverlet.MTP and AzDO) [#1866](https://github.com/coverlet-coverage/coverlet/issues/1866)
