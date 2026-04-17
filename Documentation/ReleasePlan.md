@@ -13,11 +13,12 @@ PATCH version when you make backwards-compatible bug fixes.
 Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
 ```
 
-We release 3 components as NuGet packages:
+We release 4 components as NuGet packages:
 
-**coverlet.msbuild.nupkg**
-**coverlet.console.nupkg**
-**coverlet.collector.nupkg**
+* **coverlet.msbuild.nupkg**
+* **coverlet.console.nupkg**
+* **coverlet.collector.nupkg**
+* **coverlet.MTP.nupkg**
 
 ## How to manually compare latest release with nightly build
 
@@ -49,7 +50,7 @@ In the following example the benchmark repository refit (<https://github.com/rea
 
 This is the steps to release new packages to nuget.org
 
-1. Update projects version in file `version.json` in root of repo (remove `-preview.{height}` and adjust version)
+1. Update projects version files. There are two `version.json` files in the repo. `<roo>\version.json` and `<root>\src\legacy\version.json` (remove `-preview.{height}` and adjust version)
 
     Do a PR and merge to master.
 
@@ -60,21 +61,26 @@ This is the steps to release new packages to nuget.org
   ```shell
   dotnet pack -c release /p:TF_BUILD=true /p:PublicRelease=true
   ...
-  coverlet.core -> C:\GitHub\coverlet\artifacts\bin\coverlet.core\release_netstandard2.0\coverlet.core.dll
-  coverlet.core -> C:\GitHub\coverlet\artifacts\bin\coverlet.core\release_net8.0\coverlet.core.dll
-  coverlet.collector -> C:\GitHub\coverlet\artifacts\bin\coverlet.collector\release_netstandard2.0\coverlet.collector.dll
-  coverlet.collector -> C:\GitHub\coverlet\artifacts\bin\coverlet.collector\release_net8.0\coverlet.collector.dll
-  coverlet.msbuild.tasks -> C:\GitHub\coverlet\artifacts\bin\coverlet.msbuild.tasks\release_netstandard2.0\coverlet.msbuild.tasks.dll
-  coverlet.msbuild.tasks -> C:\GitHub\coverlet\artifacts\bin\coverlet.msbuild.tasks\release_net8.0\coverlet.msbuild.tasks.dll
-  coverlet.console -> C:\GitHub\coverlet\artifacts\bin\coverlet.console\release\coverlet.console.dll
-  coverlet.console -> C:\GitHub\coverlet\artifacts\bin\coverlet.console\release\coverlet.console.exe
-  ...
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.8.0.1.nupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.msbuild.8.0.1.snupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.8.0.1.nupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.collector.8.0.1.snupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.8.0.1.nupkg'.
-  Successfully created package 'C:\GitHub\coverlet\artifacts\package\release\coverlet.console.8.0.1.snupkg'.
+  coverlet.core net8.0 succeeded (0,3s) → artifacts\bin\coverlet.core\release_net8.0\coverlet.core.dll
+  coverlet.core net9.0 succeeded (0,3s) → artifacts\bin\coverlet.core\release_net9.0\coverlet.core.dll
+  coverlet.core net10.0 succeeded (0,3s) → artifacts\bin\coverlet.core\release_net10.0\coverlet.core.dll
+  coverlet.msbuild.tasks net9.0 succeeded (0,3s) → artifacts\bin\coverlet.msbuild.tasks\release_net9.0\coverlet.msbuild.tasks.dll
+  coverlet.MTP net8.0 succeeded (0,3s) → artifacts\bin\coverlet.MTP\release_net8.0\coverlet.MTP.dll
+  coverlet.console net10.0 succeeded (0,3s) → artifacts\bin\coverlet.console\release_net10.0\coverlet.console.dll
+  coverlet.core netstandard2.0 succeeded (0,1s) → artifacts\bin\coverlet.core\release_netstandard2.0\coverlet.core.dll
+  coverlet.msbuild.tasks net10.0 succeeded (0,5s) → artifacts\bin\coverlet.msbuild.tasks\release_net10.0\coverlet.msbuild.tasks.dll
+  coverlet.collector net10.0 succeeded (0,5s) → artifacts\bin\coverlet.collector\release_net10.0\coverlet.collector.dll
+  coverlet.MTP net10.0 succeeded (0,5s) → artifacts\bin\coverlet.MTP\release_net10.0\coverlet.MTP.dll
+  coverlet.collector net9.0 succeeded (0,6s) → artifacts\bin\coverlet.collector\release_net9.0\coverlet.collector.dll
+  coverlet.console net9.0 succeeded (0,3s) → artifacts\bin\coverlet.console\release_net9.0\coverlet.console.dll
+  coverlet.console net8.0 succeeded (0,4s) → artifacts\bin\coverlet.console\release_net8.0\coverlet.console.dll
+  coverlet.msbuild.tasks net8.0 succeeded (0,5s) → artifacts\bin\coverlet.msbuild.tasks\release_net8.0\coverlet.msbuild.tasks.dll
+  coverlet.collector net8.0 succeeded (0,4s) → artifacts\bin\coverlet.collector\release_net8.0\coverlet.collector.dll
+  coverlet.console net8.0 succeeded (0,0s) → artifacts\publish\coverlet.console\release_net8.0\
+  coverlet.MTP netstandard2.0 succeeded (0,2s) → artifacts\bin\coverlet.MTP\release_netstandard2.0\coverlet.MTP.dll
+  coverlet.console net10.0 succeeded (0,0s) → artifacts\publish\coverlet.console\release_net10.0\
+  coverlet.msbuild.tasks netstandard2.0 succeeded (0,1s) → artifacts\bin\coverlet.msbuild.tasks\release_netstandard2.0\coverlet.msbuild.tasks.dll
+  coverlet.console net9.0 succeeded (0,1s) → artifacts\publish\coverlet.console\release_net9.0\
   ...
   ```
 
