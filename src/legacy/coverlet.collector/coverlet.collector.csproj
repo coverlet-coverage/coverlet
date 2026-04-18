@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">$(NetMinimum);net9.0;$(NetCurrent)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(LEGACY)' != ''">$(NetMinimum);$(NetCurrent)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' == ''">$(NetMinimum);net9.0;$(NetCurrent);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' != ''">$(NetMinimum);$(NetCurrent);netstandard2.0</TargetFrameworks>
     <AssemblyTitle>coverlet.collector</AssemblyTitle>
     <DevelopmentDependency>true</DevelopmentDependency>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
