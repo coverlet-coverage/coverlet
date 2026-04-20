@@ -60,6 +60,109 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
+    public void SelectionStatements_IfWithoutElse_OnlyTrueBranch()
+    {
+      // Test for issue #1786: if without else reports incorrect branch coverage
+      // When only the true branch runs, branch coverage should be 50% (1 of 2 branches)
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                  {
+                    // Only execute true branch
+                    instance.IfWithoutElse(true);
+                    return Task.CompletedTask;
+                  }, persistPrepareResultToFile: pathSerialize[0]);
+          return 0;
+        }, [path]);
+
+        CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+        // Generate html report to check
+        // TestInstrumentationHelper.GenerateHtmlReport(result);
+
+        // Expected behavior: 2 branches exist, only 1 should be covered
+        result.Document("Instrumentation.SelectionStatements.cs")
+              // Line 47 (return 1) should be hit, line 50 (return 0) should NOT be hit
+              .AssertLinesCovered((47, 1), (50, 0))
+              // Branch at line 45: ordinal 0 (true path) hit, ordinal 1 (false path) NOT hit
+              .AssertBranchesCovered((45, 0, 1), (45, 1, 0));
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void SelectionStatements_IfWithoutElse_OnlyFalseBranch()
+    {
+      // Verify the false branch also works correctly
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                  {
+                    // Only execute false branch (skip the if block)
+                    instance.IfWithoutElse(false);
+                    return Task.CompletedTask;
+                  }, persistPrepareResultToFile: pathSerialize[0]);
+          return 0;
+        }, [path]);
+
+        CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+        // Expected behavior: 2 branches exist, only the false branch covered
+        result.Document("Instrumentation.SelectionStatements.cs")
+              // Line 47 (return 1) should NOT be hit, line 50 (return 0) should be hit
+              .AssertLinesCovered((47, 0), (50, 1))
+              // Branch at line 45: ordinal 0 (true path) NOT hit, ordinal 1 (false path) hit
+              .AssertBranchesCovered((45, 0, 0), (45, 1, 1));
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void SelectionStatements_IfWithoutElse_BothBranches()
+    {
+      // Verify 100% coverage when both branches are executed
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
+                  {
+                    // Execute both branches
+                    instance.IfWithoutElse(true);
+                    instance.IfWithoutElse(false);
+                    return Task.CompletedTask;
+                  }, persistPrepareResultToFile: pathSerialize[0]);
+          return 0;
+        }, [path]);
+
+        CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+        // Expected behavior: 100% branch coverage
+        result.Document("Instrumentation.SelectionStatements.cs")
+              .AssertLinesCovered((47, 1), (50, 1))
+              // Both branches covered
+              .AssertBranchesCovered((45, 0, 1), (45, 1, 1));
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
     public void SelectionStatements_Switch()
     {
       string path = Path.GetTempFileName();
@@ -110,7 +213,7 @@ namespace Coverlet.CoreCoverage.Tests
         .AssertLinesCovered(BuildConfiguration.Debug, 33, 34, 35, 36, 40)
         .AssertLinesNotCovered(BuildConfiguration.Debug, 37, 38, 39)
         .AssertBranchesCovered(BuildConfiguration.Debug, (34, 0, 1), (34, 1, 0), (34, 2, 0), (34, 3, 0), (34, 4, 0), (34, 5, 0))
-        .ExpectedTotalNumberOfBranches(3);
+        .ExpectedTotalNumberOfBranches(4);
       }
       finally
       {
@@ -145,7 +248,7 @@ namespace Coverlet.CoreCoverage.Tests
         .Document("Instrumentation.SelectionStatements.cs")
         .AssertLinesCovered(BuildConfiguration.Debug, 33, 34, 35, 36, 37, 38, 39, 40)
         .AssertBranchesCovered(BuildConfiguration.Debug, (34, 0, 1), (34, 1, 3), (34, 2, 1), (34, 3, 2), (34, 4, 1), (34, 5, 1))
-        .ExpectedTotalNumberOfBranches(3);
+        .ExpectedTotalNumberOfBranches(4);
       }
       finally
       {

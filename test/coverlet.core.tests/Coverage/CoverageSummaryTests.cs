@@ -266,5 +266,41 @@ namespace Coverlet.Core.Tests
       Assert.Equal(16.66, CoverageSummary.CalculateBranchCoverage(@class.Value).Percent);
       Assert.Equal(16.66, CoverageSummary.CalculateBranchCoverage(method.Value.Branches).Percent);
     }
+
+    [Fact]
+    public void TestCalculateBranchCoverage_IfWithoutElse_OneBranchCovered()
+    {
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 45, Hits = 1, Offset = 1, Path = 0, Ordinal = 0 },
+        new BranchInfo { Line = 45, Hits = 0, Offset = 1, Path = 1, Ordinal = 1 }
+      };
+
+      var methods = new Methods();
+      string methodString = "System.Int32 Coverlet.Core.CoverageSamples.Tests.SelectionStatements::IfWithoutElse(System.Boolean)";
+      methods.Add(methodString, new Method());
+      methods[methodString].Branches = branches;
+
+      var classes = new Classes
+      {
+        { "Coverlet.Core.CoverageSamples.Tests.SelectionStatements", methods }
+      };
+
+      var documents = new Documents
+      {
+        { "Instrumentation.SelectionStatements.cs", classes }
+      };
+
+      var modules = new Modules
+      {
+        { "module", documents }
+      };
+
+      Assert.Equal(50, CoverageSummary.CalculateBranchCoverage(modules).AverageModulePercent);
+      Assert.Equal(50, CoverageSummary.CalculateBranchCoverage(documents).Percent);
+      Assert.Equal(50, CoverageSummary.CalculateBranchCoverage(classes).Percent);
+      Assert.Equal(50, CoverageSummary.CalculateBranchCoverage(methods).Percent);
+      Assert.Equal(50, CoverageSummary.CalculateBranchCoverage(branches).Percent);
+    }
   }
 }

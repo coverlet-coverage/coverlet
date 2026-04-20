@@ -53,6 +53,13 @@ The `brfalse.s` instruction has two possible outcomes:
 - **Path 0:** Condition is true → execute the `then` block
 - **Path 1:** Condition is false → skip to continuation
 
+**How to read the branch ordinals:**
+
+- Branch ordinals are assigned from the compiled IL flow, not from the original C# syntax.
+- For this `brfalse.s` pattern, **ordinal 0** is the fall-through path, so it maps to `condition == true`.
+- For this same pattern, **ordinal 1** is the jump target, so it maps to `condition == false`.
+- Ordinals should be treated as per-branch identifiers. Do not assume `0 == false` and `1 == true` in general; the mapping depends on the emitted IL instruction.
+
 Both paths represent real execution flows that can be tested:
 ```csharp
 [Fact]

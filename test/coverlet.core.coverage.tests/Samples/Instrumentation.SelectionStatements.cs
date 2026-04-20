@@ -38,5 +38,16 @@ namespace Coverlet.Core.CoverageSamples.Tests
       short s => s.ToString(System.Globalization.CultureInfo.InvariantCulture),
       _ => throw new System.NotSupportedException()
     };
+
+    // Issue #1786: if without else should report 2 branches
+    public int IfWithoutElse(bool condition)
+    {
+      if (condition)
+      {
+        return 1;
+      }
+      // No else block - implicit continuation
+      return 0;
+    }
   }
 }
