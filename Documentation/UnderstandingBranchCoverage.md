@@ -11,10 +11,10 @@ Coverlet is an **IL-based** (Intermediate Language) code coverage tool. This mea
 When you write C# code, the compiler converts it to IL instructions. The IL representation often differs from the source:
 
 | Source Code | IL Behavior |
-|-------------|-------------|
+| ------------- | ------------- |
 | `if (condition)` | Generates a conditional branch instruction (`brfalse`/`brtrue`) |
 | `&&` operator | Generates multiple conditional jumps for short-circuit evaluation |
-| `||` operator | Generates multiple conditional jumps for short-circuit evaluation |
+| `\|\|` operator | Generates multiple conditional jumps for short-circuit evaluation |
 | `??` operator | Generates null-check branches |
 | `?.` operator | Generates null-check branches |
 
@@ -27,6 +27,7 @@ When you write C# code, the compiler converts it to IL instructions. The IL repr
 **What coverlet reports:** Two branches.
 
 **Example:**
+
 ```csharp
 public void Example(bool condition)
 {
@@ -41,7 +42,8 @@ public void Example(bool condition)
 **Why this happens:**
 
 At the IL level, the code compiles to:
-```
+
+```text
 ldarg.1              // Load 'condition'
 brfalse.s IL_000a    // Branch 1: If false, jump to continuation
 call DoSomething     // Branch 0: Execute if true
@@ -50,10 +52,20 @@ ret
 ```
 
 The `brfalse.s` instruction has two possible outcomes:
+
 - **Path 0:** Condition is true → execute the `then` block
 - **Path 1:** Condition is false → skip to continuation
 
+**How to read the branch ordinals:**
+
+- Branch ordinals are assigned from the compiled IL flow, not from the original C# syntax.
+- For this `brfalse.s` pattern, **ordinal 0** is the fall-through path, so it maps to `condition == true`.
+- For this same pattern, **ordinal 1** is the jump target, so it maps to `condition == false`.
+- Ordinals should be treated as per-branch identifiers. Do not assume `0 == false` and `1 == true` in general; the mapping depends on the emitted IL instruction.
+- Having 2 branches for an `if` without `else` is therefore expected at the IL level. Issue #1786 is specifically about **incorrect hit reporting**—for example, both ordinals being marked covered even though only one outcome actually executed—not about the existence of these 2 IL branches.
+
 Both paths represent real execution flows that can be tested:
+
 ```csharp
 [Fact]
 public void Test_BothBranches()
@@ -74,6 +86,7 @@ public void Test_BothBranches()
 **What coverlet reports:** Four or more branches.
 
 **Example:**
+
 ```csharp
 public void Example(bool a, bool b)
 {
@@ -88,7 +101,7 @@ public void Example(bool a, bool b)
 
 The `&&` operator uses short-circuit evaluation. If `a` is false, `b` is never evaluated. The compiler generates IL like this:
 
-```
+```text
 ldarg.1              // Load 'a'
 brfalse.s IL_skip    // Branch 1: If a is false, skip to else/continuation
 ldarg.2              // Load 'b'
@@ -99,14 +112,16 @@ ret
 ```
 
 This creates **four branch paths**:
+
 | Path | `a` | `b` | Result |
-|------|-----|-----|--------|
+| ------ | ----- | ----- | -------- |
 | 0 | true | true | Execute `then` block |
 | 1 | true | false | Skip (short-circuit on `b`) |
 | 2 | false | (not evaluated) | Skip (short-circuit on `a`) |
 | 3 | (implicit continuation) | | Continue after block |
 
 **To achieve 100% branch coverage:**
+
 ```csharp
 [Fact]
 public void Test_AllBranches()
@@ -127,7 +142,7 @@ public void Test_AllBranches()
 The branch count increases with each logical operator:
 
 | Expression | Approximate Branch Count |
-|------------|-------------------------|
+| ------------ | ------------------------- |
 | `if (a)` | 2 |
 | `if (a && b)` | 4 |
 | `if (a && b && c)` | 6 |
@@ -136,6 +151,7 @@ The branch count increases with each logical operator:
 | `if ((a && b) \|\| c)` | 6 |
 
 **Example with three conditions:**
+
 ```csharp
 public void Example(bool a, bool b, bool c)
 {
@@ -147,6 +163,7 @@ public void Example(bool a, bool b, bool c)
 ```
 
 **Test cases needed for full coverage:**
+
 ```csharp
 Example(true, true, true);    // All true → execute block
 Example(true, true, false);   // c is false → skip
@@ -159,6 +176,7 @@ Example(false, true, true);   // a is false → skip (b, c not evaluated)
 ### 4. Null-Conditional Operators
 
 **Example:**
+
 ```csharp
 public int? Example(string? input)
 {
@@ -169,7 +187,8 @@ public int? Example(string? input)
 **Why this happens:**
 
 The `?.` operator compiles to a null check:
-```
+
+```text
 ldarg.1
 brfalse.s IL_null    // If null, return null
 call get_Length
@@ -181,6 +200,7 @@ ret
 ```
 
 **Test cases for full coverage:**
+
 ```csharp
 Example("hello");  // Non-null path
 Example(null);     // Null path
@@ -191,6 +211,7 @@ Example(null);     // Null path
 ### 5. Null-Coalescing Operator
 
 **Example:**
+
 ```csharp
 public string Example(string? input)
 {
@@ -199,6 +220,7 @@ public string Example(string? input)
 ```
 
 **Test cases for full coverage:**
+
 ```csharp
 Example("value");  // input is not null
 Example(null);     // input is null, returns "default"
@@ -209,6 +231,7 @@ Example(null);     // input is null, returns "default"
 ### 6. Ternary Operator
 
 **Example:**
+
 ```csharp
 public string Example(bool condition)
 {
@@ -217,6 +240,7 @@ public string Example(bool condition)
 ```
 
 **Test cases for full coverage:**
+
 ```csharp
 Example(true);   // Returns "yes"
 Example(false);  // Returns "no"
@@ -227,7 +251,9 @@ Example(false);  // Returns "no"
 ### 7. Pattern Matching
 
 **Example:**
+
 ```csharp
+
 public string Example(object? obj)
 {
     return obj switch  // Multiple branches based on patterns
@@ -249,7 +275,7 @@ Each pattern generates branches. The exact count depends on the patterns and com
 Coverlet automatically filters out many compiler-generated branches that users cannot directly test. These include:
 
 | Pattern | Filtered By |
-|---------|------------|
+| --------- | ------------ |
 | Async state machine branches | `SkipGeneratedBranchesForAsyncIterator` |
 | `await foreach` disposal | `SkipGeneratedBranchesForAwaitForeach` |
 | `await using` disposal | `SkipGeneratedBranchesForAwaitUsing` |
@@ -266,6 +292,7 @@ If you see unexpected branches in async code or LINQ expressions, they may be co
 ### Q: Why does my simple method show so many branches?
 
 **A:** Count the logical operators and null-checks:
+
 - Each `&&` adds ~2 branches
 - Each `||` adds ~2 branches
 - Each `?.` adds ~2 branches
@@ -279,13 +306,15 @@ If you see unexpected branches in async code or LINQ expressions, they may be co
 ### Q: How can I achieve 100% branch coverage?
 
 **A:** You need to write tests that exercise every possible path through your conditional logic:
-1. For `if (a && b)`: Test with `(T,T)`, `(T,F)`, and `(F,*)` 
+
+1. For `if (a && b)`: Test with `(T,T)`, `(T,F)`, and `(F,*)`
 2. For `if (a || b)`: Test with `(F,F)`, `(F,T)`, and `(T,*)`
 3. For null checks: Test with both null and non-null values
 
 ### Q: Should I aim for 100% branch coverage?
 
 **A:** It depends on your project requirements. Consider:
+
 - **High-risk code** (financial, security, safety): Aim for high branch coverage
 - **Business logic**: Focus on meaningful test scenarios
 - **UI/Infrastructure code**: Line coverage may be sufficient
@@ -293,6 +322,7 @@ If you see unexpected branches in async code or LINQ expressions, they may be co
 ### Q: Can I exclude certain branches from coverage?
 
 **A:** You can exclude entire methods or classes using attributes:
+
 ```csharp
 [ExcludeFromCodeCoverage]
 public void NotCovered() { }
@@ -312,10 +342,10 @@ For more granular control, see the [coverlet documentation](https://github.com/c
 ## Summary
 
 | Behavior | Explanation |
-|----------|-------------|
+| ---------- | ------------- |
 | `if` without `else` shows 2 branches | The IL has both "then" and "skip" paths |
 | `&&` creates multiple branches | Short-circuit evaluation generates separate jumps |
-| `||` creates multiple branches | Short-circuit evaluation generates separate jumps |
+| `\|\|` creates multiple branches | Short-circuit evaluation generates separate jumps |
 | `?.` shows 2 branches | Null check creates a branch |
 | `??` shows 2 branches | Null coalescing creates a branch |
 

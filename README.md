@@ -5,7 +5,7 @@
 | Driver | Current version | Downloads |
 | --- | --- | --- |
 | coverlet.MTP | [![NuGet](https://img.shields.io/nuget/v/coverlet.MTP.svg)](https://www.nuget.org/packages/coverlet.MTP/) | [![NuGet](https://img.shields.io/nuget/dt/coverlet.MTP.svg)](https://www.nuget.org/packages/coverlet.MTP/) |
-| coverlet.collector | [![NuGet](https://img.shields.io/nuget/v/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/) | [![NuGet](https://img.shields.io/nuget/dt/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/)
+| coverlet.collector | [![NuGet](https://img.shields.io/nuget/v/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/) | [![NuGet](https://img.shields.io/nuget/dt/coverlet.collector.svg)](https://www.nuget.org/packages/coverlet.collector/) |
 | coverlet.msbuild | [![NuGet](https://img.shields.io/nuget/v/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/) | [![NuGet](https://img.shields.io/nuget/dt/coverlet.msbuild.svg)](https://www.nuget.org/packages/coverlet.msbuild/) |
 | coverlet.console | [![NuGet](https://img.shields.io/nuget/v/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/) | [![NuGet](https://img.shields.io/nuget/dt/coverlet.console.svg)](https://www.nuget.org/packages/coverlet.console/) |
 

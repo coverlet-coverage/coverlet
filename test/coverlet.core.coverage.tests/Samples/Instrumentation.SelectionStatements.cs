@@ -38,5 +38,17 @@ namespace Coverlet.Core.CoverageSamples.Tests
       short s => s.ToString(System.Globalization.CultureInfo.InvariantCulture),
       _ => throw new System.NotSupportedException()
     };
+
+    // Issue #1786: if without else with a shared return continuation
+    public int IfWithoutElse(bool condition)
+    {
+      int ret = 0;
+      if (condition)
+      {
+        ret = 1;
+      }
+      // No else block - implicit continuation through the shared return
+      return ret;
+    }
   }
 }
