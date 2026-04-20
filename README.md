@@ -133,7 +133,7 @@ See [documentation](Documentation/GlobalTool.md) for advanced usage.
 >
 >>DataCollectors element
 >>
-> >Microsoft.Testing.Platform is not using data collectors. Instead it has the concept of in-process and out-of-process extensions. Each extension is configured by its respective configuration file or through the command line.
+>> Microsoft.Testing.Platform is not using data collectors. Instead it has the concept of in-process and out-of-process extensions. Each extension is configured by its respective configuration file or through the command line.
 >>
 >> Most importantly hang and crash extension, and code coverage extension.
 >
