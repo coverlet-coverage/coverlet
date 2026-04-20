@@ -39,15 +39,16 @@ namespace Coverlet.Core.CoverageSamples.Tests
       _ => throw new System.NotSupportedException()
     };
 
-    // Issue #1786: if without else should report 2 branches
+    // Issue #1786: if without else with a shared return continuation
     public int IfWithoutElse(bool condition)
     {
+      int ret = 0;
       if (condition)
       {
-        return 1;
+        ret = 1;
       }
-      // No else block - implicit continuation
-      return 0;
+      // No else block - implicit continuation through the shared return
+      return ret;
     }
   }
 }

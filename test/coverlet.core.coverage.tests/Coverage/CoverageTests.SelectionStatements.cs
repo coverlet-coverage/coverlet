@@ -62,8 +62,8 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void SelectionStatements_IfWithoutElse_OnlyTrueBranch()
     {
-      // Test for issue #1786: if without else reports incorrect branch coverage
-      // When only the true branch runs, branch coverage should be 50% (1 of 2 branches)
+      // Test for issue #1786 using the current sample shape with a shared return statement
+      // When only the true path runs, the assignment line and the shared continuation are both hit
       string path = Path.GetTempFileName();
       try
       {
@@ -71,7 +71,7 @@ namespace Coverlet.CoreCoverage.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                   {
-                    // Only execute true branch
+                    // Execute only the true path
                     instance.IfWithoutElse(true);
                     return Task.CompletedTask;
                   }, persistPrepareResultToFile: pathSerialize[0]);
@@ -83,12 +83,20 @@ namespace Coverlet.CoreCoverage.Tests
         // Generate html report to check
         // TestInstrumentationHelper.GenerateHtmlReport(result);
 
-        // Expected behavior: 2 branches exist, only 1 should be covered
+        // Current sample:
+        // int ret = 0;
+        // if (condition)
+        // {
+        //   ret = 1;
+        // }
+        // return ret;
+        //
+        // The shared return line is part of the continuation path, so it is reached even after the true path.
         result.Document("Instrumentation.SelectionStatements.cs")
-              // Line 47 (return 1) should be hit, line 50 (return 0) should NOT be hit
-              .AssertLinesCovered((47, 1), (50, 0))
-              // Branch at line 45: ordinal 0 (true path) hit, ordinal 1 (false path) NOT hit
-              .AssertBranchesCovered((45, 0, 1), (45, 1, 0));
+              // Line 45 initializes ret, line 48 assigns 1, line 51 returns the shared continuation value
+              .AssertLinesCovered((45, 1), (48, 1), (51, 1))
+              // Branch at line 46: ordinal 0 is the true body, ordinal 1 is the shared continuation
+              .AssertBranchesCovered((46, 0, 1), (46, 1, 1));
       }
       finally
       {
@@ -99,7 +107,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void SelectionStatements_IfWithoutElse_OnlyFalseBranch()
     {
-      // Verify the false branch also works correctly
+      // Verify the false path skips the assignment and reaches the shared return
       string path = Path.GetTempFileName();
       try
       {
@@ -107,7 +115,7 @@ namespace Coverlet.CoreCoverage.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                   {
-                    // Only execute false branch (skip the if block)
+                    // Execute only the false path
                     instance.IfWithoutElse(false);
                     return Task.CompletedTask;
                   }, persistPrepareResultToFile: pathSerialize[0]);
@@ -116,12 +124,12 @@ namespace Coverlet.CoreCoverage.Tests
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
-        // Expected behavior: 2 branches exist, only the false branch covered
+        // Expected behavior for the current sample: initialization and shared return are hit, assignment is not
         result.Document("Instrumentation.SelectionStatements.cs")
-              // Line 47 (return 1) should NOT be hit, line 50 (return 0) should be hit
-              .AssertLinesCovered((47, 0), (50, 1))
-              // Branch at line 45: ordinal 0 (true path) NOT hit, ordinal 1 (false path) hit
-              .AssertBranchesCovered((45, 0, 0), (45, 1, 1));
+              // Line 45 initializes ret, line 48 is skipped, line 51 returns the default value
+              .AssertLinesCovered((45, 1), (48, 0), (51, 1))
+              // Branch at line 46: ordinal 0 (true body) not hit, ordinal 1 (shared continuation) hit
+              .AssertBranchesCovered((46, 0, 0), (46, 1, 1));
       }
       finally
       {
@@ -132,7 +140,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void SelectionStatements_IfWithoutElse_BothBranches()
     {
-      // Verify 100% coverage when both branches are executed
+      // Verify the current sample hits the true body once and the shared continuation on both executions
       string path = Path.GetTempFileName();
       try
       {
@@ -140,7 +148,7 @@ namespace Coverlet.CoreCoverage.Tests
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<SelectionStatements>(instance =>
                   {
-                    // Execute both branches
+                    // Execute both paths
                     instance.IfWithoutElse(true);
                     instance.IfWithoutElse(false);
                     return Task.CompletedTask;
@@ -150,11 +158,11 @@ namespace Coverlet.CoreCoverage.Tests
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
-        // Expected behavior: 100% branch coverage
+        // Expected behavior for the current sample shape with a shared continuation
         result.Document("Instrumentation.SelectionStatements.cs")
-              .AssertLinesCovered((47, 1), (50, 1))
-              // Both branches covered
-              .AssertBranchesCovered((45, 0, 1), (45, 1, 1));
+              .AssertLinesCovered((45, 2), (48, 1), (51, 2))
+              // The true body runs once, the shared continuation runs after both executions
+              .AssertBranchesCovered((46, 0, 1), (46, 1, 2));
       }
       finally
       {
