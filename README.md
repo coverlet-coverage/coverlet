@@ -123,15 +123,23 @@ See [documentation](Documentation/GlobalTool.md) for advanced usage.
 >
 > Both packages rely on the **VSTest infrastructure**, while the **Microsoft Testing Platform uses a different test execution architecture**, which makes these integrations incompatible. ([Use Microsoft.Testing.Platform in the VSTest mode of dotnet test](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-integration-dotnet-test))
 >
-> If your test project runs on **Microsoft Testing Platform**, you must remove these packages:
+> If your test project runs on **Microsoft Testing Platform**, you must disable `TestingPlatformDotnetTestSupport`:
 >
 > ```xml
-> <PackageReference Include="coverlet.collector" />
-> <PackageReference Include="coverlet.msbuild" />
+>  <PropertyGroup>
+>    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
+>  </PropertyGroup>
 > ```
+>
+>>DataCollectors element
+>>
+> >Microsoft.Testing.Platform is not using data collectors. Instead it has the concept of in-process and out-of-process extensions. Each extension is configured by its respective configuration file or through the command line.
+>>
+>> Most importantly hang and crash extension, and code coverage extension.
 >
 > Instead, use the **coverlet.MTP extension designed for Microsoft Testing Platform**:
 > The `coverlet.MTP` package provides the equivalent functionality of `coverlet.collector` but is implemented as a **native extension for Microsoft Testing Platform**.
+>
 
 ## VSTest Integration ([guide](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/VSTestIntegration.md), [known issue](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test))
 
