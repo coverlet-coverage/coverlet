@@ -13,17 +13,16 @@ A sample project file looks like:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
+  <!-- Target only .NET 8 and .NET 9 (no .NET 10) -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Minimum version 17.13.0 -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <!-- Minimum version 18.4.0 -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
     <!-- Update this reference when new version is released -->
-    <PackageReference Include="coverlet.collector" Version="8.0.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="10.0.1" />
   ...
   </ItemGroup>
 ...
