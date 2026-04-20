@@ -123,7 +123,7 @@ See [documentation](Documentation/GlobalTool.md) for advanced usage.
 >
 > Both packages rely on the **VSTest infrastructure**, while the **Microsoft Testing Platform uses a different test execution architecture**, which makes these integrations incompatible. ([Use Microsoft.Testing.Platform in the VSTest mode of dotnet test](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-integration-dotnet-test))
 >
-> If your test project runs on **Microsoft Testing Platform**, you must disable `TestingPlatformDotnetTestSupport`:
+> If your test project targets .NET 10.0, where the Microsoft Testing Platform is enabled by default, you need to disable `TestingPlatformDotnetTestSupport`:
 >
 > ```xml
 >  <PropertyGroup>

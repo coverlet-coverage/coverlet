@@ -15,7 +15,7 @@ Update your test project file `XUnitTestProject1.csproj` with the following conf
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net10.0</TargetFrameworks>
+    <TargetFramework>net9.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
@@ -29,7 +29,7 @@ Update your test project file `XUnitTestProject1.csproj` with the following conf
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <!-- Update the version to match your locally built package -->
-    <PackageReference Include="10.0.1-preview-0001-ga126b0a194" />
+    <PackageReference Include="coverlet.collector" Version="10.0.1-preview-0001-ga126b0a194" />
   </ItemGroup>
 
   <ItemGroup>

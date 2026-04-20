@@ -15,7 +15,7 @@ A sample project file looks like:
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Target only .NET 8 and .NET 9 (no .NET 10) -->
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
   <ItemGroup>
