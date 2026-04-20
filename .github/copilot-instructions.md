@@ -50,10 +50,16 @@ In addition to the rules enforced by `.editorconfig`, you SHOULD:
 **Examples:**
 
 ❌ **INCORRECT** - Direct file system usage:
+
+```cs
 // BAD - Creates real files and directories
 File.WriteAllText("report.json", content); Directory.CreateDirectory("reports");
 bool exists = File.Exists("test.dll");
+```
+
 ✅ **CORRECT** - Mock file system:
+
+```cs
 // GOOD - Uses mocked abstraction with simulated paths
 var mockFileSystem = new Mock<IFileSystem>();
 mockFileSystem.Setup(x => x.Exists("/fake/path/test.dll")).Returns(true);
@@ -61,6 +67,8 @@ mockFileSystem.Setup(x => x.Exists("/fake/reports")).Returns(true);
 mockFileSystem.Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()));
 // Verify the mock was called correctly
 mockFileSystem.Verify(x => x.WriteAllText(It.Is<string>(path => path.EndsWith("report.json")), It.IsAny<string>()), Times.Once);
+```
+
 ### Moq Testing Rules (Critical - Prevents Runtime Errors)
 
 **NEVER use extension methods in Moq `Setup()` or `Verify()` calls.**
@@ -79,7 +87,7 @@ Extension methods are static methods that cannot be intercepted by Moq. Using th
 ❌ **INCORRECT** - Will throw `NotSupportedException`:
 // This will FAIL at runtime
 _mockLogger.Verify(x => x.LogInformation(It.IsAny<string>()), Times.Once);
-_mockLogger.Verify(x => x.LogInformation(It.Is<string>(s => s.Contains("json"))), Times.Once); 
+_mockLogger.Verify(x => x.LogInformation(It.Is<string>(s => s.Contains("json"))), Times.Once);
 _mockLogger.Setup(x => x.LogWarning(It.IsAny<string>()));
 ✅ **CORRECT** - Mocks the underlying `Log` method:
 // Verify LogInformation was called once
@@ -128,7 +136,7 @@ This codebase uses **TWO different ILogger interfaces** with different signature
    - **NO EventId parameter**.
    - Used in: `coverlet.MTP` projects.
 
-2. **Microsoft.Extensions.Logging.ILogger** (MEL Logger)  
+2. **Microsoft.Extensions.Logging.ILogger** (MEL Logger)
    - Uses `Log()` method with EventId.
    - Extension methods: `LogInformation()`, `LogError()`, etc. call underlying `Log()`.
    - Used in: Other logging scenarios.
@@ -163,7 +171,7 @@ _mockLogger.Verify(x => x.LogInformation(It.Is<string>(s => s.Contains("Coverage
 When mocking interfaces, **reference actual adapter implementations** in the codebase:
 
 - `src/coverlet.MTP/Logging/CoverletLoggerAdapter.cs` - Shows how to use `Microsoft.Testing.Platform.Logging.ILogger`.
-- `src/coverlet.collector/DataCollection/CoverletLogger.cs` - Shows how to use VSTest platform logger.  
+- `src/coverlet.collector/DataCollection/CoverletLogger.cs` - Shows how to use VSTest platform logger.
 - `src/coverlet.console/Logging/ConsoleLogger.cs` - Shows coverlet's internal `ILogger` implementation.
 - `src/coverlet.core/Abstractions/ILogger.cs` - Coverlet's internal logger interface.
 
