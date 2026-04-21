@@ -198,90 +198,101 @@ namespace Coverlet.Core.Tests.Reporters
       Assert.Equal(expectedSignature, methodAttrs["signature"]);
     }
 
-    [Fact]
-    public void TestReportWithDifferentDirectories()
+    private static List<string> BuildPossiblePaths(string report)
     {
-      var result = new CoverageResult();
-      result.Parameters = new CoverageParameters();
-      result.Identifier = Guid.NewGuid().ToString();
-
-      string absolutePath1;
-      string absolutePath2;
-      string absolutePath3;
-      string absolutePath4;
-      string absolutePath5;
-      string absolutePath6;
-      string absolutePath7;
-      string absolutePath8;
-      string absolutePath9;
-
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-      {
-        absolutePath1 = @"C:\projA\dir1\dir10\file1.cs";
-        absolutePath2 = @"C:\projA\dir1\dir10\file2.cs";
-        absolutePath3 = @"C:\projA\dir1\file3.cs";
-        absolutePath4 = @"E:\projB\dir1\dir10\file4.cs";
-        absolutePath5 = @"E:\projB\dir2\file5.cs";
-        absolutePath6 = @"F:\file6.cs";
-        absolutePath7 = @"F:\";
-        absolutePath8 = @"c:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary1\Class1.cs";
-        absolutePath9 = @"c:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary2\Class1.cs";
-      }
-      else
-      {
-        absolutePath1 = @"/projA/dir1/dir10/file1.cs";
-        absolutePath2 = @"/projA/dir1/file2.cs";
-        absolutePath3 = @"/projA/dir1/file3.cs";
-        absolutePath4 = @"/projA/dir2/file4.cs";
-        absolutePath5 = @"/projA/dir2/file5.cs";
-        absolutePath6 = @"/file1.cs";
-        absolutePath7 = @"/";
-        absolutePath8 = @"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary1/Class1.cs";
-        absolutePath9 = @"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary2/Class1.cs";
-      }
-
-      var classes = new Classes { { "Class", new Methods() } };
-      var documents = new Documents {
-                                            { absolutePath1, classes },
-                                            { absolutePath2, classes },
-                                            { absolutePath3, classes },
-                                            { absolutePath4, classes },
-                                            { absolutePath5, classes },
-                                            { absolutePath6, classes },
-                                            { absolutePath7, classes },
-                                            { absolutePath8, classes },
-                                            { absolutePath9, classes }
-            };
-
-      result.Modules = new Modules { { "Module", documents } };
-
-      var reporter = new CoberturaReporter();
-      string report = reporter.Report(result, new Mock<ISourceRootTranslator>().Object);
-
       var doc = XDocument.Load(new StringReader(report));
-
       var basePaths = doc.Element("coverage").Element("sources").Elements().Select(e => e.Value).ToList();
       var relativePaths = doc.Element("coverage").Element("packages").Element("package")
           .Element("classes").Elements().Select(e => e.Attribute("filename").Value).ToList();
 
+      // basePath always ends with '/' after the normalization fix — use concatenation, not Path.Combine.
       var possiblePaths = new List<string>();
       foreach (string basePath in basePaths)
-      {
         foreach (string relativePath in relativePaths)
-        {
-          possiblePaths.Add(Path.Combine(basePath, relativePath));
-        }
-      }
+          possiblePaths.Add(basePath + relativePath);
 
-      Assert.Contains(absolutePath1, possiblePaths);
-      Assert.Contains(absolutePath2, possiblePaths);
-      Assert.Contains(absolutePath3, possiblePaths);
-      Assert.Contains(absolutePath4, possiblePaths);
-      Assert.Contains(absolutePath5, possiblePaths);
-      Assert.Contains(absolutePath6, possiblePaths);
-      Assert.Contains(absolutePath7, possiblePaths);
-      Assert.Contains(absolutePath8, possiblePaths);
-      Assert.Contains(absolutePath9, possiblePaths);
+      return possiblePaths;
+    }
+
+    [Theory]
+    [InlineData(@"C:\projA\dir1\dir10\file1.cs")]
+    [InlineData(@"C:\projA\dir1\dir10\file2.cs")]
+    [InlineData(@"C:\projA\dir1\file3.cs")]
+    [InlineData(@"E:\projB\dir1\dir10\file4.cs")]
+    [InlineData(@"E:\projB\dir2\file5.cs")]
+    [InlineData(@"F:\file6.cs")]
+    [InlineData(@"F:\")]
+    [InlineData(@"C:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary1\Class1.cs")]
+    [InlineData(@"C:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary2\Class1.cs")]
+    public void TestReportWithDifferentDirectoriesWindows(string expectedPath)
+    {
+      Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+      var classes = new Classes { { "Class", new Methods() } };
+      var documents = new Documents
+      {
+        { @"C:\projA\dir1\dir10\file1.cs", classes },
+        { @"C:\projA\dir1\dir10\file2.cs", classes },
+        { @"C:\projA\dir1\file3.cs", classes },
+        { @"E:\projB\dir1\dir10\file4.cs", classes },
+        { @"E:\projB\dir2\file5.cs", classes },
+        { @"F:\file6.cs", classes },
+        { @"F:\", classes },
+        { @"C:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary1\Class1.cs", classes },
+        { @"C:\git\coverletissue\localpackagetest\deterministicbuild\ClassLibrary2\Class1.cs", classes }
+      };
+
+      var result = new CoverageResult
+      {
+        Parameters = new CoverageParameters(),
+        Identifier = Guid.NewGuid().ToString(),
+        Modules = new Modules { { "Module", documents } }
+      };
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      string expectedPathNormalized = expectedPath.Replace('\\', '/');
+      Assert.Contains(expectedPathNormalized, BuildPossiblePaths(report));
+    }
+
+    [Theory]
+    [InlineData(@"/projA/dir1/dir10/file1.cs")]
+    [InlineData(@"/projA/dir1/file2.cs")]
+    [InlineData(@"/projA/dir1/file3.cs")]
+    [InlineData(@"/projA/dir2/file4.cs")]
+    [InlineData(@"/projA/dir2/file5.cs")]
+    [InlineData(@"/file1.cs")]
+    [InlineData(@"/")]
+    [InlineData(@"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary1/Class1.cs")]
+    [InlineData(@"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary2/Class1.cs")]
+    public void TestReportWithDifferentDirectoriesLinux(string expectedPath)
+    {
+      Assert.SkipWhen(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Linux or macOS");
+
+      var classes = new Classes { { "Class", new Methods() } };
+      var documents = new Documents
+      {
+        { @"/projA/dir1/dir10/file1.cs", classes },
+        { @"/projA/dir1/file2.cs", classes },
+        { @"/projA/dir1/file3.cs", classes },
+        { @"/projA/dir2/file4.cs", classes },
+        { @"/projA/dir2/file5.cs", classes },
+        { @"/file1.cs", classes },
+        { @"/", classes },
+        { @"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary1/Class1.cs", classes },
+        { @"/git/coverletissue/localpackagetest/deterministicbuild/ClassLibrary2/Class1.cs", classes }
+      };
+
+      var result = new CoverageResult
+      {
+        Parameters = new CoverageParameters(),
+        Identifier = Guid.NewGuid().ToString(),
+        Modules = new Modules { { "Module", documents } }
+      };
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      Assert.Contains(expectedPath, BuildPossiblePaths(report));
     }
 
     [Fact]
@@ -306,6 +317,179 @@ namespace Coverlet.Core.Tests.Reporters
           .Select(e => e.Attribute("filename").Value).Single();
 
       Assert.Equal(absolutePath, fileName);
+    }
+
+    // ── Issue #1723: path-separator normalization ──────────────────────────────
+
+    private static CoverageResult BuildResult(
+        IEnumerable<(string path, string className)> documents,
+        CoverageParameters parameters = null)
+    {
+      var methods = new Methods();
+      string methodKey = "System.Void Coverlet.Core.Reporters.Tests::TestMethod()";
+      methods.Add(methodKey, new Method());
+      methods[methodKey].Lines = new Lines { { 1, 1 } };
+
+      var docs = new Documents();
+      foreach ((string path, string className) in documents)
+      {
+        var classes = new Classes { { className, methods } };
+        docs[path] = classes;
+      }
+
+      return new CoverageResult
+      {
+        Identifier = Guid.NewGuid().ToString(),
+        Modules = new Modules { { "Module", docs } },
+        Parameters = parameters ?? new CoverageParameters()
+      };
+    }
+
+    [Fact]
+    public void Report_NonSourceLink_WindowsStylePaths_FilenameAttributeUsesForwardSlashes()
+    {
+      // Windows-style paths simulate coverage data collected on Windows.
+      // The reporter must emit forward slashes regardless of the host OS.
+      CoverageResult result = BuildResult([
+        (@"C:\projA\src\Foo.cs", "Foo"),
+        (@"C:\projA\src\Sub\Bar.cs", "Bar")
+      ]);
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      var doc = XDocument.Load(new StringReader(report));
+      IEnumerable<string> fileNames = doc.Descendants("class").Select(c => c.Attribute("filename").Value);
+
+      Assert.All(fileNames, fn => Assert.DoesNotContain("\\", fn));
+    }
+
+    [Fact]
+    public void Report_NonSourceLink_WindowsStylePaths_SourceElementUsesForwardSlashes()
+    {
+      CoverageResult result = BuildResult([
+        (@"C:\projA\src\Foo.cs", "Foo"),
+        (@"C:\projA\src\Sub\Bar.cs", "Bar")
+      ]);
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      var doc = XDocument.Load(new StringReader(report));
+      IEnumerable<string> sources = doc.Descendants("source").Select(s => s.Value);
+
+      Assert.All(sources, s => Assert.DoesNotContain("\\", s));
+    }
+
+    [Fact]
+    public void Report_NonSourceLink_SingleWindowsStylePath_FilenameUsesForwardSlashes()
+    {
+      // Single document hits the splittedPaths.Count == 1 branch in GetBasePaths.
+      CoverageResult result = BuildResult([(@"C:\projA\Foo.cs", "Foo")]);
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      var doc = XDocument.Load(new StringReader(report));
+      string fileName = doc.Descendants("class").Select(c => c.Attribute("filename").Value).Single();
+
+      Assert.DoesNotContain("\\", fileName);
+    }
+
+    [Fact]
+    public void Report_NonSourceLink_MultipleWindowsRoots_AllSourceElementsUseForwardSlashes()
+    {
+      // Documents under two different drive roots produce two <source> elements.
+      CoverageResult result = BuildResult([
+        (@"C:\projA\Foo.cs", "Foo"),
+        (@"E:\projB\Bar.cs", "Bar")
+      ]);
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      var doc = XDocument.Load(new StringReader(report));
+      string[] sources = doc.Descendants("source").Select(s => s.Value).ToArray();
+
+      Assert.Equal(2, sources.Length);
+      Assert.Equal(["C:/", "E:/"], sources);
+      Assert.All(sources, s => Assert.DoesNotContain("\\", s));
+    }
+
+    [Fact]
+    public void Report_NonSourceLink_WindowsStylePaths_ReconstructedPathMatchesDocument()
+    {
+      // basePath + relativePath must reconstruct the original document path (forward-slash normalized).
+      const string documentPath = @"C:\projA\src\Sub\Foo.cs";
+      CoverageResult result = BuildResult([
+        (documentPath, "Foo"),
+        (@"C:\projA\src\Bar.cs", "Bar")
+      ]);
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      var doc = XDocument.Load(new StringReader(report));
+      string source = doc.Descendants("source").Select(s => s.Value).Single();
+      string fileName = doc.Descendants("class")
+          .Where(c => c.Attribute("filename").Value.EndsWith("Foo.cs"))
+          .Select(c => c.Attribute("filename").Value).Single();
+
+      Assert.Equal(documentPath.Replace('\\', '/'), source + fileName);
+    }
+
+    [Fact]
+    public void Report_NonSourceLink_CaseDifferingFragments_FilenameIsRelativeNotAbsolute()
+    {
+      // When path fragments differ only in casing, OrdinalIgnoreCase must correctly
+      // identify the common base and strip it, returning a short relative filename.
+      CoverageResult result = BuildResult([
+        (@"C:\ProjA\src\File1.cs", "File1"),
+        (@"C:\PROJA\src\File2.cs", "File2")
+      ]);
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      var doc = XDocument.Load(new StringReader(report));
+      IEnumerable<string> fileNames = doc.Descendants("class").Select(c => c.Attribute("filename").Value);
+
+      // Both filenames must be relative (not start with a drive letter).
+      Assert.All(fileNames, fn => Assert.DoesNotContain(":", fn));
+    }
+
+    [Fact]
+    public void Report_UseSourceLink_FilenamePassesThroughUnchanged()
+    {
+      // SourceLink paths are URLs — the reporter must return them as-is.
+      const string sourceUrl = "https://raw.githubusercontent.com/org/repo/abc123/src/Foo.cs";
+      CoverageResult result = BuildResult(
+          [(sourceUrl, "Foo")],
+          new CoverageParameters { UseSourceLink = true });
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      var doc = XDocument.Load(new StringReader(report));
+      string fileName = doc.Descendants("class").Select(c => c.Attribute("filename").Value).Single();
+
+      Assert.Equal(sourceUrl, fileName);
+    }
+
+    [Fact]
+    public void Report_DeterministicReport_FilenameFromTranslator()
+    {
+      // When DeterministicReport = true, the filename must come from ResolveDeterministicPath.
+      const string documentPath = @"C:\projA\src\Foo.cs";
+      const string deterministicPath = "/_/src/Foo.cs";
+
+      var mockTranslator = new Mock<ISourceRootTranslator>();
+      mockTranslator.Setup(t => t.ResolveDeterministicPath(documentPath)).Returns(deterministicPath);
+
+      CoverageResult result = BuildResult(
+          [(documentPath, "Foo")],
+          new CoverageParameters { DeterministicReport = true });
+
+      string report = new CoberturaReporter().Report(result, mockTranslator.Object);
+
+      var doc = XDocument.Load(new StringReader(report));
+      string fileName = doc.Descendants("class").Select(c => c.Attribute("filename").Value).Single();
+
+      Assert.Equal(deterministicPath, fileName);
+      mockTranslator.Verify(t => t.ResolveDeterministicPath(documentPath), Times.Once);
     }
   }
 }
