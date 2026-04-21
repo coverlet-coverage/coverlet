@@ -184,11 +184,13 @@ namespace Coverlet.Core.Reporters
 
       return modules.Values.SelectMany(k => k.Keys).GroupBy(Directory.GetDirectoryRoot).Select(group =>
       {
-        var splittedPaths = group.Select(absolutePath => absolutePath.Split(Path.DirectorySeparatorChar))
+        // Normalize to forward slashes before splitting so that the Cobertura XML uses
+        // portable, tool-compatible path separators regardless of the OS that produced the report.
+        var splittedPaths = group.Select(absolutePath => absolutePath.Replace('\\', '/').Split('/'))
                                        .OrderBy(absolutePath => absolutePath.Length).ToList();
         if (splittedPaths.Count == 1)
         {
-          return group.Key;
+          return group.Key.Replace('\\', '/');
         }
 
         var basePathFragments = new List<string>();
@@ -200,7 +202,8 @@ namespace Coverlet.Core.Reporters
                   return;
                 }
 
-                if (splittedPaths.All(sp => fragmentIndexPair.value.Equals(sp[fragmentIndexPair.index])))
+                if (splittedPaths.All(sp => fragmentIndexPair.index < sp.Length &&
+                    fragmentIndexPair.value.Equals(sp[fragmentIndexPair.index], StringComparison.OrdinalIgnoreCase)))
                 {
                   basePathFragments.Add(fragmentIndexPair.value);
                 }
@@ -209,7 +212,7 @@ namespace Coverlet.Core.Reporters
                   stopSearch = true;
                 }
               });
-        return string.Concat(string.Join(Path.DirectorySeparatorChar.ToString(), basePathFragments), Path.DirectorySeparatorChar);
+        return string.Concat(string.Join("/", basePathFragments), "/");
       });
     }
 
@@ -220,14 +223,20 @@ namespace Coverlet.Core.Reporters
         return path;
       }
 
+      // Normalize to forward slashes for consistent, portable Cobertura XML output.
+      // Use OrdinalIgnoreCase to handle path casing differences on Windows NTFS.
+      string normalizedPath = path.Replace('\\', '/');
+
       foreach (string basePath in basePaths)
       {
-        if (path.StartsWith(basePath))
+        string normalizedBase = basePath.Replace('\\', '/');
+        if (normalizedPath.StartsWith(normalizedBase, StringComparison.OrdinalIgnoreCase))
         {
-          return path.Substring(basePath.Length);
+          return normalizedPath.Substring(normalizedBase.Length);
         }
       }
-      return path;
+
+      return normalizedPath;
     }
   }
 }
