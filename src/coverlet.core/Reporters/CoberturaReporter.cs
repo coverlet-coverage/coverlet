@@ -161,7 +161,7 @@ namespace Coverlet.Core.Reporters
            Path2 c:\dir1\file2.cs
            Path3 e:\dir1\file2.cs
 
-           1) Search for root dir 
+           1) Search for root dir
               c:\ ->	c:\dir1\dir2\file1.cs
                       c:\dir1\file2.cs
               e:\ ->	e:\dir1\file2.cs
@@ -170,10 +170,10 @@ namespace Coverlet.Core.Reporters
                Path1 = [c:|dir1|file2.cs]
                Path2 = [c:|dir1|dir2|file1.cs]
 
-           3)  Find longest shared path comparing indexes		 
+           3)  Find longest shared path comparing indexes
                Path1[0]    = Path2[0], ..., PathY[0]     -> add to final fragment list
                Path1[n]    = Path2[n], ..., PathY[n]     -> add to final fragment list
-               Path1[n+1] != Path2[n+1], ..., PathY[n+1] -> break, Path1[n] was last shared fragment 		 
+               Path1[n+1] != Path2[n+1], ..., PathY[n+1] -> break, Path1[n] was last shared fragment
 
            4) Concat created fragment list
       */
@@ -182,10 +182,59 @@ namespace Coverlet.Core.Reporters
         return [string.Empty];
       }
 
-      return modules.Values.SelectMany(k => k.Keys).GroupBy(Directory.GetDirectoryRoot).Select(group =>
+      static string GetNormalizedPathRoot(string path)
       {
-        var splittedPaths = group.Select(absolutePath => absolutePath.Split(Path.DirectorySeparatorChar))
-                                       .OrderBy(absolutePath => absolutePath.Length).ToList();
+        if (string.IsNullOrEmpty(path))
+        {
+          return string.Empty;
+        }
+
+        if (path.Length >= 3 && char.IsLetter(path[0]) && path[1] == ':' && path[2] == '/')
+        {
+#if NETSTANDARD2_0
+          return path.Substring(0, 3);
+#else
+          return path[..3];
+#endif
+        }
+
+        if (path.StartsWith("//", StringComparison.Ordinal))
+        {
+          int serverEnd = path.IndexOf('/', 2);
+          if (serverEnd > 2)
+          {
+        int shareEnd = path.IndexOf('/', serverEnd + 1);
+        if (shareEnd > serverEnd + 1)
+        {
+#if NETSTANDARD2_0
+              return path.Substring(0, shareEnd + 1);
+#else
+              return path[..(shareEnd + 1)];
+#endif
+            }
+
+        return string.Concat(path, "/");
+          }
+
+          return "//";
+        }
+
+        if (path[0] == '/')
+        {
+          return "/";
+        }
+
+        return string.Empty;
+      }
+
+      return modules.Values
+        .SelectMany(k => k.Keys)
+        .Select(absolutePath => absolutePath.Replace('\\', '/'))
+        .GroupBy(GetNormalizedPathRoot, StringComparer.OrdinalIgnoreCase)
+        .Select(group =>
+      {
+        var splittedPaths = group.Select(absolutePath => absolutePath.Split('/'))
+                   .OrderBy(absolutePath => absolutePath.Length).ToList();
         if (splittedPaths.Count == 1)
         {
           return group.Key;
@@ -200,7 +249,8 @@ namespace Coverlet.Core.Reporters
                   return;
                 }
 
-                if (splittedPaths.All(sp => fragmentIndexPair.value.Equals(sp[fragmentIndexPair.index])))
+                if (splittedPaths.All(sp => fragmentIndexPair.index < sp.Length &&
+                    fragmentIndexPair.value.Equals(sp[fragmentIndexPair.index], StringComparison.OrdinalIgnoreCase)))
                 {
                   basePathFragments.Add(fragmentIndexPair.value);
                 }
@@ -209,7 +259,7 @@ namespace Coverlet.Core.Reporters
                   stopSearch = true;
                 }
               });
-        return string.Concat(string.Join(Path.DirectorySeparatorChar.ToString(), basePathFragments), Path.DirectorySeparatorChar);
+        return string.Concat(string.Join("/", basePathFragments), "/");
       });
     }
 
@@ -220,14 +270,20 @@ namespace Coverlet.Core.Reporters
         return path;
       }
 
+      // Normalize to forward slashes for consistent, portable Cobertura XML output.
+      // Use OrdinalIgnoreCase to handle path casing differences on Windows NTFS.
+      string normalizedPath = path.Replace('\\', '/');
+
       foreach (string basePath in basePaths)
       {
-        if (path.StartsWith(basePath))
+        string normalizedBase = basePath.Replace('\\', '/');
+        if (normalizedPath.StartsWith(normalizedBase, StringComparison.OrdinalIgnoreCase))
         {
-          return path.Substring(basePath.Length);
+          return normalizedPath.Substring(normalizedBase.Length);
         }
       }
-      return path;
+
+      return normalizedPath;
     }
   }
 }
