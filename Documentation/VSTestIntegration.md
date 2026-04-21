@@ -108,19 +108,19 @@ These are a list of options that are supported by coverlet. These can be specifi
 
 | Option                          | Summary                                                                                                                                                  |
 |:--------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Format                          | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats.                          |
-| Exclude                         | Exclude from code coverage analyzing using filter expressions.                                                                                           |
-| ExcludeByAttribute              | Exclude a method, an entire class or assembly from code coverage decorated by an attribute.                                                              |
-| ExcludeByFile                   | Ignore specific source files from code coverage.                                                                                                         |
-| Include                         | Explicitly set what to include in code coverage analysis using filter expressions.                                                                       |
-| IncludeDirectory                | Explicitly set which directories to include in code coverage analysis.                                                                                   |
-| SingleHit                       | Specifies whether to limit code coverage hit reporting to a single hit for each location.                                                                |
-| UseSourceLink                   | Specifies whether to use SourceLink URIs in place of file system paths.                                                                                  |
-| IncludeTestAssembly             | Include coverage of the test assembly.                                                                                                                   |
-| SkipAutoProps                   | Neither track nor record auto-implemented properties.                                                                                                    |
-| DoesNotReturnAttribute          | Methods marked with these attributes are known not to return, statements following them will be excluded from coverage                                   |
-| DeterministicReport             | Generates deterministic report in context of deterministic build. Take a look at [documentation](DeterministicBuild.md) for further information.         |
-| ExcludeAssembliesWithoutSources |  Specifies whether to exclude assemblies without source. Options are either MissingAll, MissingAny or None. Default is MissingAll.                       |
+| Format                          | Coverage output format. These are either cobertura, json, lcov, opencover or teamcity as well as combinations of these formats. <br>_Default is_ `cobertura`.  |
+| Exclude                         | Exclude from code coverage analyzing using filter expressions. <br>_Default is_ `[coverlet.*]*,[xunit.*]*,[NUnit3.*]*,[Microsoft.Testing.*]*,[Microsoft.Testplatform.*]*,[Microsoft.VisualStudio.TestPlatform.*]*`. User-supplied filters are appended to these defaults. |
+| ExcludeByAttribute              | Exclude a method, an entire class or assembly from code coverage decorated by an attribute. <br>_Default is_ no additional attributes, but `ExcludeFromCoverageAttribute` and `ExcludeFromCodeCoverageAttribute` are always excluded. |
+| ExcludeByFile                   | Ignore specific source files from code coverage.<br>_Default is none_.                                                                                        |
+| Include                         | Explicitly set what to include in code coverage analysis using filter expressions.<br>_Default is no include filters (all coverable modules except excluded ones)_. |
+| IncludeDirectory                | Explicitly set which directories to include in code coverage analysis.<br>_Default is_ none.                                                                  |
+| SingleHit                       | Specifies whether to limit code coverage hit reporting to a single hit for each location. <br>_Default is_ `false`.                                            |
+| UseSourceLink                   | Specifies whether to use SourceLink URIs in place of file system paths.<br>_Default is_ `false`.                                                              |
+| IncludeTestAssembly             | Include coverage of the test assembly.<br>_Default is_ `false`.                                                                                               |
+| SkipAutoProps                   | Neither track nor record auto-implemented properties.<br>_Default is_ `false`.                                                                                |
+| DoesNotReturnAttribute          | Methods marked with these attributes are known not to return, statements following them will be excluded from coverage.<br>_Default is none_.                  |
+| DeterministicReport             | Generates deterministic report in context of deterministic build. Take a look at [documentation](DeterministicBuild.md) for further information.<br>_Default is_ `false`. |
+| ExcludeAssembliesWithoutSources | Specifies whether to exclude assemblies without source. Options are either MissingAll, MissingAny or None. <br>_Default is_ `MissingAll`.                      |
 
 How to specify these options via runsettings?
 
