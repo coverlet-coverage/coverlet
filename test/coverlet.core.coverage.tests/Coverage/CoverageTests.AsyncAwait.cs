@@ -522,7 +522,9 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void AsyncAwait_Issue_1767_BasicTryFinally()
     {
-      // Issue #1767: Async methods with try-finally blocks containing await statements
+      // Issue #1767: Incorrect coverage for Linq Expression
+      // Issue #1337: Coverlet flagging a branch for an async functions finally block where none exists
+      // issue symptom of "Async methods with try-finally blocks containing await statements"
       // should not report phantom branches from compiler-generated exception handling
 
       string path = Path.GetTempFileName();
@@ -540,20 +542,20 @@ namespace Coverlet.CoreCoverage.Tests
         }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
-        
+
         // Verify lines in try and finally blocks are covered
         var methodLines = document.Lines.Values
           .Where(l => l.Method.Contains("BasicAsyncTryFinally"))
           .ToList();
-        
+
         Assert.NotEmpty(methodLines);
         Assert.True(methodLines.All(l => l.Hits > 0), "All lines in BasicAsyncTryFinally should be covered");
-        
+
         // Verify no phantom branches from compiler-generated exception state checks
         var methodBranches = document.Branches
           .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
           .ToList();
-        
+
         // There should be no branches in this simple try-finally - it's linear code
         Assert.Empty(methodBranches);
       }
@@ -582,11 +584,11 @@ namespace Coverlet.CoreCoverage.Tests
         }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
-        
+
         var methodLines = document.Lines.Values
           .Where(l => l.Method.Contains("TryFinallyWithReturnValue"))
           .ToList();
-        
+
         Assert.NotEmpty(methodLines);
         Assert.True(methodLines.All(l => l.Hits > 0), "All lines in TryFinallyWithReturnValue should be covered");
       }
@@ -614,19 +616,19 @@ namespace Coverlet.CoreCoverage.Tests
         }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
-        
+
         var methodLines = document.Lines.Values
           .Where(l => l.Method.Contains("NestedTryFinally"))
           .ToList();
-        
+
         Assert.NotEmpty(methodLines);
         Assert.True(methodLines.All(l => l.Hits > 0), "All lines in NestedTryFinally should be covered");
-        
+
         // Nested try-finally with awaits should not create phantom branches
         var methodBranches = document.Branches
           .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
           .ToList();
-        
+
         Assert.Empty(methodBranches);
       }
       finally
@@ -648,7 +650,7 @@ namespace Coverlet.CoreCoverage.Tests
                         // Test both branches
                         int result1 = await (Task<int>)instance.TryFinallyWithBranching(true);
                         Assert.Equal(1, result1);
-                        
+
                         int result2 = await (Task<int>)instance.TryFinallyWithBranching(false);
                         Assert.Equal(2, result2);
                       },
@@ -658,25 +660,25 @@ namespace Coverlet.CoreCoverage.Tests
         }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
-        
+
         var methodLines = document.Lines.Values
           .Where(l => l.Method.Contains("TryFinallyWithBranching"))
           .ToList();
-        
+
         Assert.NotEmpty(methodLines);
-        
+
         // The if statement creates real branches that should be reported
         var methodBranches = document.Branches
           .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
           .ToList();
-        
+
         // Should have branches from the if statement, but NOT from compiler-generated exception handling
         Assert.NotEmpty(methodBranches);
-        
+
         // Verify all user-code branches are covered
         foreach (var branch in methodBranches)
         {
-          Assert.True(branch.Value.Hits > 0, 
+          Assert.True(branch.Value.Hits > 0,
             $"Branch at line {branch.Key.Line} should be covered");
         }
       }
@@ -704,18 +706,18 @@ namespace Coverlet.CoreCoverage.Tests
         }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
-        
+
         var methodLines = document.Lines.Values
           .Where(l => l.Method.Contains("TryCatchFinallyWithAwaitInFinally"))
           .ToList();
-        
+
         Assert.NotEmpty(methodLines);
-        
+
         // The combination of catch and finally with await should not generate phantom branches
         var methodBranches = document.Branches
           .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
           .ToList();
-        
+
         // May have legitimate branches from exception handling, but should not have
         // phantom branches from the compiler-generated state checks
         // The key is that coverage should be accurate and not confusing
@@ -745,19 +747,19 @@ namespace Coverlet.CoreCoverage.Tests
         }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
-        
+
         var methodLines = document.Lines.Values
           .Where(l => l.Method.Contains("EmptyTryWithAwaitInFinally"))
           .ToList();
-        
+
         Assert.NotEmpty(methodLines);
         Assert.True(methodLines.All(l => l.Hits > 0), "All lines should be covered");
-        
+
         // Empty try with await in finally - the simplest repro case for #1767
         var methodBranches = document.Branches
           .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
           .ToList();
-        
+
         Assert.Empty(methodBranches);
       }
       finally
@@ -784,13 +786,13 @@ namespace Coverlet.CoreCoverage.Tests
         }, [path]);
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
-        
+
         var methodLines = document.Lines.Values
           .Where(l => l.Method.Contains("TryFinallyWithMultipleAwaitsInFinally"))
           .ToList();
-        
+
         Assert.NotEmpty(methodLines);
-        Assert.True(methodLines.All(l => l.Hits > 0), 
+        Assert.True(methodLines.All(l => l.Hits > 0),
           "All lines including multiple awaits in finally should be covered");
       }
       finally
@@ -799,36 +801,5 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
-    public void AsyncAwait_Issue_1767_CompareWithIssue1233()
-    {
-      // This test compares Issue #1767 with the existing Issue #1233
-      // Issue #1233 already tests empty try with await in finally
-      // Issue #1767 extends this to more complex scenarios
-
-      string path = Path.GetTempFileName();
-      try
-      {
-        FunctionExecutor.Run(async (string[] pathSerialize) =>
-        {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1233>(async instance =>
-                      {
-                        await (Task)instance.Test();
-                      },
-                      persistPrepareResultToFile: pathSerialize[0]);
-
-          return 0;
-        }, [path]);
-
-        Core.Instrumentation.Document document1233 = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
-        
-        // Issue 1233 test - should have no phantom branches
-        Assert.DoesNotContain(document1233.Branches, x => x.Key.Line == 150);
-      }
-      finally
-      {
-        File.Delete(path);
-      }
-    }
   }
 }
