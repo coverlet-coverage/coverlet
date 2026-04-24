@@ -37,7 +37,7 @@ $coveragePatterns = @(
 )
 foreach ($pattern in $coveragePatterns) {
     Get-ChildItem -Path . -Filter $pattern -Recurse -ErrorAction SilentlyContinue |
-        Where-Object { $_.FullName -notlike '*\TestAssets\*' } |
+        Where-Object { $_.FullName -notlike '*/TestAssets/*' } |
         Remove-Item -Force
 }
 
