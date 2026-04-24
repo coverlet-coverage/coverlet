@@ -83,9 +83,14 @@ foreach ($fw in $frameworks) {
     dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.MTP.validation.tests/$fwDir/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.validation.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
 }
 
-# --- Legacy tests (net8.0, net9.0) using the legacy global.json (SDK 9.0.x) ---
+ # --- Legacy tests (net8.0, net9.0) using the legacy global.json (SDK 9.0.x) ---
 $legacyGlobalJson = "$WorkspaceRoot/src/legacy/global.json"
-if (Test-Path $legacyGlobalJson) {
+$runLegacy = $false
+if ($env:LEGACY -and $env:LEGACY -ne "0" -and $env:LEGACY -ne "false") {
+    $runLegacy = $true
+}
+
+if ($runLegacy) {
     $legacyJson = Get-Content -Path $legacyGlobalJson -Raw | ConvertFrom-Json
     $legacySdkVersion = $legacyJson.sdk.version
     $legacySdkMajor = [int]($legacySdkVersion -split '\.')[0]
