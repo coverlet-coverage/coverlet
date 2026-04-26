@@ -40,9 +40,11 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   private ICoverage? _coverage;
   private readonly Microsoft.Testing.Platform.Logging.ILoggerFactory _loggerFactory;
   private readonly Microsoft.Testing.Platform.CommandLine.ICommandLineOptions _commandLineOptions;
-  private bool _coverageEnabled;
   private string? _testModulePath;
   private string? _coverageIdentifier;
+  private bool? _isCoverageEnabled;
+
+  private bool IsCoverageEnabled => _isCoverageEnabled ??= _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
 
   private readonly CoverletExtension _extension = new();
   private readonly IReporterFactory _reporterFactory;
@@ -93,10 +95,9 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     try
     {
       // Check if --coverlet flag was provided
-      _coverageEnabled = _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
-      _logger.LogVerbose($"Coverage enabled (--{CoverletOptionNames.Coverage} flag): {_coverageEnabled}");
+      _logger.LogVerbose($"Coverage enabled (--{CoverletOptionNames.Coverage} flag): {IsCoverageEnabled}");
 
-      if (!_coverageEnabled)
+      if (!IsCoverageEnabled)
       {
         _logger.LogInformation("Coverage collection is disabled. Use --coverlet to enable.");
         return Task.CompletedTask;
@@ -107,7 +108,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       if (string.IsNullOrEmpty(_testModulePath))
       {
         _logger.LogError("Could not determine test module path. Coverage disabled.");
-        _coverageEnabled = false;
+        _isCoverageEnabled = false;
         return Task.CompletedTask;
       }
 
@@ -156,7 +157,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     {
       _logger.LogError("Failed to initialize coverage instrumentation");
       _logger.LogError(ex);
-      _coverageEnabled = false;
+      _isCoverageEnabled = false;
 
       // Display error to user via IOutputDevice (visible in console output)
       DisplayErrorToUserAsync(ex).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -234,7 +235,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   /// </summary>
   Task ITestHostEnvironmentVariableProvider.UpdateAsync(IEnvironmentVariables environmentVariables)
   {
-    if (_coverageEnabled && !string.IsNullOrEmpty(_coverageIdentifier))
+    if (IsCoverageEnabled && !string.IsNullOrEmpty(_coverageIdentifier))
     {
       _logger.LogVerbose($"Setting environment variables for test host");
 
@@ -303,7 +304,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     _logger.LogVerbose($"=== OnTestHostProcessExitedAsync START ===");
     _logger.LogVerbose($"Test host PID: {testHostProcessInformation.PID}, ExitCode: {testHostProcessInformation.ExitCode}");
 
-    if (!_coverageEnabled || _coverage == null || _serviceProvider == null)
+    if (!IsCoverageEnabled || _coverage == null || _serviceProvider == null)
     {
       _logger.LogVerbose("Coverage collection skipped (not enabled or not initialized)");
       return;
@@ -332,7 +333,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   public Task<bool> IsEnabledAsync()
   {
     DebugHelper.HandleDebuggerAttachment(nameof(CoverletExtension));
-    return Task.FromResult(true);
+    return Task.FromResult(IsCoverageEnabled);
   }
 
   // Add internal setter for testing

@@ -16,6 +16,9 @@ internal sealed class CoverletExtensionEnvironmentVariableProvider : ITestHostEn
 {
   private readonly ILogger _logger;
   private readonly Microsoft.Testing.Platform.CommandLine.ICommandLineOptions _commandLineOptions;
+  private bool? _isCoverageEnabled;
+
+  private bool IsCoverageEnabled => _isCoverageEnabled ??= _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
 
   public CoverletExtensionEnvironmentVariableProvider(
     IConfiguration configuration,
@@ -34,14 +37,16 @@ internal sealed class CoverletExtensionEnvironmentVariableProvider : ITestHostEn
   public string DisplayName => "Coverlet Environment Variable Provider";
   public string Description => "Provides environment variables for Coverlet coverage collection";
 
-  public Task<bool> IsEnabledAsync() => Task.FromResult(true);
+  public Task<bool> IsEnabledAsync()
+  {
+    // Check if --coverlet flag was provided
+    return Task.FromResult(IsCoverageEnabled);
+  }
 
   public Task UpdateAsync(IEnvironmentVariables environmentVariables)
   {
     // Check if --coverlet flag was provided
-    bool coverageEnabled = _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
-
-    if (coverageEnabled)
+    if (IsCoverageEnabled)
     {
       // Tell the test host that coverage is enabled
       environmentVariables.SetVariable(
