@@ -200,8 +200,24 @@ public class CollectorExtensionTests
   #region IsEnabledAsync Tests
 
   [Fact]
-  public async Task IsEnabledAsyncReturnsTrue()
+  public async Task IsEnabledAsyncReturnsFalseIfCoverletOptionNotSet()
   {
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+      .Returns(false);
+    var collector = CreateCollector();
+
+    bool result = await collector.IsEnabledAsync();
+
+    Assert.False(result);
+  }
+
+  [Fact]
+  public async Task IsEnabledAsyncReturnsTrueIfCoverletOptionSet()
+  {
+    _mockCommandLineOptions
+      .Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage))
+      .Returns(true);
     var collector = CreateCollector();
 
     bool result = await collector.IsEnabledAsync();

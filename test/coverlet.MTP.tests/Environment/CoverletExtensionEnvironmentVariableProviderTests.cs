@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using coverlet.MTP.EnvironmentVariables;
+using Coverlet.MTP.CommandLine;
 using Coverlet.MTP.Diagnostics;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
@@ -68,10 +69,30 @@ public class CoverletExtensionEnvironmentVariableProviderTests
   #region IsEnabledAsync Tests
 
   [Fact]
-  public async Task IsEnabledAsyncReturnsTrue()
+  public async Task IsEnabledAsyncReturnsFalseIfCoverletOptionNotSet()
   {
     // Act
     bool result = await _provider.IsEnabledAsync();
+
+    // Assert
+    Assert.False(result);
+  }
+
+  [Fact]
+  public async Task IsEnabledAsyncReturnsTrueIfCoverletOptionSet()
+  {
+    // Arrange
+    var mockCommandLineOptions = new Mock<ICommandLineOptions>();
+    mockCommandLineOptions.Setup(o => o.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
+
+    // Re-create provider to pick up the environment variable
+    var provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+
+    // Act
+    bool result = await provider.IsEnabledAsync();
 
     // Assert
     Assert.True(result);
