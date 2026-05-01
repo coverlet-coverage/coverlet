@@ -19,7 +19,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DotNetConfig" Version="1.2.0" />
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.6" /> <!-- latest stable version netstandard2.0, netstandard2.1, net462 -->
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.7" /> <!-- latest stable version netstandard2.0, netstandard2.1, net462 -->
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="1.11.2" />
@@ -28,7 +28,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.6" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.6" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.6" /> <!-- latest stable version net10.0, net9.0, net8.0 -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" /> <!-- latest stable version net10.0, net9.0, net8.0 -->
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.6" /> <!-- latest stable version net10.0, net9.0, net8.0 -->
      <!-- For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext -->
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="10.0.6" />
