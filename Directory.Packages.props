@@ -26,8 +26,8 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.0.0-1.25277.114" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.6" /> <!-- latest stable version net10.0, net9.0, net8.0 -->
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.6" /> <!-- latest stable version net10.0, net9.0, net8.0 -->
      <!-- For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext -->
