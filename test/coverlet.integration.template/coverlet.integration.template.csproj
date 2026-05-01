@@ -22,7 +22,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Text.Json" Version="10.0.6"/>
-    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.2.1" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.2.2" />
   </ItemGroup>
 
   <ItemGroup>
