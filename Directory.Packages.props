@@ -19,7 +19,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DotNetConfig" Version="1.2.0" />
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.6" /> <!-- latest stable version netstandard2.0, netstandard2.1, net462 -->
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.7" /> <!-- latest stable version netstandard2.0, netstandard2.1, net462 -->
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="1.11.2" />
