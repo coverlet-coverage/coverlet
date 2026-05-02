@@ -738,7 +738,7 @@ public class AsyncDataFetcher
     <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
     <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
     <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.1"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
   </ItemGroup>
 </Project>");
 
@@ -887,7 +887,7 @@ public class IntegerFormatter
     <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
     <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
     <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.1"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
   </ItemGroup>
 </Project>");
 
@@ -1068,7 +1068,7 @@ public class Issue1843Tests
     <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
     <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
     <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.1"" />
+    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
   </ItemGroup>
 </Project>");
 
