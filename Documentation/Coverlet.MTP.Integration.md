@@ -127,6 +127,7 @@ Coverlet.MTP supports two configuration file formats:
 The `testconfig.json` format is the standard configuration file for Microsoft Testing Platform extensions. Coverlet settings are placed under `platformOptions.Coverlet`:
 
 **File Location Priority:**
+
 - `[appname].testconfig.json` - App-specific configuration (e.g., `MyTests.testconfig.json`)
 - `testconfig.json` - Generic configuration
 
@@ -252,7 +253,7 @@ The legacy `coverlet.mtp.appsettings.json` format is still supported for backwar
 
 Coverlet.MTP uses the following precedence order when determining configuration values:
 
-```
+```text
 Priority 1: Command line options (always take precedence)
 Priority 2: testconfig.json (app-specific > generic)
 Priority 3: coverlet.mtp.appsettings.json (legacy)
@@ -267,6 +268,7 @@ Priority 4: Built-in defaults (only when no configuration file exists)
 - **Defaults apply only without config files:** Built-in defaults are only used when no configuration file is present
 
 **File Priority for testconfig.json:**
+
 1. `[appname].testconfig.json` (e.g., `MyTests.testconfig.json`)
 2. `testconfig.json`
 
@@ -282,6 +284,7 @@ If you prefer to define coverlet options in your `.csproj` file and leverage MSB
 ```
 
 This approach is useful when you want to:
+
 - Use MSBuild variables like `$(AssemblyName)`, `$(MSBuildProjectName)`, or `$(Configuration)`
 - Define configuration at the solution level via `Directory.Build.props`
 - Ensure each test project uses its assembly name as the file prefix automatically
@@ -420,7 +423,7 @@ The `coverlet.MTP` extension integrates with the Microsoft Testing Platform usin
 
 - Threshold validation is not yet supported (planned for future releases)
 - Report merging is not yet supported (use external tools like `dotnet-coverage` or `reportgenerator`)
-- **--coverlet-include-test-assembly is not supported**: In the MTP model the test assembly is also the controller process. Coverlet uses static (ahead-of-time) instrumentation and must rewrite the binary on disk before it is loaded. Because the controller executable is already in use when instrumentation runs, attempting to rewrite it causes a file-sharing violation and the instrumentation of the test assembly fails silently. This is a fundamental architectural constraint of the MTP in-process model, not a bug. See [issue #1911](https://github.com/coverlet-coverage/coverlet/issues/1911) for details. Use coverlet.collector (VSTest) or coverlet.msbuild if you need to measure coverage of the test assembly itself.
+- **`--coverlet-include-test-assembly` may be accepted, but the MTP test assembly itself cannot be instrumented**: In the MTP model the test assembly is also the controller process. Coverlet uses static (ahead-of-time) instrumentation and must rewrite the binary on disk before it is loaded. Because the controller executable is already in use when instrumentation runs, attempting to rewrite that assembly causes instrumentation of the test/controller assembly to fail. Coverlet logs a warning for that module and continues processing other eligible modules; it does not fail silently. This is a fundamental architectural constraint of the MTP in-process model, not a bug. See [issue #1911](https://github.com/coverlet-coverage/coverlet/issues/1911) for details. Use coverlet.collector (VSTest) or coverlet.msbuild if you need to measure coverage of the test assembly itself.
 
 > [!TIP]
 > **Merging coverage files from multiple test runs:**

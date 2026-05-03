@@ -25,9 +25,12 @@
         "reportgenerator",
         "reporttypes",
         "runsettings",
+        "targetargs",
+        "TARGETARGS",
         "targetdir",
         "targetframework",
         "teamcity",
+        "testconfig",
         "vstest",
         "xunit"
     ],

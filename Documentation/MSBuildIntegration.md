@@ -290,6 +290,7 @@ This setting is particularly helpful when troubleshooting instrumentation issues
 
 > [!NOTE]
 > Make sure instrumented binaries are not deployed into production.
+
 ## Architecture
 
 `coverlet.msbuild` integrates through MSBuild targets/tasks and wraps test execution with instrumentation and report generation steps.
@@ -315,7 +316,7 @@ flowchart LR
 
 ### Limitations and constraints
 
-- This mode depends on MSBuild target ordering; custom targets can alter expected behavior.
-- Instrumented binaries are modified on disk during test run and then restored (unless restore is explicitly disabled).
-- Quoting/escaping of multi-value properties can vary by shell and OS (notably Linux MSBuild escaping behavior).
-- If projects are rebuilt between instrumentation and execution, collected coverage can be invalid.
+* This mode depends on MSBuild target ordering; custom targets can alter expected behavior.
+* Instrumented binaries are modified on disk during test run and then restored (unless restore is explicitly disabled).
+* Quoting/escaping of multi-value properties can vary by shell and OS (notably Linux MSBuild escaping behavior).
+* If projects are rebuilt between instrumentation and execution, collected coverage can be invalid.

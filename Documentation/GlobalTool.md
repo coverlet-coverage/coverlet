@@ -289,10 +289,11 @@ flowchart LR
 
 ### Limitations and constraints
 
-- Target execution must avoid rebuilding instrumented binaries (`--no-build` pattern is required in common workflows).
-- Hit flushing relies on graceful process shutdown; forceful termination can produce incomplete results.
-- The tool has no direct test-platform controller; it only wraps an external command/process.
-- Path and quoting behavior are shell-dependent, especially for multiple filters and arguments.
+* Target execution must avoid rebuilding instrumented binaries (`--no-build` pattern is required in common workflows).
+* Hit flushing relies on graceful process shutdown; forceful termination can produce incomplete results.
+* The tool has no direct test-platform controller; it only wraps an external command/process.
+* Path and quoting behavior are shell-dependent, especially for multiple filters and arguments.
+
 ## Exit Codes
 
 Coverlet outputs specific exit codes to better support build automation systems for determining the kind of failure so the appropriate action can be taken.
