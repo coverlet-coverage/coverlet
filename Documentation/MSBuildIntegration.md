@@ -290,3 +290,32 @@ This setting is particularly helpful when troubleshooting instrumentation issues
 
 > [!NOTE]
 > Make sure instrumented binaries are not deployed into production.
+## Architecture
+
+`coverlet.msbuild` integrates through MSBuild targets/tasks and wraps test execution with instrumentation and report generation steps.
+
+### Dependencies and functionality
+
+| Component | Dependencies | Functionality |
+| :-- | :-- | :-- |
+| `coverlet.msbuild` | MSBuild task APIs (`Microsoft.Build.Utilities.Core`), `coverlet.core` | Adds targets before/after test execution, drives instrumentation, restores binaries, evaluates thresholds, writes reports |
+| `coverlet.core` | `Mono.Cecil`, filtering/reporting infrastructure | Instruments assemblies, collects hits, computes metrics, produces output formats |
+
+```mermaid
+flowchart LR
+    CLI["dotnet test"] --> MSB["MSBuild pipeline"]
+    MSB --> PRE["InstrumentationTask\n(before test target)"]
+    PRE --> CORE["coverlet.core"]
+    MSB --> TEST["VSTest/TestHost execution"]
+    TEST --> POST["CoverageResultTask\n(after test target)"]
+    POST --> CORE
+    CORE --> OUT["coverage.json/xml/etc."]
+    POST --> THR["Threshold evaluation\n(build pass/fail)"]
+```
+
+### Limitations and constraints
+
+- This mode depends on MSBuild target ordering; custom targets can alter expected behavior.
+- Instrumented binaries are modified on disk during test run and then restored (unless restore is explicitly disabled).
+- Quoting/escaping of multi-value properties can vary by shell and OS (notably Linux MSBuild escaping behavior).
+- If projects are rebuilt between instrumentation and execution, collected coverage can be invalid.

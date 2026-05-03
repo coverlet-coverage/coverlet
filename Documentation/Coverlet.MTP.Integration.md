@@ -420,6 +420,7 @@ The `coverlet.MTP` extension integrates with the Microsoft Testing Platform usin
 
 - Threshold validation is not yet supported (planned for future releases)
 - Report merging is not yet supported (use external tools like `dotnet-coverage` or `reportgenerator`)
+- **--coverlet-include-test-assembly is not supported**: In the MTP model the test assembly is also the controller process. Coverlet uses static (ahead-of-time) instrumentation and must rewrite the binary on disk before it is loaded. Because the controller executable is already in use when instrumentation runs, attempting to rewrite it causes a file-sharing violation and the instrumentation of the test assembly fails silently. This is a fundamental architectural constraint of the MTP in-process model, not a bug. See [issue #1911](https://github.com/coverlet-coverage/coverlet/issues/1911) for details. Use coverlet.collector (VSTest) or coverlet.msbuild if you need to measure coverage of the test assembly itself.
 
 > [!TIP]
 > **Merging coverage files from multiple test runs:**

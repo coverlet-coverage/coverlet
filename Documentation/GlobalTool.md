@@ -265,6 +265,34 @@ The value for `--source-mapping-file` should be a file with each line being in t
 
 During coverage collection, Coverlet will translate any path that starts with `/_/` to `C:\git\coverlet\` allowing the collector to find the source file.
 
+## Architecture
+
+`coverlet.console` is a host-driven model where the tool owns the orchestration around an external target process.
+
+### Dependencies and functionality
+
+| Component | Dependencies | Functionality |
+| :-- | :-- | :-- |
+| `coverlet.console` | `System.CommandLine`, `coverlet.core` | Parses CLI arguments, instruments target assembly/folder, launches target process, restores binaries, writes reports and exit codes |
+| `coverlet.core` | `Mono.Cecil`, filtering/reporting infrastructure | Performs IL instrumentation, hit tracking, and report generation |
+
+```mermaid
+flowchart LR
+    USER["coverlet <path> --target <runner>"] --> CLI["coverlet.console"]
+    CLI --> CORE["coverlet.core"]
+    CORE --> INST["Instrument assemblies"]
+    CLI --> RUN["Launch target process"]
+    RUN --> HITS["Hit files flushed on graceful shutdown"]
+    CLI --> CORE
+    CORE --> REPORT["coverage outputs"]
+```
+
+### Limitations and constraints
+
+- Target execution must avoid rebuilding instrumented binaries (`--no-build` pattern is required in common workflows).
+- Hit flushing relies on graceful process shutdown; forceful termination can produce incomplete results.
+- The tool has no direct test-platform controller; it only wraps an external command/process.
+- Path and quoting behavior are shell-dependent, especially for multiple filters and arguments.
 ## Exit Codes
 
 Coverlet outputs specific exit codes to better support build automation systems for determining the kind of failure so the appropriate action can be taken.

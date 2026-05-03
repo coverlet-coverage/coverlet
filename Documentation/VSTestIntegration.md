@@ -180,6 +180,35 @@ When we specify `--collect:"XPlat Code Coverage"` VSTest platform tries to load 
 
 1. In-proc Datacollector: The in-proc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [serious known issue](KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
 
+## Architecture
+
+`coverlet.collector` uses a controller-style integration where VSTest remains the orchestrator and Coverlet hooks into collector lifecycle callbacks.
+
+### Dependencies and functionality
+
+| Component | Dependencies | Functionality |
+| :-- | :-- | :-- |
+| `coverlet.collector` | VSTest Data Collector APIs (`Microsoft.TestPlatform.ObjectModel`), `coverlet.core` | Coordinates pre/post test collection, instruments targets, collects hit files, publishes coverage as test attachments |
+| `coverlet.core` | `Mono.Cecil`, filtering/reporting infrastructure | IL instrumentation, hit tracking, coverage aggregation, report generation |
+
+```mermaid
+flowchart LR
+    VS["vstest.console / dotnet test"] --> OOP["Out-of-proc Data Collector\ncoverlet.collector"]
+    VS --> TH["testhost"]
+    TH --> IP["In-proc Data Collector\ncoverlet.collector"]
+    OOP --> CORE["coverlet.core"]
+    IP --> CORE
+    CORE --> REP["coverage reports"]
+    OOP --> ATT["VSTest attachments\nTestResults/<guid>"]
+```
+
+### Limitations and constraints
+
+- Output files are attached under `TestResults/<guid>` (platform-controlled, non-deterministic folder names).
+- Feature parity with other modes is partial (for example, threshold validation and built-in merge are not provided by this integration mode).
+- Coverage collection depends on VSTest data-collector lifecycle and testhost behavior.
+- Requires compatible `Microsoft.NET.Test.Sdk` and collector setup.
+
 ## Known Issues
 
 For a comprehensive list of known issues check the detailed documentation [KnownIssues.md](KnownIssues.md)
