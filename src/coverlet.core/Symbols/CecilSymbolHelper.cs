@@ -856,7 +856,7 @@ namespace Coverlet.Core.Symbols
       //     the state machine's current state and jumps to the right place.
       // (2) A check that the compiler-generated field "<>w__disposeMode" is false,
       //     which is used to know whether the enumerator has been disposed (so it's
-      //     necessary not to iterate any further).  This is done in more than once
+      //     necessary not to iterate any further).  This is done in more than one
       //     place, but we always want to skip it.
 
       int currentIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
@@ -949,7 +949,7 @@ namespace Coverlet.Core.Symbols
       //
       // IL_0118: ldarg.0
       // IL_0119: ldfld     class [System.Runtime]System.Threading.CancellationTokenSource Issue1275.AwaitForeachReproduction/'<AsyncEnumerable>d__1'::'<>x__combinedTokens'
-      // IL_011E: brfalse.s IL_0133
+      // IL_011e: brfalse.s IL_0133
       //
       // We'll eliminate these wherever they appear.  It's reasonable to just look for a "brfalse" or "brfalse.s" instruction, preceded
       // immediately by "ldfld" of the compiler-generated "<>x__combinedTokens" field.
@@ -1051,7 +1051,8 @@ namespace Coverlet.Core.Symbols
             if (SkipGeneratedBranchesForExceptionHandlers(methodDefinition, instruction, instructions) ||
                 SkipGeneratedBranchForExceptionRethrown(instructions, instruction) ||
                 SkipGeneratedBranchesForAwaitForeach(instructions, instruction) ||
-                SkipGeneratedBranchesForAwaitUsing(instructions, instruction))
+                SkipGeneratedBranchesForAwaitUsing(instructions, instruction) ||
+                SkipGeneratedBranchesForAsyncTryFinally(instructions, instruction, methodDefinition))
             {
               continue;
             }
@@ -1471,6 +1472,132 @@ namespace Coverlet.Core.Symbols
           .Any(eh => !(methodDefinition.DebugInformation.GetSequencePointMapping()
               .Where(i => i.Value.StartLine != StepOverLineCode)
               .Any(i => i.Value.Offset >= eh.HandlerStart.Offset && i.Value.Offset < eh.HandlerEnd.Maybe(h => h.Offset, GetOffsetOfNextEndfinally(methodDefinition.Body, eh.HandlerStart.Offset)))));
+    }
+
+    private static bool SkipGeneratedBranchesForAsyncTryFinally(List<Instruction> instructions, Instruction instruction, MethodDefinition methodDefinition)
+    {
+      /*
+          When an async method contains a try-finally block with an await statement in the finally block,
+          the compiler generates special patterns in the async state machine's MoveNext method.
+          These patterns check for exception state and manage finally block execution.
+          
+          The compiler generates branches to check if the finally block should execute and branches
+          that manage the await continuation within the finally block. These branches are implementation
+          details and should not affect coverage metrics.
+
+          Typical pattern for async try-finally with await in finally block:
+          
+          Debug version:
+          IL_xxxx: ldarg.0
+          IL_xxxx: ldfld int32 '<StateMachine>'::'<>s__X'  // Exception state field
+          IL_xxxx: stloc.s Y
+          IL_xxxx: ldloc.s Y
+          IL_xxxx: ldc.i4.1
+          IL_xxxx: beq.s IL_yyyy                            // BRANCH: Check if exception state is set
+          
+          OR for finally block execution check:
+          
+          IL_xxxx: ldarg.0
+          IL_xxxx: ldfld object '<StateMachine>'::'<>s__X'  // Exception object field
+          IL_xxxx: brfalse.s IL_yyyy                        // BRANCH: Check if exception exists
+          
+          These branches are not user code and should be excluded from coverage.
+      */
+
+      if (!methodDefinition.Body.HasExceptionHandlers)
+        return false;
+
+      // Check if this is a branch instruction that should be skipped
+      if (instruction.OpCode != OpCodes.Beq &&
+          instruction.OpCode != OpCodes.Beq_S &&
+          instruction.OpCode != OpCodes.Brfalse &&
+          instruction.OpCode != OpCodes.Brfalse_S &&
+          instruction.OpCode != OpCodes.Brtrue &&
+          instruction.OpCode != OpCodes.Brtrue_S)
+      {
+        return false;
+      }
+
+      int branchIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
+      if (branchIndex < 2)
+        return false;
+
+      // Pattern 1: Check for exception state value comparison
+      // ldloc.s Y / ldc.i4.1 / beq.s
+      if ((instruction.OpCode == OpCodes.Beq || instruction.OpCode == OpCodes.Beq_S) &&
+          branchIndex >= 2 &&
+          instructions[branchIndex - 1].OpCode == OpCodes.Ldc_I4_1 &&
+          (instructions[branchIndex - 2].OpCode == OpCodes.Ldloc ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_S ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_0 ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_1 ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_2 ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_3))
+      {
+        // Look back further to see if this local was loaded from a compiler-generated exception state field
+        // Pattern: ldarg.0 / ldfld <>s__X / stloc.s Y
+        int minSearchIndex = Math.Max(0, branchIndex - 6);
+        for (int i = branchIndex - 3; i >= minSearchIndex; i--)
+        {
+          if (instructions[i].OpCode == OpCodes.Ldfld &&
+              IsCompilerGeneratedField(instructions[i], out FieldDefinition field) &&
+              (field.FieldType.FullName == "System.Int32" && field.Name.StartsWith("<>s__")) &&
+              i >= 1 &&
+              (instructions[i - 1].OpCode == OpCodes.Ldarg_0 || instructions[i - 1].OpCode == OpCodes.Ldarg))
+          {
+            // Check if we're near a finally handler
+            var finallyHandlers = methodDefinition.Body.ExceptionHandlers
+                .Where(e => e.HandlerType == ExceptionHandlerType.Finally)
+                .ToList();
+
+            if (finallyHandlers.Any())
+            {
+              return true;
+            }
+          }
+        }
+      }
+
+      // Pattern 2: Check for exception object null check
+      // ldarg.0 / ldfld <>s__X (type: System.Object or System.Exception) / brfalse.s
+      if ((instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S ||
+           instruction.OpCode == OpCodes.Brtrue || instruction.OpCode == OpCodes.Brtrue_S) &&
+          branchIndex >= 2 &&
+          instructions[branchIndex - 1].OpCode == OpCodes.Ldfld &&
+          IsCompilerGeneratedField(instructions[branchIndex - 1], out FieldDefinition exField) &&
+          (exField.FieldType.FullName == "System.Object" || exField.FieldType.FullName == "System.Exception") &&
+          exField.Name.StartsWith("<>s__") &&
+          (instructions[branchIndex - 2].OpCode == OpCodes.Ldarg_0 || instructions[branchIndex - 2].OpCode == OpCodes.Ldarg))
+      {
+        // Check if we're in or near a finally handler region
+        var finallyHandlers = methodDefinition.Body.ExceptionHandlers
+            .Where(e => e.HandlerType == ExceptionHandlerType.Finally)
+            .ToList();
+
+        if (finallyHandlers.Any())
+        {
+          // Additional validation: look for await-related patterns nearby
+          // (GetResult, AwaitUnsafeOnCompleted, etc.)
+          int searchRangeStart = Math.Max(0, branchIndex - 10);
+          int searchRangeEnd = Math.Min(instructions.Count - 1, branchIndex + 10);
+
+          for (int i = searchRangeStart; i <= searchRangeEnd; i++)
+          {
+            if (instructions[i].OpCode == OpCodes.Call || instructions[i].OpCode == OpCodes.Callvirt)
+            {
+              if (instructions[i].Operand is MethodReference methodRef &&
+                  (methodRef.Name == "GetResult" ||
+                   methodRef.Name == "AwaitUnsafeOnCompleted" ||
+                   methodRef.DeclaringType.FullName.Contains("TaskAwaiter")))
+              {
+                return true;
+              }
+            }
+          }
+        }
+      }
+
+      return false;
     }
 
     private static int GetOffsetOfNextEndfinally(MethodBody body, int startOffset)

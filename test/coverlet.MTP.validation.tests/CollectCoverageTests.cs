@@ -669,7 +669,6 @@ public class CollectCoverageTests
   {
     // Use repository artifacts folder
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
-    DeleteDirectoryWithRetry(artifactsTemp);
     Directory.CreateDirectory(artifactsTemp);
 
     string sanitizedTestName = SanitizePathName(testName);
@@ -678,7 +677,7 @@ public class CollectCoverageTests
     if (Directory.Exists(solutionPath))
     {
       try { Directory.Delete(solutionPath, recursive: true); }
-      catch (IOException) { solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}"); }
+      catch (Exception e) when (e is IOException or UnauthorizedAccessException) { solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}"); }
     }
 
     Directory.CreateDirectory(solutionPath);
@@ -709,8 +708,6 @@ public class CollectCoverageTests
   {
     // Reproduce exact Issue #1843 scenario
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
-    DeleteDirectoryWithRetry(artifactsTemp);
-
     Directory.CreateDirectory(artifactsTemp);
 
     string sanitizedTestName = SanitizePathName(testName);
@@ -719,7 +716,7 @@ public class CollectCoverageTests
     if (Directory.Exists(solutionPath))
     {
       try { Directory.Delete(solutionPath, recursive: true); }
-      catch (IOException) { solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}"); }
+      catch (Exception e) when (e is IOException or UnauthorizedAccessException) { solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}"); }
     }
 
     Directory.CreateDirectory(solutionPath);
@@ -1045,8 +1042,6 @@ public class Issue1843Tests
   {
     // Use repository artifacts folder instead of user temp
     string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
-    DeleteDirectoryWithRetry(artifactsTemp);
-
     Directory.CreateDirectory(artifactsTemp);
 
     // Use test method name for folder naming (sanitize invalid path characters)
@@ -1060,7 +1055,7 @@ public class Issue1843Tests
       {
         Directory.Delete(solutionPath, recursive: true);
       }
-      catch (IOException)
+      catch (Exception e) when (e is IOException or UnauthorizedAccessException)
       {
         // If deletion fails, append a short unique suffix
         solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}");

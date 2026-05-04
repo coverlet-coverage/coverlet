@@ -314,4 +314,200 @@ namespace Coverlet.Core.CoverageSamples.Tests
       }
     }
   }
+
+  // Async methods with try-finally blocks containing await statements
+  // Tests various patterns of async try-finally to ensure correct coverage
+  public class AsyncTryFinallyPhantomBranches
+  {
+    // Test 1: Basic async try-finally with await in finally block
+    public async Task BasicAsyncTryFinally()
+    {
+      try
+      {
+        await Task.Delay(1);
+      }
+      finally
+      {
+        await Task.Delay(1);
+      }
+    }
+
+    // Test 2: Try-finally with code in try and await in finally
+    public async Task<int> TryFinallyWithReturnValue()
+    {
+      int result = 0;
+      try
+      {
+        result = 42;
+        await Task.Delay(1);
+      }
+      finally
+      {
+        await Task.CompletedTask;
+      }
+      return result;
+    }
+
+    // Test 3: Try-finally with exception handling
+    public async Task TryFinallyWithException()
+    {
+      try
+      {
+        await Task.Delay(1);
+        throw new System.Exception("Test exception");
+      }
+      finally
+      {
+        await Task.CompletedTask;
+      }
+    }
+
+    // Test 4: Nested try-finally blocks with await
+    public async Task NestedTryFinally()
+    {
+      try
+      {
+        await Task.Delay(1);
+        try
+        {
+          await Task.Delay(1);
+        }
+        finally
+        {
+          await Task.CompletedTask;
+        }
+      }
+      finally
+      {
+        await Task.CompletedTask;
+      }
+    }
+
+    // Test 5: Try-finally with branching logic
+    public async Task<int> TryFinallyWithBranching(bool condition)
+    {
+      int result = 0;
+      try
+      {
+        if (condition)
+        {
+          result = 1;
+          await Task.Delay(1);
+        }
+        else
+        {
+          result = 2;
+          await Task.Delay(2);
+        }
+      }
+      finally
+      {
+        await Task.CompletedTask;
+      }
+      return result;
+    }
+
+    // Test 6: Try-finally with multiple await statements in finally
+    public async Task TryFinallyWithMultipleAwaitsInFinally()
+    {
+      try
+      {
+        await Task.Delay(1);
+      }
+      finally
+      {
+        await Task.Delay(1);
+        await Task.Delay(1);
+        await Task.CompletedTask;
+      }
+    }
+
+    // Test 7: Try-catch-finally with await in finally
+    public async Task TryCatchFinallyWithAwaitInFinally()
+    {
+      try
+      {
+        await Task.Delay(1);
+      }
+      catch (System.Exception)
+      {
+        await Task.Delay(1);
+      }
+      finally
+      {
+        await Task.CompletedTask;
+      }
+    }
+
+    // Test 8: Empty try block with await in finally
+    public async Task EmptyTryWithAwaitInFinally()
+    {
+      try
+      {
+        // Empty try block
+      }
+      finally
+      {
+        await Task.CompletedTask;
+      }
+    }
+
+    // Test 9: Try-finally with ConfigureAwait
+    public async Task TryFinallyWithConfigureAwait()
+    {
+      try
+      {
+        await Task.Delay(1).ConfigureAwait(false);
+      }
+      finally
+      {
+        await Task.Delay(1).ConfigureAwait(false);
+      }
+    }
+
+    // Test 10: Try-finally with ValueTask
+    public async ValueTask TryFinallyWithValueTask()
+    {
+      try
+      {
+        await Task.Delay(1);
+      }
+      finally
+      {
+        await new ValueTask(Task.CompletedTask);
+      }
+    }
+
+    // Test 11: Try-finally with loop in try block
+    public async Task TryFinallyWithLoopInTry(int count)
+    {
+      try
+      {
+        for (int i = 0; i < count; i++)
+        {
+          await Task.Delay(1);
+        }
+      }
+      finally
+      {
+        await Task.CompletedTask;
+      }
+    }
+
+    // Test 12: Try-finally with using statement and await
+    public async Task TryFinallyWithUsingAndAwait()
+    {
+      try
+      {
+        using (var ms = new System.IO.MemoryStream())
+        {
+          await Task.Delay(1);
+        }
+      }
+      finally
+      {
+        await Task.CompletedTask;
+      }
+    }
+  }
 }

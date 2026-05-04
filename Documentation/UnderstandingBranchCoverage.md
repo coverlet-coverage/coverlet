@@ -62,20 +62,20 @@ The `brfalse.s` instruction has two possible outcomes:
 - For this `brfalse.s` pattern, **ordinal 0** is the fall-through path, so it maps to `condition == true`.
 - For this same pattern, **ordinal 1** is the jump target, so it maps to `condition == false`.
 - Ordinals should be treated as per-branch identifiers. Do not assume `0 == false` and `1 == true` in general; the mapping depends on the emitted IL instruction.
-- Having 2 branches for an `if` without `else` is therefore expected at the IL level. Issue #1786 is specifically about **incorrect hit reporting**—for example, both ordinals being marked covered even though only one outcome actually executed—not about the existence of these 2 IL branches.
+- Having 2 branches for an `if` without `else` is expected at the IL level. Issue #1786 was about **incorrect hit reporting** where both ordinals were incorrectly marked as covered even when only one execution path was taken.
 
-Both paths represent real execution flows that can be tested:
+**Fix (implemented):** Coverlet now uses a *trampoline* instrumentation strategy for taken-branch (jump) paths. When `brfalse.s` jumps to the continuation, execution passes through a dedicated trampoline block appended at the end of the method body, which records the hit exclusively for that jump path. Fall-through arrivals at the same continuation instruction no longer trigger the jump-path counter, eliminating the false-positive.
+
+Both paths represent real execution flows that can be tested independently:
 
 ```csharp
 [Fact]
 public void Test_BothBranches()
 {
-    Example(true);   // Covers path 0 (then block)
-    Example(false);  // Covers path 1 (skip block)
+    Example(true);   // Covers path 0 (fall-through into then block)
+    Example(false);  // Covers path 1 (jump to continuation — skip block)
 }
 ```
-
-**This is by-design behavior**, not a bug. IL-based coverage tools report actual IL branches, which include the implicit "else" path.
 
 ---
 
