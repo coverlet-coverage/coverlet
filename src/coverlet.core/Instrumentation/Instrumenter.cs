@@ -659,8 +659,7 @@ namespace Coverlet.Core.Instrumentation
       IDictionary<int, Instruction> targetsMap = new Dictionary<int, Instruction>();
       // Maps (branchInstruction.Offset, jumpTarget.Offset) to the first instruction of a trampoline
       // block appended at the end of the method body. Trampolines are used for taken-branch paths
-      // (Path > 0) so that the branch hit counter only fires when the specific conditional jump is
-      // taken, not when the same destination is reached via fall-through from another path. This
+      // (Path > 0) so that the branch hit counter only fires when the specific conditional jump is taken, not when the same destination is reached via fall-through from another path. This
       // prevents false-positive branch coverage for patterns such as `if` without `else`.
       IDictionary<(int branchOffset, int endOffset), Instruction> branchRedirectMap = new Dictionary<(int, int), Instruction>();
 
@@ -813,8 +812,14 @@ namespace Coverlet.Core.Instrumentation
                   : currentInstruction;
               Instruction trampolineStart = AddBranchTrampolineCode(method, processor, branchTarget, trampolineTarget);
               (int Offset, int EndOffset) redirectKey = (branchTarget.Offset, branchTarget.EndOffset);
-              if (!branchRedirectMap.ContainsKey(redirectKey))
+#if NETSTANDARD2_0
+              if(!branchRedirectMap.ContainsKey(redirectKey))
+                {
                 branchRedirectMap.Add(redirectKey, trampolineStart);
+                }
+#else
+              branchRedirectMap.TryAdd(redirectKey, trampolineStart);
+#endif
             }
           }
         }

@@ -751,7 +751,7 @@ namespace Coverlet.CoreCoverage.Tests
         Assert.NotEmpty(methodLines);
         Assert.True(methodLines.All(l => l.Hits > 0), "All lines should be covered");
 
-        // Empty try with await in finally - the simplest repro case for #1767
+        // Empty try with await in finally 
         var methodBranches = document.Branches
           .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
           .ToList();
