@@ -657,11 +657,12 @@ namespace Coverlet.Core.Instrumentation
       int count = processor.Body.Instructions.Count;
       IReadOnlyList<BranchPoint> branchPoints = _cecilSymbolHelper.GetBranchPoints(method);
       IDictionary<int, Instruction> targetsMap = new Dictionary<int, Instruction>();
-      // Maps (branchInstruction.Offset, jumpTarget.Offset) to the first instruction of a trampoline
-      // block appended at the end of the method body. Trampolines are used for taken-branch paths
-      // (Path > 0) so that the branch hit counter only fires when the specific conditional jump is taken, not when the same destination is reached via fall-through from another path. This
-      // prevents false-positive branch coverage for patterns such as `if` without `else`.
-      IDictionary<(int branchOffset, int endOffset), Instruction> branchRedirectMap = new Dictionary<(int, int), Instruction>();
+      // Maps (branchInstruction.Offset, path) to the first instruction of a trampoline block
+      // appended at the end of the method body. Path uniquely identifies each arm: 1 for a
+      // simple conditional taken-branch, i+1 for switch arm at index i. Keying by path (rather
+      // than target offset) ensures two switch arms that share the same target block each get
+      // their own trampoline so both ordinals are counted independently.
+      IDictionary<(int branchOffset, int path), Instruction> branchRedirectMap = new Dictionary<(int, int), Instruction>();
 
       // Build the set of instruction offsets that are inside any exception handler region (try,
       // catch, finally, filter). Trampolines are appended at the end of the method body, which is
@@ -807,18 +808,21 @@ namespace Coverlet.Core.Instrumentation
             {
               // Trampoline: counter is appended at end of method, only reachable via the specific
               // conditional jump — no false positives on fall-through paths.
+              //
+              // Do not cache by target offsets here: multiple distinct branch points (for example,
+              // multiple switch arms) may jump to the same target block but must still keep their
+              // own trampoline so branch ordinals/paths remain distinct.
               Instruction trampolineTarget = targetsMap.TryGetValue(currentInstruction.Offset, out Instruction firstCounter)
                   ? firstCounter
                   : currentInstruction;
               Instruction trampolineStart = AddBranchTrampolineCode(method, processor, branchTarget, trampolineTarget);
-              (int Offset, int EndOffset) redirectKey = (branchTarget.Offset, branchTarget.EndOffset);
+              // Key by (branchOffset, path) so that two switch arms that jump to the same target
+              // each get their own trampoline and their own ordinal counter.
 #if NETSTANDARD2_0
-              if(!branchRedirectMap.ContainsKey(redirectKey))
-                {
-                branchRedirectMap.Add(redirectKey, trampolineStart);
-                }
+              if (!branchRedirectMap.ContainsKey((branchTarget.Offset, branchTarget.Path)))
+                branchRedirectMap.Add((branchTarget.Offset, branchTarget.Path), trampolineStart);
 #else
-              branchRedirectMap.TryAdd(redirectKey, trampolineStart);
+              branchRedirectMap.TryAdd((branchTarget.Offset, branchTarget.Path), trampolineStart);
 #endif
             }
           }
@@ -1009,13 +1013,12 @@ namespace Coverlet.Core.Instrumentation
     }
 
     private static void ReplaceInstructionTarget(Instruction instruction, IDictionary<int, Instruction> targetsMap,
-        IDictionary<(int branchOffset, int endOffset), Instruction> branchRedirectMap)
+        IDictionary<(int branchOffset, int path), Instruction> branchRedirectMap)
     {
       if (instruction.Operand is Instruction operandInstruction)
       {
-        // Check for a dedicated trampoline first: this ensures taken-branch counters only fire
-        // when the specific conditional jump is actually taken, not on fall-through arrivals.
-        if (branchRedirectMap.TryGetValue((instruction.Offset, operandInstruction.Offset), out Instruction trampolineStart))
+        // Simple conditional branch: the only taken-path trampoline always has path = 1.
+        if (branchRedirectMap.TryGetValue((instruction.Offset, 1), out Instruction trampolineStart))
         {
           instruction.Operand = trampolineStart;
         }
@@ -1028,7 +1031,8 @@ namespace Coverlet.Core.Instrumentation
       {
         for (int i = 0; i < operandInstructions.Length; i++)
         {
-          if (branchRedirectMap.TryGetValue((instruction.Offset, operandInstructions[i].Offset), out Instruction trampolineStart))
+          // Switch arm at index i has path i+1 (path 0 is the fall-through / default).
+          if (branchRedirectMap.TryGetValue((instruction.Offset, i + 1), out Instruction trampolineStart))
             operandInstructions[i] = trampolineStart;
           else if (targetsMap.TryGetValue(operandInstructions[i].Offset, out Instruction newTarget))
             operandInstructions[i] = newTarget;

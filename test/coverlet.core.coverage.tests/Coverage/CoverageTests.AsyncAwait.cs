@@ -542,21 +542,52 @@ namespace Coverlet.CoreCoverage.Tests
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
 
-        // Verify lines in try and finally blocks are covered
-        var methodLines = document.Lines.Values
-          .Where(l => l.Method.Contains("BasicAsyncTryFinally"))
-          .ToList();
+        // Lines in the try and finally blocks must be covered
+        document.AssertLinesCovered(BuildConfiguration.Debug, (327, 1), (331, 1));
 
-        Assert.NotEmpty(methodLines);
-        Assert.True(methodLines.All(l => l.Hits > 0), "All lines in BasicAsyncTryFinally should be covered");
+        // No phantom branches from compiler-generated exception state checks
+        Assert.DoesNotContain(document.Branches, b => b.Key.Line >= 323 && b.Key.Line <= 333);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
 
-        // Verify no phantom branches from compiler-generated exception state checks
-        var methodBranches = document.Branches
-          .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
-          .ToList();
+    [Fact]
+    public void AsyncAwait_Issue_1337_TryFinallyWithException()
+    {
+      // Exercises the THROWING path of an async try-finally: the compiler emits
+      // <>s__* exception-state fields and extra branches to manage finally-block
+      // execution when an exception is in-flight. This is the exact IL pattern
+      // that SkipGeneratedBranchesForAsyncTryFinally must filter — a regression
+      // here would leave phantom branches in the report even when no user-code
+      // branch exists in the finally block.
 
-        // There should be no branches in this simple try-finally - it's linear code
-        Assert.Empty(methodBranches);
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+                      {
+                        // The method throws — wrap so the host process does not abort.
+                        await Assert.ThrowsAsync<Exception>(() => (Task)instance.TryFinallyWithException());
+                      },
+                      persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        // The try body (await + throw) and the finally body (await) must all be hit.
+        document.AssertLinesCovered(BuildConfiguration.Debug, (356, 1), (357, 1), (361, 1));
+
+        // The finally block contains only an await — no user-code branch.
+        // Phantom branches from compiler-generated exception-state checks (the
+        // <>s__* fields that are set when the exception is in-flight) must be absent.
+        Assert.DoesNotContain(document.Branches, b => b.Key.Line >= 352 && b.Key.Line <= 363);
       }
       finally
       {
@@ -783,13 +814,11 @@ namespace Coverlet.CoreCoverage.Tests
 
         Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
 
-        var methodLines = document.Lines.Values
-          .Where(l => l.Method.Contains("TryFinallyWithMultipleAwaitsInFinally"))
-          .ToList();
+        document.AssertLinesCovered(BuildConfiguration.Debug, (415, 1), (419, 1), (420, 1), (421, 1));
 
-        Assert.NotEmpty(methodLines);
-        Assert.True(methodLines.All(l => l.Hits > 0),
-          "All lines including multiple awaits in finally should be covered");
+        // Multiple awaits in the finally block must not produce phantom branches from
+        // compiler-generated exception-state checks for the second and third continuations.
+        Assert.DoesNotContain(document.Branches, b => b.Key.Line >= 411 && b.Key.Line <= 423);
       }
       finally
       {
