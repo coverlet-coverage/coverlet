@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1081,6 +1081,11 @@ namespace Coverlet.Core.Symbols
             continue;
           }
 
+          if (SkipBranchGeneratedByRelationalPattern(instruction))
+          {
+            continue;
+          }
+
           int pathCounter = 0;
 
           // store branch origin offset
@@ -1598,6 +1603,70 @@ namespace Coverlet.Core.Symbols
       }
 
       return false;
+    }
+
+    // https://github.com/coverlet-coverage/coverlet/issues/1313
+    // When using `is` with a relational `and` pattern (e.g. `x is >= A and <= B`) the compiler
+    // emits a dedicated short-circuit conditional branch (blt, bgt, etc.) that targets an
+    // intermediate `ldc.i4 0` (constant false) + unconditional `br` block used to merge the
+    // boolean result.  Unlike classic `&&` short-circuit paths, this compiler-generated block is
+    // NOT shared with any outer conditional branch, so it is only reachable when the lower-bound
+    // (or upper-bound) check fails on its own.  In typical test suites the outer `&&` short-circuit
+    // already bypasses this range entirely, leaving the phantom branch permanently uncovered and
+    // producing a misleadingly lower branch-coverage rate.
+    //
+    // Detection heuristic (after SimplifyMacros()):
+    //   1. The instruction is a relational conditional branch (blt, bgt, ble, bge, or the unsigned
+    //      variants), which are the opcodes Roslyn uses when lowering relational patterns.
+    //   2. Its taken target is `ldc.i4 0` (a constant false push).
+    //   3. That `ldc.i4 0` is immediately followed by an unconditional `br`, meaning this is
+    //      an intermediate boolean-merge block and not a real source-level decision point.
+    private static bool SkipBranchGeneratedByRelationalPattern(Instruction instruction)
+    {
+      // Accept both macro (.s) and non-macro forms because GetBranchPoints may be called on
+      // unsimplified IL (SimplifyMacros is applied by Instrumenter before calling this, but
+      // unit tests may invoke GetBranchPoints directly on raw method bodies).
+      Code code = instruction.OpCode.Code;
+      if (code != Code.Blt && code != Code.Blt_S &&
+          code != Code.Bgt && code != Code.Bgt_S &&
+          code != Code.Ble && code != Code.Ble_S &&
+          code != Code.Bge && code != Code.Bge_S &&
+          code != Code.Blt_Un && code != Code.Blt_Un_S &&
+          code != Code.Bgt_Un && code != Code.Bgt_Un_S &&
+          code != Code.Ble_Un && code != Code.Ble_Un_S &&
+          code != Code.Bge_Un && code != Code.Bge_Un_S)
+      {
+        return false;
+      }
+
+      if (instruction.Operand is not Instruction target)
+        return false;
+
+      // Target must push the constant false.  Handle both the macro form (ldc.i4.0 / Ldc_I4_0)
+      // and the simplified form (ldc.i4 0 / Ldc_I4 with operand 0).
+      Code targetCode = target.OpCode.Code;
+      if (targetCode == Code.Ldc_I4_0)
+      {
+        // macro form - operand is implicit
+      }
+      else if (targetCode == Code.Ldc_I4 && target.Operand is int targetValue && targetValue == 0)
+      {
+        // simplified form - operand is explicit
+      }
+      else
+      {
+        return false;
+      }
+
+      // The constant-false block must be followed by an unconditional branch (br or br.s) back
+      // to the boolean-merge point.  This distinguishes the private compiler-generated block of
+      // the relational `and` pattern from a classic short-circuit block that ends with stloc /
+      // brfalse / ret.
+      Instruction afterTarget = target.Next;
+      if (afterTarget is null || afterTarget.OpCode.FlowControl != FlowControl.Branch)
+        return false;
+
+      return true;
     }
 
     private static int GetOffsetOfNextEndfinally(MethodBody body, int startOffset)

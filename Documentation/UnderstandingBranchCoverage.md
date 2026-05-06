@@ -328,7 +328,11 @@ If you see unexpected branches in async code or LINQ expressions, they may be co
 public void NotCovered() { }
 ```
 
-For more granular control, see the [coverlet documentation](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/ExcludeFromCoverage.md).
+For more granular control, see the *Excluding From Coverage* section in the relevant integration guide:
+[Global Tool](GlobalTool.md#excluding-from-coverage) |
+[MSBuild](MSBuildIntegration.md#excluding-from-coverage) |
+[VSTest](VSTestIntegration.md#advanced-options-supported-via-runsettings) |
+[MTP](Coverlet.MTP.Integration.md#excluding-from-coverage).
 
 ---
 
