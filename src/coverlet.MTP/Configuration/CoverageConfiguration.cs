@@ -22,8 +22,9 @@ internal sealed class CoverageConfiguration
     "[nunit.*]*",
     "[Microsoft.Testing.*]*",
     "[Microsoft.Testplatform.*]*",
-    "[Microsoft.VisualStudio.TestPlatform.*]*"
-
+    "[Microsoft.VisualStudio.TestPlatform.*]*",
+    "[MSTest*]*",
+    "[testhost*]*"
   ];
 
   private static readonly string[] s_defaultExcludeByAttributes =
