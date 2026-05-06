@@ -79,9 +79,9 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-file-prefix <prefix>` | Prefix for coverage report filenames to prevent overwrites when multiple test projects write to the same directory. When specified, files are named `<prefix>.coverage.<extension>` instead of `coverage.<extension>`. (default: `none`) |
 | `--coverlet-include <filter>` | Include assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. (default: `none`) |
 | `--coverlet-include-directory <path>` | Include additional directories for sources. Can be specified multiple times. (default: `none`) |
-| `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. User-specified filters are merged with defaults. (default: `[coverlet.*]*`, `[xunit.*]*`, `[NUnit3.*]*`, `[nunit.*]*`, `[Microsoft.Testing.*]*`, `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`, `[MSTest*]*`, `[testhost*]*`) |
+| `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. User-specified filters are merged with defaults. (defaults: see "Default Exclusions Behavior" below) |
 | `--coverlet-exclude-by-file <pattern>` | Exclude source files matching glob patterns. Can be specified multiple times. (default: `none`) |
-| `--coverlet-exclude-by-attribute <attribute>` | Exclude methods/classes decorated with attributes. Can be specified multiple times. User-specified attributes are merged with defaults. (default: `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`) |
+| `--coverlet-exclude-by-attribute <attribute>` | Exclude methods/classes decorated with attributes. Can be specified multiple times. User-specified attributes are merged with defaults. (defaults: see "Default Exclusions Behavior" below) |
 | `--coverlet-include-test-assembly` | Include test assembly in coverage. (default: `false`) |
 | `--coverlet-single-hit` | Limit the number of hits to one for each location. (default: `false`) |
 | `--coverlet-skip-auto-props` | Skip auto-implemented properties. (default: `false`) |
@@ -99,7 +99,7 @@ Coverlet.MTP applies sensible default exclusions to reduce noise in coverage rep
 
 When using command line options **without** a configuration file, the following defaults are **automatically merged** with user-specified exclusions:
 
-- **Default Exclude Filters:** `[coverlet.*]*`, `[xunit.*]*`, `[NUnit3.*]*`, `[nunit.*]*`, `[Microsoft.Testing.*]*`, `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`
+- **Default Exclude Filters:** `[coverlet.*]*`, `[xunit.*]*`, `[NUnit3.*]*`, `[nunit.*]*`, `[Microsoft.Testing.*]*`, `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`, `[MSTest*]*`, `[testhost*]*`
 - **Default Exclude by Attributes:** `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`
 
 **Configuration File Behavior (Authoritative Mode):**
