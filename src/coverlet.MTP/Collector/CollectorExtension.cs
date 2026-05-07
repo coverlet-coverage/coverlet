@@ -4,9 +4,7 @@
 #if NETSTANDARD2_0
 using System.Diagnostics;
 #endif
-using System.Globalization;
 using System.Text;
-using ConsoleTables;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
@@ -428,7 +426,6 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       if (reporter.OutputType == ReporterOutputType.Console)
       {
         string consoleOutput = reporter.Report(result, sourceRootTranslator);
-        _logger.LogInformation(consoleOutput, important: true);
         consoleOutputs.Add(consoleOutput);
       }
       else
@@ -475,39 +472,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   /// <summary>
   /// Builds a coverage summary table string matching the format used by coverlet.msbuild and coverlet.console.
   /// </summary>
-  private static string BuildCoverageSummaryTable(CoverageResult result)
-  {
-    CoverageDetails lineCalc = CoverageSummary.CalculateLineCoverage(result.Modules);
-    CoverageDetails branchCalc = CoverageSummary.CalculateBranchCoverage(result.Modules);
-    CoverageDetails methodCalc = CoverageSummary.CalculateMethodCoverage(result.Modules);
-
-    var moduleTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-    foreach (KeyValuePair<string, Documents> module in result.Modules)
-    {
-      double linePercent = CoverageSummary.CalculateLineCoverage(module.Value).Percent;
-      double branchPercent = CoverageSummary.CalculateBranchCoverage(module.Value).Percent;
-      double methodPercent = CoverageSummary.CalculateMethodCoverage(module.Value).Percent;
-      moduleTable.AddRow(
-        Path.GetFileNameWithoutExtension(module.Key),
-        $"{linePercent.ToString(CultureInfo.InvariantCulture)}%",
-        $"{branchPercent.ToString(CultureInfo.InvariantCulture)}%",
-        $"{methodPercent.ToString(CultureInfo.InvariantCulture)}%");
-    }
-
-    var summaryTable = new ConsoleTable("", "Line", "Branch", "Method");
-    summaryTable.AddRow(
-      "Total",
-      $"{lineCalc.Percent.ToString(CultureInfo.InvariantCulture)}%",
-      $"{branchCalc.Percent.ToString(CultureInfo.InvariantCulture)}%",
-      $"{methodCalc.Percent.ToString(CultureInfo.InvariantCulture)}%");
-    summaryTable.AddRow(
-      "Average",
-      $"{lineCalc.AverageModulePercent.ToString(CultureInfo.InvariantCulture)}%",
-      $"{branchCalc.AverageModulePercent.ToString(CultureInfo.InvariantCulture)}%",
-      $"{methodCalc.AverageModulePercent.ToString(CultureInfo.InvariantCulture)}%");
-
-    return moduleTable.ToStringAlternative() + Environment.NewLine + summaryTable.ToStringAlternative();
-  }
+  private static string BuildCoverageSummaryTable(CoverageResult result) =>
+    CoverageSummary.BuildCoverageSummaryTable(result.Modules);
 
   /// <summary>
   /// Displays the coverage summary table to the output device.

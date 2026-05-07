@@ -285,9 +285,10 @@ public class CollectCoverageTests
 
     Assert.Empty(teamCityFiles);
 
-    // Assert - teamcity service messages appear in standard output
-    Assert.True(result.StandardOutput.Contains("##teamcity["),
-      $"Expected TeamCity service messages (##teamcity[...]) in standard output.\n\n{result.CombinedOutput}");
+    // Assert - teamcity service messages appear in standard output as standalone lines
+    Assert.True(
+      result.StandardOutput.Split('\n').Any(line => line.TrimStart().StartsWith("##teamcity[", StringComparison.Ordinal)),
+      $"Expected at least one output line starting with '##teamcity[' in standard output.\n\n{result.CombinedOutput}");
   }
 
   [Fact]
@@ -319,9 +320,10 @@ public class CollectCoverageTests
       $"Expected no coverage report files on disk for teamcity-only format, but found:\n" +
       $"{string.Join("\n", allCoverageFiles.Select(f => $"  - {f}"))}\n\n{result.CombinedOutput}");
 
-    // Assert - teamcity service messages appear in standard output
-    Assert.True(result.StandardOutput.Contains("##teamcity["),
-      $"Expected TeamCity service messages (##teamcity[...]) in standard output.\n\n{result.CombinedOutput}");
+    // Assert - teamcity service messages appear in standard output as standalone lines
+    Assert.True(
+      result.StandardOutput.Split('\n').Any(line => line.TrimStart().StartsWith("##teamcity[", StringComparison.Ordinal)),
+      $"Expected at least one output line starting with '##teamcity[' in standard output.\n\n{result.CombinedOutput}");
   }
 
   [Fact]

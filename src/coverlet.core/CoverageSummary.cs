@@ -3,12 +3,53 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using ConsoleTables;
 
 namespace Coverlet.Core
 {
   internal class CoverageSummary
   {
+    /// <summary>
+    /// Builds a two-section coverage summary string (per-module table followed by total/average table)
+    /// using the same format as coverlet.console and the legacy msbuild task.
+    /// </summary>
+    public static string BuildCoverageSummaryTable(Modules modules)
+    {
+      CoverageDetails lineCalc = CalculateLineCoverage(modules);
+      CoverageDetails branchCalc = CalculateBranchCoverage(modules);
+      CoverageDetails methodCalc = CalculateMethodCoverage(modules);
+
+      var moduleTable = new ConsoleTable("Module", "Line", "Branch", "Method");
+      foreach (KeyValuePair<string, Documents> module in modules)
+      {
+        double linePercent = CalculateLineCoverage(module.Value).Percent;
+        double branchPercent = CalculateBranchCoverage(module.Value).Percent;
+        double methodPercent = CalculateMethodCoverage(module.Value).Percent;
+        moduleTable.AddRow(
+          Path.GetFileNameWithoutExtension(module.Key),
+          $"{linePercent.ToString(CultureInfo.InvariantCulture)}%",
+          $"{branchPercent.ToString(CultureInfo.InvariantCulture)}%",
+          $"{methodPercent.ToString(CultureInfo.InvariantCulture)}%");
+      }
+
+      var summaryTable = new ConsoleTable(string.Empty, "Line", "Branch", "Method");
+      summaryTable.AddRow(
+        "Total",
+        $"{lineCalc.Percent.ToString(CultureInfo.InvariantCulture)}%",
+        $"{branchCalc.Percent.ToString(CultureInfo.InvariantCulture)}%",
+        $"{methodCalc.Percent.ToString(CultureInfo.InvariantCulture)}%");
+      summaryTable.AddRow(
+        "Average",
+        $"{lineCalc.AverageModulePercent.ToString(CultureInfo.InvariantCulture)}%",
+        $"{branchCalc.AverageModulePercent.ToString(CultureInfo.InvariantCulture)}%",
+        $"{methodCalc.AverageModulePercent.ToString(CultureInfo.InvariantCulture)}%");
+
+      return moduleTable.ToStringAlternative() + Environment.NewLine + summaryTable.ToStringAlternative();
+    }
+
     public static CoverageDetails CalculateLineCoverage(Lines lines)
     {
       var details = new CoverageDetails
