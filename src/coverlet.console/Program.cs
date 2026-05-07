@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ConsoleTables;
 using Coverlet.Console.Logging;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
@@ -326,39 +324,7 @@ namespace Coverlet.Console
           }
         }
 
-        var coverageTable = new ConsoleTable("Module", "Line", "Branch", "Method");
-
-        CoverageDetails linePercentCalculation = CoverageSummary.CalculateLineCoverage(result.Modules);
-        CoverageDetails branchPercentCalculation = CoverageSummary.CalculateBranchCoverage(result.Modules);
-        CoverageDetails methodPercentCalculation = CoverageSummary.CalculateMethodCoverage(result.Modules);
-
-        double totalLinePercent = linePercentCalculation.Percent;
-        double totalBranchPercent = branchPercentCalculation.Percent;
-        double totalMethodPercent = methodPercentCalculation.Percent;
-
-        double averageLinePercent = linePercentCalculation.AverageModulePercent;
-        double averageBranchPercent = branchPercentCalculation.AverageModulePercent;
-        double averageMethodPercent = methodPercentCalculation.AverageModulePercent;
-
-        foreach (KeyValuePair<string, Documents> _module in result.Modules)
-        {
-          double linePercent = CoverageSummary.CalculateLineCoverage(_module.Value).Percent;
-          double branchPercent = CoverageSummary.CalculateBranchCoverage(_module.Value).Percent;
-          double methodPercent = CoverageSummary.CalculateMethodCoverage(_module.Value).Percent;
-
-          coverageTable.AddRow(Path.GetFileNameWithoutExtension(_module.Key), $"{InvariantFormat(linePercent)}%", $"{InvariantFormat(branchPercent)}%", $"{InvariantFormat(methodPercent)}%");
-        }
-
-        logger.LogInformation(coverageTable.ToStringAlternative());
-
-        coverageTable.Columns.Clear();
-        coverageTable.Rows.Clear();
-
-        coverageTable.AddColumn(new[] { "", "Line", "Branch", "Method" });
-        coverageTable.AddRow("Total", $"{InvariantFormat(totalLinePercent)}%", $"{InvariantFormat(totalBranchPercent)}%", $"{InvariantFormat(totalMethodPercent)}%");
-        coverageTable.AddRow("Average", $"{InvariantFormat(averageLinePercent)}%", $"{InvariantFormat(averageBranchPercent)}%", $"{InvariantFormat(averageMethodPercent)}%");
-
-        logger.LogInformation(coverageTable.ToStringAlternative());
+        logger.LogInformation(CoverageSummary.BuildCoverageSummaryTable(result.Modules));
         if (process.ExitCode > 0)
         {
           s_exitCode = (int)CommandExitCodes.TestFailed;
@@ -402,7 +368,5 @@ namespace Coverlet.Console
       }
 
     }
-
-    static string InvariantFormat(double value) => value.ToString(CultureInfo.InvariantCulture);
   }
 }

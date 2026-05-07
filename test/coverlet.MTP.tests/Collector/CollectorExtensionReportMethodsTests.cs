@@ -165,7 +165,7 @@ public class CollectorExtensionReportMethodsTests
     collector.ReporterFactoryOverride = mockReporterFactory.Object;
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, List<string> consoleOutputs) = collector.GenerateCoverageReportFiles(
       result,
       _mockSourceRootTranslator.Object,
       _mockFileSystem.Object,
@@ -214,7 +214,7 @@ public class CollectorExtensionReportMethodsTests
     collector.ReporterFactoryOverride = mockReporterFactory.Object;
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, List<string> consoleOutputs) = collector.GenerateCoverageReportFiles(
       result,
       _mockSourceRootTranslator.Object,
       _mockFileSystem.Object,
@@ -252,7 +252,7 @@ public class CollectorExtensionReportMethodsTests
     collector.ReporterFactoryOverride = mockReporterFactory.Object;
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, List<string> consoleOutputs) = collector.GenerateCoverageReportFiles(
       result,
       _mockSourceRootTranslator.Object,
       _mockFileSystem.Object,
@@ -262,6 +262,8 @@ public class CollectorExtensionReportMethodsTests
     // Assert
     Assert.Empty(generatedReports);
     _mockFileSystem.Verify(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    Assert.Single(consoleOutputs);
+    Assert.Equal("Console output", consoleOutputs[0]);
   }
 
   [Fact]
@@ -290,7 +292,7 @@ public class CollectorExtensionReportMethodsTests
     collector.ReporterFactoryOverride = mockReporterFactory.Object;
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, List<string> consoleOutputs) = collector.GenerateCoverageReportFiles(
       result,
       _mockSourceRootTranslator.Object,
       _mockFileSystem.Object,
@@ -300,6 +302,8 @@ public class CollectorExtensionReportMethodsTests
     // Assert
     Assert.Single(generatedReports);
     _mockFileSystem.Verify(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    Assert.Single(consoleOutputs);
+    Assert.Equal("Console output", consoleOutputs[0]);
   }
 
   [Fact]
@@ -338,7 +342,7 @@ public class CollectorExtensionReportMethodsTests
     string[] formats = [];
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, List<string> consoleOutputs) = collector.GenerateCoverageReportFiles(
       result,
       _mockSourceRootTranslator.Object,
       _mockFileSystem.Object,
@@ -347,6 +351,7 @@ public class CollectorExtensionReportMethodsTests
 
     // Assert
     Assert.Empty(generatedReports);
+    Assert.Empty(consoleOutputs);
     _mockFileSystem.Verify(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
   }
 

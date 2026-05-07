@@ -250,6 +250,118 @@ public class CollectCoverageTests
   }
 
   [Fact]
+  public async Task CoverageWithTeamCityAndCoberturaFormats_TeamCityWritesToConsoleAndCoberturaToFile()
+  {
+    // Arrange
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProject(testName, includeSimpleTest: true);
+    await BuildProject(testProject.SolutionPath);
+
+    // Act
+    var result = await RunTestsWithCoverage(
+      testProject,
+      "--coverlet --coverlet-output-format teamcity --coverlet-output-format cobertura",
+      testName);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert - test run succeeded
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+
+    // Assert - cobertura file is written to disk
+    string[] coberturaFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      CoverageCoberturaFileName.Insert(CoverageCoberturaFileName.LastIndexOf('.'), ".*"),
+      SearchOption.AllDirectories);
+
+    Assert.True(coberturaFiles.Length > 0,
+      $"No {CoverageCoberturaFileName} found in '{testProject.OutputDirectory}'.\n\n{result.CombinedOutput}");
+
+    // Assert - no teamcity file was written to disk (console reporter writes to stdout only)
+    string[] teamCityFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      "*.teamcity*",
+      SearchOption.AllDirectories);
+
+    Assert.Empty(teamCityFiles);
+
+    // Assert - teamcity service messages appear in standard output as standalone lines
+    Assert.True(
+      result.StandardOutput.Split('\n').Any(line => line.TrimStart().StartsWith("##teamcity[", StringComparison.Ordinal)),
+      $"Expected at least one output line starting with '##teamcity[' in standard output.\n\n{result.CombinedOutput}");
+  }
+
+  [Fact]
+  public async Task CoverageWithTeamCityFormatOnly_WritesServiceMessagesToConsoleWithoutReportFile()
+  {
+    // Arrange
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProject(testName, includeSimpleTest: true);
+    await BuildProject(testProject.SolutionPath);
+
+    // Act
+    var result = await RunTestsWithCoverage(
+      testProject,
+      "--coverlet --coverlet-output-format teamcity",
+      testName);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert - test run succeeded
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+
+    // Assert - no coverage report file was written to disk at all
+    string[] allCoverageFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      "coverage.*",
+      SearchOption.AllDirectories);
+
+    Assert.True(allCoverageFiles.Length == 0,
+      $"Expected no coverage report files on disk for teamcity-only format, but found:\n" +
+      $"{string.Join("\n", allCoverageFiles.Select(f => $"  - {f}"))}\n\n{result.CombinedOutput}");
+
+    // Assert - teamcity service messages appear in standard output as standalone lines
+    Assert.True(
+      result.StandardOutput.Split('\n').Any(line => line.TrimStart().StartsWith("##teamcity[", StringComparison.Ordinal)),
+      $"Expected at least one output line starting with '##teamcity[' in standard output.\n\n{result.CombinedOutput}");
+  }
+
+  [Fact]
+  public async Task CoverageWithJsonFormat_SummaryTableAppearsInConsoleOutput()
+  {
+    // Arrange
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProject(testName, includeSimpleTest: true);
+    await BuildProject(testProject.SolutionPath);
+
+    // Act
+    var result = await RunTestsWithCoverage(
+      testProject,
+      "--coverlet --coverlet-output-format json",
+      testName);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert - test run succeeded
+    Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+
+    // Assert - module table header appears in output
+    Assert.True(result.StandardOutput.Contains("| Module"),
+      $"Expected coverage summary module table (| Module |) in standard output.\n\n{result.CombinedOutput}");
+
+    // Assert - SUT module name appears in the table
+    Assert.True(result.StandardOutput.Contains("SampleLibrary"),
+      $"Expected SUT module 'SampleLibrary' in coverage summary table.\n\n{result.CombinedOutput}");
+
+    // Assert - total/average summary table appears
+    Assert.True(result.StandardOutput.Contains("| Total"),
+      $"Expected '| Total' row in coverage summary table.\n\n{result.CombinedOutput}");
+
+    Assert.True(result.StandardOutput.Contains("| Average"),
+      $"Expected '| Average' row in coverage summary table.\n\n{result.CombinedOutput}");
+  }
+
+  [Fact]
   public async Task MultipleCoverageFormats_WithResultsDirectory()
   {
     // Arrange

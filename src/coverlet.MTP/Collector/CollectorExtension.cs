@@ -405,7 +405,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   /// <summary>
   /// Generates coverage report files. Separated for testability.
   /// </summary>
-  internal List<string> GenerateCoverageReportFiles(
+  internal (List<string> FileReports, List<string> ConsoleOutputs) GenerateCoverageReportFiles(
     CoverageResult result,
     ISourceRootTranslator sourceRootTranslator,
     IFileSystem fileSystem,
@@ -414,6 +414,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     string? filePrefix = null)
   {
     var generatedReports = new List<string>();
+    var consoleOutputs = new List<string>();
 
     foreach (string format in formats)
     {
@@ -424,7 +425,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
       if (reporter.OutputType == ReporterOutputType.Console)
       {
-        _logger.LogInformation(reporter.Report(result, sourceRootTranslator), important: true);
+        string consoleOutput = reporter.Report(result, sourceRootTranslator);
+        consoleOutputs.Add(consoleOutput);
       }
       else
       {
@@ -440,7 +442,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       }
     }
 
-    return generatedReports;
+    return (generatedReports, consoleOutputs);
   }
 
   private static string InjectTimestamp(string filename, DateTime utcNow)
@@ -450,6 +452,39 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     if (lastDot > 0)
       return filename.Insert(lastDot, $".{timestamp}");
     return $"{filename}.{timestamp}";
+  }
+
+  /// <summary>
+  /// Displays console-type reporter outputs (e.g. teamcity) directly to the output device.
+  /// An empty line is written before each output to separate it visually.
+  /// </summary>
+  private async Task DisplayConsoleReportOutputsAsync(List<string> consoleOutputs, CancellationToken cancellation)
+  {
+    foreach (string output in consoleOutputs)
+    {
+      await _outputDisplay.DisplayAsync(
+        this,
+        new TextOutputDeviceData(Environment.NewLine + output),
+        cancellation).ConfigureAwait(false);
+    }
+  }
+
+  /// <summary>
+  /// Builds a coverage summary table string matching the format used by coverlet.msbuild and coverlet.console.
+  /// </summary>
+  private static string BuildCoverageSummaryTable(CoverageResult result) =>
+    CoverageSummary.BuildCoverageSummaryTable(result.Modules);
+
+  /// <summary>
+  /// Displays the coverage summary table to the output device.
+  /// </summary>
+  private async Task DisplayCoverageSummaryAsync(CoverageResult result, CancellationToken cancellation)
+  {
+    string table = BuildCoverageSummaryTable(result);
+    await _outputDisplay.DisplayAsync(
+      this,
+      new TextOutputDeviceData(Environment.NewLine + table),
+      cancellation).ConfigureAwait(false);
   }
 
   /// <summary>
@@ -500,7 +535,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     IFileSystem fileSystem = _serviceProvider!.GetRequiredService<IFileSystem>();
 
     // Generate reports (now testable separately)
-    List<string> generatedReports = GenerateCoverageReportFiles(
+    (List<string> generatedReports, List<string> consoleOutputs) = GenerateCoverageReportFiles(
       result,
       sourceRootTranslator,
       fileSystem,
@@ -510,6 +545,12 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     // Display results
     await DisplayGeneratedReportsAsync(generatedReports, cancellation);
+
+    // Display coverage summary table after the file artifacts list
+    await DisplayCoverageSummaryAsync(result, cancellation);
+
+    // Display console-type report output (e.g. teamcity) directly to the output device
+    await DisplayConsoleReportOutputsAsync(consoleOutputs, cancellation);
   }
 
   private string GetHitsFilePath()

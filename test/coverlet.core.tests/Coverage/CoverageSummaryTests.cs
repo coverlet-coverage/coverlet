@@ -302,5 +302,68 @@ namespace Coverlet.Core.Tests
       Assert.Equal(50, CoverageSummary.CalculateBranchCoverage(methods).Percent);
       Assert.Equal(50, CoverageSummary.CalculateBranchCoverage(branches).Percent);
     }
+
+    [Fact]
+    public void BuildCoverageSummaryTable_EmptyModules_ContainsTotalAndAverageRowsWithZeroPercent()
+    {
+      var modules = new Modules();
+
+      string result = CoverageSummary.BuildCoverageSummaryTable(modules);
+
+      Assert.Contains("| Module", result);
+      Assert.Contains("| Total", result);
+      Assert.Contains("| Average", result);
+      Assert.Contains("0%", result);
+    }
+
+    [Fact]
+    public void BuildCoverageSummaryTable_SingleModule_ContainsModuleNameAndPercentages()
+    {
+      string result = CoverageSummary.BuildCoverageSummaryTable(_averageCalculationSingleModule);
+
+      // Module name without extension appears in the per-module table
+      Assert.Contains("module", result);
+
+      // Header columns
+      Assert.Contains("| Module", result);
+      Assert.Contains("Line", result);
+      Assert.Contains("Branch", result);
+      Assert.Contains("Method", result);
+
+      // Summary rows
+      Assert.Contains("| Total", result);
+      Assert.Contains("| Average", result);
+
+      // Two table sections are present (the separator between them)
+      Assert.Contains("50%", result);
+      Assert.Contains("100%", result);
+    }
+
+    [Fact]
+    public void BuildCoverageSummaryTable_MultipleModules_ContainsAllModuleNamesAndSummaryRows()
+    {
+      string result = CoverageSummary.BuildCoverageSummaryTable(_averageCalculationMultiModule);
+
+      // Both module names appear in the output
+      Assert.Contains("module", result);
+      Assert.Contains("additionalModule", result);
+
+      // Summary rows are present
+      Assert.Contains("| Total", result);
+      Assert.Contains("| Average", result);
+    }
+
+    [Fact]
+    public void BuildCoverageSummaryTable_SingleModule_TwoSectionsSeparatedByNewLine()
+    {
+      string result = CoverageSummary.BuildCoverageSummaryTable(_averageCalculationSingleModule);
+
+      // The two tables are joined by Environment.NewLine, so at least two table sections exist
+      int firstTableEnd = result.IndexOf("| Total", System.StringComparison.Ordinal);
+      int moduleHeaderPos = result.IndexOf("| Module", System.StringComparison.Ordinal);
+
+      Assert.True(moduleHeaderPos >= 0, "Module table header not found");
+      Assert.True(firstTableEnd > moduleHeaderPos, "Summary table must follow the module table");
+    }
   }
 }
