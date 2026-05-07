@@ -7,16 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## Improvements
+### Improvements
 
 - Coverlet with MTP 2 doesn't show test coverage statistic in console [#1907](https://github.com/coverlet-coverage/coverlet/issues/1907)
 - Avoid unnecessary testhost restarts [#1912](https://github.com/coverlet-coverage/coverlet/issues/1912)
 
-## Fixed
+### Fixed
 
 - [BUG] Inconsistent paths in cobertura reports [#1723](https://github.com/coverlet-coverage/coverlet/issues/1723)
 
-## Maintenance
+### Maintenance
 
 - Add architecture docs and diagrams for all integrations [#1927](https://github.com/coverlet-coverage/coverlet/pull/1927)
 - Bump dotnet-reportgenerator-globaltool from 5.5.4 to 5.5.7 [#1917](https://github.com/coverlet-coverage/coverlet/pull/1917)
@@ -28,13 +28,13 @@ coverlet.console 10.0.0
 coverlet.collector 10.0.0
 coverlet.MTP 10.0.0
 
-## Improvements
+### Improvements
 
 - Unique Report Filenames (coverlet.MTP and AzDO) [#1866](https://github.com/coverlet-coverage/coverlet/issues/1866)
 - Add `--coverlet-file-prefix` option for unique report files [#1869](https://github.com/coverlet-coverage/coverlet/pull/1869)
 - Introduce .NET 10 support [#1823](https://github.com/coverlet-coverage/coverlet/pull/1823)
 
-## Fixed
+### Fixed
 
 - Fix [BUG] Wrong branch rate on IAsyncEnumerable for generic type [#1836](https://github.com/coverlet-coverage/coverlet/issues/1836)
 - Fix [BUG] Missing Coverage after moving to MTP [#1843](https://github.com/coverlet-coverage/coverlet/issues/1843)
@@ -44,7 +44,7 @@ coverlet.MTP 10.0.0
 - Fix [BUG] Coverlet.Collector produces empty report when Mediator.SourceGenerator is referenced [#1718](https://github.com/coverlet-coverage/coverlet/issues/1718) by <https://github.com/yusyd>
 - Fix [BUG] Crash during instrumentation (Methods using LibraryImport/DllImport have no body) [#1762](https://github.com/coverlet-coverage/coverlet/issues/1762)
 
-## Maintenance
+### Maintenance
 
 - Add comprehensive async method tests and documentation for issue [#1864](https://github.com/coverlet-coverage/coverlet/pull/1864)
 - Replace Tmds.ExecFunction Package in coverlet.core.coverage.tests [#1833](https://github.com/coverlet-coverage/coverlet/issues/1833)
