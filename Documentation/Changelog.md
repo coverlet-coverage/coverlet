@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Improvements
+
+- Coverlet with MTP 2 doesn't show test coverage statistic in console [#1907](https://github.com/coverlet-coverage/coverlet/issues/1907)
+- Avoid unnecessary testhost restarts [#1912](https://github.com/coverlet-coverage/coverlet/issues/1912)
+
+## Fixed
+
+- [BUG] Inconsistent paths in cobertura reports [#1723](https://github.com/coverlet-coverage/coverlet/issues/1723)
+
+## Maintenance
+
+- Add architecture docs and diagrams for all integrations [#1927](https://github.com/coverlet-coverage/coverlet/pull/1927)
+- Bump dotnet-reportgenerator-globaltool from 5.5.4 to 5.5.7 [#1917](https://github.com/coverlet-coverage/coverlet/pull/1917)
+
 ## Release date 2026-04-17
 ### Packages
 coverlet.msbuild 10.0.0
