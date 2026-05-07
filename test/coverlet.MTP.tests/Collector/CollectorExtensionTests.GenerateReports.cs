@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Coverlet.Core;
@@ -279,7 +279,7 @@ public class CollectorExtensionGenerateReportsTests
     string[] formats = ["json"];
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, _) = collector.GenerateCoverageReportFiles(
       coverageResult,
       mockSourceRootTranslator.Object,
       mockFileSystem.Object,
@@ -323,7 +323,7 @@ public class CollectorExtensionGenerateReportsTests
     string filePrefix = "MyProject";
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, _) = collector.GenerateCoverageReportFiles(
       coverageResult,
       mockSourceRootTranslator.Object,
       mockFileSystem.Object,
@@ -367,7 +367,7 @@ public class CollectorExtensionGenerateReportsTests
     string[] formats = ["cobertura"];
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, _) = collector.GenerateCoverageReportFiles(
       coverageResult,
       mockSourceRootTranslator.Object,
       mockFileSystem.Object,
@@ -411,7 +411,7 @@ public class CollectorExtensionGenerateReportsTests
     string[] formats = ["lcov"];
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, _) = collector.GenerateCoverageReportFiles(
       coverageResult,
       mockSourceRootTranslator.Object,
       mockFileSystem.Object,
@@ -462,7 +462,7 @@ public class CollectorExtensionGenerateReportsTests
     string filePrefix = "UnitTests";
 
     // Act
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, _) = collector.GenerateCoverageReportFiles(
       coverageResult,
       mockSourceRootTranslator.Object,
       mockFileSystem.Object,
@@ -518,7 +518,7 @@ public class CollectorExtensionGenerateReportsTests
     string[] formats = ["json"];
 
     // Act - Pass a malicious prefix that should be rejected
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, _) = collector.GenerateCoverageReportFiles(
       coverageResult,
       mockSourceRootTranslator.Object,
       mockFileSystem.Object,
@@ -568,7 +568,7 @@ public class CollectorExtensionGenerateReportsTests
     string[] formats = ["json"];
 
     // Act - Pass a prefix with invalid filename characters that should be rejected
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, _) = collector.GenerateCoverageReportFiles(
       coverageResult,
       mockSourceRootTranslator.Object,
       mockFileSystem.Object,
@@ -615,7 +615,7 @@ public class CollectorExtensionGenerateReportsTests
     string[] formats = ["json"];
 
     // Act - Pass whitespace-only prefix that should be rejected
-    List<string> generatedReports = collector.GenerateCoverageReportFiles(
+    (List<string> generatedReports, _) = collector.GenerateCoverageReportFiles(
       coverageResult,
       mockSourceRootTranslator.Object,
       mockFileSystem.Object,

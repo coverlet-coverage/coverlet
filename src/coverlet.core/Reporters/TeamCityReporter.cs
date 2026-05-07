@@ -67,7 +67,7 @@ namespace Coverlet.Core.Reporters
 
     private static void OutputTeamCityServiceMessage(string key, double value, StringBuilder builder)
     {
-      builder.AppendLine($"##teamcity[buildStatisticValue key='{key}' value='{value.ToString("0.##", new CultureInfo("en-US"))}']");
+      builder.AppendLine($"##teamcity[buildStatisticValue key='{key}' value='{value.ToString("0.##", CultureInfo.InvariantCulture)}']");
     }
   }
 }
