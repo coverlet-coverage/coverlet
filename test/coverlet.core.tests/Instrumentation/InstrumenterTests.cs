@@ -1035,10 +1035,12 @@ public class SampleClass
       try
       {
         System.Reflection.Assembly instrumentedAssembly = alc.LoadFromStream(new MemoryStream(assemblyBytes));
-        Type trackerType = instrumentedAssembly
-            .GetTypes()
-            .SingleOrDefault(t =>
-                t.Namespace?.StartsWith("Coverlet.Core.Instrumentation.Tracker", StringComparison.Ordinal) ?? false);
+        // The tracker type name encodes the module filename and the instrumentation identifier,
+        // so we can match exactly — even if the input assembly was already instrumented by
+        // a prior coverlet run (e.g. CI code-coverage pass) and contains other tracker types.
+        string expectedTrackerName = Path.GetFileNameWithoutExtension(modulePath) + "_" + identifier;
+        Type trackerType = instrumentedAssembly.GetTypes().SingleOrDefault(t =>
+            t.Namespace == "Coverlet.Core.Instrumentation.Tracker" && t.Name == expectedTrackerName);
 
         // Assert
         Assert.NotNull(trackerType);
