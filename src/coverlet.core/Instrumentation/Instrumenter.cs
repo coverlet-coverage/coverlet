@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -453,6 +453,15 @@ namespace Coverlet.Core.Instrumentation
           }
 
           _customTrackerTypeDef.Methods.Add(methodOnCustomType);
+        }
+
+        foreach (CustomAttribute templateAttribute in moduleTrackerTemplate.CustomAttributes)
+        {
+          var attributeClone = new CustomAttribute(module.ImportReference(templateAttribute.Constructor));
+          foreach (CustomAttributeArgument arg in templateAttribute.ConstructorArguments)
+            attributeClone.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportReference(arg.Type), arg.Value));
+
+          _customTrackerTypeDef.CustomAttributes.Add(attributeClone);
         }
 
         module.Types.Add(_customTrackerTypeDef);

@@ -988,6 +988,74 @@ public class SampleClass
       }
     }
 
+    /// <summary>
+    /// Regression test for https://github.com/coverlet-coverage/coverlet/issues/1828
+    /// The injected Tracker class must carry [CompilerGenerated] and [ExcludeFromCodeCoverage]
+    /// custom attributes so that reflection-based tooling can identify and skip it.
+    /// </summary>
+    [Fact]
+    public void TestInstrument_TrackerType_HasCompilerGeneratedAndExcludeFromCodeCoverageAttributes()
+    {
+      // Arrange - instrument a real sample assembly so the tracker ends up in a loadable DLL.
+      // We use the empty sample project rather than the test assembly itself so that loading
+      // the instrumented copy via reflection does not conflict with the already-loaded test assembly.
+      string sampleDll = Directory.GetFiles(Directory.GetCurrentDirectory(), "coverlet.tests.projectsample.empty.dll")[0];
+      string samplePdb = Path.ChangeExtension(sampleDll, ".pdb");
+
+      string identifier = Guid.NewGuid().ToString();
+      DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
+      string modulePath = Path.Combine(directory.FullName, Path.GetFileName(sampleDll));
+
+      File.Copy(sampleDll, modulePath, overwrite: true);
+      if (File.Exists(samplePdb))
+        File.Copy(samplePdb, Path.Combine(directory.FullName, Path.GetFileName(samplePdb)), overwrite: true);
+
+      var instrumentationHelper = new InstrumentationHelper(
+          new ProcessExitHandler(), new RetryHelper(), new FileSystem(), _mockLogger.Object,
+          new SourceRootTranslator(modulePath, _mockLogger.Object, new FileSystem(), new AssemblyAdapter()));
+
+      var instrumenter = new Instrumenter(
+          modulePath, identifier,
+          new CoverageParameters { ExcludeAssembliesWithoutSources = "None" },
+          _mockLogger.Object, instrumentationHelper, new FileSystem(),
+          new SourceRootTranslator(modulePath, _mockLogger.Object, new FileSystem(), new AssemblyAdapter()),
+          new CecilSymbolHelper());
+
+      Assert.True(instrumenter.CanInstrument());
+      instrumenter.Instrument();
+
+      // Act - load the instrumented assembly bytes into memory first so no file handle is held
+      // while reflecting over the tracker type. LoadFromAssemblyPath() keeps a Windows file lock
+      // for the ALC lifetime (GC-driven release), which races against the restore pipeline and
+      // prevents temp directory cleanup. Reading bytes upfront releases the file immediately.
+      byte[] assemblyBytes = File.ReadAllBytes(modulePath);
+
+      var alc = new System.Runtime.Loader.AssemblyLoadContext(
+          nameof(TestInstrument_TrackerType_HasCompilerGeneratedAndExcludeFromCodeCoverageAttributes), isCollectible: true);
+      try
+      {
+        System.Reflection.Assembly instrumentedAssembly = alc.LoadFromStream(new MemoryStream(assemblyBytes));
+        Type trackerType = instrumentedAssembly
+            .GetTypes()
+            .SingleOrDefault(t =>
+                t.Namespace?.StartsWith("Coverlet.Core.Instrumentation.Tracker", StringComparison.Ordinal) ?? false);
+
+        // Assert
+        Assert.NotNull(trackerType);
+        Assert.True(
+            trackerType.IsDefined(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute), inherit: false),
+            "Tracker type must carry [CompilerGenerated] so reflection-based tooling recognises it as infrastructure (issue #1828).");
+        Assert.True(
+            trackerType.IsDefined(typeof(System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute), inherit: false),
+            "Tracker type must carry [ExcludeFromCodeCoverage] so coverage tools skip it (issue #1828).");
+      }
+      finally
+      {
+        alc.Unload();
+        directory.Delete(recursive: true);
+      }
+    }
+
     private static void AssertTypeNotSystemRuntime(TypeReference typeRef, string context)
     {
       if (typeRef is null)
