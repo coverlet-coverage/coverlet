@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -826,5 +826,44 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
+    [Fact]
+    public void AsyncAwait_Issue1337_TryCatchFinallyWithRealAsyncInFinally_NoPhantomBranches()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+          {
+            await (Task)instance.TryCatchFinallyWithRealAsyncInFinally();
+          },
+          persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        var methodLines = document.Lines.Values
+          .Where(l => l.Method.Contains("TryCatchFinallyWithRealAsyncInFinally"))
+          .ToList();
+
+        Assert.NotEmpty(methodLines);
+        // Assert.True(methodLines.All(l => l.Hits > 0), "All lines in TryCatchFinallyWithRealAsyncInFinally should be covered");
+
+        // The compiler-generated IsCompleted branch inside the finally continuation
+        // is a phantom branch and must not appear in coverage output (Issue #1337).
+        var methodBranches = document.Branches
+          .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
+          .ToList();
+
+        Assert.Empty(methodBranches);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
   }
 }

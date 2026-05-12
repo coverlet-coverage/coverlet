@@ -1563,16 +1563,51 @@ namespace Coverlet.Core.Symbols
         }
       }
 
-      // Pattern 2: Check for exception object null check
-      // ldarg.0 / ldfld <>s__X (type: System.Object or System.Exception) / brfalse.s
-      if ((instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S ||
-           instruction.OpCode == OpCodes.Brtrue || instruction.OpCode == OpCodes.Brtrue_S) &&
-          branchIndex >= 2 &&
-          instructions[branchIndex - 1].OpCode == OpCodes.Ldfld &&
-          IsCompilerGeneratedField(instructions[branchIndex - 1], out FieldDefinition exField) &&
+      // Pattern 2: Check for exception object null check.
+      // Handles two sub-patterns emitted by the compiler:
+      //
+      //   Sub-pattern A - direct (field loaded straight before branch):
+      //     ldarg.0 / ldfld <>s__X (Object/Exception) / brfalse.s
+      //
+      //   Sub-pattern B - via local (Issue #1337): emitted when the finally block contains a
+      //   real async await (e.g. File.WriteAllTextAsync). The compiler stores the field value
+      //   into a temp local and then tests the local, inserting a stloc/ldloc pair:
+      //     ldarg.0 / ldfld <>s__X / stloc.s V / ldloc.s V / brfalse.s
+      int exFieldLdfldIndex = -1;
+      if (instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S ||
+          instruction.OpCode == OpCodes.Brtrue || instruction.OpCode == OpCodes.Brtrue_S)
+      {
+        // Sub-pattern A: field loaded directly before the branch
+        if (branchIndex >= 2 &&
+            instructions[branchIndex - 1].OpCode == OpCodes.Ldfld)
+        {
+          exFieldLdfldIndex = branchIndex - 1;
+        }
+        // Sub-pattern B: field stored in local then loaded before the branch
+        else if (branchIndex >= 4 &&
+                 (instructions[branchIndex - 1].OpCode == OpCodes.Ldloc ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_S ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_0 ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_1 ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_2 ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_3) &&
+                 (instructions[branchIndex - 2].OpCode == OpCodes.Stloc ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_S ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_0 ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_1 ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_2 ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_3) &&
+                 instructions[branchIndex - 3].OpCode == OpCodes.Ldfld)
+        {
+          exFieldLdfldIndex = branchIndex - 3;
+        }
+      }
+
+      if (exFieldLdfldIndex >= 1 &&
+          IsCompilerGeneratedField(instructions[exFieldLdfldIndex], out FieldDefinition exField) &&
           (exField.FieldType.FullName == "System.Object" || exField.FieldType.FullName == "System.Exception") &&
           exField.Name.StartsWith("<>s__") &&
-          (instructions[branchIndex - 2].OpCode == OpCodes.Ldarg_0 || instructions[branchIndex - 2].OpCode == OpCodes.Ldarg))
+          (instructions[exFieldLdfldIndex - 1].OpCode == OpCodes.Ldarg_0 || instructions[exFieldLdfldIndex - 1].OpCode == OpCodes.Ldarg))
       {
         // Check if we're in or near a finally handler region
         var finallyHandlers = methodDefinition.Body.ExceptionHandlers

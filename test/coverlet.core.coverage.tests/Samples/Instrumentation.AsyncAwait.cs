@@ -509,5 +509,25 @@ namespace Coverlet.Core.CoverageSamples.Tests
         await Task.CompletedTask;
       }
     }
+
+    // Test 13: Try-catch-finally with NO await in try/catch, real async await in finally
+    // Mirrors DoerOfStuff.ActualWork from Issue #1337.
+    // The compiler-generated IsCompleted fast-path branch in the finally continuation
+    // must NOT appear as a phantom branch in coverage results.
+    public async Task TryCatchFinallyWithRealAsyncInFinally()
+    {
+      try
+      {
+        _ = 1 + 1;
+      }
+      catch (System.Exception)
+      {
+        _ = "caught";
+      }
+      finally
+      {
+        await System.IO.File.WriteAllTextAsync(System.IO.Path.GetTempFileName(), "test");
+      }
+    }
   }
 }
