@@ -1610,9 +1610,10 @@ namespace Coverlet.Core.Symbols
           (instructions[exFieldLdfldIndex - 1].OpCode == OpCodes.Ldarg_0 || instructions[exFieldLdfldIndex - 1].OpCode == OpCodes.Ldarg))
       {
         // The five conditions above (brfalse/brtrue opcode, <>s__X field name, Object/Exception field type,
-        // ldarg.0 predecessor, finally handlers present) uniquely identify this compiler-generated null-check.
-        // No additional proximity search is needed.
-        return methodDefinition.Body.ExceptionHandlers.Any(e => e.HandlerType == ExceptionHandlerType.Finally);
+        // ldarg.0 predecessor) uniquely identify this compiler-generated null-check.
+        // Note: async try/finally blocks compile to Catch (not Finally) IL exception handlers, so
+        // checking for ExceptionHandlerType.Finally would always return false here.
+        return true;
       }
 
       return false;
