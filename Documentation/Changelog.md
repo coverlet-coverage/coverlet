@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Maintenance
 
 - Add architecture docs and diagrams for all integrations [#1927](https://github.com/coverlet-coverage/coverlet/pull/1927)
-- Bump dotnet-reportgenerator-globaltool from 5.5.4 to 5.5.7 [#1917](https://github.com/coverlet-coverage/coverlet/pull/1917)
+- Update NuGet packages and .NET SDK versions [#1933](https://github.com/coverlet-coverage/coverlet/pull/1933)
 
 ## Release date 2026-04-17
 ### Packages
