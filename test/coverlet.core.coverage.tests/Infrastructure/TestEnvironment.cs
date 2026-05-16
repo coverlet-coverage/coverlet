@@ -77,7 +77,18 @@ public static class TestEnvironment
   public static bool IsCommandLine => !IsVisualStudio;
 
   /// <summary>
+  /// Returns true when stdin is connected to an interactive terminal (not piped or redirected).
+  /// Tests that call Console.ReadKey() will block indefinitely in this state.
+  /// </summary>
+  public static bool HasInteractiveStdin => !Console.IsInputRedirected;
+
+  /// <summary>
   /// Message to use when skipping tests in Visual Studio.
   /// </summary>
   public const string VisualStudioSkipMessage = "This test is skipped in Visual Studio due to execution environment limitations. Run from CLI or CI.";
+
+  /// <summary>
+  /// Message to use when skipping tests that call Console.ReadKey() in interactive terminals.
+  /// </summary>
+  public const string InteractiveStdinSkipMessage = "This test calls Console.ReadKey() which blocks in an interactive terminal. Run in CI or pipe stdin.";
 }

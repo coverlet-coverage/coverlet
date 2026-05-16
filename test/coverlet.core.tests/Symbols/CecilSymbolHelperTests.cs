@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -524,6 +524,56 @@ namespace Coverlet.Core.Tests.Symbols
 
       // If this fails with more than 6, we have phantom branches that need to be filtered
       Assert.Equal(6, points.Count);
+    }
+
+    [Fact]
+    public void GetBranchPoints_RelationalAndPattern_CompoundAnd_PhantomBranchSkipped()
+    {
+      // https://github.com/coverlet-coverage/coverlet/issues/1313
+      // `prefix.StartsWith("x") && c is >= 'a' and <= 'z'` compiles differently per configuration:
+      //
+      // Debug IL: brfalse + blt each target a private { ldc.i4.0; br merge } stub that is
+      //   never reachable from user code. Coverlet's SkipBranchGeneratedByRelationalPattern
+      //   heuristic suppresses those stubs -> 4 branch points (2 real decisions x 2 paths).
+      //
+      // Release IL: brfalse + blt + bgt all jump directly to `ldc.i4.0; ret`.
+      //   There is no intermediate `br` stub so the heuristic does not fire and all three
+      //   conditional branches are genuine decision points -> 6 branch points.
+
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(RelationalPatternBranch).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.FullName.Contains($"::{nameof(RelationalPatternBranch.IsLowerInCompoundCondition)}"));
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert — debug and release compilers emit structurally different IL for this pattern
+#if DEBUG
+      // Debug: phantom blt stub suppressed by heuristic -> 2 real decisions x 2 paths = 4
+      Assert.Equal(4, points.Count);
+#else
+      // Release: all three conditional branches are genuine -> 3 decisions x 2 paths = 6
+      Assert.Equal(6, points.Count);
+#endif
+    }
+
+    [Fact]
+    public void GetBranchPoints_RelationalAndPattern_SimpleIf_BltIsRealBranch()
+    {
+      // https://github.com/coverlet-coverage/coverlet/issues/1313
+      // In `if (c is >= 'a' and <= 'z')` the blt and the brfalse SHARE the same false block
+      // (ends with stloc, not br). The blt is therefore a real source-level decision point and
+      // must NOT be skipped. Expected: 4 branch points (blt lower-bound + brfalse result).
+
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(RelationalPatternBranch).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.FullName.Contains($"::{nameof(RelationalPatternBranch.IsLowerInSimpleIf)}"));
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert - 4 paths: blt (2) + brfalse (2); blt is NOT phantom here
+      Assert.Equal(4, points.Count);
     }
   }
 }

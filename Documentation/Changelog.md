@@ -14,12 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- [BUG] Inconsistent paths in cobertura reports [#1723](https://github.com/coverlet-coverage/coverlet/issues/1723)
+- Fix [BUG] Inconsistent paths in cobertura reports [#1723](https://github.com/coverlet-coverage/coverlet/issues/1723)
+- Fix When using "is" with "and" in pattern matching, branch coverage is lower than normal [#1313](https://github.com/coverlet-coverage/coverlet/issues/1313)
+- Fix Coverlet flagging a branch for an async functions finally block where none exists [#1337](https://github.com/coverlet-coverage/coverlet/issues/1337)
+- Fix Coverlet Tracker Missing CompilerGeneratedAttribute [#1828](https://github.com/coverlet-coverage/coverlet/issues/1828)
 
 ### Maintenance
 
 - Add architecture docs and diagrams for all integrations [#1927](https://github.com/coverlet-coverage/coverlet/pull/1927)
-- Bump dotnet-reportgenerator-globaltool from 5.5.4 to 5.5.7 [#1917](https://github.com/coverlet-coverage/coverlet/pull/1917)
+- Update NuGet packages and .NET SDK versions [#1933](https://github.com/coverlet-coverage/coverlet/pull/1933)
 
 ## Release date 2026-04-17
 ### Packages

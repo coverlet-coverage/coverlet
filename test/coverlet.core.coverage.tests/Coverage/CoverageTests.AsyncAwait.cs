@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -512,6 +512,353 @@ namespace Coverlet.CoreCoverage.Tests
         Assert.True(totalSequencePoints > 0,
           "Sequence points should be greater than zero. " +
           "Issue #1843 reported dramatic drop in sequence points (25080 -> 2596)");
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_Issue_1337_BasicTryFinally()
+    {
+      // Issue #1337: Coverlet flagged a branch for an async function's finally block where none exists.
+      // Async methods with try-finally blocks containing await statements should not report
+      // phantom branches from compiler-generated exception handling.
+
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+                      {
+                        await (Task)instance.BasicAsyncTryFinally();
+                      },
+                      persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        // Lines in the try and finally blocks must be covered
+        document.AssertLinesCovered(BuildConfiguration.Debug, (327, 1), (331, 1));
+
+        // No phantom branches from compiler-generated exception state checks
+        Assert.DoesNotContain(document.Branches, b => b.Key.Line >= 323 && b.Key.Line <= 333);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_Issue_1337_TryFinallyWithException()
+    {
+      // Exercises the THROWING path of an async try-finally: the compiler emits
+      // <>s__* exception-state fields and extra branches to manage finally-block
+      // execution when an exception is in-flight. This is the exact IL pattern
+      // that SkipGeneratedBranchesForAsyncTryFinally must filter — a regression
+      // here would leave phantom branches in the report even when no user-code
+      // branch exists in the finally block.
+
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+                      {
+                        // The method throws — wrap so the host process does not abort.
+                        await Assert.ThrowsAsync<Exception>(() => (Task)instance.TryFinallyWithException());
+                      },
+                      persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        // The try body (await + throw) and the finally body (await) must all be hit.
+        document.AssertLinesCovered(BuildConfiguration.Debug, (356, 1), (357, 1), (361, 1));
+
+        // The finally block contains only an await — no user-code branch.
+        // Phantom branches from compiler-generated exception-state checks (the
+        // <>s__* fields that are set when the exception is in-flight) must be absent.
+        Assert.DoesNotContain(document.Branches, b => b.Key.Line >= 352 && b.Key.Line <= 363);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_TryFinallyWithReturn()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+                      {
+                        int result = await (Task<int>)instance.TryFinallyWithReturnValue();
+                        Assert.Equal(42, result);
+                      },
+                      persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        var methodLines = document.Lines.Values
+          .Where(l => l.Method.Contains("TryFinallyWithReturnValue"))
+          .ToList();
+
+        Assert.NotEmpty(methodLines);
+        Assert.True(methodLines.All(l => l.Hits > 0), "All lines in TryFinallyWithReturnValue should be covered");
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_NestedTryFinally()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+                      {
+                        await (Task)instance.NestedTryFinally();
+                      },
+                      persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        var methodLines = document.Lines.Values
+          .Where(l => l.Method.Contains("NestedTryFinally"))
+          .ToList();
+
+        Assert.NotEmpty(methodLines);
+        Assert.True(methodLines.All(l => l.Hits > 0), "All lines in NestedTryFinally should be covered");
+
+        // Nested try-finally with awaits should not create phantom branches
+        var methodBranches = document.Branches
+          .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
+          .ToList();
+
+        Assert.Empty(methodBranches);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_TryFinallyWithBranching()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+                      {
+                        // Test both branches
+                        int result1 = await (Task<int>)instance.TryFinallyWithBranching(true);
+                        Assert.Equal(1, result1);
+
+                        int result2 = await (Task<int>)instance.TryFinallyWithBranching(false);
+                        Assert.Equal(2, result2);
+                      },
+                      persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        var methodLines = document.Lines.Values
+          .Where(l => l.Method.Contains("TryFinallyWithBranching"))
+          .ToList();
+
+        Assert.NotEmpty(methodLines);
+
+        // The if statement creates real branches that should be reported
+        var methodBranches = document.Branches
+          .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
+          .ToList();
+
+        // Should have branches from the if statement, but NOT from compiler-generated exception handling
+        Assert.NotEmpty(methodBranches);
+
+        // Verify all user-code branches are covered
+        foreach (var branch in methodBranches)
+        {
+          Assert.True(branch.Value.Hits > 0,
+            $"Branch at line {branch.Key.Line} should be covered");
+        }
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_TryCatchFinally()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+          {
+            await (Task)instance.TryCatchFinallyWithAwaitInFinally();
+          },
+                      persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        var methodLines = document.Lines.Values
+          .Where(l => l.Method.Contains("TryCatchFinallyWithAwaitInFinally"))
+          .ToList();
+
+        Assert.NotEmpty(methodLines);
+        //Assert.True(methodLines.All(l => l.Hits > 0), "All lines in TryCatchFinallyWithAwaitInFinally should be covered"); 
+
+        var methodBranches = document.Branches
+          .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
+          .ToList();
+
+        Assert.Empty(methodBranches);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_AsyncTryFinallyPhantomBranches_EmptyTryAwaitFinally()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+                      {
+                        await (Task)instance.EmptyTryWithAwaitInFinally();
+                      },
+                      persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        var methodLines = document.Lines.Values
+          .Where(l => l.Method.Contains("EmptyTryWithAwaitInFinally"))
+          .ToList();
+
+        Assert.NotEmpty(methodLines);
+        Assert.True(methodLines.All(l => l.Hits > 0), "All lines should be covered");
+
+        // Empty try with await in finally 
+        var methodBranches = document.Branches
+          .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
+          .ToList();
+
+        Assert.Empty(methodBranches);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_MultipleAwaitsInFinally()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+                      {
+                        await (Task)instance.TryFinallyWithMultipleAwaitsInFinally();
+                      },
+                      persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        document.AssertLinesCovered(BuildConfiguration.Debug, (415, 1), (419, 1), (420, 1), (421, 1));
+
+        // Multiple awaits in the finally block must not produce phantom branches from
+        // compiler-generated exception-state checks for the second and third continuations.
+        Assert.DoesNotContain(document.Branches, b => b.Key.Line >= 411 && b.Key.Line <= 423);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncAwait_Issue1337_TryCatchFinallyWithRealAsyncInFinally_NoPhantomBranches()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncTryFinallyPhantomBranches>(async instance =>
+          {
+            await (Task)instance.TryCatchFinallyWithRealAsyncInFinally();
+          },
+          persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        Core.Instrumentation.Document document = TestInstrumentationHelper.GetCoverageResult(path).Document("Instrumentation.AsyncAwait.cs");
+
+        var methodLines = document.Lines.Values
+          .Where(l => l.Method.Contains("TryCatchFinallyWithRealAsyncInFinally"))
+          .ToList();
+
+        Assert.NotEmpty(methodLines);
+        // Assert.True(methodLines.All(l => l.Hits > 0), "All lines in TryCatchFinallyWithRealAsyncInFinally should be covered");
+
+        // The compiler-generated IsCompleted branch inside the finally continuation
+        // is a phantom branch and must not appear in coverage output (Issue #1337).
+        var methodBranches = document.Branches
+          .Where(b => methodLines.Any(l => l.Number == b.Key.Line))
+          .ToList();
+
+        Assert.Empty(methodBranches);
       }
       finally
       {

@@ -95,8 +95,9 @@ namespace Coverlet.CoreCoverage.Tests
         result.Document("Instrumentation.SelectionStatements.cs")
               // Line 45 initializes ret, line 48 assigns 1, line 51 returns the shared continuation value
               .AssertLinesCovered((45, 1), (48, 1), (51, 1))
-              // Branch at line 46: ordinal 0 is the true body, ordinal 1 is the shared continuation
-              .AssertBranchesCovered((46, 0, 1), (46, 1, 1));
+              // Branch at line 46: ordinal 0 (fall-through into true body) is hit; ordinal 1 (skip path
+              // taken when condition=false) is NOT hit because we only ran the true path.
+              .AssertBranchesCovered((46, 0, 1), (46, 1, 0));
       }
       finally
       {
@@ -161,8 +162,9 @@ namespace Coverlet.CoreCoverage.Tests
         // Expected behavior for the current sample shape with a shared continuation
         result.Document("Instrumentation.SelectionStatements.cs")
               .AssertLinesCovered((45, 2), (48, 1), (51, 2))
-              // The true body runs once, the shared continuation runs after both executions
-              .AssertBranchesCovered((46, 0, 1), (46, 1, 2));
+              // The true body (ordinal 0) runs once for condition=true;
+              // the skip path (ordinal 1) runs once for condition=false.
+              .AssertBranchesCovered((46, 0, 1), (46, 1, 1));
       }
       finally
       {

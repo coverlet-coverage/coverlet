@@ -417,4 +417,38 @@ namespace Coverlet.Core.Samples.Tests
             }
         }
     }
+    // Sample for https://github.com/coverlet-coverage/coverlet/issues/1313
+    // The phantom blt branch only arises when `is >= A and <= B` is used inside a compound `&&`
+    // expression. In that case the compiler emits a PRIVATE `ldc.i4.0 + br` block for the lower-
+    // bound short-circuit that is not shared with the outer `&&` false block.
+    // In a standalone `if (c is >= A and <= B)` the lower-bound block IS shared (ends in stloc),
+    // so the blt is a real branch that must not be skipped.
+    public class RelationalPatternBranch
+    {
+        // Compound && with relational `and` pattern.
+        // The blt for the lower bound generates a PRIVATE `ldc.i4.0 + br` (phantom).
+        // Expected: 4 branch points (outer brfalse + inner brfalse), NOT 6.
+        public bool IsLowerInCompoundCondition(string prefix, char c)
+        {
+            if (prefix.StartsWith("x") && c is >= 'a' and <= 'z')
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Standalone if with relational `and` pattern.
+        // The blt and brfalse share the same false block; blt IS a real branch.
+        // Expected: 4 branch points (blt lower-bound + brfalse result).
+        public bool IsLowerInSimpleIf(char c)
+        {
+            if (c is >= 'a' and <= 'z')
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
 }

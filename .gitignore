@@ -324,3 +324,4 @@ Playground*/
 .github/agents/
 /Documentation/Plans/
 /Documentation/Issues/
+dotnet-install.sh

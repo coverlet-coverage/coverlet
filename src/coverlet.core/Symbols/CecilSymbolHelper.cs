@@ -1,4 +1,4 @@
-﻿// Copyright (c) Toni Solarin-Sodara
+// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -856,7 +856,7 @@ namespace Coverlet.Core.Symbols
       //     the state machine's current state and jumps to the right place.
       // (2) A check that the compiler-generated field "<>w__disposeMode" is false,
       //     which is used to know whether the enumerator has been disposed (so it's
-      //     necessary not to iterate any further).  This is done in more than once
+      //     necessary not to iterate any further).  This is done in more than one
       //     place, but we always want to skip it.
 
       int currentIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
@@ -949,7 +949,7 @@ namespace Coverlet.Core.Symbols
       //
       // IL_0118: ldarg.0
       // IL_0119: ldfld     class [System.Runtime]System.Threading.CancellationTokenSource Issue1275.AwaitForeachReproduction/'<AsyncEnumerable>d__1'::'<>x__combinedTokens'
-      // IL_011E: brfalse.s IL_0133
+      // IL_011e: brfalse.s IL_0133
       //
       // We'll eliminate these wherever they appear.  It's reasonable to just look for a "brfalse" or "brfalse.s" instruction, preceded
       // immediately by "ldfld" of the compiler-generated "<>x__combinedTokens" field.
@@ -1051,7 +1051,8 @@ namespace Coverlet.Core.Symbols
             if (SkipGeneratedBranchesForExceptionHandlers(methodDefinition, instruction, instructions) ||
                 SkipGeneratedBranchForExceptionRethrown(instructions, instruction) ||
                 SkipGeneratedBranchesForAwaitForeach(instructions, instruction) ||
-                SkipGeneratedBranchesForAwaitUsing(instructions, instruction))
+                SkipGeneratedBranchesForAwaitUsing(instructions, instruction) ||
+                SkipGeneratedBranchesForAsyncTryFinally(instructions, instruction, methodDefinition))
             {
               continue;
             }
@@ -1076,6 +1077,11 @@ namespace Coverlet.Core.Symbols
           }
 
           if (SkipBranchGeneratedFinallyBlock(instruction, methodDefinition))
+          {
+            continue;
+          }
+
+          if (SkipBranchGeneratedByRelationalPattern(instruction))
           {
             continue;
           }
@@ -1471,6 +1477,210 @@ namespace Coverlet.Core.Symbols
           .Any(eh => !(methodDefinition.DebugInformation.GetSequencePointMapping()
               .Where(i => i.Value.StartLine != StepOverLineCode)
               .Any(i => i.Value.Offset >= eh.HandlerStart.Offset && i.Value.Offset < eh.HandlerEnd.Maybe(h => h.Offset, GetOffsetOfNextEndfinally(methodDefinition.Body, eh.HandlerStart.Offset)))));
+    }
+
+    private static bool SkipGeneratedBranchesForAsyncTryFinally(List<Instruction> instructions, Instruction instruction, MethodDefinition methodDefinition)
+    {
+      /*
+          When an async method contains a try-finally block with an await statement in the finally block,
+          the compiler generates special patterns in the async state machine's MoveNext method.
+          These patterns check for exception state and manage finally block execution.
+          
+          The compiler generates branches to check if the finally block should execute and branches
+          that manage the await continuation within the finally block. These branches are implementation
+          details and should not affect coverage metrics.
+
+          Typical pattern for async try-finally with await in finally block:
+          
+          Debug version:
+          IL_xxxx: ldarg.0
+          IL_xxxx: ldfld int32 '<StateMachine>'::'<>s__X'  // Exception state field
+          IL_xxxx: stloc.s Y
+          IL_xxxx: ldloc.s Y
+          IL_xxxx: ldc.i4.1
+          IL_xxxx: beq.s IL_yyyy                            // BRANCH: Check if exception state is set
+          
+          OR for finally block execution check:
+          
+          IL_xxxx: ldarg.0
+          IL_xxxx: ldfld object '<StateMachine>'::'<>s__X'  // Exception object field
+          IL_xxxx: brfalse.s IL_yyyy                        // BRANCH: Check if exception exists
+          
+          These branches are not user code and should be excluded from coverage.
+      */
+
+      if (!methodDefinition.Body.HasExceptionHandlers)
+        return false;
+
+      // Check if this is a branch instruction that should be skipped
+      if (instruction.OpCode != OpCodes.Beq &&
+          instruction.OpCode != OpCodes.Beq_S &&
+          instruction.OpCode != OpCodes.Brfalse &&
+          instruction.OpCode != OpCodes.Brfalse_S &&
+          instruction.OpCode != OpCodes.Brtrue &&
+          instruction.OpCode != OpCodes.Brtrue_S)
+      {
+        return false;
+      }
+
+      int branchIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
+      if (branchIndex < 2)
+        return false;
+
+      // Pattern 1: Check for exception state value comparison
+      // ldloc.s Y / ldc.i4.1 / beq.s
+      if ((instruction.OpCode == OpCodes.Beq || instruction.OpCode == OpCodes.Beq_S) &&
+          branchIndex >= 2 &&
+          instructions[branchIndex - 1].OpCode == OpCodes.Ldc_I4_1 &&
+          (instructions[branchIndex - 2].OpCode == OpCodes.Ldloc ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_S ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_0 ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_1 ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_2 ||
+           instructions[branchIndex - 2].OpCode == OpCodes.Ldloc_3))
+      {
+        // Look back further to see if this local was loaded from a compiler-generated exception state field
+        // Pattern: ldarg.0 / ldfld <>s__X / stloc.s Y
+        int minSearchIndex = Math.Max(0, branchIndex - 6);
+        for (int i = branchIndex - 3; i >= minSearchIndex; i--)
+        {
+          if (instructions[i].OpCode == OpCodes.Ldfld &&
+              IsCompilerGeneratedField(instructions[i], out FieldDefinition field) &&
+              (field.FieldType.FullName == "System.Int32" && field.Name.StartsWith("<>s__")) &&
+              i >= 1 &&
+              (instructions[i - 1].OpCode == OpCodes.Ldarg_0 || instructions[i - 1].OpCode == OpCodes.Ldarg))
+          {
+            // Check if we're near a finally handler
+            var finallyHandlers = methodDefinition.Body.ExceptionHandlers
+                .Where(e => e.HandlerType == ExceptionHandlerType.Finally)
+                .ToList();
+
+            if (finallyHandlers.Any())
+            {
+              return true;
+            }
+          }
+        }
+      }
+
+      // Pattern 2: Check for exception object null check.
+      // Handles two sub-patterns emitted by the compiler:
+      //
+      //   Sub-pattern A - direct (field loaded straight before branch):
+      //     ldarg.0 / ldfld <>s__X (Object/Exception) / brfalse.s
+      //
+      //   Sub-pattern B - via local (Issue #1337): emitted when the finally block contains a
+      //   real async await (e.g. File.WriteAllTextAsync). The compiler stores the field value
+      //   into a temp local and then tests the local, inserting a stloc/ldloc pair:
+      //     ldarg.0 / ldfld <>s__X / stloc.s V / ldloc.s V / brfalse.s
+      int exFieldLdfldIndex = -1;
+      if (instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S ||
+          instruction.OpCode == OpCodes.Brtrue || instruction.OpCode == OpCodes.Brtrue_S)
+      {
+        // Sub-pattern A: field loaded directly before the branch
+        if (branchIndex >= 2 &&
+            instructions[branchIndex - 1].OpCode == OpCodes.Ldfld)
+        {
+          exFieldLdfldIndex = branchIndex - 1;
+        }
+        // Sub-pattern B: field stored in local then loaded before the branch
+        else if (branchIndex >= 4 &&
+                 (instructions[branchIndex - 1].OpCode == OpCodes.Ldloc ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_S ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_0 ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_1 ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_2 ||
+                  instructions[branchIndex - 1].OpCode == OpCodes.Ldloc_3) &&
+                 (instructions[branchIndex - 2].OpCode == OpCodes.Stloc ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_S ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_0 ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_1 ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_2 ||
+                  instructions[branchIndex - 2].OpCode == OpCodes.Stloc_3) &&
+                 instructions[branchIndex - 3].OpCode == OpCodes.Ldfld)
+        {
+          exFieldLdfldIndex = branchIndex - 3;
+        }
+      }
+
+      if (exFieldLdfldIndex >= 1 &&
+          IsCompilerGeneratedField(instructions[exFieldLdfldIndex], out FieldDefinition exField) &&
+          (exField.FieldType.FullName == "System.Object" || exField.FieldType.FullName == "System.Exception") &&
+          exField.Name.StartsWith("<>s__") &&
+          (instructions[exFieldLdfldIndex - 1].OpCode == OpCodes.Ldarg_0 || instructions[exFieldLdfldIndex - 1].OpCode == OpCodes.Ldarg))
+      {
+        // The five conditions above (brfalse/brtrue opcode, <>s__X field name, Object/Exception field type,
+        // ldarg.0 predecessor) uniquely identify this compiler-generated null-check.
+        // Note: async try/finally blocks compile to Catch (not Finally) IL exception handlers, so
+        // checking for ExceptionHandlerType.Finally would always return false here.
+        return true;
+      }
+
+      return false;
+    }
+
+    // https://github.com/coverlet-coverage/coverlet/issues/1313
+    // When using `is` with a relational `and` pattern (e.g. `x is >= A and <= B`) the compiler
+    // emits a dedicated short-circuit conditional branch (blt, bgt, etc.) that targets an
+    // intermediate `ldc.i4 0` (constant false) + unconditional `br` block used to merge the
+    // boolean result.  Unlike classic `&&` short-circuit paths, this compiler-generated block is
+    // NOT shared with any outer conditional branch, so it is only reachable when the lower-bound
+    // (or upper-bound) check fails on its own.  In typical test suites the outer `&&` short-circuit
+    // already bypasses this range entirely, leaving the phantom branch permanently uncovered and
+    // producing a misleadingly lower branch-coverage rate.
+    //
+    // Detection heuristic (after SimplifyMacros()):
+    //   1. The instruction is a relational conditional branch (blt, bgt, ble, bge, or the unsigned
+    //      variants), which are the opcodes Roslyn uses when lowering relational patterns.
+    //   2. Its taken target is `ldc.i4 0` (a constant false push).
+    //   3. That `ldc.i4 0` is immediately followed by an unconditional `br`, meaning this is
+    //      an intermediate boolean-merge block and not a real source-level decision point.
+    private static bool SkipBranchGeneratedByRelationalPattern(Instruction instruction)
+    {
+      // Accept both macro (.s) and non-macro forms because GetBranchPoints may be called on
+      // unsimplified IL (SimplifyMacros is applied by Instrumenter before calling this, but
+      // unit tests may invoke GetBranchPoints directly on raw method bodies).
+      Code code = instruction.OpCode.Code;
+      if (code != Code.Blt && code != Code.Blt_S &&
+          code != Code.Bgt && code != Code.Bgt_S &&
+          code != Code.Ble && code != Code.Ble_S &&
+          code != Code.Bge && code != Code.Bge_S &&
+          code != Code.Blt_Un && code != Code.Blt_Un_S &&
+          code != Code.Bgt_Un && code != Code.Bgt_Un_S &&
+          code != Code.Ble_Un && code != Code.Ble_Un_S &&
+          code != Code.Bge_Un && code != Code.Bge_Un_S)
+      {
+        return false;
+      }
+
+      if (instruction.Operand is not Instruction target)
+        return false;
+
+      // Target must push the constant false.  Handle both the macro form (ldc.i4.0 / Ldc_I4_0)
+      // and the simplified form (ldc.i4 0 / Ldc_I4 with operand 0).
+      Code targetCode = target.OpCode.Code;
+      if (targetCode == Code.Ldc_I4_0)
+      {
+        // macro form - operand is implicit
+      }
+      else if (targetCode == Code.Ldc_I4 && target.Operand is int targetValue && targetValue == 0)
+      {
+        // simplified form - operand is explicit
+      }
+      else
+      {
+        return false;
+      }
+
+      // The constant-false block must be followed by an unconditional branch (br or br.s) back
+      // to the boolean-merge point.  This distinguishes the private compiler-generated block of
+      // the relational `and` pattern from a classic short-circuit block that ends with stloc /
+      // brfalse / ret.
+      Instruction afterTarget = target.Next;
+      if (afterTarget is null || afterTarget.OpCode.FlowControl != FlowControl.Branch)
+        return false;
+
+      return true;
     }
 
     private static int GetOffsetOfNextEndfinally(MethodBody body, int startOffset)
