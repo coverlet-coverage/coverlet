@@ -10,12 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improvements
 
 - Coverlet with MTP 2 doesn't show test coverage statistic in console [#1907](https://github.com/coverlet-coverage/coverlet/issues/1907)
-- Avoid unnecessary testhost restarts [#1912](https://github.com/coverlet-coverage/coverlet/issues/1912)
+- Avoid unnecessary testhost restarts [#1912](https://github.com/coverlet-coverage/coverlet/issues/1912) by <https://github.com/mawosoft>
 
 ### Fixed
 
-- Fix [BUG] Inconsistent paths in cobertura reports [#1723](https://github.com/coverlet-coverage/coverlet/issues/1723)
-- Fix When using "is" with "and" in pattern matching, branch coverage is lower than normal [#1313](https://github.com/coverlet-coverage/coverlet/issues/1313)
+- Fix inconsistent paths in cobertura reports [#1723](https://github.com/coverlet-coverage/coverlet/issues/1723)
+- Fix when using "is" with "and" in pattern matching, branch coverage is lower than normal [#1313](https://github.com/coverlet-coverage/coverlet/issues/1313)
 - Fix Coverlet flagging a branch for an async functions finally block where none exists [#1337](https://github.com/coverlet-coverage/coverlet/issues/1337)
 - Fix Coverlet Tracker Missing CompilerGeneratedAttribute [#1828](https://github.com/coverlet-coverage/coverlet/issues/1828)
 
