@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Release date 2026-05-18
+
 ### Improvements
 
 - Coverlet with MTP 2 doesn't show test coverage statistic in console [#1907](https://github.com/coverlet-coverage/coverlet/issues/1907)
