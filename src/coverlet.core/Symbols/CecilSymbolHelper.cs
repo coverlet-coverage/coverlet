@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -256,17 +256,25 @@ namespace Coverlet.Core.Symbols
       Instruction current = instruction.Previous;
       for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
       {
-        if (current.OpCode == OpCodes.Ldsfld && current.Operand is FieldDefinition fd &&
-            // LambdaCacheField  https://github.com/dotnet/roslyn/blob/e704ca635bd6de70a0250e34c4567c7a28fa9f6d/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L31
-            // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs#L145
-            fd.Name.StartsWith("<>9_") &&
-            IsCompilerGenerated(fd))
+        // LambdaCacheField  https://github.com/dotnet/roslyn/blob/e704ca635bd6de70a0250e34c4567c7a28fa9f6d/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L31
+        // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs#L145
+        // Cecil may surface the operand as FieldDefinition or FieldReference depending on whether the type is in the
+        // same module (FieldDefinition) or referenced from another assembly (FieldReference). Both must be handled.
+        if (current.OpCode == OpCodes.Ldsfld && IsLambdaCachedField(current.Operand))
         {
           return true;
         }
       }
       return false;
     }
+
+    private static bool IsLambdaCachedField(object operand) =>
+      operand switch
+      {
+        FieldDefinition fd when fd.Name.StartsWith("<>9_") && IsCompilerGenerated(fd) => true,
+        FieldReference fr when fr.Name.StartsWith("<>9_") && IsCompilerGenerated(fr.Resolve()) => true,
+        _ => false
+      };
 
     private static bool SkipDelegateCacheField(Instruction instruction)
     {
@@ -297,16 +305,23 @@ namespace Coverlet.Core.Symbols
       Instruction current = instruction.Previous;
       for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
       {
-        if (current.OpCode == OpCodes.Ldsfld && current.Operand is FieldDefinition fd &&
-            // https://github.com/dotnet/roslyn/blob/main/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs#L513
-            Regex.IsMatch(fd.Name, "^<\\d+>__") &&
-            IsCompilerGenerated(fd))
+        // https://github.com/dotnet/roslyn/blob/main/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs#L513
+        // Cecil may surface the operand as FieldDefinition or FieldReference. Both must be handled.
+        if (current.OpCode == OpCodes.Ldsfld && IsDelegateCachedField(current.Operand))
         {
           return true;
         }
       }
       return false;
     }
+
+    private static bool IsDelegateCachedField(object operand) =>
+      operand switch
+      {
+        FieldDefinition fd when Regex.IsMatch(fd.Name, "^<\\d+>__") && IsCompilerGenerated(fd) => true,
+        FieldReference fr when Regex.IsMatch(fr.Name, "^<\\d+>__") && IsCompilerGenerated(fr.Resolve()) => true,
+        _ => false
+      };
 
     private static bool SkipGeneratedBranchForExceptionRethrown(List<Instruction> instructions, Instruction instruction)
     {
