@@ -22,26 +22,11 @@ namespace Coverlet.MTP.validation.tests;
 /// for scenarios where command-line options are not available.
 /// </summary>
 [Collection(nameof(MtpValidationTests))]
-public class ConfigurationFileTests
+public class ConfigurationFileTests : MtpValidationTestBase
 {
-  private readonly string _buildConfiguration;
-  private readonly string _repoRoot;
   private const string CoverageJsonFileName = "coverage.json";
   private const string CoverageCoberturaFileName = "coverage.cobertura.xml";
   private const string CoverageLcovFileName = "coverage.info";
-  private const string TestProjectName = "TestProject";
-  private const string SutProjectName = "SampleLibrary";
-
-  public ConfigurationFileTests()
-  {
-#if DEBUG
-    _buildConfiguration = "Debug";
-#else
-    _buildConfiguration = "Release";
-#endif
-
-    _repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
-  }
 
   /// <summary>
   /// Validates that when using coverlet.mtp.appsettings.json, only the minimal exclude filter
@@ -619,36 +604,10 @@ public class ConfigurationFileTests
 
   private TestProjectInfo CreateTestProjectWithConfigFile(string testName, string configContent)
   {
-    // Use a unique subfolder per test to avoid file lock conflicts with other tests
-    // Do NOT delete the parent temp directory as it may contain files locked by other processes
-    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    string artifactsTemp = Path.Combine(RepoRoot, "artifacts", "tmp", BuildConfiguration.ToLowerInvariant());
     Directory.CreateDirectory(artifactsTemp);
 
-    string sanitizedTestName = SanitizePathName(testName);
-    // Add timestamp to ensure uniqueness and avoid conflicts with parallel test runs
-    string uniqueSuffix = $"{DateTime.Now:yyyyMMddHHmmssfff}_{Environment.ProcessId}";
-    string solutionPath = Path.Combine(artifactsTemp, $"MTP_Config_{sanitizedTestName}_{uniqueSuffix}");
-
-    // Only try to delete the specific test folder, not the entire temp directory
-    if (Directory.Exists(solutionPath))
-    {
-      try
-      {
-        Directory.Delete(solutionPath, recursive: true);
-      }
-      catch (IOException)
-      {
-        // If deletion fails, use an alternative path
-        solutionPath = Path.Combine(artifactsTemp, $"MTP_Config_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
-      }
-      catch (UnauthorizedAccessException)
-      {
-        // If files are locked, use an alternative path
-        solutionPath = Path.Combine(artifactsTemp, $"MTP_Config_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
-      }
-    }
-
-    Directory.CreateDirectory(solutionPath);
+    string solutionPath = CreateSolutionDirectory(artifactsTemp, "MTP_Config_", SanitizePathName(testName));
 
     string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
     string testProjectPath = Path.Combine(solutionPath, TestProjectName);
@@ -658,17 +617,13 @@ public class ConfigurationFileTests
     CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
-    // Create SUT library
     CreateSutLibraryProject(sutProjectPath);
-
-    // Create test project with config file
     CreateTestProjectWithConfigFiles(testProjectPath, coverletMtpVersion, configContent);
 
-    // Create solution
     string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
     CreateSolutionFile(solutionFile);
 
-    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, BuildConfiguration.ToLower());
     return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
   }
 
@@ -721,45 +676,11 @@ public class StringUtils
   {
     string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
 
-    // Create test project csproj with configuration file included
     string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
-    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>12.0</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <OutputType>Exe</OutputType>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <UseArtifactsOutput>true</UseArtifactsOutput>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
-    <DebugType>portable</DebugType>
-    <Deterministic>false</Deterministic>
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
-    </RestoreSources>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include=""{relativeSutPath}"" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
-    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
-    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
-  </ItemGroup>
-  <!-- Configuration file must be copied to output directory per documentation -->
-  <ItemGroup>
-    <None Update=""coverlet.mtp.appsettings.json"">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-</Project>");
+    File.WriteAllText(testCsproj, GenerateTestCsproj(
+      coverletMtpVersion,
+      relativeSutPath,
+      [("coverlet.mtp.appsettings.json", "Always")]));
 
     // Create the configuration file
     string configFilePath = Path.Combine(testProjectPath, "coverlet.mtp.appsettings.json");
@@ -823,30 +744,10 @@ public class StringUtilsTests
   /// </summary>
   private TestProjectInfo CreateTestProjectWithTestConfigJson(string testName, string configContent)
   {
-    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    string artifactsTemp = Path.Combine(RepoRoot, "artifacts", "tmp", BuildConfiguration.ToLowerInvariant());
     Directory.CreateDirectory(artifactsTemp);
 
-    string sanitizedTestName = SanitizePathName(testName);
-    string uniqueSuffix = $"{DateTime.Now:yyyyMMddHHmmssfff}_{Environment.ProcessId}";
-    string solutionPath = Path.Combine(artifactsTemp, $"MTP_TestConfig_{sanitizedTestName}_{uniqueSuffix}");
-
-    if (Directory.Exists(solutionPath))
-    {
-      try
-      {
-        Directory.Delete(solutionPath, recursive: true);
-      }
-      catch (IOException)
-      {
-        solutionPath = Path.Combine(artifactsTemp, $"MTP_TestConfig_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
-      }
-      catch (UnauthorizedAccessException)
-      {
-        solutionPath = Path.Combine(artifactsTemp, $"MTP_TestConfig_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
-      }
-    }
-
-    Directory.CreateDirectory(solutionPath);
+    string solutionPath = CreateSolutionDirectory(artifactsTemp, "MTP_TestConfig_", SanitizePathName(testName));
 
     string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
     string testProjectPath = Path.Combine(solutionPath, TestProjectName);
@@ -862,7 +763,7 @@ public class StringUtilsTests
     string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
     CreateSolutionFile(solutionFile);
 
-    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, BuildConfiguration.ToLower());
     return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
   }
 
@@ -872,30 +773,10 @@ public class StringUtilsTests
   /// </summary>
   private TestProjectInfo CreateTestProjectWithBothConfigFiles(string testName, string testConfigContent, string legacyConfigContent)
   {
-    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    string artifactsTemp = Path.Combine(RepoRoot, "artifacts", "tmp", BuildConfiguration.ToLowerInvariant());
     Directory.CreateDirectory(artifactsTemp);
 
-    string sanitizedTestName = SanitizePathName(testName);
-    string uniqueSuffix = $"{DateTime.Now:yyyyMMddHHmmssfff}_{Environment.ProcessId}";
-    string solutionPath = Path.Combine(artifactsTemp, $"MTP_BothConfig_{sanitizedTestName}_{uniqueSuffix}");
-
-    if (Directory.Exists(solutionPath))
-    {
-      try
-      {
-        Directory.Delete(solutionPath, recursive: true);
-      }
-      catch (IOException)
-      {
-        solutionPath = Path.Combine(artifactsTemp, $"MTP_BothConfig_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
-      }
-      catch (UnauthorizedAccessException)
-      {
-        solutionPath = Path.Combine(artifactsTemp, $"MTP_BothConfig_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
-      }
-    }
-
-    Directory.CreateDirectory(solutionPath);
+    string solutionPath = CreateSolutionDirectory(artifactsTemp, "MTP_BothConfig_", SanitizePathName(testName));
 
     string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
     string testProjectPath = Path.Combine(solutionPath, TestProjectName);
@@ -911,7 +792,7 @@ public class StringUtilsTests
     string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
     CreateSolutionFile(solutionFile);
 
-    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, BuildConfiguration.ToLower());
     return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
   }
 
@@ -921,30 +802,10 @@ public class StringUtilsTests
   /// </summary>
   private TestProjectInfo CreateTestProjectWithAppSpecificTestConfig(string testName, string appSpecificContent, string genericContent)
   {
-    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    string artifactsTemp = Path.Combine(RepoRoot, "artifacts", "tmp", BuildConfiguration.ToLowerInvariant());
     Directory.CreateDirectory(artifactsTemp);
 
-    string sanitizedTestName = SanitizePathName(testName);
-    string uniqueSuffix = $"{DateTime.Now:yyyyMMddHHmmssfff}_{Environment.ProcessId}";
-    string solutionPath = Path.Combine(artifactsTemp, $"MTP_AppSpecific_{sanitizedTestName}_{uniqueSuffix}");
-
-    if (Directory.Exists(solutionPath))
-    {
-      try
-      {
-        Directory.Delete(solutionPath, recursive: true);
-      }
-      catch (IOException)
-      {
-        solutionPath = Path.Combine(artifactsTemp, $"MTP_AppSpecific_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
-      }
-      catch (UnauthorizedAccessException)
-      {
-        solutionPath = Path.Combine(artifactsTemp, $"MTP_AppSpecific_{sanitizedTestName}_{DateTime.Now:HHmmssfff}");
-      }
-    }
-
-    Directory.CreateDirectory(solutionPath);
+    string solutionPath = CreateSolutionDirectory(artifactsTemp, "MTP_AppSpecific_", SanitizePathName(testName));
 
     string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
     string testProjectPath = Path.Combine(solutionPath, TestProjectName);
@@ -960,7 +821,7 @@ public class StringUtilsTests
     string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
     CreateSolutionFile(solutionFile);
 
-    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, BuildConfiguration.ToLower());
     return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
   }
 
@@ -969,43 +830,10 @@ public class StringUtilsTests
     string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
 
     string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
-    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>12.0</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <OutputType>Exe</OutputType>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <UseArtifactsOutput>true</UseArtifactsOutput>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
-    <DebugType>portable</DebugType>
-    <Deterministic>false</Deterministic>
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
-    </RestoreSources>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include=""{relativeSutPath}"" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
-    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
-    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
-  </ItemGroup>
-  <!-- testconfig.json must be copied to output directory -->
-  <ItemGroup>
-    <None Update=""testconfig.json"">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-</Project>");
+    File.WriteAllText(testCsproj, GenerateTestCsproj(
+      coverletMtpVersion,
+      relativeSutPath,
+      [("testconfig.json", "Always")]));
 
     // Create testconfig.json (MTP standard format)
     string configFilePath = Path.Combine(testProjectPath, "testconfig.json");
@@ -1024,46 +852,10 @@ public class StringUtilsTests
     string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
 
     string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
-    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>12.0</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <OutputType>Exe</OutputType>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <UseArtifactsOutput>true</UseArtifactsOutput>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
-    <DebugType>portable</DebugType>
-    <Deterministic>false</Deterministic>
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
-    </RestoreSources>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include=""{relativeSutPath}"" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
-    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
-    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
-  </ItemGroup>
-  <!-- Both config files must be copied to output directory -->
-  <ItemGroup>
-    <None Update=""testconfig.json"">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update=""coverlet.mtp.appsettings.json"">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-</Project>");
+    File.WriteAllText(testCsproj, GenerateTestCsproj(
+      coverletMtpVersion,
+      relativeSutPath,
+      [("testconfig.json", "Always"), ("coverlet.mtp.appsettings.json", "Always")]));
 
     // Create testconfig.json (should take priority)
     File.WriteAllText(Path.Combine(testProjectPath, "testconfig.json"), testConfigContent);
@@ -1083,46 +875,10 @@ public class StringUtilsTests
     string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
 
     string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
-    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>12.0</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <OutputType>Exe</OutputType>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <UseArtifactsOutput>true</UseArtifactsOutput>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
-    <DebugType>portable</DebugType>
-    <Deterministic>false</Deterministic>
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
-    </RestoreSources>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include=""{relativeSutPath}"" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
-    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
-    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
-  </ItemGroup>
-  <!-- Both app-specific and generic testconfig.json must be copied -->
-  <ItemGroup>
-    <None Update=""{TestProjectName}.testconfig.json"">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update=""testconfig.json"">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-</Project>");
+    File.WriteAllText(testCsproj, GenerateTestCsproj(
+      coverletMtpVersion,
+      relativeSutPath,
+      [($"{TestProjectName}.testconfig.json", "Always"), ("testconfig.json", "Always")]));
 
     // Create [appname].testconfig.json (should take priority)
     File.WriteAllText(Path.Combine(testProjectPath, $"{TestProjectName}.testconfig.json"), appSpecificContent);
@@ -1187,107 +943,8 @@ public class StringUtilsTests
     File.WriteAllText(Path.Combine(testProjectPath, "Tests.cs"), testCode);
   }
 
-  private void CreateNugetConfig(string solutionPath)
-  {
-    string localPackagesPath = Path.Combine(_repoRoot, "artifacts", "package", _buildConfiguration.ToLowerInvariant());
-
-    string nugetConfig = Path.Combine(solutionPath, "NuGet.config");
-    File.WriteAllText(nugetConfig, $@"<?xml version=""1.0"" encoding=""utf-8""?>
-<configuration>
-  <packageSources>
-    <clear />
-    <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
-    <add key=""local"" value=""{localPackagesPath}"" />
-  </packageSources>
-</configuration>");
-  }
-
-  private string GetCoverletMtpPackageVersion()
-  {
-    string packagesPath = Path.Combine(_repoRoot, "artifacts", "package", _buildConfiguration.ToLowerInvariant());
-    string[] packages = Directory.GetFiles(packagesPath, "coverlet.MTP.*.nupkg");
-    if (packages.Length == 0)
-    {
-      throw new InvalidOperationException($"Could not find coverlet.MTP package in {packagesPath}. Run 'dotnet pack' first.");
-    }
-
-    // Extract version from filename: coverlet.MTP.{version}.nupkg
-    string filename = Path.GetFileNameWithoutExtension(packages[0]);
-    return filename.Replace("coverlet.MTP.", "");
-  }
-
-  private static void CreateSolutionFile(string solutionFile)
-  {
-    File.WriteAllText(solutionFile, @"Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.0.0
-MinimumVisualStudioVersion = 10.0.40219.1
-Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""SampleLibrary"", ""SampleLibrary\SampleLibrary.csproj"", ""{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}""
-EndProject
-Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""TestProject"", ""TestProject\TestProject.csproj"", ""{12345678-1234-1234-1234-123456789012}""
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12345678-1234-1234-1234-123456789012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12345678-1234-1234-1234-123456789012}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12345678-1234-1234-1234-123456789012}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12345678-1234-1234-1234-123456789012}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-EndGlobal
-");
-  }
-
-  private static string SanitizePathName(string name)
-  {
-    char[] invalidChars = Path.GetInvalidFileNameChars();
-    foreach (char c in invalidChars)
-    {
-      name = name.Replace(c, '_');
-    }
-    if (name.Length > 50)
-    {
-      name = name[..50];
-    }
-    return name;
-  }
-
-  private async Task BuildProject(string solutionPath)
-  {
-    var psi = new ProcessStartInfo
-    {
-      FileName = "dotnet",
-      Arguments = $"build \"{solutionPath}\" -c {_buildConfiguration}",
-      UseShellExecute = false,
-      RedirectStandardOutput = true,
-      RedirectStandardError = true,
-      CreateNoWindow = true
-    };
-
-    using var process = Process.Start(psi)!;
-
-    // Read both streams concurrently to avoid deadlock.
-    // Sequential reads can deadlock if one buffer fills while waiting for the other.
-    // See: https://learn.microsoft.com/dotnet/api/system.diagnostics.process.standardoutput#remarks
-    Task<string> stdoutTask = process.StandardOutput.ReadToEndAsync();
-    Task<string> stderrTask = process.StandardError.ReadToEndAsync();
-
-    await Task.WhenAll(stdoutTask, stderrTask);
-    await process.WaitForExitAsync();
-
-    string stdout = await stdoutTask;
-    string stderr = await stderrTask;
-
-    Assert.True(process.ExitCode == 0,
-      $"Build failed with exit code {process.ExitCode}.\n\nStdOut:\n{stdout}\n\nStdErr:\n{stderr}");
-  }
+	// Build helper delegates to base class
+	private Task BuildProject(string solutionPath) => BuildProjectAsync(solutionPath);
 
   private async Task<TestResult> RunTestsWithCoverage(TestProjectInfo testProject, string coverletArgs, bool enableDiagnostics = false)
   {
@@ -1325,59 +982,6 @@ EndGlobal
   }
 
 #region Helper Classes
-
-  private sealed class TestProjectInfo : IDisposable
-  {
-    public string SolutionPath { get; }
-    public string TestProjectPath { get; }
-    public string OutputDirectory { get; }
-    public string SolutionDirectory { get; }
-
-    public TestProjectInfo(string solutionPath, string testProjectPath, string outputDirectory, string solutionDirectory)
-    {
-      SolutionPath = solutionPath;
-      TestProjectPath = testProjectPath;
-      OutputDirectory = outputDirectory;
-      SolutionDirectory = solutionDirectory;
-    }
-
-    public void Dispose()
-    {
-      // Allow opt-out of cleanup via environment variable for local debugging
-      string? keepTestProjects = Environment.GetEnvironmentVariable("COVERLET_KEEP_TESTPROJECTS");
-      if (keepTestProjects is "1" || string.Equals(keepTestProjects, "true", StringComparison.OrdinalIgnoreCase))
-      {
-        return;
-      }
-
-      if (Directory.Exists(SolutionDirectory))
-      {
-        try
-        {
-          Directory.Delete(SolutionDirectory, recursive: true);
-        }
-        catch
-        {
-          // Ignore cleanup failures: disposal is best-effort and should not fail the test run.
-        }
-      }
-    }
-  }
-
-  private sealed class TestResult
-  {
-    public int ExitCode { get; }
-    public string StandardOutput { get; }
-    public string ErrorText { get; }
-    public string CombinedOutput => $"=== STDOUT ===\n{StandardOutput}\n\n=== STDERR ===\n{ErrorText}";
-
-    public TestResult(int exitCode, string standardOutput, string errorText)
-    {
-      ExitCode = exitCode;
-      StandardOutput = standardOutput;
-      ErrorText = errorText;
-    }
-  }
 
   /// <summary>
   /// Represents parsed diagnostic settings from a coverlet diagnostic log file.
