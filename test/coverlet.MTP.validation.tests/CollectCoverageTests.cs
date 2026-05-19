@@ -14,32 +14,12 @@ namespace Coverlet.MTP.validation.tests;
 /// Similar to coverlet.integration.tests.Collectors but for Microsoft Testing Platform instead of VSTest.
 /// Uses a separate library project (SUT) referenced by the test project - the typical real-world scenario.
 /// </summary>
-///
-
 [Collection(nameof(MtpValidationTests))]
-public class CollectCoverageTests
+public class CollectCoverageTests : MtpValidationTestBase
 {
-  private readonly string _buildConfiguration;
-  private readonly string _localPackagesPath;
   private const string CoverageJsonFileName = "coverage.json";
   private const string CoverageCoberturaFileName = "coverage.cobertura.xml";
   private const string CoverageLcovFileName = "coverage.info";
-  private const string TestProjectName = "TestProject";
-  private const string SutProjectName = "SampleLibrary";
-  private readonly string _repoRoot;
-
-  public CollectCoverageTests()
-  {
-#if DEBUG
-    _buildConfiguration = "Debug";
-#else
-    _buildConfiguration = "Release";
-#endif
-
-    // Get local packages path (adjust based on your build output)
-    _repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
-    _localPackagesPath = Path.Combine(_repoRoot, "artifacts", "package", _buildConfiguration.ToLowerInvariant());
-  }
 
   [Fact]
   public async Task TestCodeWithoutCodeCoverage()
@@ -370,7 +350,7 @@ public class CollectCoverageTests
     await BuildProject(testProject.SolutionPath);
 
     // Create a specific results directory
-    string resultsDirectory = Path.GetFullPath(Path.Combine(testProject.SolutionDirectory, _repoRoot, "artifacts", "tmp", "TestResults"));
+    string resultsDirectory = Path.GetFullPath(Path.Combine(testProject.SolutionDirectory, RepoRoot, "artifacts", "tmp", "TestResults"));
     if (Directory.Exists(resultsDirectory))
     {
       Directory.Delete(resultsDirectory, recursive: true);
@@ -667,20 +647,10 @@ public class CollectCoverageTests
 
   private TestProjectInfo CreateAsyncTestProject(string testName)
   {
-    // Use repository artifacts folder
-    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    string artifactsTemp = Path.Combine(RepoRoot, "artifacts", "tmp", BuildConfiguration.ToLowerInvariant());
     Directory.CreateDirectory(artifactsTemp);
 
-    string sanitizedTestName = SanitizePathName(testName);
-    string solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}");
-
-    if (Directory.Exists(solutionPath))
-    {
-      try { Directory.Delete(solutionPath, recursive: true); }
-      catch (Exception e) when (e is IOException or UnauthorizedAccessException) { solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}"); }
-    }
-
-    Directory.CreateDirectory(solutionPath);
+    string solutionPath = CreateSolutionDirectory(artifactsTemp, "MTP_", SanitizePathName(testName));
 
     string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
     string testProjectPath = Path.Combine(solutionPath, TestProjectName);
@@ -690,36 +660,22 @@ public class CollectCoverageTests
     CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
-    // Create SUT with async methods
     CreateAsyncSutLibraryProject(sutProjectPath);
-
-    // Create test project
     CreateAsyncTestProjectFiles(testProjectPath, coverletMtpVersion);
 
-    // Create solution
     string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
     CreateSolutionFile(solutionFile);
 
-    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, BuildConfiguration.ToLower());
     return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
   }
 
   private TestProjectInfo CreateIssue1843ExactReproProject(string testName)
   {
-    // Reproduce exact Issue #1843 scenario
-    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    string artifactsTemp = Path.Combine(RepoRoot, "artifacts", "tmp", BuildConfiguration.ToLowerInvariant());
     Directory.CreateDirectory(artifactsTemp);
 
-    string sanitizedTestName = SanitizePathName(testName);
-    string solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}");
-
-    if (Directory.Exists(solutionPath))
-    {
-      try { Directory.Delete(solutionPath, recursive: true); }
-      catch (Exception e) when (e is IOException or UnauthorizedAccessException) { solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}"); }
-    }
-
-    Directory.CreateDirectory(solutionPath);
+    string solutionPath = CreateSolutionDirectory(artifactsTemp, "MTP_", SanitizePathName(testName));
 
     string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
     string testProjectPath = Path.Combine(solutionPath, TestProjectName);
@@ -729,14 +685,13 @@ public class CollectCoverageTests
     CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
-    // Create Issue #1843 exact repro SUT
     CreateIssue1843SutProject(sutProjectPath);
     CreateIssue1843TestProject(testProjectPath, coverletMtpVersion);
 
     string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
     CreateSolutionFile(solutionFile);
 
-    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, BuildConfiguration.ToLower());
     return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
   }
 
@@ -819,37 +774,7 @@ public class AsyncDataFetcher
     string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
 
     string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
-    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>12.0</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <OutputType>Exe</OutputType>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <UseArtifactsOutput>true</UseArtifactsOutput>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
-    <DebugType>portable</DebugType>
-    <Deterministic>false</Deterministic>
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
-    </RestoreSources>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include=""{relativeSutPath}"" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
-    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
-    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
-  </ItemGroup>
-</Project>");
+    File.WriteAllText(testCsproj, GenerateTestCsproj(coverletMtpVersion, relativeSutPath));
 
     string testCode = @"// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
@@ -968,37 +893,7 @@ public class IntegerFormatter
     string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
 
     string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
-    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>12.0</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <OutputType>Exe</OutputType>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <UseArtifactsOutput>true</UseArtifactsOutput>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
-    <DebugType>portable</DebugType>
-    <Deterministic>false</Deterministic>
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
-    </RestoreSources>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include=""{relativeSutPath}"" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
-    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
-    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
-  </ItemGroup>
-</Project>");
+    File.WriteAllText(testCsproj, GenerateTestCsproj(coverletMtpVersion, relativeSutPath));
 
     string testCode = @"// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
@@ -1040,72 +935,27 @@ public class Issue1843Tests
     bool includeBranchTest = false,
     bool includeMultipleTests = false)
   {
-    // Use repository artifacts folder instead of user temp
-    string artifactsTemp = Path.Combine(_repoRoot, "artifacts", "tmp", _buildConfiguration.ToLowerInvariant());
+    string artifactsTemp = Path.Combine(RepoRoot, "artifacts", "tmp", BuildConfiguration.ToLowerInvariant());
     Directory.CreateDirectory(artifactsTemp);
 
-    // Use test method name for folder naming (sanitize invalid path characters)
-    string sanitizedTestName = SanitizePathName(testName);
-    string solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}");
+    string solutionPath = CreateSolutionDirectory(artifactsTemp, "MTP_", SanitizePathName(testName));
 
-    // Clean up any existing folder from previous test runs
-    if (Directory.Exists(solutionPath))
-    {
-      try
-      {
-        Directory.Delete(solutionPath, recursive: true);
-      }
-      catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-      {
-        // If deletion fails, append a short unique suffix
-        solutionPath = Path.Combine(artifactsTemp, $"MTP_{sanitizedTestName}_{DateTime.Now:HHmmss}");
-      }
-    }
-
-    Directory.CreateDirectory(solutionPath);
-
-    // Create solution structure with separate SUT library and test project
     string sutProjectPath = Path.Combine(solutionPath, SutProjectName);
     string testProjectPath = Path.Combine(solutionPath, TestProjectName);
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    // Create NuGet.config at solution level
     CreateNugetConfig(solutionPath);
-
-    // Get coverlet.MTP package version
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
-    // Create the SUT library project
     CreateSutLibraryProject(sutProjectPath, includeSimpleTest, includeMethodTests, includeCalculatorTest, includeBranchTest, includeMultipleClasses);
-
-    // Create the test project with reference to SUT library
     CreateTestProjectFiles(testProjectPath, coverletMtpVersion, includeSimpleTest, includeMethodTests, includeCalculatorTest, includeBranchTest, includeMultipleTests, includeMultipleClasses);
 
-    // Create solution file
     string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
     CreateSolutionFile(solutionFile);
 
-    // Output path for test project: artifacts\tmp\debug\MTP_TestName\bin\TestProject\debug
-    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, _buildConfiguration.ToLower());
-
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, BuildConfiguration.ToLower());
     return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
-  }
-
-  private static string SanitizePathName(string name)
-  {
-    // Replace invalid path characters with underscore
-    char[] invalidChars = Path.GetInvalidFileNameChars();
-    foreach (char c in invalidChars)
-    {
-      name = name.Replace(c, '_');
-    }
-    // Limit length to avoid path too long issues
-    if (name.Length > 50)
-    {
-      name = name[..50];
-    }
-    return name;
   }
 
   private static void CreateSutLibraryProject(string sutProjectPath,
@@ -1146,108 +996,10 @@ public class Issue1843Tests
     string relativeSutPath = Path.Combine("..", SutProjectName, $"{SutProjectName}.csproj");
 
     string testCsproj = Path.Combine(testProjectPath, $"{TestProjectName}.csproj");
-    File.WriteAllText(testCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>12.0</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <OutputType>Exe</OutputType>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <UseArtifactsOutput>true</UseArtifactsOutput>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
-    <DebugType>portable</DebugType>
-    <Deterministic>false</Deterministic>
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
-    </RestoreSources>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include=""{relativeSutPath}"" />
-  </ItemGroup>
-  <ItemGroup>
-    <!-- Use xunit.v3.mtp-v2 which is designed for MTP v2.x -->
-    <PackageReference Include=""xunit.v3.mtp-v2"" Version=""3.2.2"" />
-    <PackageReference Include=""Microsoft.Testing.Platform"" Version=""2.2.2"" />
-    <PackageReference Include=""coverlet.MTP"" Version=""{coverletMtpVersion}"" />
-    <PackageReference Include=""Microsoft.Testing.Extensions.TrxReport"" Version=""2.2.2"" />
-  </ItemGroup>
-</Project>");
+    File.WriteAllText(testCsproj, GenerateTestCsproj(coverletMtpVersion, relativeSutPath));
 
-    // Generate test code
     string testCode = GenerateTestCode(includeSimpleTest, includeMethodTests, includeCalculatorTest, includeBranchTest, includeMultipleTests, includeMultipleClasses);
     File.WriteAllText(Path.Combine(testProjectPath, "Tests.cs"), testCode);
-  }
-
-  private static void CreateSolutionFile(string solutionFile)
-  {
-    string sutGuid = Guid.NewGuid().ToString("B").ToUpperInvariant();
-    string testGuid = Guid.NewGuid().ToString("B").ToUpperInvariant();
-
-    string solutionContent = $@"Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
-MinimumVisualStudioVersion = 10.0.40219.1
-Project(""{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}}"") = ""{SutProjectName}"", ""{SutProjectName}\{SutProjectName}.csproj"", ""{sutGuid}""
-EndProject
-Project(""{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}}"") = ""{TestProjectName}"", ""{TestProjectName}\{TestProjectName}.csproj"", ""{testGuid}""
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{sutGuid}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{sutGuid}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{sutGuid}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{sutGuid}.Release|Any CPU.Build.0 = Release|Any CPU
-		{testGuid}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{testGuid}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{testGuid}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{testGuid}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
-";
-    File.WriteAllText(solutionFile, solutionContent);
-  }
-
-  private void CreateNugetConfig(string solutionPath)
-  {
-    string nugetConfig = $@"<?xml version=""1.0"" encoding=""utf-8""?>
-<configuration>
-  <packageSources>
-    <clear />
-    <add key=""local"" value=""{_localPackagesPath}"" />
-    <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
-  </packageSources>
-</configuration>";
-
-    File.WriteAllText(Path.Combine(solutionPath, "NuGet.config"), nugetConfig);
-  }
-
-  private string GetCoverletMtpPackageVersion()
-  {
-    if (Directory.Exists(_localPackagesPath))
-    {
-      var mtpPackages = Directory.GetFiles(_localPackagesPath, "coverlet.MTP.*.nupkg");
-      if (mtpPackages.Length > 0)
-      {
-        string packageName = Path.GetFileNameWithoutExtension(mtpPackages[0]);
-        string version = packageName["coverlet.MTP.".Length..];
-        return version;
-      }
-    }
-
-    return "8.0.0-preview.*";
   }
 
   private static string GenerateSutCode(
@@ -1595,33 +1347,7 @@ public class StringHelperTests
     return codeBuilder.ToString();
   }
 
-  private async Task<int> BuildProject(string solutionPath)
-  {
-    var processStartInfo = new ProcessStartInfo
-    {
-      FileName = "dotnet",
-      Arguments = $"build \"{solutionPath}\" -c {_buildConfiguration}",
-      RedirectStandardOutput = true,
-      RedirectStandardError = true,
-      UseShellExecute = false,
-      CreateNoWindow = true,
-      WorkingDirectory = Path.GetDirectoryName(solutionPath)
-    };
-
-    using var process = Process.Start(processStartInfo);
-
-    string output = await process!.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
-
-    await process.WaitForExitAsync();
-
-    if (process.ExitCode != 0)
-    {
-      throw new InvalidOperationException($"Build failed:\nOutput: {output}\nError: {error}");
-    }
-
-    return process.ExitCode;
-  }
+  private Task BuildProject(string solutionPath) => BuildProjectAsync(solutionPath);
 
   private static async Task<TestResult> RunTestsWithCoverage(TestProjectInfo testProject, string arguments, string testName)
   {
@@ -1687,18 +1413,13 @@ public class StringHelperTests
       _ => "unrecognized exit code"
     };
 
-    return new TestResult
-    {
-      ExitCode = process.ExitCode,
-      ErrorText = errorContext,
-      StandardOutput = output,
-      StandardError = error,
-      CombinedOutput = $"=== TEST EXECUTABLE ===\n{testExecutable}\n\n" +
-                    $"=== ARGUMENTS ===\n{arguments}\n\n" +
-                    $"=== EXIT CODE ===\n{process.ExitCode}\n\n" +
-                    $"=== STDOUT ===\n{output}\n\n" +
-                    $"=== STDERR ===\n{error}"
-    };
+    return new TestResult(
+      exitCode: process.ExitCode,
+      standardOutput: $"=== TEST EXECUTABLE ===\n{testExecutable}\n\n" +
+                      $"=== ARGUMENTS ===\n{arguments}\n\n" +
+                      $"=== EXIT CODE ===\n{process.ExitCode}\n\n" +
+                      $"=== STDOUT ===\n{output}",
+      errorText: errorContext + "\n\n" + error);
   }
 
   private static JsonDocument ParseCoverageJson(string filePath)
@@ -1709,127 +1430,4 @@ public class StringHelperTests
 
   #endregion
 
-  /// <summary>
-  /// Holds information about the generated test project structure.
-  /// Implements cleanup to remove binary artifacts while preserving diagnostic and coverage files.
-  /// </summary>
-  private sealed class TestProjectInfo : IDisposable
-  {
-    public string SolutionPath { get; }
-    public string TestProjectPath { get; }
-    public string OutputDirectory { get; }
-    public string SolutionDirectory { get; }
-
-    // File extensions to preserve (diagnostic logs and coverage reports)
-    private static readonly string[] s_preserveExtensions = [".txt", ".log", ".json", ".xml", ".info", ".cobertura.xml"];
-
-    // Directories to remove (build artifacts)
-    private static readonly string[] s_cleanupDirectories = ["bin", "obj"];
-
-    public TestProjectInfo(string solutionPath, string testProjectPath, string outputDirectory, string solutionDirectory)
-    {
-      SolutionPath = solutionPath;
-      TestProjectPath = testProjectPath;
-      OutputDirectory = outputDirectory;
-      SolutionDirectory = solutionDirectory;
-    }
-
-    public void Dispose()
-    {
-      CleanupBinaryArtifacts();
-    }
-
-    /// <summary>
-    /// Removes binary artifacts (bin, obj folders) while preserving diagnostic and coverage files.
-    /// </summary>
-    private void CleanupBinaryArtifacts()
-    {
-      if (string.IsNullOrEmpty(SolutionDirectory) || !Directory.Exists(SolutionDirectory))
-        return;
-
-      try
-      {
-        // First, copy coverage and diagnostic files from bin to solution root (if needed)
-        PreserveCoverageFiles();
-
-        // Remove bin and obj directories
-        foreach (string dirName in s_cleanupDirectories)
-        {
-          string dirPath = Path.Combine(SolutionDirectory, dirName);
-          DeleteDirectoryWithRetry(dirPath);
-        }
-
-        // Remove project directories (SampleLibrary, TestProject) but keep files at solution root
-        string sutDir = Path.Combine(SolutionDirectory, SutProjectName);
-        DeleteDirectoryWithRetry(sutDir);
-
-        string testDir = Path.Combine(SolutionDirectory, TestProjectName);
-        DeleteDirectoryWithRetry(testDir);
-
-        // Remove solution file and NuGet.config (keep only coverage/diagnostic files)
-        TryDeleteFile(SolutionPath);
-        TryDeleteFile(Path.Combine(SolutionDirectory, "NuGet.config"));
-      }
-      catch (Exception ex)
-      {
-        Debug.WriteLine($"Warning: Cleanup failed for {SolutionDirectory}: {ex.Message}");
-      }
-    }
-
-    /// <summary>
-    /// Ensures coverage files are available at solution root level.
-    /// </summary>
-    private void PreserveCoverageFiles()
-    {
-      if (!Directory.Exists(OutputDirectory))
-        return;
-
-      // Find and copy coverage files to solution root if they're only in bin
-      foreach (string file in s_preserveExtensions
-        .Select(extension => $"*{extension}")
-        .SelectMany(pattern => Directory.GetFiles(OutputDirectory, pattern, SearchOption.AllDirectories)))
-      {
-        string fileName = Path.GetFileName(file);
-        string destPath = Path.Combine(SolutionDirectory, fileName);
-
-        // Only copy if not already at solution root
-        if (!File.Exists(destPath))
-        {
-          try
-          {
-            File.Copy(file, destPath, overwrite: false);
-          }
-          catch
-          {
-            // Ignore copy failures
-          }
-        }
-      }
-    }
-
-    private static void TryDeleteFile(string path)
-    {
-      try
-      {
-        if (File.Exists(path))
-        {
-          File.SetAttributes(path, FileAttributes.Normal);
-          File.Delete(path);
-        }
-      }
-      catch
-      {
-        // Ignore deletion failures
-      }
-    }
   }
-
-  private sealed class TestResult
-  {
-    public int ExitCode { get; set; }
-    public string ErrorText { get; set; } = string.Empty;
-    public string StandardOutput { get; set; } = string.Empty;
-    public string StandardError { get; set; } = string.Empty;
-    public string CombinedOutput { get; set; } = string.Empty;
-  }
-}

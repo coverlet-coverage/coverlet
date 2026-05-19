@@ -20,7 +20,7 @@ A sample project file looks like:
   </PropertyGroup>
   <ItemGroup>
     <!-- Minimum version 18.4.0 -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
     <!-- Update this reference when new version is released -->
     <PackageReference Include="coverlet.collector" Version="10.0.1" />
   ...
@@ -204,10 +204,10 @@ flowchart LR
 
 ### Limitations and constraints
 
-- Output files are attached under `TestResults/<guid>` (platform-controlled, non-deterministic folder names).
-- Feature parity with other modes is partial (for example, threshold validation and built-in merge are not provided by this integration mode).
-- Coverage collection depends on VSTest data-collector lifecycle and testhost behavior.
-- Requires compatible `Microsoft.NET.Test.Sdk` and collector setup.
+* Output files are attached under `TestResults/<guid>` (platform-controlled, non-deterministic folder names).
+* Feature parity with other modes is partial (for example, threshold validation and built-in merge are not provided by this integration mode).
+* Coverage collection depends on VSTest data-collector lifecycle and testhost behavior.
+* Requires compatible `Microsoft.NET.Test.Sdk` and collector setup.
 
 ## Known Issues
 
