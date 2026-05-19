@@ -145,4 +145,29 @@ namespace Coverlet.Core.CoverageSamples.Tests
 
     private static int Map(int row) => row + 1;
   }
+
+  // Regression test sample for https://github.com/coverlet-coverage/coverlet/issues/1937
+  // A lambda with a real branch assigned to a delegate property must not generate a phantom
+  // branch from the compiler-generated delegate-cache null-check (brtrue.s on the <>9__ field).
+  public class Issue_1937
+  {
+    public System.Func<string, bool> SecretFilter { get; set; }
+
+    public void Configure()
+    {
+      SecretFilter = (secret) =>
+      {
+        if (secret.StartsWith("prefix_"))
+          return true;
+        return false;
+      };
+    }
+
+    public void Test()
+    {
+      Configure();
+      SecretFilter("prefix_test");
+      SecretFilter("other");
+    }
+  }
 }

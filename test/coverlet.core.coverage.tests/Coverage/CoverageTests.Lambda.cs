@@ -167,5 +167,42 @@ namespace Coverlet.CoreCoverage.Tests
         File.Delete(path);
       }
     }
+
+    [Fact]
+    public void Issue_1937()
+    {
+      // Regression test: the compiler-generated delegate-cache null-check branch (brtrue.s on the
+      // <>9__ cached-lambda field) must NOT appear as a phantom branch in coverage results.
+      // Only the real user-code `if` branch inside the lambda (line 160) should be reported,
+      // with both paths hit: ordinal 0 (false/fall-through, "other" input) and
+      // ordinal 1 (true/taken, "prefix_test" input).
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<Issue_1937>(instance =>
+            {
+              instance.Test();
+              return Task.CompletedTask;
+            },
+            persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        TestInstrumentationHelper.GetCoverageResult(path)
+          .Document("Instrumentation.Lambda.cs")
+          // Exactly one branch point: the user-code `if` on line 160.
+          // No phantom branch from the compiler-generated delegate-cache null-check.
+          .ExpectedTotalNumberOfBranches(BuildConfiguration.Debug, 1)
+          // Both paths of the `if` must be hit exactly once.
+          .AssertBranchesCovered(BuildConfiguration.Debug, (160, 0, 1), (160, 1, 1));
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
   }
 }
