@@ -195,5 +195,15 @@ namespace Coverlet.Core.CoverageSamples.Tests
         System.Console.WriteLine("InFinally-2");    //unreachable
       }                                               //unreachable
     }                                                   //unreachable
+
+    // Async method calling a [DoesNotReturn] helper — issue #1717
+    // The compiler emits the body inside a nested state-machine type (MoveNext).
+    // ReachabilityHelper must scan nested types so the call is recognised.
+    public async System.Threading.Tasks.Task AsyncCallsDoesNotReturn(string message)
+    {
+      System.Console.WriteLine(message);
+      Throws();
+      System.Console.WriteLine("Async-After");      // unreachable
+    }                                                 // unreachable
   }
 }

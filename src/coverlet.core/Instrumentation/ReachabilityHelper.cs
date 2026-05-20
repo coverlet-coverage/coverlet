@@ -260,7 +260,11 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
       ImmutableHashSet<MetadataToken> processedMethods = ImmutableHashSet<MetadataToken>.Empty;
       ImmutableHashSet<MetadataToken>.Builder doNotReturn = ImmutableHashSet.CreateBuilder<MetadataToken>();
-      foreach (TypeDefinition type in module.Types)
+
+      // module.Types only returns top-level types; async state machines and other compiler-generated
+      // types are emitted as nested types and must be traversed recursively to find [DoesNotReturn]
+      // calls within async method bodies (issue #1717).
+      foreach (TypeDefinition type in GetAllTypes(module))
       {
         foreach (MethodDefinition mtd in type.Methods)
         {
@@ -781,6 +785,25 @@ namespace Coverlet.Core.Instrumentation.Reachability
       }
 
       return blocks;
+    }
+
+    /// <summary>
+    /// Enumerates all types in a module, including nested types at any depth.
+    /// This is required so that compiler-generated state machines (e.g. for async/await)
+    /// — which are emitted as nested types — are also scanned for [DoesNotReturn] calls.
+    /// </summary>
+    private static System.Collections.Generic.IEnumerable<TypeDefinition> GetAllTypes(ModuleDefinition module)
+    {
+      var stack = new System.Collections.Generic.Stack<TypeDefinition>(module.Types);
+      while (stack.Count > 0)
+      {
+        TypeDefinition type = stack.Pop();
+        yield return type;
+        foreach (TypeDefinition nested in type.NestedTypes)
+        {
+          stack.Push(nested);
+        }
+      }
     }
 
     /// <summary>

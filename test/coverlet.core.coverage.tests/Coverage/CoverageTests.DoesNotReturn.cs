@@ -308,5 +308,41 @@ namespace Coverlet.CoreCoverage.Tests
         File.Delete(path);
       }
     }
+
+    [Fact]
+    public async Task AsyncCallsDoesNotReturn_DoesNotReturnAttribute_InstrumentsCorrect()
+    {
+      // Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
+      // Regression test for issue #1717:
+      // [DoesNotReturn] was not honoured when called from an async method because the
+      // compiler emits async bodies inside nested state-machine types, which were not
+      // scanned by ReachabilityHelper.CreateForModule.
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(async instance =>
+          {
+            try { await instance.AsyncCallsDoesNotReturn("test"); }
+            catch (Exception) { }
+
+          }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
+
+          return 0;
+
+        }, [path]);
+
+        CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+        result.Document("Instrumentation.DoesNotReturn.cs")
+            .AssertInstrumentLines(BuildConfiguration.Debug, 7, 8, 203, 204, 205)
+            .AssertNonInstrumentedLines(BuildConfiguration.Debug, 206, 207);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
   }
 }
