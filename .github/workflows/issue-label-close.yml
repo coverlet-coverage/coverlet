@@ -1,10 +1,11 @@
-name: Label inactive issues
+name: Label or close inactive issues
 on:
   schedule:
     - cron: "0 1 * * 0"
   workflow_dispatch:
 
 env:
+  DAYS_BEFORE_ISSUE_CLOSE: 275
   DAYS_BEFORE_ISSUE_STALE: 90
 
 permissions:
@@ -20,11 +21,14 @@ jobs:
     steps:
       - uses: actions/stale@v10
         with:
-          exempt-issue-labels: "bug,tracking-external-issue,Known Issue,stale"
-          days-before-issue-stale: ${{ env.DAYS_BEFORE_ISSUE_STALE }}
+          exempt-issue-labels: "tracking-external-issue,Known Issue"
+          days-before-issue-close: ${{ env.DAYS_BEFORE_ISSUE_CLOSE }}
+          close-issue-message: "This issue was closed because it has been inactive for ${{ env.DAYS_BEFORE_ISSUE_CLOSE }} days since being marked as stale."
           stale-issue-label: "stale"
+          days-before-issue-stale: ${{ env.DAYS_BEFORE_ISSUE_STALE }}
           stale-issue-message: "This issue is stale because it has been open for ${{ env.DAYS_BEFORE_ISSUE_STALE }} days with no activity."
           days-before-pr-stale: -1
           days-before-pr-close: -1
+          only-issue-types: "bug,question"
           operations-per-run: 100
           repo-token: ${{ secrets.GITHUB_TOKEN }}
