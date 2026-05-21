@@ -2,49 +2,62 @@ using System;
 
 namespace Coverlet.Core.CoverageSamples.Tests
 {
-  public class AutoProps
+  public class ClassWithAutoProps
   {
     private int _myVal = 0;
-    public AutoProps()
+    public ClassWithAutoProps()
     {
       _myVal = new Random().Next();
     }
     public int AutoPropsNonInit { get; set; }
     public int AutoPropsInit { get; set; } = 10;
+    public int AutoPropsInitKeyword { get; init; }
   }
 
-  public record RecordWithPropertyInit
-  {
-    private int _myRecordVal = 0;
-    public RecordWithPropertyInit()
+    public class ClassWithAutoPropsPrimaryConstructor
     {
-      _myRecordVal = new Random().Next();
+        public ClassWithAutoPropsPrimaryConstructor()
+        {
+            var instance = new InnerClassWithAutoProps(1)
+            {
+                AutoPropsNonInit = 20,
+                AutoPropsInit = 30,
+                AutoPropsInitKeyword = 33
+            };
+        }
+        private class InnerClassWithAutoProps(int myVal = 10)
+        {
+            public int AutoPropsNonInit { get; set; }
+            public int AutoPropsInit { get; set; } = myVal;
+            public int AutoPropsInitKeyword { get; init; }
+        }
     }
-    public string RecordAutoPropsNonInit { get; set; }
-    public string RecordAutoPropsInit { get; set; } = string.Empty;
-  }
 
-  public class ClassWithRecordsAutoProperties
+    public record RecordWithAutoProps
   {
-    record RecordWithPrimaryConstructor(string Prop1, string Prop2);
-
-    public ClassWithRecordsAutoProperties()
-    {
-      var record = new RecordWithPrimaryConstructor(string.Empty, string.Empty);
-    }
+      private int _myVal = 0;
+      public RecordWithAutoProps()
+      {
+          _myVal = new Random().Next();
+      }
+      public int AutoPropsNonInit { get; set; }
+      public int AutoPropsInit { get; set; } = 10;
+      public int AutoPropsInitKeyword { get; init; }
   }
 
-  public class ClassWithInheritingRecordsAndAutoProperties
-  {
-    record BaseRecord(int A);
-
-    record InheritedRecord(int A) : BaseRecord(A);
-
-    public ClassWithInheritingRecordsAndAutoProperties()
+    public class RecordsWithPrimaryConstructor
     {
-      var record = new InheritedRecord(1);
+        public record RecordWithAutoPropsPrimaryConstructor(int AutoPropsNonInit, int AutoPropsInit = 10);
+
+        public record RecordWithAutoPropsPrimaryConstructorMultiline(
+            int AutoPropsNonInit,
+            int AutoPropsInit = 10
+        );
+
+        public RecordsWithPrimaryConstructor()
+        {
+            var primaryConstructor = new RecordWithAutoPropsPrimaryConstructor(20, 30);
+            var primaryConstructorMultiline = new RecordWithAutoPropsPrimaryConstructorMultiline(20);
+        }
     }
-  }
-
-
 }
