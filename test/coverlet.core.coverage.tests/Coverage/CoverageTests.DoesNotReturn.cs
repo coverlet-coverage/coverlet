@@ -310,7 +310,7 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
-    public async Task AsyncCallsDoesNotReturn_DoesNotReturnAttribute_InstrumentsCorrect()
+    public void AsyncCallsDoesNotReturn_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       // Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       // Regression test for issue #1717:
@@ -322,10 +322,11 @@ namespace Coverlet.CoreCoverage.Tests
       {
         FunctionExecutor.Run(async (string[] pathSerialize) =>
         {
-          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(async instance =>
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
           {
-            try { await instance.AsyncCallsDoesNotReturn("test"); }
+            try { instance.AsyncCallsDoesNotReturn("test").GetAwaiter().GetResult(); }
             catch (Exception) { }
+            return Task.CompletedTask;
 
           }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
 
@@ -336,8 +337,8 @@ namespace Coverlet.CoreCoverage.Tests
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
 
         result.Document("Instrumentation.DoesNotReturn.cs")
-            .AssertInstrumentLines(BuildConfiguration.Debug, 7, 8, 203, 204, 205)
-            .AssertNonInstrumentedLines(BuildConfiguration.Debug, 206, 207);
+            .AssertInstrumentLines(BuildConfiguration.Debug, 7, 8, 207, 208, 209)
+            .AssertNonInstrumentedLines(BuildConfiguration.Debug, 210, 211);
       }
       finally
       {

@@ -199,7 +199,11 @@ namespace Coverlet.Core.CoverageSamples.Tests
     // Async method calling a [DoesNotReturn] helper — issue #1717
     // The compiler emits the body inside a nested state-machine type (MoveNext).
     // ReachabilityHelper must scan nested types so the call is recognised.
+    // CS1998: no await is intentional — the async keyword is required to trigger state-machine
+    // generation, which is the exact scenario being tested.
+#pragma warning disable CS1998
     public async System.Threading.Tasks.Task AsyncCallsDoesNotReturn(string message)
+#pragma warning restore CS1998
     {
       System.Console.WriteLine(message);
       Throws();
