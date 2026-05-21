@@ -51,7 +51,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
-      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
+      //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
       string path = Path.GetTempFileName();
       try
@@ -84,7 +84,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
-      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
+      //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
       string path = Path.GetTempFileName();
       try
@@ -117,7 +117,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
-      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
+      //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
       string path = Path.GetTempFileName();
       try
@@ -150,7 +150,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
-      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
+      //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
       string path = Path.GetTempFileName();
       try
@@ -279,7 +279,7 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void FiltersAndFinally_DoesNotReturnAttribute_InstrumentsCorrect()
     {
-      Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
+      //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       string path = Path.GetTempFileName();
       try
       {
@@ -302,6 +302,43 @@ namespace Coverlet.CoreCoverage.Tests
         result.Document("Instrumentation.DoesNotReturn.cs")
             .AssertInstrumentLines(BuildConfiguration.Debug, 7, 8, 171, 173, 174, 175, 179, 180, 181, 182, 185, 186, 187, 188, 192, 193, 194)
             .AssertNonInstrumentedLines(BuildConfiguration.Debug, 176, 177, 183, 184, 189, 190, 195, 196, 197);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
+    public void AsyncCallsDoesNotReturn_DoesNotReturnAttribute_InstrumentsCorrect()
+    {
+      // Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
+      // Regression test for issue #1717:
+      // [DoesNotReturn] was not honoured when called from an async method because the
+      // compiler emits async bodies inside nested state-machine types, which were not
+      // scanned by ReachabilityHelper.CreateForModule.
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<DoesNotReturn>(instance =>
+          {
+            try { instance.AsyncCallsDoesNotReturn("test").GetAwaiter().GetResult(); }
+            catch (Exception) { }
+            return Task.CompletedTask;
+
+          }, persistPrepareResultToFile: pathSerialize[0], doesNotReturnAttributes: _ => ["DoesNotReturnAttribute"]);
+
+          return 0;
+
+        }, [path]);
+
+        CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+
+        result.Document("Instrumentation.DoesNotReturn.cs")
+            .AssertInstrumentLines(BuildConfiguration.Debug, 7, 8, 207, 208, 209)
+            .AssertNonInstrumentedLines(BuildConfiguration.Debug, 210, 211);
       }
       finally
       {
