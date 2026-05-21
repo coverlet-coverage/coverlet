@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix Regression in branch coverage for lambda expressions [#1937](https://github.com/coverlet-coverage/coverlet/issues/1937)
+- Fix DoesNotReturnAttribute is not respected by Coverlet when applied to methods marked with the async keyword [#1717](https://github.com/coverlet-coverage/coverlet/issues/1717)
 
 ## Release date 2026-05-18
 
