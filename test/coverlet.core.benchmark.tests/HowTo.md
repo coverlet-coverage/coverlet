@@ -166,7 +166,7 @@ using the automation script at `scripts/Update-BenchmarkHistory.ps1`.
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `-ArtifactsRoot` | No | Current directory | Folder that contains the `BenchmarkDotNet.Artifacts` sub-folder. |
-| `-HistoryFile` | No | `scripts/BenchmarkHistory.md` | Path to the accumulated results Markdown file. |
+| `-HistoryFile` | No | `Documentation/BenchmarkHistory.md` | Path to the accumulated results Markdown file. |
 | `-CoverletVersion` | No | Read from `coverlet.core.csproj` | Version string to record, e.g. `"6.0.5"`. |
 | `-BenchmarkFilter` | No | *(all rows)* | Case-insensitive substring filter on the Method column. |
 

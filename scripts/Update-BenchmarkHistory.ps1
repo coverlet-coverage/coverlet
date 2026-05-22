@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Parses a BenchmarkDotNet GitHub-flavoured Markdown report and appends one summary row
-    per benchmark to BenchmarkHistory.md.
+    per benchmark to Documentation/BenchmarkHistory.md.
 
 .DESCRIPTION
     Reads the newest '*-report-github.md' file found under the BenchmarkDotNet.Artifacts
@@ -27,7 +27,7 @@
 
 .PARAMETER HistoryFile
     Path to the Markdown file that stores accumulated results.
-    Defaults to 'BenchmarkHistory.md' in the same folder as this script.
+    Defaults to 'Documentation/BenchmarkHistory.md' of the GitHub repository root.
 
 .PARAMETER CoverletVersion
     Coverlet version string to record, e.g. "6.0.5".
@@ -51,7 +51,7 @@
 [CmdletBinding()]
 param(
     [string] $ArtifactsRoot = (Get-Location).Path,
-    [string] $HistoryFile   = (Join-Path $PSScriptRoot 'BenchmarkHistory.md'),
+    [string] $HistoryFile   = (Join-Path (Split-Path $PSScriptRoot -Parent) 'Documentation/BenchmarkHistory.md'),
     [string] $CoverletVersion = '',
     [string] $BenchmarkFilter = ''
 )

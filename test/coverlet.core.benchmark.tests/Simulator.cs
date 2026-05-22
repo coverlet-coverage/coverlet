@@ -302,7 +302,7 @@ namespace coverlet.core.benchmark.tests
 
       Process.RunToCompletion(
           DotnetMuxer.Path.FullName,
-          $" {_coverletTestSubjectDllPath}",
+          $"\"{_coverletTestSubjectDllPath}\"",
           workingDirectory: _coverletTestSubjectArtifactPath);
 
     }
@@ -313,7 +313,7 @@ namespace coverlet.core.benchmark.tests
     /// <exception cref="InvalidOperationException"></exception>
     public void Phase3_ProcessResults()
     {
-      _logger.LogInformation("\nCalculating code coverage results: {_coverletTestSubjectDllPath}");
+      _logger.LogInformation($"\nCalculating code coverage results: {_coverletTestSubjectDllPath}");
       if (_coveragePrepareResult?.Results == null)
       {
         throw new InvalidOperationException("No coverage results available to process");
@@ -529,6 +529,8 @@ namespace coverlet.core.benchmark.tests
     static DotnetMuxer()
     {
       var muxerFileName = ExecutableName("dotnet");
+      Path = new FileInfo(muxerFileName);
+
       var fxDepsFile = GetDataFromAppDomain("FX_DEPS_FILE");
 
       if (string.IsNullOrEmpty(fxDepsFile))
