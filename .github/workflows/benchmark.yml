@@ -1,0 +1,61 @@
+name: Coverlet Benchmarks
+
+# Description:
+# This workflow automates performance benchmarking for the Coverlet project.
+#
+# Triggers:
+# - Manual trigger via workflow_dispatch
+#
+# What it does:
+# 1. Sets up windows environment
+# 2. Installs .NET SDK based on global.json
+# 3. Builds benchmark tests in Release mode
+# 4. Runs performance benchmarks using BenchmarkDotNet
+# 5. Uploads benchmark results as artifacts
+#
+# Results:
+# - Benchmark artifacts are stored under: artifacts/bin/coverlet.core.benchmark.tests/release/BenchmarkDotNet.Artifacts/results/
+# - Results can be downloaded from GitHub Actions artifacts
+#
+# Usage:
+# - Can be manually triggered from Actions tab using workflow_dispatch
+# - Use results to monitor performance changes over time
+
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.editorconfig'
+
+jobs:
+  benchmark:
+    name: Run Benchmarks
+    runs-on: windows-latest  # Using Windows as per the benchmark results context
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: ./global.json
+
+    - name: Build Benchmark Project
+      run: dotnet build test/coverlet.core.benchmark.tests -c Release
+
+    - name: Run Benchmarks
+      working-directory: artifacts/bin/coverlet.core.benchmark.tests/release
+      run: ./coverlet.core.benchmark.tests.exe
+
+    - name: Upload Benchmark Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: |
+          artifacts/bin/coverlet.core.benchmark.tests/release/BenchmarkDotNet.Artifacts/**/*
+        if-no-files-found: error

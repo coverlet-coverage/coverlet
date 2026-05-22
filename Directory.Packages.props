@@ -18,6 +18,10 @@
     <MoqVersion>4.20.72</MoqVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageVersion Include="BenchmarkDotNet.TestAdapter" Version="0.15.8" />
+    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.8" />
+    <!--<PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="17.13.35606.1" />-->
     <PackageVersion Include="DotNetConfig" Version="1.2.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.8" /> <!-- latest stable version netstandard2.0, netstandard2.1, net462 -->
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
