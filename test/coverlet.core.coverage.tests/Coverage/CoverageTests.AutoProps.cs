@@ -24,13 +24,13 @@ namespace Coverlet.CoreCoverage.Tests
         FunctionExecutor.Run(async (string[] parameters) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AutoProps>(instance =>
-                  {
-                    instance.AutoPropsNonInit = 10;
-                    instance.AutoPropsInit = 20;
-                    int readValue = instance.AutoPropsNonInit;
-                    readValue = instance.AutoPropsInit;
-                    return Task.CompletedTask;
-                  },
+          {
+            instance.AutoPropsNonInit = 10;
+            instance.AutoPropsInit = 20;
+            int readValue = instance.AutoPropsNonInit;
+            readValue = instance.AutoPropsInit;
+            return Task.CompletedTask;
+          },
                   persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
@@ -72,13 +72,13 @@ namespace Coverlet.CoreCoverage.Tests
         FunctionExecutor.Run(async (string[] parameters) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<RecordWithPropertyInit>(instance =>
-                      {
-                        instance.RecordAutoPropsNonInit = string.Empty;
-                        instance.RecordAutoPropsInit = string.Empty;
-                        string readValue = instance.RecordAutoPropsInit;
-                        readValue = instance.RecordAutoPropsNonInit;
-                        return Task.CompletedTask;
-                      },
+          {
+            instance.RecordAutoPropsNonInit = string.Empty;
+            instance.RecordAutoPropsInit = string.Empty;
+            string readValue = instance.RecordAutoPropsInit;
+            readValue = instance.RecordAutoPropsNonInit;
+            return Task.CompletedTask;
+          },
                   persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
@@ -119,9 +119,9 @@ namespace Coverlet.CoreCoverage.Tests
         FunctionExecutor.Run(async (string[] parameters) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithRecordsAutoProperties>(instance =>
-                      {
-                        return Task.CompletedTask;
-                      },
+          {
+            return Task.CompletedTask;
+          },
                       persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
@@ -161,9 +161,9 @@ namespace Coverlet.CoreCoverage.Tests
         FunctionExecutor.Run(async (string[] parameters) =>
         {
           CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<ClassWithInheritingRecordsAndAutoProperties>(instance =>
-            {
-              return Task.CompletedTask;
-            },
+          {
+            return Task.CompletedTask;
+          },
             persistPrepareResultToFile: parameters[0], skipAutoProps: bool.Parse(parameters[1]));
 
           return 0;
