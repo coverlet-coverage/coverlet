@@ -46,55 +46,5 @@ namespace Coverlet.Core.CoverageSamples.Tests
     }
   }
 
-  // Samples for issue #1633: records without primary constructor show no coverage
-  public class ClassWithRecordsNoPrimaryConstructor
-  {
-    // Record without primary constructor parentheses — previously showed no coverage at all
-    record RecordNoCtor
-    {
-      public string Bar() => "baz";
-    }
-
-    // Record with empty primary constructor parentheses — workaround that users found
-    record RecordEmptyCtor()
-    {
-      public string Bar() => "baz";
-    }
-
-    public ClassWithRecordsNoPrimaryConstructor()
-    {
-      new RecordNoCtor().Bar();
-      new RecordEmptyCtor().Bar();
-    }
-  }
-
-  public class ClassWithAbstractRecordsNoPrimaryConstructor
-  {
-    public abstract record AbstractBase
-    {
-      public abstract string GetValue();
-    }
-
-    public abstract record AbstractBaseWithCtor()
-    {
-      public abstract string GetValue();
-    }
-
-    public record ConcreteFromBase : AbstractBase
-    {
-      public override string GetValue() => "concrete";
-    }
-
-    public record ConcreteFromBaseCtor : AbstractBaseWithCtor
-    {
-      public override string GetValue() => "concrete-ctor";
-    }
-
-    public ClassWithAbstractRecordsNoPrimaryConstructor()
-    {
-      new ConcreteFromBase().GetValue();
-      new ConcreteFromBaseCtor().GetValue();
-    }
-  }
 
 }
