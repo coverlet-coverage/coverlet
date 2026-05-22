@@ -42,7 +42,11 @@ namespace coverlet.core.benchmark.tests
       var summary = BenchmarkRunner.Run(new[]{
             BenchmarkConverter.TypeToBenchmarks( typeof(CoverageBenchmarks), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(InstrumenterBenchmarks), config),
-            BenchmarkConverter.TypeToBenchmarks( typeof(CoverageWorkflowBenchmark ), config),
+            BenchmarkConverter.TypeToBenchmarks( typeof(CoverageWorkflowBenchmark), config),
+            BenchmarkConverter.TypeToBenchmarks( typeof(InstrumentationOptionsBenchmarks), config),
+            BenchmarkConverter.TypeToBenchmarks( typeof(ReportFormatBenchmarks), config),
+            BenchmarkConverter.TypeToBenchmarks( typeof(DeterministicAndSourceLinkBenchmarks), config),
+            BenchmarkConverter.TypeToBenchmarks( typeof(ExcludeAssembliesHeuristicBenchmarks), config),
             });
 
       // Use this to select benchmarks from the console and execute with additional options e.g. 'coverlet.core.benchmark.tests.exe --profiler EP'
