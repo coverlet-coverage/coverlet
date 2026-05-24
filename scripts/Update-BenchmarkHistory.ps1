@@ -282,6 +282,52 @@ function Compare-CoverletVersion([string] $a, [string] $b) {
     # Split off pre-release tag
     $splitVersion = {
         param([string] $v)
+        if ($v -match '^(\d+\.\d+\.\d+)(?:-(.+))?$') {
+            [pscustomobject]@{ Core = [version]$Matches[1]; Pre = $Matches[2] }
+        } else {
+            [pscustomobject]@{ Core = [version]'0.0.0'; Pre = $v }
+        }
+    }
+
+    $va = & $splitVersion $a
+    $vb = & $splitVersion $b
+
+    $cmp = $va.Core.CompareTo($vb.Core)
+    if ($cmp -ne 0) { return $cmp }
+
+    # Same core: release beats pre-release
+    if (-not $va.Pre -and $vb.Pre)  { return  1 }   # a is release, b is pre
+    if ($va.Pre  -and -not $vb.Pre) { return -1 }   # a is pre, b is release
+    if (-not $va.Pre -and -not $vb.Pre) { return 0 }
+
+    # Both pre-release: compare label text, then trailing integer
+    $labelCmp = [string]::Compare($va.Pre, $vb.Pre, [System.StringComparison]::OrdinalIgnoreCase)
+    if ($labelCmp -ne 0) {
+        # Try to extract and compare trailing integers for labels like "p0", "p1", "rc2"
+        $numA = if ($va.Pre -match '(\d+)$') { [int]$Matches[1] } else { $null }
+        $numB = if ($vb.Pre -match '(\d+)$') { [int]$Matches[1] } else { $null }
+        $prefA = if ($va.Pre -match '^(\D+)') { $Matches[1] } else { '' }
+        $prefB = if ($vb.Pre -match '^(\D+)') { $Matches[1] } else { '' }
+        if ($prefA -eq $prefB -and $null -ne $numA -and $null -ne $numB) {
+            return $numA.CompareTo($numB)
+        }
+        return $labelCmp
+    }
+    return 0
+}
+
+# ---------------------------------------------------------------------------
+# Helper: compare two coverlet version strings.
+# Format: major.minor.patch  or  major.minor.patch-prelabel+buildN
+# Release > pre-release ("6.0.0" > "6.0.0-p1").
+# Pre-release labels compared lexically by suffix after the last '-' then by
+# any trailing integer (so "p1" > "p0", "rc2" > "rc1").
+# Returns  1 if $a > $b,  -1 if $a < $b,  0 if equal.
+# ---------------------------------------------------------------------------
+function Compare-CoverletVersion([string] $a, [string] $b) {
+    # Split off pre-release tag
+    $splitVersion = {
+        param([string] $v)
         # Ignore SemVer build metadata (e.g. "+build.123") when ordering versions.
         $v = $v -replace '\+.*$', ''
         if ($v -match '^(\d+\.\d+\.\d+)(?:-(.+))?$') {
