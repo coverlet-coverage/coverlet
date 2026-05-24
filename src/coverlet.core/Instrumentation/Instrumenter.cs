@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -50,6 +50,9 @@ namespace Coverlet.Core.Instrumentation
     private List<(SequencePoint firstSequencePoint, SequencePoint lastSequencePoint)> _excludedMethodSections;
     private List<string> _excludedLambdaMethods;
     private ReachabilityHelper _reachabilityHelper;
+    // P2: per-run caches so IsTypeExcluded / IsTypeIncluded are computed at most once per type per module.
+    private readonly Dictionary<string, bool> _typeExcludedCache = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, bool> _typeIncludedCache = new(StringComparer.Ordinal);
 
     public bool SkipModule { get; set; }
 
@@ -163,21 +166,76 @@ namespace Coverlet.Core.Instrumentation
     // If I'm out every my children and every children of my children will be out
     private bool IsTypeExcluded(TypeDefinition type)
     {
+      // P2: check root-type cache first
+      if (_typeExcludedCache.TryGetValue(type.FullName, out bool cachedResult))
+        return cachedResult;
+
+      bool result = ComputeIsTypeExcluded(type);
+      _typeExcludedCache[type.FullName] = result;
+      return result;
+    }
+
+    private bool ComputeIsTypeExcluded(TypeDefinition type)
+    {
       for (TypeDefinition current = type; current != null; current = current.DeclaringType)
       {
+        // P2: reuse cached ancestor results to short-circuit the walk
+        if (current != type && _typeExcludedCache.TryGetValue(current.FullName, out bool ancestorCached))
+        {
+          if (ancestorCached)
+            return true;
+          continue;
+        }
+
         // Check exclude attribute and filters
         // Issue #1843: For compiler-generated state machine types, only ignore CompilerGeneratedAttribute
         // and GeneratedCodeAttribute, but still honor other user-configured exclusion attributes.
         // State machines (async, iterator, async iterator) implement specific interfaces and their coverage is important.
-        if (current.CustomAttributes.Any(attr => IsExcludeAttribute(attr) &&
-                (!IsCompilerGeneratedStateMachineType(current) || !IsCompilerGeneratedOrGeneratedCodeAttribute(attr))) ||
-            _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _parameters.ExcludeFilters))
-        {
+        bool excluded = HasExcludeAttributeForType(current) ||
+            _instrumentationHelper.IsTypeExcluded(_module, current.FullName, _parameters.ExcludeFilters);
+
+        if (current != type)
+          _typeExcludedCache[current.FullName] = excluded;
+
+        if (excluded)
           return true;
-        }
       }
 
       return false;
+    }
+
+    // P3: foreach replacement for the hot-path .Any() on CustomAttributes inside IsTypeExcluded.
+    private bool HasExcludeAttributeForType(TypeDefinition current)
+    {
+      bool isStateMachine = IsCompilerGeneratedStateMachineType(current);
+      foreach (CustomAttribute attr in current.CustomAttributes)
+      {
+        if (IsExcludeAttribute(attr) &&
+            (!isStateMachine || !IsCompilerGeneratedOrGeneratedCodeAttribute(attr)))
+          return true;
+      }
+      return false;
+    }
+
+    // P3: allocation-free check for any exclude attribute on a generic attribute collection.
+    private bool HasExcludeAttribute(IEnumerable<CustomAttribute> attributes)
+    {
+      foreach (CustomAttribute attr in attributes)
+      {
+        if (IsExcludeAttribute(attr))
+          return true;
+      }
+      return false;
+    }
+
+    // P2: cache IsTypeIncluded results for this module run (one Instrumenter instance per module).
+    private bool IsTypeIncludedCached(string typeFullName)
+    {
+      if (_typeIncludedCache.TryGetValue(typeFullName, out bool cached))
+        return cached;
+      bool result = _instrumentationHelper.IsTypeIncluded(_module, typeFullName, _parameters.IncludeFilters);
+      _typeIncludedCache[typeFullName] = result;
+      return result;
     }
 
     /// <summary>
@@ -204,11 +262,17 @@ namespace Coverlet.Core.Instrumentation
     /// </remarks>
     private static bool IsCompilerGeneratedStateMachineType(TypeDefinition type)
     {
-      return type.Interfaces.Any(i =>
-        i.InterfaceType.FullName == "System.Runtime.CompilerServices.IAsyncStateMachine" ||
-        i.InterfaceType.FullName == "System.Collections.IEnumerator" ||
-        i.InterfaceType.FullName.StartsWith("System.Collections.Generic.IEnumerator`") ||
-        i.InterfaceType.FullName.StartsWith("System.Collections.Generic.IAsyncEnumerator`"));
+      // P3: foreach avoids enumerator allocation on a collection walked per type.
+      foreach (InterfaceImplementation iface in type.Interfaces)
+      {
+        string fn = iface.InterfaceType.FullName;
+        if (fn == "System.Runtime.CompilerServices.IAsyncStateMachine" ||
+            fn == "System.Collections.IEnumerator" ||
+            fn.StartsWith("System.Collections.Generic.IEnumerator`", StringComparison.Ordinal) ||
+            fn.StartsWith("System.Collections.Generic.IAsyncEnumerator`", StringComparison.Ordinal))
+          return true;
+      }
+      return false;
     }
 
     // Instrumenting Interlocked which is used for recording hits would cause an infinite loop.
@@ -273,7 +337,7 @@ namespace Coverlet.Core.Instrumentation
         if (
             !Is_System_Threading_Interlocked_CoreLib_Type(type) &&
             !IsTypeExcluded(type) &&
-            _instrumentationHelper.IsTypeIncluded(_module, type.FullName, _parameters.IncludeFilters)
+            IsTypeIncludedCached(type.FullName)
             )
         {
           InstrumentType(type);
@@ -551,7 +615,7 @@ namespace Coverlet.Core.Instrumentation
           // If the async state machine generated by compiler is "associated" to this method we check for exclusions
           // The associated type is specified on attribute constructor
           // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.asyncstatemachineattribute.-ctor?view=netcore-3.1
-          if (attribute.ConstructorArguments[0].Value == method.DeclaringType && typeMethod.CustomAttributes.Any(IsExcludeAttribute))
+          if (attribute.ConstructorArguments[0].Value == method.DeclaringType && HasExcludeAttribute(typeMethod.CustomAttributes))
           {
             return true;
           }
@@ -594,7 +658,7 @@ namespace Coverlet.Core.Instrumentation
           continue;
         }
 
-        if (!customAttributes.Any(IsExcludeAttribute))
+        if (!HasExcludeAttribute(customAttributes))
         {
           InstrumentMethod(method);
         }
@@ -610,7 +674,7 @@ namespace Coverlet.Core.Instrumentation
       IEnumerable<MethodDefinition> ctors = type.GetConstructors();
       foreach (MethodDefinition ctor in ctors)
       {
-        if (!ctor.CustomAttributes.Any(IsExcludeAttribute) && !IsCompilerGenerated(ctor))
+        if (!HasExcludeAttribute(ctor.CustomAttributes) && !IsCompilerGenerated(ctor))
         {
           InstrumentMethod(ctor);
         }
@@ -619,7 +683,13 @@ namespace Coverlet.Core.Instrumentation
 
     private static bool IsCompilerGenerated(IMemberDefinition member)
     {
-      return member.CustomAttributes.Any(ca => ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);
+      // P3: foreach avoids enumerator allocation.
+      foreach (CustomAttribute ca in member.CustomAttributes)
+      {
+        if (ca.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName)
+          return true;
+      }
+      return false;
     }
 
     private void InstrumentMethod(MethodDefinition method)

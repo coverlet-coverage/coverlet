@@ -27,6 +27,10 @@ namespace Coverlet.Core.Helpers
     private static readonly RegexOptions s_regexOptions =
       RegexOptions.Multiline | RegexOptions.Compiled;
 
+    // P6: cache compiled (moduleRegex, typeRegex) pairs keyed on the raw filter string so
+    // WildcardToRegex + Regex construction runs at most once per unique filter expression.
+    private static readonly ConcurrentDictionary<string, (Regex moduleRegex, Regex typeRegex)> s_filterRegexCache = new();
+
     public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger, ISourceRootTranslator sourceRootTranslator)
     {
       processExitHandler.Add((s, e) => RestoreOriginalModules());
@@ -510,13 +514,18 @@ namespace Coverlet.Core.Helpers
 
       foreach (string filter in filters)
       {
-        string typePattern = filter.Substring(filter.IndexOf(']') + 1);
-        string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+        // P6: compile each filter expression once; reuse on subsequent calls.
+        (Regex moduleRegex, Regex typeRegex) = s_filterRegexCache.GetOrAdd(filter, static f =>
+        {
+          string typePattern   = f.Substring(f.IndexOf(']') + 1);
+          string modulePattern = f.Substring(1, f.IndexOf(']') - 1);
+          return (
+            new Regex(WildcardToRegex(modulePattern), RegexOptions.Compiled, TimeSpan.FromSeconds(10)),
+            new Regex(WildcardToRegex(typePattern),   RegexOptions.Compiled, TimeSpan.FromSeconds(10))
+          );
+        });
 
-        typePattern = WildcardToRegex(typePattern);
-        modulePattern = WildcardToRegex(modulePattern);
-
-        if (Regex.IsMatch(type, typePattern) && Regex.IsMatch(module, modulePattern))
+        if (moduleRegex.IsMatch(module) && typeRegex.IsMatch(type))
           return true;
       }
 
