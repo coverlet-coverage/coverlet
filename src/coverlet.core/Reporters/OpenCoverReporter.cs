@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
 
@@ -13,6 +14,10 @@ namespace Coverlet.Core.Reporters
 {
   internal class OpenCoverReporter : IReporter
   {
+    // P4: Pool a MemoryStream per thread to avoid a large heap allocation per Report() call.
+    private static readonly ThreadLocal<MemoryStream> s_stream =
+        new(() => new MemoryStream(capacity: 256 * 1024));
+
     public ReporterOutputType OutputType => ReporterOutputType.File;
 
     public string Format => "opencover";
@@ -248,11 +253,13 @@ namespace Coverlet.Core.Reporters
       coverage.Add(modules);
       xml.Add(coverage);
 
-      using var stream = new MemoryStream();
-      using var streamWriter = new StreamWriter(stream, new UTF8Encoding(false));
+      MemoryStream stream = s_stream.Value!;
+      stream.SetLength(0);
+      using var streamWriter = new StreamWriter(stream, new UTF8Encoding(false), bufferSize: 1024, leaveOpen: true);
       xml.Save(streamWriter);
+      streamWriter.Flush();
 
-      return Encoding.UTF8.GetString(stream.ToArray());
+      return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
     }
   }
 }

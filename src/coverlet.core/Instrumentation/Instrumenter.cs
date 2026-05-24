@@ -281,28 +281,40 @@ namespace Coverlet.Core.Instrumentation
       return _isCoreLibrary && type.FullName == "System.Threading.Interlocked";
     }
 
-    // Have to do this before we start writing to a module, as we'll get into file
-    // locking issues if we do it while writing.
-    private void CreateReachabilityHelper()
+    // P1: Accept already-read bytes to avoid a second file-open for the reachability pass.
+    private void CreateReachabilityHelper(byte[] moduleBytes)
     {
-      using Stream stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read);
+      using var memStream = new MemoryStream(moduleBytes, writable: false);
       using var resolver = new NetstandardAwareAssemblyResolver(_module, _logger);
       resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
-      var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
+      var parameters = new ReaderParameters { ReadSymbols = false, AssemblyResolver = resolver };
       if (_isCoreLibrary)
       {
         parameters.MetadataImporterProvider = new CoreLibMetadataImporterProvider();
       }
 
-      using var module = ModuleDefinition.ReadModule(stream, parameters);
+      using var module = ModuleDefinition.ReadModule(memStream, parameters);
       _reachabilityHelper = ReachabilityHelper.CreateForModule(module, _doesNotReturnAttributes, _logger);
     }
 
     private void InstrumentModule()
     {
-      CreateReachabilityHelper();
-
       using Stream stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite);
+
+      // P1: Read all bytes once; pass a read-only copy to the reachability pass so that
+      // the file is not opened a second time, saving one full Cecil IL-stream read.
+      byte[] moduleBytes = new byte[stream.Length];
+      int totalRead = 0;
+      while (totalRead < moduleBytes.Length)
+      {
+        int read = stream.Read(moduleBytes, totalRead, moduleBytes.Length - totalRead);
+        if (read == 0)
+          break;
+        totalRead += read;
+      }
+
+      stream.Position = 0;
+      CreateReachabilityHelper(moduleBytes);
       using var resolver = new NetstandardAwareAssemblyResolver(_module, _logger);
       resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
       var parameters = new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver };
