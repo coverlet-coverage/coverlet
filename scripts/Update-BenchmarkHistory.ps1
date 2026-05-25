@@ -53,7 +53,8 @@ param(
     [string] $ArtifactsRoot = (Get-Location).Path,
     [string] $HistoryFile   = (Join-Path (Split-Path $PSScriptRoot -Parent) 'Documentation/BenchmarkHistory.md'),
     [string] $CoverletVersion = '',
-    [string] $BenchmarkFilter = ''
+    [string] $BenchmarkFilter = '',
+    [switch] $Force   # Allow writing a version older than the latest already in the history file
 )
 
 Set-StrictMode -Version Latest
@@ -144,39 +145,56 @@ $colMean      = [Array]::FindIndex($headerCells, [Predicate[string]]{ param($h) 
 $colError     = [Array]::FindIndex($headerCells, [Predicate[string]]{ param($h) $h -match '^Error$' })
 $colAlloc     = [Array]::FindIndex($headerCells, [Predicate[string]]{ param($h) $h -match '^Allocated$' })
 
+# Known BDN infrastructure / diagnoser columns that must never appear in the Options column.
+# Only [Params]-declared columns (user benchmark parameters) are kept.
+$bdnInfraColumns = @(
+    'Job', 'Toolchain', 'Runtime', 'WarmupCount', 'IterationCount', 'InvocationCount',
+    'UnrollFactor', 'StdDev', 'Error', 'Median', 'Ratio', 'RatioSD', 'Baseline',
+    'Gen0', 'Gen1', 'Gen2', 'Lock Contentions', 'Completed Work Items', 'Exceptions'
+)
+
 # Params columns (e.g. SingleHit, SkipAutoProps, ReportFormat …)
+# Exclude all BDN infrastructure columns; keep only user-declared [Params] values.
 $paramCols = @{}
 for ($i = 0; $i -lt $headerCells.Count; $i++) {
+    $h = $headerCells[$i]
     if ($i -notin @($colType, $colMethod, $colMean, $colError, $colAlloc) -and
-        $headerCells[$i] -notmatch 'StdDev|Gen[012]|Median|Ratio|Baseline') {
-        $paramCols[$headerCells[$i]] = $i
+        $bdnInfraColumns -notcontains $h) {
+        $paramCols[$h] = $i
     }
 }
 
 # ---------------------------------------------------------------------------
-# Helper: normalise a BDN duration string to milliseconds (double)
+# Helper: parse a BDN number string (dot decimal, no thousands separator)
+# ---------------------------------------------------------------------------
+function ParseNumber([string] $raw) {
+    return [double]::Parse($raw.Trim(), [cultureinfo]::InvariantCulture)
+}
+
+# ---------------------------------------------------------------------------
+# Helper: convert a BDN duration string to milliseconds (double)
 # ---------------------------------------------------------------------------
 function ConvertToMs([string] $raw) {
-    $raw = $raw.Trim() -replace ',', ''          # remove thousands separators
+    $raw = $raw.Trim()
 
-    if ($raw -match '([\d.]+)\s*ns$')  { return [double]$Matches[1] / 1e6 }
-    if ($raw -match '([\d.]+)\s*μs$')  { return [double]$Matches[1] / 1e3 }
-    if ($raw -match '([\d.]+)\s*us$')  { return [double]$Matches[1] / 1e3 }
-    if ($raw -match '([\d.]+)\s*ms$')  { return [double]$Matches[1] }
-    if ($raw -match '([\d.]+)\s*s$')   { return [double]$Matches[1] * 1e3 }
+    if ($raw -match '([\d.]+)\s*ns$')  { return (ParseNumber $Matches[1]) / 1e6 }
+    if ($raw -match '([\d.]+)\s*μs$')  { return (ParseNumber $Matches[1]) / 1e3 }
+    if ($raw -match '([\d.]+)\s*us$')  { return (ParseNumber $Matches[1]) / 1e3 }
+    if ($raw -match '([\d.]+)\s*ms$')  { return (ParseNumber $Matches[1]) }
+    if ($raw -match '([\d.]+)\s*s$')   { return (ParseNumber $Matches[1]) * 1e3 }
     return [double]::NaN
 }
 
 # ---------------------------------------------------------------------------
-# Helper: normalise a BDN allocated string to MB (double)
+# Helper: convert a BDN allocated string to MB (double)
 # ---------------------------------------------------------------------------
 function ConvertToMB([string] $raw) {
-    $raw = $raw.Trim() -replace ',', ''
+    $raw = $raw.Trim()
 
-    if ($raw -match '([\d.]+)\s*B$')   { return [double]$Matches[1] / 1MB }
-    if ($raw -match '([\d.]+)\s*KB$')  { return [double]$Matches[1] / 1KB }
-    if ($raw -match '([\d.]+)\s*MB$')  { return [double]$Matches[1] }
-    if ($raw -match '([\d.]+)\s*GB$')  { return [double]$Matches[1] * 1024 }
+    if ($raw -match '([\d.]+)\s*B$')   { return (ParseNumber $Matches[1]) / 1MB }
+    if ($raw -match '([\d.]+)\s*KB$')  { return (ParseNumber $Matches[1]) / 1KB }
+    if ($raw -match '([\d.]+)\s*MB$')  { return (ParseNumber $Matches[1]) }
+    if ($raw -match '([\d.]+)\s*GB$')  { return (ParseNumber $Matches[1]) * 1024 }
     return [double]::NaN
 }
 
@@ -190,11 +208,23 @@ $rows = foreach ($line in $dataLines) {
 
     if ($cells.Count -lt ($colMean + 1)) { continue }
 
+    # Strip BDN GitHub-markdown bold (**text**) and common HTML entities from every cell
+    $cells = $cells | ForEach-Object {
+        $_ -replace '\*\*([^*]*)\*\*', '$1' `
+           -replace "&#39;", "'" `
+           -replace '&amp;', '&' `
+           -replace '&lt;',  '<' `
+           -replace '&gt;',  '>'
+    }
+
     $typeName  = if ($colType   -ge 0) { $cells[$colType]   } else { '' }
     $method    = if ($colMethod -ge 0) { $cells[$colMethod]  } else { '' }
     $meanRaw   = if ($colMean   -ge 0) { $cells[$colMean]    } else { '0' }
     $errorRaw  = if ($colError  -ge 0) { $cells[$colError]   } else { '0' }
     $allocRaw  = if ($colAlloc  -ge 0) { $cells[$colAlloc]   } else { '-' }
+
+    # Skip rows that BDN could not measure (out-of-process jobs, exceptions during benchmark)
+    if ($meanRaw -match '^[-?]$') { continue }
 
     # Apply optional filter
     if ($BenchmarkFilter -and ($typeName + $method) -notmatch $BenchmarkFilter) { continue }
@@ -205,11 +235,13 @@ $rows = foreach ($line in $dataLines) {
     $allocMB = ConvertToMB  $allocRaw
 
     # Collect parameter values
-    $optionParts = foreach ($kvp in $paramCols.GetEnumerator()) {
+    $optionParts = foreach ($kvp in $paramCols.GetEnumerator() | Sort-Object Key) {
         $idx = $kvp.Value
-        if ($idx -lt $cells.Count) { "$($kvp.Key)=$($cells[$idx])" }
+        if ($idx -lt $cells.Count -and $cells[$idx] -notmatch '^[?-]$') {
+            "$($kvp.Key)=$($cells[$idx])"
+        }
     }
-    $options = $optionParts -join ', '
+    $options = ($optionParts | Where-Object { $_ }) -join ', '
 
     [PSCustomObject]@{
         Date          = (Get-Date -Format 'yyyy-MM-dd')
@@ -239,44 +271,170 @@ $isReport = { param($r) $r.Method -imatch 'GetCoverage|Report' }
 $grouped = $rows | Group-Object { "$($_.BenchmarkClass)|$($_.Options)" }
 
 # ---------------------------------------------------------------------------
+# Helper: compare two coverlet version strings.
+# Format: major.minor.patch  or  major.minor.patch-prelabel+buildN
+# Release > pre-release ("6.0.0" > "6.0.0-p1").
+# Pre-release labels compared lexically by suffix after the last '-' then by
+# any trailing integer (so "p1" > "p0", "rc2" > "rc1").
+# Returns  1 if $a > $b,  -1 if $a < $b,  0 if equal.
+# ---------------------------------------------------------------------------
+function Compare-CoverletVersion([string] $a, [string] $b) {
+    # Split off pre-release tag
+    $splitVersion = {
+        param([string] $v)
+        if ($v -match '^(\d+\.\d+\.\d+)(?:-(.+))?$') {
+            [pscustomobject]@{ Core = [version]$Matches[1]; Pre = $Matches[2] }
+        } else {
+            [pscustomobject]@{ Core = [version]'0.0.0'; Pre = $v }
+        }
+    }
+
+    $va = & $splitVersion $a
+    $vb = & $splitVersion $b
+
+    $cmp = $va.Core.CompareTo($vb.Core)
+    if ($cmp -ne 0) { return $cmp }
+
+    # Same core: release beats pre-release
+    if (-not $va.Pre -and $vb.Pre)  { return  1 }   # a is release, b is pre
+    if ($va.Pre  -and -not $vb.Pre) { return -1 }   # a is pre, b is release
+    if (-not $va.Pre -and -not $vb.Pre) { return 0 }
+
+    # Both pre-release: compare label text, then trailing integer
+    $labelCmp = [string]::Compare($va.Pre, $vb.Pre, [System.StringComparison]::OrdinalIgnoreCase)
+    if ($labelCmp -ne 0) {
+        # Try to extract and compare trailing integers for labels like "p0", "p1", "rc2"
+        $numA = if ($va.Pre -match '(\d+)$') { [int]$Matches[1] } else { $null }
+        $numB = if ($vb.Pre -match '(\d+)$') { [int]$Matches[1] } else { $null }
+        $prefA = if ($va.Pre -match '^(\D+)') { $Matches[1] } else { '' }
+        $prefB = if ($vb.Pre -match '^(\D+)') { $Matches[1] } else { '' }
+        if ($prefA -eq $prefB -and $null -ne $numA -and $null -ne $numB) {
+            return $numA.CompareTo($numB)
+        }
+        return $labelCmp
+    }
+    return 0
+}
+
+# ---------------------------------------------------------------------------
+# Helper: extract the deduplication key from an existing markdown table row.
+# Key = Version | BenchmarkClass | Method | Options  (columns 2, 4, 5, 6).
+# Returns $null for non-data lines (headers, separators, prose).
+# ---------------------------------------------------------------------------
+function Get-RowKey([string] $line) {
+    if ($line -notmatch '^\|' -or $line -match '^\|[-| :]+\|') { return $null }
+    # Split on '|' and trim but keep empty cells so positions stay fixed.
+    # A row  '| a | b | c |'  becomes  ['', 'a', 'b', 'c', '']
+    # Column layout (1-based pipe index):
+    #   [1]=Date  [2]=Version  [3]=Runtime  [4]=BenchmarkClass  [5]=Method  [6]=Options …
+    $cells = $line -split '\|' | ForEach-Object { $_.Trim() }
+    if ($cells.Count -lt 8 -or $cells[1] -eq 'Date') { return $null }
+    return "$($cells[2])|$($cells[4])|$($cells[5])|$($cells[6])"
+}
+
+# ---------------------------------------------------------------------------
 # 7. Ensure HistoryFile and its markdown table exist
 # ---------------------------------------------------------------------------
-$tableHeader = @'
-| Date | Version | Runtime | BenchmarkClass | Method | Options | Mean (ms) | Max (ms) | Allocated (MB) |
-|------|---------|---------|----------------|--------|---------|----------:|---------:|---------------:|
-'@
+$tableHeaderLines = @(
+    '| Date | Version | Runtime | BenchmarkClass | Method | Options | Mean (ms) | Max (ms) | Allocated (MB) |',
+    '|------|---------|---------|----------------|--------|---------|----------:|---------:|---------------:|'
+)
 
 if (-not (Test-Path $HistoryFile)) {
     Write-Host "Creating new history file: $HistoryFile"
-    @"
-# Coverlet Benchmark History
-
-This file is maintained automatically by `scripts/Update-BenchmarkHistory.ps1`.
-Do not edit the table rows by hand – re-run the script after each benchmark run.
-
-$tableHeader
-"@ | Set-Content $HistoryFile -Encoding UTF8
+    $init = @(
+        '# Coverlet Benchmark History',
+        '',
+        'This file is maintained automatically by `scripts/Update-BenchmarkHistory.ps1`.',
+        'Do not edit the table rows by hand – re-run the script after each benchmark run.',
+        ''
+    ) + $tableHeaderLines
+    $init | Set-Content $HistoryFile -Encoding UTF8
 }
-else {
-    $existing = Get-Content $HistoryFile -Raw
-    if ($existing -notmatch [regex]::Escape('| Date | Version |')) {
-        # Append the table header after the last line
-        Add-Content $HistoryFile -Value "`n$tableHeader" -Encoding UTF8
+
+# ---------------------------------------------------------------------------
+# 8. Read history into memory, upsert rows by dedup key, write back once
+# ---------------------------------------------------------------------------
+$fileLines = [System.Collections.Generic.List[string]](Get-Content $HistoryFile -Encoding UTF8)
+
+# ---------------------------------------------------------------------------
+# Guard: reject an update if $CoverletVersion is older than the latest version
+# already recorded, unless the caller passed -Force.
+# ---------------------------------------------------------------------------
+$latestRecorded = $fileLines |
+    Where-Object { $_ -match '^\|' -and $_ -notmatch '^\|[-| :]+\|' } |
+    ForEach-Object {
+        $c = $_ -split '\|' | ForEach-Object { $_.Trim() }
+        if ($c.Count -ge 3 -and $c[1] -ne 'Date' -and $c[2] -ne '') { $c[2] }
+    } |
+    Where-Object { $_ } |
+    Select-Object -Unique |
+    ForEach-Object -Begin   { $best = $null } `
+                   -Process {
+                       if ($null -eq $best -or (Compare-CoverletVersion $_ $best) -gt 0) { $best = $_ }
+                   } `
+                   -End     { $best }
+
+if ($latestRecorded -and -not $Force) {
+    $cmp = Compare-CoverletVersion $CoverletVersion $latestRecorded
+    if ($cmp -lt 0) {
+        Write-Error (@"
+Version '$CoverletVersion' is older than the latest version already in the history file ('$latestRecorded').
+Re-run with -Force if you intentionally want to record an older version.
+"@)
+    }
+    if ($cmp -eq 0) {
+        Write-Host "Version '$CoverletVersion' matches the latest recorded version '$latestRecorded' – rows will be updated in-place."
+    }
+    if ($cmp -gt 0) {
+        Write-Host "New version '$CoverletVersion' is newer than '$latestRecorded' – new rows will be appended."
+    }
+}
+$hasHeader = $fileLines | Where-Object { $_ -match [regex]::Escape('| Date | Version |') }
+if (-not $hasHeader) {
+    $fileLines.Add('')
+    foreach ($h in $tableHeaderLines) { $fileLines.Add($h) }
+}
+
+# Build an index: dedup key -> line index within $fileLines
+$keyIndex = @{}
+for ($i = 0; $i -lt $fileLines.Count; $i++) {
+    $k = Get-RowKey $fileLines[$i]
+    if ($k) { $keyIndex[$k] = $i }
+}
+
+$replaced = 0
+$appended = 0
+
+foreach ($row in $rows) {
+    $ic       = [cultureinfo]::InvariantCulture
+    $meanFmt  = if ([double]::IsNaN($row.MeanMs))  { '-' } else { $row.MeanMs.ToString('F3', $ic)  }
+    $maxFmt   = if ([double]::IsNaN($row.MaxMs))   { '-' } else { $row.MaxMs.ToString('F3', $ic)   }
+    $allocFmt = if ([double]::IsNaN($row.AllocMB)) { '-' } else { $row.AllocMB.ToString('F4', $ic) }
+
+    $mdRow = "| $($row.Date) | $($row.Version) | $($row.Runtime) | $($row.BenchmarkClass) | $($row.Method) | $($row.Options) | $meanFmt | $maxFmt | $allocFmt |"
+    # Key must match Get-RowKey: cells[2]=Version, cells[4]=BenchmarkClass, cells[5]=Method, cells[6]=Options
+    $key   = "$($row.Version)|$($row.BenchmarkClass)|$($row.Method)|$($row.Options)"
+
+    if ($keyIndex.ContainsKey($key)) {
+        # Replace the existing row in-place
+        $fileLines[$keyIndex[$key]] = $mdRow
+        $replaced++
+    } else {
+        # New combination – append and record its future index for this session
+        $keyIndex[$key] = $fileLines.Count
+        $fileLines.Add($mdRow)
+        $appended++
     }
 }
 
-# ---------------------------------------------------------------------------
-# 8. Append one row per benchmark entry
-# ---------------------------------------------------------------------------
-$appended = 0
-foreach ($row in $rows) {
-    $meanFmt  = if ([double]::IsNaN($row.MeanMs))  { '-' } else { $row.MeanMs.ToString('F3') }
-    $maxFmt   = if ([double]::IsNaN($row.MaxMs))   { '-' } else { $row.MaxMs.ToString('F3')  }
-    $allocFmt = if ([double]::IsNaN($row.AllocMB)) { '-' } else { $row.AllocMB.ToString('F4') }
+# Write the updated file back in a single operation (preserve trailing newline)
+[System.IO.File]::WriteAllLines(
+    (Resolve-Path $HistoryFile).Path,
+    $fileLines,
+    [System.Text.UTF8Encoding]::new($false)   # UTF-8 without BOM
+)
 
-    $mdRow = "| $($row.Date) | $($row.Version) | $($row.Runtime) | $($row.BenchmarkClass) | $($row.Method) | $($row.Options) | $meanFmt | $maxFmt | $allocFmt |"
-    Add-Content $HistoryFile -Value $mdRow -Encoding UTF8
-    $appended++
-}
-
-Write-Host "Appended $appended row(s) to $HistoryFile"
+if ($replaced -gt 0) { Write-Host "Replaced $replaced existing row(s) in $HistoryFile" }
+if ($appended -gt 0) { Write-Host "Appended $appended new row(s) to $HistoryFile"      }
+if ($replaced -eq 0 -and $appended -eq 0) { Write-Host 'No rows written.' }

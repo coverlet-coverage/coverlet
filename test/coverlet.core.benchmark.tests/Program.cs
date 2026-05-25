@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 //using System.Diagnostics.Tracing;
+using System.Globalization;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 //using BenchmarkDotNet.Diagnostics.Windows;
@@ -10,6 +11,7 @@ using BenchmarkDotNet.Exporters.Csv;
 using BenchmarkDotNet.Exporters.Json;
 using BenchmarkDotNet.Exporters.Xml;
 using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 //using Microsoft.Diagnostics.NETCore.Client;
@@ -22,15 +24,25 @@ namespace coverlet.core.benchmark.tests
 
     public static void Main(string[] args)
     {
+      // InvariantCulture has "," as NumberGroupSeparator, which produces "483,051,510.20 ns"
+      // in CSV/summary output. Enforce "." as decimal separator and suppress the thousands
+      // separator so results are unambiguous and comparable worldwide.
+      var noGroupSeparatorCulture = (CultureInfo)CultureInfo.InvariantCulture.Clone();
+      noGroupSeparatorCulture.NumberFormat.NumberDecimalSeparator = ".";
+      noGroupSeparatorCulture.NumberFormat.NumberGroupSeparator = string.Empty;
+      noGroupSeparatorCulture.NumberFormat.NumberGroupSizes = [0];
+
       var config = DefaultConfig.Instance
             .WithOptions(ConfigOptions.DisableOptimizationsValidator)
             .WithOptions(ConfigOptions.JoinSummary)
             .WithOption(ConfigOptions.DisableLogFile, true)
+            .WithCultureInfo(noGroupSeparatorCulture)
+            .WithSummaryStyle(SummaryStyle.Default.WithCultureInfo(noGroupSeparatorCulture))
             .AddJob(Job
-              .ShortRun
+              .LongRun
               .WithLaunchCount(1)
               .WithToolchain(InProcessNoEmitToolchain.Instance))
-            .AddExporter(CsvExporter.Default, CsvMeasurementsExporter.Default, RPlotExporter.Default, HtmlExporter.Default, JsonExporter.Default, MarkdownExporter.GitHub, XmlExporter.Default)
+            .AddExporter(new CsvExporter(CsvSeparator.Semicolon), new CsvMeasurementsExporter(CsvSeparator.Semicolon), RPlotExporter.Default, HtmlExporter.Default, JsonExporter.Default, MarkdownExporter.GitHub, XmlExporter.Default)
             .AddDiagnoser(MemoryDiagnoser.Default, ThreadingDiagnoser.Default, ExceptionDiagnoser.Default)
             //.AddDiagnoser(new InliningDiagnoser(), new EtwProfiler()) // only windows platform, requires elevated privileges
             //.AddDiagnoser(new EventPipeProfiler(EventPipeProfile.CpuSampling)) // stops collecting results ???
@@ -45,8 +57,6 @@ namespace coverlet.core.benchmark.tests
             BenchmarkConverter.TypeToBenchmarks( typeof(CoverageWorkflowBenchmark), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(InstrumentationOptionsBenchmarks), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(ReportFormatBenchmarks), config),
-            BenchmarkConverter.TypeToBenchmarks( typeof(DeterministicAndSourceLinkBenchmarks), config),
-            BenchmarkConverter.TypeToBenchmarks( typeof(ExcludeAssembliesHeuristicBenchmarks), config),
             });
 
       // Use this to select benchmarks from the console and execute with additional options e.g. 'coverlet.core.benchmark.tests.exe --profiler EP'

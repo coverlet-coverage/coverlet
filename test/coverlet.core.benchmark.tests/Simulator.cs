@@ -21,7 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace coverlet.core.benchmark.tests
 {
-  [SimpleJob(launchCount: 1, warmupCount: 0, iterationCount: 3)]
+  [MemoryDiagnoser]
   public class CoverageWorkflowBenchmark
   {
     //private string _tempRoot;

@@ -32,6 +32,7 @@ results\BenchmarkRun-joined-2025-04-11-08-38-13-report.html
 
 > [!NOTE]
 > Run the benchmarks for every coverlet release to detect performance regressions early.
+> Update *documentation/BenchmarkHistory.md* using `./scripts/Update-BenchmarkHistory.ps1` 
 
 ---
 

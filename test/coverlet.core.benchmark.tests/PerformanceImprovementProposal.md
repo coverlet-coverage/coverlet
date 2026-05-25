@@ -272,3 +272,10 @@ thread-safety constraints are met.
 Run `scripts/Update-BenchmarkHistory.ps1` after each benchmark run to append the new
 measurements to `BenchmarkHistory.md`.  Compare the **Mean (ms)** and **Allocated (MB)**
 columns for `InstrumentWithOptions` and `GetCoverageAndReport` across releases.
+
+
+## Implementation plan
+
+- ✅ P2,P6,P3 => PR #1934
+- ✅ P1,P4 => PR #1934
+- ⏭️ P5 => separate PR required (High Risk)
