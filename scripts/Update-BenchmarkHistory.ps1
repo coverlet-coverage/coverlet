@@ -282,6 +282,8 @@ function Compare-CoverletVersion([string] $a, [string] $b) {
     # Split off pre-release tag
     $splitVersion = {
         param([string] $v)
+        # Ignore SemVer build metadata (e.g. "+build.123") when ordering versions.
+        $v = $v -replace '\+.*$', ''
         if ($v -match '^(\d+\.\d+\.\d+)(?:-(.+))?$') {
             [pscustomobject]@{ Core = [version]$Matches[1]; Pre = $Matches[2] }
         } else {
