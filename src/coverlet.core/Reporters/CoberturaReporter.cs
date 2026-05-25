@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Xml.Linq;
 
 using Coverlet.Core.Abstractions;
@@ -16,10 +16,6 @@ namespace Coverlet.Core.Reporters
 {
   internal class CoberturaReporter : IReporter
   {
-    // P4: Pool a MemoryStream per thread to avoid a large heap allocation per Report() call.
-    private static readonly ThreadLocal<MemoryStream> s_stream =
-        new(() => new MemoryStream(capacity: 256 * 1024));
-
     public ReporterOutputType OutputType => ReporterOutputType.File;
 
     public string Format => "cobertura";
@@ -150,13 +146,26 @@ namespace Coverlet.Core.Reporters
       coverage.Add(packages);
       xml.Add(coverage);
 
-      MemoryStream stream = s_stream.Value!;
-      stream.SetLength(0);
-      using var streamWriter = new StreamWriter(stream, new UTF8Encoding(false), bufferSize: 1024, leaveOpen: true);
-      xml.Save(streamWriter);
-      streamWriter.Flush();
+      // P4: Use a short-lived MemoryStream and rent a byte buffer from ArrayPool for the
+      // final encoding step. This avoids both the per-call MemoryStream.ToArray() allocation
+      // and the per-thread buffer retention that ThreadLocal<MemoryStream> would cause.
+      using var stream = new MemoryStream(capacity: 256 * 1024);
+      using (var streamWriter = new StreamWriter(stream, new UTF8Encoding(false), bufferSize: 1024, leaveOpen: true))
+      {
+        xml.Save(streamWriter);
+      }
 
-      return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
+      int byteCount = (int)stream.Length;
+      byte[] rentedBuffer = ArrayPool<byte>.Shared.Rent(byteCount);
+      try
+      {
+        stream.GetBuffer().AsSpan(0, byteCount).CopyTo(rentedBuffer);
+        return Encoding.UTF8.GetString(rentedBuffer, 0, byteCount);
+      }
+      finally
+      {
+        ArrayPool<byte>.Shared.Return(rentedBuffer);
+      }
     }
 
     private static IEnumerable<string> GetBasePaths(Modules modules, bool useSourceLink)

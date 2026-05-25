@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -54,26 +55,26 @@ namespace Coverlet.Core.Reporters
               sb.Append("FNDA:").Append(firstLine.Value).Append(',').AppendLine(method.Key);
 
               foreach (KeyValuePair<int, int> line in method.Value.Lines)
-                sb.Append("DA:").Append(line.Key).Append(',').AppendLine(line.Value.ToString());
+                sb.Append("DA:").Append(line.Key).Append(',').Append(line.Value).AppendLine();
 
               foreach (BranchInfo branch in method.Value.Branches)
               {
                 sb.Append("BRDA:").Append(branch.Line).Append(',')
                   .Append(branch.Offset).Append(',')
                   .Append(branch.Path).Append(',')
-                  .AppendLine(branch.Hits.ToString());
+                  .Append(branch.Hits).AppendLine();
               }
             }
           }
 
-          sb.Append("LF:").AppendLine(docLineCoverage.Total.ToString());
-          sb.Append("LH:").AppendLine(docLineCoverage.Covered.ToString());
+          sb.Append("LF:").Append(docLineCoverage.Total).AppendLine();
+          sb.Append("LH:").Append(docLineCoverage.Covered.ToString(CultureInfo.InvariantCulture)).AppendLine();
 
-          sb.Append("BRF:").AppendLine(docBranchCoverage.Total.ToString());
-          sb.Append("BRH:").AppendLine(docBranchCoverage.Covered.ToString());
+          sb.Append("BRF:").Append(docBranchCoverage.Total).AppendLine();
+          sb.Append("BRH:").Append(docBranchCoverage.Covered.ToString(CultureInfo.InvariantCulture)).AppendLine();
 
-          sb.Append("FNF:").AppendLine(docMethodCoverage.Total.ToString());
-          sb.Append("FNH:").AppendLine(docMethodCoverage.Covered.ToString());
+          sb.Append("FNF:").Append(docMethodCoverage.Total).AppendLine();
+          sb.Append("FNH:").Append(docMethodCoverage.Covered.ToString(CultureInfo.InvariantCulture)).AppendLine();
 
           sb.AppendLine("end_of_record");
         }

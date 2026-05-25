@@ -303,7 +303,14 @@ namespace Coverlet.Core.Instrumentation
 
       // P1: Read all bytes once; pass a read-only copy to the reachability pass so that
       // the file is not opened a second time, saving one full Cecil IL-stream read.
-      byte[] moduleBytes = new byte[stream.Length];
+      // Guard against assemblies ≥ 2 GB (Cecil itself has the same int-based limit).
+      if (stream.Length > int.MaxValue)
+        throw new InvalidOperationException($"Module '{_module}' is too large to instrument ({stream.Length} bytes).");
+
+      byte[] moduleBytes = new byte[(int)stream.Length];
+#if NETCOREAPP || NET5_0_OR_GREATER
+      stream.ReadExactly(moduleBytes);
+#else
       int totalRead = 0;
       while (totalRead < moduleBytes.Length)
       {
@@ -312,6 +319,7 @@ namespace Coverlet.Core.Instrumentation
           break;
         totalRead += read;
       }
+#endif
 
       stream.Position = 0;
       CreateReachabilityHelper(moduleBytes);
