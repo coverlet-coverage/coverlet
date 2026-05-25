@@ -32,6 +32,7 @@ results\BenchmarkRun-joined-2025-04-11-08-38-13-report.html
 
 > [!NOTE]
 > Run the benchmarks for every coverlet release to detect performance regressions early.
+> Update *Documentation/BenchmarkHistory.md* from the repo root using `pwsh scripts/Update-BenchmarkHistory.ps1`
 
 ---
 
@@ -118,41 +119,6 @@ report-generation phase is timed per iteration.
 | Benchmark | Description |
 |-----------|-------------|
 | `GetCoverageResult + Report` | Result collection and serialisation for the selected format. |
-
----
-
-### `DeterministicAndSourceLinkBenchmarks`
-
-**File:** `InstrumentationOptionsBenchmarks.cs`
-
-Measures the instrumentation cost of the `DeterministicReport` and `UseSourceLink` flags
-in all 2 × 2 = **4 combinations**.
-
-| Parameter | Values |
-|-----------|--------|
-| `DeterministicReport` | `false`, `true` |
-| `UseSourceLink` | `false`, `true` |
-
-| Benchmark | Description |
-|-----------|-------------|
-| `Instrumentation - DeterministicReport / UseSourceLink` | `Coverage.PrepareModules` under each flag combination. |
-
----
-
-### `ExcludeAssembliesHeuristicBenchmarks`
-
-**File:** `InstrumentationOptionsBenchmarks.cs`
-
-Measures how the `ExcludeAssembliesWithoutSources` heuristic level affects instrumentation
-throughput.
-
-| Parameter | Values |
-|-----------|--------|
-| `ExcludeAssembliesWithoutSources` | `"None"`, `"MissingAll"`, `"MissingAny"` |
-
-| Benchmark | Description |
-|-----------|-------------|
-| `Instrumentation - ExcludeAssembliesWithoutSources heuristic` | `Coverage.PrepareModules` for each heuristic level. |
 
 ---
 

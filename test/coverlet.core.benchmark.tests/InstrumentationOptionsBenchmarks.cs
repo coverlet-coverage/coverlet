@@ -22,7 +22,6 @@ namespace coverlet.core.benchmark.tests
   ///   cd artifacts/bin/coverlet.core.benchmark.tests/release_net10.0
   ///   ./coverlet.core.benchmark.tests.exe
   /// </summary>
-  [SimpleJob(launchCount: 1, warmupCount: 1, iterationCount: 3)]
   [MemoryDiagnoser]
   public class InstrumentationOptionsBenchmarks
   {
@@ -50,7 +49,11 @@ namespace coverlet.core.benchmark.tests
     // -----------------------------------------------------------------------
 
     private string _testSubjectDllPath;
+    private string _testSubjectPdbPath;
     private string _artifactPath;
+    private string _workDir;
+    private string _workDllPath;
+    private string _workPdbPath;
     private IInstrumentationHelper _instrumentationHelper;
     private ICecilSymbolHelper _cecilSymbolHelper;
     private ISourceRootTranslator _sourceRootTranslator;
@@ -67,6 +70,22 @@ namespace coverlet.core.benchmark.tests
       if (!File.Exists(_testSubjectDllPath))
       {
         throw new FileNotFoundException($"Test subject DLL not found: {_testSubjectDllPath}");
+      }
+
+      // Isolated working directory: the benchmark copies the clean DLL here before each
+      // iteration so that PrepareModules always instruments an un-modified binary.
+      _workDir = Path.Combine(Path.GetTempPath(), "coverlet_bench_opts_" + Guid.NewGuid().ToString("N"));
+      Directory.CreateDirectory(_workDir);
+      _workDllPath = Path.Combine(_workDir, "coverlet.testsubject.dll");
+      _workPdbPath = Path.ChangeExtension(_workDllPath, ".pdb");
+
+      // Copy both DLL and PDB so Mono.Cecil can match symbols.
+      // Both are also required before BDN's internal JIT phase (runs the body once before [IterationSetup]).
+      _testSubjectPdbPath = Path.ChangeExtension(_testSubjectDllPath, ".pdb");
+      File.Copy(_testSubjectDllPath, _workDllPath, overwrite: true);
+      if (File.Exists(_testSubjectPdbPath))
+      {
+        File.Copy(_testSubjectPdbPath, _workPdbPath, overwrite: true);
       }
 
       IServiceCollection services = new ServiceCollection();
@@ -96,6 +115,29 @@ namespace coverlet.core.benchmark.tests
       _cecilSymbolHelper = provider.GetRequiredService<ICecilSymbolHelper>();
     }
 
+    /// <summary>
+    /// Restores both the un-instrumented DLL and its matching PDB before each BDN iteration.
+    /// The PDB must be restored alongside the DLL because <c>Instrument()</c> writes a new PDB
+    /// in place; leaving a stale instrumented PDB causes <c>SymbolsNotMatchingException</c> on
+    /// subsequent iterations.
+    /// </summary>
+    [IterationSetup]
+    public void IterationSetup()
+    {
+      File.Copy(_testSubjectDllPath, _workDllPath, overwrite: true);
+      if (File.Exists(_testSubjectPdbPath))
+      {
+        File.Copy(_testSubjectPdbPath, _workPdbPath, overwrite: true);
+      }
+    }
+
+    [GlobalCleanup]
+    public void Cleanup()
+    {
+      try { Directory.Delete(_workDir, recursive: true); }
+      catch { /* best-effort */ }
+    }
+
     // -----------------------------------------------------------------------
     // Benchmark: PrepareModules (instrumentation phase)
     // -----------------------------------------------------------------------
@@ -103,9 +145,7 @@ namespace coverlet.core.benchmark.tests
     /// <summary>
     /// Measures the instrumentation (PrepareModules) duration for each combination of
     /// <see cref="SingleHit"/>, <see cref="SkipAutoProps"/> and <see cref="IncludeTestAssembly"/>.
-    ///
-    /// The assembly is restored to its original state after each iteration so that BenchmarkDotNet
-    /// can re-instrument it from scratch on the next iteration.
+    /// A fresh un-instrumented DLL copy is used each iteration (<see cref="IterationSetup"/>).
     /// </summary>
     [Benchmark(Description = "Instrumentation - PrepareModules")]
     public void InstrumentWithOptions()
@@ -121,9 +161,8 @@ namespace coverlet.core.benchmark.tests
 
     private CoverageParameters BuildParameters() => new()
     {
-      Module = _testSubjectDllPath,
       IncludeFilters = ["[coverlet.testsubject]*"],
-      IncludeDirectories = [_artifactPath],
+      IncludeDirectories = [_workDir],
       ExcludeFilters = [],
       ExcludedSourceFiles = [],
       ExcludeAttributes = [],
@@ -138,7 +177,7 @@ namespace coverlet.core.benchmark.tests
 
     private Coverage BuildCoverage(CoverageParameters parameters) =>
         new(
-            _testSubjectDllPath,
+            _workDir,
             parameters,
             _logger,
             _instrumentationHelper,
@@ -154,7 +193,6 @@ namespace coverlet.core.benchmark.tests
   ///
   /// Supported formats: json, lcov, opencover, cobertura, teamcity
   /// </summary>
-  [SimpleJob(launchCount: 1, warmupCount: 1, iterationCount: 5)]
   [MemoryDiagnoser]
   public class ReportFormatBenchmarks
   {
@@ -239,189 +277,13 @@ namespace coverlet.core.benchmark.tests
     }
   }
 
-  /// <summary>
-  /// Benchmarks the impact of <c>DeterministicReport</c> and <c>UseSourceLink</c> on overall
-  /// instrumentation and result-collection throughput.
-  /// </summary>
-  [SimpleJob(launchCount: 1, warmupCount: 1, iterationCount: 3)]
-  [MemoryDiagnoser]
-  public class DeterministicAndSourceLinkBenchmarks
-  {
-    [Params(false, true)]
-    public bool DeterministicReport { get; set; }
+  // DeterministicAndSourceLinkBenchmarks removed: UseSourceLink only has an effect when the
+  // assembly contains an embedded source-link JSON blob. coverlet.testsubject does not, so all
+  // four flag combinations measure identical paths and produce results within noise range.
+  // Reintroduce this class once a source-link-enabled test subject is available.
 
-    [Params(false, true)]
-    public bool UseSourceLink { get; set; }
-
-    private string _testSubjectDllPath;
-    private string _artifactPath;
-    private IInstrumentationHelper _instrumentationHelper;
-    private ICecilSymbolHelper _cecilSymbolHelper;
-    private ISourceRootTranslator _sourceRootTranslator;
-    private IFileSystem _fileSystem;
-    private Coverlet.Core.Abstractions.ILogger _logger;
-
-    [GlobalSetup]
-    public void Setup()
-    {
-      _logger = new ConsoleLogger();
-      _artifactPath = AppContext.BaseDirectory;
-      _testSubjectDllPath = Path.Combine(_artifactPath, "coverlet.testsubject.dll");
-
-      if (!File.Exists(_testSubjectDllPath))
-      {
-        throw new FileNotFoundException($"Test subject DLL not found: {_testSubjectDllPath}");
-      }
-
-      IServiceCollection services = new ServiceCollection();
-      services.AddTransient<IRetryHelper, RetryHelper>();
-      services.AddTransient<IProcessExitHandler, ProcessExitHandler>();
-      services.AddTransient<IFileSystem, FileSystem>();
-      services.AddTransient<Coverlet.Core.Abstractions.ILogger>(_ => _logger);
-      services.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
-      services.AddSingleton<IAssemblyAdapter, AssemblyAdapter>();
-      services.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(
-          p => new SourceRootTranslator(
-              "",
-              p.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(),
-              p.GetRequiredService<IFileSystem>()));
-      services.AddSingleton<IInstrumentationHelper>(p =>
-          new InstrumentationHelper(
-              p.GetRequiredService<IProcessExitHandler>(),
-              p.GetRequiredService<IRetryHelper>(),
-              p.GetRequiredService<IFileSystem>(),
-              p.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(),
-              p.GetRequiredService<ISourceRootTranslator>()));
-
-      var provider = services.BuildServiceProvider();
-      _fileSystem = provider.GetRequiredService<IFileSystem>();
-      _instrumentationHelper = provider.GetRequiredService<IInstrumentationHelper>();
-      _sourceRootTranslator = provider.GetRequiredService<ISourceRootTranslator>();
-      _cecilSymbolHelper = provider.GetRequiredService<ICecilSymbolHelper>();
-    }
-
-    [Benchmark(Description = "Instrumentation - DeterministicReport / UseSourceLink")]
-    public void InstrumentWithDeterministicOptions()
-    {
-      var parameters = new CoverageParameters
-      {
-        Module = _testSubjectDllPath,
-        IncludeFilters = ["[coverlet.testsubject]*"],
-        IncludeDirectories = [_artifactPath],
-        ExcludeFilters = [],
-        ExcludedSourceFiles = [],
-        ExcludeAttributes = [],
-        IncludeTestAssembly = false,
-        SingleHit = false,
-        MergeWith = string.Empty,
-        UseSourceLink = UseSourceLink,
-        SkipAutoProps = false,
-        DeterministicReport = DeterministicReport,
-        ExcludeAssembliesWithoutSources = "None",
-      };
-
-      var coverage = new Coverage(
-          _testSubjectDllPath,
-          parameters,
-          _logger,
-          _instrumentationHelper,
-          _fileSystem,
-          _sourceRootTranslator,
-          _cecilSymbolHelper);
-
-      _ = coverage.PrepareModules();
-    }
-  }
-
-  /// <summary>
-  /// Benchmarks how the <c>ExcludeAssembliesWithoutSources</c>
-  /// instrumentation performance.  The three meaningful values are "None", "MissingAll", and
-  /// "MissingAny".
-  /// </summary>
-  [SimpleJob(launchCount: 1, warmupCount: 1, iterationCount: 3)]
-  [MemoryDiagnoser]
-  public class ExcludeAssembliesHeuristicBenchmarks
-  {
-    [Params("None", "MissingAll", "MissingAny")]
-    public string ExcludeAssembliesWithoutSources { get; set; }
-
-    private string _testSubjectDllPath;
-    private string _artifactPath;
-    private IInstrumentationHelper _instrumentationHelper;
-    private ICecilSymbolHelper _cecilSymbolHelper;
-    private ISourceRootTranslator _sourceRootTranslator;
-    private IFileSystem _fileSystem;
-    private Coverlet.Core.Abstractions.ILogger _logger;
-
-    [GlobalSetup]
-    public void Setup()
-    {
-      _logger = new ConsoleLogger();
-      _artifactPath = AppContext.BaseDirectory;
-      _testSubjectDllPath = Path.Combine(_artifactPath, "coverlet.testsubject.dll");
-
-      if (!File.Exists(_testSubjectDllPath))
-      {
-        throw new FileNotFoundException($"Test subject DLL not found: {_testSubjectDllPath}");
-      }
-
-      IServiceCollection services = new ServiceCollection();
-      services.AddTransient<IRetryHelper, RetryHelper>();
-      services.AddTransient<IProcessExitHandler, ProcessExitHandler>();
-      services.AddTransient<IFileSystem, FileSystem>();
-      services.AddTransient<Coverlet.Core.Abstractions.ILogger>(_ => _logger);
-      services.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
-      services.AddSingleton<IAssemblyAdapter, AssemblyAdapter>();
-      services.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(
-          p => new SourceRootTranslator(
-              "",
-              p.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(),
-              p.GetRequiredService<IFileSystem>()));
-      services.AddSingleton<IInstrumentationHelper>(p =>
-          new InstrumentationHelper(
-              p.GetRequiredService<IProcessExitHandler>(),
-              p.GetRequiredService<IRetryHelper>(),
-              p.GetRequiredService<IFileSystem>(),
-              p.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(),
-              p.GetRequiredService<ISourceRootTranslator>()));
-
-      var provider = services.BuildServiceProvider();
-      _fileSystem = provider.GetRequiredService<IFileSystem>();
-      _instrumentationHelper = provider.GetRequiredService<IInstrumentationHelper>();
-      _sourceRootTranslator = provider.GetRequiredService<ISourceRootTranslator>();
-      _cecilSymbolHelper = provider.GetRequiredService<ICecilSymbolHelper>();
-    }
-
-    [Benchmark(Description = "Instrumentation - ExcludeAssembliesWithoutSources heuristic")]
-    public void InstrumentWithHeuristic()
-    {
-      var parameters = new CoverageParameters
-      {
-        Module = _testSubjectDllPath,
-        IncludeFilters = ["[coverlet.testsubject]*"],
-        IncludeDirectories = [_artifactPath],
-        ExcludeFilters = [],
-        ExcludedSourceFiles = [],
-        ExcludeAttributes = [],
-        IncludeTestAssembly = false,
-        SingleHit = false,
-        MergeWith = string.Empty,
-        UseSourceLink = false,
-        SkipAutoProps = false,
-        DeterministicReport = false,
-        ExcludeAssembliesWithoutSources = ExcludeAssembliesWithoutSources,
-      };
-
-      var coverage = new Coverage(
-          _testSubjectDllPath,
-          parameters,
-          _logger,
-          _instrumentationHelper,
-          _fileSystem,
-          _sourceRootTranslator,
-          _cecilSymbolHelper);
-
-      _ = coverage.PrepareModules();
-    }
-  }
+  // ExcludeAssembliesHeuristicBenchmarks removed: with a single small assembly the heuristic
+  // scans zero additional files regardless of the MissingAll/MissingAny/None setting. The
+  // measured 20–45 ms range reflects lock/GC variance, not the heuristic. Reintroduce when
+  // benchmarking against a directory containing multiple assemblies without PDBs.
 }

@@ -7,47 +7,96 @@ using BenchmarkDotNet.Attributes;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
-using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Symbols;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace coverlet.core.benchmark.tests
 {
+  /// <summary>
+  /// Benchmarks the instrumentation phase (<see cref="Coverage.PrepareModules"/>) using the
+  /// <c>coverlet.testsubject</c> assembly which contains the sizeable <c>BigClass</c> type.
+  ///
+  /// Service infrastructure is constructed once in <see cref="Setup"/> so that DI container
+  /// creation cost is excluded from timing. The DLL is copied to a temp working directory
+  /// and refreshed before each iteration so BenchmarkDotNet always instruments a clean binary.
+  /// </summary>
+  [MemoryDiagnoser]
   public class InstrumenterBenchmarks
   {
+    private string _testSubjectDllPath;
+    private string _testSubjectPdbPath;
+    private string _workDir;
+    private string _workDllPath;
+    private string _workPdbPath;
+
     private Coverlet.Core.Abstractions.ILogger _logger;
     private IFileSystem _fileSystem;
-    private Instrumenter _instrumenter;
-    private Coverage _coverage;
-    private CoverageParameters _coverageParameters;
-    private CoveragePrepareResult _coveragePrepareResult;
-    private ISourceRootTranslator _sourceRootTranslator;
-    private CoverageParameters _parameters;
     private IInstrumentationHelper _instrumentationHelper;
+    private ISourceRootTranslator _sourceRootTranslator;
     private ICecilSymbolHelper _cecilSymbolHelper;
+    private CoverageParameters _coverageParameters;
 
-    [GlobalCleanup]
-    public void IterationCleanup()
+    [GlobalSetup]
+    public void Setup()
     {
+      // Source DLL (output copy placed next to this executable by the build)
+      _testSubjectDllPath = Path.Combine(AppContext.BaseDirectory, "coverlet.testsubject.dll");
+      if (!File.Exists(_testSubjectDllPath))
+      {
+        throw new FileNotFoundException($"Test subject DLL not found: {_testSubjectDllPath}");
+      }
 
-    }
+      // Shared working directory; a fresh copy of the DLL is placed here per iteration
+      _workDir = Path.Combine(Path.GetTempPath(), "coverlet_bench_" + Guid.NewGuid().ToString("N"));
+      Directory.CreateDirectory(_workDir);
+      _workDllPath = Path.Combine(_workDir, "coverlet.testsubject.dll");
+      _workPdbPath = Path.ChangeExtension(_workDllPath, ".pdb");
 
-    [Benchmark]
-    public void InstrumenterBigClassBenchmark()
-    {
-      string testSubjectDLLFilePath = Path.Combine(Directory.GetCurrentDirectory(), "coverlet.testsubject.dll");
-      string _coverletTestSubjectArtifactPath = Directory.GetCurrentDirectory();
+      // Copy both DLL and PDB so Mono.Cecil can match symbols.
+      // Both are also required before BDN's internal JIT phase (runs the body once before [IterationSetup]).
+      _testSubjectPdbPath = Path.ChangeExtension(_testSubjectDllPath, ".pdb");
+      File.Copy(_testSubjectDllPath, _workDllPath, overwrite: true);
+      if (File.Exists(_testSubjectPdbPath))
+      {
+        File.Copy(_testSubjectPdbPath, _workPdbPath, overwrite: true);
+      }
+
       _logger = new ConsoleLogger();
+
+      IServiceCollection services = new ServiceCollection();
+      services.AddTransient<IRetryHelper, RetryHelper>();
+      services.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+      services.AddTransient<IFileSystem, FileSystem>();
+      services.AddTransient<Coverlet.Core.Abstractions.ILogger>(_ => _logger);
+      services.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
+      services.AddSingleton<IAssemblyAdapter, AssemblyAdapter>();
+      services.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(
+          p => new SourceRootTranslator(
+              "",
+              p.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(),
+              p.GetRequiredService<IFileSystem>()));
+      services.AddSingleton<IInstrumentationHelper>(p =>
+          new InstrumentationHelper(
+              p.GetRequiredService<IProcessExitHandler>(),
+              p.GetRequiredService<IRetryHelper>(),
+              p.GetRequiredService<IFileSystem>(),
+              p.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(),
+              p.GetRequiredService<ISourceRootTranslator>()));
+
+      var provider = services.BuildServiceProvider();
+      _fileSystem = provider.GetRequiredService<IFileSystem>();
+      _instrumentationHelper = provider.GetRequiredService<IInstrumentationHelper>();
+      _sourceRootTranslator = provider.GetRequiredService<ISourceRootTranslator>();
+      _cecilSymbolHelper = provider.GetRequiredService<ICecilSymbolHelper>();
 
       _coverageParameters = new CoverageParameters
       {
-        Module = testSubjectDLLFilePath,
         IncludeFilters = ["[coverlet.testsubject]*"],
-        IncludeDirectories = [_coverletTestSubjectArtifactPath],
-        ExcludeFilters = null,
-        ExcludedSourceFiles = null,
-        ExcludeAttributes = null,
-        IncludeTestAssembly = true,
+        IncludeDirectories = [_workDir],
+        ExcludeFilters = [],
+        ExcludedSourceFiles = [],
+        ExcludeAttributes = [],
+        IncludeTestAssembly = false,
         SingleHit = false,
         MergeWith = string.Empty,
         UseSourceLink = false,
@@ -55,60 +104,53 @@ namespace coverlet.core.benchmark.tests
         DeterministicReport = false,
         ExcludeAssembliesWithoutSources = "None",
       };
+    }
 
-      // Set up service collection like in InstrumentationTask
-      IServiceCollection serviceCollection = new ServiceCollection();
-      // These can stay transient
-      serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
-      serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
-      serviceCollection.AddTransient<IFileSystem, FileSystem>();
-      serviceCollection.AddTransient<Coverlet.Core.Abstractions.ILogger>(_ => _logger);
+    /// <summary>
+    /// Restores both the un-instrumented DLL and its matching PDB before each BDN iteration.
+    /// The PDB must be restored alongside the DLL because <c>Instrument()</c> writes a new PDB
+    /// in place; leaving a stale instrumented PDB causes <c>SymbolsNotMatchingException</c> on
+    /// subsequent iterations.
+    /// </summary>
+    [IterationSetup]
+    public void IterationSetup()
+    {
+      File.Copy(_testSubjectDllPath, _workDllPath, overwrite: true);
+      if (File.Exists(_testSubjectPdbPath))
+      {
+        File.Copy(_testSubjectPdbPath, _workPdbPath, overwrite: true);
+      }
+    }
 
-      // Make all symbol and instrumentation related services singletons
-      serviceCollection.AddSingleton<ICecilSymbolHelper, CecilSymbolHelper>();
-      serviceCollection.AddSingleton<IAssemblyAdapter, AssemblyAdapter>();
-      serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(provider => new SourceRootTranslator("", provider.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(), provider.GetRequiredService<IFileSystem>()));
+    [GlobalCleanup]
+    public void Cleanup()
+    {
+      try { Directory.Delete(_workDir, recursive: true); }
+      catch { /* best-effort */ }
+    }
 
-      serviceCollection.AddSingleton<IInstrumentationHelper>(serviceProvider =>
-          new InstrumentationHelper(
-              serviceProvider.GetRequiredService<IProcessExitHandler>(),
-              serviceProvider.GetRequiredService<IRetryHelper>(),
-              serviceProvider.GetRequiredService<IFileSystem>(),
-              serviceProvider.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(),
-              serviceProvider.GetRequiredService<ISourceRootTranslator>()));
-
-      var serviceProvider = serviceCollection.BuildServiceProvider();
-
-      // Initialize helpers using the service provider
-      _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-      _instrumentationHelper = serviceProvider.GetRequiredService<IInstrumentationHelper>();
-      _sourceRootTranslator = serviceProvider.GetRequiredService<ISourceRootTranslator>();
-      _cecilSymbolHelper = serviceProvider.GetRequiredService<ICecilSymbolHelper>();
-
-      _sourceRootTranslator = new SourceRootTranslator(_logger, new FileSystem());
-      _parameters = new CoverageParameters();
-      _instrumentationHelper =
-          new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), _fileSystem, _logger, _sourceRootTranslator);
-      _instrumenter = new Instrumenter(testSubjectDLLFilePath, "_coverlet_instrumented", _parameters, _logger, _instrumentationHelper, _fileSystem, _sourceRootTranslator, new CecilSymbolHelper());
-
-      _coverage = new Coverage(
-          testSubjectDLLFilePath,
+    /// <summary>
+    /// Measures only the instrumentation phase (<see cref="Coverage.PrepareModules"/>).
+    /// Service construction is excluded – it is performed once in <see cref="Setup"/>.
+    /// </summary>
+    [Benchmark]
+    public void InstrumenterBigClassBenchmark()
+    {
+      var coverage = new Coverage(
+          _workDir,
           _coverageParameters,
           _logger,
           _instrumentationHelper,
           _fileSystem,
           _sourceRootTranslator,
-          _cecilSymbolHelper
-          );
+          _cecilSymbolHelper);
 
-      // Prepare modules for instrumentation
-      _coveragePrepareResult = _coverage.PrepareModules();
+      CoveragePrepareResult result = coverage.PrepareModules();
 
-      if (_coveragePrepareResult.Results.Length == 0)
+      if (result.Results.Length == 0)
       {
-        throw (new InvalidOperationException("Instrumentation failed: _coveragePrepareResult.Results missing"));
+        throw new InvalidOperationException("Instrumentation failed: PrepareModules returned no results");
       }
-
     }
   }
 }
