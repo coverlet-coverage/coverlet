@@ -61,7 +61,7 @@ canary across releases.
 
 | Benchmark | Description |
 |-----------|-------------|
-| `InstrumenterBigClassBenchmark` | Full `PrepareModules` run including DI setup. |
+| `InstrumenterBenchmark` | Full `PrepareModules` run including DI setup. |
 
 ---
 
