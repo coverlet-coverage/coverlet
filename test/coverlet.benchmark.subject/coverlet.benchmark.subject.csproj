@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+    <Nullable>enable</Nullable>
+    <!-- Optimise so the JIT-compiled binary resembles a real production assembly. -->
+    <Optimize>true</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- IDE0032 fires on backing fields whose getter is trivial even when the setter has logic.
+         This is a synthetic workload project, not shipping code, so the rule adds no value. -->
+    <NoWarn>$(NoWarn);IDE0032</NoWarn>
+  </PropertyGroup>
+
+</Project>
