@@ -92,9 +92,19 @@ namespace Coverlet.Core.Reporters
               method.Add(new XAttribute("complexity", CoverageSummary.CalculateCyclomaticComplexity(meth.Value.Branches)));
 
               var lines = new XElement("lines");
+
+              // P7: pre-group branches by line number once – O(B) – so the line loop is O(1) per line
+              Dictionary<int, List<BranchInfo>> branchesByLine = new Dictionary<int, List<BranchInfo>>(meth.Value.Branches.Count);
+              foreach (BranchInfo b in meth.Value.Branches)
+              {
+                if (!branchesByLine.TryGetValue(b.Line, out List<BranchInfo> list))
+                  branchesByLine[b.Line] = list = [];
+                list.Add(b);
+              }
+
               foreach (KeyValuePair<int, int> ln in meth.Value.Lines)
               {
-                bool isBranchPoint = meth.Value.Branches.Any(b => b.Line == ln.Key);
+                bool isBranchPoint = branchesByLine.ContainsKey(ln.Key);
                 var line = new XElement("line");
                 line.Add(new XAttribute("number", ln.Key.ToString()));
                 line.Add(new XAttribute("hits", ln.Value.ToString()));
@@ -102,7 +112,7 @@ namespace Coverlet.Core.Reporters
 
                 if (isBranchPoint)
                 {
-                  var branches = meth.Value.Branches.Where(b => b.Line == ln.Key).ToList();
+                  List<BranchInfo> branches = branchesByLine[ln.Key];
                   CoverageDetails branchInfoCoverage = CoverageSummary.CalculateBranchCoverage(branches);
                   line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent.ToString(CultureInfo.InvariantCulture)}% ({branchInfoCoverage.Covered.ToString(CultureInfo.InvariantCulture)}/{branchInfoCoverage.Total.ToString(CultureInfo.InvariantCulture)})"));
                   var conditions = new XElement("conditions");

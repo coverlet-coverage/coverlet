@@ -462,9 +462,9 @@ measurements to `BenchmarkHistory.md`.
 
 ## Implementation Plan
 
-- ⏳ BS-1 – new richer benchmark subject
+- ✅ BS-1 – new richer benchmark subject (master branch) [10.0.2-p0]
 - ⏳ BS-2 – multi-module benchmark variant
-- ⏳ P7, P8, P9, P10, P11 => single PR (reporter + coverage-result phase)
+- ✅ P7, P8, P9, P10, P11 => single PR (reporter + coverage-result phase) - [10.0.2-p3]
 - ⏳ P12 => separate PR (InstrumentIL change)
 - ⏳ P13 => separate PR (module-level short-circuit)
 - ⏭️ P5 => separate PR, requires design review (Cecil thread-safety)

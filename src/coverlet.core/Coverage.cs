@@ -253,6 +253,15 @@ namespace Coverlet.Core
         _instrumentationHelper.RestoreOriginalModule(result.ModulePath, Identifier);
       }
 
+      // P11: build a HashSet once across all results so BranchInCompilerGeneratedClass is O(1)
+      // instead of O(modules × array-length) per branch lookup.
+      var branchesInGeneratedClassSet = new HashSet<string>(StringComparer.Ordinal);
+      foreach (InstrumenterResult r in _results)
+      {
+        foreach (string m in r.BranchesInCompiledGeneratedClass)
+          branchesInGeneratedClassSet.Add(m);
+      }
+
       // In case of anonymous delegate compiler generate a custom class and passes it as type.method delegate.
       // If in delegate method we've a branches we need to move these to "actual" class/method that use it.
       // We search "method" with same "Line" of closure class method and add missing branches to it,
@@ -275,7 +284,7 @@ namespace Coverlet.Core
             {
               foreach (BranchInfo branch in method.Value.Branches)
               {
-                if (BranchInCompilerGeneratedClass(method.Key))
+                if (branchesInGeneratedClassSet.Contains(method.Key))
                 {
                   Method actualMethod = GetMethodWithSameLineInSameDocument(document.Value, @class.Key, branch.Line);
 
@@ -333,18 +342,6 @@ namespace Coverlet.Core
       return coverageResult;
     }
 
-    private bool BranchInCompilerGeneratedClass(string methodName)
-    {
-      foreach (InstrumenterResult instrumentedResult in _results)
-      {
-        if (instrumentedResult.BranchesInCompiledGeneratedClass.Contains(methodName))
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
     private static Method GetMethodWithSameLineInSameDocument(Classes documentClasses, string compilerGeneratedClassName, int branchLine)
     {
       foreach (KeyValuePair<string, Methods> @class in documentClasses)
@@ -395,6 +392,8 @@ namespace Coverlet.Core
 
         // Calculate lines to skip for every hits start/end candidate
         // Nested ranges win on outermost one
+        // P9: pre-group by docIndex once (O(N)) so the inner loop is O(group) instead of O(N)
+        ILookup<int, HitCandidate> hitCandidatesByDoc = result.HitCandidates.ToLookup(x => x.docIndex);
         foreach (HitCandidate hitCandidate in result.HitCandidates)
         {
           if (hitCandidate.isBranch || hitCandidate.end == hitCandidate.start)
@@ -402,7 +401,7 @@ namespace Coverlet.Core
             continue;
           }
 
-          foreach (HitCandidate hitCandidateToCompare in result.HitCandidates.Where(x => x.docIndex.Equals(hitCandidate.docIndex)))
+          foreach (HitCandidate hitCandidateToCompare in hitCandidatesByDoc[hitCandidate.docIndex])
           {
             if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch && hitCandidateToCompare.start > hitCandidate.start &&
                  hitCandidateToCompare.end < hitCandidate.end)
