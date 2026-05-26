@@ -144,17 +144,19 @@ namespace coverlet.benchmark.subject
 
     public event EventHandler<int>? ValueChanged;
 
+    private int _value;
+
     public int Value
     {
-      get;
-      set
-      {
-        if (field != value)
+        get => _value;
+        set
         {
-          field = value;
-          ValueChanged?.Invoke(this, value);
+            if (_value != value)
+            {
+                _value = value;
+                ValueChanged?.Invoke(this, value);
+            }
         }
-      }
     }
 
     public void Subscribe(Action<int> handler)
