@@ -27,7 +27,7 @@
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.projectsample.excludedbyattribute\coverlet.tests.projectsample.excludedbyattribute.csproj" />
-    <ProjectReference Include="$(RepoRoot)test\coverlet.testsubject\coverlet.testsubject.csproj" />
+    <ProjectReference Include="$(RepoRoot)test\coverlet.benchmark.subject\coverlet.benchmark.subject.csproj" />
   </ItemGroup>
 
 </Project>

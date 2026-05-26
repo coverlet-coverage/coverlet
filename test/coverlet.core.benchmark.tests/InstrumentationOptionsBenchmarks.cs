@@ -65,7 +65,7 @@ namespace coverlet.core.benchmark.tests
     {
       _logger = new ConsoleLogger();
       _artifactPath = AppContext.BaseDirectory;
-      _testSubjectDllPath = Path.Combine(_artifactPath, "coverlet.testsubject.dll");
+      _testSubjectDllPath = Path.Combine(_artifactPath, "coverlet.benchmark.subject.dll");
 
       if (!File.Exists(_testSubjectDllPath))
       {
@@ -76,7 +76,7 @@ namespace coverlet.core.benchmark.tests
       // iteration so that PrepareModules always instruments an un-modified binary.
       _workDir = Path.Combine(Path.GetTempPath(), "coverlet_bench_opts_" + Guid.NewGuid().ToString("N"));
       Directory.CreateDirectory(_workDir);
-      _workDllPath = Path.Combine(_workDir, "coverlet.testsubject.dll");
+      _workDllPath = Path.Combine(_workDir, "coverlet.benchmark.subject.dll");
       _workPdbPath = Path.ChangeExtension(_workDllPath, ".pdb");
 
       // Copy both DLL and PDB so Mono.Cecil can match symbols.
@@ -161,7 +161,7 @@ namespace coverlet.core.benchmark.tests
 
     private CoverageParameters BuildParameters() => new()
     {
-      IncludeFilters = ["[coverlet.testsubject]*"],
+      IncludeFilters = ["[coverlet.benchmark.subject]*"],
       IncludeDirectories = [_workDir],
       ExcludeFilters = [],
       ExcludedSourceFiles = [],
@@ -278,7 +278,7 @@ namespace coverlet.core.benchmark.tests
   }
 
   // DeterministicAndSourceLinkBenchmarks removed: UseSourceLink only has an effect when the
-  // assembly contains an embedded source-link JSON blob. coverlet.testsubject does not, so all
+  // assembly contains an embedded source-link JSON blob. coverlet.benchmark.subject does not, so all
   // four flag combinations measure identical paths and produce results within noise range.
   // Reintroduce this class once a source-link-enabled test subject is available.
 

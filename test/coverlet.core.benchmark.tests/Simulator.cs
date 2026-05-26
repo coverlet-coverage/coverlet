@@ -69,7 +69,7 @@ namespace coverlet.core.benchmark.tests
 
       _logger.LogInformation($"Solution root path: {solutionRoot}");
       // Build source location path
-      _coverletTestSubjectSourcePath = Path.GetFullPath(Path.Combine(solutionRoot, "test", "coverlet.testsubject"));
+      _coverletTestSubjectSourcePath = Path.GetFullPath(Path.Combine(solutionRoot, "test", "coverlet.benchmark.subject"));
 
       _logger.LogInformation($"Source path: {_coverletTestSubjectSourcePath}");
 
@@ -157,7 +157,7 @@ namespace coverlet.core.benchmark.tests
     {
       _logger.LogInformation($"SimulateWorkflow Directory: {Directory.GetCurrentDirectory()}");
       _coverletTestSubjectArtifactPath = Directory.GetCurrentDirectory();
-      _coverletTestSubjectDllPath = Path.Combine(Directory.GetCurrentDirectory(), "coverlet.testsubject.dll");
+      _coverletTestSubjectDllPath = Path.Combine(Directory.GetCurrentDirectory(), "coverlet.benchmark.subject.dll");
 
       string pdbPath = Path.ChangeExtension(_coverletTestSubjectDllPath, ".pdb");
       if (!File.Exists(pdbPath))
@@ -168,7 +168,7 @@ namespace coverlet.core.benchmark.tests
       _coverageParameters = new CoverageParameters
       {
         Module = _coverletTestSubjectDllPath,
-        IncludeFilters = ["[coverlet.testsubject]*"],
+        IncludeFilters = ["[coverlet.benchmark.subject]*"],
         IncludeDirectories = [_coverletTestSubjectArtifactPath],
         ExcludeFilters = null,
         ExcludedSourceFiles = null,
@@ -188,7 +188,7 @@ namespace coverlet.core.benchmark.tests
     }
 
     /// <summary>
-    /// Instruments SUT assembly 'coverlet.testsubject' for code coverage analysis.
+    /// Instruments SUT assembly 'coverlet.benchmark.subject' for code coverage analysis.
     /// </summary>
     /// <remarks>This method processes the SUT assembly, instruments them for code coverage.
     /// If no modules are instrumented, an <see cref="InvalidOperationException"/> is thrown.</remarks>
@@ -288,13 +288,13 @@ namespace coverlet.core.benchmark.tests
     }
 
     /// <summary>
-    /// Run SUT assembly 'coverlet.testsubject' to generate coverage hits.
+    /// Run SUT assembly 'coverlet.benchmark.subject' to generate coverage hits.
     /// </summary>
     /// <exception cref="FileNotFoundException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
     public void Phase2_GenerateHits()
     {
-      _logger.LogInformation($"Execute BigClass: {_coverletTestSubjectDllPath}");
+      _logger.LogInformation($"Execute benchmark subject: {_coverletTestSubjectDllPath}");
       if (!File.Exists(_coverletTestSubjectDllPath))
       {
         throw new FileNotFoundException($"Instrumented assembly not found at: {_coverletTestSubjectDllPath}");
@@ -308,7 +308,7 @@ namespace coverlet.core.benchmark.tests
     }
 
     /// <summary>
-    /// Collects and processes the coverage results from SUT assembly 'coverlet.testsubject'.
+    /// Collects and processes the coverage results from SUT assembly 'coverlet.benchmark.subject'.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public void Phase3_ProcessResults()

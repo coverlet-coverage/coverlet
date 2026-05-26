@@ -55,7 +55,7 @@ instrumented once in `[GlobalSetup]` so only the result-collection phase is time
 
 **File:** `InstrumenterBenchmarks.cs`
 
-Measures end-to-end instrumentation of the `coverlet.testsubject` assembly including
+Measures end-to-end instrumentation of the `coverlet.benchmark.subject` assembly including
 full service-provider construction on every iteration.  Useful as a coarse regression
 canary across releases.
 
@@ -70,7 +70,7 @@ canary across releases.
 **File:** `Simulator.cs`
 
 Simulates the complete three-phase coverage workflow against a freshly built copy of
-`coverlet.testsubject`:
+`coverlet.benchmark.subject`:
 
 | Phase | Method | Description |
 |-------|--------|-------------|

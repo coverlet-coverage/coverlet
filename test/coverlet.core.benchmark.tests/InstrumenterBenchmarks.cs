@@ -14,7 +14,7 @@ namespace coverlet.core.benchmark.tests
 {
   /// <summary>
   /// Benchmarks the instrumentation phase (<see cref="Coverage.PrepareModules"/>) using the
-  /// <c>coverlet.testsubject</c> assembly which contains the sizeable <c>BigClass</c> type.
+  /// <c>coverlet.benchmark.subject</c> assembly which contains several types.
   ///
   /// Service infrastructure is constructed once in <see cref="Setup"/> so that DI container
   /// creation cost is excluded from timing. The DLL is copied to a temp working directory
@@ -40,7 +40,7 @@ namespace coverlet.core.benchmark.tests
     public void Setup()
     {
       // Source DLL (output copy placed next to this executable by the build)
-      _testSubjectDllPath = Path.Combine(AppContext.BaseDirectory, "coverlet.testsubject.dll");
+      _testSubjectDllPath = Path.Combine(AppContext.BaseDirectory, "coverlet.benchmark.subject.dll");
       if (!File.Exists(_testSubjectDllPath))
       {
         throw new FileNotFoundException($"Test subject DLL not found: {_testSubjectDllPath}");
@@ -49,7 +49,7 @@ namespace coverlet.core.benchmark.tests
       // Shared working directory; a fresh copy of the DLL is placed here per iteration
       _workDir = Path.Combine(Path.GetTempPath(), "coverlet_bench_" + Guid.NewGuid().ToString("N"));
       Directory.CreateDirectory(_workDir);
-      _workDllPath = Path.Combine(_workDir, "coverlet.testsubject.dll");
+      _workDllPath = Path.Combine(_workDir, "coverlet.benchmark.subject.dll");
       _workPdbPath = Path.ChangeExtension(_workDllPath, ".pdb");
 
       // Copy both DLL and PDB so Mono.Cecil can match symbols.
@@ -91,7 +91,7 @@ namespace coverlet.core.benchmark.tests
 
       _coverageParameters = new CoverageParameters
       {
-        IncludeFilters = ["[coverlet.testsubject]*"],
+        IncludeFilters = ["[coverlet.benchmark.subject]*"],
         IncludeDirectories = [_workDir],
         ExcludeFilters = [],
         ExcludedSourceFiles = [],
@@ -134,7 +134,7 @@ namespace coverlet.core.benchmark.tests
     /// Service construction is excluded – it is performed once in <see cref="Setup"/>.
     /// </summary>
     [Benchmark]
-    public void InstrumenterBigClassBenchmark()
+    public void InstrumenterBenchmark()
     {
       var coverage = new Coverage(
           _workDir,

@@ -1,3 +1,4 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.1.11312.151
@@ -101,6 +102,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP.validation.tests", "test\coverlet.MTP.validation.tests\coverlet.MTP.validation.tests.csproj", "{9BB7E3B0-606F-2A58-C4A3-D233519875C5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.integration.legacy.tests", "test\coverlet.integration.legacy.tests\coverlet.integration.legacy.tests.csproj", "{ECDE9A84-B00D-4FFB-827D-523A9FE365F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.benchmark.subject", "test\coverlet.benchmark.subject\coverlet.benchmark.subject.csproj", "{CCB15D78-0177-4DC4-8761-BA971873F51F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -484,6 +487,18 @@ Global
 		{ECDE9A84-B00D-4FFB-827D-523A9FE365F6}.Release|x64.Build.0 = Release|Any CPU
 		{ECDE9A84-B00D-4FFB-827D-523A9FE365F6}.Release|x86.ActiveCfg = Release|Any CPU
 		{ECDE9A84-B00D-4FFB-827D-523A9FE365F6}.Release|x86.Build.0 = Release|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Debug|x64.Build.0 = Debug|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Debug|x86.Build.0 = Debug|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Release|x64.ActiveCfg = Release|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Release|x64.Build.0 = Release|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Release|x86.ActiveCfg = Release|Any CPU
+		{CCB15D78-0177-4DC4-8761-BA971873F51F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -521,6 +536,7 @@ Global
 		{E97959B1-73BA-5B91-5795-5602ADC73FB5} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{9BB7E3B0-606F-2A58-C4A3-D233519875C5} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{ECDE9A84-B00D-4FFB-827D-523A9FE365F6} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{CCB15D78-0177-4DC4-8761-BA971873F51F} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}
