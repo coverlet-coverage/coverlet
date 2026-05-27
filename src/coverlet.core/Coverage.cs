@@ -258,6 +258,8 @@ namespace Coverlet.Core
       var branchesInGeneratedClassSet = new HashSet<string>(StringComparer.Ordinal);
       foreach (InstrumenterResult r in _results)
       {
+        if (r.BranchesInCompiledGeneratedClass is null)
+          continue;
         foreach (string m in r.BranchesInCompiledGeneratedClass)
           branchesInGeneratedClassSet.Add(m);
       }
