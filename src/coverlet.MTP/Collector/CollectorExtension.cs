@@ -115,8 +115,13 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       // Load configuration file settings (coverlet.mtp.appsettings.json)
       CoverletMTPSettings? configFileSettings = LoadConfigurationFileSettings(_testModulePath!);
 
-      // Create merged configuration: command-line options take precedence over config file
-      var config = new CoverageConfiguration(_commandLineOptions, configFileSettings, _loggerFactory.CreateLogger(nameof(CollectorExtension)));
+      // Create merged configuration: command-line options take precedence over config file.
+      // testAssemblyName is passed so the dynamic exclude-filter logic can omit the test assembly itself.
+      var config = new CoverageConfiguration(
+        _commandLineOptions,
+        configFileSettings,
+        testAssemblyName: Path.GetFileNameWithoutExtension(_testModulePath),
+        logger: _loggerFactory.CreateLogger(nameof(CollectorExtension)));
       _configuration.DeterministicReport = config.DeterministicReport;
       _configuration.DisableManagedInstrumentationRestore = false;
       _configuration.DoesNotReturnAttributes = config.GetDoesNotReturnAttributes();

@@ -12,20 +12,12 @@ internal sealed class CoverageConfiguration
   private readonly ICommandLineOptions _commandLineOptions;
   private readonly ILogger? _logger;
   private readonly CoverletMTPSettings? _configFileSettings;
+  private readonly Coverlet.Core.Abstractions.IProcessAssemblyHelper _processAssemblyHelper;
+  private readonly string? _testAssemblyName;
 
-  // Default exclusions for user convenience, to avoid common noise in coverage reports. These are merged with any user-specified exclusions.
-  private static readonly string[] s_defaultExcludeFilters =
-  [
-    "[coverlet.*]*",
-    "[xunit.*]*",
-    "[NUnit3.*]*",
-    "[nunit.*]*",
-    "[Microsoft.Testing.*]*",
-    "[Microsoft.Testplatform.*]*",
-    "[Microsoft.VisualStudio.TestPlatform.*]*",
-    "[MSTest*]*",
-    "[testhost*]*"
-  ];
+  // Permanent baseline: coverlet assemblies must always be excluded regardless of source.
+  // All other test-framework assemblies are discovered dynamically at runtime via IProcessAssemblyHelper.
+  private static readonly string[] s_baselineExcludeFilters = ["[coverlet.*]*"];
 
   private static readonly string[] s_defaultExcludeByAttributes =
   [
@@ -39,7 +31,7 @@ internal sealed class CoverageConfiguration
   /// Initializes a new instance of CoverageConfiguration using only command-line options.
   /// </summary>
   public CoverageConfiguration(ICommandLineOptions commandLineOptions, ILogger? logger = null)
-    : this(commandLineOptions, configFileSettings: null, logger)
+    : this(commandLineOptions, configFileSettings: null, testAssemblyName: null, logger)
   {
   }
 
@@ -48,13 +40,20 @@ internal sealed class CoverageConfiguration
   /// Configuration precedence (highest to lowest):
   /// 1. Explicit command-line options
   /// 2. Configuration file settings (coverlet.mtp.appsettings.json)
-  /// 3. Built-in defaults
+  /// 3. Dynamic defaults derived from process-loaded assemblies (only when no config file)
   /// </summary>
-  public CoverageConfiguration(ICommandLineOptions commandLineOptions, CoverletMTPSettings? configFileSettings, ILogger? logger = null)
+  public CoverageConfiguration(
+    ICommandLineOptions commandLineOptions,
+    CoverletMTPSettings? configFileSettings,
+    string? testAssemblyName,
+    ILogger? logger = null,
+    Coverlet.Core.Abstractions.IProcessAssemblyHelper? processAssemblyHelper = null)
   {
     _commandLineOptions = commandLineOptions;
     _configFileSettings = configFileSettings;
+    _testAssemblyName = testAssemblyName;
     _logger = logger;
+    _processAssemblyHelper = processAssemblyHelper ?? new Coverlet.Core.Helpers.ProcessAssemblyHelper();
   }
 
   public bool IsCoverageEnabled =>
@@ -114,23 +113,57 @@ internal sealed class CoverageConfiguration
       CoverletOptionNames.Exclude,
       out string[]? filters))
     {
-      // Merge explicit exclusions with defaults for CLI convenience
-      string[] merged = [.. s_defaultExcludeFilters.Concat(filters).Distinct()];
+      // Merge explicit exclusions with the permanent baseline only — dynamic list is not
+      // applied here because the user is taking explicit control of the filter set.
+      string[] merged = [.. s_baselineExcludeFilters.Concat(filters).Distinct()];
       LogOptionValue(CoverletOptionNames.Exclude, merged, isExplicit: true);
       return merged;
     }
 
-    // Priority 2: Configuration file - authoritative when present
-    // Config file filters already include [coverlet.*]* prepended by CoverletMTPSettingsParser
+    // Priority 2: Configuration file - authoritative when present.
+    // Config file filters already include [coverlet.*]* prepended by CoverletMTPSettingsParser.
+    // Dynamic defaults are intentionally skipped when a config file is in use.
     if (_configFileSettings?.IsFromConfigFile == true)
     {
       LogOptionValue(CoverletOptionNames.Exclude, _configFileSettings.ExcludeFilters, isExplicit: false, source: "config file");
       return _configFileSettings.ExcludeFilters;
     }
 
-    // Priority 3: Built-in defaults - only when no config file
-    LogOptionValue(CoverletOptionNames.Exclude, s_defaultExcludeFilters, isExplicit: false);
-    return s_defaultExcludeFilters;
+    // Priority 3: Dynamic defaults derived from the assemblies already loaded into this
+    // process. Because only loaded assemblies are inspected, transitive dependencies that
+    // have not yet been resolved are never included in the list.
+    string[] dynamicDefaults = BuildDynamicExcludeFilters();
+    LogOptionValue(CoverletOptionNames.Exclude, dynamicDefaults, isExplicit: false);
+    return dynamicDefaults;
+  }
+
+  /// <summary>
+  /// Builds exclude-filter defaults by converting the names of assemblies currently loaded
+  /// into this process into coverlet filter patterns (e.g. "[xunit.core]*"), then merging
+  /// them with the permanent <see cref="s_baselineExcludeFilters"/>.
+  /// </summary>
+  private string[] BuildDynamicExcludeFilters()
+  {
+    string simpleTestName = string.IsNullOrWhiteSpace(_testAssemblyName)
+      ? string.Empty
+      : Path.GetFileNameWithoutExtension(_testAssemblyName)!;
+
+    try
+    {
+      IReadOnlyList<string> loadedNames = string.IsNullOrEmpty(simpleTestName)
+        ? []
+        : _processAssemblyHelper.GetLoadedAssemblyNames(simpleTestName);
+
+      IEnumerable<string> dynamicFilters = loadedNames.Select(Coverlet.Core.Helpers.ProcessAssemblyHelper.ToExcludeFilter);
+      return [.. s_baselineExcludeFilters.Concat(dynamicFilters).Distinct(StringComparer.OrdinalIgnoreCase)];
+    }
+    catch (Exception ex)
+    {
+      // Dynamic discovery is best-effort; fall back to the permanent baseline so coverage
+      // collection is never completely broken by an unexpected reflection error.
+      _logger?.LogWarning($"Dynamic assembly discovery failed; falling back to baseline exclude filters. Reason: {ex.Message}");
+      return s_baselineExcludeFilters;
+    }
   }
 
   public string[] GetExcludeByFileFilters()

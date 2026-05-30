@@ -227,8 +227,7 @@ public sealed class CoverageConfigurationTests
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
 
-    Assert.Contains("[xunit.*]*", result);
-    Assert.Contains("[Microsoft.Testing.*]*", result);
+    // Baseline filter is always present when CLI flag is used
     Assert.Contains("[coverlet.*]*", result);
     Assert.Contains("[CustomExclude]*", result);
   }
@@ -248,22 +247,16 @@ public sealed class CoverageConfigurationTests
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(9, result.Length);
-    Assert.Contains("[xunit.*]*", result);
-    Assert.Contains("[Microsoft.Testing.*]*", result);
+    // Permanent baseline is always present
     Assert.Contains("[coverlet.*]*", result);
-    Assert.Contains("[Microsoft.Testplatform.*]*", result);
-    Assert.Contains("[Microsoft.VisualStudio.TestPlatform.*]*", result);
-    Assert.Contains("[NUnit3.*]*", result);
-    Assert.Contains("[nunit.*]*", result);
-    Assert.Contains("[MSTest*]*", result);
-    Assert.Contains("[testhost*]*", result);
+    // Dynamic discovery adds loaded-process assemblies on top of the baseline
+    Assert.True(result.Length >= 1);
   }
 
   [Fact]
   public void GetExcludeFiltersRemovesDuplicates()
   {
-    string[] customFilters = ["[xunit.*]*", "[CustomExclude]*"];
+    string[] customFilters = ["[coverlet.*]*", "[CustomExclude]*"];
 #pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
   .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
@@ -276,14 +269,15 @@ public sealed class CoverageConfigurationTests
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(10, result.Length);
-    Assert.Single(result, f => f == "[xunit.*]*");
+    // [coverlet.*]* appears in both the baseline and the custom list; must be deduplicated
+    Assert.Single(result, f => f == "[coverlet.*]*");
+    Assert.Contains("[CustomExclude]*", result);
   }
 
   [Fact]
   public void GetExcludeFiltersWithMultipleDuplicatesRemovesAllDuplicates()
   {
-    string[] customFilters = ["[xunit.*]*", "[Microsoft.Testing.*]*", "[CustomExclude]*", "[xunit.*]*"];
+    string[] customFilters = ["[coverlet.*]*", "[MyFilter]*", "[CustomExclude]*", "[coverlet.*]*"];
 #pragma warning disable IDE0350 // Use implicitly typed lambda
     _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.Exclude, out It.Ref<string[]?>.IsAny))
   .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
@@ -296,9 +290,10 @@ public sealed class CoverageConfigurationTests
     var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(10, result.Length); // 9 defaults + 1 custom (all duplicates removed)
-    Assert.Single(result, f => f == "[xunit.*]*");
-    Assert.Single(result, f => f == "[Microsoft.Testing.*]*");
+    // All duplicates must be removed regardless of how many times they appear
+    Assert.Single(result, f => f == "[coverlet.*]*");
+    Assert.Single(result, f => f == "[MyFilter]*");
+    Assert.Single(result, f => f == "[CustomExclude]*");
   }
 
   #endregion
