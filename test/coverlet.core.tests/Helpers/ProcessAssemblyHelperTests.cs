@@ -68,9 +68,18 @@ namespace Coverlet.Core.Tests.Helpers
     }
 
     [Theory]
-    [InlineData("xunit.runner.utility", "[xunit.runner.utility]*")]
+    // Single segment — exact
+    [InlineData("xunit", "[xunit]*")]
+    // Two segments — exact
     [InlineData("ReportGenerator.Mtp", "[ReportGenerator.Mtp]*")]
-    [InlineData("Microsoft.Testing.Platform", "[Microsoft.Testing.Platform]*")]
+    // Two segments — exact
+    [InlineData("coverlet.core", "[coverlet.core]*")]
+    // Three segments — wildcard from third onwards
+    [InlineData("xunit.v3.mtp-v2", "[xunit.v3.*]*")]
+    [InlineData("xunit.runner.utility", "[xunit.runner.*]*")]
+    [InlineData("Microsoft.Testing.Platform", "[Microsoft.Testing.*]*")]
+    // Four segments — still uses first-two-segment prefix
+    [InlineData("Microsoft.Extensions.Configuration.Binder", "[Microsoft.Extensions.*]*")]
     public void WhenToExcludeFilterThenReturnsCorrectPattern(string assemblyName, string expectedFilter)
     {
       string result = ProcessAssemblyHelper.ToExcludeFilter(assemblyName);
@@ -78,13 +87,34 @@ namespace Coverlet.Core.Tests.Helpers
       Assert.Equal(expectedFilter, result);
     }
 
+    [Theory]
+    // An exact filter that is already covered by a wildcard should be pruned.
+    [InlineData(new[] { "[coverlet.*]*", "[coverlet.core]*" }, new[] { "[coverlet.*]*" })]
+    // A wildcard is not pruned by itself.
+    [InlineData(new[] { "[coverlet.*]*" }, new[] { "[coverlet.*]*" })]
+    // An exact filter not covered by any wildcard is kept.
+    [InlineData(new[] { "[coverlet.*]*", "[Serilog]*" }, new[] { "[coverlet.*]*", "[Serilog]*" })]
+    // Deeper exact filter covered by parent wildcard.
+    [InlineData(new[] { "[Microsoft.Extensions.*]*", "[Microsoft.Extensions.Logging]*" }, new[] { "[Microsoft.Extensions.*]*" })]
+    // Exact filter where no matching wildcard exists is kept.
+    [InlineData(new[] { "[xunit.v3.*]*", "[System.Runtime]*" }, new[] { "[xunit.v3.*]*", "[System.Runtime]*" })]
+    public void WhenPruneRedundantFiltersThenRemovesExactFiltersCoveredByWildcard(string[] input, string[] expected)
+    {
+      IEnumerable<string> result = ProcessAssemblyHelper.PruneRedundantFilters(input);
+
+      Assert.Equal(expected, result);
+    }
+
     [Fact]
     public void WhenGetLoadedAssemblyNamesThenContainsKnownAssembly()
     {
-      // xunit itself must be loaded in the test process
+      // Derive the expected name from a type that is definitely in the test process,
+      // so this test stays valid if the xUnit package or assembly name ever changes.
+      string expectedAssemblyName = typeof(FactAttribute).Assembly.GetName().Name!;
+
       IReadOnlyList<string> result = _sut.GetLoadedAssemblyNames("SomeOtherAssembly");
 
-      Assert.Contains("xunit.v3.core", result, StringComparer.OrdinalIgnoreCase);
+      Assert.Contains(expectedAssemblyName, result, StringComparer.OrdinalIgnoreCase);
     }
   }
 }

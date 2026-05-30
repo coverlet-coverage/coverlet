@@ -120,7 +120,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       var config = new CoverageConfiguration(
         _commandLineOptions,
         configFileSettings,
-        testAssemblyName: Path.GetFileNameWithoutExtension(_testModulePath),
+        testModulePath: _testModulePath,
         logger: _loggerFactory.CreateLogger(nameof(CollectorExtension)));
       _configuration.DeterministicReport = config.DeterministicReport;
       _configuration.DisableManagedInstrumentationRestore = false;
@@ -210,9 +210,11 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     if (ex is AggregateException aggEx && aggEx.InnerExceptions.Count > 0)
     {
       var distinctMessages = aggEx.InnerExceptions
+#pragma warning disable IDE0200
         .Select(e => GetConciseErrorMessage(e))
         .Distinct()
         .ToList();
+#pragma warning restore IDE0200
 
       return string.Join(Environment.NewLine + "  ", distinctMessages);
     }
@@ -226,12 +228,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   private static string GetConciseErrorMessage(Exception ex)
   {
     // For IOException (file access issues), include the specific file info
-    if (ex is IOException ioEx)
-    {
-      return ioEx.Message;
-    }
-
-    return ex.Message;
+    return ex is IOException ioEx ? ioEx.Message : ex.Message;
   }
 
   /// <summary>
@@ -454,9 +451,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   {
     string timestamp = utcNow.ToString("ddMMyyHHmmssfff");
     int lastDot = filename.LastIndexOf('.');
-    if (lastDot > 0)
-      return filename.Insert(lastDot, $".{timestamp}");
-    return $"{filename}.{timestamp}";
+    return lastDot > 0 ? filename.Insert(lastDot, $".{timestamp}") : $"{filename}.{timestamp}";
   }
 
   /// <summary>
@@ -604,12 +599,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
 
     // Reject invalid filename characters
     char[] invalidChars = Path.GetInvalidFileNameChars();
-    if (prefix.IndexOfAny(invalidChars) >= 0)
-    {
-      return null;
-    }
-
-    return prefix;
+    return prefix.IndexOfAny(invalidChars) >= 0 ? null : prefix;
   }
 
   private string? ResolveTestModulePath()
