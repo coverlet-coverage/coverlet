@@ -18,7 +18,7 @@ internal sealed class CoverageConfiguration
 
   // Permanent baseline: coverlet assemblies must always be excluded regardless of source.
   // All other test-framework assemblies are discovered dynamically at runtime via IProcessAssemblyHelper.
-  private static readonly string[] s_baselineExcludeFilters = ["[coverlet.*]*"];
+  private static readonly string[] s_baselineExcludeFilters = ["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*"];
 
   private static readonly string[] s_defaultExcludeByAttributes =
   [
