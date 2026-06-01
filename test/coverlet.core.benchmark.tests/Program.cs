@@ -51,12 +51,27 @@ namespace coverlet.core.benchmark.tests
       config = config.WithOptions(ConfigOptions.DisableOptimizationsValidator);
       System.Diagnostics.Debugger.Launch(); // Optional: force debugger attachment
 #endif
+      // AutoPropsBenchmarks carries [CPUUsageDiagnoser] which requires an out-of-process
+      // toolchain so the VS DiagnosticsHub profiler can attach to the child process and
+      // export a .diagsession file. Using InProcessNoEmitToolchain here suppresses that
+      // entirely because there is no child process to attach to.
+      var vsProfilingConfig = DefaultConfig.Instance
+            .WithOptions(ConfigOptions.DisableOptimizationsValidator)
+            .WithOptions(ConfigOptions.JoinSummary)
+            .WithOption(ConfigOptions.DisableLogFile, true)
+            .WithCultureInfo(noGroupSeparatorCulture)
+            .WithSummaryStyle(SummaryStyle.Default.WithCultureInfo(noGroupSeparatorCulture))
+            .AddJob(Job.LongRun.WithLaunchCount(1)) // out-of-process: no InProcessNoEmitToolchain
+            .AddExporter(new CsvExporter(CsvSeparator.Semicolon), JsonExporter.Default, MarkdownExporter.GitHub)
+            .AddDiagnoser(MemoryDiagnoser.Default);
+
       var summary = BenchmarkRunner.Run(new[]{
             BenchmarkConverter.TypeToBenchmarks( typeof(CoverageBenchmarks), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(InstrumenterBenchmarks), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(CoverageWorkflowBenchmark), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(InstrumentationOptionsBenchmarks), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(ReportFormatBenchmarks), config),
+            BenchmarkConverter.TypeToBenchmarks( typeof(AutoPropsBenchmarks), vsProfilingConfig),
             });
 
       // Use this to select benchmarks from the console and execute with additional options e.g. 'coverlet.core.benchmark.tests.exe --profiler EP'
