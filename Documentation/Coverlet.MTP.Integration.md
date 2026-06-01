@@ -99,21 +99,28 @@ Coverlet.MTP applies sensible default exclusions to reduce noise in coverage rep
 
 When using command line options **without** a configuration file, the following defaults are **automatically merged** with user-specified exclusions:
 
-- **Default Exclude Filters:** `[coverlet.*]*`, `[xunit.*]*`, `[NUnit3.*]*`, `[nunit.*]*`, `[Microsoft.Testing.*]*`, `[Microsoft.Testplatform.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`, `[MSTest*]*`, `[testhost*]*`
+- **Default Exclude Filters:** `[coverlet.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`, `[testhost*]*`
 - **Default Exclude by Attributes:** `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`
+
+**Dynamic Exclude Filters (Assembly Naming Convention):**
+
+Coverlet.MTP also applies **dynamic exclusions** derived from the test assembly name and its namespace conventions at runtime. These are intended to automatically exclude common test infrastructure assemblies that follow standard naming patterns.
+
+> [!WARNING]
+> **Assembly Naming Limitation:** Dynamic exclusions rely on the assembly name following conventional naming schemas (e.g., `MyApp.Tests`, `MyApp.UnitTests`, `MyApp.IntegrationTests`). Assemblies that **do not follow these naming conventions** will **not** be automatically excluded by the dynamic filter. In such cases, you must add explicit `--coverlet-exclude` filters manually.
 
 **Configuration File Behavior (Authoritative Mode):**
 
 When a configuration file is present (`testconfig.json` or `coverlet.mtp.appsettings.json`), the configuration file becomes **authoritative**:
 
 - **No defaults are injected** for `Format`, `Exclude`, `ExcludeByAttribute`, or other settings
-- You are responsible for defining all options you need
+- **Dynamic exclude filters are also not applied** — you are fully responsible for defining all exclusions
 - Only the minimal `[coverlet.*]*` exclude filter is always prepended to prevent self-instrumentation
 
 This design follows the principle that providing a configuration file represents your complete intent for coverlet settings.
 
 > [!IMPORTANT]
-> **Breaking Change Notice:** In previous versions, defaults were merged even when a configuration file existed. Starting with this version, configuration files are authoritative. If you relied on default exclusions being applied automatically, you must now explicitly add them to your configuration file.
+> **Breaking Change Notice:** In previous versions, defaults were merged even when a configuration file existed. Starting with this version, configuration files are authoritative. If you relied on default exclusions (including dynamic ones) being applied automatically, you must now explicitly add them to your configuration file.
 
 ### Configuration Files
 
