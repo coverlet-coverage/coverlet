@@ -106,7 +106,7 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(["[coverlet.*]*"], result);
+    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*"], result);
   }
 
   [Fact]
@@ -127,7 +127,7 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(["[coverlet.*]*"], result);
+    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*"], result);
   }
 
   [Fact]
@@ -166,7 +166,7 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(["[coverlet.*]*"], result);
+    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*"], result);
     _mockProcessAssemblyHelper.Verify(
       x => x.GetDepsJsonAssemblyNames(It.IsAny<string>(), It.IsAny<string>()),
       Times.Never);
