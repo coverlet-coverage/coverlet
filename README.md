@@ -26,6 +26,7 @@ Coverlet is a cross platform code coverage framework for .NET, with support for 
 * [Known Issues](#known-issues)
 * [Consume nightly build](#consume-nightly-build)
 * [Feature samples](Documentation/Examples.md)
+* [Experimental features](#experimental-features)
 * [Cake Add-In](#cake-add-in)
 * [Visual Studio Add-In](#visual-studio-add-in)
 * [Changelog](Documentation/Changelog.md)
@@ -221,6 +222,54 @@ Coverlet supports coverage for deterministic builds. The solution at the moment 
 Take a look at [documentation](Documentation/DeterministicBuild.md).
 
 ## Are you in trouble with some feature? Check on [examples](Documentation/Examples.md)
+
+## Experimental features
+
+Coverlet exposes opt-in performance improvements that are not yet enabled by default.
+Each feature is controlled by an environment variable.  
+Setting a variable to `1` (or any non-empty value other than `0` / `false`) **enables** the feature.  
+When the variable is absent or falsy, Coverlet behaves exactly like the current stable release.
+
+> [!WARNING]
+> Experimental features may change or be removed without notice. Please report any issues you find.
+
+### `COVERLET_EXPERIMENTAL_AUTOPROP_BACKING_FIELD_CACHE`
+
+**Scope:** `SkipInlineAssignedAutoProperty` / auto-property backing-field detection  
+**Default:** disabled (original O(N) LINQ scan, identical to master)
+
+When enabled, Coverlet caches the set of compiler-generated `k__BackingField` names **per declaring type** so the per-field scan is performed at most once per type rather than on every constructor instruction.
+This can measurably reduce instrumentation time for assemblies with many classes that use inline-initialised auto-properties.
+
+#### Performance impact
+
+| Scenario | Without flag (default) | With flag enabled |
+| --- | --- | --- |
+| Per-constructor instruction | O(N) LINQ scan over all fields of the declaring type | O(1) `HashSet<string>` lookup |
+| First visit of a declaring type | O(N) scan | O(N) scan — result is cached |
+| Subsequent visits of the same type | O(N) scan repeated for every instruction | O(1) lookup from cache |
+| Memory overhead | None | One `HashSet<string>` per instrumented declaring type, held for the lifetime of the `CecilSymbolHelper` instance |
+
+> [!NOTE]
+> The benefit is most noticeable in large assemblies that contain many classes with multiple inline-initialised auto-properties (i.e. properties with a default value set directly in the declaration). For small assemblies or assemblies without auto-property initialisers the difference is negligible.
+
+```powershell
+# Enable
+$env:COVERLET_EXPERIMENTAL_AUTOPROP_BACKING_FIELD_CACHE = "1"
+
+# Disable (restore default)
+Remove-Item Env:COVERLET_EXPERIMENTAL_AUTOPROP_BACKING_FIELD_CACHE
+```
+
+Or set it as a persistent user/system environment variable before running `dotnet test` / `coverlet`:
+
+```bash
+# Linux / macOS
+export COVERLET_EXPERIMENTAL_AUTOPROP_BACKING_FIELD_CACHE=1
+
+# Windows (Command Prompt)
+set COVERLET_EXPERIMENTAL_AUTOPROP_BACKING_FIELD_CACHE=1
+```
 
 ## Known Issues
 
