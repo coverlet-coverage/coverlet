@@ -20,14 +20,14 @@ namespace coverlet.core.benchmark.tests
   /// auto-property and record types added to <c>coverlet.benchmark.subject</c>
   /// (issue-1633 / PR-1941).
   ///
-  /// The suite isolates three dimensions that affect this code path:
+  /// The suite isolates two dimensions that affect this code path:
   /// <list type="bullet">
   ///   <item><term>SkipAutoProps</term><description>
   ///     Toggles the guard condition — when <c>false</c> the entire scan is
   ///     bypassed, making it the ideal baseline to quantify the net cost of
   ///     the backing-field enumeration when <c>true</c>.
   ///   </description></item>
-  ///   <item><term>RecordScenario</term><description>
+  ///   <item><term>FocusRecordTypes</term><description>
   ///     Selects the filter applied to the benchmark subject so that only the
   ///     record/auto-prop types are included (high-density scenario) or the full
   ///     assembly (real-world baseline).
