@@ -51,6 +51,7 @@ steps:
   displayName: Run unit tests with coverage
   env:
     MSBUILDDISABLENODEREUSE: 1
+    COVERLET_EXPERIMENTAL_AUTOPROP_BACKING_FIELD_CACHE: 1
 
 - task: PublishTestResults@2
   inputs:
