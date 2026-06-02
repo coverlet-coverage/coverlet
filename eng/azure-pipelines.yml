@@ -7,8 +7,6 @@ trigger:
 variables:
   system.debug: false
   frameworks: 'net8.0,net10.0'
-  COVERLET_EXPERIMENTAL_AUTOPROP_BACKING_FIELD_CACHE: '1'
-
 
 jobs:
 - job: Windows
@@ -69,7 +67,6 @@ jobs:
   variables:
     frameworks: 'net8.0,net9.0'
     LEGACY: 'true'
-    COVERLET_EXPERIMENTAL_AUTOPROP_BACKING_FIELD_CACHE: '1'
   steps:
   - template: build-legacy.yml
 
