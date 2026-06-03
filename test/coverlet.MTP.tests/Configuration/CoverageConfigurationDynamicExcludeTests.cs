@@ -47,7 +47,7 @@ public sealed class CoverageConfigurationDynamicExcludeTests
   {
     _mockProcessAssemblyHelper
       .Setup(x => x.GetDepsJsonAssemblyNames(s_fakeModuleDir, TestAssemblyName))
-      .Returns(["xunit.core", "ReportGenerator.Mtp"]);
+      .Returns(["xunit.core"]);
     _mockProcessAssemblyHelper
       .Setup(x => x.GetLoadedAssemblyNames(TestAssemblyName))
       .Returns([]);
@@ -62,7 +62,6 @@ public sealed class CoverageConfigurationDynamicExcludeTests
     string[] result = config.GetExcludeFilters();
 
     Assert.Contains("[xunit.core]*", result);
-    Assert.Contains("[ReportGenerator.Mtp]*", result);
   }
 
   [Fact]
@@ -106,7 +105,7 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*"], result);
+    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*", "[ReportGenerator.*]*"], result);
   }
 
   [Fact]
@@ -127,7 +126,7 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*"], result);
+    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*", "[ReportGenerator.*]*"], result);
   }
 
   [Fact]
@@ -166,7 +165,7 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*"], result);
+    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*", "[ReportGenerator.*]*"], result);
     _mockProcessAssemblyHelper.Verify(
       x => x.GetDepsJsonAssemblyNames(It.IsAny<string>(), It.IsAny<string>()),
       Times.Never);
