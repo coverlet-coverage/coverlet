@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">$(NetMinimum);net9.0;$(NetCurrent)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(LEGACY)' != ''">$(NetMinimum);$(NetCurrent)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' == ''">netstandard2.0;$(NetMinimum);net9.0;$(NetCurrent)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' != ''">netstandard2.0;$(NetMinimum);$(NetCurrent)</TargetFrameworks>
     <AssemblyTitle>coverlet.collector</AssemblyTitle>
     <DevelopmentDependency>true</DevelopmentDependency>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -15,7 +15,7 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
     <!-- Open issue https://github.com/NuGet/Home/issues/8941 -->
-    <NoWarn>$(NoWarn);NU5127;NU5100</NoWarn>
+    <NoWarn>$(NoWarn);NU5127;NU5100;NU1701</NoWarn>
     <EnablePackageValidation>true</EnablePackageValidation>
     <!-- disable transitive version update and use versions defined in coverlet.core -->
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
