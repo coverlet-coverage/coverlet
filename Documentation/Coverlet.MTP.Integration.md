@@ -88,6 +88,9 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-does-not-return-attribute <attribute>` | Attributes that mark methods as not returning. Can be specified multiple times. (default: `none`) |
 | `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. (default: `None`) |
 
+> [!TIP]
+> If you encounter instrumentation failures like "The process cannot access the file ... because it is being used by another process", try setting `--coverlet-exclude-assemblies-without-sources MissingAll` (or in a config file: `"ExcludeAssembliesWithoutSources": "MissingAll"`) to skip assemblies without sources and reduce access conflicts.
+
 > [!NOTE]
 > Coverage report files will be stored in `--results-directory` folder and a time stamp `{DateTime.UtcNow:ddMMyyHHmmssfff}` is used for generated code coverage files name e.g. `coverage.280326122803612.json` or `coverage.cobertura.280326122803612.xml`
 
