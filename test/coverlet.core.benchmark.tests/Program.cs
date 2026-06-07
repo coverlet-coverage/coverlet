@@ -69,6 +69,8 @@ namespace coverlet.core.benchmark.tests
       {
         // When CLI arguments are provided, delegate to BenchmarkSwitcher so built-in
         // BenchmarkDotNet filters like --filter are honored.
+        CultureInfo.DefaultThreadCurrentCulture = noGroupSeparatorCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = noGroupSeparatorCulture;
         BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         return;
       }

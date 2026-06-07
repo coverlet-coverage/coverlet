@@ -17,10 +17,11 @@ namespace coverlet.benchmark.subject
   /// </remarks>
   internal static class Program
   {
+    private static int s_failures;
     private static int Main(string[] args)
     {
       Run();
-      return 0;
+      return s_failures == 0 ? 0 : 1;
     }
 
     private static void Run()
@@ -46,6 +47,7 @@ namespace coverlet.benchmark.subject
       }
       catch (Exception ex)
       {
+        s_failures++;
         Console.Error.WriteLine($"[subject] {workloadName} failed: {ex.GetType().FullName}: {ex.Message}");
       }
     }
