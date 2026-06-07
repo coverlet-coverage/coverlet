@@ -155,9 +155,14 @@ namespace coverlet.core.benchmark.tests
     [Benchmark(Description = "Simulate Workflow")]
     public void SimulateWorkflow()
     {
-      _logger.LogInformation($"SimulateWorkflow Directory: {Directory.GetCurrentDirectory()}");
-      _coverletTestSubjectArtifactPath = Directory.GetCurrentDirectory();
-      _coverletTestSubjectDllPath = Path.Combine(Directory.GetCurrentDirectory(), "coverlet.benchmark.subject.dll");
+      _coverletTestSubjectArtifactPath = AppContext.BaseDirectory;
+      _coverletTestSubjectDllPath = Path.Combine(_coverletTestSubjectArtifactPath, "coverlet.benchmark.subject.dll");
+      _logger.LogInformation($"SimulateWorkflow Artifact Directory: {_coverletTestSubjectArtifactPath}");
+
+      if (!File.Exists(_coverletTestSubjectDllPath))
+      {
+        throw new FileNotFoundException($"Test subject DLL not found at: {_coverletTestSubjectDllPath}");
+      }
 
       string pdbPath = Path.ChangeExtension(_coverletTestSubjectDllPath, ".pdb");
       if (!File.Exists(pdbPath))
@@ -300,11 +305,15 @@ namespace coverlet.core.benchmark.tests
         throw new FileNotFoundException($"Instrumented assembly not found at: {_coverletTestSubjectDllPath}");
       }
 
-      Process.RunToCompletion(
+      int exitCode = Process.RunToCompletion(
           DotnetMuxer.Path.FullName,
           $"\"{_coverletTestSubjectDllPath}\"",
           workingDirectory: _coverletTestSubjectArtifactPath);
 
+      if (exitCode != 0)
+      {
+        throw new InvalidOperationException($"Benchmark subject exited with code {exitCode}");
+      }
     }
 
     /// <summary>

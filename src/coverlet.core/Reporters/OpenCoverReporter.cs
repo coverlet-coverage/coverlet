@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Buffers;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -248,11 +249,26 @@ namespace Coverlet.Core.Reporters
       coverage.Add(modules);
       xml.Add(coverage);
 
-      using var stream = new MemoryStream();
-      using var streamWriter = new StreamWriter(stream, new UTF8Encoding(false));
-      xml.Save(streamWriter);
+      // P4: Use a short-lived MemoryStream and rent a byte buffer from ArrayPool for the
+      // final encoding step. This avoids both the per-call MemoryStream.ToArray() allocation
+      // and the per-thread buffer retention that ThreadLocal<MemoryStream> would cause.
+      using var stream = new MemoryStream(capacity: 256 * 1024);
+      using (var streamWriter = new StreamWriter(stream, new UTF8Encoding(false), bufferSize: 1024, leaveOpen: true))
+      {
+        xml.Save(streamWriter);
+      }
 
-      return Encoding.UTF8.GetString(stream.ToArray());
+      int byteCount = (int)stream.Length;
+      byte[] rentedBuffer = ArrayPool<byte>.Shared.Rent(byteCount);
+      try
+      {
+        stream.GetBuffer().AsSpan(0, byteCount).CopyTo(rentedBuffer);
+        return Encoding.UTF8.GetString(rentedBuffer, 0, byteCount);
+      }
+      finally
+      {
+        ArrayPool<byte>.Shared.Return(rentedBuffer);
+      }
     }
   }
 }

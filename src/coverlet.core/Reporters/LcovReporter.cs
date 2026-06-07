@@ -3,13 +3,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using Coverlet.Core.Abstractions;
 
 namespace Coverlet.Core.Reporters
 {
   internal class LcovReporter : IReporter
   {
+    // P4: Pool a StringBuilder per thread to avoid repeated large heap allocations.
+    private static readonly ThreadLocal<StringBuilder> s_sb =
+        new(() => new StringBuilder(capacity: 64 * 1024));
+
     public ReporterOutputType OutputType => ReporterOutputType.File;
 
     public string Format => "lcov";
@@ -23,7 +30,8 @@ namespace Coverlet.Core.Reporters
         throw new NotSupportedException("Deterministic report not supported by lcov reporter");
       }
 
-      var lcov = new List<string>();
+      StringBuilder sb = s_sb.Value!;
+      sb.Clear();
 
       foreach (KeyValuePair<string, Documents> module in result.Modules)
       {
@@ -33,7 +41,7 @@ namespace Coverlet.Core.Reporters
           CoverageDetails docBranchCoverage = CoverageSummary.CalculateBranchCoverage(doc.Value);
           CoverageDetails docMethodCoverage = CoverageSummary.CalculateMethodCoverage(doc.Value);
 
-          lcov.Add("SF:" + doc.Key);
+          sb.Append("SF:").AppendLine(doc.Key);
           foreach (KeyValuePair<string, Methods> @class in doc.Value)
           {
             foreach (KeyValuePair<string, Method> method in @class.Value)
@@ -42,33 +50,42 @@ namespace Coverlet.Core.Reporters
               if (method.Value.Lines.Count == 0)
                 continue;
 
-              lcov.Add($"FN:{method.Value.Lines.First().Key - 1},{method.Key}");
-              lcov.Add($"FNDA:{method.Value.Lines.First().Value},{method.Key}");
+              KeyValuePair<int, int> firstLine = method.Value.Lines.First();
+              sb.Append("FN:").Append(firstLine.Key - 1).Append(',').AppendLine(method.Key);
+              sb.Append("FNDA:").Append(firstLine.Value).Append(',').AppendLine(method.Key);
 
               foreach (KeyValuePair<int, int> line in method.Value.Lines)
-                lcov.Add($"DA:{line.Key},{line.Value}");
+                sb.Append("DA:").Append(line.Key).Append(',').Append(line.Value).AppendLine();
 
               foreach (BranchInfo branch in method.Value.Branches)
               {
-                lcov.Add($"BRDA:{branch.Line},{branch.Offset},{branch.Path},{branch.Hits}");
+                sb.Append("BRDA:").Append(branch.Line).Append(',')
+                  .Append(branch.Offset).Append(',')
+                  .Append(branch.Path).Append(',')
+                  .Append(branch.Hits).AppendLine();
               }
             }
           }
 
-          lcov.Add($"LF:{docLineCoverage.Total}");
-          lcov.Add($"LH:{docLineCoverage.Covered}");
+          sb.Append("LF:").Append(docLineCoverage.Total).AppendLine();
+          sb.Append("LH:").Append(docLineCoverage.Covered.ToString(CultureInfo.InvariantCulture)).AppendLine();
 
-          lcov.Add($"BRF:{docBranchCoverage.Total}");
-          lcov.Add($"BRH:{docBranchCoverage.Covered}");
+          sb.Append("BRF:").Append(docBranchCoverage.Total).AppendLine();
+          sb.Append("BRH:").Append(docBranchCoverage.Covered.ToString(CultureInfo.InvariantCulture)).AppendLine();
 
-          lcov.Add($"FNF:{docMethodCoverage.Total}");
-          lcov.Add($"FNH:{docMethodCoverage.Covered}");
+          sb.Append("FNF:").Append(docMethodCoverage.Total).AppendLine();
+          sb.Append("FNH:").Append(docMethodCoverage.Covered.ToString(CultureInfo.InvariantCulture)).AppendLine();
 
-          lcov.Add("end_of_record");
+          sb.AppendLine("end_of_record");
         }
       }
 
-      return string.Join(Environment.NewLine, lcov);
+      // Trim the trailing newline added by the last AppendLine to match the original
+      // string.Join(Environment.NewLine, ...) output which has no trailing newline.
+      if (sb.Length >= Environment.NewLine.Length)
+        sb.Length -= Environment.NewLine.Length;
+
+      return sb.ToString();
     }
   }
 }

@@ -27,6 +27,21 @@ namespace Coverlet.Core.Helpers
     private static readonly RegexOptions s_regexOptions =
       RegexOptions.Multiline | RegexOptions.Compiled;
 
+    // P10: cache the validation regex – the pattern never changes so there is no reason to
+    // allocate a new compiled Regex on every IsValidFilterExpression call.
+    private static readonly Regex s_invalidFilterCharsRegex =
+      new(@"[^\w*]", s_regexOptions, TimeSpan.FromSeconds(10));
+
+    // P6: cache compiled (moduleRegex, typeRegex) pairs keyed on the raw filter string so
+    // WildcardToRegex + Regex construction runs at most once per unique filter expression.
+    // The cache is capped at MaxFilterCacheEntries: filter strings come from user configuration
+    // (a handful of [Assembly]*Type patterns per run) so growth is bounded in practice, but a
+    // hard ceiling prevents unbounded memory accumulation in long-running hosts (e.g. collectors)
+    // that could theoretically see many distinct filter sets over their lifetime.
+    // Once the cap is reached new patterns are compiled on the fly without caching (safe fall-through).
+    private const int MaxFilterCacheEntries = 512;
+    private static readonly ConcurrentDictionary<string, (Regex moduleRegex, Regex typeRegex)> s_filterRegexCache = new();
+
     public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger, ISourceRootTranslator sourceRootTranslator)
     {
       processExitHandler.Add((s, e) => RestoreOriginalModules());
@@ -375,11 +390,15 @@ namespace Coverlet.Core.Helpers
       if (!filter.Contains("]"))
         return false;
 
-      if (filter.Count(f => f == '[') > 1)
-        return false;
-
-      if (filter.Count(f => f == ']') > 1)
-        return false;
+      // P10: single pass over the string to count '[' and ']' simultaneously
+      int openCount = 0, closeCount = 0;
+      foreach (char c in filter)
+      {
+        if (c == '[') openCount++;
+        else if (c == ']') closeCount++;
+        if (openCount > 1 || closeCount > 1)
+          return false;
+      }
 
       if (filter.IndexOf(']') < filter.IndexOf('['))
         return false;
@@ -390,7 +409,8 @@ namespace Coverlet.Core.Helpers
       if (filter.EndsWith("]"))
         return false;
 
-      if (new Regex(@"[^\w*]", s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(filter.Replace(".", "").Replace("?", "").Replace("[", "").Replace("]", "")))
+      // P10: use the cached compiled regex instead of allocating a new one per call
+      if (s_invalidFilterCharsRegex.IsMatch(filter.Replace(".", "").Replace("?", "").Replace("[", "").Replace("]", "")))
         return false;
 
       return true;
@@ -503,6 +523,16 @@ namespace Coverlet.Core.Helpers
       _logger = logger;
     }
 
+    private static (Regex moduleRegex, Regex typeRegex) CompileFilter(string filter)
+    {
+      string typePattern   = filter.Substring(filter.IndexOf(']') + 1);
+      string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+      return (
+        new Regex(WildcardToRegex(modulePattern), RegexOptions.Compiled, TimeSpan.FromSeconds(10)),
+        new Regex(WildcardToRegex(typePattern),   RegexOptions.Compiled, TimeSpan.FromSeconds(10))
+      );
+    }
+
     private static bool IsTypeFilterMatch(string module, string type, string[] filters)
     {
       Debug.Assert(module != null);
@@ -510,13 +540,16 @@ namespace Coverlet.Core.Helpers
 
       foreach (string filter in filters)
       {
-        string typePattern = filter.Substring(filter.IndexOf(']') + 1);
-        string modulePattern = filter.Substring(1, filter.IndexOf(']') - 1);
+        // P6: compile each filter expression once; reuse on subsequent calls.
+        // Fall back to compiling without caching when the cap is reached to prevent
+        // unbounded memory growth in long-running hosts that see many distinct filter sets.
+        (Regex moduleRegex, Regex typeRegex) = s_filterRegexCache.TryGetValue(filter, out (Regex moduleRegex, Regex typeRegex) cached)
+          ? cached
+          : s_filterRegexCache.Count < MaxFilterCacheEntries
+            ? s_filterRegexCache.GetOrAdd(filter, static f => CompileFilter(f))
+            : CompileFilter(filter);
 
-        typePattern = WildcardToRegex(typePattern);
-        modulePattern = WildcardToRegex(modulePattern);
-
-        if (Regex.IsMatch(type, typePattern) && Regex.IsMatch(module, modulePattern))
+        if (moduleRegex.IsMatch(module) && typeRegex.IsMatch(type))
           return true;
       }
 

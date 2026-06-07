@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -91,9 +92,19 @@ namespace Coverlet.Core.Reporters
               method.Add(new XAttribute("complexity", CoverageSummary.CalculateCyclomaticComplexity(meth.Value.Branches)));
 
               var lines = new XElement("lines");
+
+              // P7: pre-group branches by line number once – O(B) – so the line loop is O(1) per line
+              Dictionary<int, List<BranchInfo>> branchesByLine = new Dictionary<int, List<BranchInfo>>(meth.Value.Branches.Count);
+              foreach (BranchInfo b in meth.Value.Branches)
+              {
+                if (!branchesByLine.TryGetValue(b.Line, out List<BranchInfo> list))
+                  branchesByLine[b.Line] = list = [];
+                list.Add(b);
+              }
+
               foreach (KeyValuePair<int, int> ln in meth.Value.Lines)
               {
-                bool isBranchPoint = meth.Value.Branches.Any(b => b.Line == ln.Key);
+                bool isBranchPoint = branchesByLine.ContainsKey(ln.Key);
                 var line = new XElement("line");
                 line.Add(new XAttribute("number", ln.Key.ToString()));
                 line.Add(new XAttribute("hits", ln.Value.ToString()));
@@ -101,7 +112,7 @@ namespace Coverlet.Core.Reporters
 
                 if (isBranchPoint)
                 {
-                  var branches = meth.Value.Branches.Where(b => b.Line == ln.Key).ToList();
+                  List<BranchInfo> branches = branchesByLine[ln.Key];
                   CoverageDetails branchInfoCoverage = CoverageSummary.CalculateBranchCoverage(branches);
                   line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent.ToString(CultureInfo.InvariantCulture)}% ({branchInfoCoverage.Covered.ToString(CultureInfo.InvariantCulture)}/{branchInfoCoverage.Total.ToString(CultureInfo.InvariantCulture)})"));
                   var conditions = new XElement("conditions");
@@ -145,11 +156,26 @@ namespace Coverlet.Core.Reporters
       coverage.Add(packages);
       xml.Add(coverage);
 
-      using var stream = new MemoryStream();
-      using var streamWriter = new StreamWriter(stream, new UTF8Encoding(false));
-      xml.Save(streamWriter);
+      // P4: Use a short-lived MemoryStream and rent a byte buffer from ArrayPool for the
+      // final encoding step. This avoids both the per-call MemoryStream.ToArray() allocation
+      // and the per-thread buffer retention that ThreadLocal<MemoryStream> would cause.
+      using var stream = new MemoryStream(capacity: 256 * 1024);
+      using (var streamWriter = new StreamWriter(stream, new UTF8Encoding(false), bufferSize: 1024, leaveOpen: true))
+      {
+        xml.Save(streamWriter);
+      }
 
-      return Encoding.UTF8.GetString(stream.ToArray());
+      int byteCount = (int)stream.Length;
+      byte[] rentedBuffer = ArrayPool<byte>.Shared.Rent(byteCount);
+      try
+      {
+        stream.GetBuffer().AsSpan(0, byteCount).CopyTo(rentedBuffer);
+        return Encoding.UTF8.GetString(rentedBuffer, 0, byteCount);
+      }
+      finally
+      {
+        ArrayPool<byte>.Shared.Return(rentedBuffer);
+      }
     }
 
     private static IEnumerable<string> GetBasePaths(Modules modules, bool useSourceLink)

@@ -52,12 +52,14 @@ namespace Coverlet.Core
 
     public static CoverageDetails CalculateLineCoverage(Lines lines)
     {
-      var details = new CoverageDetails
+      // P8: single-pass foreach avoids LINQ state-machine allocation
+      int covered = 0;
+      foreach (KeyValuePair<int, int> l in lines)
       {
-        Covered = lines.Count(l => l.Value > 0),
-        Total = lines.Count
-      };
-      return details;
+        if (l.Value > 0)
+          covered++;
+      }
+      return new CoverageDetails { Covered = covered, Total = lines.Count };
     }
 
     public static CoverageDetails CalculateLineCoverage(Methods methods)
@@ -266,14 +268,16 @@ namespace Coverlet.Core
 
     public static CoverageDetails CalculateMethodCoverage(Methods methods)
     {
+      // P8: single pass – accumulate Total inside the loop to avoid re-enumerating the Where() query
       var details = new CoverageDetails();
-      IEnumerable<KeyValuePair<string, Method>> methodsWithLines = methods.Where(m => m.Value.Lines.Count > 0);
-      foreach (KeyValuePair<string, Method> method in methodsWithLines)
+      foreach (KeyValuePair<string, Method> method in methods)
       {
+        if (method.Value.Lines.Count == 0)
+          continue;
+        details.Total++;
         CoverageDetails methodCoverage = CalculateMethodCoverage(method.Value.Lines);
         details.Covered += methodCoverage.Covered;
       }
-      details.Total = methodsWithLines.Count();
       return details;
     }
 
