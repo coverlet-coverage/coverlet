@@ -155,9 +155,14 @@ namespace coverlet.core.benchmark.tests
     [Benchmark(Description = "Simulate Workflow")]
     public void SimulateWorkflow()
     {
-      _logger.LogInformation($"SimulateWorkflow Directory: {Directory.GetCurrentDirectory()}");
-      _coverletTestSubjectArtifactPath = Directory.GetCurrentDirectory();
-      _coverletTestSubjectDllPath = Path.Combine(Directory.GetCurrentDirectory(), "coverlet.benchmark.subject.dll");
+      _coverletTestSubjectArtifactPath = AppContext.BaseDirectory;
+      _coverletTestSubjectDllPath = Path.Combine(_coverletTestSubjectArtifactPath, "coverlet.benchmark.subject.dll");
+      _logger.LogInformation($"SimulateWorkflow Artifact Directory: {_coverletTestSubjectArtifactPath}");
+
+      if (!File.Exists(_coverletTestSubjectDllPath))
+      {
+        throw new FileNotFoundException($"Test subject DLL not found at: {_coverletTestSubjectDllPath}");
+      }
 
       string pdbPath = Path.ChangeExtension(_coverletTestSubjectDllPath, ".pdb");
       if (!File.Exists(pdbPath))
@@ -170,7 +175,7 @@ namespace coverlet.core.benchmark.tests
         Module = _coverletTestSubjectDllPath,
         IncludeFilters = ["[coverlet.benchmark.subject]*"],
         IncludeDirectories = [_coverletTestSubjectArtifactPath],
-        ExcludeFilters = null,
+        ExcludeFilters = ["[coverlet.benchmark.subject]coverlet.benchmark.subject.Program*"],
         ExcludedSourceFiles = null,
         ExcludeAttributes = null,
         IncludeTestAssembly = true,
@@ -300,11 +305,37 @@ namespace coverlet.core.benchmark.tests
         throw new FileNotFoundException($"Instrumented assembly not found at: {_coverletTestSubjectDllPath}");
       }
 
-      Process.RunToCompletion(
+      var stdOut = new List<string>();
+      var stdErr = new List<string>();
+      int exitCode = Process.RunToCompletion(
           DotnetMuxer.Path.FullName,
           $"\"{_coverletTestSubjectDllPath}\"",
+          line => stdOut.Add(line),
+          line => stdErr.Add(line),
           workingDirectory: _coverletTestSubjectArtifactPath);
 
+      bool logSubjectOutput = string.Equals(
+          Environment.GetEnvironmentVariable("COVERLET_BENCHMARK_VERBOSE_SUBJECT_LOGS"),
+          "1",
+          StringComparison.Ordinal);
+
+      if (logSubjectOutput || exitCode != 0)
+      {
+        foreach (string line in stdOut)
+        {
+          _logger.LogVerbose($"[subject stdout] {line}");
+        }
+
+        foreach (string line in stdErr)
+        {
+          _logger.LogWarning($"[subject stderr] {line}");
+        }
+      }
+
+      if (exitCode != 0)
+      {
+        throw new InvalidOperationException($"Benchmark subject exited with code {exitCode}");
+      }
     }
 
     /// <summary>

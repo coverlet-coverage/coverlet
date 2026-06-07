@@ -65,6 +65,16 @@ namespace coverlet.core.benchmark.tests
             .AddExporter(new CsvExporter(CsvSeparator.Semicolon), JsonExporter.Default, MarkdownExporter.GitHub)
             .AddDiagnoser(MemoryDiagnoser.Default);
 
+      if (args.Length > 0)
+      {
+        // When CLI arguments are provided, delegate to BenchmarkSwitcher so built-in
+        // BenchmarkDotNet filters like --filter are honored.
+        CultureInfo.DefaultThreadCurrentCulture = noGroupSeparatorCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = noGroupSeparatorCulture;
+        BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+        return;
+      }
+
       var summary = BenchmarkRunner.Run(new[]{
             BenchmarkConverter.TypeToBenchmarks( typeof(CoverageBenchmarks), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(InstrumenterBenchmarks), config),
@@ -73,9 +83,6 @@ namespace coverlet.core.benchmark.tests
             BenchmarkConverter.TypeToBenchmarks( typeof(ReportFormatBenchmarks), config),
             BenchmarkConverter.TypeToBenchmarks( typeof(AutoPropsBenchmarks), vsProfilingConfig),
             });
-
-      // Use this to select benchmarks from the console and execute with additional options e.g. 'coverlet.core.benchmark.tests.exe --profiler EP'
-      //var summaries = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
     }
   }
 }
