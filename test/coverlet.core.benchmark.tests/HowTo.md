@@ -16,6 +16,49 @@ cd artifacts/bin/coverlet.core.benchmark.tests/release_net10.0
 ./coverlet.core.benchmark.tests.exe
 ```
 
+### Run a specific benchmark with `--filter`
+
+When CLI arguments are provided, benchmark execution is delegated to `BenchmarkSwitcher`,
+so BenchmarkDotNet built-in filters are honored.
+
+List benchmarks (full names):
+
+```bash
+./coverlet.core.benchmark.tests.exe --list flat
+```
+
+Current benchmark full names:
+
+```text
+coverlet.core.benchmark.tests.AutoPropsBenchmarks.InstrumentAutoPropsAndRecords
+coverlet.core.benchmark.tests.CoverageBenchmarks.GetCoverageBenchmark
+coverlet.core.benchmark.tests.CoverageWorkflowBenchmark.SimulateWorkflow
+coverlet.core.benchmark.tests.InstrumentationOptionsBenchmarks.InstrumentWithOptions
+coverlet.core.benchmark.tests.InstrumenterBenchmarks.InstrumenterBenchmark
+coverlet.core.benchmark.tests.ReportFormatBenchmarks.GetCoverageAndReport
+```
+
+Run one benchmark by full name:
+
+```bash
+./coverlet.core.benchmark.tests.exe --filter "coverlet.core.benchmark.tests.CoverageWorkflowBenchmark.SimulateWorkflow"
+```
+
+Run benchmarks by glob pattern:
+
+```bash
+./coverlet.core.benchmark.tests.exe --filter "*.InstrumenterBenchmarks.*"
+```
+
+### Enable verbose benchmark subject logs (troubleshooting)
+
+By default, benchmark subject stdout/stderr logs are suppressed and only emitted on failures.
+To force verbose subject logs, set this environment variable before running benchmarks:
+
+```powershell
+$env:COVERLET_BENCHMARK_VERBOSE_SUBJECT_LOGS='1'
+```
+
 > [!TIP]
 > If an error occurs about a missing `TestAssets\System.Private.CoreLib.dll` or
 > `TestAssets\System.Private.CoreLib.pdb`, copy the files from

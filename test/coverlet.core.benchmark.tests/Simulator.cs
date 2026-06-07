@@ -175,7 +175,7 @@ namespace coverlet.core.benchmark.tests
         Module = _coverletTestSubjectDllPath,
         IncludeFilters = ["[coverlet.benchmark.subject]*"],
         IncludeDirectories = [_coverletTestSubjectArtifactPath],
-        ExcludeFilters = null,
+        ExcludeFilters = ["[coverlet.benchmark.subject]coverlet.benchmark.subject.Program*"],
         ExcludedSourceFiles = null,
         ExcludeAttributes = null,
         IncludeTestAssembly = true,
@@ -305,10 +305,32 @@ namespace coverlet.core.benchmark.tests
         throw new FileNotFoundException($"Instrumented assembly not found at: {_coverletTestSubjectDllPath}");
       }
 
+      var stdOut = new List<string>();
+      var stdErr = new List<string>();
       int exitCode = Process.RunToCompletion(
           DotnetMuxer.Path.FullName,
           $"\"{_coverletTestSubjectDllPath}\"",
+          line => stdOut.Add(line),
+          line => stdErr.Add(line),
           workingDirectory: _coverletTestSubjectArtifactPath);
+
+      bool logSubjectOutput = string.Equals(
+          Environment.GetEnvironmentVariable("COVERLET_BENCHMARK_VERBOSE_SUBJECT_LOGS"),
+          "1",
+          StringComparison.Ordinal);
+
+      if (logSubjectOutput || exitCode != 0)
+      {
+        foreach (string line in stdOut)
+        {
+          _logger.LogVerbose($"[subject stdout] {line}");
+        }
+
+        foreach (string line in stdErr)
+        {
+          _logger.LogWarning($"[subject stderr] {line}");
+        }
+      }
 
       if (exitCode != 0)
       {

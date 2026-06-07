@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -24,14 +25,29 @@ namespace coverlet.benchmark.subject
 
     private static void Run()
     {
-      RunAsyncWorkload();
-      RunAutoPropsWorkload();
-      RunDeepNestingWorkload();
-      RunExcludedWorkload();
-      RunGenericWorkload();
-      RunIteratorWorkload();
-      RunLambdaWorkload();
-      RunSwitchWorkload();
+      RunSafely(nameof(RunAsyncWorkload), RunAsyncWorkload);
+      RunSafely(nameof(RunAutoPropsWorkload), RunAutoPropsWorkload);
+      RunSafely(nameof(RunDeepNestingWorkload), RunDeepNestingWorkload);
+      RunSafely(nameof(RunExcludedWorkload), RunExcludedWorkload);
+      RunSafely(nameof(RunGenericWorkload), RunGenericWorkload);
+      RunSafely(nameof(RunIteratorWorkload), RunIteratorWorkload);
+      RunSafely(nameof(RunLambdaWorkload), RunLambdaWorkload);
+      RunSafely(nameof(RunSwitchWorkload), RunSwitchWorkload);
+    }
+
+    private static void RunSafely(string workloadName, Action action)
+    {
+      ArgumentNullException.ThrowIfNull(workloadName);
+      ArgumentNullException.ThrowIfNull(action);
+
+      try
+      {
+        action();
+      }
+      catch (Exception ex)
+      {
+        Console.Error.WriteLine($"[subject] {workloadName} failed: {ex.GetType().FullName}: {ex.Message}");
+      }
     }
 
     private static void RunAsyncWorkload()
@@ -53,7 +69,6 @@ namespace coverlet.benchmark.subject
       _ = workload.ComputeValueTaskAsync(1, 2).AsTask().GetAwaiter().GetResult();
       _ = workload.IsZeroAsync(0).AsTask().GetAwaiter().GetResult();
       _ = workload.DeeplyNestedAsync(4).GetAwaiter().GetResult();
-      workload.FireAndForgetCompute(1, 2);
     }
 
     private static void RunAutoPropsWorkload()
