@@ -9,12 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Improvements
 
-- Implement dynamic exclusion filters for Coverlet.MTP assemblies [#1946](https://github.com/coverlet-coverage/coverlet/pull/1946)
+- Implement dynamic exclusion filters for assemblies (Coverlet.MTP)  [#1946](https://github.com/coverlet-coverage/coverlet/pull/1946)
 
 ### Fixed
 
 - Fix Regression in branch coverage for lambda expressions [#1937](https://github.com/coverlet-coverage/coverlet/issues/1937)
-- Fix coverlet.MTP crashes during instrumentation [#1934](https://github.com/coverlet-coverage/coverlet/issues/1934)
+- Fix coverlet.MTP crashes during instrumentation (ReportGenerator.MTP) [#1934](https://github.com/coverlet-coverage/coverlet/issues/1934)
 
 ## Release date 2026-05-18
 
