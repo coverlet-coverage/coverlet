@@ -6,6 +6,5 @@
     ],
     "nugetPackageVersion": {
         "semVer": 2
-    },
-    "pathFilters": [ "src/legacy/" ]
+    }
 }
