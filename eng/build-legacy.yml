@@ -10,7 +10,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     useGlobalJson: true
-  displayName: Install .NET Core SDK 9.0.314 (global.json)
+  displayName: Install .NET Core SDK 9.0.315 (global.json)
 
 # create artifact/package folder
 - pwsh: |
