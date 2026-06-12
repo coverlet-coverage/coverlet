@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="HowTo.md" />
+  </Folder>
+  <Project Path="ClassLibrary1/ClassLibrary1.csproj" />
+  <Project Path="ClassLibrary2/ClassLibrary2.csproj" />
+  <Project Path="ClassLibrary3/ClassLibrary3.csproj" />
+  <Project Path="XUnitTestProject1/XUnitTestProject1.csproj" />
+  <Project Path="XUnitTestProject2/XUnitTestProject2.csproj" />
+  <Project Path="XUnitTestProject3/XUnitTestProject3.csproj" />
+</Solution>

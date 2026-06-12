@@ -1,0 +1,68 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/copilot-instructions.md" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="Documentation/Changelog.md" />
+    <File Path="eng/azure-pipelines-nightly.yml" />
+    <File Path="eng/azure-pipelines.yml" />
+    <File Path="eng/build-legacy.yml" />
+    <File Path="eng/build.yml" />
+    <File Path="global.json" />
+    <File Path="src/legacy/global-legacy.json" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/coverlet.console/coverlet.console.csproj" />
+    <Project Path="src/coverlet.core/coverlet.core.csproj" />
+    <Project Path="src/coverlet.MTP/coverlet.MTP.csproj" />
+    <Project Path="src/legacy/coverlet.collector/coverlet.collector.csproj" />
+    <Project Path="src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/coverlet.benchmark.subject/coverlet.benchmark.subject.csproj" />
+    <Project Path="test/coverlet.collector.tests/coverlet.collector.tests.csproj">
+      <BuildDependency Project="src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj" />
+    </Project>
+    <Project Path="test/coverlet.core.benchmark.tests/coverlet.core.benchmark.tests.csproj" />
+    <Project Path="test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj" />
+    <Project Path="test/coverlet.core.tests.samples.netstandard/coverlet.core.tests.samples.netstandard.csproj" />
+    <Project Path="test/coverlet.core.tests/coverlet.core.tests.csproj">
+      <BuildDependency Project="src/legacy/coverlet.collector/coverlet.collector.csproj" />
+      <BuildDependency Project="src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj" />
+    </Project>
+    <Project Path="test/coverlet.integration.determisticbuild/coverlet.integration.determisticbuild.csproj" />
+    <Project Path="test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj" />
+    <Project Path="test/coverlet.integration.MTP.tests/coverlet.integration.MTP.tests.csproj" />
+    <Project Path="test/coverlet.integration.template/coverlet.integration.template.csproj" />
+    <Project Path="test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj" />
+    <Project Path="test/coverlet.MTP.tests/coverlet.MTP.tests.csproj" />
+    <Project Path="test/coverlet.MTP.validation.tests/coverlet.MTP.validation.tests.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.aspmvcrazor.tests/coverlet.tests.projectsample.aspmvcrazor.tests.csproj">
+      <BuildDependency Project="src/coverlet.core/coverlet.core.csproj" />
+      <BuildDependency Project="test/coverlet.tests.projectsample.aspmvcrazor/coverlet.tests.projectsample.aspmvcrazor.csproj" />
+    </Project>
+    <Project Path="test/coverlet.tests.projectsample.aspmvcrazor/coverlet.tests.projectsample.aspmvcrazor.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.aspnet8.tests/coverlet.tests.projectsample.aspnet8.tests.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.aspnet8/coverlet.tests.projectsample.aspnet8.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.empty/coverlet.tests.projectsample.empty.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.excludedbyattribute/coverlet.tests.projectsample.excludedbyattribute.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.fsharp/coverlet.tests.projectsample.fsharp.fsproj" />
+    <Project Path="test/coverlet.tests.projectsample.netframework/coverlet.tests.projectsample.netframework.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.vbmynamespace/coverlet.tests.projectsample.vbmynamespace.vbproj" />
+    <Project Path="test/coverlet.tests.projectsample.wpf8.selfcontained/coverlet.tests.projectsample.wpf8.selfcontained.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.wpf8/coverlet.tests.projectsample.wpf8.csproj" />
+    <Project Path="test/coverlet.tests.utils/coverlet.tests.utils.csproj" />
+  </Folder>
+  <Folder Name="/test/Build/">
+    <File Path="test/Directory.Build.props" />
+    <File Path="test/Directory.Build.targets" />
+  </Folder>
+</Solution>
