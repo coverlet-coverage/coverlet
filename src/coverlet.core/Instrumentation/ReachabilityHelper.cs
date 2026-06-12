@@ -313,7 +313,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
               unresolvedMethodReferenceWarnings++;
               if (unresolvedMethodReferenceWarnings <= MaxUnresolvedMethodWarnings)
               {
-                logger.LogWarning($"Unable to resolve method reference \"{calledMtd.FullName}\", assuming calls to will return");
+                logger.LogWarning($"Unable to resolve method reference \"{calledMtd.FullName}\", assuming calls to it will return");
               }
               else if (!unresolvedMethodReferenceWarningSuppressed)
               {
@@ -322,7 +322,7 @@ namespace Coverlet.Core.Instrumentation.Reachability
               }
               else
               {
-                logger.LogVerbose($"Suppressed unresolved method reference \"{calledMtd.FullName}\", assuming calls to will return");
+                logger.LogVerbose($"Suppressed unresolved method reference \"{calledMtd.FullName}\", assuming calls to it will return");
               }
 
               mtdDef = null;

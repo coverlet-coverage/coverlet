@@ -176,9 +176,9 @@ _mockLogger.Verify(x => x.LogErrorAsync(It.IsAny<string>(), It.IsAny<Cancellatio
 _mockLogger.Verify(x => x.LogWarningAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
 // To verify message content:
 _mockLogger.Verify(x => x.LogInformationAsync(It.Is<string>(s => s.Contains("expected text")), It.IsAny<CancellationToken>()), Times.Once);
-// For synchronous extension methods (from LoggerExtensions):
-_mockLogger.Verify(x => x.LogInformation(It.IsAny<string>()), Times.Once);
-_mockLogger.Verify(x => x.LogInformation(It.Is<string>(s => s.Contains("Coverage reports generated"))), Times.Once);
+ // For synchronous LoggerExtensions (extension methods):
+ // NOTE: These are extension methods and cannot be verified with Moq; verify the underlying Log(...) call instead.
+ _mockLogger.Verify(x => x.Log(LogLevel.Information, It.Is<string>(s => s.Contains("Coverage reports generated")), It.IsAny<Exception?>(), It.IsAny<Func<string, Exception?, string>>()), Times.Once);
 ```
 
 **Verification Checklist:**
