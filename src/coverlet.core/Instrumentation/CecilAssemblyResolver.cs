@@ -133,6 +133,12 @@ namespace Coverlet.Core.Instrumentation
             return asm;
           }
 
+          asm = TryWithNetFrameworkRuntimeResolver(name);
+          if (asm != null)
+          {
+            return asm;
+          }
+
           throw;
         }
       }
@@ -142,6 +148,43 @@ namespace Coverlet.Core.Instrumentation
     {
       // object for .NET Framework is inside mscorlib.dll
       return Path.GetFileName(typeof(object).Assembly.Location) == "System.Private.CoreLib.dll";
+    }
+
+    internal AssemblyDefinition TryWithNetFrameworkRuntimeResolver(AssemblyNameReference name)
+    {
+      _logger.LogVerbose($"TryWithNetFrameworkRuntimeResolver for {name}");
+
+      if (IsDotNetCore())
+      {
+        return null;
+      }
+
+      string runtimeDirectory = Path.GetDirectoryName(typeof(object).Assembly.Location);
+      if (string.IsNullOrWhiteSpace(runtimeDirectory) || !Directory.Exists(runtimeDirectory))
+      {
+        return null;
+      }
+
+      foreach (string extension in new[] { ".dll", ".exe" })
+      {
+        string candidate = Path.Combine(runtimeDirectory, name.Name + extension);
+        if (!File.Exists(candidate))
+        {
+          continue;
+        }
+
+        try
+        {
+          _logger.LogVerbose($"TryWithNetFrameworkRuntimeResolver loading '{candidate}'");
+          return AssemblyDefinition.ReadAssembly(candidate, new ReaderParameters { AssemblyResolver = this });
+        }
+        catch (Exception ex)
+        {
+          _logger.LogVerbose($"TryWithNetFrameworkRuntimeResolver exception loading '{candidate}': {ex}");
+        }
+      }
+
+      return null;
     }
 
     /// <summary>
