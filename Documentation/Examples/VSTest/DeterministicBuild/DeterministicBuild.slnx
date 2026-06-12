@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="HowTo.md" />
+  </Folder>
+  <Project Path="ClassLibrary1/ClassLibrary1.csproj" />
+  <Project Path="XUnitTestProject1/XUnitTestProject1.csproj" />
+</Solution>

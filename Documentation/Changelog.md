@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improvements
 
 - Implement dynamic exclusion filters for assemblies (Coverlet.MTP)  [#1946](https://github.com/coverlet-coverage/coverlet/pull/1946)
+- Replace legacy .sln files with modern .slnx format [1966](https://github.com/coverlet-coverage/coverlet/pull/1966)
 
 ### Fixed
 

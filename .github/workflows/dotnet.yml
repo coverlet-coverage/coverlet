@@ -64,12 +64,12 @@ jobs:
 
 
     - name: Restore dependencies
-      run: dotnet restore coverlet.sln
+      run: dotnet restore coverlet.slnx
 
     - name: Build
       run: |
-        dotnet build coverlet.sln --no-restore -bl:build.binlog -c ${{env.BuildConfiguration}}
-        dotnet build coverlet.sln --no-restore -bl:build.binlog -c release
+        dotnet build coverlet.slnx --no-restore -bl:build.binlog -c ${{env.BuildConfiguration}}
+        dotnet build coverlet.slnx --no-restore -bl:build.binlog -c release
         dotnet pack -c ${{env.BuildConfiguration}}
         dotnet pack -c release
 
