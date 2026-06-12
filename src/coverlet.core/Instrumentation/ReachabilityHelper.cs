@@ -16,6 +16,8 @@ namespace Coverlet.Core.Instrumentation.Reachability
   /// </summary>
   internal class ReachabilityHelper
   {
+    private const int MaxUnresolvedMethodWarnings = 25;
+
     internal readonly struct UnreachableRange
     {
       /// <summary>
@@ -260,6 +262,8 @@ namespace Coverlet.Core.Instrumentation.Reachability
 
       ImmutableHashSet<MetadataToken> processedMethods = ImmutableHashSet<MetadataToken>.Empty;
       ImmutableHashSet<MetadataToken>.Builder doNotReturn = ImmutableHashSet.CreateBuilder<MetadataToken>();
+      int unresolvedMethodReferenceWarnings = 0;
+      bool unresolvedMethodReferenceWarningSuppressed = false;
       foreach (TypeDefinition type in module.Types)
       {
         foreach (MethodDefinition mtd in type.Methods)
@@ -306,7 +310,21 @@ namespace Coverlet.Core.Instrumentation.Reachability
             }
             catch
             {
-              logger.LogWarning($"Unable to resolve method reference \"{calledMtd.FullName}\", assuming calls to will return");
+              unresolvedMethodReferenceWarnings++;
+              if (unresolvedMethodReferenceWarnings <= MaxUnresolvedMethodWarnings)
+              {
+                logger.LogWarning($"Unable to resolve method reference \"{calledMtd.FullName}\", assuming calls to it will return");
+              }
+              else if (!unresolvedMethodReferenceWarningSuppressed)
+              {
+                logger.LogWarning($"Further unresolved method reference warnings are suppressed after {MaxUnresolvedMethodWarnings} occurrences. Enable verbose diagnostics to inspect additional entries.");
+                unresolvedMethodReferenceWarningSuppressed = true;
+              }
+              else
+              {
+                logger.LogVerbose($"Suppressed unresolved method reference \"{calledMtd.FullName}\", assuming calls to it will return");
+              }
+
               mtdDef = null;
             }
 

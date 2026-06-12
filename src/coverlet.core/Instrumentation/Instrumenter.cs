@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -21,6 +21,26 @@ using Mono.Cecil.Rocks;
 
 namespace Coverlet.Core.Instrumentation
 {
+  internal enum InstrumentationPreflightStatus
+  {
+    Ready = 0,
+    Locked,
+    UnresolvableDependencies,
+    UnknownError
+  }
+
+  internal struct InstrumentationPreflightResult
+  {
+    public InstrumentationPreflightStatus Status { get; }
+    public string Reason { get; }
+
+    public InstrumentationPreflightResult(InstrumentationPreflightStatus status, string reason)
+    {
+      Status = status;
+      Reason = reason ?? string.Empty;
+    }
+  }
+
   internal class Instrumenter
   {
     private readonly string _module;
@@ -96,6 +116,64 @@ namespace Coverlet.Core.Instrumentation
           .SelectMany(a => a.EndsWith("Attribute") ? [a] : new[] { a, $"{a}Attribute" })
           // The default custom attributes used to exclude from coverage.
           .Union(defaultAttrs)];
+    }
+
+    public InstrumentationPreflightResult Preflight()
+    {
+      try
+      {
+        try
+        {
+          using Stream _ = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.ReadWrite);
+        }
+        catch (IOException ex)
+        {
+          return new InstrumentationPreflightResult(InstrumentationPreflightStatus.Locked, ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+          return new InstrumentationPreflightResult(InstrumentationPreflightStatus.Locked, ex.Message);
+        }
+
+        if (!CanResolveModuleAssemblyReferences(out string reason))
+        {
+          return new InstrumentationPreflightResult(InstrumentationPreflightStatus.UnresolvableDependencies, reason);
+        }
+
+        return new InstrumentationPreflightResult(InstrumentationPreflightStatus.Ready, string.Empty);
+      }
+      catch (Exception ex)
+      {
+        return new InstrumentationPreflightResult(InstrumentationPreflightStatus.UnknownError, ex.Message);
+      }
+    }
+
+    private bool CanResolveModuleAssemblyReferences(out string reason)
+    {
+      reason = string.Empty;
+
+      using Stream stream = _fileSystem.NewFileStream(_module, FileMode.Open, FileAccess.Read);
+      using var resolver = new NetstandardAwareAssemblyResolver(_module, _logger);
+      resolver.AddSearchDirectory(Path.GetDirectoryName(_module));
+      var parameters = new ReaderParameters { ReadSymbols = false, AssemblyResolver = resolver };
+
+      using var module = ModuleDefinition.ReadModule(stream, parameters);
+
+      foreach (AssemblyNameReference reference in module.AssemblyReferences)
+      {
+        try
+        {
+          resolver.Resolve(reference);
+        }
+        catch (Exception ex)
+        {
+          reason = $"Failed to resolve assembly reference '{reference.FullName}': {ex.Message}";
+          _logger.LogVerbose($"Preflight unresolved reference '{reference.FullName}' for module '{_module}'.");
+          return false;
+        }
+      }
+
+      return true;
     }
 
     public bool CanInstrument()

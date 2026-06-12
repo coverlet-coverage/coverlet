@@ -85,29 +85,45 @@ Extension methods are static methods that cannot be intercepted by Moq. Using th
 #### Example: Mocking ILogger
 
 ❌ **INCORRECT** - Will throw `NotSupportedException`:
+
+```cs
 // This will FAIL at runtime
 _mockLogger.Verify(x => x.LogInformation(It.IsAny<string>()), Times.Once);
 _mockLogger.Verify(x => x.LogInformation(It.Is<string>(s => s.Contains("json"))), Times.Once);
 _mockLogger.Setup(x => x.LogWarning(It.IsAny<string>()));
+```
+
 ✅ **CORRECT** - Mocks the underlying `Log` method:
+
+```cs
 // Verify LogInformation was called once
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Verify LogInformation was called with a message containing "json"
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("json")), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Setup LogWarning behavior
 _mockLogger.Setup(x => x.Log(LogLevel.Warning, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()));
+```
+
 #### Example: Mocking LogDebug
 
 ❌ **INCORRECT**:
+
+```cs
 // This will FAIL at runtime
 _mockLogger.Verify(x => x.LogDebug(It.IsAny<string>()), Times.Once);
+```
+
 ✅ **CORRECT** - Mocks the underlying `Log` method:
+
+```cs
 // Verify LogDebug was called once
 _mockLogger.Verify(x => x.Log(LogLevel.Debug, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Verify LogDebug was called with a message containing "xml"
 _mockLogger.Verify(x => x.Log(LogLevel.Debug, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("xml")), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Setup LogError behavior
 _mockLogger.Setup(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()));
+```
+
 **Key Points:**
 1. Always use `ILogger.Log()` with the appropriate `LogLevel` instead of extension methods.
 2. Use `It.IsAny<It.IsAnyType>()` for the state parameter.
@@ -144,19 +160,27 @@ This codebase uses **TWO different ILogger interfaces** with different signature
 **Common Pitfall - Microsoft.Testing.Platform.Logging.ILogger:**
 
 ❌ **INCORRECT** - Assumes `EventId` parameter (which doesn't exist in MTP Logger):
+
+```cs
 // BAD - Microsoft.Testing.Platform.Logging.ILogger does NOT have EventId
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), // ⚠️ EventId does NOT exist in MTP LOGGER
      It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+```
+
 ✅ **CORRECT** - Uses actual MTP ILogger API signature (async methods):
+
+```cs
 // GOOD - Microsoft.Testing.Platform.Logging.ILogger uses simple async methods
 _mockLogger.Verify(x => x.LogInformationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
 _mockLogger.Verify(x => x.LogErrorAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
 _mockLogger.Verify(x => x.LogWarningAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
 // To verify message content:
 _mockLogger.Verify(x => x.LogInformationAsync(It.Is<string>(s => s.Contains("expected text")), It.IsAny<CancellationToken>()), Times.Once);
-// For synchronous extension methods (from LoggerExtensions):
-_mockLogger.Verify(x => x.LogInformation(It.IsAny<string>()), Times.Once);
-_mockLogger.Verify(x => x.LogInformation(It.Is<string>(s => s.Contains("Coverage reports generated"))), Times.Once);
+ // For synchronous LoggerExtensions (extension methods):
+ // NOTE: These are extension methods and cannot be verified with Moq; verify the underlying Log(...) call instead.
+ _mockLogger.Verify(x => x.Log(LogLevel.Information, It.Is<string>(s => s.Contains("Coverage reports generated")), It.IsAny<Exception?>(), It.IsAny<Func<string, Exception?, string>>()), Times.Once);
+```
+
 **Verification Checklist:**
 - [ ] I have searched for the interface definition using `get_symbols_by_name`.
 - [ ] I have reviewed existing usage in the codebase using `code_search`.
@@ -176,6 +200,7 @@ When mocking interfaces, **reference actual adapter implementations** in the cod
 - `src/coverlet.core/Abstractions/ILogger.cs` - Coverlet's internal logger interface.
 
 **Example from CoverletLoggerAdapter.cs:**
+
 ```csharp
 // Shows actual MTP ILogger usage - simple methods, no EventId
 public void LogInformation(string message, bool important = false)
@@ -236,9 +261,10 @@ public void LogInformation(string message, bool important = false)
 4. **Avoid extension methods in Moq** - They cannot be intercepted and will cause runtime exceptions.
 5. **Use simulated paths** - Always use fake paths like `/fake/path/test.dll` in test mocks.
 6. **Verify existing tests** - Check for duplicates before adding new test methods.
-7. **Use Theory for parameterized tests** - Don't create multiple test methods for different input values
+7. **Use Theory for parameterized tests** - Don't create multiple test methods for different input values.
 
+## Issue-Specific Guidelines
 
-- @azure Rule - Use Azure Tools - When handling requests related to Azure, always use your tools.
-- @azure Rule - Use Azure Best Practices - When handling requests related to Azure, always invoke your `azmcp_bestpractices_get` tool first.
-- @azure Rule - Enable Best Practices - If you do not have an `azmcp_bestpractices_get` tool ask the user to enable it.
+- For issue #1965, identify problematic assemblies before instrumentation and skip them, rather than relying on partial-restore/non-fatal restore behavior after failure.
+- For assembly-level instrumentation viability, preflight logic should only check lock and resolvability, not PDB/source-based exclusion; PDB/source exclusion remains handled by existing assembly-without-sources filtering via CanInstrument/options.
+- **Prefer calling `instrumenter.CanInstrument()` before preflight** so assemblies already excluded by existing coverage filters (no PDB/no local sources) skip preflight probing.
