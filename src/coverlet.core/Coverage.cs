@@ -133,25 +133,34 @@ namespace Coverlet.Core
                                             _sourceRootTranslator,
                                             _cecilSymbolHelper);
 
-        if (instrumenter.CanInstrument())
+        if (!instrumenter.CanInstrument())
         {
-          _instrumentationHelper.BackupOriginalModule(module, Identifier, _parameters.DisableManagedInstrumentationRestore);
+          continue;
+        }
 
-          // Guard code path and restore if instrumentation fails.
-          try
+        InstrumentationPreflightResult preflightResult = instrumenter.Preflight();
+        if (preflightResult.Status != InstrumentationPreflightStatus.Ready)
+        {
+          _logger.LogWarning($"Skipping module '{module}': {preflightResult.Status}. {preflightResult.Reason}");
+          continue;
+        }
+
+        _instrumentationHelper.BackupOriginalModule(module, Identifier, _parameters.DisableManagedInstrumentationRestore);
+
+        // Guard code path and restore if instrumentation fails.
+        try
+        {
+          InstrumenterResult result = instrumenter.Instrument();
+          if (!instrumenter.SkipModule)
           {
-            InstrumenterResult result = instrumenter.Instrument();
-            if (!instrumenter.SkipModule)
-            {
-              _results.Add(result);
-              _logger.LogVerbose($"Instrumented module: '{module}'");
-            }
+            _results.Add(result);
+            _logger.LogVerbose($"Instrumented module: '{module}'");
           }
-          catch (Exception ex)
-          {
-            _logger.LogWarning($"Unable to instrument module: {module}\n{ex}");
-            _instrumentationHelper.RestoreOriginalModule(module, Identifier);
-          }
+        }
+        catch (Exception ex)
+        {
+          _logger.LogWarning($"Unable to instrument module: {module}\n{ex}");
+          _instrumentationHelper.RestoreOriginalModule(module, Identifier);
         }
       }
 

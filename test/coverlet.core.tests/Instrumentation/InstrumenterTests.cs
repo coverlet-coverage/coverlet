@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -238,6 +238,64 @@ namespace Coverlet.Core.Tests.Instrumentation
       instrumenterTest.Directory.Delete(true);
     }
 
+    [Fact]
+    public void TestPreflight_LockedModule_ReturnsLocked()
+    {
+      InstrumenterTest instrumenterTest = CreateInstrumentor();
+      try
+      {
+        using var moduleLock = new FileStream(instrumenterTest.Module, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+        InstrumentationPreflightResult preflightResult = instrumenterTest.Instrumenter.Preflight();
+
+        Assert.Equal(InstrumentationPreflightStatus.Locked, preflightResult.Status);
+      }
+      finally
+      {
+        instrumenterTest.Directory.Delete(true);
+      }
+    }
+
+    [Fact]
+    public void TestPreflight_UnresolvableDependency_ReturnsUnresolvableDependencies()
+    {
+      string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+      Directory.CreateDirectory(tempDirectory);
+      string modulePath = Path.Combine(tempDirectory, "preflight-unresolvable.dll");
+
+      try
+      {
+        var assemblyName = new AssemblyNameDefinition("preflight-unresolvable", new Version(1, 0, 0, 0));
+        using (AssemblyDefinition assemblyDefinition = AssemblyDefinition.CreateAssembly(assemblyName, "preflight-unresolvable", ModuleKind.Dll))
+        {
+          assemblyDefinition.MainModule.AssemblyReferences.Add(new AssemblyNameReference("Definitely.Missing.Dependency", new Version(1, 0, 0, 0)));
+          assemblyDefinition.Write(modulePath);
+        }
+
+        var instrumentationHelper =
+            new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), new FileSystem(), new Mock<ILogger>().Object,
+                                      new SourceRootTranslator(new Mock<ILogger>().Object, new FileSystem()));
+
+        var instrumenter = new Instrumenter(modulePath,
+                                            Guid.NewGuid().ToString("N"),
+                                            new CoverageParameters(),
+                                            _mockLogger.Object,
+                                            instrumentationHelper,
+                                            new FileSystem(),
+                                            new SourceRootTranslator(_mockLogger.Object, new FileSystem()),
+                                            new CecilSymbolHelper());
+
+        InstrumentationPreflightResult preflightResult = instrumenter.Preflight();
+
+        Assert.Equal(InstrumentationPreflightStatus.UnresolvableDependencies, preflightResult.Status);
+        Assert.Contains("Definitely.Missing.Dependency", preflightResult.Reason, StringComparison.Ordinal);
+      }
+      finally
+      {
+        Directory.Delete(tempDirectory, true);
+      }
+    }
+
     private InstrumenterTest CreateInstrumentor(bool fakeCoreLibModule = false, string[] attributesToIgnore = null, string[] excludedFiles = null, bool singleHit = false)
     {
       string module = GetType().Assembly.Location;
@@ -415,7 +473,7 @@ namespace Coverlet.Core.Tests.Instrumentation
                                         }};
     }
 
-    [Theory]
+    [Theory(DisableDiscoveryEnumeration = true)]
     [MemberData(nameof(TestInstrument_ExcludedFilesHelper_Data))]
     public void TestInstrument_ExcludedFilesHelper(string[] excludeFilterHelper, ValueTuple<string, bool, bool>[] result)
     {
