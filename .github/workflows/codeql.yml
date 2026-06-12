@@ -58,7 +58,7 @@ jobs:
 
         # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
-        build-mode: "manual" # Use "auto" for automatic build detection, or "none" to skip the build step.
+        build-mode: "none" # Use "auto" for automatic build detection, or "none" to skip the build step.
 
     - name: Setup dotnet using global.json
       uses: actions/setup-dotnet@v5
@@ -73,7 +73,7 @@ jobs:
 
     - run: |
         echo "Run, Build Application using script"
-        dotnet build coverlet.sln --configuration Debug
+        dotnet build coverlet.slnx --configuration Debug
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
