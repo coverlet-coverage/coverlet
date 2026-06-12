@@ -244,9 +244,26 @@ namespace Coverlet.Core.Tests.Instrumentation
       InstrumenterTest instrumenterTest = CreateInstrumentor();
       try
       {
-        using var moduleLock = new FileStream(instrumenterTest.Module, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var fileSystemMock = new Mock<FileSystem>();
+        fileSystemMock.CallBase = true;
+        fileSystemMock
+          .Setup(fs => fs.NewFileStream(instrumenterTest.Module, FileMode.Open, FileAccess.ReadWrite))
+          .Throws(new IOException("The process cannot access the file because it is being used by another process."));
 
-        InstrumentationPreflightResult preflightResult = instrumenterTest.Instrumenter.Preflight();
+        var instrumentationHelper =
+          new InstrumentationHelper(new ProcessExitHandler(), new RetryHelper(), fileSystemMock.Object, new Mock<ILogger>().Object,
+                                    new SourceRootTranslator(new Mock<ILogger>().Object, fileSystemMock.Object));
+
+        var instrumenter = new Instrumenter(instrumenterTest.Module,
+                                            instrumenterTest.Identifier,
+                                            new CoverageParameters(),
+                                            _mockLogger.Object,
+                                            instrumentationHelper,
+                                            fileSystemMock.Object,
+                                            new SourceRootTranslator(_mockLogger.Object, fileSystemMock.Object),
+                                            new CecilSymbolHelper());
+
+        InstrumentationPreflightResult preflightResult = instrumenter.Preflight();
 
         Assert.Equal(InstrumentationPreflightStatus.Locked, preflightResult.Status);
       }
