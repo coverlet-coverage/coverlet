@@ -25,6 +25,7 @@
         "reportgenerator",
         "reporttypes",
         "runsettings",
+        "slnx",
         "targetargs",
         "TARGETARGS",
         "targetdir",
