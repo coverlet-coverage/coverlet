@@ -1,7 +1,6 @@
 // Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using Coverlet.Core.Samples.Tests;
 using Xunit;
@@ -143,7 +142,7 @@ namespace Coverlet.Core.Tests
     /// This is the key test for issue #1969.
     /// </summary>
     [Fact]
-    public void BothOrMethodsAchieveSameBranchCoverage()
+    public void BothOrMethodsHaveSameBehaviorAcrossInputs()
     {
       // Test set covering all code paths
       var testInputs = new[] { "hello", "world", "other", "", null };
@@ -151,20 +150,11 @@ namespace Coverlet.Core.Tests
 
       foreach (var input in testInputs)
       {
-        try
-        {
-          bool operatorResult = PatternMatchingOr.OrOperator(input);
-          bool patternResult = PatternMatchingOr.PatternMatchingOrMethod(input);
+        bool operatorResult = PatternMatchingOr.OrOperator(input);
+        bool patternResult = PatternMatchingOr.PatternMatchingOrMethod(input);
 
-          results.Add((operatorResult, patternResult));
-          Assert.Equal(operatorResult, patternResult);
-        }
-        catch (NullReferenceException) when (input is null)
-        {
-          // Both methods should handle null the same way
-          Assert.Throws<NullReferenceException>(() => PatternMatchingOr.OrOperator(input));
-          Assert.Throws<NullReferenceException>(() => PatternMatchingOr.PatternMatchingOrMethod(input));
-        }
+        results.Add((operatorResult, patternResult));
+        Assert.Equal(operatorResult, patternResult);
       }
 
       // Ensure we covered different outcomes
