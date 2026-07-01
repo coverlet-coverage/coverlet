@@ -11,7 +11,7 @@
     <MicrosoftCodeAnalysisVersion>5.3.0</MicrosoftCodeAnalysisVersion> <!-- .NET 8.0 support -->
     <NugetPackageVersion>7.6.0</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
-    <MicrosoftNETTestSdkVersion>18.6.0</MicrosoftNETTestSdkVersion>
+    <MicrosoftNETTestSdkVersion>18.7.0</MicrosoftNETTestSdkVersion>
     <XunitV3Version>3.2.2</XunitV3Version>
     <XunitRunnerVisualstudioVersion>3.1.5</XunitRunnerVisualstudioVersion>
     <MicrosoftTestingPlatformVersion>2.2.3</MicrosoftTestingPlatformVersion>
