@@ -1111,6 +1111,11 @@ namespace Coverlet.Core.Symbols
             continue;
           }
 
+          if (SkipBranchGeneratedByPatternMatchingOr(instructions, instruction))
+          {
+            continue;
+          }
+
           if (SkipBranchGeneratedByRelationalPattern(instruction))
           {
             continue;
@@ -1674,6 +1679,104 @@ namespace Coverlet.Core.Symbols
         // ldarg.0 predecessor) uniquely identify this compiler-generated null-check.
         // Note: async try/finally blocks compile to Catch (not Finally) IL exception handlers, so
         // checking for ExceptionHandlerType.Finally would always return false here.
+        return true;
+      }
+
+      return false;
+    }
+
+    // https://github.com/coverlet-coverage/coverlet/issues/1969
+    // When using `is` with `or` pattern (e.g. `x is "hello" or "world"`) the compiler
+    // emits a dedicated short-circuit conditional branch that targets an intermediate
+    // `ldc.i4 0` (constant false) + unconditional `br` block used to merge the boolean result.
+    // Unlike the classic `||` operator which only generates one branch point, pattern matching
+    // with `or` generates an additional synthetic branch that is NOT semantically reachable
+    // during normal execution. This intermediate block is only reachable when ALL pattern
+    // alternatives fail, but the outer short-circuit already bypasses it.
+    //
+    // Example IL generated for `x is "hello" or "world"`:
+    //   IL_0000: ldarg.0                               ; load string to test
+    //   IL_0001: ldstr "hello"
+    //   IL_0006: call bool String::Equals(...)
+    //   IL_000b: brtrue IL_0017                        ; BRANCH 1: matches "hello"
+    //   IL_000d: ldarg.0
+    //   IL_000e: ldstr "world"
+    //   IL_0013: call bool String::Equals(...)
+    //   IL_0018: brtrue IL_0017                        ; BRANCH 2: matches "world"
+    //   IL_001a: ldc.i4.0                              ; FALSE constant block (unreachable)
+    //   IL_001b: br IL_0019                            ; SYNTHETIC BRANCH: short-circuit to merge
+    //   IL_001d: ldc.i4.1                              ; merge point
+    //
+    // Detection heuristic (after SimplifyMacros()):
+    //   1. The instruction is a conditional branch (brtrue, brtrue.s, brfalse, brfalse.s, beq, beq.s, etc.)
+    //   2. Its target is `ldc.i4 0` or similar constant-false push for failed string/pattern comparisons.
+    //   3. That constant is immediately followed by an unconditional `br` to the result merge point.
+    //   4. The comparison before the branch is for a string equality or similar pattern match.
+    private static bool SkipBranchGeneratedByPatternMatchingOr(List<Instruction> instructions, Instruction instruction)
+    {
+      // Only handle conditional branches that are used in pattern matching scenarios
+      Code code = instruction.OpCode.Code;
+      if (code != Code.Brtrue && code != Code.Brtrue_S &&
+          code != Code.Brfalse && code != Code.Brfalse_S &&
+          code != Code.Beq && code != Code.Beq_S)
+      {
+        return false;
+      }
+
+      if (instruction.Operand is not Instruction target)
+        return false;
+
+      // Target must push constant false for the failed pattern.
+      // This handles various forms: ldc.i4.0 (macro) or ldc.i4 0 (simplified).
+      Code targetCode = target.OpCode.Code;
+      if (targetCode == Code.Ldc_I4_0)
+      {
+        // macro form - implicit zero
+      }
+      else if (targetCode == Code.Ldc_I4 && target.Operand is int targetValue && targetValue == 0)
+      {
+        // simplified form - explicit zero
+      }
+      else
+      {
+        return false;
+      }
+
+      // The constant-false block must be followed by an unconditional branch (br or br.s)
+      // that merges back to the result block. This is the synthetic short-circuit branch
+      // that should be excluded.
+      Instruction afterTarget = target.Next;
+      if (afterTarget is null || afterTarget.OpCode.FlowControl != FlowControl.Branch)
+        return false;
+
+      // Additional heuristic: For pattern matching `or`, we expect the branch to be comparing
+      // strings or values. Look back a few instructions to find the comparison that feeds
+      // this branch. Typical pattern: call (String.Equals, etc.) followed by brtrue/brfalse.
+      int branchIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
+      if (branchIndex < 2)
+        return false;
+
+      // Check if previous instruction could be a pattern comparison result.
+      // For string patterns: result of String.Equals(...)
+      // For type patterns: result of 'is' operator or type check
+      Instruction prevInstruction = instructions[branchIndex - 1];
+      if (prevInstruction.OpCode == OpCodes.Call || prevInstruction.OpCode == OpCodes.Callvirt)
+      {
+        if (prevInstruction.Operand is MethodReference methodRef)
+        {
+          // String comparison methods used in pattern matching
+          if (methodRef.Name == "Equals" && methodRef.DeclaringType.FullName == "System.String")
+            return true;
+
+          // Generic IEquatable<T>.Equals calls
+          if (methodRef.Name == "Equals" && methodRef.DeclaringType.FullName.StartsWith("System.IEquatable`"))
+            return true;
+        }
+      }
+      else if (prevInstruction.OpCode == OpCodes.Ldc_I4 || prevInstruction.OpCode == OpCodes.Ldc_I4_0 ||
+               prevInstruction.OpCode == OpCodes.Ldc_I4_1)
+      {
+        // Direct boolean constant (used in some optimized patterns)
         return true;
       }
 
