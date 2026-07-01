@@ -823,6 +823,63 @@ public sealed class CoverageConfigurationTests
 
   #endregion
 
+  #region Additional CoverageConfiguration Tests
+
+  [Fact]
+  public void DeterministicReportReturnsFalseWhenOptionNotSet()
+  {
+    // Arrange
+    _mockCommandLineOptions.Setup(x => x.IsOptionSet(It.IsAny<string>())).Returns(false);
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    bool result = config.DeterministicReport;
+
+    // Assert
+    Assert.False(result);
+  }
+
+  [Fact]
+  public void DeterministicReportReturnsTrueWhenOptionSet()
+  {
+    // Arrange
+    _mockCommandLineOptions.Setup(x => x.IsOptionSet("coverlet-deterministic-report")).Returns(true);
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    bool result = config.DeterministicReport;
+
+    // Assert
+    Assert.True(result);
+  }
+
+  [Fact]
+  public void GetFilePrefixWithWhitespaceOnlyReturnsNull()
+  {
+    // Arrange
+    string[] prefixOption = ["   "];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
+    _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.FilePrefix, out It.Ref<string[]?>.IsAny))
+      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? value) =>
+      {
+        value = prefixOption;
+        return true;
+      }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+
+    // Act
+    string? result = config.GetFilePrefix();
+
+    // Assert
+    Assert.Null(result);
+  }
+
+  #endregion
+
   // Helper delegate for Moq setup - must return bool to match TryGetOptionArgumentList signature
   private delegate bool TryGetOptionArgumentListDelegate(string optionName, out string[]? value);
 }

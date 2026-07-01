@@ -777,4 +777,148 @@ public class InstrumentationDiagnosticsTests : IDisposable
   }
 
   #endregion
+
+  #region FormatFileSize Edge Cases
+
+  [Fact]
+  public async Task LogGeneratedReportsAsyncWithBytesFileSizeFormatsCorrectly()
+  {
+    // Arrange - file size in bytes
+    string reportPath = Path.Combine(_tempDirectory, "small.xml");
+    File.WriteAllText(reportPath, "123");  // 123 bytes
+    var reportPaths = new[] { reportPath };
+
+    // Act
+    await _diagnostics.LogGeneratedReportsAsync(reportPaths);
+
+    // Assert
+    VerifyLogAsyncCalled(LogLevel.Information, "B)", Times.Once());  // Should show bytes
+  }
+
+  [Fact]
+  public async Task LogGeneratedReportsAsyncWithKBFileSizeFormatsCorrectly()
+  {
+    // Arrange - file size in KB
+    string reportPath = Path.Combine(_tempDirectory, "medium.xml");
+    byte[] data = new byte[2048];  // 2 KB
+    File.WriteAllBytes(reportPath, data);
+    var reportPaths = new[] { reportPath };
+
+    // Act
+    await _diagnostics.LogGeneratedReportsAsync(reportPaths);
+
+    // Assert
+    VerifyLogAsyncCalled(LogLevel.Information, "KB)", Times.Once());  // Should show KB
+  }
+
+  [Fact]
+  public async Task LogGeneratedReportsAsyncWithMultipleReports()
+  {
+    // Arrange
+    string report1 = Path.Combine(_tempDirectory, "report1.xml");
+    string report2 = Path.Combine(_tempDirectory, "report2.json");
+    File.WriteAllText(report1, "<coverage />");
+    File.WriteAllText(report2, "{}");
+    var reportPaths = new[] { report1, report2 };
+
+    // Act
+    await _diagnostics.LogGeneratedReportsAsync(reportPaths);
+
+    // Assert
+    VerifyLogAsyncCalled(LogLevel.Information, "Generated coverage reports:", Times.Once());
+    _mockLogger.Verify(x => x.LogAsync(It.IsAny<LogLevel>(), It.IsAny<string>(), It.IsAny<Exception?>(), It.IsAny<Func<string, Exception?, string>>()), Times.AtLeast(2));
+  }
+
+  [Fact]
+  public async Task LogGeneratedReportsAsyncWithEmptyReportList()
+  {
+    // Arrange
+    var reportPaths = Array.Empty<string>();
+
+    // Act
+    await _diagnostics.LogGeneratedReportsAsync(reportPaths);
+
+    // Assert
+    VerifyLogAsyncCalled(LogLevel.Information, "Generated coverage reports:", Times.Once());
+  }
+
+  #endregion
+
+  #region LogInstrumentationResultsAsync Edge Cases
+
+  [Fact]
+  public async Task LogInstrumentationResultsAsyncWithExactly10DocumentsDoesNotShowMoreMessage()
+  {
+    // Arrange
+    InstrumenterResult result = CreateInstrumenterResult("TestModule.dll", documentsCount: 10);
+
+    // Act
+    await _diagnostics.LogInstrumentationResultsAsync(result);
+
+    // Assert
+    // Verify exactly 10 documents are logged
+    _mockLogger.Verify(
+      x => x.LogAsync(
+        LogLevel.Debug,
+        It.Is<It.IsAnyType>((v, t) => v != null && v.ToString()!.Contains("Document9.cs")),
+        It.IsAny<Exception?>(),
+        It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+      Times.Once());
+  }
+
+  [Fact]
+  public async Task LogInstrumentationResultsAsyncLogsDocumentFilenames()
+  {
+    // Arrange
+    InstrumenterResult result = CreateInstrumenterResult("TestModule.dll", documentsCount: 3);
+
+    // Act
+    await _diagnostics.LogInstrumentationResultsAsync(result);
+
+    // Assert
+    VerifyLogAsyncCalled(LogLevel.Debug, "Document", Times.AtLeast(3));
+  }
+
+  #endregion
+
+  #region LogExcludedModulesAsync Edge Cases
+
+  [Fact]
+  public async Task LogExcludedModulesAsyncLogsFooter()
+  {
+    // Arrange
+    var allModules = new[] { "Module1.dll", "Module2.dll" };
+    var instrumentedModules = new[] { "Module1.dll" };
+    var excludeFilters = new[] { "[Module2]*" };
+
+    // Act
+    await _diagnostics.LogExcludedModulesAsync(allModules, instrumentedModules, excludeFilters);
+
+    // Assert
+    VerifyLogAsyncCalled(LogLevel.Debug, "========================", Times.Once());
+  }
+
+  [Fact]
+  public async Task LogExcludedModulesAsyncLogsEachExcludedModule()
+  {
+    // Arrange
+    var allModules = new[] { "Module1.dll", "Module2.dll", "Module3.dll", "Module4.dll" };
+    var instrumentedModules = new[] { "Module1.dll" };
+    var excludeFilters = new[] { "[Module2]*", "[Module3]*", "[Module4]*" };
+
+    // Act
+    await _diagnostics.LogExcludedModulesAsync(allModules, instrumentedModules, excludeFilters);
+
+    // Assert
+    // Verify excluded modules are logged
+    _mockLogger.Verify(
+      x => x.LogAsync(
+        LogLevel.Debug,
+        It.Is<It.IsAnyType>((v, t) => v != null && v.ToString()!.Contains("Module2.dll")),
+        It.IsAny<Exception?>(),
+        It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+      Times.Once());
+  }
+
+  #endregion
 }

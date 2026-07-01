@@ -4,6 +4,7 @@
 using coverlet.MTP.EnvironmentVariables;
 using Coverlet.MTP.CommandLine;
 using Coverlet.MTP.Diagnostics;
+using Coverlet.MTP.EnvironmentVariables;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
@@ -273,6 +274,89 @@ public class CoverletExtensionEnvironmentVariableProviderTests
 
     // Assert
     Assert.True(result.IsValid);
+  }
+
+  #endregion
+
+  #region Additional UpdateAsync Tests
+
+  [Fact]
+  public async Task UpdateAsyncDoesNotSetVariablesWhenCoverageDisabled()
+  {
+    // Arrange
+    _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(false);
+    var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+    var provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      _mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+
+    // Act
+    await provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+    // Assert
+    mockEnvironmentVariables.Verify(
+      x => x.SetVariable(It.Is<EnvironmentVariable>(
+        ev => ev.Variable == CoverletMtpEnvironmentVariables.CoverageEnabled)),
+      Times.Never());
+  }
+
+  [Fact]
+  public async Task UpdateAsyncWithBothExceptionLogAndTrackerLogEnabled()
+  {
+    // Arrange
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, "1");
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, "1");
+
+    try
+    {
+      _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
+      var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+      var provider = new CoverletExtensionEnvironmentVariableProvider(
+        _mockConfiguration.Object,
+        _mockCommandLineOptions.Object,
+        _mockLoggerFactory.Object);
+
+      // Act
+      await provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+      // Assert - Both should be set
+      mockEnvironmentVariables.Verify(
+        x => x.SetVariable(It.Is<EnvironmentVariable>(
+          ev => ev.Variable == CoverletMtpDebugConstants.EnableTrackerLog)),
+        Times.Once());
+      mockEnvironmentVariables.Verify(
+        x => x.SetVariable(It.Is<EnvironmentVariable>(
+          ev => ev.Variable == CoverletMtpDebugConstants.ExceptionLogEnabled)),
+        Times.Once());
+    }
+    finally
+    {
+      System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, null);
+      System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.ExceptionLogEnabled, null);
+    }
+  }
+
+  [Fact]
+  public async Task UpdateAsyncWithTrackerLogDisabled()
+  {
+    // Arrange
+    System.Environment.SetEnvironmentVariable(CoverletMtpDebugConstants.EnableTrackerLog, null);
+    _mockCommandLineOptions.Setup(x => x.IsOptionSet(CoverletOptionNames.Coverage)).Returns(true);
+    var mockEnvironmentVariables = new Mock<IEnvironmentVariables>();
+    var provider = new CoverletExtensionEnvironmentVariableProvider(
+      _mockConfiguration.Object,
+      _mockCommandLineOptions.Object,
+      _mockLoggerFactory.Object);
+
+    // Act
+    await provider.UpdateAsync(mockEnvironmentVariables.Object);
+
+    // Assert
+    mockEnvironmentVariables.Verify(
+      x => x.SetVariable(It.Is<EnvironmentVariable>(
+        ev => ev.Variable == CoverletMtpDebugConstants.EnableTrackerLog)),
+      Times.Never());
   }
 
   #endregion
