@@ -1708,79 +1708,53 @@ namespace Coverlet.Core.Symbols
     //   IL_001d: ldc.i4.1                              ; merge point
     //
     // Detection heuristic (after SimplifyMacros()):
-    //   1. The instruction is a conditional branch (brtrue, brtrue.s, brfalse, brfalse.s, beq, beq.s, etc.)
-    //   2. Its target is `ldc.i4 0` or similar constant-false push for failed string/pattern comparisons.
-    //   3. That constant is immediately followed by an unconditional `br` to the result merge point.
-    //   4. The comparison before the branch is for a string equality or similar pattern match.
+    //   1. The instruction is a conditional branch (brtrue, brtrue.s).
+    //   2. The instruction immediately preceding it is a call to String.op_Equality or String.Equals.
+    //   3. The instruction immediately following it (the fall-through path) is an unconditional
+    //      branch (br, br.s) — meaning this brtrue is the last alternative in the `or` chain
+    //      and falls through directly to the synthetic "false" path.
     private static bool SkipBranchGeneratedByPatternMatchingOr(List<Instruction> instructions, Instruction instruction)
     {
-      // Only handle conditional branches that are used in pattern matching scenarios
+      // Only brtrue / brtrue.s are used to jump to the shared true-result block when a
+      // pattern-matching `or` alternative matches.
       Code code = instruction.OpCode.Code;
-      if (code != Code.Brtrue && code != Code.Brtrue_S &&
-          code != Code.Brfalse && code != Code.Brfalse_S &&
-          code != Code.Beq && code != Code.Beq_S)
-      {
-        return false;
-      }
-
-      if (instruction.Operand is not Instruction target)
+      if (code != Code.Brtrue && code != Code.Brtrue_S)
         return false;
 
-      // Target must push constant false for the failed pattern.
-      // This handles various forms: ldc.i4.0 (macro) or ldc.i4 0 (simplified).
-      Code targetCode = target.OpCode.Code;
-      if (targetCode == Code.Ldc_I4_0)
-      {
-        // macro form - implicit zero
-      }
-      else if (targetCode == Code.Ldc_I4 && target.Operand is int targetValue && targetValue == 0)
-      {
-        // simplified form - explicit zero
-      }
-      else
-      {
-        return false;
-      }
-
-      // The constant-false block must be followed by an unconditional branch (br or br.s)
-      // that merges back to the result block. This is the synthetic short-circuit branch
-      // that should be excluded.
-      Instruction afterTarget = target.Next;
-      if (afterTarget is null || afterTarget.OpCode.FlowControl != FlowControl.Branch)
-        return false;
-
-      // Additional heuristic: For pattern matching `or`, we expect the branch to be comparing
-      // strings or values. Look back a few instructions to find the comparison that feeds
-      // this branch. Typical pattern: call (String.Equals, etc.) followed by brtrue/brfalse.
+      // The previous instruction must be a string-equality call that feeds this branch.
       int branchIndex = instructions.BinarySearch(instruction, new InstructionByOffsetComparer());
-      if (branchIndex < 2)
+      if (branchIndex < 1)
         return false;
 
-      // Check if previous instruction could be a pattern comparison result.
-      // For string patterns: result of String.Equals(...)
-      // For type patterns: result of 'is' operator or type check
       Instruction prevInstruction = instructions[branchIndex - 1];
-      if (prevInstruction.OpCode == OpCodes.Call || prevInstruction.OpCode == OpCodes.Callvirt)
-      {
-        if (prevInstruction.Operand is MethodReference methodRef)
-        {
-          // String comparison methods used in pattern matching
-          if (methodRef.Name == "Equals" && methodRef.DeclaringType.FullName == "System.String")
-            return true;
+      if (prevInstruction.OpCode != OpCodes.Call && prevInstruction.OpCode != OpCodes.Callvirt)
+        return false;
 
-          // Generic IEquatable<T>.Equals calls
-          if (methodRef.Name == "Equals" && methodRef.DeclaringType.FullName.StartsWith("System.IEquatable`"))
-            return true;
-        }
-      }
-      else if (prevInstruction.OpCode == OpCodes.Ldc_I4 || prevInstruction.OpCode == OpCodes.Ldc_I4_0 ||
-               prevInstruction.OpCode == OpCodes.Ldc_I4_1)
-      {
-        // Direct boolean constant (used in some optimized patterns)
-        return true;
-      }
+      if (prevInstruction.Operand is not MethodReference methodRef)
+        return false;
 
-      return false;
+      if (methodRef.DeclaringType.FullName != "System.String")
+        return false;
+
+      if (methodRef.Name is not ("op_Equality" or "Equals"))
+        return false;
+
+      // For pattern-matching `or`, keep the FIRST conditional branch in the chain and skip the
+      // later ones. This matches the already-correct `||` operator behavior: the first decision
+      // site alone is sufficient to distinguish "matched first alternative" vs "continue/fall
+      // through to the rest of the expression".
+      //
+      // Example Debug IL for `text is "hello" or "world"`:
+      //   call  String::op_Equality         ; compare "hello"
+      //   brtrue.s  -> ldc.i4.1            ; KEPT:   reached by both "hello" and "world"
+      //   call  String::op_Equality         ; compare "world"
+      //   brtrue.s  -> ldc.i4.1            ; SKIPPED: later branch in same `or` chain
+      //   br.s -> ldc.i4.0                 ; unconditional false path
+      //
+      // The terminal branch is identified by an unconditional jump on the fall-through path.
+      // That final branch is the synthetic one to exclude; earlier chained branches are kept.
+      Instruction next = instruction.Next;
+      return next is not null && next.OpCode.FlowControl == FlowControl.Branch;
     }
 
     // https://github.com/coverlet-coverage/coverlet/issues/1313

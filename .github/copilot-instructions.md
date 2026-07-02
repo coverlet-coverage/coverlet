@@ -2,6 +2,11 @@
 
 This is a .NET based repository that contains the coverlet projects for code coverage collection. Please follow these guidelines when contributing:
 
+## General Guidelines
+- Always ask before creating any documentation files (e.g., `.md`, `.txt`, `.rst`). Prioritize code and test changes only.
+- Create a single, well-organized proposal or resolution document per issue, located in `Documentation/Plans/`. This folder is Git-ignored and local-only; documents are NOT uploaded to GitHub.
+- Stop deep analysis once effort/usage for a topic reaches about 60%, and keep investigation focused and efficient.
+
 ## Code Standards
 
 You MUST follow all code-formatting and naming conventions defined in [`.editorconfig`](../.editorconfig).
@@ -21,11 +26,13 @@ In addition to the rules enforced by `.editorconfig`, you SHOULD:
   - SA1028: Code must not contain trailing whitespace
   - SA1316: Tuple element names should use correct casing
   - SA1518: File is required to end with a single newline character
+- Any update for pattern matching `or` must not break the already-correct `text == "hello" || text == "world"` operator scenario.
 
 ## Testing Guidelines
 
 - Tests for coverlet MUST use xunit.v3.
 - Overall code test coverage for shipping projects (coverlet nuget packages) shall not be below 90%.
+- Aim for 100% branch coverage in the coverage report for the pattern matching `or` case (e.g., `text is "hello" or "world"`). Tests may inspect current raw branch behavior for diagnosis but should ultimately validate the correct 100% reported branch coverage outcome.
 
 ## Testing Requirements
 
@@ -101,7 +108,7 @@ _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAn
 // Verify LogInformation was called with a message containing "json"
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("json")), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Setup LogWarning behavior
-_mockLogger.Setup(x => x.Log(LogLevel.Warning, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()));
+_mockLogger.Setup(x => x.Log(LogLevel.Warning, It.IsAny<string>()));
 ```
 
 #### Example: Mocking LogDebug
@@ -165,7 +172,7 @@ This codebase uses **TWO different ILogger interfaces** with different signature
 // BAD - Microsoft.Testing.Platform.Logging.ILogger does NOT have EventId
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), // ⚠️ EventId does NOT exist in MTP LOGGER
      It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
-```
+     ```
 
 ✅ **CORRECT** - Uses actual MTP ILogger API signature (async methods):
 
@@ -176,9 +183,9 @@ _mockLogger.Verify(x => x.LogErrorAsync(It.IsAny<string>(), It.IsAny<Cancellatio
 _mockLogger.Verify(x => x.LogWarningAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
 // To verify message content:
 _mockLogger.Verify(x => x.LogInformationAsync(It.Is<string>(s => s.Contains("expected text")), It.IsAny<CancellationToken>()), Times.Once);
- // For synchronous LoggerExtensions (extension methods):
- // NOTE: These are extension methods and cannot be verified with Moq; verify the underlying Log(...) call instead.
- _mockLogger.Verify(x => x.Log(LogLevel.Information, It.Is<string>(s => s.Contains("Coverage reports generated")), It.IsAny<Exception?>(), It.IsAny<Func<string, Exception?, string>>()), Times.Once);
+// For synchronous LoggerExtensions (extension methods):
+// NOTE: These are extension methods and cannot be verified with Moq; verify the underlying Log(...) call instead.
+_mockLogger.Verify(x => x.Log(LogLevel.Information, It.Is<string>(s => s.Contains("Coverage reports generated")), It.IsAny<Exception?>(), It.IsAny<Func<string, Exception?, string>>()), Times.Once);
 ```
 
 **Verification Checklist:**
@@ -335,6 +342,7 @@ The one comprehensive document MUST include:
 **Result:** Developers see a single, focused, comprehensive proposal in their workspace — not a sprawling documentation package.
 
 #### Template Structure
+
 ```markdown
 # Issue #[NUMBER]: [Short Description] - Resolution
 
@@ -366,19 +374,7 @@ The one comprehensive document MUST include:
 - Test status
 - Coverage metrics
 
-## Deployment
-- Steps
-- Compatibility notes
-```
-
-#### Example
-For Issue #1969, create one document:
-- **File:** `Documentation/Plans/Issue-1969-Resolution.md` (~3-5 KB, comprehensive)
-- **NOT:** 15+ separate markdown files in the root directory
-
-This keeps the repository clean, the documentation focused, and makes it easy for reviewers to understand the issue and resolution without navigating multiple files.
-
-### Documentation Creation (Critical Rule - Always Ask First)
+#### Documentation Creation (Critical Rule - Always Ask First)
 
 **ALWAYS ask the user BEFORE creating any documentation files.**
 
@@ -418,7 +414,8 @@ The following are code and do not need explicit documentation approval:
 #### Workflow Example
 
 **❌ WRONG - Creating docs without asking:**
-```
+
+```text
 User: "Implement feature X"
 Copilot: [Creates feature code]
          [Also creates: Feature_Guide.md, Architecture.md, Quick_Start.md]
@@ -427,7 +424,8 @@ User: "I don't need all these docs..."
 ```
 
 **✅ RIGHT - Asking before creating docs:**
-```
+
+```text
 User: "Implement feature X"
 Copilot: [Creates feature code]
          "Code implementation complete. Would you like me to create 
@@ -452,22 +450,3 @@ Copilot: [Adds code comments where helpful]
 2. XML documentation (within `.cs` files)
 3. Inline explanations (within code)
 4. Test documentation (within test files)
-
-#### Suggested Questions
-
-When you're considering creating documentation, ask the user:
-
-✅ "Should I create a [document type] explaining [purpose]?"
-✅ "Would you like documentation for [specific feature/fix]?"
-✅ "Should I document [aspect]? If so, what format?"
-✅ "Rather than creating a guide, should I add code comments instead?"
-✅ "Is a README needed for this component, or is the code self-explanatory?"
-
-#### Exception: Auto-Generated Documentation
-
-The only documentation created without asking:
-- ✅ Code comments within source files (when improving code clarity)
-- ✅ XML doc comments on public methods (when required by standards)
-- ✅ Inline explanations for complex logic
-
-All other documentation requires explicit user approval.

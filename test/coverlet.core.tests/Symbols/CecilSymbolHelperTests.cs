@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -574,6 +574,37 @@ namespace Coverlet.Core.Tests.Symbols
 
       // assert - 4 paths: blt (2) + brfalse (2); blt is NOT phantom here
       Assert.Equal(4, points.Count);
+    }
+
+    [Fact]
+    public void GetBranchPoints_PatternMatchingOr_ShouldMatchOrOperator_AndStayOnSourceLine()
+    {
+      // https://github.com/coverlet-coverage/coverlet/issues/1969
+      // Pattern matching `or` must not report extra synthetic branches compared to `||`.
+
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(PatternMatchingOr).FullName);
+      MethodDefinition orOperatorMethod = type.Methods.Single(x => x.FullName.Contains($"::{nameof(PatternMatchingOr.OrOperator)}"));
+      MethodDefinition patternMatchingOrMethod = type.Methods.Single(x => x.FullName.Contains($"::{nameof(PatternMatchingOr.PatternMatchingOrMethod)}"));
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> orOperatorPoints = _cecilSymbolHelper.GetBranchPoints(orOperatorMethod);
+      System.Collections.Generic.IReadOnlyList<BranchPoint> patternMatchingOrPoints = _cecilSymbolHelper.GetBranchPoints(patternMatchingOrMethod);
+
+      // assert
+      // OrOperator (text == "hello" || text == "world") compiles to ONE conditional branch
+      // (brtrue.s for the first comparison; the second feeds directly into br.s/stloc) = 2 branch points.
+      // PatternMatchingOrMethod (text is "hello" or "world") compiles to TWO brtrue.s instructions;
+      // the heuristic skips the last one (whose fall-through is an unconditional br) so the
+      // effective count equals OrOperator: 2 branch points.
+      Assert.Equal(2, orOperatorPoints.Count);
+      Assert.Equal(orOperatorPoints.Count, patternMatchingOrPoints.Count);
+      // All branch points must map to the same user-visible source line (the or-expression itself).
+      // We derive the expected line from the branch points rather than from the first sequence point,
+      // because in Debug builds the first sequence point is the opening brace on the preceding line.
+      int branchLine = patternMatchingOrPoints[0].StartLine;
+      Assert.True(branchLine > 0, "Branch points must map to a valid source line, not a compiler-generated prologue");
+      Assert.All(patternMatchingOrPoints, x => Assert.Equal(branchLine, x.StartLine));
     }
   }
 }
