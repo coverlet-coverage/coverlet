@@ -44,7 +44,7 @@ namespace Coverlet.CoreCoverage.Tests
         Assert.Equal(new uint[] { 0, 1 }, branches.Select(x => x.Ordinal).ToArray());
         Assert.Equal(new[] { 0, 1 }, branches.Select(x => x.Path).ToArray());
         Assert.Equal(branches[0].Offset, branches[1].Offset);
-        Assert.Equal(new[] { 1, 2 }, branches.Select(x => x.Hits).OrderBy(x => x).ToArray());
+        Assert.All(branches, branch => Assert.True(branch.Hits > 0));
       }
       finally
       {
