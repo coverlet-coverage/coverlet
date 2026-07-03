@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Exceptions;
@@ -126,14 +127,19 @@ namespace Coverlet.Core.Instrumentation
         }
         catch (AssemblyResolutionException)
         {
-          AssemblyDefinition asm = TryWithCustomResolverOnDotNetCore(name);
-
+          AssemblyDefinition asm = TryWithNetFrameworkRuntimeResolver(name);
           if (asm != null)
           {
             return asm;
           }
 
-          asm = TryWithNetFrameworkRuntimeResolver(name);
+          asm = TryWithNetFrameworkReferenceAssemblyResolver(name);
+          if (asm != null)
+          {
+            return asm;
+          }
+
+          asm = TryWithCustomResolverOnDotNetCore(name);
           if (asm != null)
           {
             return asm;
@@ -185,6 +191,143 @@ namespace Coverlet.Core.Instrumentation
       }
 
       return null;
+    }
+
+    internal AssemblyDefinition TryWithNetFrameworkReferenceAssemblyResolver(AssemblyNameReference name)
+    {
+      _logger.LogVerbose($"TryWithNetFrameworkReferenceAssemblyResolver for {name}");
+
+      if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || string.IsNullOrWhiteSpace(name?.Name))
+      {
+        return null;
+      }
+
+      foreach (string candidate in EnumerateNetFrameworkAssemblyCandidates(name))
+      {
+        if (!File.Exists(candidate))
+        {
+          continue;
+        }
+
+        try
+        {
+          _logger.LogVerbose($"TryWithNetFrameworkReferenceAssemblyResolver loading '{candidate}'");
+          return AssemblyDefinition.ReadAssembly(candidate, new ReaderParameters { AssemblyResolver = this });
+        }
+        catch (Exception ex)
+        {
+          _logger.LogVerbose($"TryWithNetFrameworkReferenceAssemblyResolver exception loading '{candidate}': {ex}");
+        }
+      }
+
+      return null;
+    }
+
+    private static IEnumerable<string> EnumerateNetFrameworkAssemblyCandidates(AssemblyNameReference name)
+    {
+      foreach (string baseDirectory in GetNetFrameworkReferenceAssemblyDirectories())
+      {
+        IEnumerable<string> frameworkVersionDirectories;
+        try
+        {
+          frameworkVersionDirectories = Directory.GetDirectories(baseDirectory, "v*")
+              .OrderByDescending(path => path, StringComparer.OrdinalIgnoreCase);
+        }
+        catch
+        {
+          continue;
+        }
+
+        foreach (string frameworkVersionDirectory in frameworkVersionDirectories)
+        {
+          yield return Path.Combine(frameworkVersionDirectory, name.Name + ".dll");
+          yield return Path.Combine(frameworkVersionDirectory, name.Name + ".exe");
+        }
+      }
+
+      foreach (string gacRoot in GetGacRoots())
+      {
+        foreach (string candidate in EnumerateGacCandidates(gacRoot, name.Name))
+        {
+          yield return candidate;
+        }
+      }
+    }
+
+    private static IEnumerable<string> GetNetFrameworkReferenceAssemblyDirectories()
+    {
+      string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+      if (!string.IsNullOrWhiteSpace(programFilesX86))
+      {
+        string directory = Path.Combine(programFilesX86, "Reference Assemblies", "Microsoft", "Framework", ".NETFramework");
+        if (Directory.Exists(directory))
+        {
+          yield return directory;
+        }
+      }
+
+      string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+      if (!string.IsNullOrWhiteSpace(programFiles))
+      {
+        string directory = Path.Combine(programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETFramework");
+        if (Directory.Exists(directory))
+        {
+          yield return directory;
+        }
+      }
+    }
+
+    private static IEnumerable<string> GetGacRoots()
+    {
+      string windowsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+      if (string.IsNullOrWhiteSpace(windowsDirectory))
+      {
+        yield break;
+      }
+
+      string modernGacRoot = Path.Combine(windowsDirectory, "Microsoft.NET", "assembly");
+      foreach (string bucket in new[] { "GAC_MSIL", "GAC_64", "GAC_32" })
+      {
+        string bucketPath = Path.Combine(modernGacRoot, bucket);
+        if (Directory.Exists(bucketPath))
+        {
+          yield return bucketPath;
+        }
+      }
+
+      string legacyGacRoot = Path.Combine(windowsDirectory, "assembly", "GAC_MSIL");
+      if (Directory.Exists(legacyGacRoot))
+      {
+        yield return legacyGacRoot;
+      }
+    }
+
+    private static IEnumerable<string> EnumerateGacCandidates(string gacRoot, string assemblySimpleName)
+    {
+      string assemblyRoot = Path.Combine(gacRoot, assemblySimpleName);
+      if (!Directory.Exists(assemblyRoot))
+      {
+        yield break;
+      }
+
+      string[] versionFolders;
+      try
+      {
+        versionFolders = Directory.GetDirectories(assemblyRoot);
+      }
+      catch
+      {
+        yield break;
+      }
+
+      Array.Sort(versionFolders, StringComparer.OrdinalIgnoreCase);
+      Array.Reverse(versionFolders);
+
+      foreach (string versionFolder in versionFolders)
+      {
+        yield return Path.Combine(versionFolder, assemblySimpleName + ".dll");
+        yield return Path.Combine(versionFolder, assemblySimpleName + ".exe");
+      }
     }
 
     /// <summary>
