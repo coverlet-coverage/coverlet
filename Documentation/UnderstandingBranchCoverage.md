@@ -250,13 +250,16 @@ Example(false);  // Returns "no"
 
 ### 7. Pattern Matching
 
+Pattern matching can produce compiler-lowered branch shapes that differ from source-level intuition.
+
+#### `switch` pattern matching
+
 **Example:**
 
 ```csharp
-
 public string Example(object? obj)
 {
-    return obj switch  // Multiple branches based on patterns
+    return obj switch
     {
         int i => $"Integer: {i}",
         string s => $"String: {s}",
@@ -266,7 +269,33 @@ public string Example(object? obj)
 }
 ```
 
-Each pattern generates branches. The exact count depends on the patterns and compiler optimizations.
+Each pattern arm can generate one or more IL branches. The exact branch count depends on compiler lowering and optimizations.
+
+#### `is ... or ...` string pattern matching (current behavior)
+
+**Example:**
+
+```csharp
+public bool Example(string text)
+{
+    return text is "hello" or "world";
+}
+```
+
+Coverlet aligns this pattern with `text == "hello" || text == "world"` branch semantics.
+In practice, branch coverage is treated as a single source-level decision with two outcomes:
+
+- **match path** (any listed alternative matches, such as `"hello"` or `"world"`)
+- **no-match path** (none of the alternatives match)
+
+Because of this normalization, you do **not** need one test per alternative to reach full branch coverage.
+
+**Coverage rule for this pattern:**
+
+- Run at least one input that matches **any** alternative.
+- Run at least one input that does not match any alternative.
+
+This is sufficient for 100% branch coverage for `text is "a" or "b"`-style string patterns.
 
 ---
 
@@ -309,7 +338,8 @@ If you see unexpected branches in async code or LINQ expressions, they may be co
 
 1. For `if (a && b)`: Test with `(T,T)`, `(T,F)`, and `(F,*)`
 2. For `if (a || b)`: Test with `(F,F)`, `(F,T)`, and `(T,*)`
-3. For null checks: Test with both null and non-null values
+3. For `text is "a" or "b"` (string patterns): one matching input and one non-matching input are enough
+4. For null checks: Test with both null and non-null values
 
 ### Q: Should I aim for 100% branch coverage?
 
@@ -340,6 +370,7 @@ For more granular control, see the *Excluding From Coverage* section in the rele
 
 - [#1786 - False positive branch coverage for `if` without `else`](https://github.com/coverlet-coverage/coverlet/issues/1786)
 - [#1751 - False positive due to short-circuiting operators](https://github.com/coverlet-coverage/coverlet/issues/1751)
+- [#1969 - Pattern matching `or` branch coverage alignment](https://github.com/coverlet-coverage/coverlet/issues/1969)
 
 ---
 

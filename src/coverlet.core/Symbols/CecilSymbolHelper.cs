@@ -1753,7 +1753,14 @@ namespace Coverlet.Core.Symbols
       //
       // The terminal branch is identified by an unconditional jump on the fall-through path.
       // That final branch is the synthetic one to exclude; earlier chained branches are kept.
+      // Release builds can insert NOPs between the conditional branch and the terminal jump,
+      // so we walk to the next non-NOP instruction before checking flow control.
       Instruction next = instruction.Next;
+      while (next is not null && next.OpCode == OpCodes.Nop)
+      {
+        next = next.Next;
+      }
+
       return next is not null && next.OpCode.FlowControl == FlowControl.Branch;
     }
 
