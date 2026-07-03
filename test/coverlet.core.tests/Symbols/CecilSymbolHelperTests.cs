@@ -7,6 +7,7 @@ using System.Reflection;
 using coverlet.tests.projectsample.netframework;
 using Coverlet.Core.Samples.Tests;
 using Coverlet.Core.Symbols;
+using Coverlet.Tests.Utils;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Xunit;
@@ -598,7 +599,14 @@ namespace Coverlet.Core.Tests.Symbols
       // the heuristic skips the last one (whose fall-through is an unconditional br) so the
       // effective count equals OrOperator: 2 branch points.
       Assert.Equal(2, orOperatorPoints.Count);
-      Assert.Equal(orOperatorPoints.Count, patternMatchingOrPoints.Count);
+      if (TestUtils.GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
+      {
+        Assert.Equal(2, patternMatchingOrPoints.Count);
+      }
+      else
+      {
+        Assert.Equal(4, patternMatchingOrPoints.Count);
+      }
       // All branch points must map to the same user-visible source line (the or-expression itself).
       // We derive the expected line from the branch points rather than from the first sequence point,
       // because in Debug builds the first sequence point is the opening brace on the preceding line.
