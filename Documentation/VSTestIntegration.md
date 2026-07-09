@@ -1,5 +1,14 @@
 # Coverlet integration with VSTest (a.k.a. Visual Studio Test Platform)
 
+> [!IMPORTANT]
+> **`coverlet.collector` is not compatible with the Microsoft Testing Platform (MTP v2).**
+>
+> This is particularly important if you're using the native `dotnet test` integration introduced in **.NET 10**, which can run tests through the Microsoft Testing Platform.
+>
+> The `coverlet.collector` package is built on the **VSTest** data collector infrastructure. Because the **Microsoft Testing Platform** uses a different test execution architecture and does not support VSTest data collectors, `coverlet.collector` cannot be used with MTP v2.
+>
+> For more information, see: [*Use Microsoft.Testing.Platform in the VSTest mode of `dotnet test`*](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-integration-dotnet-test).
+
 **Supported runtime versions**:
 
 Since version `8.0.0`

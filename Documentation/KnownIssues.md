@@ -47,7 +47,7 @@ This happen also if there are other "piece of code" during testing that slow dow
 
 *Solution:*
 
-The only way to get around this issue is to use collectors integration <https://github.com/coverlet-coverage/coverlet#vstest-integration-preferred-due-to-known-issue-supports-only-net-core-application>. With the collector, we're injected in test host through a in-proc collector that communicates with the VSTest platform so we can signal when we end our work.
+The only way to get around this issue is to use **coverlet.collector** integration. With the collector, we're injected in test host through a in-proc collector that communicates with the VSTest platform so we can signal when we end our work.
 
 ## Upgrade `coverlet.collector` to version > 1.0.0
 

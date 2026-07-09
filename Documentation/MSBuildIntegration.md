@@ -1,5 +1,14 @@
 # Coverlet integration with MSBuild
 
+> [!IMPORTANT]
+> **`coverlet.msbuild` is not compatible with the Microsoft Testing Platform (MTP v2).**
+>
+> This is particularly important if you're using the native `dotnet test` integration introduced in **.NET 10**, which can run tests through the Microsoft Testing Platform.
+>
+> The `coverlet.msbuild` package relies on **MSBuild test targets** that are part of the **VSTest** execution model. Because the **Microsoft Testing Platform** uses a different test execution architecture and does not invoke these targets, `coverlet.msbuild` cannot collect code coverage when running with MTP v2.
+>
+> For more information, see: [*Use Microsoft.Testing.Platform in the VSTest mode of `dotnet test`*](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-integration-dotnet-test).
+
 In this mode, Coverlet doesn't require any additional setup other than including the `coverlet.msbuild` NuGet package in the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
 
 If a property takes multiple comma-separated values please note that [you will have to add escaped quotes around the string](https://github.com/Microsoft/msbuild/issues/2999#issuecomment-366078677) like this: `/p:Exclude=\"[coverlet.*]*,[*]Coverlet.Core*\"`, `/p:Include=\"[coverlet.*]*,[*]Coverlet.Core*\"`, or `/p:CoverletOutputFormat=\"json,opencover\"`.
