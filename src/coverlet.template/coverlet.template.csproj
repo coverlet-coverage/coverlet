@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    This project exists solely to compile ModuleTrackerTemplate to netstandard2.0. The resulting
+    assembly is embedded into coverlet.core (see coverlet.core.csproj) and used as the source of the
+    tracker IL that gets injected into instrumented modules.
+
+    Why netstandard2.0 and nothing else: when ModuleTrackerTemplate is compiled for net6.0+, the C#
+    compiler lowers its string interpolations to DefaultInterpolatedStringHandler, a type that does
+    not exist on .NET Framework. Injecting that IL into a .NET Framework module makes the tracker's
+    flush handler (UnloadModule) fail to JIT at process exit, silently losing all coverage.
+    Compiled for netstandard2.0 the same interpolations lower to string.Concat/string.Format, which
+    resolve against mscorlib on .NET Framework. Do NOT add PackageReferences that polyfill net6+ BCL
+    types (e.g. a DefaultInterpolatedStringHandler shim) - that would defeat the purpose.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <!-- ModuleTrackerTemplate's static fields are assigned by the instrumenter at IL-injection time,
+         never in source, so CS0649 ("field is never assigned") is a false positive here. coverlet.core
+         does not report it because its InternalsVisibleTo lets Roslyn assume external assignment. -->
+    <NoWarn>$(NoWarn);CS0649</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Single source of truth: the template lives in coverlet.core and is linked (not copied) here. -->
+    <Compile Include="..\coverlet.core\Instrumentation\ModuleTrackerTemplate.cs" Link="ModuleTrackerTemplate.cs" />
+  </ItemGroup>
+
+</Project>

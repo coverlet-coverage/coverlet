@@ -1064,6 +1064,125 @@ public class SampleClass
     }
 
     /// <summary>
+    /// Regression test for https://github.com/coverlet-coverage/coverlet/issues/1984
+    /// The tracker IL injected into a .NET Framework module must not reference
+    /// System.Runtime.CompilerServices.DefaultInterpolatedStringHandler (a .NET 6+ type). A net8.0+
+    /// build of coverlet.core lowers the template's string interpolations to that handler; injecting
+    /// it makes the tracker's UnloadModule flush handler fail to JIT on .NET Framework, silently
+    /// dropping all coverage while tests still pass. The fix sources the template from an embedded
+    /// netstandard2.0 build, whose interpolations lower to string.Concat/string.Format instead.
+    /// Note: the #1818 test above passes even with the bug present, because the scope-remap points the
+    /// missing handler at mscorlib - so a dedicated assertion on the type identity is required here.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "NetFramework")]
+    public void TestInstrument_NetFrameworkAssembly_TrackerDoesNotReferenceInterpolatedStringHandler()
+    {
+      // Skip on non-Windows or if .NET Framework sample not built
+      if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+      {
+        return;
+      }
+
+      string netFrameworkProjectPath = TestUtils.GetTestBinaryPath("coverlet.tests.projectsample.netframework");
+      string netFrameworkAssemblyPath = Path.Combine(
+          netFrameworkProjectPath,
+          TestUtils.GetBuildConfigurationString(),
+          "coverlet.tests.projectsample.netframework.dll");
+
+      if (!File.Exists(netFrameworkAssemblyPath))
+      {
+        return;
+      }
+
+      string identifier = Guid.NewGuid().ToString();
+      DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), identifier));
+      string destModule = "coverlet.tests.projectsample.netframework.dll";
+      string destPdb = "coverlet.tests.projectsample.netframework.pdb";
+
+      try
+      {
+        File.Copy(netFrameworkAssemblyPath, Path.Combine(directory.FullName, destModule), true);
+        string pdbPath = Path.ChangeExtension(netFrameworkAssemblyPath, ".pdb");
+        if (File.Exists(pdbPath))
+        {
+          File.Copy(pdbPath, Path.Combine(directory.FullName, destPdb), true);
+        }
+
+        string modulePath = Path.Combine(directory.FullName, destModule);
+
+        var instrumentationHelper = new InstrumentationHelper(
+            new ProcessExitHandler(),
+            new RetryHelper(),
+            new FileSystem(),
+            _mockLogger.Object,
+            new SourceRootTranslator(_mockLogger.Object, new FileSystem()));
+
+        var instrumenter = new Instrumenter(
+            modulePath,
+            identifier,
+            new CoverageParameters(),
+            _mockLogger.Object,
+            instrumentationHelper,
+            new FileSystem(),
+            new SourceRootTranslator(_mockLogger.Object, new FileSystem()),
+            new CecilSymbolHelper());
+
+        if (!instrumenter.CanInstrument())
+        {
+          return;
+        }
+
+        Assert.NotNull(instrumenter.Instrument());
+
+        using var instrumentedModule = ModuleDefinition.ReadModule(modulePath);
+
+        // Confirms it really is a .NET Framework assembly (core library mscorlib).
+        Assert.Equal("mscorlib", instrumentedModule.TypeSystem.CoreLibrary.Name);
+
+        TypeDefinition trackerType = instrumentedModule.Types.FirstOrDefault(
+            t => t.Namespace.StartsWith("Coverlet.Core.Instrumentation.Tracker"));
+        Assert.NotNull(trackerType);
+
+        foreach (MethodDefinition method in trackerType.Methods)
+        {
+          if (!method.HasBody)
+          {
+            continue;
+          }
+
+          foreach (VariableDefinition variable in method.Body.Variables)
+          {
+            AssertNotInterpolatedStringHandler(variable.VariableType, $"local in {method.Name}");
+          }
+
+          foreach (Instruction instr in method.Body.Instructions)
+          {
+            if (instr.Operand is MethodReference methodRef)
+            {
+              AssertNotInterpolatedStringHandler(methodRef.DeclaringType, $"method ref '{methodRef.FullName}' in {method.Name}");
+            }
+            else if (instr.Operand is TypeReference typeRef)
+            {
+              AssertNotInterpolatedStringHandler(typeRef, $"type ref in {method.Name}");
+            }
+          }
+        }
+      }
+      finally
+      {
+        try
+        {
+          directory.Delete(true);
+        }
+        catch
+        {
+          // Ignore cleanup errors
+        }
+      }
+    }
+
+    /// <summary>
     /// Regression test for https://github.com/coverlet-coverage/coverlet/issues/1828
     /// The injected Tracker class must carry [CompilerGenerated] and [ExcludeFromCodeCoverage]
     /// custom attributes so that reflection-based tooling can identify and skip it.
@@ -1151,6 +1270,17 @@ public class SampleClass
             assemblyRef.Name == "System.Runtime",
             $"Type '{typeRef.FullName}' in {context} should not reference System.Runtime, but found scope: {assemblyRef.Name}");
       }
+    }
+
+    private static void AssertNotInterpolatedStringHandler(TypeReference typeRef, string context)
+    {
+      if (typeRef is null)
+        return;
+
+      Assert.False(
+          typeRef.GetElementType().FullName == "System.Runtime.CompilerServices.DefaultInterpolatedStringHandler",
+          $"The injected .NET Framework tracker must not reference DefaultInterpolatedStringHandler (found via {context}); " +
+          "the template must be sourced from the embedded netstandard2.0 build. See issue #1984.");
     }
   }
 }

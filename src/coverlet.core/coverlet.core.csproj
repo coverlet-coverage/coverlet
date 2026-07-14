@@ -50,4 +50,30 @@
     <PackageReference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
 
+  <!--
+    Embed a netstandard2.0-compiled copy of ModuleTrackerTemplate. The Instrumenter reads the tracker
+    IL from this embedded assembly (see Instrumenter.AddCustomModuleTrackerToModule) instead of from
+    the running coverlet.core build. That keeps the injected IL safe to JIT on .NET Framework no matter
+    which TFM coverlet.core runs as: a net8.0+ build lowers the template's string interpolations to
+    DefaultInterpolatedStringHandler, a type absent on .NET Framework, which silently breaks coverage.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\coverlet.template\coverlet.template.csproj"
+                      ReferenceOutputAssembly="false"
+                      Private="false"
+                      OutputItemType="_CoverletTrackerTemplateAssembly" />
+  </ItemGroup>
+
+  <Target Name="_EmbedCoverletTrackerTemplate"
+          DependsOnTargets="ResolveProjectReferences"
+          BeforeTargets="AssignTargetPaths">
+    <Error Condition="'@(_CoverletTrackerTemplateAssembly)' == ''"
+           Text="coverlet.template output could not be resolved; the tracker template cannot be embedded." />
+    <ItemGroup>
+      <EmbeddedResource Include="@(_CoverletTrackerTemplateAssembly)">
+        <LogicalName>coverlet.template.dll</LogicalName>
+      </EmbeddedResource>
+    </ItemGroup>
+  </Target>
+
 </Project>

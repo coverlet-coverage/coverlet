@@ -17,6 +17,7 @@
   <Folder Name="/src/">
     <Project Path="src/coverlet.console/coverlet.console.csproj" />
     <Project Path="src/coverlet.core/coverlet.core.csproj" />
+    <Project Path="src/coverlet.template/coverlet.template.csproj" />
     <Project Path="src/coverlet.MTP/coverlet.MTP.csproj" />
     <Project Path="src/legacy/coverlet.collector/coverlet.collector.csproj" />
     <Project Path="src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj" />

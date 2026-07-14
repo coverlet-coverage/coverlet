@@ -440,7 +440,8 @@ namespace Coverlet.Core.Instrumentation
 
     private void AddCustomModuleTrackerToModule(ModuleDefinition module)
     {
-      using (var coverletInstrumentationAssembly = AssemblyDefinition.ReadAssembly(typeof(ModuleTrackerTemplate).Assembly.Location))
+      using Stream trackerTemplateStream = GetTrackerTemplateAssemblyStream();
+      using (var coverletInstrumentationAssembly = AssemblyDefinition.ReadAssembly(trackerTemplateStream))
       {
         TypeDefinition moduleTrackerTemplate = coverletInstrumentationAssembly.MainModule.GetType(
             "Coverlet.Core.Instrumentation", nameof(ModuleTrackerTemplate));
@@ -547,6 +548,37 @@ namespace Coverlet.Core.Instrumentation
 
       Debug.Assert(_customTrackerHitsArray != null);
       Debug.Assert(_customTrackerClassConstructorIl != null);
+    }
+
+    /// <summary>
+    /// Returns a stream over the netstandard2.0-compiled <see cref="ModuleTrackerTemplate"/> assembly
+    /// that is embedded in coverlet.core. The tracker IL injected into instrumented modules is copied
+    /// from this assembly rather than from the running coverlet.core build, so that a net8.0+ build of
+    /// coverlet.core never injects IL referencing net6+ only BCL types (e.g.
+    /// DefaultInterpolatedStringHandler) that cannot be JIT-compiled on .NET Framework.
+    /// </summary>
+    private static Stream GetTrackerTemplateAssemblyStream()
+    {
+      const string trackerTemplateResourceName = "coverlet.template.dll";
+
+      System.Reflection.Assembly coreAssembly = typeof(Instrumenter).Assembly;
+      string resourceName = Array.Find(
+          coreAssembly.GetManifestResourceNames(),
+          name => name.EndsWith(trackerTemplateResourceName, StringComparison.OrdinalIgnoreCase));
+
+      if (resourceName is null)
+      {
+        throw new InvalidOperationException(
+            $"Embedded tracker template '{trackerTemplateResourceName}' was not found in '{coreAssembly.FullName}'. " +
+            "This assembly is required to inject .NET Framework-safe coverage tracking code.");
+      }
+
+      using Stream resourceStream = coreAssembly.GetManifestResourceStream(resourceName);
+      // Cecil needs a seekable stream that stays readable for the duration of the copy; use memory.
+      var templateStream = new MemoryStream();
+      resourceStream.CopyTo(templateStream);
+      templateStream.Position = 0;
+      return templateStream;
     }
 
     /// <summary>

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix Regression in branch coverage for lambda expressions [#1937](https://github.com/coverlet-coverage/coverlet/issues/1937)
 - Fix When using "is" with "or" in pattern matching, branch coverage is lower than normal [#1969](https://github.com/coverlet-coverage/coverlet/issues/1969)
+- Fix silent zero coverage on .NET Framework (console/collector) since 8.0.0: the injected tracker no longer references the net6+ `DefaultInterpolatedStringHandler` [#1984](https://github.com/coverlet-coverage/coverlet/issues/1984)
 
 ## Release date 2026-05-18
 
