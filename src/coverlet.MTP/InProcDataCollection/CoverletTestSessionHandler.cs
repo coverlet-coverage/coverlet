@@ -72,10 +72,6 @@ public class CoverletTestSessionHandler : ITestSessionLifetimeHandler
           [typeof(object), typeof(EventArgs)]);
 
       unloadModule?.Invoke(null, [this, EventArgs.Empty]);
-
-      injectedInstrumentationClass
-          .GetField("FlushHitFile", BindingFlags.Static | BindingFlags.Public)?
-          .SetValue(null, false);
     }
 
     return Task.CompletedTask;

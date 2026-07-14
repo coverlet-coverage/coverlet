@@ -81,8 +81,9 @@ namespace Coverlet.Core.Instrumentation
 
     public static void UnloadModule(object sender, EventArgs e)
     {
-      // The same module can be unloaded multiple times in the same process via different app domains.
-      // Use a global mutex to ensure no concurrent access.
+      // The same module can be unloaded concurrently (different AppDomains, or ProcessExit racing an
+      // in-proc-collector call). A global mutex serialises access; FlushHitFile is cleared inside the
+      // lock so a waiting caller sees the updated value and skips a redundant write.
       using var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew);
       if (!createdNew)
       {
@@ -156,6 +157,10 @@ namespace Coverlet.Core.Instrumentation
           WriteLog(ex.ToString());
           throw;
         }
+
+        // Clear the flag inside the mutex so that any concurrent caller (e.g. ProcessExit)
+        // that is waiting for the mutex will see FlushHitFile == false and skip a redundant write.
+        FlushHitFile = false;
       }
 
       // On purpose this is not under a try-finally: it is better to have an exception if there was any error writing the hits file

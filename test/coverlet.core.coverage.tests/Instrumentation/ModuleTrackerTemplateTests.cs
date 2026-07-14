@@ -125,10 +125,39 @@ namespace Coverlet.Core.Tests.Instrumentation
         ModuleTrackerTemplate.HitsArray = [0, 3, 2, 1];
         ModuleTrackerTemplate.UnloadModule(null, null);
 
+        // Each AppDomain has its own copy of ModuleTrackerTemplate with FlushHitFile = true.
+        // Reset the flag to simulate a second AppDomain's unload.
+        ModuleTrackerTemplate.FlushHitFile = true;
         ModuleTrackerTemplate.HitsArray = [0, 1, 2, 3];
         ModuleTrackerTemplate.UnloadModule(null, null);
 
         int[] expectedHitsArray = [0, 4, 4, 4];
+        Assert.Equal(expectedHitsArray, ReadHitsFile());
+
+        return s_success;
+      });
+    }
+
+    [Fact]
+    public void FlushHitFileClearedInsideMutexPreventsDoubleWrite()
+    {
+      // Regression test for Fix 3 in issue #1983: FlushHitFile must be cleared inside the mutex so a
+      // concurrent ProcessExit caller that was waiting for the lock sees false and skips the
+      // write.
+      FunctionExecutor.Run(() =>
+      {
+        using var ctx = new TrackerContext();
+        ModuleTrackerTemplate.HitsArray = [1, 2, 3];
+
+        ModuleTrackerTemplate.UnloadModule(null, null);
+
+        // FlushHitFile must be false inside the mutex, not after it is released.
+        Assert.False(ModuleTrackerTemplate.FlushHitFile);
+
+        // Second call simulates ProcessExit in the old TOCTOU window; must be a no-op.
+        ModuleTrackerTemplate.UnloadModule(null, null);
+
+        int[] expectedHitsArray = [1, 2, 3];
         Assert.Equal(expectedHitsArray, ReadHitsFile());
 
         return s_success;

@@ -98,8 +98,8 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
   }
 
   /// <summary>
-  /// Iterates through all loaded assemblies and calls UnloadModule on any
-  /// instrumented tracker classes to flush hit data to files.
+  /// Iterates through all loaded assemblies and calls UnloadModule on any instrumented tracker
+  /// classes to flush hit data to files.
   /// </summary>
   private void FlushCoverageData()
   {
@@ -123,11 +123,6 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
         if (unloadMethod != null)
         {
           unloadMethod.Invoke(null, [this, EventArgs.Empty]);
-
-          // Prevent double-flush on process exit
-          FieldInfo? flushField = trackerType.GetField("FlushHitFile", BindingFlags.Static | BindingFlags.Public);
-          flushField?.SetValue(null, false);
-
           flushedCount++;
           _logger.LogDebug($"[Coverlet.MTP.InProcess] Successfully flushed coverage for '{assembly.GetName().Name}'");
         }
