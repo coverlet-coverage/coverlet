@@ -2,58 +2,44 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
+using System.Collections.Concurrent;
 using Coverlet.Collector.DataCollection;
+using Coverlet.Core.Instrumentation;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollector.InProcDataCollector;
 using Moq;
 using Xunit;
 
 namespace Coverlet.Collector.Tests.DataCollection
 {
-  public class CoverletInProcDataCollectorTests
+  public class CoverletInProcDataCollectorTests : IDisposable
   {
     private readonly CoverletInProcDataCollector _dataCollector;
 
     public CoverletInProcDataCollectorTests()
     {
       _dataCollector = new CoverletInProcDataCollector();
+      _dataCollector.Initialize(new Mock<IDataCollectionSink>().Object);
+    }
+
+    public void Dispose()
+    {
+      // Remove any registry entries written during the test so other tests are not affected.
+      AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, null);
     }
 
     [Fact]
-    public void GetInstrumentationClass_ShouldReturnNullForNonMatchingType_EnabledLogging()
+    public void TestSessionEnd_UsesRegistryWhenAvailable()
     {
-      // Arrange
-      var dataCollectionSink = new Mock<IDataCollectionSink>();
-      var mockAssembly = new Mock<Assembly>();
-      var mockType = new Mock<Type>();
-      mockType.Setup(t => t.Namespace).Returns("Coverlet.Core.Instrumentation.Tracker");
-      mockType.Setup(t => t.Name).Returns("MockAssembly_Tracker");
-      mockAssembly.Setup(a => a.GetTypes()).Returns(new[] { mockType.Object });
-      Environment.SetEnvironmentVariable("COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED", "1");
-      _dataCollector.Initialize(dataCollectionSink.Object);
+      // Regression test for Fix 1 in issue #1983: TestSessionEnd must invoke handlers from the AppDomain registry.
+      bool handlerCalled = false;
 
-      // Act & Assert
-      var results = _dataCollector.GetInstrumentationClass(mockAssembly.Object);
+      var bag = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
+      bag?.Add(new((_, _) => { handlerCalled = true; }));
 
-      // Assert
-      Assert.Null(results);
-    }
+      _dataCollector.TestSessionEnd(new TestSessionEndArgs());
 
-    [Fact]
-    public void GetInstrumentationClass_ShouldReturnNullForNonMatchingType()
-    {
-      // Arrange
-      var mockAssembly = new Mock<Assembly>();
-      var mockType = new Mock<Type>();
-      mockType.Setup(t => t.Namespace).Returns("NonMatchingNamespace");
-      mockType.Setup(t => t.Name).Returns("NonMatchingName");
-      mockAssembly.Setup(a => a.GetTypes()).Returns(new[] { mockType.Object });
-
-      // Act
-      var result = _dataCollector.GetInstrumentationClass(mockAssembly.Object);
-
-      // Assert
-      Assert.Null(result);
+      Assert.True(handlerCalled);
     }
   }
 }

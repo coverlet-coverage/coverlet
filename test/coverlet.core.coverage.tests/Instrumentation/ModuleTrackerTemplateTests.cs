@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -132,6 +133,30 @@ namespace Coverlet.Core.Tests.Instrumentation
         ModuleTrackerTemplate.UnloadModule(null, null);
 
         int[] expectedHitsArray = [0, 4, 4, 4];
+        Assert.Equal(expectedHitsArray, ReadHitsFile());
+
+        return s_success;
+      });
+    }
+
+    [Fact]
+    public void RegisterUnloadEventsPopulatesRegistry()
+    {
+      // Regression test for Fix 1 in issue #1983: RegisterUnloadEvents must record the module's
+      // UnloadModule delegate so the in-proc collector can flush all hit files.
+      FunctionExecutor.Run(() =>
+      {
+        using var ctx = new TrackerContext();
+        ModuleTrackerTemplate.HitsArray = [3, 1, 4];
+
+        // Simulate Initialize pre-creating the bag, then module load calling RegisterUnloadEvents.
+        var bag = new ConcurrentBag<EventHandler>();
+        AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, bag);
+        ModuleTrackerTemplate.RegisterUnloadEvents();
+
+        EventHandler handler = Assert.Single(bag);
+        handler.Invoke(null, EventArgs.Empty);
+        int[] expectedHitsArray = [3, 1, 4];
         Assert.Equal(expectedHitsArray, ReadHitsFile());
 
         return s_success;

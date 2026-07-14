@@ -367,14 +367,6 @@ namespace Coverlet.Core.Instrumentation
 
       Instruction lastInstr = _customTrackerClassConstructorIl.Body.Instructions[_customTrackerClassConstructorIl.Body.Instructions.Count - 1];
 
-      if (!containsAppContext)
-      {
-        // For "normal" cases, where the instrumented assembly is not the core library, we add a call to
-        // RegisterUnloadEvents to the static constructor of the generated custom tracker. Due to static
-        // initialization constraints, the core library is handled separately below.
-        _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Call, _customTrackerRegisterUnloadEventsMethod));
-      }
-
       _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count));
       _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Newarr, module.TypeSystem.Int32));
       _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerHitsArray));
@@ -384,6 +376,16 @@ namespace Coverlet.Core.Instrumentation
       _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerSingleHit));
       _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Ldc_I4_1));
       _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Stsfld, _customTrackerFlushHitFile));
+
+      if (!containsAppContext)
+      {
+        // For "normal" cases, where the instrumented assembly is not the core library, we add a call to
+        // RegisterUnloadEvents to the static constructor of the generated custom tracker. Due to static
+        // initialization constraints, the core library is handled separately below.
+        // NOTE: this insertion must follow the field initialisations above; HitsFilePath must be set
+        // before RegisterUnloadEvents runs.
+        _customTrackerClassConstructorIl.InsertBefore(lastInstr, Instruction.Create(OpCodes.Call, _customTrackerRegisterUnloadEventsMethod));
+      }
 
       if (containsAppContext)
       {

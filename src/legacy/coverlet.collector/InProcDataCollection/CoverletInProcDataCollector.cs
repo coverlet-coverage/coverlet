@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Reflection;
-using System.Text;
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Instrumentation;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
@@ -42,6 +41,11 @@ namespace Coverlet.Collector.DataCollection
 
       _eqtTrace = new TestPlatformEqtTrace();
       _eqtTrace.Verbose("Initialize CoverletInProcDataCollector");
+
+      // Pre-create the registry bag before any instrumented assembly is loaded.
+      AppDomain.CurrentDomain.SetData(
+          ModuleTrackerTemplate.ModuleTrackerRegistryKey,
+          new ConcurrentBag<EventHandler>());
     }
 
     public void TestCaseEnd(TestCaseEndArgs testCaseEndArgs)
@@ -54,20 +58,19 @@ namespace Coverlet.Collector.DataCollection
 
     public void TestSessionEnd(TestSessionEndArgs testSessionEndArgs)
     {
-      foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-      {
-        Type injectedInstrumentationClass = GetInstrumentationClass(assembly);
-        if (injectedInstrumentationClass is null)
-        {
-          continue;
-        }
+      // Use the AppDomain registry populated by RegisterUnloadEvents at module-load time.
+      var registeredHandlers = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
+      if (registeredHandlers is null)
+        return;
 
+      foreach (EventHandler handler in registeredHandlers)
+      {
+        string assemblyName = handler.Method?.DeclaringType?.Assembly?.FullName ?? "(unknown)";
         try
         {
-          _eqtTrace.Verbose($"Calling ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
-          MethodInfo unloadModule = injectedInstrumentationClass.GetMethod(nameof(ModuleTrackerTemplate.UnloadModule), new[] { typeof(object), typeof(EventArgs) });
-          unloadModule.Invoke(null, new[] { (object)this, EventArgs.Empty });
-          _eqtTrace.Verbose($"Called ModuleTrackerTemplate.UnloadModule for '{injectedInstrumentationClass.Assembly.FullName}'");
+          _eqtTrace.Verbose($"Calling ModuleTrackerTemplate.UnloadModule for '{assemblyName}'");
+          handler.Invoke(this, EventArgs.Empty);
+          _eqtTrace.Verbose($"Called ModuleTrackerTemplate.UnloadModule for '{assemblyName}'");
         }
         catch (Exception ex)
         {
@@ -84,44 +87,5 @@ namespace Coverlet.Collector.DataCollection
     {
     }
 
-    internal Type GetInstrumentationClass(Assembly assembly)
-    {
-      try
-      {
-        foreach (Type type in assembly.GetTypes())
-        {
-          if (type.Namespace == "Coverlet.Core.Instrumentation.Tracker"
-              && type.Name.StartsWith(assembly.GetName().Name + "_"))
-          {
-            return type;
-          }
-        }
-
-        return null;
-      }
-      catch (Exception ex)
-      {
-        if (_enableExceptionLog)
-        {
-          var exceptionString = new StringBuilder();
-          exceptionString.AppendFormat("{0}: Failed to get Instrumentation class for assembly '{1}' with error: {2}",
-              CoverletConstants.InProcDataCollectorName, assembly, ex);
-          exceptionString.AppendLine();
-
-          if (ex is ReflectionTypeLoadException rtle)
-          {
-            exceptionString.AppendLine("ReflectionTypeLoadException list:");
-            foreach (Exception loaderEx in rtle.LoaderExceptions)
-            {
-              exceptionString.AppendLine(loaderEx.ToString());
-            }
-          }
-
-          _eqtTrace.Warning(exceptionString.ToString());
-        }
-
-        return null;
-      }
-    }
   }
 }

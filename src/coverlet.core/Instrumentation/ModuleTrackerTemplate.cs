@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
@@ -22,6 +23,12 @@ namespace Coverlet.Core.Instrumentation
   [ExcludeFromCodeCoverage]
   internal static class ModuleTrackerTemplate
   {
+    /// <summary>
+    /// AppDomain data key under which a <see cref="ConcurrentBag{T}"/> of <see cref="EventHandler"/>
+    /// delegates, one per loaded instrumented module, is stored for use by the in-proc collector.
+    /// </summary>
+    internal const string ModuleTrackerRegistryKey = "Coverlet_RegisteredModuleTrackers";
+
     public static string HitsFilePath;
     public static int[] HitsArray;
     public static bool SingleHit;
@@ -41,6 +48,13 @@ namespace Coverlet.Core.Instrumentation
     // to UnloadModule will be injected in System.AppContext.OnProcessExit.
     public static void RegisterUnloadEvents()
     {
+      // HitsFilePath is already set before this call (the injected static constructor initialises
+      // all fields before calling RegisterUnloadEvents). If no in-proc collector created the
+      // registry (MSBuild / global-tool integration), GetData returns null and the Add is a
+      // deliberate no-op; the ProcessExit handler covers the flush in those paths.
+      var registry = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerRegistryKey);
+      registry?.Add(new EventHandler(UnloadModule));
+
       AppDomain.CurrentDomain.ProcessExit += new EventHandler(UnloadModule);
       AppDomain.CurrentDomain.DomainUnload += new EventHandler(UnloadModule);
     }
