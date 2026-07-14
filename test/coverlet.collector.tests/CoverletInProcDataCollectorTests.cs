@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using Coverlet.Collector.DataCollection;
+using Coverlet.Collector.Utilities;
 using Coverlet.Core.Instrumentation;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollector.InProcDataCollector;
@@ -40,6 +41,39 @@ namespace Coverlet.Collector.Tests.DataCollection
       _dataCollector.TestSessionEnd(new TestSessionEndArgs());
 
       Assert.True(handlerCalled);
+    }
+
+    [Fact]
+    public void TestSessionEnd_DoesNotRethrowWhenHandlerThrows()
+    {
+      // Regression test for Fix 4 in issue #1983: a failing handler must be logged but must not
+      // propagate by default, so coverage failures do not abort the test run.
+      var bag = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
+      bag?.Add(new((_, _) => throw new InvalidOperationException("simulated flush failure")));
+
+      _dataCollector.TestSessionEnd(new TestSessionEndArgs());
+    }
+
+    [Fact]
+    public void TestSessionEnd_RethrowsWhenHandlerThrowsAndExceptionLogEnabled()
+    {
+      // Regression test for Fix 4 in issue #1983: with COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED=1
+      // a failing handler must be rethrown so the test run can surface coverage failures explicitly.
+      try
+      {
+        Environment.SetEnvironmentVariable("COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED", "1");
+        var collector = new CoverletInProcDataCollector();
+        collector.Initialize(new Mock<IDataCollectionSink>().Object);
+
+        var bag = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
+        bag?.Add(new((_, _) => throw new InvalidOperationException("simulated flush failure")));
+
+        Assert.Throws<CoverletDataCollectorException>(() => collector.TestSessionEnd(new TestSessionEndArgs()));
+      }
+      finally
+      {
+        Environment.SetEnvironmentVariable("COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED", null);
+      }
     }
   }
 }

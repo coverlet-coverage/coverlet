@@ -74,11 +74,9 @@ namespace Coverlet.Collector.DataCollection
         }
         catch (Exception ex)
         {
+          _eqtTrace.Error("{0}: Failed to unload module '{1}' with error: {2}", CoverletConstants.InProcDataCollectorName, assemblyName, ex);
           if (_enableExceptionLog)
-          {
-            _eqtTrace.Error("{0}: Failed to unload module with error: {1}", CoverletConstants.InProcDataCollectorName, ex);
             throw new CoverletDataCollectorException($"{CoverletConstants.InProcDataCollectorName}: Failed to unload module", ex);
-          }
         }
       }
     }
