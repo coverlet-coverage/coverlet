@@ -16,6 +16,7 @@ namespace Coverlet.Collector.DataCollection
   {
     private TestPlatformEqtTrace _eqtTrace;
     private bool _enableExceptionLog;
+    private bool _disableInprocFlush;
 
     private void AttachDebugger()
     {
@@ -34,10 +35,19 @@ namespace Coverlet.Collector.DataCollection
       }
     }
 
+    private void DisableInprocFlush()
+    {
+      if (int.TryParse(Environment.GetEnvironmentVariable("COVERLET_DATACOLLECTOR_INPROC_FLUSH_DISABLED"), out int result) && result == 1)
+      {
+        _disableInprocFlush = true;
+      }
+    }
+
     public void Initialize(IDataCollectionSink dataCollectionSink)
     {
       AttachDebugger();
       EnableExceptionLog();
+      DisableInprocFlush();
 
       _eqtTrace = new TestPlatformEqtTrace();
       _eqtTrace.Verbose("Initialize CoverletInProcDataCollector");
@@ -58,6 +68,12 @@ namespace Coverlet.Collector.DataCollection
 
     public void TestSessionEnd(TestSessionEndArgs testSessionEndArgs)
     {
+      if (_disableInprocFlush)
+      {
+        _eqtTrace.Verbose("COVERLET_DATACOLLECTOR_INPROC_FLUSH_DISABLED is set; skipping in-proc flush, hits will be written by process-exit handlers");
+        return;
+      }
+
       // Use the AppDomain registry populated by RegisterUnloadEvents at module-load time.
       var registeredHandlers = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
       if (registeredHandlers is null)

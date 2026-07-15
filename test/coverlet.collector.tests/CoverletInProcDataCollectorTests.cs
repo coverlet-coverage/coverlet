@@ -55,6 +55,31 @@ namespace Coverlet.Collector.Tests.DataCollection
     }
 
     [Fact]
+    public void TestSessionEnd_SkipsFlushWhenInprocFlushDisabled()
+    {
+      // Regression test: COVERLET_DATACOLLECTOR_INPROC_FLUSH_DISABLED=1 must cause TestSessionEnd to skip
+      // the in-proc flush entirely, leaving coverage data to be written by the process-exit handlers.
+      try
+      {
+        Environment.SetEnvironmentVariable("COVERLET_DATACOLLECTOR_INPROC_FLUSH_DISABLED", "1");
+        var collector = new CoverletInProcDataCollector();
+        collector.Initialize(new Mock<IDataCollectionSink>().Object);
+
+        bool handlerCalled = false;
+        var bag = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
+        bag?.Add(new((_, _) => { handlerCalled = true; }));
+
+        collector.TestSessionEnd(new TestSessionEndArgs());
+
+        Assert.False(handlerCalled);
+      }
+      finally
+      {
+        Environment.SetEnvironmentVariable("COVERLET_DATACOLLECTOR_INPROC_FLUSH_DISABLED", null);
+      }
+    }
+
+    [Fact]
     public void TestSessionEnd_RethrowsWhenHandlerThrowsAndExceptionLogEnabled()
     {
       // Regression test for Fix 4 in issue #1983: with COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED=1
