@@ -473,7 +473,7 @@ namespace Coverlet.Core.Instrumentation
 
         foreach (MethodDefinition methodDef in moduleTrackerTemplate.Methods)
         {
-          var methodOnCustomType = new MethodDefinition(methodDef.Name, methodDef.Attributes, methodDef.ReturnType);
+          var methodOnCustomType = new MethodDefinition(methodDef.Name, methodDef.Attributes, ImportToCoreLibrary(module, methodDef.ReturnType));
 
           foreach (ParameterDefinition parameter in methodDef.Parameters)
           {
@@ -503,7 +503,7 @@ namespace Coverlet.Core.Instrumentation
               else
               {
                 // Move to the custom type
-                var updatedMethodReference = new MethodReference(methodReference.Name, methodReference.ReturnType, _customTrackerTypeDef);
+                var updatedMethodReference = new MethodReference(methodReference.Name, ImportToCoreLibrary(module, methodReference.ReturnType), _customTrackerTypeDef);
                 foreach (ParameterDefinition parameter in methodReference.Parameters)
                   updatedMethodReference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, ImportToCoreLibrary(module, parameter.ParameterType)));
 

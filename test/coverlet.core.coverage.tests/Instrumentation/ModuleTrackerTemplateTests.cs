@@ -28,8 +28,9 @@ namespace Coverlet.Core.Tests.Instrumentation
       {
         if (disposing)
         {
-          // Dispose managed resources
           File.Delete(ModuleTrackerTemplate.HitsFilePath);
+          File.Delete(ModuleTrackerTemplate.HitsFilePath + ".tmp");
+          File.Delete(ModuleTrackerTemplate.HitsFilePath + ".lock");
         }
 
         // Dispose unmanaged resources
@@ -190,6 +191,27 @@ namespace Coverlet.Core.Tests.Instrumentation
     }
 
     [Fact]
+    public void HitsFileWrittenAtomicallyLeavesNoTempFile()
+    {
+      // Regression test for Fix 2 in issue #1983: UnloadModule must write via a temp file and rename
+      // so the hit file appears at HitsFilePath only once it is complete. No .tmp residual should
+      // remain after a successful flush.
+      FunctionExecutor.Run(() =>
+      {
+        using var ctx = new TrackerContext();
+        ModuleTrackerTemplate.HitsArray = [1, 2, 3];
+        ModuleTrackerTemplate.UnloadModule(null, null);
+
+        Assert.True(File.Exists(ModuleTrackerTemplate.HitsFilePath));
+        Assert.False(File.Exists(ModuleTrackerTemplate.HitsFilePath + ".tmp"));
+        int[] expectedHitsArray = [1, 2, 3];
+        Assert.Equal(expectedHitsArray, ReadHitsFile());
+
+        return s_success;
+      });
+    }
+
+    [Fact]
     public void MutexBlocksMultipleWriters()
     {
       FunctionExecutor.Run(async () =>
@@ -221,6 +243,26 @@ namespace Coverlet.Core.Tests.Instrumentation
         return 0;
       });
 
+    }
+
+    [Fact]
+    public void LockFileHeldDuringWriteAndReleasedAfter()
+    {
+      FunctionExecutor.Run(() =>
+      {
+        using var ctx = new TrackerContext();
+        string lockPath = ModuleTrackerTemplate.HitsFilePath + ".lock";
+
+        ModuleTrackerTemplate.HitsArray = [1, 2, 3];
+        ModuleTrackerTemplate.UnloadModule(null, null);
+
+        // After a completed write the lock file must have been released.
+        // A successful exclusive open (FileShare.None) confirms no one holds it.
+        using var probe = new FileStream(lockPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        Assert.True(probe.CanRead);
+
+        return s_success;
+      });
     }
 
     private static void WriteHitsFile(int[] hitsArray)

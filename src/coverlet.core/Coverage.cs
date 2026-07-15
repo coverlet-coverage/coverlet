@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -392,85 +393,106 @@ namespace Coverlet.Core
           }
         }
 
-        if (!_fileSystem.Exists(result.HitsFilePath))
-        {
-          // Hits file could be missed mainly for two reason
-          // 1) Issue during module Unload()
-          // 2) Instrumented module is never loaded or used so we don't have any hit to register and
-          //    module tracker is never used
-          _logger.LogVerbose($"Hits file:'{result.HitsFilePath}' not found for module: '{result.Module}'");
-          continue;
-        }
+        string lockFilePath = result.HitsFilePath + ".lock";
+        string tmpFilePath = result.HitsFilePath + ".tmp";
 
-        // Calculate lines to skip for every hits start/end candidate
-        // Nested ranges win on outermost one
-        foreach (HitCandidate hitCandidate in result.HitCandidates)
+        // Hold a shared lock on the lock file while reading so the writer cannot slip in a new
+        // write between our existence check and our read. The OS releases the writer's exclusive
+        // lock on process death, so a crashed writer is also detected here.
+        using (FileStream lockFileHandle = TryAcquireReaderLockOnFile(lockFilePath, result.Module, _logger))
         {
-          if (hitCandidate.isBranch || hitCandidate.end == hitCandidate.start)
+          if (!_fileSystem.Exists(result.HitsFilePath))
           {
-            continue;
-          }
-
-          foreach (HitCandidate hitCandidateToCompare in result.HitCandidates.Where(x => x.docIndex.Equals(hitCandidate.docIndex)))
-          {
-            if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch && hitCandidateToCompare.start > hitCandidate.start &&
-                 hitCandidateToCompare.end < hitCandidate.end)
+            if (!_fileSystem.Exists(tmpFilePath))
             {
-              for (int i = hitCandidateToCompare.start;
-                   i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);
-                   i++)
-              {
-                (hitCandidate.AccountedByNestedInstrumentation ??= []).Add(i);
-              }
-            }
-          }
-        }
-
-        var documentsList = result.Documents.Values.ToList();
-        using (Stream fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open, FileAccess.Read))
-        using (var br = new BinaryReader(fs))
-        {
-          int hitCandidatesCount = br.ReadInt32();
-
-          // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
-
-          for (int i = 0; i < hitCandidatesCount; ++i)
-          {
-            HitCandidate hitLocation = result.HitCandidates[i];
-            Document document = documentsList[hitLocation.docIndex];
-            int hits = br.ReadInt32();
-
-            if (hits == 0)
+              _logger.LogVerbose($"Hits file: '{result.HitsFilePath}' not found for module: '{result.Module}'");
               continue;
-
-            hits = hits < 0 ? int.MaxValue : hits;
-
-            if (hitLocation.isBranch)
-            {
-              Branch branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
-              branch.Hits += hits;
-
-              if (branch.Hits < 0)
-                branch.Hits = int.MaxValue;
             }
-            else
+
+            // .tmp present, hits absent: the writer started but did not finish (crashed or killed).
+            if (!_fileSystem.Exists(result.HitsFilePath))
             {
-              for (int j = hitLocation.start; j <= hitLocation.end; j++)
+              _logger.LogWarning($"Hits file not found for module '{result.Module}': '{result.HitsFilePath}'. An incomplete write was detected; coverage data for this module is missing.");
+              continue;
+            }
+          }
+          else if (_fileSystem.Exists(tmpFilePath))
+          {
+            // Hits file exists but .tmp also present: merge write was killed mid-replace.
+            // The file reflects the pre-merge state; coverage data from the merge is lost.
+            _logger.LogWarning($"Hits file for module '{result.Module}' may be incomplete: a merge was in progress when the writer was killed. Coverage data from the merge is missing.");
+          }
+
+          // Calculate lines to skip for every hits start/end candidate
+          // Nested ranges win on outermost one
+          foreach (HitCandidate hitCandidate in result.HitCandidates)
+          {
+            if (hitCandidate.isBranch || hitCandidate.end == hitCandidate.start)
+            {
+              continue;
+            }
+
+            foreach (HitCandidate hitCandidateToCompare in result.HitCandidates.Where(x => x.docIndex.Equals(hitCandidate.docIndex)))
+            {
+              if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch && hitCandidateToCompare.start > hitCandidate.start &&
+                   hitCandidateToCompare.end < hitCandidate.end)
               {
-                if (hitLocation.AccountedByNestedInstrumentation?.Contains(j) == true)
+                for (int i = hitCandidateToCompare.start;
+                     i <= (hitCandidateToCompare.end == 0 ? hitCandidateToCompare.start : hitCandidateToCompare.end);
+                     i++)
                 {
-                  continue;
+                  (hitCandidate.AccountedByNestedInstrumentation ??= []).Add(i);
                 }
-
-                Line line = document.Lines[j];
-                line.Hits += hits;
-
-                if (line.Hits < 0)
-                  line.Hits = int.MaxValue;
               }
             }
           }
-        }
+
+          var documentsList = result.Documents.Values.ToList();
+          using (Stream fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open, FileAccess.Read))
+          using (var br = new BinaryReader(fs))
+          {
+            int hitCandidatesCount = br.ReadInt32();
+
+            // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
+
+            for (int i = 0; i < hitCandidatesCount; ++i)
+            {
+              HitCandidate hitLocation = result.HitCandidates[i];
+              Document document = documentsList[hitLocation.docIndex];
+              int hits = br.ReadInt32();
+
+              if (hits == 0)
+                continue;
+
+              hits = hits < 0 ? int.MaxValue : hits;
+
+              if (hitLocation.isBranch)
+              {
+                Branch branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
+                branch.Hits += hits;
+
+                if (branch.Hits < 0)
+                  branch.Hits = int.MaxValue;
+              }
+              else
+              {
+                for (int j = hitLocation.start; j <= hitLocation.end; j++)
+                {
+                  if (hitLocation.AccountedByNestedInstrumentation?.Contains(j) == true)
+                  {
+                    continue;
+                  }
+
+                  Line line = document.Lines[j];
+                  line.Hits += hits;
+
+                  if (line.Hits < 0)
+                    line.Hits = int.MaxValue;
+                }
+              }
+            }
+          }
+        } // shared lock released here; safe to delete the lock file below
 
         try
         {
@@ -481,6 +503,51 @@ namespace Coverlet.Core
         {
           _logger.LogWarning($"Unable to remove hit file: {result.HitsFilePath} because : {ex.Message}");
         }
+
+        TryDeleteFile(tmpFilePath);
+        TryDeleteFile(lockFilePath);
+      }
+    }
+
+    private static FileStream TryAcquireReaderLockOnFile(string lockFilePath, string moduleName, ILogger logger)
+    {
+      if (!File.Exists(lockFilePath))
+        return null;
+
+      TimeSpan elapsed = TimeSpan.Zero;
+      TimeSpan interval = TimeSpan.FromMilliseconds(50);
+      TimeSpan timeout = TimeSpan.FromSeconds(10);
+      while (elapsed <= timeout)
+      {
+        try
+        {
+          return new FileStream(lockFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        }
+        catch (FileNotFoundException)
+        {
+          // Lock file was removed between File.Exists and FileStream open; no writer active.
+          return null;
+        }
+        catch (IOException)
+        {
+          // Writer holds the lock file exclusively; wait for it to finish or die.
+          Thread.Sleep(interval);
+          elapsed += interval;
+        }
+      }
+
+      logger.LogWarning($"Timed out waiting for write lock on hits file for module '{moduleName}'. Coverage data may be incomplete.");
+      return null;
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+      try
+      {
+        File.Delete(path);
+      }
+      catch
+      {
       }
     }
 

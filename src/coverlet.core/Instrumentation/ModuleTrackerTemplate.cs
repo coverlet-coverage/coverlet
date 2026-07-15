@@ -104,82 +104,109 @@ namespace Coverlet.Core.Instrumentation
         mutex.WaitOne();
       }
 
-      if (FlushHitFile)
+      // Hold the lock file exclusively for the entire write so the out-of-proc reader can detect
+      // a write in progress and wait, or detect a crashed writer (the OS releases all file handles
+      // on process death, making the lock visible to readers immediately).
+      // A reader may briefly hold the file shared; retry a handful of times before giving up.
+      using (FileStream lockFile = TryAcquireExclusiveLockOnFile(HitsFilePath + ".lock"))
       {
-        try
+        if (lockFile == null)
+          throw new InvalidOperationException($"Failed to acquire lock file for '{HitsFilePath}' after retries.");
+
+        if (FlushHitFile)
         {
-          // Claim the current hits array and reset it to prevent double-counting scenarios.
-          int[] hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
-
-          WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}' by '{sender ?? "null"}'");
-          WriteLog($"Flushing hit file '{HitsFilePath}'");
-
-          bool failedToCreateNewHitsFile = false;
           try
           {
-            using var fs = new FileStream(HitsFilePath, FileMode.CreateNew);
-            using var bw = new BinaryWriter(fs);
-            bw.Write(hitsArray.Length);
-            foreach (int hitCount in hitsArray)
+            // Claim the current hits array and reset it to prevent double-counting scenarios.
+            int[] hitsArray = Interlocked.Exchange(ref HitsArray, new int[HitsArray.Length]);
+
+            WriteLog($"Unload called for '{Assembly.GetExecutingAssembly().Location}' by '{sender ?? "null"}'");
+            WriteLog($"Flushing hit file '{HitsFilePath}'");
+
+            string tmpFilePath = HitsFilePath + ".tmp";
+            if (File.Exists(HitsFilePath))
             {
-              bw.Write(hitCount);
+              // Another AppDomain already wrote HitsFilePath (only possible on .NET Framework).
+              // Read it, compute the merged result, then replace atomically.
+              int[] mergedHits = MergeHitsWithExistingFile(hitsArray);
+              WriteHitsToFile(tmpFilePath, mergedHits);
+              File.Replace(tmpFilePath, HitsFilePath, null);
             }
+            else
+            {
+              // First write: stage in .tmp so HitsFilePath only appears once the data is complete.
+              WriteHitsToFile(tmpFilePath, hitsArray);
+              File.Move(tmpFilePath, HitsFilePath);
+            }
+
+            WriteHits(sender);
+
+            WriteLog($"Hit file '{HitsFilePath}' flushed, size {new FileInfo(HitsFilePath).Length}");
+            WriteLog("--------------------------------");
           }
           catch (Exception ex)
           {
-            WriteLog($"Failed to create new hits file '{HitsFilePath}' -> '{ex.Message}'");
-            failedToCreateNewHitsFile = true;
+            WriteLog(ex.ToString());
+            throw;
           }
 
-          if (failedToCreateNewHitsFile)
-          {
-            // Update the number of hits by adding value on disk with the ones on memory.
-            // This path should be triggered only in the case of multiple AppDomain unloads.
-            using var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-            using var br = new BinaryReader(fs);
-            using var bw = new BinaryWriter(fs);
-            int hitsLength = br.ReadInt32();
-            WriteLog($"Current hits found '{hitsLength}'");
-
-            if (hitsLength != hitsArray.Length)
-            {
-              throw new InvalidOperationException($"{HitsFilePath} has {hitsLength} entries but on memory {nameof(HitsArray)} has {hitsArray.Length}");
-            }
-
-            for (int i = 0; i < hitsLength; ++i)
-            {
-              int oldHitCount = br.ReadInt32();
-              bw.Seek(-sizeof(int), SeekOrigin.Current);
-              if (SingleHit)
-              {
-                bw.Write(hitsArray[i] + oldHitCount > 0 ? 1 : 0);
-              }
-              else
-              {
-                bw.Write(hitsArray[i] + oldHitCount);
-              }
-            }
-          }
-
-          WriteHits(sender);
-
-          WriteLog($"Hit file '{HitsFilePath}' flushed, size {new FileInfo(HitsFilePath).Length}");
-          WriteLog("--------------------------------");
+          // Clear the flag inside the mutex so that any concurrent caller (e.g. ProcessExit)
+          // that is waiting for the mutex will see FlushHitFile == false and skip a redundant write.
+          FlushHitFile = false;
         }
-        catch (Exception ex)
-        {
-          WriteLog(ex.ToString());
-          throw;
-        }
-
-        // Clear the flag inside the mutex so that any concurrent caller (e.g. ProcessExit)
-        // that is waiting for the mutex will see FlushHitFile == false and skip a redundant write.
-        FlushHitFile = false;
       }
 
       // On purpose this is not under a try-finally: it is better to have an exception if there was any error writing the hits file
       // this case is relevant when instrumenting corelib since multiple processes can be running against the same instrumented dll.
       mutex.ReleaseMutex();
+    }
+
+    private static FileStream TryAcquireExclusiveLockOnFile(string lockFilePath)
+    {
+      for (int i = 0; i < 25; i++)
+      {
+        try
+        {
+          return new FileStream(lockFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        }
+        catch (IOException)
+        {
+          Thread.Sleep(20);
+        }
+      }
+      return null;
+    }
+
+    private static void WriteHitsToFile(string filePath, int[] hitsArray)
+    {
+      using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+      using var bw = new BinaryWriter(fs);
+      bw.Write(hitsArray.Length);
+      foreach (int hitCount in hitsArray)
+      {
+        bw.Write(hitCount);
+      }
+    }
+
+    private static int[] MergeHitsWithExistingFile(int[] inMemoryHits)
+    {
+      using var fs = new FileStream(HitsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+      using var br = new BinaryReader(fs);
+      int hitsLength = br.ReadInt32();
+      WriteLog($"Current hits found '{hitsLength}'");
+
+      if (hitsLength != inMemoryHits.Length)
+        throw new InvalidOperationException($"{HitsFilePath} has {hitsLength} entries but in-memory {nameof(HitsArray)} has {inMemoryHits.Length}");
+
+      int[] merged = new int[hitsLength];
+      for (int i = 0; i < hitsLength; ++i)
+      {
+        int existing = br.ReadInt32();
+        merged[i] = SingleHit
+          ? inMemoryHits[i] + existing > 0 ? 1 : 0
+          : inMemoryHits[i] + existing;
+      }
+      return merged;
     }
 
     private static void WriteHits(object sender)
