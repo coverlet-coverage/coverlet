@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Concurrent;
+using Coverlet.Core.Instrumentation;
 using Coverlet.MTP.EnvironmentVariables;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using Microsoft.Testing.Platform.Logging;
@@ -349,22 +351,30 @@ public class CoverletInProcessHandlerTests : IDisposable
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();
     mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-session-789"));
+    AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, new ConcurrentBag<EventHandler>());
 
-    // Act
-    await ((ITestSessionLifetimeHandler)handler).OnTestSessionFinishingAsync(mockSessionContext.Object);
+    try
+    {
+      // Act
+      await ((ITestSessionLifetimeHandler)handler).OnTestSessionFinishingAsync(mockSessionContext.Object);
 
-    // Assert
-    _mockLogger.Verify(
-      x => x.Log(
-        It.Is<LogLevel>(l => l == LogLevel.Debug),
-        It.Is<string>(s => s.Contains("Flushed") && s.Contains("instrumented assemblies")),
-        It.IsAny<Exception?>(),
-        It.IsAny<Func<string, Exception?, string>>()),
-      Times.Once);
+      // Assert
+      _mockLogger.Verify(
+        x => x.Log(
+          It.Is<LogLevel>(l => l == LogLevel.Debug),
+          It.Is<string>(s => s.Contains("Flushed") && s.Contains("instrumented assemblies")),
+          It.IsAny<Exception?>(),
+          It.IsAny<Func<string, Exception?, string>>()),
+        Times.Once);
+    }
+    finally
+    {
+      AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, null);
+    }
   }
 
   [Fact]
-  public async Task OnTestSessionFinishingAsyncWhenExceptionOccursWithExceptionLogEnabledLogsError()
+  public async Task OnTestSessionFinishingAsyncWhenExceptionOccursWithExceptionLogEnabledLogsErrorAndRethrows()
   {
     // Arrange
     System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
@@ -375,21 +385,35 @@ public class CoverletInProcessHandlerTests : IDisposable
     var mockSessionContext = new Mock<ITestSessionContext>();
     mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-exception-session"));
 
-    // Act - This should complete without throwing, even if internal exceptions occur
-    await ((ITestSessionLifetimeHandler)handler).OnTestSessionFinishingAsync(mockSessionContext.Object);
+    // Inject a failing handler into the registry
+    var registry = new ConcurrentBag<EventHandler>
+    {
+        (s, e) => throw new InvalidOperationException("Test exception")
+    };
+    AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, registry);
 
-    // Assert - Should not throw and should log debug messages
-    _mockLogger.Verify(
-      x => x.Log(
-        It.Is<LogLevel>(l => l == LogLevel.Debug),
-        It.IsAny<string>(),
-        It.IsAny<Exception?>(),
-        It.IsAny<Func<string, Exception?, string>>()),
-      Times.AtLeastOnce);
+    try
+    {
+      // Act
+      await Assert.ThrowsAsync<InvalidOperationException>(() => ((ITestSessionLifetimeHandler)handler).OnTestSessionFinishingAsync(mockSessionContext.Object));
+
+      // Assert
+      _mockLogger.Verify(
+        x => x.Log(
+          It.Is<LogLevel>(l => l == LogLevel.Error),
+          It.Is<string>(s => s.Contains("Failed to flush coverage for")),
+          It.IsAny<Exception?>(),
+          It.IsAny<Func<string, Exception?, string>>()),
+        Times.AtLeastOnce);
+    }
+    finally
+    {
+      AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, null);
+    }
   }
 
   [Fact]
-  public async Task OnTestSessionFinishingAsyncWhenExceptionOccursWithExceptionLogDisabledDoesNotLogError()
+  public async Task OnTestSessionFinishingAsyncWhenExceptionOccursWithExceptionLogDisabledLogsErrorButDoesNotThrow()
   {
     // Arrange
     System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
@@ -399,17 +423,31 @@ public class CoverletInProcessHandlerTests : IDisposable
     var mockSessionContext = new Mock<ITestSessionContext>();
     mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-no-log-session"));
 
-    // Act
-    await ((ITestSessionLifetimeHandler)handler).OnTestSessionFinishingAsync(mockSessionContext.Object);
+    // Inject a failing handler into the registry
+    var registry = new ConcurrentBag<EventHandler>
+    {
+        (s, e) => throw new InvalidOperationException("Test exception")
+    };
+    AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, registry);
 
-    // Assert - Should not throw
-    _mockLogger.Verify(
-      x => x.Log(
-        It.Is<LogLevel>(l => l == LogLevel.Error),
-        It.IsAny<string>(),
-        It.IsAny<Exception?>(),
-        It.IsAny<Func<string, Exception?, string>>()),
-      Times.Never);
+    try
+    {
+      // Act
+      await ((ITestSessionLifetimeHandler)handler).OnTestSessionFinishingAsync(mockSessionContext.Object);
+
+      // Assert - Should not throw
+      _mockLogger.Verify(
+        x => x.Log(
+          It.Is<LogLevel>(l => l == LogLevel.Error),
+          It.IsAny<string>(),
+          It.IsAny<Exception?>(),
+          It.IsAny<Func<string, Exception?, string>>()),
+        Times.AtLeastOnce);
+    }
+    finally
+    {
+      AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, null);
+    }
   }
 
   #endregion

@@ -77,7 +77,7 @@ internal sealed class CoverletExtensionEnvironmentVariableProvider : ITestHostEn
     {
       environmentVariables.SetVariable(
         new EnvironmentVariable(
-          CoverletMtpDebugConstants.ExceptionLogEnabled,
+          CoverletMtpEnvironmentVariables.InProcessExceptionLog,
           "1",
           isSecret: false,
           isLocked: false));

@@ -523,7 +523,7 @@ sequenceDiagram
 | `COVERLET_MTP_COVERAGE_IDENTIFIER` | Unique ID for result correlation |
 | `COVERLET_MTP_HITS_FILE_PATH` | Directory for hit data files |
 | `COVERLET_MTP_INPROC_DEBUG` | Set to "1" to debug in-process handler |
-| `COVERLET_MTP_INPROC_EXCEPTIONLOG_ENABLED` | Set to "1" for detailed error logging |
+| `COVERLET_MTP_INPROC_EXCEPTIONLOG_ENABLED` | Set to "1" to rethrow exceptions from the in-process handler |
 
 ## Troubleshooting
 
@@ -598,11 +598,19 @@ set COVERLET_MTP_INSTRUMENTATION_DEBUG=1
 
 ### Enable Exception Logging
 
-To capture detailed exception information (Windows):
+To rethrow exceptions from the in-process handler (making failures visible as a test run error):
 
 ```shell
 set COVERLET_MTP_EXCEPTIONLOG_ENABLED=1
 ```
+
+Or alternatively, using the in-process specific variable:
+
+```shell
+set COVERLET_MTP_INPROC_EXCEPTIONLOG_ENABLED=1
+```
+
+By default, failures in the in-proc handler's module-unload step are recorded in the MTP diagnostics log but do not abort the test run. Setting this variable to `1` causes those failures to be rethrown.
 
 ### Using MTP Built-in Diagnostics
 

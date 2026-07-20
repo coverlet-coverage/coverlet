@@ -168,7 +168,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
     // Assert
     mockEnvironmentVariables.Verify(
       x => x.SetVariable(It.Is<EnvironmentVariable>(
-        ev => ev.Variable == CoverletMtpDebugConstants.ExceptionLogEnabled && ev.Value == "1")),
+        ev => ev.Variable == CoverletMtpEnvironmentVariables.InProcessExceptionLog && ev.Value == "1")),
       Times.Once());
   }
 
@@ -219,7 +219,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
       Times.Once());
     mockEnvironmentVariables.Verify(
       x => x.SetVariable(It.Is<EnvironmentVariable>(
-        ev => ev.Variable == CoverletMtpDebugConstants.ExceptionLogEnabled)),
+        ev => ev.Variable == CoverletMtpEnvironmentVariables.InProcessExceptionLog)),
       Times.Once());
   }
 
@@ -327,7 +327,7 @@ public class CoverletExtensionEnvironmentVariableProviderTests
         Times.Once());
       mockEnvironmentVariables.Verify(
         x => x.SetVariable(It.Is<EnvironmentVariable>(
-          ev => ev.Variable == CoverletMtpDebugConstants.ExceptionLogEnabled)),
+          ev => ev.Variable == CoverletMtpEnvironmentVariables.InProcessExceptionLog)),
         Times.Once());
     }
     finally

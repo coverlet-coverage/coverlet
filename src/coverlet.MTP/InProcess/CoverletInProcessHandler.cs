@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Reflection;
 using Coverlet.MTP.EnvironmentVariables;
 using Coverlet.Core.Instrumentation;
 using Microsoft.Testing.Platform.Extensions.TestHost;
@@ -22,7 +22,6 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
   private readonly bool _coverageEnabled;
   private readonly string? _coverageIdentifier;
   private readonly bool _enableExceptionLog;
-  private readonly ILogger? _object; // Make nullable
 
   public string Uid => "Coverlet.MTP.InProcess";
   public string Version => typeof(CoverletExtension).Assembly.GetName().Version?.ToString() ?? "1.0.0";
@@ -48,10 +47,9 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
     _logger.LogDebug($"[Coverlet.MTP.InProcess] Initialized - CoverageEnabled={_coverageEnabled}, Identifier={_coverageIdentifier ?? "(null)"}");
   }
 
-  public CoverletInProcessHandler(ILogger @object)
+  public CoverletInProcessHandler(ILogger logger)
   {
-    _logger = @object;
-    _object = @object;
+    _logger = logger;
     // You may want to initialize other fields here as needed
   }
 
@@ -65,6 +63,11 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
     if (_coverageEnabled)
     {
       _logger.LogDebug($"[Coverlet.MTP.InProcess] Test session starting: {testSessionContext.SessionUid}");
+
+      // Pre-create the registry bag before any instrumented assembly is loaded.
+      AppDomain.CurrentDomain.SetData(
+          ModuleTrackerTemplate.ModuleTrackerRegistryKey,
+          new ConcurrentBag<EventHandler>());
     }
     return Task.CompletedTask;
   }
@@ -82,17 +85,7 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
 
     _logger.LogDebug($"[Coverlet.MTP.InProcess] Test session finishing: {testSessionContext.SessionUid}, flushing coverage data");
 
-    try
-    {
-      FlushCoverageData();
-    }
-    catch (Exception ex)
-    {
-      if (_enableExceptionLog)
-      {
-        _logger.LogError($"[Coverlet.MTP.InProcess] Failed to flush coverage data: {ex}");
-      }
-    }
+    FlushCoverageData();
 
     return Task.CompletedTask;
   }
@@ -105,78 +98,30 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
   {
     int flushedCount = 0;
 
-    foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-    {
-      Type? trackerType = GetInstrumentationTrackerType(assembly);
-      if (trackerType == null)
-        continue;
+    var registeredHandlers = (ConcurrentBag<EventHandler>?)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
+    if (registeredHandlers is null)
+      return;
 
+    foreach (EventHandler handler in registeredHandlers)
+    {
+      string assemblyName = handler.Method?.DeclaringType?.Assembly?.GetName().Name ?? "(unknown)";
       try
       {
-        _logger.LogDebug($"[Coverlet.MTP.InProcess] Flushing coverage for '{assembly.GetName().Name}'");
-
-        // Call ModuleTrackerTemplate.UnloadModule to flush hit data
-        MethodInfo? unloadMethod = trackerType.GetMethod(
-          nameof(ModuleTrackerTemplate.UnloadModule),
-          [typeof(object), typeof(EventArgs)]);
-
-        if (unloadMethod != null)
-        {
-          unloadMethod.Invoke(null, [this, EventArgs.Empty]);
-          flushedCount++;
-          _logger.LogDebug($"[Coverlet.MTP.InProcess] Successfully flushed coverage for '{assembly.GetName().Name}'");
-        }
+        _logger.LogDebug($"[Coverlet.MTP.InProcess] Flushing coverage for '{assemblyName}'");
+        handler.Invoke(this, EventArgs.Empty);
+        flushedCount++;
+        _logger.LogDebug($"[Coverlet.MTP.InProcess] Successfully flushed coverage for '{assemblyName}'");
       }
       catch (Exception ex)
       {
+        _logger.LogError($"[Coverlet.MTP.InProcess] Failed to flush coverage for '{assemblyName}': {ex}");
         if (_enableExceptionLog)
         {
-          _logger.LogWarning($"[Coverlet.MTP.InProcess] Failed to flush coverage for '{assembly.GetName().Name}': {ex.Message}");
+          throw new InvalidOperationException($"[Coverlet.MTP.InProcess] Failed to flush coverage for '{assemblyName}'", ex);
         }
       }
     }
 
     _logger.LogDebug($"[Coverlet.MTP.InProcess] Flushed {flushedCount} instrumented assemblies");
   }
-
-  /// <summary>
-  /// Finds the injected tracker type in an assembly.
-  /// Tracker types are in namespace "Coverlet.Core.Instrumentation.Tracker"
-  /// with name pattern "{AssemblyName}_*".
-  /// </summary>
-  private Type? GetInstrumentationTrackerType(Assembly assembly)
-  {
-    try
-    {
-      string? assemblyName = assembly.GetName().Name;
-      if (string.IsNullOrEmpty(assemblyName))
-        return null;
-
-      foreach (Type type in assembly.GetTypes())
-      {
-        if (type.Namespace == "Coverlet.Core.Instrumentation.Tracker" &&
-            type.Name.StartsWith(assemblyName + "_", StringComparison.Ordinal))
-        {
-          return type;
-        }
-      }
-
-      return null;
-    }
-    catch (ReflectionTypeLoadException ex)
-    {
-      if (_enableExceptionLog)
-      {
-        string errors = string.Join(", ", ex.LoaderExceptions?.Select(e => e?.Message) ?? []);
-        _logger.LogDebug($"[Coverlet.MTP.InProcess] ReflectionTypeLoadException for '{assembly.GetName().Name}': {errors}");
-      }
-      return null;
-    }
-    catch
-    {
-      // Silently ignore assemblies that can't be inspected
-      return null;
-    }
-  }
-
 }
