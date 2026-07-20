@@ -185,9 +185,9 @@ Take a look here for further information:<https://github.com/microsoft/vstest/bl
 Coverlet integration is implemented with the help of [datacollectors](https://github.com/microsoft/vstest/blob/main/docs/extensions/datacollector.md).
 When we specify `--collect:"XPlat Code Coverage"` VSTest platform tries to load coverlet collectors inside `coverlet.collector.dll`
 
-1. Out-of-proc Datacollector: The outproc collector run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector is responsible for calling into Coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
+1. Out-of-proc Datacollector: The outproc collector run in a separate process (datacollector.exe/datacollector.dll) than the process in which tests are being executed (testhost*.exe/testhost.dll). This datacollector is responsible for calling into Coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
 
-1. In-proc Datacollector: The in-proc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [serious known issue](KnownIssues.md#1-vstest-stops-process-execution-earlydotnet-test)
+1. In-proc Datacollector: The in-proc collector is loaded in the testhost process executing the tests. This collector will be needed to remove the dependency on the process exit handler to flush the hit files and avoid to hit this [known issue](KnownIssues.md#vstest-stops-process-execution-early)
 
 ## Architecture
 

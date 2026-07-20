@@ -2,62 +2,45 @@
 
 ## VSTest stops process execution early
 
-*Affected drivers*: msbuild (`dotnet test`) , dotnet tool(if you're using `--targetargs "test ... --no-build"`)
+*Affected drivers*: msbuild (`dotnet test`), dotnet tool (if you're using `--targetargs "test ... --no-build"`)
 
 *Symptoms:*
 
-* warning or error like:
+* Zero or missing coverage result, often only on CI.
 
-  `Unable to read beyond end of stream`
+* Warning messages in the build output:
 
-  `warning : [coverlet] Hits file:'C:\Users\REDACTED\AppData\Local\Temp\testApp_ac32258b-fd4a-4bb4-824c-a79061e97c31' not found for module: 'testApp'`
+  * ```
+    warning : [coverlet] Hits file not found for module 'testApp': 'C:\Users\REDACTED\AppData\Local\Temp\testApp_ac32258b-fd4a-4bb4-824c-a79061e97c31'. An incomplete write was detected; coverage data for this module is missing.
+    ```
 
-* zero coverage result (often only on CI but not on local)
+  * ```
+    warning : [coverlet] Hits file for module 'testApp' may be incomplete: a merge was in progress when the writer was killed. Coverage data from the merge is missing.
+    ```
 
-  ```bash
-  Calculating coverage result...
-  C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\6.0.0\build\netstandard2.0\coverlet.msbuild.targets(21,5): warning : [coverlet] Hits file:'C:\Users\REDACTED\AppData\Local\Temp\testApp_ac32258b-fd4a-4bb4-824c-a79061e97c31' not found for module: 'testApp' [C:\Users\REDACTED\Documents\repo\testapp\testapp.Tests\testapp.Tests.csproj]
-  C:\Users\REDACTED\.nuget\packages\coverlet.msbuild\6.0.0\build\netstandard2.0\coverlet.msbuild.targets(21,5): warning : [coverlet] Hits file:'C:\Users\REDACTED\AppData\Local\Temp\testApp.Tests_ac32258b-fd4a-4bb4-824c-a79061e97c31' not found for module: 'testApp.Tests' [C:\Users\REDACTED\Documents\repo\testapp\testapp.Tests\testapp.Tests.csproj]
-    Generating report 'C:\Users\REDACTED\Documents\repo\testapp\lcov.info'
-
-  +---------------+------+--------+--------+
-  | Module        | Line | Branch | Method |
-  +---------------+------+--------+--------+
-  | testApp       | 0%   | 0%     | 0%     |
-  +---------------+------+--------+--------+
-  | testApp.Tests | 0%   | 100%   | 0%     |
-  +---------------+------+--------+--------+
-
-  +---------+------+--------+--------+
-  |         | Line | Branch | Method |
-  +---------+------+--------+--------+
-  | Total   | 0%   | 0%     | 0%     |
-  +---------+------+--------+--------+
-  | Average | 0%   | 0%     | 0%     |
-  +---------+------+--------+--------+
-
-  ```
-
-The issue is related to VSTest platform <https://github.com/microsoft/vstest/issues/1900#issuecomment-457488472>
+The issue is related to the VSTest platform ([vstest#1900](https://github.com/microsoft/vstest/issues/1900#issuecomment-457488472)):
 
 > However if testhost doesn't shut down within 100ms (as the execution is completed, we expect it to shutdown fast). vstest.console forcefully kills the process.
 
-Coverlet collects and writes hits data on process exit, if for some reason the process is too slow to close, it will be killed and we cannot collect coverage result.
-This happen also if there are other "piece of code" during testing that slow down process exit. We found problem for instance with tests that use RabbitMQ.
+`coverlet.msbuild` and the dotnet tool collect and write hits data on process exit. If the testhost is killed before that write completes, we cannot collect the coverage result.
+This can also happen if there are other "pieces of code" during testing that slow down process exit. We found problems for instance with tests that use RabbitMQ.
 
 *Solution:*
 
 The only way to get around this issue is to use **coverlet.collector** integration. With the collector, we're injected in test host through a in-proc collector that communicates with the VSTest platform so we can signal when we end our work.
 
+> [!NOTE]
+> `coverlet.collector` is normally not affected by this issue. But if the synchronous flush fails for a module, it falls back to writing on process exit as a safety net, and the same warnings above might be observed.
+
 ## Upgrade `coverlet.collector` to version > 1.0.0
 
 *Affected drivers*: VSTest integration `dotnet test --collect:"XPlat Code Coverage"`
 
-*Symptoms:* The same as "known issue 1".
+*Symptoms:* Zero coverage result, same as [VSTest stops process execution early](#vstest-stops-process-execution-early).
 
 There is a bug inside the VSTest platform: <https://github.com/microsoft/vstest/issues/2205>.
 
-If you upgrade the collector package with a version greater than 1.0.0, in-proc collector won't be loaded so you could incur "known issue number 1" and get zero coverage result
+If you upgrade the collector package with a version greater than 1.0.0, in-proc collector won't be loaded so you could incur the [issue above](#vstest-stops-process-execution-early) and get zero coverage result.
 
 *Solutions:*
 

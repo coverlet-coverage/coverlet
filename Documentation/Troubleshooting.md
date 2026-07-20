@@ -56,7 +56,7 @@ Test Run Successful.
 Test execution time: 4,6411 Seconds
 
 Calculating coverage result...
-Hits file:'C:\Users\Marco\AppData\Local\Temp\coverlet.core_703263e9-21f0-4d1c-9ce3-98ddeacecc01' not found for module: 'coverlet.core'
+Hits file: 'C:\Users\Marco\AppData\Local\Temp\coverlet.core_703263e9-21f0-4d1c-9ce3-98ddeacecc01' not found for module: 'coverlet.core'
   Generating report 'C:\git\coverlet\src\coverlet.console\bin\Debug\net8.0\coverage.json'
 +--------------------------------------------------+--------+--------+--------+
 | Module                                           | Line   | Branch | Method |
@@ -263,7 +263,7 @@ You can live attach and debug collectors with `COVERLET_DATACOLLECTOR_OUTOFPROC_
 ```
 
 You will be asked to attach a debugger through UI popup.
-To enable exceptions log for in-process data collectors
+To rethrow exceptions from in-process data collectors (making failures visible as a test run error)
 
 ```shell
  set COVERLET_DATACOLLECTOR_INPROC_EXCEPTIONLOG_ENABLED=1
