@@ -10,14 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improvements
 
 - Implement dynamic exclusion filters for assemblies (Coverlet.MTP) [#1946](https://github.com/coverlet-coverage/coverlet/pull/1946)
-- Add preflight checks for locked/unresolvable assemblies [#1967](https://github.com/coverlet-coverage/coverlet/pull/1967)
 - Replace legacy .sln files with modern .slnx format [#1966](https://github.com/coverlet-coverage/coverlet/pull/1966)
 
 ### Fixed
 
-- Fix Regression in branch coverage for lambda expressions [#1937](https://github.com/coverlet-coverage/coverlet/issues/1937)
-- Fix When using "is" with "or" in pattern matching, branch coverage is lower than normal [#1969](https://github.com/coverlet-coverage/coverlet/issues/1969)
-- Fix silent zero coverage on .NET Framework (console/collector) since 8.0.0: the injected tracker no longer references the net6+ `DefaultInterpolatedStringHandler` [#1984](https://github.com/coverlet-coverage/coverlet/issues/1984)
+- Fix coverlet.MTP does not collect coverage on the .NET Framework portion of a large project [#1980](https://github.com/coverlet-coverage/coverlet/pull/1980) [#1967](https://github.com/coverlet-coverage/coverlet/pull/1967)
+- Fix Regression in branch coverage for lambda expressions [#1938](https://github.com/coverlet-coverage/coverlet/pull/1938)
+- Fix When using "is" with "or" in pattern matching, branch coverage is lower than normal [#1979](https://github.com/coverlet-coverage/coverlet/pull/1979)
+- Fix silent zero coverage on .NET Framework since 8.0.0 [#1985](https://github.com/coverlet-coverage/coverlet/pull/1985)
+- Fix Race condition between ProcessExit hit-file write and out-of-proc coverage read causes EndOfStreamException [#1987](https://github.com/coverlet-coverage/coverlet/pull/1987) [#1988](https://github.com/coverlet-coverage/coverlet/pull/1988)
 
 ## Release date 2026-05-18
 
