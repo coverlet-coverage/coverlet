@@ -249,6 +249,20 @@ Both `--exclude` and `--include` options can be used together but `--exclude` ta
 
 You can also include coverage of the test assembly itself by specifying the `--include-test-assembly` flag.
 
+## install coverlet.console tool
+
+### install from nuget.org
+
+```shell
+dotnet tool install --global coverlet.console --version 10.0.2
+```
+
+### install prerelease from local source
+
+```shell
+dotnet tool install --global coverlet.console --source c:\local_source --prerelease
+```
+
 ## SourceLink
 
 Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `--use-source-link` flag, Coverlet will generate results that contain the URL to the source files in your source control instead of local file paths.
