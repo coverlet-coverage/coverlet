@@ -51,7 +51,6 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
-      //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
       string path = Path.GetTempFileName();
       try
@@ -84,7 +83,6 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
-      //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
       string path = Path.GetTempFileName();
       try
@@ -117,7 +115,6 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
-      //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
       string path = Path.GetTempFileName();
       try
@@ -150,7 +147,6 @@ namespace Coverlet.CoreCoverage.Tests
     [Fact]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
-      //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
       string path = Path.GetTempFileName();
       try

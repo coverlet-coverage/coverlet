@@ -50,7 +50,7 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestInstrument_NetCoreSharedFrameworkResolver_SelfContained()
     {
-      Assert.Skip("VSTest data collectors are not supported with .NET 10 SDK MTP mode");
+      Assert.SkipUnless(!TestUtils.IsNet10OrLater(), "VSTest data collectors are not supported with .NET 10 SDK MTP mode");
       Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
       string buildConfiguration = TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant();
       string wpfProjectPath = TestUtils.GetTestProjectPath("coverlet.tests.projectsample.wpf8.selfcontained");
