@@ -25,7 +25,7 @@ $testProcesses = @(
     'coverlet.core.coverage.tests',
     'coverlet.msbuild.tasks.tests',
     'coverlet.collector.tests',
-    'coverlet.integration.legacy.tests',
+    'coverlet.integration.tests',
     'coverlet.MTP.tests',
     'coverlet.MTP.validation.tests'
 )
@@ -74,9 +74,9 @@ foreach ($fw in $frameworks) {
     dotnet build-server shutdown
     dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.msbuild.tasks.tests/$fwDir/coverlet.msbuild.tasks.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.msbuild.tasks.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.msbuild.tasks.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
 
-    # coverlet.integration.MTP.tests
+    # coverlet.integration.tests
     dotnet build-server shutdown
-    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.integration.MTP.tests/$fwDir/coverlet.integration.MTP.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.MTP.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.integration.MTP.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
+    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.integration.tests/$fwDir/coverlet.integration.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.MTP.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.integration.MTP.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
 
     # coverlet.MTP.validation.tests
     dotnet build-server shutdown
@@ -134,8 +134,8 @@ if ($runLegacy) {
                 # coverlet.collector.tests
                 dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -f $fw -c $BuildConfiguration --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$WorkspaceRoot/artifacts/reports/" --logger "trx;LogFileName=coverlet.collector.tests.$fw.trx" --diag:"$WorkspaceRoot/artifacts/log/coverlet.collector.tests.$fw.diag;tracelevel=verbose"
 
-                # coverlet.integration.legacy.tests
-                dotnet test test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f $fw -c $BuildConfiguration --no-build --results-directory "$WorkspaceRoot/artifacts/reports/" --logger "trx;LogFileName=coverlet.integration.legacy.tests.$fw.trx" --diag:"$WorkspaceRoot/artifacts/log/coverlet.integration.legacy.tests.$fw.diag;tracelevel=verbose"
+                # coverlet.integration.tests
+                dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -f $fw -c $BuildConfiguration --no-build --results-directory "$WorkspaceRoot/artifacts/reports/" --logger "trx;LogFileName=coverlet.integration.tests.$fw.trx" --diag:"$WorkspaceRoot/artifacts/log/coverlet.integration.tests.$fw.diag;tracelevel=verbose"
 
                 # coverlet.MTP.validation.tests
                 dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.MTP.validation.tests/${BuildConfiguration}_$fw/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.$fw.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.validation.tests_$fw" --results-directory "$WorkspaceRoot/artifacts/reports/"

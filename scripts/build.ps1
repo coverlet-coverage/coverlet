@@ -115,8 +115,8 @@ dotnet build test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.cspr
 dotnet build test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -bl:build.MTP.tests.binlog
 dotnet build test/coverlet.MTP.validation.tests/coverlet.MTP.validation.tests.csproj -bl:build.MTP.validation.tests.binlog
 
-dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net8.0 -bl:build.coverlet.integration.legacy.tests.8.0.binlog /p:ContinuousIntegrationBuild=true
-# dotnet build test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj -f net9.0 -bl:build.coverlet.integration.legacy.tests.9.0.binlog /p:ContinuousIntegrationBuild=true
+dotnet build test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net8.0 -bl:build.coverlet.integration.tests.8.0.binlog /p:ContinuousIntegrationBuild=true
+# dotnet build test/coverlet.integration.tests/coverlet.integration.tests.csproj -f net9.0 -bl:build.coverlet.integration.tests.9.0.binlog /p:ContinuousIntegrationBuild=true
 
 dotnet build-server shutdown
 

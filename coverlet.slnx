@@ -35,8 +35,7 @@
       <BuildDependency Project="src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj" />
     </Project>
     <Project Path="test/coverlet.integration.determisticbuild/coverlet.integration.determisticbuild.csproj" />
-    <Project Path="test/coverlet.integration.legacy.tests/coverlet.integration.legacy.tests.csproj" />
-    <Project Path="test/coverlet.integration.MTP.tests/coverlet.integration.MTP.tests.csproj" />
+    <Project Path="test/coverlet.integration.tests/coverlet.integration.tests.csproj" />
     <Project Path="test/coverlet.integration.template/coverlet.integration.template.csproj" />
     <Project Path="test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj" />
     <Project Path="test/coverlet.MTP.tests/coverlet.MTP.tests.csproj" />
