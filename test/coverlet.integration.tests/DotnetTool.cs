@@ -61,6 +61,7 @@ namespace Coverlet.Integration.Tests
         // For .NET 9 or earlier, we can just specify the test assembly in the targetargs for dotnet test (VsTest syntax)
         cmdArgs = $"\"{publishedTestFile}\" --target \"dotnet\" --targetargs \"test {Path.Combine(clonedTemplateProject.ProjectRootPath, ClonedTemplateProject.ProjectFileName)} -f {_buildTargetFramework} --no-build\"  --include-test-assembly --output \"{outputPath}\"";
       }
+      _output.WriteLine($"coverlet {cmdArgs}\n");
       int cmdExitCode = RunCommand(coverletToolCommandPath, cmdArgs, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
@@ -93,7 +94,9 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      int cmdExitCode = RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --output \"{outputPath}\"", out string standardOutput, out string standardError);
+      string cmdArgs = $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --output \"{outputPath}\"";
+      _output.WriteLine($"coverlet {cmdArgs}\n");
+      int cmdExitCode = RunCommand(coverletToolCommandPath, cmdArgs, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -125,7 +128,9 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      int cmdExitCode = RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --output \"{outputPath}\"", out string standardOutput, out string standardError);
+      string cmdArgs = $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --output \"{outputPath}\"";
+      _output.WriteLine($"coverlet {cmdArgs}\n");
+      int cmdExitCode = RunCommand(coverletToolCommandPath, cmdArgs, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -160,7 +165,9 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      int cmdExitCode = RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --output \"{outputPath}\"", out string standardOutput, out string standardError);
+      string cmdArgs = $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --output \"{outputPath}\"";
+      _output.WriteLine($"coverlet {cmdArgs}\n");
+      int cmdExitCode = RunCommand(coverletToolCommandPath, cmdArgs, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -195,7 +202,9 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => !f.Contains("obj") && !f.Contains("ref"));
-      int cmdExitCode = RunCommand(coverletToolCommandPath, $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --threshold-type method --output \"{outputPath}\"", out string standardOutput, out string standardError);
+      string cmdArgs = $"\"{Path.GetDirectoryName(publishedTestFile)}\" --target \"dotnet\" --targetargs \"{publishedTestFile}\"  --threshold 80 --threshold-type line --threshold-type method --output \"{outputPath}\"";
+      _output.WriteLine($"coverlet {cmdArgs}\n");
+      int cmdExitCode = RunCommand(coverletToolCommandPath, cmdArgs, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
