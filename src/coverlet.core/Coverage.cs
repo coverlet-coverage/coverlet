@@ -142,7 +142,7 @@ namespace Coverlet.Core
         if (!instrumenter.CanInstrument(out string canInstrumentReason))
         {
           skippedByCanInstrument++;
-          _logger.LogWarning($"Skipping module '{module}': not eligible for instrumentation. {canInstrumentReason}");
+          _logger.LogVerbose($"Skipping module '{module}': not eligible for instrumentation. {canInstrumentReason}");
           continue;
         }
 
