@@ -30,7 +30,7 @@ namespace Coverlet.Console
       Option<string> target = new("--target", "-t") { Description = "Path to the test runner application.", Arity = ArgumentArity.ZeroOrOne, Required = true };
       Option<string> targs = new("--targetargs", "-a") { Description = "Arguments to be passed to the test runner.", Arity = ArgumentArity.ZeroOrOne };
       Option<string> output = new("--output", "-o") { Description = "Output of the generated coverage report", Arity = ArgumentArity.ZeroOrOne };
-      Option<LogLevel> verbosity = new("--verbosity", "-v") { DefaultValueFactory = (_) => LogLevel.Normal, Description = "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.", Arity = ArgumentArity.ZeroOrOne };
+      Option<LogLevel> verbosity = new("--verbosity", "-v") { DefaultValueFactory = (_) => LogLevel.Normal, Description = "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed, trace.", Arity = ArgumentArity.ZeroOrOne };
       Option<string[]> formats = new("--format", "-f") { DefaultValueFactory = (_) => new[] { "json" }, Description = "Format of the generated coverage report.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
       formats.AcceptOnlyFromAmong("json", "lcov", "opencover", "cobertura", "teamcity");
       Option<string> threshold = new("--threshold") { Description = "Exits with error if the coverage % is below value.", Arity = ArgumentArity.ZeroOrOne };
@@ -51,6 +51,7 @@ namespace Coverlet.Console
       Option<string> excludeAssembliesWithoutSources = new("--exclude-assemblies-without-sources") { DefaultValueFactory = (_) => "MissingAll", Description = "Specifies behavior of heuristic to ignore assemblies with missing source documents." };
       excludeAssembliesWithoutSources.AcceptOnlyFromAmong("MissingAll", "MissingAny", "None");
       Option<string> sourceMappingFile = new("--source-mapping-file") { Description = "Specifies the path to a SourceRootsMappings file.", Arity = ArgumentArity.ZeroOrOne };
+      Option<string> diagFile = new("--diag") { Description = "Writes detailed trace diagnostics to the specified file, regardless of --verbosity. Useful for troubleshooting CI-only failures (e.g. instrumentation failures, missing hits, empty coverage results).", Arity = ArgumentArity.ZeroOrOne };
 
       RootCommand rootCommand = new("Cross platform .NET Core code coverage tool");
       rootCommand.Arguments.Add(moduleOrAppDirectory);
@@ -75,6 +76,7 @@ namespace Coverlet.Console
       rootCommand.Options.Add(doesNotReturnAttributes);
       rootCommand.Options.Add(excludeAssembliesWithoutSources);
       rootCommand.Options.Add(sourceMappingFile);
+      rootCommand.Options.Add(diagFile);
 
       rootCommand.SetAction(async (parseResult) =>
       {
@@ -100,6 +102,7 @@ namespace Coverlet.Console
         string[] doesNotReturnAttributesValue = parseResult.GetValue(doesNotReturnAttributes);
         string excludeAssembliesWithoutSourcesValue = parseResult.GetValue(excludeAssembliesWithoutSources);
         string sourceMappingFileValue = parseResult.GetValue(sourceMappingFile);
+        string diagFileValue = parseResult.GetValue(diagFile);
 
         if (string.IsNullOrEmpty(moduleOrAppDirectoryValue) || string.IsNullOrWhiteSpace(moduleOrAppDirectoryValue))
           throw new ArgumentException("No test assembly or application directory specified.");
@@ -125,7 +128,8 @@ namespace Coverlet.Console
                       useSourceLinkValue,
                       doesNotReturnAttributesValue,
                       excludeAssembliesWithoutSourcesValue,
-                      sourceMappingFileValue);
+                      sourceMappingFileValue,
+                      diagFileValue);
 
         s_exitCode = taskStatus;
         return taskStatus;
@@ -156,7 +160,8 @@ namespace Coverlet.Console
                                                            bool useSourceLink,
                                                            string[] doesNotReturnAttributes,
                                                            string excludeAssembliesWithoutSources,
-                                                           string sourceMappingFile
+                                                           string sourceMappingFile,
+                                                           string diagFile
              )
     {
 
@@ -177,6 +182,10 @@ namespace Coverlet.Console
 
       // Adjust log level based on user input.
       logger.Level = verbosity;
+      if (!string.IsNullOrWhiteSpace(diagFile))
+      {
+        logger.EnableDiagnosticFile(diagFile);
+      }
       s_exitCode = (int)CommandExitCodes.Success;
 
       try

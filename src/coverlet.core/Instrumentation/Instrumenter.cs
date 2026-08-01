@@ -176,8 +176,16 @@ namespace Coverlet.Core.Instrumentation
       return true;
     }
 
-    public bool CanInstrument()
+    public bool CanInstrument() => CanInstrument(out _);
+
+    /// <summary>
+    /// Determines whether the module is eligible for instrumentation and, when not, exposes a
+    /// human-readable reason (e.g. missing PDB, no local sources, probing exception). Used to give
+    /// actionable diagnostics for silently-skipped modules.
+    /// </summary>
+    public bool CanInstrument(out string reason)
     {
+      reason = string.Empty;
       try
       {
         if (_instrumentationHelper.HasPdb(_module, out bool embeddedPdb))
@@ -187,23 +195,28 @@ namespace Coverlet.Core.Instrumentation
             return true;
           }
 
-          if (embeddedPdb)
+          bool hasLocalSource = embeddedPdb
+              ? _instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, _excludeAssembliesWithoutSources)
+              : _instrumentationHelper.PortablePdbHasLocalSource(_module, _excludeAssembliesWithoutSources);
+
+          if (!hasLocalSource)
           {
-            return _instrumentationHelper.EmbeddedPortablePdbHasLocalSource(_module, _excludeAssembliesWithoutSources);
+            reason = $"Module has no local source documents matching heuristic '{_excludeAssembliesWithoutSources}' " +
+                     $"({(embeddedPdb ? "embedded" : "portable")} PDB).";
           }
-          else
-          {
-            return _instrumentationHelper.PortablePdbHasLocalSource(_module, _excludeAssembliesWithoutSources);
-          }
+
+          return hasLocalSource;
         }
         else
         {
+          reason = "Module has no PDB (or an unsupported PDB format) and cannot be instrumented.";
           return false;
         }
       }
       catch (Exception ex)
       {
-        _logger.LogWarning($"Unable to instrument module: '{_module}'\n{ex}");
+        reason = $"Exception while probing module for instrumentation eligibility: {ex.GetType().Name}: {ex.Message}";
+        _logger.LogWarning($"Unable to probe module for instrumentation eligibility: '{_module}'\n{ex}");
         return false;
       }
     }

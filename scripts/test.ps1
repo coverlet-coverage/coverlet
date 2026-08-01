@@ -60,27 +60,27 @@ foreach ($fw in $frameworks) {
 
     # coverlet.MTP.tests
     dotnet build-server shutdown
-    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.MTP.tests/$fwDir/coverlet.MTP.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
+    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.MTP.tests/$fwDir/coverlet.MTP.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --progress off
 
     # coverlet.core.tests
     dotnet build-server shutdown
-    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.core.tests/$fwDir/coverlet.core.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.core.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
+    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.core.tests/$fwDir/coverlet.core.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.core.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --progress off
 
     # coverlet.core.coverage.tests - waits for keyboard input (strange behavior)
     # dotnet build-server shutdown
-    # dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.core.coverage.tests/$fwDir/coverlet.core.coverage.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.core.coverage.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
+    # dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.core.coverage.tests/$fwDir/coverlet.core.coverage.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.core.coverage.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.core.coverage.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --progress off
 
     # coverlet.msbuild.tasks.tests
     dotnet build-server shutdown
-    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.msbuild.tasks.tests/$fwDir/coverlet.msbuild.tasks.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.msbuild.tasks.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.msbuild.tasks.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
+    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.msbuild.tasks.tests/$fwDir/coverlet.msbuild.tasks.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.msbuild.tasks.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.msbuild.tasks.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --progress off
 
     # coverlet.integration.tests
     dotnet build-server shutdown
-    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.integration.tests/$fwDir/coverlet.integration.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.MTP.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.integration.MTP.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
+    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.integration.tests/$fwDir/coverlet.integration.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.integration.MTP.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.integration.MTP.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --progress off
 
     # coverlet.MTP.validation.tests
     dotnet build-server shutdown
-    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.MTP.validation.tests/$fwDir/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.validation.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --no-progress
+    dotnet exec "$WorkspaceRoot/artifacts/bin/coverlet.MTP.validation.tests/$fwDir/coverlet.MTP.validation.tests.dll" --diagnostic --diagnostic-verbosity trace --report-xunit-trx --report-xunit-trx-filename "coverlet.MTP.validation.tests.${fwDir}.trx" --diagnostic-output-directory "$WorkspaceRoot/artifacts/log/" --diagnostic-file-prefix "coverlet.MTP.validation.tests.${fwDir}" --results-directory "$WorkspaceRoot/artifacts/reports/" --progress off
 }
 
  # --- Legacy tests (net8.0, net9.0) using the legacy global.json (SDK 9.0.x) ---

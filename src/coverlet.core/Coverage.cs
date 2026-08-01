@@ -60,6 +60,7 @@ namespace Coverlet.Core
     private readonly ICecilSymbolHelper _cecilSymbolHelper;
     private readonly List<InstrumenterResult> _results;
     private readonly CoverageParameters _parameters;
+    private int _modulesWithHits;
 
     public string Identifier { get; }
 
@@ -123,6 +124,10 @@ namespace Coverlet.Core
         _logger.LogVerbose($"Excluded module: '{excludedModule}'");
       }
 
+      int skippedByCanInstrument = 0;
+      int skippedByPreflight = 0;
+      int instrumentationExceptions = 0;
+
       foreach (string module in validModules)
       {
         var instrumenter = new Instrumenter(module,
@@ -134,14 +139,17 @@ namespace Coverlet.Core
                                             _sourceRootTranslator,
                                             _cecilSymbolHelper);
 
-        if (!instrumenter.CanInstrument())
+        if (!instrumenter.CanInstrument(out string canInstrumentReason))
         {
+          skippedByCanInstrument++;
+          _logger.LogVerbose($"Skipping module '{module}': not eligible for instrumentation. {canInstrumentReason}");
           continue;
         }
 
         InstrumentationPreflightResult preflightResult = instrumenter.Preflight();
         if (preflightResult.Status != InstrumentationPreflightStatus.Ready)
         {
+          skippedByPreflight++;
           _logger.LogWarning($"Skipping module '{module}': {preflightResult.Status}. {preflightResult.Reason}");
           continue;
         }
@@ -160,9 +168,19 @@ namespace Coverlet.Core
         }
         catch (Exception ex)
         {
+          instrumentationExceptions++;
           _logger.LogWarning($"Unable to instrument module: {module}\n{ex}");
           _instrumentationHelper.RestoreOriginalModule(module, Identifier);
         }
+      }
+
+      if (validModules.Count > 0 && _results.Count == 0)
+      {
+        _logger.LogWarning(
+            $"No modules were instrumented. Selected: {validModules.Count}, Instrumented: 0 " +
+            $"(skipped - not eligible: {skippedByCanInstrument}, preflight: {skippedByPreflight}, exceptions: {instrumentationExceptions}). " +
+            "Most common causes: missing PDB/local sources, unresolved dependencies, or locked files. " +
+            "Run with higher verbosity for details.");
       }
 
       return new CoveragePrepareResult()
@@ -340,6 +358,15 @@ namespace Coverlet.Core
         }
       }
 
+      if (coverageResult.Modules is null || coverageResult.Modules.Count == 0)
+      {
+        _logger.LogWarning(
+            $"Coverage result has no modules. Instrumented modules: {_results.Count}; modules with hits: {_modulesWithHits}. " +
+            "The generated report will be empty. This can happen if no modules were instrumented, " +
+            "the target process exited abruptly, or no instrumented code was exercised. " +
+            "Run with higher verbosity for details.");
+      }
+
       return coverageResult;
     }
 
@@ -380,8 +407,10 @@ namespace Coverlet.Core
 
     private void CalculateCoverage()
     {
+      _modulesWithHits = 0;
       foreach (InstrumenterResult result in _results)
       {
+        bool moduleHasNonZeroHits = false;
         var documents = result.Documents.Values.ToList();
         if (_parameters.UseSourceLink && result.SourceLink != null)
         {
@@ -464,6 +493,7 @@ namespace Coverlet.Core
               if (hits == 0)
                 continue;
 
+              moduleHasNonZeroHits = true;
               hits = hits < 0 ? int.MaxValue : hits;
 
               if (hitLocation.isBranch)
@@ -494,6 +524,11 @@ namespace Coverlet.Core
           }
         } // shared lock released here; safe to delete the lock file below
 
+        if (moduleHasNonZeroHits)
+        {
+          _modulesWithHits++;
+        }
+
         try
         {
           _instrumentationHelper.DeleteHitsFile(result.HitsFilePath);
@@ -506,6 +541,14 @@ namespace Coverlet.Core
 
         TryDeleteFile(tmpFilePath);
         TryDeleteFile(lockFilePath);
+      }
+
+      if (_results.Count > 0 && _modulesWithHits == 0)
+      {
+        _logger.LogWarning(
+            $"No coverage hits were collected from any of the {_results.Count} instrumented module(s). " +
+            "This can happen if the target process exits abruptly, instrumented code was not exercised, " +
+            "or hit files were not flushed. Run with higher verbosity for details.");
       }
     }
 
