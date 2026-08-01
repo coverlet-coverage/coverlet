@@ -22,7 +22,7 @@ Options:
   -t, --target <target> (REQUIRED)                                           Path to the test runner application.
   -a, --targetargs <targetargs>                                              Arguments to be passed to the test runner.
   -o, --output <output>                                                      Output of the generated coverage report
-  -v, --verbosity <Detailed|Minimal|Normal|Quiet>                            Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed. [default: Normal]
+  -v, --verbosity <Detailed|Minimal|Normal|Quiet|Trace>                      Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed, trace. [default: Normal]
   -f, --format <format>                                                      Format of the generated coverage report. [default: json]
   --threshold <threshold>                                                    Exits with error if the coverage % is below value.
   --threshold-type <branch|line|method>                                      Coverage type to apply the threshold to. [default: line|branch|method]
@@ -40,6 +40,7 @@ Options:
   --does-not-return-attribute <does-not-return-attribute>                    Attributes that mark methods that do not return
   --exclude-assemblies-without-sources <exclude-assemblies-without-sources>  Specifies behavior of heuristic to ignore assemblies with missing source documents. [default: MissingAll]
   --source-mapping-file <source-mapping-file>                                Specifies the path to a SourceRootsMappings file.
+  --diag <diag>                                                              Writes detailed trace diagnostics to the specified file, regardless of --verbosity. Useful for troubleshooting CI-only failures.
   --version                                                                  Show version information
   -?, -h, --help                                                             Show help and usage information
 ```
@@ -58,6 +59,22 @@ or pass the multiple values as space separated sequence, i.e.
 ```
 
 For `--merge-with` [check the sample](Examples.md).
+
+## Troubleshooting instrumentation and coverage collection
+
+If `coverlet` runs without errors but produces an empty or unexpectedly small coverage report (for example, `coverage.json` has no modules, or all reported percentages are 0%), rerun with `trace` verbosity and write a diagnostic file for further analysis:
+
+```shell
+coverlet <ASSEMBLY> --target <TARGET> --targetargs <TARGETARGS> --verbosity trace --diag ./coverlet-trace.log
+```
+
+This surfaces actionable warnings for the most common silent-failure scenarios:
+
+* **Instrumentation failures** — a module could not be instrumented (e.g. missing/unsupported PDB, no local source documents matching `--exclude-assemblies-without-sources`, locked file, or unresolved assembly dependency). Coverlet logs a per-module reason and an aggregate warning when no modules were instrumented at all.
+* **No hits collected** — modules were instrumented but no hits were recorded (e.g. the target process exited abruptly, or instrumented code was never exercised). Coverlet logs an aggregate warning listing the number of instrumented modules with zero hits.
+* **Empty coverage result** — the generated `CoverageResult` has no modules at all. Coverlet logs a warning before the report is written, including counts of instrumented modules and modules with hits, so the report's emptiness is not silent.
+
+The `--diag <file>` option always writes these (and other verbose/trace-level) diagnostics to the specified file, independent of the console `--verbosity` setting, which is useful when only the console summary is captured by a CI system.
 
 ## Code Coverage
 

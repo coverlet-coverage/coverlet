@@ -9,6 +9,13 @@ namespace Coverlet.Console.Logging
   enum LogLevel
   {
     /// <summary>
+    /// Most verbose logging level. Used for troubleshooting instrumentation and coverage-collection
+    /// issues (e.g. skipped modules, missing hits, empty coverage results). Intended for diagnostic
+    /// scenarios such as CI failures that cannot be reproduced locally.
+    /// </summary>
+    Trace = -1,
+
+    /// <summary>
     /// Logs that track the general flow of the application. These logs should have long-term value.
     /// </summary>
     Detailed = 0,
