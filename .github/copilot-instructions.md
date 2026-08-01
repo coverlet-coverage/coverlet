@@ -4,6 +4,7 @@ This is a .NET based repository that contains the coverlet projects for code cov
 
 ## General Guidelines
 - Always ask before creating any documentation files (e.g., `.md`, `.txt`, `.rst`). Prioritize code and test changes only.
+- Always ask for explicit approval before running any tests (`dotnet test`, integration tests, test scripts, coverage test runs, or equivalent).
 - Create a single, well-organized proposal or resolution document per issue, located in `Documentation/Plans/`. This folder is Git-ignored and local-only; documents are NOT uploaded to GitHub.
 - Stop deep analysis once effort/usage for a topic reaches about 60%, and keep investigation focused and efficient.
 
