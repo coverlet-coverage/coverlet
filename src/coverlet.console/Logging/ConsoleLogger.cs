@@ -16,13 +16,15 @@ namespace Coverlet.Console.Logging
     public LogLevel Level { get; set; } = LogLevel.Normal;
 
     /// <summary>
-    /// Enables writing all trace-level diagnostics to the specified file, regardless of the
-    /// configured console <see cref="Level"/>. Intended for CI troubleshooting (e.g. --diag).
+    /// Enables writing diagnostics to the specified file. All log messages (including trace-level
+    /// messages that may be suppressed from the console by <see cref="Level"/>) are written to the file.
+    /// Intended for CI troubleshooting (e.g. --diag).
     /// </summary>
     public void EnableDiagnosticFile(string path)
     {
       ArgumentNullException.ThrowIfNull(path);
 
+      StreamWriter newWriter = null;
       try
       {
         string directory = Path.GetDirectoryName(Path.GetFullPath(path));
@@ -31,11 +33,22 @@ namespace Coverlet.Console.Logging
           Directory.CreateDirectory(directory);
         }
 
-        _diagWriter = new StreamWriter(path, append: false) { AutoFlush = true };
+        newWriter = new StreamWriter(path, append: false) { AutoFlush = true };
+
+        lock (s_sync)
+        {
+          _diagWriter?.Dispose();
+          _diagWriter = newWriter;
+        }
       }
       catch (Exception ex)
       {
-        _diagWriter = null;
+        newWriter?.Dispose();
+        lock (s_sync)
+        {
+          _diagWriter = null;
+        }
+
         LogWarning($"Unable to create diagnostic file '{path}': {ex.Message}");
       }
     }
