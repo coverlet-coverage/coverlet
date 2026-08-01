@@ -215,8 +215,8 @@ namespace Coverlet.Core.Instrumentation
       }
       catch (Exception ex)
       {
-        reason = $"Exception while probing module for instrumentation eligibility: {ex.Message}";
-        _logger.LogWarning($"Unable to instrument module: '{_module}'\n{ex}");
+        reason = $"Exception while probing module for instrumentation eligibility: {ex.GetType().Name}: {ex.Message}";
+        _logger.LogWarning($"Unable to probe module for instrumentation eligibility: '{_module}'\n{ex}");
         return false;
       }
     }

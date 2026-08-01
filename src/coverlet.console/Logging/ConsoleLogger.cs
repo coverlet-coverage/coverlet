@@ -100,7 +100,14 @@ namespace Coverlet.Console.Logging
 
       lock (s_sync)
       {
-        _diagWriter.WriteLine($"[{DateTime.UtcNow:O}] [{level}] {message}");
+        try
+        {
+          _diagWriter.WriteLine($"[{DateTime.UtcNow:O}] [{level}] {message}");
+        }
+        catch
+        {
+          _diagWriter = null;
+        }
       }
     }
   }
