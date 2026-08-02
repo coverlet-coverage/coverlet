@@ -102,7 +102,14 @@ namespace Coverlet.Console.Logging
       {
         try
         {
-          _diagWriter.WriteLine($"[{DateTime.UtcNow:O}] [{level}] {message}");
+          // Multiline messages (e.g. coverage summary table): write the timestamp header on its
+          // own line so the table body starts on the next line and renders cleanly in the file.
+          string header = $"[{DateTime.UtcNow:O}] [{level}]";
+          string entry = message.Contains('\n')
+              ? $"{header}{Environment.NewLine}{message}"
+              : $"{header} {message}";
+
+          _diagWriter.WriteLine(entry);
         }
         catch
         {
