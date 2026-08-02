@@ -106,7 +106,7 @@ namespace Coverlet.Console.Logging
           // own line so the table body starts on the next line and renders cleanly in the file.
           string header = $"[{DateTime.UtcNow:O}] [{level}]";
           string entry = message.Contains('\n')
-              ? $"{header} \n{message}"
+              ? $"{header}{Environment.NewLine}{message}"
               : $"{header} {message}";
 
           _diagWriter.WriteLine(entry);
