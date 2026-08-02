@@ -589,6 +589,12 @@ namespace Coverlet.Core.Instrumentation
       }
 
       using Stream resourceStream = coreAssembly.GetManifestResourceStream(resourceName);
+      if (resourceStream is null)
+      {
+        throw new InvalidOperationException(
+            $"Embedded tracker template stream '{resourceName}' was not found in '{coreAssembly.FullName}'. " +
+            "This assembly is required to inject .NET Framework-safe coverage tracking code.");
+      }
       // Cecil needs a seekable stream that stays readable for the duration of the copy; use memory.
       var templateStream = new MemoryStream();
       resourceStream.CopyTo(templateStream);
