@@ -483,6 +483,95 @@ public class CollectorExtensionReportMethodsTests
 
   #endregion
 
+  #region DisplayConsoleReportOutputsAsync Tests
+
+  [Fact]
+  public async Task DisplayConsoleReportOutputsAsyncWithEmptyListDoesNotCallOutputDevice()
+  {
+    // Arrange
+    var collector = CreateCollectorWithCoverageEnabled();
+    var consoleOutputs = new List<string>();
+
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("DisplayConsoleReportOutputsAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+    Assert.NotNull(method);
+
+    // Act
+    await (Task)method.Invoke(collector, [consoleOutputs, CancellationToken.None])!;
+
+    // Assert
+    _mockOutputDevice.Verify(
+      x => x.DisplayAsync(It.IsAny<IOutputDeviceDataProducer>(), It.IsAny<IOutputDeviceData>(), It.IsAny<CancellationToken>()),
+      Times.Never);
+  }
+
+  [Fact]
+  public async Task DisplayConsoleReportOutputsAsyncWithMultipleOutputsCallsOutputDeviceForEachOutput()
+  {
+    // Arrange
+    var collector = CreateCollectorWithCoverageEnabled();
+    var consoleOutputs = new List<string> { "##teamcity[buildStatus status='SUCCESS']", "console-report-line" };
+
+    _mockOutputDevice.Setup(x => x.DisplayAsync(
+      It.IsAny<IOutputDeviceDataProducer>(),
+      It.IsAny<IOutputDeviceData>(),
+      It.IsAny<CancellationToken>()))
+      .Returns(Task.CompletedTask);
+
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("DisplayConsoleReportOutputsAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+    Assert.NotNull(method);
+
+    // Act
+    await (Task)method.Invoke(collector, [consoleOutputs, CancellationToken.None])!;
+
+    // Assert
+    _mockOutputDevice.Verify(
+      x => x.DisplayAsync(
+        It.Is<IOutputDeviceDataProducer>(p => p == collector),
+        It.Is<TextOutputDeviceData>(data => data.Text.Contains("teamcity") || data.Text.Contains("console-report-line")),
+        It.IsAny<CancellationToken>()),
+      Times.Exactly(2));
+  }
+
+  #endregion
+
+  #region DisplayCoverageSummaryAsync Tests
+
+  [Fact]
+  public async Task DisplayCoverageSummaryAsyncDisplaysCoverageTable()
+  {
+    // Arrange
+    var collector = CreateCollectorWithCoverageEnabled();
+    CoverageResult result = CreateTestCoverageResult();
+
+    _mockOutputDevice.Setup(x => x.DisplayAsync(
+      It.IsAny<IOutputDeviceDataProducer>(),
+      It.IsAny<IOutputDeviceData>(),
+      It.IsAny<CancellationToken>()))
+      .Returns(Task.CompletedTask);
+
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("DisplayCoverageSummaryAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+    Assert.NotNull(method);
+
+    // Act
+    await (Task)method.Invoke(collector, [result, CancellationToken.None])!;
+
+    // Assert
+    _mockOutputDevice.Verify(
+      x => x.DisplayAsync(
+        It.Is<IOutputDeviceDataProducer>(p => p == collector),
+        It.Is<TextOutputDeviceData>(data => data.Text.Contains("Module") && data.Text.Contains("Line") && data.Text.Contains("Method")),
+        It.IsAny<CancellationToken>()),
+      Times.Once);
+  }
+
+  #endregion
+
   #region GetHitsFilePath Tests
 
   [Fact]
@@ -620,6 +709,80 @@ public class CollectorExtensionReportMethodsTests
         CreatePlatformPath("deeply", "nested", "folder", "structure")
       }
     };
+  }
+
+  #endregion
+
+  #region Configuration Loading Tests
+
+  [Fact]
+  public void LoadTestConfigSettingsWhenAppSpecificConfigExistsReturnsSettings()
+  {
+    // Arrange
+    var collector = CreateCollectorWithCoverageEnabled();
+    string testModulePath = CreatePlatformPath("fake", "path", "test.dll");
+    string configPath = CreatePlatformPath("fake", "path", "test.testconfig.json");
+
+    _mockFileSystem.Setup(x => x.Exists(configPath)).Returns(true);
+    _mockFileSystem.Setup(x => x.ReadAllText(configPath)).Returns(
+      """
+      {
+        "platformOptions": {
+          "coverlet": {
+            "format": "json",
+            "includeDirectory": "/config/include"
+          }
+        }
+      }
+      """);
+
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("LoadTestConfigSettings", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+    Assert.NotNull(method);
+
+    // Act
+    var settings = (Coverlet.MTP.Configuration.CoverletMTPSettings?)method.Invoke(collector, [testModulePath]);
+
+    // Assert
+    Assert.NotNull(settings);
+    Assert.True(settings.IsFromConfigFile);
+    Assert.Contains("json", settings.ReportFormats);
+    Assert.Contains("/config/include", settings.IncludeDirectories);
+  }
+
+  [Fact]
+  public void LoadLegacyAppSettingsWhenConfigFileExistsReturnsSettingsWithConfigFlag()
+  {
+    // Arrange
+    var collector = CreateCollectorWithCoverageEnabled();
+    string testModulePath = CreatePlatformPath("fake", "path", "test.dll");
+    string configPath = Path.Combine(CreatePlatformPath("fake", "path"), "coverlet.mtp.appsettings.json");
+
+    _mockFileSystem.Setup(x => x.Exists(configPath)).Returns(true);
+    _mockFileSystem.Setup(x => x.ReadAllText(configPath)).Returns(
+      """
+      {
+        "Coverlet": {
+          "Format": "json",
+          "IncludeDirectory": "/legacy/include",
+          "ExcludeByFile": "**/LegacyGenerated/**"
+        }
+      }
+      """);
+
+    System.Reflection.MethodInfo? method = typeof(CollectorExtension)
+      .GetMethod("LoadLegacyAppSettings", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+    Assert.NotNull(method);
+
+    // Act
+    var settings = (Coverlet.MTP.Configuration.CoverletMTPSettings?)method.Invoke(collector, [testModulePath]);
+
+    // Assert
+    Assert.NotNull(settings);
+    Assert.True(settings.IsFromConfigFile);
+    Assert.Contains("json", settings.ReportFormats);
+    Assert.Contains("/legacy/include", settings.IncludeDirectories);
+    Assert.Contains("**/LegacyGenerated/**", settings.ExcludeSourceFiles);
   }
 
   #endregion

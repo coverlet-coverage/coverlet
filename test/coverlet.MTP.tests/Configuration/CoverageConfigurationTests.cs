@@ -356,6 +356,55 @@ public sealed class CoverageConfigurationTests
     Assert.Equal(expectedFilters, result);
   }
 
+  [Fact]
+  public void GetExcludeByFileFiltersWhenConfigFileSettingsPresentReturnsConfigFilters()
+  {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
+    _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
+      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      {
+        filters = null;
+        return false;
+      }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
+
+    var configFileSettings = new CoverletMTPSettings
+    {
+      IsFromConfigFile = true,
+      ExcludeSourceFiles = ["**/Generated/**", "**/Migrations/**"]
+    };
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, configFileSettings, testModulePath: "/fake/path/test.dll", _mockLogger.Object);
+    string[] result = config.GetExcludeByFileFilters();
+
+    Assert.Equal(configFileSettings.ExcludeSourceFiles, result);
+  }
+
+  [Fact]
+  public void GetExcludeByFileFiltersWhenCliAndConfigFileSetReturnsCliFilters()
+  {
+    string[] cliFilters = ["**/Cli/**"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
+    _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByFile, out It.Ref<string[]?>.IsAny))
+      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? filters) =>
+      {
+        filters = cliFilters;
+        return true;
+      }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
+
+    var configFileSettings = new CoverletMTPSettings
+    {
+      IsFromConfigFile = true,
+      ExcludeSourceFiles = ["**/Config/**"]
+    };
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, configFileSettings, testModulePath: "/fake/path/test.dll", _mockLogger.Object);
+    string[] result = config.GetExcludeByFileFilters();
+
+    Assert.Equal(cliFilters, result);
+  }
+
   #endregion
 
   #region GetExcludeByAttributeFilters Tests
@@ -445,6 +494,34 @@ public sealed class CoverageConfigurationTests
     Assert.Contains("System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute", result);
   }
 
+  [Fact]
+  public void GetExcludeByAttributeFiltersWhenCliAndConfigFileSetUsesCliDefaultsMerge()
+  {
+    string[] cliAttributes = ["CliOnlyAttribute"];
+#pragma warning disable IDE0350 // Use implicitly typed lambda
+    _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.ExcludeByAttribute, out It.Ref<string[]?>.IsAny))
+      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? attributes) =>
+      {
+        attributes = cliAttributes;
+        return true;
+      }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
+
+    var configFileSettings = new CoverletMTPSettings
+    {
+      IsFromConfigFile = true,
+      ExcludeAttributes = ["ConfigOnlyAttribute"]
+    };
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, configFileSettings, testModulePath: "/fake/path/test.dll", _mockLogger.Object);
+    string[] result = config.GetExcludeByAttributeFilters();
+
+    Assert.Contains("ExcludeFromCodeCoverage", result);
+    Assert.Contains("CompilerGeneratedAttribute", result);
+    Assert.Contains("CliOnlyAttribute", result);
+    Assert.DoesNotContain("ConfigOnlyAttribute", result);
+  }
+
   #endregion
 
   #region GetIncludeDirectories Tests
@@ -503,6 +580,30 @@ public sealed class CoverageConfigurationTests
     string[] result = config.GetIncludeDirectories();
 
     Assert.Equal(expectedDirectories, result);
+  }
+
+  [Fact]
+  public void GetIncludeDirectoriesWhenConfigFileSettingsPresentReturnsConfigDirectories()
+  {
+#pragma warning disable IDE0350 // Use implicitly typed lambda
+    _mockCommandLineOptions.Setup(x => x.TryGetOptionArgumentList(CoverletOptionNames.IncludeDirectory, out It.Ref<string[]?>.IsAny))
+      .Returns(new TryGetOptionArgumentListDelegate((string optionName, out string[]? directories) =>
+      {
+        directories = null;
+        return false;
+      }));
+#pragma warning restore IDE0350 // Use implicitly typed lambda
+
+    var configFileSettings = new CoverletMTPSettings
+    {
+      IsFromConfigFile = true,
+      IncludeDirectories = ["/config/include1", "/config/include2"]
+    };
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, configFileSettings, testModulePath: "/fake/path/test.dll", _mockLogger.Object);
+    string[] result = config.GetIncludeDirectories();
+
+    Assert.Equal(configFileSettings.IncludeDirectories, result);
   }
 
   #endregion
@@ -805,17 +906,52 @@ public sealed class CoverageConfigurationTests
       }));
 #pragma warning restore IDE0350 // Use implicitly typed lambda
 
-    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, _mockLogger.Object);
+    var configFileSettings = new CoverletMTPSettings
+    {
+      IsFromConfigFile = true,
+      ReportFormats = ["json"],
+      IncludeFilters = ["[MyAssembly]*"],
+      ExcludeFilters = ["[coverlet.*]*", "[Excluded]*"],
+      ExcludeSourceFiles = ["**/Generated/**"],
+      ExcludeAttributes = ["MyExcludeAttribute"],
+      IncludeDirectories = ["/tmp/include"],
+      ExcludeAssembliesWithoutSources = "MissingAll"
+    };
+
+    var config = new CoverageConfiguration(_mockCommandLineOptions.Object, configFileSettings, testModulePath: "/fake/path/test.dll", _mockLogger.Object);
 
     // Act
     config.LogConfigurationSummary();
 
-    // Assert - Verify the underlying Log method was called for LogInformation
-    // Microsoft.Testing.Platform.Logging.ILogger.LogInformation extension method calls Log<TState>
+    // Assert - Verify representative information lines are logged
     _mockLogger.Verify(
       x => x.Log(
         It.IsAny<LogLevel>(),
-        It.Is<string>(s => s.Contains("Coverlet Coverage Configuration")),
+        It.Is<string>(s => s.Contains("=== Coverlet Coverage Configuration ===")),
+        It.IsAny<Exception?>(),
+        It.IsAny<Func<string, Exception?, string>>()),
+      Times.Once);
+
+    _mockLogger.Verify(
+      x => x.Log(
+        It.IsAny<LogLevel>(),
+        It.Is<string>(s => s.Contains("Output Formats: json")),
+        It.IsAny<Exception?>(),
+        It.IsAny<Func<string, Exception?, string>>()),
+      Times.Once);
+
+    _mockLogger.Verify(
+      x => x.Log(
+        It.IsAny<LogLevel>(),
+        It.Is<string>(s => s.Contains("Include Directories: /tmp/include")),
+        It.IsAny<Exception?>(),
+        It.IsAny<Func<string, Exception?, string>>()),
+      Times.Once);
+
+    _mockLogger.Verify(
+      x => x.Log(
+        It.IsAny<LogLevel>(),
+        It.Is<string>(s => s.Contains("========================================")),
         It.IsAny<Exception?>(),
         It.IsAny<Func<string, Exception?, string>>()),
       Times.Once);

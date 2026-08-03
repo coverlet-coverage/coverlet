@@ -614,5 +614,228 @@ namespace Coverlet.Core.Tests.Symbols
       Assert.True(branchLine > 0, "Branch points must map to a valid source line, not a compiler-generated prologue");
       Assert.All(patternMatchingOrPoints, x => Assert.Equal(branchLine, x.StartLine));
     }
+
+    #region Private Pattern Coverage Tests
+
+    [Fact]
+    public void SkipGeneratedBackingFieldAssignmentDefault_WhenInstructionMatchesCompilerGeneratedBackingField_ReturnsTrue()
+    {
+      // arrange
+      MethodInfo method = typeof(CecilSymbolHelper).GetMethod("SkipGeneratedBackingFieldAssignmentDefault", BindingFlags.NonPublic | BindingFlags.Static);
+      Assert.NotNull(method);
+
+      MethodDefinition methodDefinition = CreateMethodWithAutoPropertyBackingFieldAssignment(isCompilerGeneratedBackingField: true, out Instruction firstInstruction);
+
+      // act
+      bool shouldSkip = (bool)method.Invoke(null, [methodDefinition, firstInstruction]);
+
+      // assert
+      Assert.True(shouldSkip);
+    }
+
+    [Fact]
+    public void SkipGeneratedBackingFieldAssignmentDefault_WhenFieldIsNotCompilerGenerated_ReturnsFalse()
+    {
+      // arrange
+      MethodInfo method = typeof(CecilSymbolHelper).GetMethod("SkipGeneratedBackingFieldAssignmentDefault", BindingFlags.NonPublic | BindingFlags.Static);
+      Assert.NotNull(method);
+
+      MethodDefinition methodDefinition = CreateMethodWithAutoPropertyBackingFieldAssignment(isCompilerGeneratedBackingField: false, out Instruction firstInstruction);
+
+      // act
+      bool shouldSkip = (bool)method.Invoke(null, [methodDefinition, firstInstruction]);
+
+      // assert
+      Assert.False(shouldSkip);
+    }
+
+    [Fact]
+    public void SkipGeneratedBranchesForAsyncTryFinally_WhenStateFieldComparePatternIsPresent_ReturnsTrue()
+    {
+      // arrange
+      MethodInfo method = typeof(CecilSymbolHelper).GetMethod("SkipGeneratedBranchesForAsyncTryFinally", BindingFlags.NonPublic | BindingFlags.Static);
+      Assert.NotNull(method);
+
+      (MethodDefinition methodDefinition, System.Collections.Generic.List<Instruction> instructions, Instruction branchInstruction) =
+        CreateAsyncTryFinallyPatternForStateFieldComparison();
+
+      // act
+      bool shouldSkip = (bool)method.Invoke(null, [instructions, branchInstruction, methodDefinition]);
+
+      // assert
+      Assert.True(shouldSkip);
+    }
+
+    [Fact]
+    public void SkipGeneratedBranchesForAsyncTryFinally_WhenLocalTempExceptionObjectPatternIsPresent_ReturnsTrue()
+    {
+      // arrange
+      MethodInfo method = typeof(CecilSymbolHelper).GetMethod("SkipGeneratedBranchesForAsyncTryFinally", BindingFlags.NonPublic | BindingFlags.Static);
+      Assert.NotNull(method);
+
+      (MethodDefinition methodDefinition, System.Collections.Generic.List<Instruction> instructions, Instruction branchInstruction) =
+        CreateAsyncTryFinallyPatternForExceptionObjectLocalCheck(fieldName: "<>s__3");
+
+      // act
+      bool shouldSkip = (bool)method.Invoke(null, [instructions, branchInstruction, methodDefinition]);
+
+      // assert
+      Assert.True(shouldSkip);
+    }
+
+    [Fact]
+    public void SkipGeneratedBranchesForAsyncTryFinally_WhenExceptionFieldIsNotCompilerGenerated_ReturnsFalse()
+    {
+      // arrange
+      MethodInfo method = typeof(CecilSymbolHelper).GetMethod("SkipGeneratedBranchesForAsyncTryFinally", BindingFlags.NonPublic | BindingFlags.Static);
+      Assert.NotNull(method);
+
+      (MethodDefinition methodDefinition, System.Collections.Generic.List<Instruction> instructions, Instruction branchInstruction) =
+        CreateAsyncTryFinallyPatternForExceptionObjectLocalCheck(fieldName: "state");
+
+      // act
+      bool shouldSkip = (bool)method.Invoke(null, [instructions, branchInstruction, methodDefinition]);
+
+      // assert
+      Assert.False(shouldSkip);
+    }
+
+    private static MethodDefinition CreateMethodWithAutoPropertyBackingFieldAssignment(bool isCompilerGeneratedBackingField, out Instruction firstInstruction)
+    {
+      var module = ModuleDefinition.CreateModule("AutoPropModule", ModuleKind.Dll);
+      var type = new TypeDefinition("Coverage", "AutoPropHost", Mono.Cecil.TypeAttributes.Class | Mono.Cecil.TypeAttributes.Public, module.TypeSystem.Object);
+      module.Types.Add(type);
+
+      var backingField = new FieldDefinition("<Name>k__BackingField", Mono.Cecil.FieldAttributes.Private, module.TypeSystem.String);
+      if (isCompilerGeneratedBackingField)
+      {
+        var compilerGeneratedCtor = typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute).GetConstructor(global::System.Type.EmptyTypes);
+        Assert.NotNull(compilerGeneratedCtor);
+        backingField.CustomAttributes.Add(new CustomAttribute(module.ImportReference(compilerGeneratedCtor)));
+      }
+
+      type.Fields.Add(backingField);
+
+      var method = new MethodDefinition(".ctor", Mono.Cecil.MethodAttributes.Public | Mono.Cecil.MethodAttributes.HideBySig | Mono.Cecil.MethodAttributes.SpecialName | Mono.Cecil.MethodAttributes.RTSpecialName, module.TypeSystem.Void);
+      var arg = new ParameterDefinition("value", Mono.Cecil.ParameterAttributes.None, module.TypeSystem.String);
+      method.Parameters.Add(arg);
+      type.Methods.Add(method);
+
+      firstInstruction = Instruction.Create(OpCodes.Ldarg, arg);
+      method.Body.Instructions.Add(firstInstruction);
+      method.Body.Instructions.Add(Instruction.Create(OpCodes.Nop));
+      method.Body.Instructions.Add(Instruction.Create(OpCodes.Stfld, backingField));
+      method.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+      return method;
+    }
+
+    private static (MethodDefinition MethodDefinition, System.Collections.Generic.List<Instruction> Instructions, Instruction BranchInstruction) CreateAsyncTryFinallyPatternForStateFieldComparison()
+    {
+      var module = ModuleDefinition.CreateModule("AsyncTryFinallyState", ModuleKind.Dll);
+      var type = new TypeDefinition("Coverage", "StateMachineHost", Mono.Cecil.TypeAttributes.Class | Mono.Cecil.TypeAttributes.NotPublic, module.TypeSystem.Object);
+      module.Types.Add(type);
+
+      var compilerGeneratedCtor = typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute).GetConstructor(global::System.Type.EmptyTypes);
+      Assert.NotNull(compilerGeneratedCtor);
+      type.CustomAttributes.Add(new CustomAttribute(module.ImportReference(compilerGeneratedCtor)));
+
+      var stateField = new FieldDefinition("<>s__1", Mono.Cecil.FieldAttributes.Private, module.TypeSystem.Int32);
+      type.Fields.Add(stateField);
+
+      var method = new MethodDefinition("MoveNext", Mono.Cecil.MethodAttributes.Public, module.TypeSystem.Void);
+      method.Body.InitLocals = true;
+      method.Body.Variables.Add(new VariableDefinition(module.TypeSystem.Int32));
+      type.Methods.Add(method);
+
+      Instruction start = Instruction.Create(OpCodes.Nop);
+      Instruction ldarg0 = Instruction.Create(OpCodes.Ldarg_0);
+      Instruction ldfld = Instruction.Create(OpCodes.Ldfld, stateField);
+      Instruction stloc0 = Instruction.Create(OpCodes.Stloc_0);
+      Instruction ldloc0 = Instruction.Create(OpCodes.Ldloc_0);
+      Instruction ldc1 = Instruction.Create(OpCodes.Ldc_I4_1);
+      Instruction beq = Instruction.Create(OpCodes.Beq_S, start);
+      Instruction endFinally = Instruction.Create(OpCodes.Endfinally);
+      Instruction ret = Instruction.Create(OpCodes.Ret);
+
+      method.Body.Instructions.Add(start);
+      method.Body.Instructions.Add(ldarg0);
+      method.Body.Instructions.Add(ldfld);
+      method.Body.Instructions.Add(stloc0);
+      method.Body.Instructions.Add(ldloc0);
+      method.Body.Instructions.Add(ldc1);
+      method.Body.Instructions.Add(beq);
+      method.Body.Instructions.Add(endFinally);
+      method.Body.Instructions.Add(ret);
+
+      method.Body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Finally)
+      {
+        TryStart = start,
+        TryEnd = endFinally,
+        HandlerStart = endFinally,
+        HandlerEnd = ret
+      });
+
+      // Re-read module to ensure Cecil computes stable instruction offsets.
+      // SkipGeneratedBranchesForAsyncTryFinally uses BinarySearch by instruction offset.
+      using var stream = new MemoryStream();
+      module.Write(stream);
+      stream.Position = 0;
+      ModuleDefinition reloadedModule = ModuleDefinition.ReadModule(stream);
+      TypeDefinition reloadedType = reloadedModule.Types.Single(x => x.Name == "StateMachineHost");
+      MethodDefinition reloadedMethod = reloadedType.Methods.Single(x => x.Name == "MoveNext");
+      Instruction reloadedBranchInstruction = reloadedMethod.Body.Instructions.Single(x => x.OpCode == OpCodes.Beq || x.OpCode == OpCodes.Beq_S);
+
+      return (reloadedMethod, reloadedMethod.Body.Instructions.ToList(), reloadedBranchInstruction);
+    }
+
+    private static (MethodDefinition MethodDefinition, System.Collections.Generic.List<Instruction> Instructions, Instruction BranchInstruction) CreateAsyncTryFinallyPatternForExceptionObjectLocalCheck(string fieldName)
+    {
+      var module = ModuleDefinition.CreateModule("AsyncTryFinallyException", ModuleKind.Dll);
+      var type = new TypeDefinition("Coverage", "ExceptionStateMachineHost", Mono.Cecil.TypeAttributes.Class | Mono.Cecil.TypeAttributes.NotPublic, module.TypeSystem.Object);
+      module.Types.Add(type);
+
+      var compilerGeneratedCtor = typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute).GetConstructor(global::System.Type.EmptyTypes);
+      Assert.NotNull(compilerGeneratedCtor);
+      type.CustomAttributes.Add(new CustomAttribute(module.ImportReference(compilerGeneratedCtor)));
+
+      FieldDefinition exceptionField = new FieldDefinition(fieldName, Mono.Cecil.FieldAttributes.Private, module.TypeSystem.Object);
+      type.Fields.Add(exceptionField);
+
+      var method = new MethodDefinition("MoveNext", Mono.Cecil.MethodAttributes.Public, module.TypeSystem.Void);
+      method.Body.InitLocals = true;
+      method.Body.Variables.Add(new VariableDefinition(module.TypeSystem.Object));
+      type.Methods.Add(method);
+
+      Instruction start = Instruction.Create(OpCodes.Nop);
+      Instruction ldarg0 = Instruction.Create(OpCodes.Ldarg_0);
+      Instruction ldfld = Instruction.Create(OpCodes.Ldfld, exceptionField);
+      Instruction stloc0 = Instruction.Create(OpCodes.Stloc_0);
+      Instruction ldloc0 = Instruction.Create(OpCodes.Ldloc_0);
+      Instruction brfalse = Instruction.Create(OpCodes.Brfalse_S, start);
+      Instruction endFinally = Instruction.Create(OpCodes.Endfinally);
+      Instruction ret = Instruction.Create(OpCodes.Ret);
+
+      method.Body.Instructions.Add(start);
+      method.Body.Instructions.Add(ldarg0);
+      method.Body.Instructions.Add(ldfld);
+      method.Body.Instructions.Add(stloc0);
+      method.Body.Instructions.Add(ldloc0);
+      method.Body.Instructions.Add(brfalse);
+      method.Body.Instructions.Add(endFinally);
+      method.Body.Instructions.Add(ret);
+
+      method.Body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Finally)
+      {
+        TryStart = start,
+        TryEnd = endFinally,
+        HandlerStart = endFinally,
+        HandlerEnd = ret
+      });
+
+      return (method, method.Body.Instructions.ToList(), brfalse);
+    }
+
+    #endregion
   }
 }
