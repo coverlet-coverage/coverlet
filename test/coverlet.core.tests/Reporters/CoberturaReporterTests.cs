@@ -452,6 +452,26 @@ namespace Coverlet.Core.Tests.Reporters
       Assert.All(fileNames, fn => Assert.DoesNotContain(":", fn));
     }
 
+    [Theory]
+    [InlineData("//server/share/file.cs", "//server/share/")]
+    [InlineData("//server/share", "//server/share/")]
+    [InlineData("//server", "//")]
+    [InlineData("/var/tmp/file.cs", "/")]
+    [InlineData("relative/file.cs", "")]
+    public void Report_NonSourceLink_SourceRootNormalization_HandlesUncUnixAndRelative(string documentPath, string expectedSource)
+    {
+      // Covers GetNormalizedPathRoot branches for UNC, Unix-rooted and relative paths.
+      CoverageResult result = BuildResult([(documentPath, "Foo")]);
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      var doc = XDocument.Load(new StringReader(report));
+      string[] sources = doc.Descendants("source").Select(s => s.Value).ToArray();
+
+      Assert.Single(sources);
+      Assert.Equal(expectedSource, sources[0]);
+    }
+
     [Fact]
     public void Report_UseSourceLink_FilenamePassesThroughUnchanged()
     {

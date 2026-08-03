@@ -700,6 +700,23 @@ namespace Coverlet.Core.Tests.Symbols
       Assert.False(shouldSkip);
     }
 
+    [Fact]
+    public void SkipGeneratedBranchesForAsyncIterator_WhenStateSwitchPatternIsPresent_ReturnsTrue()
+    {
+      // arrange
+      MethodInfo method = typeof(CecilSymbolHelper).GetMethod("SkipGeneratedBranchesForAsyncIterator", BindingFlags.NonPublic | BindingFlags.Static);
+      Assert.NotNull(method);
+
+      (System.Collections.Generic.List<Instruction> instructions, Instruction switchInstruction) =
+        CreateAsyncIteratorStateSwitchPattern();
+
+      // act
+      bool shouldSkip = (bool)method.Invoke(null, [instructions, switchInstruction]);
+
+      // assert
+      Assert.True(shouldSkip);
+    }
+
     private static MethodDefinition CreateMethodWithAutoPropertyBackingFieldAssignment(bool isCompilerGeneratedBackingField, out Instruction firstInstruction)
     {
       var module = ModuleDefinition.CreateModule("AutoPropModule", ModuleKind.Dll);
@@ -843,6 +860,59 @@ namespace Coverlet.Core.Tests.Symbols
       MethodDefinition reloadedMethod = reloadedType.Methods.Single(x => x.Name == "MoveNext");
       Instruction reloadedBranchInstruction = reloadedMethod.Body.Instructions.Single(x => x.OpCode == OpCodes.Brfalse || x.OpCode == OpCodes.Brfalse_S);
       return (reloadedMethod, reloadedMethod.Body.Instructions.ToList(), reloadedBranchInstruction);
+    }
+
+    private static (System.Collections.Generic.List<Instruction> Instructions, Instruction SwitchInstruction) CreateAsyncIteratorStateSwitchPattern()
+    {
+      var module = ModuleDefinition.CreateModule("AsyncIteratorStateSwitch", ModuleKind.Dll);
+      var type = new TypeDefinition("Coverage", "AsyncIteratorStateMachineHost", Mono.Cecil.TypeAttributes.Class | Mono.Cecil.TypeAttributes.NotPublic, module.TypeSystem.Object);
+      module.Types.Add(type);
+
+      var compilerGeneratedCtor = typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute).GetConstructor(global::System.Type.EmptyTypes);
+      Assert.NotNull(compilerGeneratedCtor);
+      type.CustomAttributes.Add(new CustomAttribute(module.ImportReference(compilerGeneratedCtor)));
+
+      var stateField = new FieldDefinition("<>1__state", Mono.Cecil.FieldAttributes.Private, module.TypeSystem.Int32);
+      type.Fields.Add(stateField);
+
+      var method = new MethodDefinition("MoveNext", Mono.Cecil.MethodAttributes.Public, module.TypeSystem.Void);
+      method.Body.InitLocals = true;
+      method.Body.Variables.Add(new VariableDefinition(module.TypeSystem.Int32));
+      type.Methods.Add(method);
+
+      Instruction start = Instruction.Create(OpCodes.Nop);
+      Instruction ldarg0 = Instruction.Create(OpCodes.Ldarg_0);
+      Instruction ldfld = Instruction.Create(OpCodes.Ldfld, stateField);
+      Instruction stloc0 = Instruction.Create(OpCodes.Stloc_0);
+      Instruction ldloc0 = Instruction.Create(OpCodes.Ldloc_0);
+      Instruction ldcMinus4 = Instruction.Create(OpCodes.Ldc_I4_S, (sbyte)-4);
+      Instruction sub = Instruction.Create(OpCodes.Sub);
+      Instruction case0 = Instruction.Create(OpCodes.Nop);
+      Instruction case1 = Instruction.Create(OpCodes.Nop);
+      Instruction switchInstruction = Instruction.Create(OpCodes.Switch, new[] { case0, case1 });
+      Instruction ret = Instruction.Create(OpCodes.Ret);
+
+      method.Body.Instructions.Add(start);
+      method.Body.Instructions.Add(ldarg0);
+      method.Body.Instructions.Add(ldfld);
+      method.Body.Instructions.Add(stloc0);
+      method.Body.Instructions.Add(ldloc0);
+      method.Body.Instructions.Add(ldcMinus4);
+      method.Body.Instructions.Add(sub);
+      method.Body.Instructions.Add(switchInstruction);
+      method.Body.Instructions.Add(case0);
+      method.Body.Instructions.Add(case1);
+      method.Body.Instructions.Add(ret);
+
+      using var stream = new MemoryStream();
+      module.Write(stream);
+      stream.Position = 0;
+      ModuleDefinition reloadedModule = ModuleDefinition.ReadModule(stream);
+      TypeDefinition reloadedType = reloadedModule.Types.Single(x => x.Name == "AsyncIteratorStateMachineHost");
+      MethodDefinition reloadedMethod = reloadedType.Methods.Single(x => x.Name == "MoveNext");
+      Instruction reloadedSwitch = reloadedMethod.Body.Instructions.Single(x => x.OpCode == OpCodes.Switch);
+
+      return (reloadedMethod.Body.Instructions.ToList(), reloadedSwitch);
     }
 
     #endregion
