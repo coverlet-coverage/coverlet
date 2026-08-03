@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Coverlet.Core.Helpers;
+using Microsoft.Extensions.DependencyModel;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Helpers
@@ -115,6 +117,48 @@ namespace Coverlet.Core.Tests.Helpers
       IReadOnlyList<string> result = _sut.GetLoadedAssemblyNames("SomeOtherAssembly");
 
       Assert.Contains(expectedAssemblyName, result, StringComparer.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void WhenGetDepsJsonAssemblyNamesThenReturnsRuntimePackageNamesAndSkipsProjectLibraries()
+    {
+      string testModuleDirectory = AppContext.BaseDirectory;
+      string testAssemblyName = Path.GetFileNameWithoutExtension(typeof(ProcessAssemblyHelperTests).Assembly.Location);
+
+      IReadOnlyList<string> result = _sut.GetDepsJsonAssemblyNames(testModuleDirectory, testAssemblyName);
+
+      Assert.NotEmpty(result);
+      Assert.DoesNotContain(testAssemblyName, result, StringComparer.OrdinalIgnoreCase);
+
+      var unique = new HashSet<string>(result, StringComparer.OrdinalIgnoreCase);
+      Assert.Equal(unique.Count, result.Count);
+
+      IReadOnlySet<string> projectRuntimeLibraries = GetProjectRuntimeLibraryNames(testModuleDirectory);
+      Assert.NotEmpty(projectRuntimeLibraries);
+      Assert.All(projectRuntimeLibraries, projectName =>
+        Assert.DoesNotContain(projectName, result, StringComparer.OrdinalIgnoreCase));
+    }
+
+    private static IReadOnlySet<string> GetProjectRuntimeLibraryNames(string testModuleDirectory)
+    {
+      var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      using var reader = new DependencyContextJsonReader();
+
+      foreach (string depsFile in Directory.EnumerateFiles(testModuleDirectory, "*.deps.json"))
+      {
+        using FileStream stream = File.OpenRead(depsFile);
+        DependencyContext context = reader.Read(stream);
+
+        foreach (RuntimeLibrary lib in context.RuntimeLibraries)
+        {
+          if (lib.Type.Equals("project", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(lib.Name))
+          {
+            names.Add(lib.Name);
+          }
+        }
+      }
+
+      return names;
     }
   }
 }
