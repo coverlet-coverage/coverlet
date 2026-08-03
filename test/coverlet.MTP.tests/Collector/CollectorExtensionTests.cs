@@ -590,7 +590,7 @@ public class CollectorExtensionTests
   }
 
   [Fact]
-  public async Task OnTestHostProcessExitedAsyncWhenOutputDirectoryMissingCreatesDirectory()
+  public async Task GenerateReportsAsyncWhenPlatformConfigurationIsSyntheticAndResultDirectoryMissingThrowsUnreachableException()
   {
     // MTP's ConfigurationExtensions.GetTestResultDirectory performs internal-type checks
     // and throws UnreachableException when IConfiguration is not from the real platform pipeline.

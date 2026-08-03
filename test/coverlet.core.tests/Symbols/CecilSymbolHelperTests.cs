@@ -833,7 +833,16 @@ namespace Coverlet.Core.Tests.Symbols
         HandlerEnd = ret
       });
 
-      return (method, method.Body.Instructions.ToList(), brfalse);
+      // Re-read module to ensure Cecil computes stable instruction offsets.
+      // SkipGeneratedBranchesForAsyncTryFinally uses BinarySearch by instruction offset.
+      using var stream = new MemoryStream();
+      module.Write(stream);
+      stream.Position = 0;
+      ModuleDefinition reloadedModule = ModuleDefinition.ReadModule(stream);
+      TypeDefinition reloadedType = reloadedModule.Types.Single(x => x.Name == "ExceptionStateMachineHost");
+      MethodDefinition reloadedMethod = reloadedType.Methods.Single(x => x.Name == "MoveNext");
+      Instruction reloadedBranchInstruction = reloadedMethod.Body.Instructions.Single(x => x.OpCode == OpCodes.Brfalse || x.OpCode == OpCodes.Brfalse_S);
+      return (reloadedMethod, reloadedMethod.Body.Instructions.ToList(), reloadedBranchInstruction);
     }
 
     #endregion
