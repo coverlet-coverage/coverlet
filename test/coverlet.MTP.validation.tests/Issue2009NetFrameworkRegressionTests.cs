@@ -66,7 +66,8 @@ public class Issue2009NetFrameworkRegressionTests : MtpValidationTestBase
     string solutionFile = Path.Combine(solutionPath, "TestSolution.sln");
     CreateSolutionFile(solutionFile);
 
-    return new TestProjectInfo(solutionFile, testProjectPath, testProjectPath, solutionPath);
+    string outputPath = Path.Combine(solutionPath, "bin", TestProjectName, BuildConfiguration.ToLowerInvariant());
+    return new TestProjectInfo(solutionFile, testProjectPath, outputPath, solutionPath);
   }
 
   private static void CreateIssue2009SutProject(string sutProjectPath)
@@ -192,10 +193,13 @@ public class ReproTests
 
     using var process = Process.Start(processStartInfo)!;
 
-    string output = await process.StandardOutput.ReadToEndAsync();
-    string error = await process.StandardError.ReadToEndAsync();
+    Task<string> stdoutTask = process.StandardOutput.ReadToEndAsync();
+    Task<string> stderrTask = process.StandardError.ReadToEndAsync();
 
     await process.WaitForExitAsync();
+    await Task.WhenAll(stdoutTask, stderrTask, process.WaitForExitAsync());
+    string output = await stdoutTask;
+    string error = await stderrTask;
 
     return new TestResult(
       process.ExitCode,
