@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Coverlet.Collector.DataCollection;
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Instrumentation;
@@ -35,8 +35,13 @@ namespace Coverlet.Collector.Tests.DataCollection
       // Regression test for Fix 1 in issue #1983: TestSessionEnd must invoke handlers from the AppDomain registry.
       bool handlerCalled = false;
 
-      var bag = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
-      bag?.Add(new((_, _) => { handlerCalled = true; }));
+      if (AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey) is List<EventHandler> handlers)
+      {
+        lock (handlers)
+        {
+          handlers.Add(new((_, _) => { handlerCalled = true; }));
+        }
+      }
 
       _dataCollector.TestSessionEnd(new TestSessionEndArgs());
 
@@ -48,8 +53,13 @@ namespace Coverlet.Collector.Tests.DataCollection
     {
       // Regression test for Fix 4 in issue #1983: a failing handler must be logged but must not
       // propagate by default, so coverage failures do not abort the test run.
-      var bag = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
-      bag?.Add(new((_, _) => throw new InvalidOperationException("simulated flush failure")));
+      if (AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey) is List<EventHandler> handlers)
+      {
+        lock (handlers)
+        {
+          handlers.Add(new((_, _) => throw new InvalidOperationException("simulated flush failure")));
+        }
+      }
 
       _dataCollector.TestSessionEnd(new TestSessionEndArgs());
     }
@@ -66,8 +76,13 @@ namespace Coverlet.Collector.Tests.DataCollection
         collector.Initialize(new Mock<IDataCollectionSink>().Object);
 
         bool handlerCalled = false;
-        var bag = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
-        bag?.Add(new((_, _) => { handlerCalled = true; }));
+        if (AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey) is List<EventHandler> handlers)
+        {
+          lock (handlers)
+          {
+            handlers.Add(new((_, _) => { handlerCalled = true; }));
+          }
+        }
 
         collector.TestSessionEnd(new TestSessionEndArgs());
 
@@ -90,8 +105,13 @@ namespace Coverlet.Collector.Tests.DataCollection
         var collector = new CoverletInProcDataCollector();
         collector.Initialize(new Mock<IDataCollectionSink>().Object);
 
-        var bag = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
-        bag?.Add(new((_, _) => throw new InvalidOperationException("simulated flush failure")));
+        if (AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey) is List<EventHandler> handlers)
+        {
+          lock (handlers)
+          {
+            handlers.Add(new((_, _) => throw new InvalidOperationException("simulated flush failure")));
+          }
+        }
 
         Assert.Throws<CoverletDataCollectorException>(() => collector.TestSessionEnd(new TestSessionEndArgs()));
       }

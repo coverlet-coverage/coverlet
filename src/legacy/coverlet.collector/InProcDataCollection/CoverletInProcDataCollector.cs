@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Coverlet.Collector.Utilities;
 using Coverlet.Core.Instrumentation;
@@ -52,10 +52,10 @@ namespace Coverlet.Collector.DataCollection
       _eqtTrace = new TestPlatformEqtTrace();
       _eqtTrace.Verbose("Initialize CoverletInProcDataCollector");
 
-      // Pre-create the registry bag before any instrumented assembly is loaded.
+      // Pre-create the registry list before any instrumented assembly is loaded.
       AppDomain.CurrentDomain.SetData(
           ModuleTrackerTemplate.ModuleTrackerRegistryKey,
-          new ConcurrentBag<EventHandler>());
+          new List<EventHandler>());
     }
 
     public void TestCaseEnd(TestCaseEndArgs testCaseEndArgs)
@@ -75,11 +75,16 @@ namespace Coverlet.Collector.DataCollection
       }
 
       // Use the AppDomain registry populated by RegisterUnloadEvents at module-load time.
-      var registeredHandlers = (ConcurrentBag<EventHandler>)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
-      if (registeredHandlers is null)
+      if (AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey) is not List<EventHandler> registeredHandlers)
         return;
 
-      foreach (EventHandler handler in registeredHandlers)
+      EventHandler[] handlersSnapshot;
+      lock (registeredHandlers)
+      {
+        handlersSnapshot = [.. registeredHandlers];
+      }
+
+      foreach (EventHandler handler in handlersSnapshot)
       {
         string assemblyName = handler.Method?.DeclaringType?.Assembly?.FullName ?? "(unknown)";
         try

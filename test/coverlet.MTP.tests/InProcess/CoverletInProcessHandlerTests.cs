@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Concurrent;
 using Coverlet.Core.Instrumentation;
 using Coverlet.MTP.EnvironmentVariables;
 using Microsoft.Testing.Platform.Extensions.TestHost;
@@ -351,7 +350,7 @@ public class CoverletInProcessHandlerTests : IDisposable
     var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
     var mockSessionContext = new Mock<ITestSessionContext>();
     mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-session-789"));
-    AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, new ConcurrentBag<EventHandler>());
+    AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, new List<EventHandler>());
 
     try
     {
@@ -386,7 +385,7 @@ public class CoverletInProcessHandlerTests : IDisposable
     mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-exception-session"));
 
     // Inject a failing handler into the registry
-    var registry = new ConcurrentBag<EventHandler>
+    var registry = new List<EventHandler>
     {
         (s, e) => throw new InvalidOperationException("Test exception")
     };
@@ -424,7 +423,7 @@ public class CoverletInProcessHandlerTests : IDisposable
     mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-no-log-session"));
 
     // Inject a failing handler into the registry
-    var registry = new ConcurrentBag<EventHandler>
+    var registry = new List<EventHandler>
     {
         (s, e) => throw new InvalidOperationException("Test exception")
     };
