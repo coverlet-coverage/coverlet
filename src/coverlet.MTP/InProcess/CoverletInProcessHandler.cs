@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using Coverlet.MTP.EnvironmentVariables;
 using Coverlet.Core.Instrumentation;
@@ -64,10 +63,10 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
     {
       _logger.LogDebug($"[Coverlet.MTP.InProcess] Test session starting: {testSessionContext.SessionUid}");
 
-      // Pre-create the registry bag before any instrumented assembly is loaded.
+      // Pre-create the registry list before any instrumented assembly is loaded.
       AppDomain.CurrentDomain.SetData(
           ModuleTrackerTemplate.ModuleTrackerRegistryKey,
-          new ConcurrentBag<EventHandler>());
+          new List<EventHandler>());
     }
     return Task.CompletedTask;
   }
@@ -98,11 +97,18 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
   {
     int flushedCount = 0;
 
-    var registeredHandlers = (ConcurrentBag<EventHandler>?)AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey);
-    if (registeredHandlers is null)
+    if (AppDomain.CurrentDomain.GetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey) is not List<EventHandler> registeredHandlers)
+    {
       return;
+    }
 
-    foreach (EventHandler handler in registeredHandlers)
+    EventHandler[] handlersSnapshot;
+    lock (registeredHandlers)
+    {
+      handlersSnapshot = [.. registeredHandlers];
+    }
+
+    foreach (EventHandler handler in handlersSnapshot)
     {
       string assemblyName = handler.Method?.DeclaringType?.Assembly?.GetName().Name ?? "(unknown)";
       try

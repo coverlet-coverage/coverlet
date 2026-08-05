@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix When using "is" with "or" in pattern matching, branch coverage is lower than normal [#1979](https://github.com/coverlet-coverage/coverlet/pull/1979)
 - Fix silent zero coverage on .NET Framework since 8.0.0 [#1985](https://github.com/coverlet-coverage/coverlet/pull/1985)
 - Fix Race condition between ProcessExit hit-file write and out-of-proc coverage read causes EndOfStreamException [#1987](https://github.com/coverlet-coverage/coverlet/pull/1987) [#1988](https://github.com/coverlet-coverage/coverlet/pull/1988)
+- Fix Regression TypeInitializationException when targeting .NET Framework - Could not load type 'System.Collections.Concurrent.ConcurrentBag [#2010](https://github.com/coverlet-coverage/coverlet/pull/2010)
 
 ## Release date 2026-05-18
 
