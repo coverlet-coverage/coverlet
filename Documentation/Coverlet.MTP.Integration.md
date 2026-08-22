@@ -196,6 +196,9 @@ The `testconfig.json` format is the standard configuration file for Microsoft Te
 </ItemGroup>
 ```
 
+> [!TIP]
+> The `ItemGroup` is not required when the `testconfig.json` file is located in the test project folder.
+
 #### coverlet.mtp.appsettings.json (Legacy)
 
 The legacy `coverlet.mtp.appsettings.json` format is still supported for backward compatibility. If both `testconfig.json` and `coverlet.mtp.appsettings.json` exist, `testconfig.json` takes priority.
@@ -282,7 +285,7 @@ Priority 4: Built-in defaults (only when no configuration file exists)
 1. `[appname].testconfig.json` (e.g., `MyTests.testconfig.json`)
 2. `testconfig.json`
 
-> [!NOTE]
+> [!TIP]
 > See also: [Use a centralized testconfig.json](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-config#use-a-centralized-testconfigjson)
 
 #### Alternative: MSBuild Property for Command Line Arguments
