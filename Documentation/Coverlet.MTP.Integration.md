@@ -282,6 +282,9 @@ Priority 4: Built-in defaults (only when no configuration file exists)
 1. `[appname].testconfig.json` (e.g., `MyTests.testconfig.json`)
 2. `testconfig.json`
 
+> [!NOTE]
+> See also: [Use a centralized testconfig.json](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-config#use-a-centralized-testconfigjson)
+
 #### Alternative: MSBuild Property for Command Line Arguments
 
 If you prefer to define coverlet options in your `.csproj` file and leverage MSBuild variables (like `$(AssemblyName)`), you can use the `TestingPlatformCommandLineArguments` property:
