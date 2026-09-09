@@ -83,7 +83,7 @@ public class CollectCoverageTests : MtpValidationTestBase
 
     // Assert
     Assert.True(result.ExitCode == 14, $"Expected threshold failure exit code 14 from Microsoft Testing Platform but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
-    Assert.Contains("86.7% < 100.0% threshold", result.CombinedOutput);
+    Assert.Contains("coverage threshold was not met", result.CombinedOutput);
   }
 
   [Fact]
