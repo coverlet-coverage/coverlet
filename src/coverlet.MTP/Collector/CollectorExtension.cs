@@ -508,7 +508,13 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     foreach (string generatedReport in generatedReports)
     {
       cancellation.ThrowIfCancellationRequested();
-      string reportFormat = Path.GetExtension(generatedReport).TrimStart('.');
+      string fileName = Path.GetFileName(generatedReport);
+      string fileNameLower = fileName.ToLowerInvariant();
+      string reportFormat = fileNameLower.Contains(".cobertura.") ? "cobertura"
+        : fileNameLower.Contains(".opencover.") ? "opencover"
+        : fileNameLower.EndsWith(".info", StringComparison.Ordinal) ? "lcov"
+        : fileNameLower.EndsWith(".json", StringComparison.Ordinal) ? "json"
+        : Path.GetExtension(fileNameLower).TrimStart('.');
       if (string.IsNullOrWhiteSpace(reportFormat))
       {
         continue;
@@ -702,7 +708,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     // Display console-type report output (e.g. teamcity) directly to the output device
     await DisplayConsoleReportOutputsAsync(consoleOutputs, cancellation);
 
-    // Exitcode `CoverageThresholdFailed = 14` shall only override otherwise successful test runs.
+    // Coverage threshold exit-code behavior is owned by Microsoft Testing Platform.
     if (_configuration.Threshold.HasValue)
     {
       ThresholdStatistic thresholdStat = _configuration.ThresholdStat;
@@ -712,18 +718,13 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       ThresholdTypeFlags belowThreshold = result.GetThresholdTypesBelowThreshold(thresholdValues, thresholdStat);
       if (belowThreshold != ThresholdTypeFlags.None)
       {
-        int currentExitCode = Environment.ExitCode != 0 ? Environment.ExitCode : testHostExitCode;
-        if (currentExitCode == 0)
+        if (IsCoverageThresholdExitCodeIgnored())
         {
-          if (IsCoverageThresholdExitCodeIgnored())
-          {
-            _logger.LogInformation("Coverage thresholds not met, but exit code 14 is ignored by --ignore-exit-code.");
-          }
-          else
-          {
-            _logger.LogError("Coverage thresholds not met. Setting exit code for Microsoft Testing Framework to 14.");
-            Environment.ExitCode = 14;
-          }
+          _logger.LogInformation("Coverage thresholds not met, but exit code 14 is ignored by --ignore-exit-code.");
+        }
+        else
+        {
+          _logger.LogError("Coverage thresholds not met.");
         }
       }
     }

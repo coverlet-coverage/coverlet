@@ -66,6 +66,27 @@ public class CollectCoverageTests : MtpValidationTestBase
   }
 
   [Fact]
+  public async Task CoverageThresholdFailure_UsesMtpManagedExitCode()
+  {
+    // Arrange
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProject(testName, includeSimpleTest: true, includeMultipleClasses: true);
+    await BuildProject(testProject.SolutionPath);
+
+    // Act
+    var result = await RunTestsWithCoverage(
+      testProject,
+      "--coverlet --coverlet-output-format json --coverlet-threshold 100 --coverlet-threshold-type line --coverlet-threshold-stat total",
+      testName);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert
+    Assert.True(result.ExitCode == 14, $"Expected threshold failure exit code 14 from Microsoft Testing Platform but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+    Assert.Contains("86.7% < 100.0% threshold", result.CombinedOutput);
+  }
+
+  [Fact]
   public async Task CoverageWithFormat_GeneratesCorrectOutputFormat()
   {
     // Arrange
@@ -1411,6 +1432,7 @@ public class StringHelperTests
       11 => "test process will exit if dependent process exits",
       12 => "test session was unable to run because the client does not support any of the supported protocol versions",
       13 => "exceeded number of maximum failed tests",
+      14 => "coverage threshold was not met",
       _ => "unrecognized exit code"
     };
 

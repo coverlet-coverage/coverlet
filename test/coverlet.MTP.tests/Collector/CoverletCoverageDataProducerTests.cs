@@ -55,7 +55,7 @@ public class CoverletCoverageDataProducerTests
   [InlineData("cobertura", CoverageReportFormat.Cobertura, null)]
   [InlineData("opencover", CoverageReportFormat.OpenCover, null)]
   [InlineData("lcov", CoverageReportFormat.Lcov, null)]
-  [InlineData("json", CoverageReportFormat.Custom, "json")]
+  [InlineData("json", CoverageReportFormat.Custom, "coverlet.json")]
   public void CreateReportMessageMapsKnownFormats(string reportFormat, CoverageReportFormat expectedFormat, string? expectedCustomFormat)
   {
     var producer = new CoverletCoverageDataProducer();

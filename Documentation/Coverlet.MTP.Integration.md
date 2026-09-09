@@ -88,8 +88,8 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-does-not-return-attribute <attribute>` | Attributes that mark methods as not returning. Can be specified multiple times. (default: `none`) |
 | `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. (default: `None`) |
 | `--coverlet-threshold <threshold>` | Exits with error if the coverage % is below value |
-| `--coverlet-threshold-type <branch\line\|method>` | Coverage type to apply the threshold to. [default: `line`, `branch`, `method`] |
-| `--coverlet-threshold-stat <Average\|Minimum\|Total>` | Coverage statistic used to enforce the threshold value. [default: Minimum] |
+| `--coverlet-threshold-type <line\|branch\|method>` | Coverage type(s) to apply the threshold to. Can be specified multiple times or as a comma-separated list. (default: `line`) |
+| `--coverlet-threshold-stat <Average\|Minimum\|Total>` | Coverage statistic used to enforce the threshold value. (default: `Minimum`) |
 
 > [!TIP]
 > If you encounter instrumentation failures like "The process cannot access the file ... because it is being used by another process", try setting `--coverlet-exclude-assemblies-without-sources MissingAll` (or in a config file: `"ExcludeAssembliesWithoutSources": "MissingAll"`) to skip assemblies without sources and reduce access conflicts.

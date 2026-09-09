@@ -180,7 +180,7 @@ internal sealed class CoverletCoverageDataProducer : IDataProducer
       "cobertura" => (CoverageReportFormat.Cobertura, null),
       "opencover" => (CoverageReportFormat.OpenCover, null),
       "lcov" => (CoverageReportFormat.Lcov, null),
-      "json" => (CoverageReportFormat.Custom, "json"),
+      "json" => (CoverageReportFormat.Custom, "coverlet.json"),
       _ => (CoverageReportFormat.Custom, reportFormat),
     };
   }

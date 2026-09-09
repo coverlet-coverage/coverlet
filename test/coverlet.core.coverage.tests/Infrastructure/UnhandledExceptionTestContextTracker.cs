@@ -12,7 +12,7 @@ namespace Coverlet.Core.Tests.Infrastructure;
 internal static class UnhandledExceptionTestContextTracker
 {
   private static readonly AsyncLocal<TestExecutionContext> s_currentContext = new();
-  private static string s_lastKnownContext;
+  private static string s_lastKnownContext = string.Empty;
 
   public static void Set(IXunitTest test)
   {
