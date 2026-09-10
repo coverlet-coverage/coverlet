@@ -241,7 +241,6 @@ namespace Coverlet.Core.Tests
       try
       {
         string modulePath = Path.Combine(tempDirectory, "MissingDep.dll");
-        string pdbPath = Path.Combine(tempDirectory, "MissingDep.pdb");
 
         var assemblyName = new AssemblyNameDefinition("MissingDep", new Version(1, 0, 0, 0));
         using (AssemblyDefinition assemblyDefinition = AssemblyDefinition.CreateAssembly(assemblyName, "MissingDep", ModuleKind.Dll))
