@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -12,6 +13,8 @@ using Coverlet.Core.Helpers;
 using Coverlet.Core.Instrumentation;
 using Coverlet.Core.Symbols;
 using Moq;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using Xunit;
 
 namespace Coverlet.Core.Tests
@@ -228,6 +231,81 @@ namespace Coverlet.Core.Tests
 
       // Assert
       Assert.Equal("other/coverlet.core/Coverage.cs", result);
+    }
+
+    [Fact]
+    public void PrepareModules_DoesNotSkipWhenDependencyIsMissing()
+    {
+      string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+      Directory.CreateDirectory(tempDirectory);
+
+      try
+      {
+        string modulePath = Path.Combine(tempDirectory, "MissingDep.dll");
+        string pdbPath = Path.Combine(tempDirectory, "MissingDep.pdb");
+
+        var assemblyName = new AssemblyNameDefinition("MissingDep", new Version(1, 0, 0, 0));
+        using (AssemblyDefinition assemblyDefinition = AssemblyDefinition.CreateAssembly(assemblyName, "MissingDep", ModuleKind.Dll))
+        {
+          TypeDefinition classType = new TypeDefinition("MissingDep", "TestClass", TypeAttributes.Public | TypeAttributes.Sealed);
+          MethodDefinition mainMethod = new MethodDefinition("Add", MethodAttributes.Public | MethodAttributes.Static, assemblyDefinition.MainModule.TypeSystem.Int32);
+          mainMethod.Parameters.Add(new ParameterDefinition("left", ParameterAttributes.None, assemblyDefinition.MainModule.TypeSystem.Int32));
+          mainMethod.Parameters.Add(new ParameterDefinition("right", ParameterAttributes.None, assemblyDefinition.MainModule.TypeSystem.Int32));
+
+          ILProcessor ilProc = mainMethod.Body.GetILProcessor();
+          ilProc.Append(ilProc.Create(OpCodes.Ldarg_0));
+          ilProc.Append(ilProc.Create(OpCodes.Ldarg_1));
+          ilProc.Append(ilProc.Create(OpCodes.Add));
+          ilProc.Append(ilProc.Create(OpCodes.Ret));
+
+          classType.Methods.Add(mainMethod);
+          assemblyDefinition.MainModule.Types.Add(classType);
+
+          assemblyDefinition.MainModule.AssemblyReferences.Add(new AssemblyNameReference("Definitely.Missing.Dependency", new Version(1, 0, 0, 0)));
+          assemblyDefinition.Write(modulePath, new WriterParameters { WriteSymbols = true, SymbolWriterProvider = new PortablePdbWriterProvider() });
+        }
+
+        var loggerMock = new Mock<ILogger>();
+        var fileSystem = new FileSystem();
+        var instrumentationHelper = new InstrumentationHelper(
+            new ProcessExitHandler(),
+            new RetryHelper(),
+            fileSystem,
+            loggerMock.Object,
+            new SourceRootTranslator(modulePath, loggerMock.Object, fileSystem, new AssemblyAdapter()));
+
+        var parameters = new CoverageParameters
+        {
+          IncludeFilters = [],
+          IncludeDirectories = [],
+          ExcludeFilters = [],
+          ExcludedSourceFiles = [],
+          ExcludeAttributes = [],
+          IncludeTestAssembly = true,
+          SingleHit = false,
+          MergeWith = string.Empty,
+          UseSourceLink = false,
+          ExcludeAssembliesWithoutSources = "None"
+        };
+
+        var coverage = new Coverage(
+            tempDirectory,
+            parameters,
+            loggerMock.Object,
+            instrumentationHelper,
+            fileSystem,
+            new SourceRootTranslator(loggerMock.Object, fileSystem),
+            new CecilSymbolHelper());
+
+        CoveragePrepareResult result = coverage.PrepareModules();
+
+        Assert.NotEmpty(result.Results);
+        Assert.Single(result.Results);
+      }
+      finally
+      {
+        Directory.Delete(tempDirectory, true);
+      }
     }
   }
 

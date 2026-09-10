@@ -147,7 +147,18 @@ namespace Coverlet.Core
         }
 
         InstrumentationPreflightResult preflightResult = instrumenter.Preflight();
-        if (preflightResult.Status != InstrumentationPreflightStatus.Ready)
+        if (preflightResult.Status == InstrumentationPreflightStatus.Locked)
+        {
+          skippedByPreflight++;
+          _logger.LogWarning($"Skipping module '{module}': {preflightResult.Status}. {preflightResult.Reason}");
+          continue;
+        }
+
+        if (preflightResult.Status == InstrumentationPreflightStatus.UnresolvableDependencies)
+        {
+          _logger.LogVerbose($"Preflight for module '{module}' reported {preflightResult.Status}. {preflightResult.Reason}");
+        }
+        else if (preflightResult.Status != InstrumentationPreflightStatus.Ready)
         {
           skippedByPreflight++;
           _logger.LogWarning($"Skipping module '{module}': {preflightResult.Status}. {preflightResult.Reason}");
@@ -179,7 +190,7 @@ namespace Coverlet.Core
         _logger.LogWarning(
             $"No modules were instrumented. Selected: {validModules.Count}, Instrumented: 0 " +
             $"(skipped - not eligible: {skippedByCanInstrument}, preflight: {skippedByPreflight}, exceptions: {instrumentationExceptions}). " +
-            "Most common causes: missing PDB/local sources, unresolved dependencies, or locked files. " +
+            "Most common causes: missing PDB/local sources or locked files. " +
             "Run with higher verbosity for details.");
       }
 
