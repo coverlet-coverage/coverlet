@@ -297,8 +297,9 @@ namespace Coverlet.Core.Tests
 
         CoveragePrepareResult result = coverage.PrepareModules();
 
-        Assert.NotEmpty(result.Results);
         Assert.Single(result.Results);
+        loggerMock.Verify(l => l.LogVerbose(It.Is<string>(v => v.Contains("reported UnresolvableDependencies", StringComparison.Ordinal))), Times.Once);
+        loggerMock.Verify(l => l.LogWarning(It.Is<string>(v => v.Contains("UnresolvableDependencies", StringComparison.Ordinal))), Times.Never);
       }
       finally
       {
