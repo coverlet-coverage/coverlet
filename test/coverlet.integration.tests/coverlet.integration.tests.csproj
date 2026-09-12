@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks Condition="'$(LEGACY)' == ''">$(NetCurrent);net9.0;$(NetMinimum)</TargetFrameworks>
     <TargetFrameworks Condition="'$(LEGACY)' != ''">$(NetCurrent);$(NetMinimum)</TargetFrameworks>
@@ -16,6 +16,8 @@
   <ItemGroup>
     <PackageReference Condition="'$(LEGACY)' != ''" Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Condition="'$(LEGACY)' == ''" Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftNetRuntimeVersion)" />
+    <PackageReference Include="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)"/>
     <!-- Microsoft.TestPlatform.TestHost depends on Newtonsoft.Json -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNetRuntimeVersion)" />

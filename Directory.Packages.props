@@ -54,8 +54,9 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="MSTest" Version="4.2.3" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.2.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="MSTest" Version="4.4.0" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.4.0" />
     <!-- Nuget -->
     <PackageVersion Include="NuGet.Frameworks" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
