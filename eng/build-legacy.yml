@@ -52,6 +52,7 @@ steps:
   env:
     MSBUILDDISABLENODEREUSE: 1
     COVERLET_EXPERIMENTAL_AUTOPROP_BACKING_FIELD_CACHE: 1
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
 - task: PublishTestResults@2
   inputs:
