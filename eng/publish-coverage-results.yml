@@ -26,21 +26,21 @@ steps:
   artifact: CoverageResults_$(Agent.Os)_$(BuildConfiguration)
   condition: ${{parameters.condition}}
 
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage'
-  condition: ${{parameters.condition}}
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageReport/Cobertura.xml'
-    reportDirectory: '$(Build.SourcesDirectory)/artifacts/CoverageReport'
-    failIfCoverageEmpty: ${{parameters.breakBuild}}
-
-#- task: PublishCodeCoverageResults@2
+#- task: PublishCodeCoverageResults@1
 #  displayName: 'Publish code coverage'
 #  condition: ${{parameters.condition}}
 #  inputs:
+#    codeCoverageTool: Cobertura
 #    summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageReport/Cobertura.xml'
+#    reportDirectory: '$(Build.SourcesDirectory)/artifacts/CoverageReport'
 #    failIfCoverageEmpty: ${{parameters.breakBuild}}
+
+- task: PublishCodeCoverageResults@2
+  displayName: 'Publish code coverage'
+  condition: ${{parameters.condition}}
+  inputs:
+    summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageReport/Cobertura.xml'
+    failIfCoverageEmpty: ${{parameters.breakBuild}}
 
 #- task: reportgenerator@5
 #  displayName: ReportGenerator
@@ -48,5 +48,5 @@ steps:
 #    reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
 #    reporttypes: 'HtmlInline_AzurePipelines_Dark;Cobertura'
 #    targetdir: 'coveragereport'
-    publishCodeCoverageResults: true
+#    publishCodeCoverageResults: true
 
