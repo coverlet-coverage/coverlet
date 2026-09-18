@@ -8,22 +8,24 @@ More information is available here:
 - [Microsoft.Testing.Platform extensibility](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-architecture-extensions)
 - [Migrate to MTP mode of dotnet test](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test#migrate-to-mtp-mode-of-dotnet-test)
 
-coverlet.MTP implements coverlet.collector functionality for Microsoft.Testing.Platform.
+`Codebelt.Coverlet.MTP` packages Coverlet's Microsoft Testing Platform integration while preserving the implementation assembly name `coverlet.MTP.dll` for extension discovery.
 
 ## Supported Runtime Versions
 
-Since version `8.0.0`:
+This package provides explicit dependency groups for:
 
-- .NET Core >= 8.0
+- `netstandard2.0`
+- `net9.0`
+- `net10.0`
 
 ## Quick Start
 
 ### Installation
 
-Add the `coverlet.MTP` package to your test project:
+Add the `Codebelt.Coverlet.MTP` package to your test project:
 
 ```bash
-dotnet add package coverlet.MTP
+dotnet add package Codebelt.Coverlet.MTP
 ```
 
 A sample project file looks like:
@@ -31,7 +33,7 @@ A sample project file looks like:
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
    <PropertyGroup>
-      <TargetFramework>net8.0</TargetFramework>
+      <TargetFramework>net10.0</TargetFramework>
       <OutputType>Exe</OutputType>
       <!-- Enable Microsoft Testing Platform -->
       <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -41,7 +43,7 @@ A sample project file looks like:
       <!-- Use xunit.v3.mtp-v2 for MTP v2.x compatibility -->
       <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.1" />
       <PackageReference Include="Microsoft.Testing.Platform" Version="2.2.1" />
-      <PackageReference Include="coverlet.MTP" Version="8.0.0" />
+      <PackageReference Include="Codebelt.Coverlet.MTP" Version="CURRENT_VERSION" />
    </ItemGroup>
 </Project>
 ```
@@ -64,7 +66,7 @@ After the test run, a `coverage.json` file containing the results will be genera
 
 ## Command Line Options
 
-The `coverlet.MTP` extension provides the following command line options. To see all available options, run:
+The `Codebelt.Coverlet.MTP` extension provides the following command line options. To see all available options, run:
 
 ```bash
 dotnet exec <test-assembly.dll> --help
@@ -419,7 +421,7 @@ dotnet exec TestProject.dll --coverlet --coverlet-exclude-by-file "**/Generated/
 
 ## How It Works
 
-The `coverlet.MTP` extension integrates with the Microsoft Testing Platform using the extensibility model:
+The `Codebelt.Coverlet.MTP` extension integrates with the Microsoft Testing Platform using the extensibility model:
 
 1. **Test Host Controller Extension**: Implements `ITestHostProcessLifetimeHandler` to instrument assemblies before tests run and collect coverage after tests complete.
 
@@ -432,20 +434,9 @@ The `coverlet.MTP` extension integrates with the Microsoft Testing Platform usin
    - Reads recorded hit information
    - Generates coverage report in the specified format(s)
 
-## Comparison with coverlet.collector (VSTest)
-
-| Feature | coverlet.MTP | coverlet.collector |
-| :-------- | :------------- | :------------------- |
-| Test Platform | Microsoft Testing Platform | VSTest |
-| Configuration | Command line options | runsettings file |
-| | coverlet.mtp.appsettings.json | |
-| Default Format | JSON | Cobertura |
-
 ## Known Limitations
 
-- Threshold validation is not yet supported (planned for future releases)
-- Report merging is not yet supported (use external tools like `dotnet-coverage` or `reportgenerator`)
-- **`--coverlet-include-test-assembly` may be accepted, but the MTP test assembly itself cannot be instrumented**: In the MTP model the test assembly is also the controller process. Coverlet uses static (ahead-of-time) instrumentation and must rewrite the binary on disk before it is loaded. Because the controller executable is already in use when instrumentation runs, attempting to rewrite that assembly causes instrumentation of the test/controller assembly to fail. Coverlet logs a warning for that module and continues processing other eligible modules; it does not fail silently. This is a fundamental architectural constraint of the MTP in-process model, not a bug. See [issue #1911](https://github.com/coverlet-coverage/coverlet/issues/1911) for details. Use coverlet.collector (VSTest) or coverlet.msbuild if you need to measure coverage of the test assembly itself.
+- **`--coverlet-include-test-assembly` may be accepted, but the MTP test assembly itself cannot be instrumented**: In the MTP model the test assembly is also the controller process. Coverlet uses static (ahead-of-time) instrumentation and must rewrite the binary on disk before it is loaded. Because the controller executable is already in use when instrumentation runs, attempting to rewrite that assembly causes instrumentation of the test/controller assembly to fail. Coverlet logs a warning for that module and continues processing other eligible modules; it does not fail silently. This is a fundamental architectural constraint of the MTP in-process model, not a bug. See upstream issue [coverlet-coverage/coverlet#1911](https://github.com/coverlet-coverage/coverlet/issues/1911) for details.
 
 > [!TIP]
 > **Merging coverage files from multiple test runs:**
@@ -494,7 +485,7 @@ flowchart LR
     style TestHost fill:#e6ffe6,stroke:#009900,stroke-width:2px
 ```
 
-And here's a sequence diagram showing the coverlet.MTP flow:
+And here's a sequence diagram showing the Codebelt.Coverlet.MTP flow:
 
 ```mermaid
 sequenceDiagram
@@ -559,7 +550,7 @@ set COVERLET_MTP_DEBUG=1 dotnet exec TestProject.dll --coverlet
 
 ### Enable Debugger Launch
 
-To launch a debugger when coverlet.MTP initializes:
+To launch a debugger when Codebelt.Coverlet.MTP initializes:
 
 Windows:
 
@@ -575,7 +566,7 @@ export COVERLET_MTP_DEBUG=1
 
 ### Wait for Debugger Attach
 
-To make coverlet.MTP wait for a debugger to attach (Windows):
+To make Codebelt.Coverlet.MTP wait for a debugger to attach (Windows):
 
 ```shell
 set COVERLET_MTP_DEBUG_WAIT=1
@@ -650,13 +641,6 @@ dotnet test --coverlet --diagnostic --diagnostic-verbosity Trace
 
 ## Requirements
 
-- .NET 8.0 SDK or newer
+- .NET 9.0 SDK or newer for `net9.0` projects; .NET 10.0 SDK or newer for `net10.0` projects
 - Microsoft.Testing.Platform 2.0.0 or newer
 - Test framework with MTP support (e.g., xUnit v3 (xunit.v3.mtp-v2), MSTest v3, NUnit with MTP adapter)
-
-## Related Documentation
-
-- [VSTest Integration](VSTestIntegration.md) - For VSTest-based projects using `coverlet.collector`
-- [MSBuild Integration](MSBuildIntegration.md) - For MSBuild-based coverage collection
-- [Global Tool](GlobalTool.md) - For standalone coverage collection
-- [Known Issues](KnownIssues.md) - Common issues and workarounds

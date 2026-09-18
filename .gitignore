@@ -302,8 +302,6 @@ __pycache__/
 # DeterministicSourcePaths workaround generated file DeterministicBuild.targets
 .AssemblyAttributes
 DeterministicTest.props
-test/coverlet.integration.determisticbuild/*.txt
-test/coverlet.integration.determisticbuild/runsettings
 
 coverage.json
 coverage.xml
@@ -315,7 +313,6 @@ coverage.*.cobertura.xml
 coverage.*.opencover.xml
 
 FolderProfile.pubxml
-BenchmarkDotNet.Artifacts/
 /NuGet.config
 nuget.config
 *.dmp
@@ -327,3 +324,6 @@ Playground*/
 /Documentation/Issues/
 dotnet-install.sh
 /Documentation/ToDo.txt
+/test/coverlet.MTP.validation.tests/TestProjects/BasicTestProject/.packages/
+/test/coverlet.MTP.validation.tests/TestProjects/BasicTestProject/MTPTest.props
+/test/coverlet.MTP.validation.tests/TestProjects/BasicTestProject/NuGet.config

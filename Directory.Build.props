@@ -2,9 +2,6 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <NetCurrent Condition="'$(LEGACY)' == ''">net10.0</NetCurrent>
-    <NetCurrent Condition="'$(LEGACY)' != ''">net9.0</NetCurrent>
-    <NetMinimum>net8.0</NetMinimum>
     <FullFrameworkTFM>net472</FullFrameworkTFM>
     <!-- enforce CamelCase case string-->
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -22,16 +19,12 @@
     <LangVersion>latest</LangVersion>
     <NoWarn>$(NoWarn);NU1507;NU5105;CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-    </RestoreSources>
     <!--<UsingMicrosoftArtifactsSdk>true</UsingMicrosoftArtifactsSdk>-->
     <!-- https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output -->
     <!-- C:\Program Files\dotnet\sdk\8.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.DefaultOutputPaths.targets -->
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
     <ArtifactsBinOutputName>bin</ArtifactsBinOutputName>
-    <CoverletVersion Condition="'$(CoverletVersion)'==''">8.0.0</CoverletVersion>
     <!-- Breaking change NET 8.0 InformationalVersion with SourceRevisionId -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
@@ -51,21 +44,6 @@
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(IsTestProject)' == 'true' And '$(UseMicrosoftTestingPlatformRunner)' != 'true'">
-    <VSTestLogger Include="trx%3BLogFileName=TestResults-$(TargetFramework)-$(MSBuildProjectName).trx" />
-    <VSTestLogger Include="html%3BLogFileName=TestResults-$(TargetFramework)-$(MSBuildProjectName).html" />
-  </ItemGroup>
-
-  <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' And '$(UseMicrosoftTestingPlatformRunner)' != 'true'">
-    <VSTestResultsDirectory>$(RepoRoot)artifacts/reports/$(Configuration.ToLowerInvariant())</VSTestResultsDirectory>
-    <VSTestLogger>@(VSTestLogger)</VSTestLogger>
-  </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' And '$(UseMicrosoftTestingPlatformRunner)' != 'true'">
-    <VSTestResultsDirectory>$(RepoRoot)artifacts\reports\$(Configuration.ToLowerInvariant())</VSTestResultsDirectory>
-    <VSTestLogger>@(VSTestLogger)</VSTestLogger>
   </PropertyGroup>
 
 </Project>

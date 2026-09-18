@@ -177,8 +177,6 @@ _mockLogger.Verify(x => x.Log(LogLevel.Information, It.Is<string>(s => s.Contain
 When mocking interfaces, **reference actual adapter implementations** in the codebase:
 
 - `src/coverlet.MTP/Logging/CoverletLoggerAdapter.cs` - Shows how to use `Microsoft.Testing.Platform.Logging.ILogger`.
-- `src/coverlet.collector/DataCollection/CoverletLogger.cs` - Shows how to use VSTest platform logger.
-- `src/coverlet.console/Logging/ConsoleLogger.cs` - Shows coverlet's internal `ILogger` implementation.
 - `src/coverlet.core/Abstractions/ILogger.cs` - Coverlet's internal logger interface.
 
 **Example from CoverletLoggerAdapter.cs:**
