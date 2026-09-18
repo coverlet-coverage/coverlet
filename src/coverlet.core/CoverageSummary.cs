@@ -14,7 +14,7 @@ namespace Coverlet.Core
   {
     /// <summary>
     /// Builds a two-section coverage summary string (per-module table followed by total/average table)
-    /// using the same format as coverlet.console and the legacy msbuild task.
+    /// using the same summary format as the upstream Coverlet drivers.
     /// </summary>
     public static string BuildCoverageSummaryTable(Modules modules)
     {

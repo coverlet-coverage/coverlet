@@ -8,7 +8,7 @@ namespace Coverlet.MTP.Diagnostics;
 
 /// <summary>
 /// Provides diagnostic logging for instrumentation process.
-/// Similar to CoverageManager diagnostics in coverlet.collector.
+/// Diagnostics emitted by MTP instrumentation.
 /// </summary>
 internal sealed class InstrumentationDiagnostics
 {

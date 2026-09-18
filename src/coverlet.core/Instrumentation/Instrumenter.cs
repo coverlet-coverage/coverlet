@@ -568,7 +568,7 @@ namespace Coverlet.Core.Instrumentation
     /// <summary>
     /// Returns a stream over the netstandard2.0-compiled <see cref="ModuleTrackerTemplate"/> assembly
     /// that is embedded in coverlet.core. The tracker IL injected into instrumented modules is copied
-    /// from this assembly rather than from the running coverlet.core build, so that a net8.0+ build of
+    /// from this assembly rather than from the running coverlet.core build, so that a modern .NET build of
     /// coverlet.core never injects IL referencing net6+ only BCL types (e.g.
     /// DefaultInterpolatedStringHandler) that cannot be JIT-compiled on .NET Framework.
     /// </summary>

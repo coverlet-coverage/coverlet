@@ -13,7 +13,7 @@ namespace Coverlet.MTP.InProcess;
 /// <summary>
 /// In-process handler that runs inside the test host process.
 /// Responsible for flushing coverage hit data when tests complete.
-/// Similar to CoverletInProcDataCollector from coverlet.collector.
+/// Handles in-process MTP coverage callbacks.
 /// </summary>
 internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
 {

@@ -6,7 +6,7 @@ using Coverlet.Core.Enums;
 namespace Coverlet.MTP.Configuration;
 
 /// <summary>
-/// Constants for coverlet.MTP configuration (mirrors coverlet.collector's CoverletConstants)
+/// Constants for coverlet.MTP configuration.
 /// </summary>
 internal static class CoverletMTPConstants
 {

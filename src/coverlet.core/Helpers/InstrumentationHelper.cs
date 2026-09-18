@@ -288,7 +288,7 @@ namespace Coverlet.Core.Helpers
       }
 
       // Restore the original module - retry up to 10 times, since the destination file could be locked
-      // See: https://github.com/tonerdo/coverlet/issues/25
+      // See: https://github.com/coverlet-coverage/coverlet/issues/25
       Func<TimeSpan> retryStrategy = CreateRetryStrategy();
 
       _retryHelper.Retry(() =>
@@ -323,7 +323,7 @@ namespace Coverlet.Core.Helpers
       _logger.LogVerbose($"RestoreOriginalModules: {_backupList.Count} modules to restore");
 
       // Restore the original module - retry up to 10 times, since the destination file could be locked
-      // See: https://github.com/tonerdo/coverlet/issues/25
+      // See: https://github.com/coverlet-coverage/coverlet/issues/25
       Func<TimeSpan> retryStrategy = CreateRetryStrategy();
 
       foreach (string key in _backupList.Keys.ToList())

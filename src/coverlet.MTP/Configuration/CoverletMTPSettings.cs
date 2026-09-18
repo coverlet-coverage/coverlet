@@ -7,7 +7,7 @@ using Coverlet.Core.Enums;
 namespace Coverlet.MTP.Configuration;
 
 /// <summary>
-/// Coverlet MTP settings (equivalent to coverlet.collector's CoverletSettings)
+/// Coverlet MTP settings.
 /// </summary>
 public class CoverletMTPSettings
 {
