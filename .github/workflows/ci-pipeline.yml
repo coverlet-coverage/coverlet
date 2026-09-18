@@ -1,0 +1,103 @@
+name: Codebelt Coverlet MTP CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: call-build
+    uses: codebeltnet/jobs-dotnet-build/.github/workflows/default.yml@v3
+    with:
+      projects: coverlet.slnx
+      configuration: Release
+      upload-build-artifact-name: build-release
+      timeout-minutes: 45
+
+  test:
+    name: call-test-${{ matrix.os }}-${{ matrix.project_name }}
+    needs: [build]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025, macos-26]
+        project_name: [core, core-coverage, mtp]
+        include:
+          - project_name: core
+            project: test/coverlet.core.tests/coverlet.core.tests.csproj
+          - project_name: core-coverage
+            project: test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj
+          - project_name: mtp
+            project: test/coverlet.MTP.tests/coverlet.MTP.tests.csproj
+    uses: codebeltnet/jobs-dotnet-test/.github/workflows/default.yml@v3
+    with:
+      runs-on: ${{ matrix.os }}
+      projects: ${{ matrix.project }}
+      configuration: Release
+      build: true
+      restore: true
+      download-pattern: build-release
+      timeout-minutes: 45
+
+  pack:
+    name: call-pack
+    needs: [build, test]
+    uses: codebeltnet/jobs-dotnet-pack/.github/workflows/default.yml@v3
+    with:
+      projects: src/coverlet.MTP/coverlet.MTP.csproj
+      configuration: Release
+      version: ${{ needs.build.outputs.version }}
+      download-build-artifact-pattern: build-release
+      upload-packed-artifact-name: NuGet-Release
+      timeout-minutes: 30
+
+  package_validation:
+    name: validate-package-${{ matrix.os }}-${{ matrix.framework }}
+    needs: [pack]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025, macos-26]
+        framework: [net9.0, net10.0]
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: codebeltnet/git-checkout@v1
+
+      - name: Install .NET
+        uses: codebeltnet/install-dotnet@v3
+
+      - name: Download validated package
+        uses: actions/download-artifact@v8
+        with:
+          name: NuGet-Release
+          path: artifacts/package/release
+
+      - name: Run package validation tests
+        shell: pwsh
+        run: dotnet test test/coverlet.MTP.validation.tests/coverlet.MTP.validation.tests.csproj -c Release -f ${{ matrix.framework }} --logger "trx;LogFileName=coverlet.MTP.validation.tests.${{ matrix.framework }}.trx"
+
+  publish_nuget:
+    if: ${{ github.event_name != 'pull_request' && needs.build.result == 'success' && needs.test.result == 'success' && needs.pack.result == 'success' && needs.package_validation.result == 'success' }}
+    name: call-nuget
+    needs: [build, test, pack, package_validation]
+    uses: codebeltnet/jobs-nuget-push/.github/workflows/default.yml@v3
+    with:
+      version: ${{ needs.build.outputs.version }}
+      environment: Production
+      configuration: Release
+      download-build-artifact-name: NuGet-Release
+    permissions:
+      contents: read
+      packages: write
+    secrets:
+      NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}

@@ -1,0 +1,9 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\Codebelt.Coverlet.MTP.props"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\Codebelt.Coverlet.MTP.props')" />
+
+  <ItemGroup>
+    <!-- Register the extension assembly for MTP to discover. The package ID changed; the assembly name intentionally did not. -->
+    <TestingPlatformExtension Include="$(MSBuildThisFileDirectory)..\..\lib\$(TargetFramework)\coverlet.MTP.dll" />
+  </ItemGroup>
+</Project>
