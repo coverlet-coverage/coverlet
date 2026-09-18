@@ -905,7 +905,7 @@ public class SampleClass
 
       Assert.Single(referencedFrameworks);
       Assert.Collection(referencedFrameworks, item => Assert.Equal("Microsoft.NETCore.App", item.Name));
-      Assert.Collection(referencedFrameworks, item => Assert.Equal("8.0.0", item.Version));
+      Assert.Collection(referencedFrameworks, item => Assert.Equal("9.0.0", item.Version));
 
     }
 
@@ -918,9 +918,9 @@ public class SampleClass
 
       Assert.Equal(2, referencedFrameworks.Length);
       Assert.Equal("Microsoft.NETCore.App", referencedFrameworks[0].Name);
-      Assert.Equal("8.0.0", referencedFrameworks[0].Version);
+      Assert.Equal("9.0.0", referencedFrameworks[0].Version);
       Assert.Equal("Microsoft.AspNetCore.App", referencedFrameworks[1].Name);
-      Assert.Equal("8.0.0", referencedFrameworks[1].Version);
+      Assert.Equal("9.0.0", referencedFrameworks[1].Version);
     }
 
     /// <summary>
@@ -1066,7 +1066,7 @@ public class SampleClass
     /// <summary>
     /// Regression test for https://github.com/coverlet-coverage/coverlet/issues/1984
     /// The tracker IL injected into a .NET Framework module must not reference
-    /// System.Runtime.CompilerServices.DefaultInterpolatedStringHandler (a .NET 6+ type). A net8.0+
+    /// System.Runtime.CompilerServices.DefaultInterpolatedStringHandler (a .NET 6+ type). A modern .NET
     /// build of coverlet.core lowers the template's string interpolations to that handler; injecting
     /// it makes the tracker's UnloadModule flush handler fail to JIT on .NET Framework, silently
     /// dropping all coverage while tests still pass. The fix sources the template from an embedded

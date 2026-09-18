@@ -5,6 +5,7 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace Coverlet.Tests.Utils
 {
@@ -24,20 +25,19 @@ namespace Coverlet.Tests.Utils
     private static readonly string s_rel4Parents = s_rel3Parents + s_relParent;
     public static BuildConfiguration GetAssemblyBuildConfiguration()
     {
-#if DEBUG
-      return BuildConfiguration.Debug;
-#endif
-#if RELEASE
-      return BuildConfiguration.Release;
-#endif
-      throw new NotSupportedException($"Build configuration not supported");
+      string? configurationName = typeof(TestUtils).Assembly
+        .GetCustomAttribute<AssemblyConfigurationAttribute>()?.Configuration;
+
+      if (Enum.TryParse(configurationName, ignoreCase: true, out BuildConfiguration configuration))
+      {
+        return configuration;
+      }
+
+      throw new NotSupportedException($"Build configuration '{configurationName}' not supported");
     }
 
     public static string GetAssemblyTargetFramework()
     {
-#if NET8_0
-      return "net8.0";
-#endif
 #if NET9_0
       return "net9.0";
 #endif

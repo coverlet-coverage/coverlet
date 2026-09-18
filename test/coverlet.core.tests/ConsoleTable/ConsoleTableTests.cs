@@ -6,7 +6,7 @@ using System.IO;
 using ConsoleTables;
 using Xunit;
 
-namespace coverlet.msbuild.tasks.tests
+namespace Coverlet.Core.Tests.ConsoleTables
 {
   public class ConsoleTableTests
   {

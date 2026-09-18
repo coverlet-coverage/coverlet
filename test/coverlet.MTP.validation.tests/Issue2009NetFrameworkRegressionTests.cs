@@ -77,6 +77,7 @@ public class Issue2009NetFrameworkRegressionTests : MtpValidationTestBase
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <IsPackable>false</IsPackable>
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
@@ -116,6 +117,7 @@ public class Class1
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>{{NetFrameworkTfm}}</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -134,7 +136,7 @@ public class Class1
   <ItemGroup>
     <PackageReference Include="xunit.v3.mtp-v2" Version="{{MtpPackageVersions.XunitV3}}" />
     <PackageReference Include="Microsoft.Testing.Platform" Version="{{MtpPackageVersions.MicrosoftTestingPlatform}}" />
-    <PackageReference Include="coverlet.MTP" Version="{{coverletMtpVersion}}" />
+    <PackageReference Include="Codebelt.Coverlet.MTP" Version="{{coverletMtpVersion}}" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="{{MtpPackageVersions.MicrosoftTestingPlatform}}" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
       <PrivateAssets>all</PrivateAssets>

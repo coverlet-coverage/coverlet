@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Text;
+using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.MTP.validation.tests;
@@ -36,7 +37,7 @@ public abstract class MtpValidationTestBase
     // ── Package version ──────────────────────────────────────────────────────
 
     /// <summary>
-    /// Resolves the coverlet.MTP package version from locally built artifacts.
+    /// Resolves the Codebelt.Coverlet.MTP package version from locally built artifacts.
     /// Throws if the package directory is missing or contains more than one package.
     /// </summary>
     protected string GetCoverletMtpPackageVersion()
@@ -47,21 +48,21 @@ public abstract class MtpValidationTestBase
                 $"Local packages path '{LocalPackagesPath}' not found. Run 'dotnet pack' first.");
         }
 
-        string[] packages = Directory.GetFiles(LocalPackagesPath, "coverlet.MTP.*.nupkg");
+        string[] packages = Directory.GetFiles(LocalPackagesPath, "Codebelt.Coverlet.MTP.*.nupkg");
         if (packages.Length == 0)
         {
             throw new InvalidOperationException(
-                $"Could not find coverlet.MTP package in '{LocalPackagesPath}'. Run 'dotnet pack' first.");
+                $"Could not find Codebelt.Coverlet.MTP package in '{LocalPackagesPath}'. Run 'dotnet pack' first.");
         }
 
         if (packages.Length > 1)
         {
             throw new InvalidOperationException(
-                $"Found {packages.Length} coverlet.MTP packages in '{LocalPackagesPath}'. Expected exactly one.");
+                $"Found {packages.Length} Codebelt.Coverlet.MTP packages in '{LocalPackagesPath}'. Expected exactly one.");
         }
 
         string filename = Path.GetFileNameWithoutExtension(packages[0]);
-        return filename["coverlet.MTP.".Length..];
+        return filename["Codebelt.Coverlet.MTP.".Length..];
     }
 
     // ── Solution directory helpers ───────────────────────────────────────────
@@ -109,14 +110,44 @@ public abstract class MtpValidationTestBase
     // ── NuGet.config / solution file ─────────────────────────────────────────
 
     /// <summary>
-    /// Writes a <c>NuGet.config</c> that uses the local artifacts folder as the primary feed
-    /// followed by nuget.org.
+    /// Writes local build files that keep generated validation projects isolated from the repository build.
     /// </summary>
     protected void CreateNugetConfig(string solutionPath)
     {
+        string repoRoot = RepoRoot.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)
+            ? RepoRoot
+            : RepoRoot + Path.DirectorySeparatorChar;
+
+        File.WriteAllText(Path.Combine(solutionPath, "Directory.Build.props"), $"""
+            <Project>
+              <PropertyGroup>
+                <RepoRoot>{repoRoot}</RepoRoot>
+                <Configuration Condition=" '$(Configuration)' == '' ">{BuildConfiguration}</Configuration>
+                <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+                <UseArtifactsOutput>true</UseArtifactsOutput>
+                <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+                <RestoreSources>
+                  {LocalPackagesPath};
+                  https://api.nuget.org/v3/index.json;
+                </RestoreSources>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        File.WriteAllText(Path.Combine(solutionPath, "Directory.Packages.props"), """
+            <Project>
+              <PropertyGroup>
+                <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+              </PropertyGroup>
+            </Project>
+            """);
+
         File.WriteAllText(Path.Combine(solutionPath, "NuGet.config"), $"""
             <?xml version="1.0" encoding="utf-8"?>
             <configuration>
+              <config>
+                <add key="globalPackagesFolder" value="{Path.Combine(solutionPath, ".packages")}" />
+              </config>
               <packageSources>
                 <clear />
                 <add key="local" value="{LocalPackagesPath}" />
@@ -172,7 +203,7 @@ public abstract class MtpValidationTestBase
     /// Generates a test project <c>.csproj</c> whose package versions are read from
     /// <c>Directory.Packages.props</c> via <see cref="MtpPackageVersions"/>.
     /// </summary>
-    /// <param name="coverletMtpVersion">The version of the locally built <c>coverlet.MTP</c> package.</param>
+    /// <param name="coverletMtpVersion">The version of the locally built <c>Codebelt.Coverlet.MTP</c> package.</param>
     /// <param name="relativeSutPath">Relative path from the test project to the SUT <c>.csproj</c>.</param>
     /// <param name="additionalNoneItems">
     /// Optional config files that need to be copied to the output directory,
@@ -185,12 +216,13 @@ public abstract class MtpValidationTestBase
     {
         string mtpVersion = MtpPackageVersions.MicrosoftTestingPlatform;
         string xunitVersion = MtpPackageVersions.XunitV3;
+        string targetFramework = TestUtils.GetAssemblyTargetFramework();
         string noneItemGroup = BuildNoneItemGroup(additionalNoneItems);
 
         return $"""
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup>
-                <TargetFramework>net8.0</TargetFramework>
+                <TargetFramework>{targetFramework}</TargetFramework>
                 <LangVersion>12.0</LangVersion>
                 <ImplicitUsings>enable</ImplicitUsings>
                 <Nullable>enable</Nullable>
@@ -204,10 +236,6 @@ public abstract class MtpValidationTestBase
                 <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
                 <DebugType>portable</DebugType>
                 <Deterministic>false</Deterministic>
-                <RestoreSources>
-                  https://api.nuget.org/v3/index.json;
-                  $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
-                </RestoreSources>
               </PropertyGroup>
               <ItemGroup>
                 <ProjectReference Include="{relativeSutPath}" />
@@ -215,7 +243,7 @@ public abstract class MtpValidationTestBase
               <ItemGroup>
                 <PackageReference Include="xunit.v3.mtp-v2" Version="{xunitVersion}" />
                 <PackageReference Include="Microsoft.Testing.Platform" Version="{mtpVersion}" />
-                <PackageReference Include="coverlet.MTP" Version="{coverletMtpVersion}" />
+                <PackageReference Include="Codebelt.Coverlet.MTP" Version="{coverletMtpVersion}" />
                 <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="{mtpVersion}" />
               </ItemGroup>
             {noneItemGroup}</Project>

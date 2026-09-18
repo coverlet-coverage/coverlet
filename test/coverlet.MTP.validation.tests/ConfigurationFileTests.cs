@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.MTP.validation.tests;
@@ -632,7 +633,7 @@ public class ConfigurationFileTests : MtpValidationTestBase
     string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
     File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>{TestUtils.GetAssemblyTargetFramework()}</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -950,13 +951,19 @@ public class StringUtilsTests
   {
     string testAssembly = Path.Combine(testProject.OutputDirectory, $"{TestProjectName}.dll");
 
+    string resultsDirectoryArgs = coverletArgs.Contains("--results-directory", StringComparison.OrdinalIgnoreCase)
+      ? string.Empty
+      : $" --results-directory \"{testProject.OutputDirectory}\"";
+
     // Add diagnostic flags if requested for configuration validation
-    string diagnosticArgs = enableDiagnostics ? " --diagnostic --diagnostic-verbosity trace" : "";
+    string diagnosticArgs = enableDiagnostics
+      ? $" --diagnostic --diagnostic-verbosity trace --diagnostic-output-directory \"{testProject.OutputDirectory}\""
+      : "";
 
     var psi = new ProcessStartInfo
     {
       FileName = "dotnet",
-      Arguments = $"exec \"{testAssembly}\" {coverletArgs}{diagnosticArgs}",
+      Arguments = $"exec \"{testAssembly}\" {coverletArgs}{resultsDirectoryArgs}{diagnosticArgs}",
       UseShellExecute = false,
       RedirectStandardOutput = true,
       RedirectStandardError = true,

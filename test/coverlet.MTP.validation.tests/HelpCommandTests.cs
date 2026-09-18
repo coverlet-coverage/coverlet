@@ -93,7 +93,7 @@ public class HelpCommandTests
     deterministicTestProps.Add(
             new XElement("Project",
                 new XElement("PropertyGroup",
-                    new XElement("coverletMTPVersion", GetPackageVersion("*MTP*.nupkg")))));
+                    new XElement("CodebeltCoverletMTPVersion", GetPackageVersion("Codebelt.Coverlet.MTP.*.nupkg")))));
 
     string csprojPath = Path.Combine(_testProjectPath, SutName + ".csproj");
     XElement csproj = XElement.Load(csprojPath)!;
@@ -445,12 +445,12 @@ public class HelpCommandTests
     string packagesPath = TestUtils.GetPackagePath(
       TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant());
 
-    // Check for coverlet.MTP
-    string[] mtpPackages = Directory.GetFiles(packagesPath, "coverlet.MTP.*.nupkg");
+    // Check for Codebelt.Coverlet.MTP
+    string[] mtpPackages = Directory.GetFiles(packagesPath, "Codebelt.Coverlet.MTP.*.nupkg");
     if (mtpPackages.Length == 0)
     {
       throw new InvalidOperationException(
-        $"coverlet.MTP package not found in '{packagesPath}'.\n" +
+        $"Codebelt.Coverlet.MTP package not found in '{packagesPath}'.\n" +
         $"Run: dotnet pack src/coverlet.MTP -c {_buildConfiguration}");
     }
   }
@@ -546,9 +546,12 @@ public class HelpCommandTests
     
     string nugetConfig = $@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
-  <packageSources>
-    <clear />
-    <add key=""local"" value=""{_localPackagesPath}"" />
+      <config>
+        <add key=""globalPackagesFolder"" value=""{Path.Combine(_testProjectPath, ".packages")}"" />
+      </config>
+      <packageSources>
+        <clear />
+        <add key=""local"" value=""{_localPackagesPath}"" />
     <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
   </packageSources>
 </configuration>";

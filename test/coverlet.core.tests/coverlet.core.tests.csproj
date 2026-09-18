@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetMinimum);$(NetCurrent)</TargetFrameworks>
+    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <DebugType>portable</DebugType>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -87,6 +86,4 @@
     </ItemGroup>
     <Copy SourceFiles="@(ExcludedByAttributeFiles)" DestinationFolder="$(OutputPath)TestAssets" SkipUnchangedFiles="true" />
   </Target>
-
-  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' " />
 </Project>

@@ -1,8 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
+    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -25,14 +24,13 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)\src\coverlet.MTP\coverlet.MTP.csproj">
-      <SetTargetFramework Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) != '.NETCoreApp'">TargetFramework=netstandard2.0</SetTargetFramework>
     </ProjectReference>
     <ProjectReference Include="$(RepoRoot)\src\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- required for code coverage using dotnet command -->
-    <PackageReference Include="Newtonsoft.Json" VersionOverride="13.0.4" />
+    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
   </ItemGroup>
   
@@ -57,5 +55,4 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' "/>
 </Project>

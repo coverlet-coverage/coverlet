@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Xml.Linq;
+using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.MTP.validation.tests;
@@ -11,7 +12,6 @@ namespace Coverlet.MTP.validation.tests;
 /// <summary>
 /// Integration tests for Coverlet Microsoft Testing Platform extension.
 /// These tests verify code instrumentation and coverage data collection using MTP.
-/// Similar to coverlet.integration.tests.Collectors but for Microsoft Testing Platform instead of VSTest.
 /// Uses a separate library project (SUT) referenced by the test project - the typical real-world scenario.
 /// </summary>
 [Collection(nameof(MtpValidationTests))]
@@ -722,7 +722,7 @@ public class CollectCoverageTests : MtpValidationTestBase
     string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
     File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>{TestUtils.GetAssemblyTargetFramework()}</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -865,7 +865,7 @@ public class AsyncDataFetcherTests
     string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
     File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>{TestUtils.GetAssemblyTargetFramework()}</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -991,7 +991,7 @@ public class Issue1843Tests
     string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
     File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>{TestUtils.GetAssemblyTargetFramework()}</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -1390,18 +1390,21 @@ public class StringHelperTests
     {
       throw new FileNotFoundException(
         $"Coverlet MTP extension not found: {coverletMtpDll}\n" +
-        $"The coverlet.MTP NuGet package may not have restored correctly.");
+        $"The Codebelt.Coverlet.MTP NuGet package may not have restored correctly.");
     }
 
     string solutionDir = Path.GetDirectoryName(testProject.SolutionPath)!;
 
     // Exclude coverlet assemblies and test framework assemblies from instrumentation
     string excludeFilters = "--coverlet-exclude \"[coverlet.*]*\" --coverlet-exclude \"[xunit.*]*\" --coverlet-exclude \"[Microsoft.Testing.*]*\"";
+    string resultsDirectoryArgument = arguments.Contains("--results-directory", StringComparison.OrdinalIgnoreCase)
+      ? string.Empty
+      : $" --results-directory \"{testProject.OutputDirectory}\"";
 
     var processStartInfo = new ProcessStartInfo
     {
       FileName = "dotnet",
-      Arguments = $"exec \"{testExecutable}\" {arguments} {excludeFilters} --diagnostic --diagnostic-verbosity trace --diagnostic-output-directory \"{solutionDir}\" --diagnostic-file-prefix {testName}\"",
+      Arguments = $"exec \"{testExecutable}\" {arguments} {excludeFilters}{resultsDirectoryArgument} --diagnostic --diagnostic-verbosity trace --diagnostic-output-directory \"{solutionDir}\" --diagnostic-file-prefix \"{testName}\"",
       RedirectStandardOutput = true,
       RedirectStandardError = true,
       UseShellExecute = false,

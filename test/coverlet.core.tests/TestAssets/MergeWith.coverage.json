@@ -1,6 +1,6 @@
 {
   "coverletsamplelib.integration.template.dll": {
-    "C:\\GitHub\\coverlet\\artifacts\\bin\\coverlet.integration.tests\\debug_net7.0\\01021711\\Program.cs": {
+    "C:\\GitHub\\coverlet\\artifacts\\bin\\coverlet.core.tests\\debug_net9.0\\01021711\\Program.cs": {
       "HelloWorld.Program": {
         "System.Void HelloWorld.Program::Main(System.String[])": {
           "Lines": {
@@ -14,7 +14,7 @@
         }
       }
     },
-    "C:\\GitHub\\coverlet\\artifacts\\bin\\coverlet.integration.tests\\debug_net7.0\\01021711\\DeepThought.cs": {
+    "C:\\GitHub\\coverlet\\artifacts\\bin\\coverlet.core.tests\\debug_net9.0\\01021711\\DeepThought.cs": {
       "Coverlet.Integration.Template.DeepThought": {
         "System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()": {
           "Lines": {
@@ -26,7 +26,7 @@
         }
       }
     },
-    "C:\\GitHub\\coverlet\\artifacts\\bin\\coverlet.integration.tests\\debug_net7.0\\01021711\\TemplateTest.cs": {
+    "C:\\GitHub\\coverlet\\artifacts\\bin\\coverlet.core.tests\\debug_net9.0\\01021711\\TemplateTest.cs": {
       "Coverlet.Integration.Template.TemplateTest": {
         "System.Void Coverlet.Integration.Template.TemplateTest::Answer()": {
           "Lines": {
