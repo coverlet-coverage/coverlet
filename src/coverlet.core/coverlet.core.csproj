@@ -2,38 +2,36 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">net8.0;net9.0;net10.0;netstandard2.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(LEGACY)' != ''">net8.0;net9.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net9.0;net10.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);IDE0057</NoWarn>
   </PropertyGroup>
 
   <!-- Common packages for all target frameworks -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
     <PackageReference Include="Mono.Cecil" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 
-  <!-- Use framework-matching versions of packages with System.Text.Json dependencies to avoid assembly version mismatch at runtime -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="8.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1" />
-    <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
-  </ItemGroup>
+  <!-- Use framework-matching versions for copied runtime dependencies to avoid newer generation assets in older TFM groups. -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="9.0.20" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="9.0.20" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="9.0.20" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="9.0.20" />
     <PackageReference Include="System.Text.Json" VersionOverride="9.0.20" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <!-- System.Text.Json is part of .NET 10 framework - no explicit reference needed -->
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="8.0.1" />
     <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
   </ItemGroup>
 
@@ -42,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="NuGet.Versioning" VersionOverride="6.14.0"/> <!-- latest version that supports netstandard2.0 -->
+    <PackageReference Include="NuGet.Versioning" VersionOverride="6.14.0" /> <!-- latest version that supports netstandard2.0 -->
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Memory" />
@@ -54,7 +52,7 @@
     Embed a netstandard2.0-compiled copy of ModuleTrackerTemplate. The Instrumenter reads the tracker
     IL from this embedded assembly (see Instrumenter.AddCustomModuleTrackerToModule) instead of from
     the running coverlet.core build. That keeps the injected IL safe to JIT on .NET Framework no matter
-    which TFM coverlet.core runs as: a net8.0+ build lowers the template's string interpolations to
+    which TFM coverlet.core runs as: a modern .NET build lowers the template's string interpolations to
     DefaultInterpolatedStringHandler, a type absent on .NET Framework, which silently breaks coverage.
   -->
   <ItemGroup>

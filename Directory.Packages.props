@@ -3,90 +3,47 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
-  <ItemGroup>
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.10.94" />
-  </ItemGroup>
   <PropertyGroup>
-    <!-- .NET 8.0 support -->
-    <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion>
-    <MicrosoftCodeAnalysisVersion>5.9.0</MicrosoftCodeAnalysisVersion>
-    <!-- .NET 8.0 support -->
-    <NugetPackageVersion>7.6.0</NugetPackageVersion>
-    <!-- Test Platform, .NET Test SDK and Object Model  -->
+    <MicrosoftNetRuntimeVersion>10.0.12</MicrosoftNetRuntimeVersion>
     <MicrosoftNETTestSdkVersion>18.10.1</MicrosoftNETTestSdkVersion>
-    <XunitV3Version>4.0.1</XunitV3Version>
-    <XunitRunnerVisualstudioVersion>4.0.0</XunitRunnerVisualstudioVersion>
     <MicrosoftTestingPlatformVersion>2.4.1</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.20.72</MoqVersion>
-    <MicrosoftNetRuntimeVersion>10.0.12</MicrosoftNetRuntimeVersion>
+    <NugetPackageVersion>7.6.0</NugetPackageVersion>
+    <XunitV3Version>4.0.1</XunitV3Version>
+    <XunitRunnerVisualstudioVersion>4.0.0</XunitRunnerVisualstudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
-    <PackageVersion Include="BenchmarkDotNet.TestAdapter" Version="0.15.8" />
-    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.8" />
-    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.7.37220.1" />
-    <!--<PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="17.13.35606.1" />-->
-    <PackageVersion Include="DotNetConfig" Version="1.2.0" />
+    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.11" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildVersion)" />
-    <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
-    <PackageVersion Include="Microsoft.Build.Locator" Version="1.11.2" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.0.0-1.25277.114" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftNetRuntimeVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftNetRuntimeVersion)" />
-    <!-- latest stable version net10.0, net9.0, net8.0 -->
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MicrosoftNetRuntimeVersion)" />
-    <!-- latest stable version net10.0, net9.0, net8.0 -->
-    <!-- For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(MicrosoftNetRuntimeVersion)" />
-    <!--For test TestInstrument_NetstandardAwareAssemblyResolver_PreserveCompilationContext-->
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
-    <PackageVersion Include="Microsoft.Sbom.Targets" Version="4.1.5" />
-    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftNETTestSdkVersion)" />
-    <!-- Microsoft Testing Platform-->
-    <PackageVersion Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
     <PackageVersion Include="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageVersion Include="MSTest" Version="4.4.0" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.4.0" />
-    <!-- Nuget -->
-    <PackageVersion Include="NuGet.Frameworks" Version="$(NugetPackageVersion)" />
-    <PackageVersion Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
-    <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageVersion Include="MinVer" Version="8.0.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Moq" Version="$(MoqVersion)" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageVersion Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
+    <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="ReportGenerator.Core" Version="5.5.11" />
-    <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
-    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.11" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.12" />
-    <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
-    <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
-    <PackageVersion Include="xunit.v3.runner.msbuild" Version="$(XunitV3Version)" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
     <PackageVersion Include="System.Buffers" Version="4.6.1" />
     <PackageVersion Include="System.Collections.Immutable" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="System.Diagnostics.EventLog" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="System.Formats.Asn1" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="System.IO.Pipelines" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="System.Linq.Async" Version="7.0.1" />
     <PackageVersion Include="System.Memory" Version="4.6.3" />
-    <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reflection.Metadata" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
-    <PackageVersion Include="System.Security.AccessControl" Version="6.0.1" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="System.Text.Encoding.CodePages" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="System.Text.Json" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
+    <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
   </ItemGroup>
 </Project>

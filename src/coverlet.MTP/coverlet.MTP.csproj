@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;$(NetMinimum);$(NetCurrent)</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net9.0;net10.0</TargetFrameworks>
     <AssemblyTitle>Coverlet.MTP</AssemblyTitle>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -18,29 +18,28 @@
     <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
     <IsPackable>true</IsPackable>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-    <!-- disable transitive version update and use versions defined in coverlet.core -->
+    <BuildProjectReferences Condition="'$(NoBuild)' == 'true'">false</BuildProjectReferences>
+    <!-- Keep dependency groups explicit; coverlet.core and its runtime assets are copied into this package. -->
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>preview-recommended</AnalysisLevel>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AnalysisLevelInteroperability>true</AnalysisLevelInteroperability>
-    <!-- create SBOM for CI build-->
-    <GenerateSBOM>true</GenerateSBOM>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Title>coverlet.MTP</Title>
-    <PackageId>coverlet.MTP</PackageId>
-    <Authors>tonerdo</Authors>
+    <Title>Codebelt.Coverlet.MTP</Title>
+    <PackageId>Codebelt.Coverlet.MTP</PackageId>
+    <Authors>Codebelt</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/coverlet-coverage/coverlet</PackageProjectUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/codebeltnet/coverlet</PackageProjectUrl>
     <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>Coverlet code coverage for Microsoft Testing Platform</Description>
+    <Description>Cross-platform code coverage for .NET with explicit TFM support and framework-aligned dependencies.</Description>
     <PackageTags>coverage;microsoft-testing-platform;code-coverage</PackageTags>
     <PackageReadmeFile>Coverlet.MTP.Integration.md</PackageReadmeFile>
-    <PackageReleaseNotes>https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/codebeltnet/coverlet/releases</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/codebeltnet/coverlet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
@@ -52,16 +51,28 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Testing.Platform" />
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-    <PackageReference Include="Microsoft.Testing.Platform" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.Extensions.Configuration" VersionOverride="9.0.20" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" VersionOverride="9.0.20" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="9.0.20" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.Configuration" VersionOverride="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" VersionOverride="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1" />
     <PackageReference Include="System.Buffers" />
     <PackageReference Include="System.Memory" />
-    <PackageReference Include="Microsoft.Sbom.Targets">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
