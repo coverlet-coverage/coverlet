@@ -799,6 +799,56 @@ public class SampleClass
     }
 
     [Fact]
+    public void TestInstrument_NetstandardAwareAssemblyResolver_MissingFromCompileLibrariesFallsBackToSharedFramework()
+    {
+      // Regression test for https://github.com/coverlet-coverage/coverlet/issues/2026: an assembly
+      // can be completely absent from every *.deps.json's compileLibraries (e.g. when the
+      // FrameworkReference that pulls it in is declared transitively - on a referenced
+      // project/package - rather than directly on the instrumented module; recent SDKs, observed
+      // starting with the 10.0.4xx feature band, stop listing such assemblies there) yet still be
+      // physically present in a shared framework directory (e.g. Microsoft.AspNetCore.App).
+      // Before the fix, TryWithCustomResolverOnDotNetCore gave up the moment the compileLibraries
+      // lookup missed, without ever asking NetCoreSharedFrameworkResolver directly - even though
+      // that resolver (already part of _compositeResolver, see constructor) could find it on disk.
+      string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+      Directory.CreateDirectory(tempDirectory);
+      try
+      {
+        // No *.deps.json is written here on purpose: TryWithCustomResolverOnDotNetCore's
+        // Directory.GetFiles(..., "*.deps.json") scan then finds nothing, so its "libraries"
+        // dictionary stays empty and the initial lookup misses - exactly the state a caller sees
+        // when their assembly isn't listed in any compileLibraries at all.
+        string modulePath = Path.Combine(tempDirectory, "module.without.deps.json.dll");
+
+        string runtimeVersion = new DirectoryInfo(Path.GetDirectoryName(typeof(object).Assembly.Location)!).Name;
+        string runtimeConfigFile = Path.Combine(tempDirectory, "testhost.runtimeconfig.json");
+        File.WriteAllText(runtimeConfigFile,
+            "{\n" +
+            "  \"runtimeOptions\": {\n" +
+            "    \"tfm\": \"net8.0\",\n" +
+            "    \"framework\": {\n" +
+            "      \"name\": \"Microsoft.NETCore.App\",\n" +
+            $"      \"version\": \"{runtimeVersion}\"\n" +
+            "    }\n" +
+            "  }\n" +
+            "}\n");
+
+        var netstandardResolver = new NetstandardAwareAssemblyResolver(modulePath, _mockLogger.Object);
+        AssemblyName textJsonAssembly = typeof(System.Text.Json.JsonSerializer).Assembly.GetName();
+
+        AssemblyDefinition asm = netstandardResolver.TryWithCustomResolverOnDotNetCore(
+            new AssemblyNameReference(textJsonAssembly.Name, textJsonAssembly.Version));
+
+        Assert.NotNull(asm);
+        Assert.Equal(textJsonAssembly.Name, asm.Name.Name);
+      }
+      finally
+      {
+        Directory.Delete(tempDirectory, true);
+      }
+    }
+
+    [Fact]
     public void TestReachabilityHelper()
     {
       int[] allInstrumentedLines =

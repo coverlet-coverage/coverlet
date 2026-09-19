@@ -400,6 +400,29 @@ namespace Coverlet.Core.Instrumentation
         return asm.Value;
       }
 
+      // The assembly can be missing from every *.deps.json's compileLibraries yet still be
+      // physically present in a shared framework (e.g. Microsoft.AspNetCore.App). This happens
+      // when the FrameworkReference that pulls it in is declared transitively - on a referenced
+      // project/package - rather than directly on the instrumented module; recent SDKs
+      // (observed starting with the 10.0.4xx feature band) stop listing such assemblies in
+      // compileLibraries even though NetCoreSharedFrameworkResolver (already part of
+      // _compositeResolver, see constructor) can still find them on disk. Ask it directly by
+      // name before giving up.
+      try
+      {
+        var sharedFrameworkLibrary = new CompilationLibrary("package", name.Name, "0.0.0.0", null, [name.Name], [], false);
+        string sharedFrameworkPath = sharedFrameworkLibrary.ResolveReferencePaths(_compositeResolver.Value).FirstOrDefault();
+        if (!string.IsNullOrEmpty(sharedFrameworkPath))
+        {
+          _logger.LogVerbose($"'{name}' not listed in any compileLibraries, resolved via shared framework fallback: '{sharedFrameworkPath}'");
+          return AssemblyDefinition.ReadAssembly(sharedFrameworkPath, new ReaderParameters() { AssemblyResolver = this });
+        }
+      }
+      catch (Exception ex)
+      {
+        _logger.LogVerbose($"TryWithCustomResolverOnDotNetCore shared framework fallback exception: {ex}");
+      }
+
       throw new CecilAssemblyResolutionException($"AssemblyResolutionException for '{name}'. Try to add <PreserveCompilationContext>true</PreserveCompilationContext> to test projects </PropertyGroup> or pass '/p:CopyLocalLockFileAssemblies=true' option to the 'dotnet test' command-line", new AssemblyResolutionException(name));
     }
   }
