@@ -124,8 +124,18 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
         return Task.CompletedTask;
       }
 
-      // Load configuration file settings (coverlet.mtp.appsettings.json)
-      CoverletMTPSettings? configFileSettings = LoadConfigurationFileSettings(_testModulePath!);
+      CoverletMTPSettings? configFileSettings;
+
+      if (_commandLineOptions.TryGetOptionArgumentList("--config-file", out string[]? configFilePaths))
+      {
+        // If a config file was passed via the command-line, we'll use that.
+        configFileSettings = TestConfigParser.ParseFromFile(configFilePaths[0], _testModulePath!, _fileSystem);
+      }
+      else
+      {
+        // If not, we'll try loading up a legacy one (coverlet.mtp.appsettings.json) instead.
+        configFileSettings = LoadConfigurationFileSettings(_testModulePath!);
+      }
 
       // Create merged configuration: command-line options take precedence over config file.
       // testAssemblyName is passed so the dynamic exclude-filter logic can omit the test assembly itself.
