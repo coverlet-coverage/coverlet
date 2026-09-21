@@ -77,7 +77,8 @@ namespace Coverlet.Core.Tests
                                                            string persistPrepareResultToFile = null,
                                                            bool disableRestoreModules = false,
                                                            bool skipAutoProps = false,
-                                                           string assemblyLocation = null)
+                                                           string assemblyLocation = null,
+                                                           string[] excludeAttributes = null)
     {
       if (persistPrepareResultToFile is null)
       {
@@ -112,7 +113,7 @@ namespace Coverlet.Core.Tests
                       "[coverlet.*]*"
           }).ToArray(),
         ExcludedSourceFiles = Array.Empty<string>(),
-        ExcludeAttributes = Array.Empty<string>(),
+        ExcludeAttributes = excludeAttributes ?? Array.Empty<string>(),
         IncludeTestAssembly = true,
         SingleHit = false,
         MergeWith = string.Empty,
