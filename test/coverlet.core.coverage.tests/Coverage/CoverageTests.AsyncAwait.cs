@@ -103,6 +103,50 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     [Fact]
+    public void AsyncAwait_Issue_1727_ExcludeByCompilerGeneratedAttribute_StateMachineStillInstrumented()
+    {
+      // Issue #1727: with <ExcludeByAttribute>CompilerGeneratedAttribute</ExcludeByAttribute>
+      // (the coverlet setting commonly recommended for ASP.NET projects to silence Razor/
+      // top-level-statement noise), every async method's compiler-generated state machine
+      // class -- which the compiler always stamps with [CompilerGenerated] -- used to be
+      // excluded outright, so async methods vanished from the coverage report with no error.
+      // Fixed by #1940 (IsCompilerGeneratedStateMachineType check in Instrumenter.IsTypeExcluded):
+      // state machine types now ignore CompilerGeneratedAttribute/GeneratedCodeAttribute
+      // specifically, while still honoring any other user-configured exclusion attribute.
+      // This test reruns the ConfigureAwait() scenario from the "AsyncAwait" test above with
+      // that exclude attribute set and expects the SAME lines covered as the unfiltered run
+      // (a plain, Moq-free sample is used deliberately: reusing a Moq-backed sample class,
+      // e.g. Issue_669_1, from a second test in the same process trips an unrelated Castle
+      // DynamicProxy "Invalid assembly public key" collision -- TestInstrumentationHelper.Run
+      // reloads a fresh copy of the test assembly per call, and Moq's proxy-type cache does
+      // not expect the same mocked interface to be reloaded from two different assembly
+      // copies within one test host process).
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          CoveragePrepareResult coveragePrepareResult = await TestInstrumentationHelper.Run<AsyncAwait>(async instance =>
+                  {
+                    int res = await (Task<int>)instance.ConfigureAwait();
+                  },
+                  persistPrepareResultToFile: pathSerialize[0],
+                  excludeAttributes: new[] { "CompilerGeneratedAttribute" });
+
+          return 0;
+        }, [path]);
+
+        TestInstrumentationHelper.GetCoverageResult(path)
+        .Document("Instrumentation.AsyncAwait.cs")
+        .AssertLinesCovered(BuildConfiguration.Debug, (89, 1), (90, 1));
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
+    [Fact]
     public void AsyncAwait_Issue_669_2()
     {
       string path = Path.GetTempFileName();
