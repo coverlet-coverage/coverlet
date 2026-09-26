@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Release date 2026-09-27
+
 ### Improvements
 
 - Publish Microsoft.Testing.Platform coverage messages from coverlet.MTP [#2019](https://github.com/coverlet-coverage/coverlet/pull/2019)
