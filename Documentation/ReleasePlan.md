@@ -50,7 +50,7 @@ In the following example the benchmark repository refit (<https://github.com/rea
 
 This is the steps to release new packages to nuget.org
 
-1. Update projects version files. There are two `version.json` files in the repo. `<roo>\version.json` and `<root>\src\legacy\version.json` (remove `-preview.{height}` and adjust version)
+1. Update projects version file `<root>\version.json` (remove `-preview.{height}` and adjust version)
 
     Do a PR and merge to master.
 
