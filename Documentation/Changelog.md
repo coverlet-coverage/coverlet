@@ -7,23 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Release date 2026-09-27
+### Packages
+coverlet.msbuild 10.1.0
+coverlet.console 10.1.0
+coverlet.collector 10.1.0
+coverlet.MTP 10.1.0
+
 ### Improvements
 
 - Publish Microsoft.Testing.Platform coverage messages from coverlet.MTP [#2019](https://github.com/coverlet-coverage/coverlet/pull/2019)
 - Implement dynamic exclusion filters for assemblies (Coverlet.MTP) [#1946](https://github.com/coverlet-coverage/coverlet/pull/1946)
 - Replace legacy .sln files with modern .slnx format [#1966](https://github.com/coverlet-coverage/coverlet/pull/1966)
 - coverlet.console: add trace diagnostics and actionable warnings for instrumentation/hit/empty-result failures [#2005](https://github.com/coverlet-coverage/coverlet/pull/2005)
+- Relax auto-property skip logic and improve coverage for records [#1941](https://github.com/coverlet-coverage/coverlet/pull/1941)
 
 ### Fixed
 
 - Fix coverlet.MTP does not collect coverage on the .NET Framework portion of a large project [#1980](https://github.com/coverlet-coverage/coverlet/pull/1980) [#1967](https://github.com/coverlet-coverage/coverlet/pull/1967)
 - Fix Regression in branch coverage for lambda expressions [#1938](https://github.com/coverlet-coverage/coverlet/pull/1938)
 - Fix When using "is" with "or" in pattern matching, branch coverage is lower than normal [#1979](https://github.com/coverlet-coverage/coverlet/pull/1979)
-- Fix silent zero coverage on .NET Framework since 8.0.0 [#1985](https://github.com/coverlet-coverage/coverlet/pull/1985)
-- Fix Race condition between ProcessExit hit-file write and out-of-proc coverage read causes EndOfStreamException [#1987](https://github.com/coverlet-coverage/coverlet/pull/1987) [#1988](https://github.com/coverlet-coverage/coverlet/pull/1988)
+- Fix silent zero coverage on .NET Framework since 8.0.0 [#1985](https://github.com/coverlet-coverage/coverlet/pull/1985) by <https://github.com/tobiwae>
+- Fix Race condition between ProcessExit hit-file write and out-of-proc coverage read causes EndOfStreamException [#1987](https://github.com/coverlet-coverage/coverlet/pull/1987) [#1988](https://github.com/coverlet-coverage/coverlet/pull/1988) by <https://github.com/bkoelman>
 - Fix Regression TypeInitializationException when targeting .NET Framework - Could not load type 'System.Collections.Concurrent.ConcurrentBag [#2010](https://github.com/coverlet-coverage/coverlet/pull/2010)
+- Fix use --config-file CLI arg in coverlet.MTP [#2030](https://github.com/coverlet-coverage/coverlet/pull/2030) by <https://github.com/alexthornton1>
+- Fix silently empty coverage for shared-framework assemblies missing from compileLibraries [#2032](https://github.com/coverlet-coverage/coverlet/pull/2032) by <https://github.com/Eljees>
 
 ## Release date 2026-05-18
+### Packages
+coverlet.msbuild 10.0.1
+coverlet.console 10.0.1
+coverlet.collector 10.0.1
+coverlet.MTP 10.0.1
 
 ### Improvements
 
