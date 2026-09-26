@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ## Release date 2026-09-27
+### Packages
+coverlet.msbuild 10.1.0
+coverlet.console 10.1.0
+coverlet.collector 10.1.0
+coverlet.MTP 10.1.0
 
 ### Improvements
 
@@ -29,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix silently empty coverage for shared-framework assemblies missing from compileLibraries [#2032](https://github.com/coverlet-coverage/coverlet/pull/2032) by <https://github.com/Eljees>
 
 ## Release date 2026-05-18
+### Packages
+coverlet.msbuild 10.0.1
+coverlet.console 10.0.1
+coverlet.collector 10.0.1
+coverlet.MTP 10.0.1
 
 ### Improvements
 
