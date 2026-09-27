@@ -25,9 +25,9 @@ We release 4 components as NuGet packages:
 Before creating a new release it makes sense to test the new release against a benchmark repository. This can help to determine bugs that haven't been found
 by the unit/integration tests. Therefore, coverage of the latest release is compared with our nightly build.
 
-In the following example the benchmark repository refit (<https://github.com/reactiveui/refit>) is used which already uses coverlet for coverage.
+In the following example the benchmark repository kiota (<https://github.com/microsoft/kiota>) is used which already uses coverlet for coverage.
 
-1. Clone the benchmark repository (<https://github.com/reactiveui/refit>)
+1. Clone the benchmark repository (<https://github.com/microsoft/kiota>)
 2. Check if latest coverlet version is used by the project, otherwise add coverlet to the project (<https://github.com/coverlet-coverage/coverlet#installation>).
 3. Create coverage report for latest coverlet version:
 
