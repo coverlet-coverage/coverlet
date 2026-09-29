@@ -11,13 +11,13 @@ assignees: ''
 Please share a clear and concise description of the problem.
 
 **To Reproduce**
-Please include minimal steps to reproduce the problem if possible. E.g.: the smallest possible code snippet; or a small project, with steps to run it. If possible include text as text rather than screenshots (so it shows up in searches).
+Please provide the shortest steps to reproduce the problem, such as a small code snippet or project and instructions to run it. Include text directly instead of screenshots when possible so it can be searched. For code issues, a minimal .NET project is especially helpful; you can attach it as a ZIP archive.
 
 **Expected behavior**
 Provide a description of the expected behavior.
 
 **Actual behavior**
-Provide a description of the actual behavior observed. If applicable please include any error messages, exception stacktraces or memory dumps.
+Describe the behavior you observed, including any relevant error messages, stack traces, or memory dumps. If possible, generate diagnostic logs using the CLI options and attach them to the issue.
 
 **Configuration (please complete the following information):**
 Please provide more information on your .NET configuration:
