@@ -28,6 +28,8 @@ public class ConfigurationFileTests : MtpValidationTestBase
   private const string CoverageCoberturaFileName = "coverage.cobertura.xml";
   private const string CoverageLcovFileName = "coverage.info";
 
+  private const string CoverageOpenCoverFileName = "coverage.opencover.xml";
+
   /// <summary>
   /// Validates that when using coverlet.mtp.appsettings.json, only the minimal exclude filter
   /// "[coverlet.*]*" is applied (not the extended command-line defaults).
@@ -106,7 +108,7 @@ public class ConfigurationFileTests : MtpValidationTestBase
     string testName = TestContext.Current.TestCase!.TestMethodName!;
     using var testProject = CreateTestProjectWithConfigFile(testName, configContent: @"{
   ""Coverlet"": {
-    ""Format"": ""json,cobertura,lcov"",
+    ""Format"": ""json,cobertura,lcov,opencover"",
     ""IncludeTestAssembly"": false
   }
 }");
@@ -150,6 +152,15 @@ public class ConfigurationFileTests : MtpValidationTestBase
       $"Expected LCOV coverage file but none found in {testProject.OutputDirectory}.\n" +
       $"Files found: {string.Join(", ", Directory.GetFiles(testProject.OutputDirectory, "*", SearchOption.AllDirectories).Select(Path.GetFileName))}");
 
+    // Verify OpenCover format file was produced
+    string[] opencoverCoverageFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      CoverageOpenCoverFileName.Insert(CoverageOpenCoverFileName.LastIndexOf('.'), ".*"),
+      SearchOption.AllDirectories);
+    Assert.True(opencoverCoverageFiles.Length > 0,
+      $"Expected OpenCover coverage file but none found in {testProject.OutputDirectory}.\n" +
+      $"Files found: {string.Join(", ", Directory.GetFiles(testProject.OutputDirectory, "*", SearchOption.AllDirectories).Select(Path.GetFileName))}");
+
     // Verify configuration settings via diagnostic log
     DiagnosticSettings? diagSettings = ParseDiagnosticFile(testProject.OutputDirectory);
     if (diagSettings is not null)
@@ -191,6 +202,7 @@ public class ConfigurationFileTests : MtpValidationTestBase
     TestContext.Current?.AddAttachment("JSON Coverage", jsonCoverageFiles[0]);
     TestContext.Current?.AddAttachment("Cobertura Coverage", coberturaCoverageFiles[0]);
     TestContext.Current?.AddAttachment("LCOV Coverage", lcovCoverageFiles[0]);
+    TestContext.Current?.AddAttachment("OpenCover Coverage", opencoverCoverageFiles[0]);
   }
 
   /// <summary>
@@ -600,6 +612,83 @@ public class ConfigurationFileTests : MtpValidationTestBase
         $"testconfig.json should take priority over coverlet.mtp.appsettings.json.\n" +
         $"Diagnostic content:\n{diagSettings.RawContent}");
     }
+  }
+
+  /// <summary>
+  /// Validates that --config-file command-line option loads a central testconfig.json file.
+  /// This covers regression scenario from PR #2030 where command-line config file handling was fixed.
+  /// </summary>
+  [Fact]
+  public async Task CommandLine_ConfigFile_UsesCentralTestConfigFile()
+  {
+    Assert.SkipUnless(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Test requires Windows");
+
+    // Arrange - local legacy config should be ignored when --config-file points to central config.
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProjectWithConfigFile(testName, configContent: """
+    {
+      "Coverlet": {
+        "Format": "cobertura",
+        "FilePrefix": "LegacyConfig"
+      }
+    }
+    """);
+
+    string centralConfigPath = Path.Combine(testProject.SolutionDirectory, "testconfig.central.json");
+    File.WriteAllText(centralConfigPath, """
+    {
+      "platformOptions": {
+        "Coverlet": {
+          "exclude": "[*.Tests]*,[xunit*]*",
+          "excludeByAttribute": "GeneratedCode,ExcludeFromCodeCoverage",
+          "format": "cobertura,json,lcov,opencover",
+          "skipAutoProps": true,
+          "excludeAssembliesWithoutSources": "MissingAll"
+        }
+      }
+    }
+    """);
+
+    await BuildProject(testProject.SolutionPath);
+
+    // Act
+    string runArgs = $"--coverlet --config-file \"{centralConfigPath}\" --coverlet-file-prefix CentralConfig";
+    var result = await RunTestsWithCoverage(testProject, runArgs, enableDiagnostics: true);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert - test should pass
+    Assert.True(result.ExitCode == 0,
+      $"Expected successful test run (exit code 0) but got {result.ExitCode}.\n\n{result.CombinedOutput}");
+
+    // Validate central config file prefix and format generated exactly 4 reports.
+    string[] centralCoverageFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      "CentralConfig.coverage*",
+      SearchOption.AllDirectories);
+    Assert.True(centralCoverageFiles.Length == 4,
+      $"Expected exactly 4 coverage files with prefix 'CentralConfig.coverage', but found {centralCoverageFiles.Length}.\n" +
+      $"Files found: {string.Join(", ", Directory.GetFiles(testProject.OutputDirectory, "*", SearchOption.AllDirectories).Select(Path.GetFileName))}");
+
+    string[] legacyCoverageFiles = Directory.GetFiles(
+      testProject.OutputDirectory,
+      "LegacyConfig.coverage*",
+      SearchOption.AllDirectories);
+    Assert.Empty(legacyCoverageFiles);
+
+    DiagnosticSettings? diagSettings = ParseDiagnosticFile(testProject.OutputDirectory);
+    if (diagSettings is null)
+    {
+      Assert.Fail("Expected diagnostic file to be generated but no .diag file was found.");
+      return;
+    }
+
+    TestContext.Current?.AddAttachment("Diagnostic Log", diagSettings.RawContent);
+
+    Assert.Equal("CentralConfig", diagSettings.FilePrefix);
+    Assert.True(diagSettings.SkipAutoProps,
+      $"Expected SkipAutoProps=true from central config file but got {diagSettings.SkipAutoProps}.\n" +
+      $"Diagnostic content:\n{diagSettings.RawContent}");
   }
 
   private TestProjectInfo CreateTestProjectWithConfigFile(string testName, string configContent)
