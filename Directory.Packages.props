@@ -8,7 +8,7 @@
   </ItemGroup>
   <PropertyGroup>
     <!-- .NET 8.0 support -->
-    <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion>
+    <MicrosoftBuildVersion>18.10.1</MicrosoftBuildVersion>
     <MicrosoftCodeAnalysisVersion>5.9.0</MicrosoftCodeAnalysisVersion>
     <!-- .NET 8.0 support -->
     <NugetPackageVersion>7.6.0</NugetPackageVersion>
