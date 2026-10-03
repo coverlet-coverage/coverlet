@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
@@ -160,6 +161,26 @@ namespace Coverlet.Core.Tests.Instrumentation
 
       bool found = doc.Lines.Values.Any(l => l.Class == excludedType.FullName);
       Assert.False(found, "Class decorated with with exclude attribute should be excluded");
+
+      instrumenterTest.Directory.Delete(true);
+    }
+
+    [Fact]
+    public void TestInstrument_LocalFunction_IsNotExcludedByDefaultCompilerGeneratedAttribute()
+    {
+      // Regression test for https://github.com/coverlet-coverage/coverlet/issues/2045:
+      // local functions are compiled by Roslyn as regular methods decorated with
+      // [CompilerGeneratedAttribute]. Since that attribute is part of the default
+      // ExcludeByAttribute list, the local function body must still be instrumented
+      // rather than being entirely dropped from the coverage report.
+      InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { nameof(CompilerGeneratedAttribute) });
+      InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
+
+      Coverlet.Core.Instrumentation.Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+      Assert.NotNull(doc);
+
+      bool found = doc.Lines.Values.Any(l => l.Method.Contains("Throw"));
+      Assert.True(found, "Local function should still be instrumented even though CompilerGeneratedAttribute is in the exclude list");
 
       instrumenterTest.Directory.Delete(true);
     }

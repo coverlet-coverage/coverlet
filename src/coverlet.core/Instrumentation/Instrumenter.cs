@@ -699,7 +699,8 @@ namespace Coverlet.Core.Instrumentation
       {
         MethodDefinition actualMethod = method;
         IEnumerable<CustomAttribute> customAttributes = method.CustomAttributes;
-        if (_instrumentationHelper.IsLocalMethod(method.Name))
+        bool isLocalFunction = _instrumentationHelper.IsLocalMethod(method.Name);
+        if (isLocalFunction)
           actualMethod = methods.FirstOrDefault(m => m.Name == method.Name.Split('>')[0].Substring(1)) ?? method;
 
         if (actualMethod.IsGetter || actualMethod.IsSetter)
@@ -725,7 +726,17 @@ namespace Coverlet.Core.Instrumentation
           continue;
         }
 
-        if (!customAttributes.Any(IsExcludeAttribute))
+        // Issue #2045: Local functions are compiled as regular methods decorated with
+        // [CompilerGeneratedAttribute] by Roslyn. Since this attribute is in the default
+        // ExcludeByAttribute list, local functions would otherwise be entirely excluded
+        // from instrumentation. Mirror the Issue #1843 state-machine carve-out: ignore
+        // CompilerGenerated/GeneratedCode attributes for local functions, but still honor
+        // other user-configured exclusion attributes (e.g. ExcludeFromCodeCoverage).
+        bool isExcluded = isLocalFunction
+            ? customAttributes.Any(attr => IsExcludeAttribute(attr) && !IsCompilerGeneratedOrGeneratedCodeAttribute(attr))
+            : customAttributes.Any(IsExcludeAttribute);
+
+        if (!isExcluded)
         {
           InstrumentMethod(method);
         }
