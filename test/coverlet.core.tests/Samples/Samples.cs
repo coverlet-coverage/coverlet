@@ -451,4 +451,24 @@ namespace Coverlet.Core.Samples.Tests
             return false;
         }
     }
+
+    // Sample for https://github.com/coverlet-coverage/coverlet/issues/2045
+    // Local functions are compiled by Roslyn as regular methods on the declaring type,
+    // decorated with [CompilerGeneratedAttribute]. Since that attribute is part of the
+    // default ExcludeByAttribute list, the local function body must still be instrumented.
+    public class ClassWithLocalFunction
+    {
+        public static void TestCapacity(uint capacity)
+        {
+            if (capacity < 16)
+            {
+                Throw(capacity);
+            }
+
+            static void Throw(uint capacity)
+            {
+                throw new ArgumentException($"Capacity must be >= 16. Actual value was {capacity}.");
+            }
+        }
+    }
 }
