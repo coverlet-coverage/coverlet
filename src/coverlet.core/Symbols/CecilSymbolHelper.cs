@@ -1015,9 +1015,47 @@ namespace Coverlet.Core.Symbols
 
     // https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/Expression%20Breakpoints.md
     private static bool SkipExpressionBreakpointsBranches(Instruction instruction) => instruction.Previous is not null && instruction.Previous.OpCode == OpCodes.Ldc_I4 &&
-                                                                                      instruction.Previous.Operand is int operandValue && operandValue == 1 &&
-                                                                                      instruction.Next is not null && instruction.Next.OpCode == OpCodes.Nop &&
-                                                                                      instruction.Operand == instruction.Next?.Next;
+                                                                                       instruction.Previous.Operand is int operandValue && operandValue == 1 &&
+                                                                                       instruction.Next is not null && instruction.Next.OpCode == OpCodes.Nop &&
+                                                                                       instruction.Operand == instruction.Next?.Next;
+
+    /// <summary>
+    /// Checks if a branch path is reachable through normal control flow.
+    /// A path is unreachable if preceded by unconditional control flow 
+    /// (return, throw) that prevents execution from reaching it.
+    /// </summary>
+    /// <param name="instructions">List of all instructions in the method body</param>
+    /// <param name="pathStart">The first instruction of the path to check</param>
+    /// <returns>true if the path is reachable, false if it's dead code</returns>
+    private static bool IsPathReachable(List<Instruction> instructions, Instruction pathStart)
+    {
+      // A path is considered unreachable if it's preceded by unconditional control flow
+      // Only unreachable paths should have IsReachable = false
+      // Most paths are reachable by default
+
+      if (pathStart == null)
+        return true;
+
+      int pathIndex = instructions.BinarySearch(pathStart, new InstructionByOffsetComparer());
+      if (pathIndex <= 0)
+        return true; // First instruction or not found - assume reachable
+
+      // Look back at immediate predecessors for unconditional control flow
+      // Check up to 2 instructions back to account for potential nop or other padding
+      for (int i = pathIndex - 1; i >= Math.Max(0, pathIndex - 2); i--)
+      {
+        Instruction instr = instructions[i];
+
+        // Unconditional control flow makes subsequent code unreachable
+        if (instr.OpCode.FlowControl == FlowControl.Return ||
+            instr.OpCode.FlowControl == FlowControl.Throw)
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
 
     public IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
     {
@@ -1158,6 +1196,9 @@ namespace Coverlet.Core.Symbols
 
       List<int> pathOffsetList = GetBranchPath(@else);
 
+      // Determine if the else path is reachable
+      bool elsePathReachable = IsPathReachable(instructions, @else);
+
       // add Path 0
       var path0 = new BranchPoint
       {
@@ -1170,7 +1211,8 @@ namespace Coverlet.Core.Symbols
               pathOffsetList.Count > 1
                   ? pathOffsetList.GetRange(0, pathOffsetList.Count - 1)
                   : [],
-        EndOffset = pathOffsetList.Last()
+        EndOffset = pathOffsetList.Last(),
+        IsReachable = elsePathReachable  // Set reachability for else path
       };
 
       // Add Conditional Branch (Path=1)
@@ -1180,8 +1222,11 @@ namespace Coverlet.Core.Symbols
         if (instruction.Operand is not Instruction @then)
           return false;
 
+        // Determine if the then path is reachable
+        bool thenPathReachable = IsPathReachable(instructions, @then);
+
         ordinal = BuildPointsForBranch(list, then, branchingInstructionLine, document, branchOffset,
-            ordinal, pathCounter, path0, instructions, methodDefinition);
+            ordinal, pathCounter, path0, instructions, methodDefinition, thenPathReachable);
       }
       else // instruction.OpCode.Code == Code.Switch
       {
@@ -1189,13 +1234,13 @@ namespace Coverlet.Core.Symbols
           return false;
 
         ordinal = BuildPointsForSwitchCases(list, path0, branchInstructions, branchingInstructionLine,
-            document, branchOffset, ordinal, ref pathCounter);
+            document, branchOffset, ordinal, ref pathCounter, instructions);
       }
       return true;
     }
 
     private static uint BuildPointsForBranch(List<BranchPoint> list, Instruction then, int branchingInstructionLine, string document,
-        int branchOffset, uint ordinal, int pathCounter, BranchPoint path0, List<Instruction> instructions, MethodDefinition methodDefinition)
+        int branchOffset, uint ordinal, int pathCounter, BranchPoint path0, List<Instruction> instructions, MethodDefinition methodDefinition, bool thenPathReachable)
     {
       List<int> pathOffsetList1 = GetBranchPath(@then);
 
@@ -1211,7 +1256,8 @@ namespace Coverlet.Core.Symbols
               pathOffsetList1.Count > 1
                   ? pathOffsetList1.GetRange(0, pathOffsetList1.Count - 1)
                   : [],
-        EndOffset = pathOffsetList1.Last()
+        EndOffset = pathOffsetList1.Last(),
+        IsReachable = thenPathReachable  // Set reachability for then path
       };
 
       // only add branch if branch does not match a known sequence 
@@ -1238,7 +1284,7 @@ namespace Coverlet.Core.Symbols
 
       bool match = ignoreSequences
           .Where(ignoreSequence => range.Count >= ignoreSequence.Length)
-          .Any(ignoreSequence => range.Zip(ignoreSequence, (instruction, code) => instruction.OpCode.Code == code).All(x => x));
+          .Any(ignoreSequence => range.Zip(ignoreSequence, (instr, code) => instr.OpCode.Code == code).All(x => x));
 
       int count = range
           .Count(i => methodDefinition.DebugInformation.GetSequencePoint(i) != null);
@@ -1252,25 +1298,33 @@ namespace Coverlet.Core.Symbols
     }
 
     private static uint BuildPointsForSwitchCases(List<BranchPoint> list, BranchPoint path0, Instruction[] branchInstructions,
-        int branchingInstructionLine, string document, int branchOffset, uint ordinal, ref int pathCounter)
+        int branchingInstructionLine, string document, int branchOffset, uint ordinal, ref int pathCounter, List<Instruction> instructions)
     {
       int counter = pathCounter;
       list.Add(path0);
+
       // Add Conditional Branches (Path>0)
-      list.AddRange(branchInstructions.Select(GetBranchPath)
-          .Select(pathOffsetList1 => new BranchPoint
-          {
-            StartLine = branchingInstructionLine,
-            Document = document,
-            Offset = branchOffset,
-            Ordinal = ordinal++,
-            Path = counter++,
-            OffsetPoints =
-                  pathOffsetList1.Count > 1
-                      ? pathOffsetList1.GetRange(0, pathOffsetList1.Count - 1)
-                      : [],
-            EndOffset = pathOffsetList1.Last()
-          }));
+      list.AddRange(branchInstructions.Select(branchInstruction =>
+      {
+        List<int> pathOffsetList1 = GetBranchPath(branchInstruction);
+        bool switchCaseReachable = IsPathReachable(instructions, branchInstruction);
+
+        return new BranchPoint
+        {
+          StartLine = branchingInstructionLine,
+          Document = document,
+          Offset = branchOffset,
+          Ordinal = ordinal++,
+          Path = counter++,
+          OffsetPoints =
+                pathOffsetList1.Count > 1
+                    ? pathOffsetList1.GetRange(0, pathOffsetList1.Count - 1)
+                    : [],
+          EndOffset = pathOffsetList1.Last(),
+          IsReachable = switchCaseReachable  // Set reachability for switch case
+        };
+      }));
+
       pathCounter = counter;
       return ordinal;
     }
