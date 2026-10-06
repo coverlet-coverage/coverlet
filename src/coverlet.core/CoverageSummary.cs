@@ -117,10 +117,14 @@ namespace Coverlet.Core
 
     public static CoverageDetails CalculateBranchCoverage(IList<BranchInfo> branches)
     {
+      // Filter to only include reachable branches per issue #2036
+      // Unreachable branches (e.g., dead code after return/throw) should not count against coverage
+      var reachableBranches = branches.Where(b => b.IsReachable).ToList();
+
       var details = new CoverageDetails
       {
-        Covered = branches.Count(bi => bi.Hits > 0),
-        Total = branches.Count
+        Covered = reachableBranches.Count(bi => bi.Hits > 0),
+        Total = reachableBranches.Count
       };
       return details;
     }
