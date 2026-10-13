@@ -115,7 +115,7 @@ See [documentation](Documentation/GlobalTool.md) for advanced usage.
 
 #### Requirements (coverlet.console)
 
-* .NET global tools rely on a .NET Core runtime installed on your machine <https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools#what-could-go-wrong>
+* .NET global tools rely on a .NET Core runtime installed on your machine <https://learn.microsoft.com/en-us/dotnet/core/tools/troubleshoot-usage-issues#installed-net-tool-fails-to-run>
 * .NET Coverlet global tool requires *.NET 8.0 or above*
 
 > [!WARNING]

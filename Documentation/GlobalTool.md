@@ -280,6 +280,9 @@ dotnet tool install --global coverlet.console --version 10.0.2
 dotnet tool install --global coverlet.console --source c:\local_source --prerelease
 ```
 
+> [!IMPORTANT]  
+> The option `--global` requires the update PATH to point to the .NET tools location. Make sure your shell’s PATH includes that location on Windows or Linux (see [Global tools](https://learn.microsoft.com/en-us/dotnet/core/tools/troubleshoot-usage-issues#global-tools)).
+
 ## SourceLink
 
 Coverlet supports [SourceLink](https://github.com/dotnet/sourcelink) custom debug information contained in PDBs. When you specify the `--use-source-link` flag, Coverlet will generate results that contain the URL to the source files in your source control instead of local file paths.
