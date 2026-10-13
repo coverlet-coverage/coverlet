@@ -105,7 +105,7 @@ namespace Coverlet.Core.Reporters
                   CoverageDetails branchInfoCoverage = CoverageSummary.CalculateBranchCoverage(branches);
                   line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent.ToString(CultureInfo.InvariantCulture)}% ({branchInfoCoverage.Covered.ToString(CultureInfo.InvariantCulture)}/{branchInfoCoverage.Total.ToString(CultureInfo.InvariantCulture)})"));
                   var conditions = new XElement("conditions");
-                  // Filter to only reachable branches for condition elements (issue #2036)
+                  // Filter to only reachable branches for condition elements
                   var reachableBranches = branches.Where(b => b.IsReachable).ToList();
                   var byOffset = reachableBranches.GroupBy(b => b.Offset).ToDictionary(b => b.Key, b => b.ToList());
                   foreach (KeyValuePair<int, List<BranchInfo>> entry in byOffset)
