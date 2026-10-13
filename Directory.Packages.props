@@ -11,12 +11,12 @@
     <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion>
     <MicrosoftCodeAnalysisVersion>5.9.0</MicrosoftCodeAnalysisVersion>
     <!-- .NET 8.0 support -->
-    <NugetPackageVersion>7.6.0</NugetPackageVersion>
+    <NugetPackageVersion>7.9.0</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
-    <MicrosoftNETTestSdkVersion>18.10.1</MicrosoftNETTestSdkVersion>
-    <XunitV3Version>4.0.1</XunitV3Version>
-    <XunitRunnerVisualstudioVersion>4.0.0</XunitRunnerVisualstudioVersion>
-    <MicrosoftTestingPlatformVersion>2.4.1</MicrosoftTestingPlatformVersion>
+    <MicrosoftNETTestSdkVersion>18.11.0</MicrosoftNETTestSdkVersion>
+    <XunitV3Version>4.0.2</XunitV3Version>
+    <XunitRunnerVisualstudioVersion>4.0.1</XunitRunnerVisualstudioVersion>
+    <MicrosoftTestingPlatformVersion>2.5.1</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.21.0</MoqVersion>
     <MicrosoftNetRuntimeVersion>10.0.12</MicrosoftNetRuntimeVersion>
   </PropertyGroup>
@@ -65,7 +65,7 @@
     <PackageVersion Include="Moq" Version="$(MoqVersion)" />
     <PackageVersion Include="ReportGenerator.Core" Version="5.5.11" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
-    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.11" />
+    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.1.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.12" />
     <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
