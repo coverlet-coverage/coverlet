@@ -354,6 +354,101 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
+    public void CalculateBranchCoverage_AllBranchesReachable_CountsAllBranches()
+    {
+      // Arrange - All branches are reachable
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1, IsReachable = true },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2, IsReachable = true }
+      };
+
+      // Act
+      var result = CoverageSummary.CalculateBranchCoverage(branches);
+
+      // Assert - Both branches count: 1 covered, 2 total = 50%
+      Assert.Equal(2, result.Total);
+      Assert.Equal(1, result.Covered);
+      Assert.Equal(50, result.Percent);
+    }
+
+    [Fact]
+    public void CalculateBranchCoverage_OneUnreachableBranch_ExcludesUnreachable()
+    {
+      // Arrange - One branch is unreachable (e.g., dead code after return)
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1, IsReachable = true },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2, IsReachable = false }
+      };
+
+      // Act
+      var result = CoverageSummary.CalculateBranchCoverage(branches);
+
+      // Assert - Only reachable branch counts: 1 covered, 1 total = 100%
+      Assert.Equal(1, result.Total);
+      Assert.Equal(1, result.Covered);
+      Assert.Equal(100, result.Percent);
+    }
+
+    [Fact]
+    public void CalculateBranchCoverage_AllBranchesUnreachable_ReturnsZero()
+    {
+      // Arrange - All branches are unreachable (edge case)
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1, IsReachable = false },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2, IsReachable = false }
+      };
+
+      // Act
+      var result = CoverageSummary.CalculateBranchCoverage(branches);
+
+      // Assert - No reachable branches: 0 total, 0 covered, 100% (no branches to measure)
+      Assert.Equal(0, result.Total);
+      Assert.Equal(0, result.Covered);
+      Assert.Equal(100, result.Percent);
+    }
+
+    [Fact]
+    public void CalculateBranchCoverage_EmptyBranches_ReturnsZero()
+    {
+      // Arrange
+      var branches = new Branches();
+
+      // Act
+      var result = CoverageSummary.CalculateBranchCoverage(branches);
+
+      // Assert
+      Assert.Equal(0, result.Total);
+      Assert.Equal(0, result.Covered);
+      Assert.Equal(100, result.Percent);
+    }
+
+    [Fact]
+    public void CalculateBranchCoverage_Issue2036_UnreachablePathNotCountedAsPartial()
+    {
+      // Arrange - Simulates issue #2036: if-return pattern where false branch is reachable
+      // (both branches ARE reachable per control flow, but this test shows unreachable case)
+      var branches = new Branches
+      {
+        // True branch: executes, returns (reachable, covered)
+        new BranchInfo { Line = 91, Hits = 3, Offset = 103, Path = 0, Ordinal = 1, IsReachable = true },
+        // False branch: unreachable (e.g., dead code alternative in nested condition)
+        new BranchInfo { Line = 91, Hits = 0, Offset = 103, Path = 1, Ordinal = 2, IsReachable = false }
+      };
+
+      // Act
+      var result = CoverageSummary.CalculateBranchCoverage(branches);
+
+      // Assert - False branch excluded: 1 covered, 1 total = 100%
+      // NOT "50% (1/2)" which was the original bug
+      Assert.Equal(1, result.Total);
+      Assert.Equal(1, result.Covered);
+      Assert.Equal(100, result.Percent);
+    }
+
+    [Fact]
     public void BuildCoverageSummaryTable_SingleModule_TwoSectionsSeparatedByNewLine()
     {
       string result = CoverageSummary.BuildCoverageSummaryTable(_averageCalculationSingleModule);

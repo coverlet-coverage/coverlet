@@ -17,6 +17,18 @@ namespace Coverlet.Core
     public int Path { get; set; }
     public uint Ordinal { get; set; }
     public int Hits { get; set; }
+
+    /// <summary>
+    /// Indicates whether this branch is reachable through normal control flow.
+    /// Used to avoid false partial coverage reports for unreachable branches.
+    /// 
+    /// This property helps distinguish between:
+    /// - Branches that are truly unreachable (e.g., dead code after unconditional return/throw)
+    /// - Branches that are reachable but not covered in the current test run
+    /// 
+    /// Default value: true (assume all branches are reachable unless proven otherwise)
+    /// </summary>
+    public bool IsReachable { get; set; } = true;
   }
   internal class Lines : SortedDictionary<int, int> { }
   internal class Branches : List<BranchInfo> { }
@@ -96,7 +108,7 @@ namespace Coverlet.Core
                       foreach (BranchInfo branch in method.Value.Branches)
                       {
                         Branches branches = Modules[module.Key][document.Key][@class.Key][method.Key].Branches;
-                        BranchInfo branchInfo = branches.FirstOrDefault(b => b.EndOffset == branch.EndOffset && b.Line == branch.Line && b.Offset == branch.Offset && b.Ordinal == branch.Ordinal && b.Path == branch.Path);
+                        BranchInfo branchInfo = branches.FirstOrDefault(b => b.EndOffset == branch.EndOffset && b.Line == branch.Line && b.Offset == branch.Offset && b.Ordinal == branch.Ordinal && b.Path == branch.Path && b.IsReachable == branch.IsReachable);
                         if (branchInfo == null)
                           branches.Add(branch);
                         else

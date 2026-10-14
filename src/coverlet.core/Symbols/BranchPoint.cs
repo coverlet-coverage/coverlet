@@ -47,5 +47,19 @@ namespace Coverlet.Core.Symbols
     /// The url to the document if an entry was not mapped to an id
     /// </summary>
     public string Document { get; set; }
+
+    /// <summary>
+    /// Indicates whether this branch path is reachable through normal control flow.
+    /// This property helps distinguish between:
+    /// - Branches that are truly unreachable (e.g., dead code after unconditional return/throw)
+    /// - Branches that are reachable but not covered in the current test run
+    /// 
+    /// Used to avoid false partial coverage reports for patterns like:
+    ///   if (condition) { return value; }
+    /// where the false branch should not be marked as unreachable.
+    /// 
+    /// Default value: true (branch is considered reachable unless proven otherwise)
+    /// </summary>
+    public bool IsReachable { get; set; } = true;
   }
 }

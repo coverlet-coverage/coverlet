@@ -490,6 +490,77 @@ namespace Coverlet.Core.Tests.Reporters
     }
 
     [Fact]
+    public void Report_UnreachableBranchesExcluded_Issue2036()
+    {
+      // Issue #2036: Verify unreachable branches don't appear in condition coverage
+      var result = new CoverageResult();
+      result.Identifier = Guid.NewGuid().ToString();
+
+      var lines = new Lines
+      {
+        { 91, 3 }  // Line 91 with 3 hits
+      };
+
+      var branches = new Branches
+      {
+        // True branch: reachable and covered (3 hits)
+        new BranchInfo { Line = 91, Hits = 3, Offset = 103, EndOffset = 110, Path = 0, Ordinal = 1, IsReachable = true },
+        // False branch: unreachable (dead code), should not count toward condition coverage
+        new BranchInfo { Line = 91, Hits = 0, Offset = 103, EndOffset = 120, Path = 1, Ordinal = 2, IsReachable = false }
+      };
+
+      var methods = new Methods();
+      string methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestMethod()";
+      methods.Add(methodString, new Method());
+      methods[methodString].Lines = lines;
+      methods[methodString].Branches = branches;
+
+      var classes = new Classes
+      {
+        { "Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods }
+      };
+
+      var documents = new Documents();
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+      {
+        documents.Add(@"C:\test.cs", classes);
+      }
+      else
+      {
+        documents.Add(@"/test.cs", classes);
+      }
+
+      result.Modules = new Modules
+      {
+        { "module", documents }
+      };
+      result.Parameters = new CoverageParameters();
+
+      // Generate report
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      // Parse and verify
+      var doc = XDocument.Load(new StringReader(report));
+
+      // Find the line element for line 91
+      var lineElement = doc.Descendants("line")
+        .FirstOrDefault(l => l.Attribute("number")?.Value == "91");
+
+      Assert.NotNull(lineElement);
+
+      // Verify condition-coverage is 100% (1/1), not 50% (1/2)
+      string conditionCoverage = lineElement.Attribute("condition-coverage")?.Value;
+      Assert.NotNull(conditionCoverage);
+      Assert.Equal("100% (1/1)", conditionCoverage);  // Not "50% (1/2)"
+
+      // Verify only 1 condition element (the reachable one)
+      var conditions = lineElement.Element("conditions");
+      Assert.NotNull(conditions);
+      var conditionCount = conditions.Elements("condition").Count();
+      Assert.Equal(1, conditionCount);  // Only the reachable branch
+    }
+
+    [Fact]
     public void Report_DeterministicReport_FilenameFromTranslator()
     {
       // When DeterministicReport = true, the filename must come from ResolveDeterministicPath.
