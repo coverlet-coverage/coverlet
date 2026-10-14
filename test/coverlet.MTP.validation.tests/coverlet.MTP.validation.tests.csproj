@@ -23,6 +23,7 @@
     <PackageReference Include="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)"/>
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNetRuntimeVersion)" />
   </ItemGroup>
 
   <ItemGroup>
