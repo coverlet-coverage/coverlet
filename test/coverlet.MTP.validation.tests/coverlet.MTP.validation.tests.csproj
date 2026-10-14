@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)"/>
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNetRuntimeVersion)" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNetRuntimeVersion)" />
   </ItemGroup>
 
   <ItemGroup>
