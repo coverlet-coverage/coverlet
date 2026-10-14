@@ -18,7 +18,7 @@
     <XunitRunnerVisualstudioVersion>4.0.1</XunitRunnerVisualstudioVersion>
     <MicrosoftTestingPlatformVersion>2.5.1</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.21.0</MoqVersion>
-    <MicrosoftNetRuntimeVersion>10.0.12</MicrosoftNetRuntimeVersion>
+    <MicrosoftNetRuntimeVersion>10.0.13</MicrosoftNetRuntimeVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
@@ -66,7 +66,7 @@
     <PackageVersion Include="ReportGenerator.Core" Version="5.5.11" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.1.0" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.12" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.13" />
     <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.runner.msbuild" Version="$(XunitV3Version)" />
