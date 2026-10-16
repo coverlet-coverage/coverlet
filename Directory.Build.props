@@ -2,9 +2,10 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <NetCurrent Condition="'$(LEGACY)' == ''">net10.0</NetCurrent>
+    <NetCurrent Condition="'$(LEGACY)' == ''">net11.0</NetCurrent>
     <NetCurrent Condition="'$(LEGACY)' != ''">net9.0</NetCurrent>
-    <NetMinimum>net8.0</NetMinimum>
+    <NetMinimum Condition="'$(LEGACY)' == ''">net10.0</NetMinimum>
+    <NetMinimum Condition="'$(LEGACY)' != ''">net8.0</NetMinimum>
     <FullFrameworkTFM>net472</FullFrameworkTFM>
     <!-- enforce CamelCase case string-->
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>

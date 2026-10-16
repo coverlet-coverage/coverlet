@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
   <PropertyGroup>
     <TargetFrameworks>$(NetMinimum);$(NetCurrent)</TargetFrameworks>
@@ -45,6 +45,12 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
     <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="18.4.0">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net11.0' ">
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="18.9.6">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
