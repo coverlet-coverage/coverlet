@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">net8.0;net9.0;net10.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(LEGACY)' != ''">net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>$(NetMinimum);$(NetCurrent)</TargetFrameworks>
     <ToolCommandName>coverlet</ToolCommandName>
     <PackAsTool>true</PackAsTool>
     <AssemblyTitle>coverlet.console</AssemblyTitle>
