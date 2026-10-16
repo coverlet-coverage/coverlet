@@ -2,8 +2,7 @@
   <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">net10.0;net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(LEGACY)' != ''">net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <DebugType>portable</DebugType>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -22,8 +21,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="9.1.1" Condition="'$(TargetFramework)' != 'net10.0'" />
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="8.2.1" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="9.1.1" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="10.1.1" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="10.1.1" Condition="'$(TargetFramework)' == 'net11.0'" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />

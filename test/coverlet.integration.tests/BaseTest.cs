@@ -65,10 +65,17 @@ namespace Coverlet.Integration.Tests
         File.Copy(file, Path.Combine(finalRoot.FullName, Path.GetFileName(file)));
       }
 
-      // We need to prevent the inheritance of global props/targets for template project
+      // We need to prevent the inheritance of global props/targets for template project,
+      // while still defining framework properties used by the template csproj.
       File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.props"),
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project>
+  <PropertyGroup>
+    <NetCurrent Condition=""'$(LEGACY)' == ''"">net11.0</NetCurrent>
+    <NetCurrent Condition=""'$(LEGACY)' != ''"">net9.0</NetCurrent>
+    <NetMinimum Condition=""'$(LEGACY)' == ''"">net10.0</NetMinimum>
+    <NetMinimum Condition=""'$(LEGACY)' != ''"">net8.0</NetMinimum>
+  </PropertyGroup>
 </Project>");
 
       File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.targets"),
