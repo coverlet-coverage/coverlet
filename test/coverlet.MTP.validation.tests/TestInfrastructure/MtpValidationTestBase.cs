@@ -190,7 +190,7 @@ public abstract class MtpValidationTestBase
         return $"""
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup>
-                <TargetFramework>net8.0</TargetFramework>
+                <TargetFramework>$(NetMinimum)</TargetFramework>
                 <LangVersion>12.0</LangVersion>
                 <ImplicitUsings>enable</ImplicitUsings>
                 <Nullable>enable</Nullable>
