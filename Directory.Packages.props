@@ -19,7 +19,7 @@
     <MicrosoftTestingPlatformVersion>2.5.1</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.21.0</MoqVersion>
     <MicrosoftNetRuntimeVersion Condition="'$(LEGACY)' == ''">11.0.0-rc.2.26504.105</MicrosoftNetRuntimeVersion>
-    <MicrosoftNetRuntimeVersion Condition="'$(LEGACY)' != ''">9.0.21</MicrosoftNetRuntimeVersion>
+    <MicrosoftNetRuntimeVersion Condition="'$(LEGACY)' != ''">10.0.13</MicrosoftNetRuntimeVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
