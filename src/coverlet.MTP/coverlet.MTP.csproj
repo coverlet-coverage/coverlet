@@ -26,6 +26,7 @@
     <AnalysisLevelInteroperability>true</AnalysisLevelInteroperability>
     <!-- create SBOM for CI build-->
     <GenerateSBOM>true</GenerateSBOM>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <PropertyGroup>
