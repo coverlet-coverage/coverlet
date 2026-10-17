@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
@@ -33,6 +33,8 @@
     <PackageReference Include="Moq" />
     <!-- Tmds.ExecFunction removed - replaced with custom ProcessExecutor (Issue #1833) -->
     <PackageReference Include="ReportGenerator.Core" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" VersionOverride="10.0.13" Condition="'$(TargetFramework)' != 'net11.0'"/>
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="xunit.v3.mtp-v2" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>

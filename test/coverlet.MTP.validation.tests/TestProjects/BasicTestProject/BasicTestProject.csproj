@@ -3,7 +3,7 @@
   <Import Project="MTPTest.props" Condition="Exists('MTPTest.props')" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>>
+    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>

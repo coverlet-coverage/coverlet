@@ -7,6 +7,8 @@ This is a .NET based repository that contains the coverlet projects for code cov
 - Always ask for explicit approval before running any tests (`dotnet test`, integration tests, test scripts, coverage test runs, or equivalent). User prefers to run tests manually and does not want me to execute test runs unless explicitly requested.
 - Create a single, well-organized proposal or resolution document per issue, located in `Documentation/Plans/`. This folder is Git-ignored and local-only; documents are NOT uploaded to GitHub.
 - Stop deep analysis once effort/usage for a topic reaches about 60%, and keep investigation focused and efficient.
+- Do not use `rg` (ripgrep) commands because it is not available in the user's environment; use available alternatives instead.
+- Before continuing broader analysis/searches, verify the result of the most recent code update first (e.g., compile check/result verification).
 - Use ILVerify as a local dotnet tool for future IL investigations.
 
 ## Code Standards
