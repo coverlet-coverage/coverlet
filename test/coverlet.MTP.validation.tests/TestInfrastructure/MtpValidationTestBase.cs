@@ -106,26 +106,6 @@ public abstract class MtpValidationTestBase
         return name.Length > 50 ? name[..50] : name;
     }
 
-    // ── NuGet.config / solution file ─────────────────────────────────────────
-
-    /// <summary>
-    /// Writes a <c>NuGet.config</c> that uses the local artifacts folder as the primary feed
-    /// followed by nuget.org.
-    /// </summary>
-    protected void CreateNugetConfig(string solutionPath)
-    {
-        File.WriteAllText(Path.Combine(solutionPath, "NuGet.config"), $"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <configuration>
-              <packageSources>
-                <clear />
-                <add key="local" value="{LocalPackagesPath}" />
-                <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-              </packageSources>
-            </configuration>
-            """);
-    }
-
     /// <summary>
     /// Writes a two-project <c>.sln</c> file for <c>SampleLibrary</c> and <c>TestProject</c>
     /// using freshly generated GUIDs so parallel test runs never collide.
@@ -190,7 +170,7 @@ public abstract class MtpValidationTestBase
         return $"""
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup>
-                <TargetFramework>net8.0</TargetFramework>
+                <TargetFramework>$(NetMinimum)</TargetFramework>
                 <LangVersion>12.0</LangVersion>
                 <ImplicitUsings>enable</ImplicitUsings>
                 <Nullable>enable</Nullable>

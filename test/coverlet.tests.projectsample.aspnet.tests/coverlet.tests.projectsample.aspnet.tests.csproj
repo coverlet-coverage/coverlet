@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <OutputType>Exe</OutputType>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\coverlet.core\coverlet.core.csproj" />
-    <ProjectReference Include="..\coverlet.tests.projectsample.aspnet8\coverlet.tests.projectsample.aspnet8.csproj" />
+    <ProjectReference Include="..\coverlet.tests.projectsample.aspnet\coverlet.tests.projectsample.aspnet.csproj" />
   </ItemGroup>
 
 
