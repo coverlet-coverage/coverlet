@@ -721,7 +721,7 @@ public class ConfigurationFileTests : MtpValidationTestBase
     string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
     File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(NetMinimum)</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
