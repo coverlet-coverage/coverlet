@@ -239,7 +239,8 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
       string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, $"[{s_sutName}]*DeepThought", deterministicReport: true);
-      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
+      string logFilePath = Path.Combine(testLogFilesPath, "log.txt");
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{logFilePath}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -250,6 +251,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
+      AttachTextAttachment("VSTest Diagnostic Log", logFilePath);
 
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
@@ -299,7 +302,8 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
       string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, $"[{s_sutName}]*DeepThought", sourceLink: true);
-      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
+      string logFilePath = Path.Combine(testLogFilesPath, "log.txt");
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{logFilePath}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -310,6 +314,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
+      AttachTextAttachment("VSTest Diagnostic Log", logFilePath);
 
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);

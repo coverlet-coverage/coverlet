@@ -679,7 +679,6 @@ public class CollectCoverageTests : MtpValidationTestBase
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateAsyncSutLibraryProject(sutProjectPath);
@@ -704,7 +703,6 @@ public class CollectCoverageTests : MtpValidationTestBase
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateIssue1843SutProject(sutProjectPath);
@@ -967,7 +965,6 @@ public class Issue1843Tests
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateSutLibraryProject(sutProjectPath, includeSimpleTest, includeMethodTests, includeCalculatorTest, includeBranchTest, includeMultipleClasses);
