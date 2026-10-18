@@ -703,7 +703,6 @@ public class ConfigurationFileTests : MtpValidationTestBase
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateSutLibraryProject(sutProjectPath);
@@ -843,7 +842,6 @@ public class StringUtilsTests
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateSutLibraryProject(sutProjectPath);
@@ -872,7 +870,6 @@ public class StringUtilsTests
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateSutLibraryProject(sutProjectPath);
@@ -901,7 +898,6 @@ public class StringUtilsTests
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateSutLibraryProject(sutProjectPath);

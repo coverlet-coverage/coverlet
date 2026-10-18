@@ -56,8 +56,6 @@ public class Issue2009NetFrameworkRegressionTests : MtpValidationTestBase
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
-
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateIssue2009SutProject(sutProjectPath);
@@ -125,6 +123,10 @@ public class Class1
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)..</ArtifactsPath>
     <Deterministic>false</Deterministic>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
+    </RestoreSources>
   </PropertyGroup>
 
   <ItemGroup>

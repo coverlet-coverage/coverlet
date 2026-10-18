@@ -19,8 +19,8 @@
     <XunitRunnerVisualstudioVersion>4.0.1</XunitRunnerVisualstudioVersion>
     <MicrosoftTestingPlatformVersion>2.5.1</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.21.0</MoqVersion>
-    <MicrosoftNetRuntimeVersion Condition="'$(LEGACY)' == ''">11.0.0-rc.2.26504.105</MicrosoftNetRuntimeVersion>
-    <MicrosoftNetRuntimeVersion Condition="'$(LEGACY)' != ''">10.0.13</MicrosoftNetRuntimeVersion>
+    <MicrosoftNETRuntimeVersion Condition="'$(LEGACY)' == ''">11.0.0-rc.2.26504.105</MicrosoftNETRuntimeVersion>
+    <MicrosoftNETRuntimeVersion Condition="'$(LEGACY)' != ''">9.0.21</MicrosoftNETRuntimeVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
@@ -91,15 +91,5 @@
     <PackageVersion Include="System.Text.Json" Version="$(MicrosoftNETRuntimeVersion)" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(LEGACY)' == ''">
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNETRuntimeVersion)" />
-    <PackageVersion Include="System.Collections.Immutable" Version="$(MicrosoftNETRuntimeVersion)" />
-    <PackageVersion Include="System.Diagnostics.EventLog" Version="$(MicrosoftNETRuntimeVersion)" />
-    <PackageVersion Include="System.Formats.Asn1" Version="$(MicrosoftNETRuntimeVersion)" />
-    <PackageVersion Include="System.IO.Pipelines" Version="$(MicrosoftNETRuntimeVersion)" />
-    <PackageVersion Include="System.Reflection.Metadata" Version="$(MicrosoftNETRuntimeVersion)" />
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNETRuntimeVersion)" />
-    <PackageVersion Include="System.Text.Encoding.CodePages" Version="$(MicrosoftNETRuntimeVersion)" />
   </ItemGroup>
 </Project>

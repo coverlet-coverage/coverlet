@@ -24,7 +24,8 @@
     <PackageReference Include="Microsoft.Testing.Extensions.AzureDevOpsReport" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Moq" />
-    <PackageReference Include="ReportGenerator.Core" />
+    <PackageReference Include="ReportGenerator.Core" VersionOverride="5.5.11" Condition="'$(LEGACY)' == ''"/>
+    <PackageReference Include="ReportGenerator.Core" VersionOverride="5.4.18" Condition="'$(LEGACY)' != ''"/>
     <PackageReference Include="System.Linq.Async" />
     <!--<PackageReference Include="System.Reflection.Metadata" />-->
     <PackageReference Include="xunit.v3.mtp-v2" />
