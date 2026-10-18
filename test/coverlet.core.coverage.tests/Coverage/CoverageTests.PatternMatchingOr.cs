@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
-using Coverlet.Tests.Utils;
 using Xunit;
 
 namespace Coverlet.CoreCoverage.Tests
@@ -40,16 +39,9 @@ namespace Coverlet.CoreCoverage.Tests
 
         var branches = methodDocument.Branches.Values.OrderBy(x => x.Ordinal).ToArray();
 
-        if (TestUtils.GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
-        {
-          Assert.Equal(2, branches.Length);
-          Assert.Equal(new uint[] { 0, 1 }, branches.Select(x => x.Ordinal).ToArray());
-          Assert.Equal(new[] { 0, 1 }, branches.Select(x => x.Path).ToArray());
-        } else {
-          Assert.Equal(4, branches.Length);
-          Assert.Equal(new uint[] { 0, 1, 2, 3 }, branches.Select(x => x.Ordinal).ToArray());
-          Assert.Equal(new[] { 0, 1, 0,1 }, branches.Select(x => x.Path).ToArray());
-        }
+        Assert.Equal(2, branches.Length);
+        Assert.Equal(new uint[] { 0, 1 }, branches.Select(x => x.Ordinal).ToArray());
+        Assert.Equal(new[] { 0, 1 }, branches.Select(x => x.Path).ToArray());
         Assert.All(branches, branch => Assert.Equal(9, branch.Number));
         Assert.Equal(branches[0].Offset, branches[1].Offset);
         Assert.All(branches, branch => Assert.True(branch.Hits > 0));
