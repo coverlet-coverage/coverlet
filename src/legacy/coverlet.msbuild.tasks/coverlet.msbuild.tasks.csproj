@@ -21,6 +21,7 @@
     <NoWarn>$(NoWarn);NU5100</NoWarn>
     <!-- create SBOM for CI build-->
     <GenerateSBOM>true</GenerateSBOM>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
