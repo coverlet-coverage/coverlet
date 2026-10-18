@@ -83,7 +83,8 @@ namespace Coverlet.Integration.Tests
       Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+      string logFilePath = Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt");
+      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --diag:{logFilePath}", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
       // IncludeTestAssembly=true we do it in other test
       if (!string.IsNullOrEmpty(standardError))
@@ -94,6 +95,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
+      AttachTextAttachment("VSTest Diagnostic Log", logFilePath);
 
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
@@ -108,7 +111,8 @@ namespace Coverlet.Integration.Tests
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string runSettingsPath = AddCollectorRunsettingsFile(clonedTemplateProject.ProjectRootPath!);
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out string standardOutput, out string standardError);
+      string logFilePath = Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt");
+      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" --collect:\"XPlat Code Coverage\" --settings \"{runSettingsPath}\" --diag:{logFilePath}", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -117,6 +121,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
+      AttachTextAttachment("VSTest Diagnostic Log", logFilePath);
 
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
@@ -142,7 +148,8 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, result);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish"));
       Assert.NotNull(publishedTestFile);
-      result = DotnetCli($"vstest \"{publishedTestFile}\" --collect:\"XPlat Code Coverage\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out standardOutput, out standardError);
+      string logFilePath = Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt");
+      result = DotnetCli($"vstest \"{publishedTestFile}\" --collect:\"XPlat Code Coverage\" --diag:{logFilePath}", out standardOutput, out standardError);
       // We don't have any result to check because tests and code to instrument are in same assembly so we need to pass
       // IncludeTestAssembly=true we do it in other test
       if (!string.IsNullOrEmpty(standardError))
@@ -153,6 +160,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
+      AttachTextAttachment("VSTest Diagnostic Log", logFilePath);
 
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
@@ -177,7 +186,8 @@ namespace Coverlet.Integration.Tests
       Assert.Equal(0, result);
       string publishedTestFile = clonedTemplateProject.GetFiles("*" + ClonedTemplateProject.AssemblyName + ".dll").Single(f => f.Contains("publish"));
       Assert.NotNull(publishedTestFile);
-      result = DotnetCli($"vstest \"{publishedTestFile}\" --collect:\"XPlat Code Coverage\" --ResultsDirectory:\"{clonedTemplateProject.ProjectRootPath}\" /settings:\"{runSettingsPath}\" --diag:{Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt")}", out standardOutput, out standardError);
+      string logFilePath = Path.Combine(clonedTemplateProject.ProjectRootPath, "log.txt");
+      result = DotnetCli($"vstest \"{publishedTestFile}\" --collect:\"XPlat Code Coverage\" --ResultsDirectory:\"{clonedTemplateProject.ProjectRootPath}\" /settings:\"{runSettingsPath}\" --diag:{logFilePath}", out standardOutput, out standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -186,6 +196,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
+      AttachTextAttachment("VSTest Diagnostic Log", logFilePath);
 
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
