@@ -11,7 +11,10 @@ using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Moq;
 using Xunit;
+using Xunit.Sdk;
+using Xunit.v3;
 
+[assembly: Parallelization(Mode = ParallelMode.None)]
 namespace Coverlet.Core.Tests.Helpers
 {
   public class InstrumentationHelperTests

@@ -2,12 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>$(NetMinimum);$(NetCurrent)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' == ''">net8.0;net9.0;net10.0;net11.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' != ''">net8.0;net9.0</TargetFrameworks>
     <ToolCommandName>coverlet</ToolCommandName>
     <PackAsTool>true</PackAsTool>
     <AssemblyTitle>coverlet.console</AssemblyTitle>
     <!-- create SBOM for CI build-->
     <GenerateSBOM>true</GenerateSBOM>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->

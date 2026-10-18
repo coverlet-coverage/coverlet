@@ -15,6 +15,7 @@ steps:
 # create artifact/package folder
 - pwsh: |
     New-Item -ItemType Directory -Path artifacts/package/debug -Force
+    New-Item -ItemType Directory -Path artifacts/package/release -Force
   displayName: create folder artifacts/package/$(BuildConfiguration)
 
 # Authenticate Azure DevOps NuGet feed

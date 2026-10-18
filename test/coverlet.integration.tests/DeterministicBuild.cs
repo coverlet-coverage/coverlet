@@ -63,11 +63,73 @@ namespace Coverlet.Integration.Tests
       if (tfmsElement is null)
         throw new InvalidOperationException("No <TargetFrameworks> or <TargetFramework> element found in the first PropertyGroup.");
 
-      _testProjectTfms = tfmsElement.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+      _testProjectTfms = tfmsElement.Value
+        .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Select(ResolveTargetFrameworkToken)
+        .ToArray();
 
       Assert.Contains(_buildTargetFramework, _testProjectTfms);
 
       deterministicTestProps.Save(Path.Combine(propsFile));
+    }
+
+    private string ResolveTargetFrameworkToken(string targetFramework)
+    {
+      if (!TryGetMsBuildPropertyName(targetFramework, out string propertyName))
+      {
+        return targetFramework;
+      }
+
+      return GetDirectoryBuildPropertyValue(propertyName);
+    }
+
+    private static string GetDirectoryBuildPropertyValue(string propertyName)
+    {
+      string propsPath = Path.Combine(TestUtils.GetRepositoryRootPath(), "Directory.Build.props");
+      XElement props = XElement.Load(propsPath);
+
+      string legacy = Environment.GetEnvironmentVariable("LEGACY") ?? string.Empty;
+
+      XElement? selectedElement = props
+        .Descendants(propertyName)
+        .FirstOrDefault(element => IsConditionMatch(element.Attribute("Condition")?.Value, legacy));
+
+      if (selectedElement is null || string.IsNullOrWhiteSpace(selectedElement.Value))
+      {
+        throw new InvalidOperationException($"No '{propertyName}' value found in '{propsPath}' for LEGACY='{legacy}'.");
+      }
+
+      return selectedElement.Value.Trim();
+    }
+
+    private static bool TryGetMsBuildPropertyName(string value, out string propertyName)
+    {
+      propertyName = string.Empty;
+
+      if (!value.StartsWith("$(", StringComparison.Ordinal) || !value.EndsWith(")", StringComparison.Ordinal))
+      {
+        return false;
+      }
+
+      propertyName = value[2..^1];
+      return !string.IsNullOrWhiteSpace(propertyName);
+    }
+
+    private static bool IsConditionMatch(string? condition, string legacy)
+    {
+      if (string.IsNullOrWhiteSpace(condition))
+      {
+        return true;
+      }
+
+      string normalizedCondition = condition.Replace(" ", string.Empty, StringComparison.Ordinal);
+
+      return normalizedCondition switch
+      {
+        "'$(LEGACY)'==''" => string.IsNullOrEmpty(legacy),
+        "'$(LEGACY)'!=''" => !string.IsNullOrEmpty(legacy),
+        _ => false,
+      };
     }
 
     private protected void AssertCoverage(string standardOutput = "", string reportName = "", bool checkDeterministicReport = true)
@@ -239,7 +301,8 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
       string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, $"[{s_sutName}]*DeepThought", deterministicReport: true);
-      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
+      string logFilePath = Path.Combine(testLogFilesPath, "log.txt");
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{logFilePath}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -250,6 +313,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
+      AttachTextAttachment("VSTest Diagnostic Log", logFilePath);
 
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
@@ -299,7 +364,8 @@ namespace Coverlet.Integration.Tests
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
       string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, $"[{s_sutName}]*DeepThought", sourceLink: true);
-      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
+      string logFilePath = Path.Combine(testLogFilesPath, "log.txt");
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{logFilePath}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -310,6 +376,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardOutput);
       }
+
+      AttachTextAttachment("VSTest Diagnostic Log", logFilePath);
 
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
