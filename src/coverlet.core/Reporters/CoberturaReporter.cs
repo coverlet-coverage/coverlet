@@ -93,7 +93,7 @@ namespace Coverlet.Core.Reporters
               var lines = new XElement("lines");
               foreach (KeyValuePair<int, int> ln in meth.Value.Lines)
               {
-                bool isBranchPoint = meth.Value.Branches.Any(b => b.Line == ln.Key);
+                bool isBranchPoint = meth.Value.Branches.Any(b => b.Line == ln.Key && b.IsReachable);
                 var line = new XElement("line");
                 line.Add(new XAttribute("number", ln.Key.ToString()));
                 line.Add(new XAttribute("hits", ln.Value.ToString()));
@@ -101,7 +101,7 @@ namespace Coverlet.Core.Reporters
 
                 if (isBranchPoint)
                 {
-                  var branches = meth.Value.Branches.Where(b => b.Line == ln.Key).ToList();
+                  var branches = meth.Value.Branches.Where(b => b.Line == ln.Key && b.IsReachable).ToList();
                   CoverageDetails branchInfoCoverage = CoverageSummary.CalculateBranchCoverage(branches);
                   line.Add(new XAttribute("condition-coverage", $"{branchInfoCoverage.Percent.ToString(CultureInfo.InvariantCulture)}% ({branchInfoCoverage.Covered.ToString(CultureInfo.InvariantCulture)}/{branchInfoCoverage.Total.ToString(CultureInfo.InvariantCulture)})"));
                   var conditions = new XElement("conditions");

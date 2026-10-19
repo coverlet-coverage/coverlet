@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using Coverlet.Core.Abstractions;
@@ -32,6 +33,50 @@ namespace Coverlet.Core.Tests.Reporters
       Assert.DoesNotContain(doc.Descendants().Attributes("sequenceCoverage"), v => v.Value != "33.33");
       Assert.DoesNotContain(doc.Descendants().Attributes("branchCoverage"), v => v.Value != "25");
       Assert.DoesNotContain(doc.Descendants().Attributes("nPathComplexity"), v => v.Value != "4");
+    }
+
+    [Fact]
+    public void TestReport_UnreachableBranches_BranchPointsAgreeWithSummary()
+    {
+      var lines = new Lines
+      {
+        { 1, 3 }
+      };
+
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 3, Offset = 10, EndOffset = 20, Path = 0, Ordinal = 0, IsReachable = true },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 10, EndOffset = 30, Path = 1, Ordinal = 1, IsReachable = true },
+        new BranchInfo { Line = 1, Hits = 2, Offset = 40, EndOffset = 50, Path = 0, Ordinal = 2, IsReachable = false },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 60, Path = 1, Ordinal = 3, IsReachable = false }
+      };
+
+      var methods = new Methods();
+      string methodString = "System.Void Coverlet.Core.Tests.Reporters.Sample::TestMethod()";
+      methods.Add(methodString, new Method());
+      methods[methodString].Lines = lines;
+      methods[methodString].Branches = branches;
+
+      var result = new CoverageResult
+      {
+        Parameters = new CoverageParameters(),
+        Identifier = Guid.NewGuid().ToString(),
+        Modules = new Modules
+        {
+          { "module", new Documents { { "doc.cs", new Classes { { "Coverlet.Core.Tests.Reporters.Sample", methods } } } } }
+        }
+      };
+
+      XDocument doc = XDocument.Parse(new OpenCoverReporter().Report(result, new Mock<ISourceRootTranslator>().Object));
+      XElement method = doc.Descendants("Method").Single();
+
+      Assert.Equal(new[] { "10", "10" }, method.Descendants("BranchPoint").Select(b => b.Attribute("offset").Value));
+      XElement summary = method.Element("Summary");
+      Assert.Equal("2", summary.Attribute("numBranchPoints").Value);
+      Assert.Equal("1", summary.Attribute("visitedBranchPoints").Value);
+      XElement sequencePoint = method.Descendants("SequencePoint").Single();
+      Assert.Equal("2", sequencePoint.Attribute("bec").Value);
+      Assert.Equal("1", sequencePoint.Attribute("bev").Value);
     }
 
     [Fact]

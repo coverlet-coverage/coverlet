@@ -1039,7 +1039,8 @@ namespace Coverlet.Core.Instrumentation
               Offset = branchPoint.Offset,
               EndOffset = branchPoint.EndOffset,
               Path = branchPoint.Path,
-              Ordinal = branchPoint.Ordinal
+              Ordinal = branchPoint.Ordinal,
+              IsReachable = branchPoint.IsReachable
             }
         );
 
@@ -1111,7 +1112,8 @@ namespace Coverlet.Core.Instrumentation
               Offset = branchPoint.Offset,
               EndOffset = branchPoint.EndOffset,
               Path = branchPoint.Path,
-              Ordinal = branchPoint.Ordinal
+              Ordinal = branchPoint.Ordinal,
+              IsReachable = branchPoint.IsReachable
             }
         );
 

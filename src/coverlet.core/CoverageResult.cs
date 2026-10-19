@@ -17,6 +17,13 @@ namespace Coverlet.Core
     public int Path { get; set; }
     public uint Ordinal { get; set; }
     public int Hits { get; set; }
+
+    /// <summary>
+    /// Indicates whether this branch can be reached from the method entry.
+    /// Unreachable branches are not counted in branch coverage.
+    /// Default value: true (assume all branches are reachable unless proven otherwise)
+    /// </summary>
+    public bool IsReachable { get; set; } = true;
   }
   internal class Lines : SortedDictionary<int, int> { }
   internal class Branches : List<BranchInfo> { }
