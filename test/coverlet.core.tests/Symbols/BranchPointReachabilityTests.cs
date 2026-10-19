@@ -347,7 +347,7 @@ namespace Coverlet.Reachability
       return module.GetType("Coverlet.Reachability.Samples").Methods.Single(m => m.Name == methodName);
     }
 
-    internal static (byte[] PeImage, byte[] PdbImage) Compile(string source, string fileName, string assemblyName, OptimizationLevel optimization)
+    private static (byte[] PeImage, byte[] PdbImage) Compile(string source, string fileName, string assemblyName, OptimizationLevel optimization)
     {
       CSharpCompilation compilation = CSharpCompilation.Create(
           assemblyName,
