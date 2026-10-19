@@ -1020,41 +1020,92 @@ namespace Coverlet.Core.Symbols
                                                                                        instruction.Operand == instruction.Next?.Next;
 
     /// <summary>
-    /// Checks if a branch path is reachable through normal control flow.
-    /// A path is unreachable if preceded by unconditional control flow 
-    /// (return, throw) that prevents execution from reaching it.
+    /// Computes instructions reachable from method entry using control-flow edges.
     /// </summary>
-    /// <param name="instructions">List of all instructions in the method body</param>
-    /// <param name="pathStart">The first instruction of the path to check</param>
-    /// <returns>true if the path is reachable, false if it's dead code</returns>
-    private static bool IsPathReachable(List<Instruction> instructions, Instruction pathStart)
+    /// <param name="body">Method body to analyze.</param>
+    /// <returns>Set of reachable instructions.</returns>
+    private static HashSet<Instruction> ComputeReachableInstructions(MethodBody body)
     {
-      // A path is considered unreachable if it's preceded by unconditional control flow
-      // Only unreachable paths should have IsReachable = false
-      // Most paths are reachable by default
-
-      if (pathStart == null)
-        return true;
-
-      int pathIndex = instructions.BinarySearch(pathStart, new InstructionByOffsetComparer());
-      if (pathIndex <= 0)
-        return true; // First instruction or not found - assume reachable
-
-      // Look back at immediate predecessors for unconditional control flow
-      // Check up to 2 instructions back to account for potential nop or other padding
-      for (int i = pathIndex - 1; i >= Math.Max(0, pathIndex - 2); i--)
+      var reached = new HashSet<Instruction>();
+      if (body is null || body.Instructions.Count == 0)
       {
-        Instruction instr = instructions[i];
+        return reached;
+      }
 
-        // Unconditional control flow makes subsequent code unreachable
-        if (instr.OpCode.FlowControl == FlowControl.Return ||
-            instr.OpCode.FlowControl == FlowControl.Throw)
+      var work = new Stack<Instruction>();
+
+      void Visit(Instruction instruction)
+      {
+        if (instruction is not null && reached.Add(instruction))
         {
-          return false;
+          work.Push(instruction);
         }
       }
 
-      return true;
+      Visit(body.Instructions[0]);
+
+      bool grew = true;
+      while (grew)
+      {
+        while (work.Count > 0)
+        {
+          Instruction instruction = work.Pop();
+          switch (instruction.OpCode.FlowControl)
+          {
+            case FlowControl.Branch:
+              if (instruction.Operand is Instruction branchTarget)
+              {
+                Visit(branchTarget);
+              }
+              else if (instruction.Operand is Instruction[] switchTargets)
+              {
+                foreach (Instruction switchTarget in switchTargets)
+                {
+                  Visit(switchTarget);
+                }
+              }
+
+              break;
+            case FlowControl.Cond_Branch:
+              if (instruction.Operand is Instruction conditionalTarget)
+              {
+                Visit(conditionalTarget);
+              }
+              else if (instruction.Operand is Instruction[] conditionalTargets)
+              {
+                foreach (Instruction conditionalBranchTarget in conditionalTargets)
+                {
+                  Visit(conditionalBranchTarget);
+                }
+              }
+
+              Visit(instruction.Next);
+              break;
+            case FlowControl.Return:
+            case FlowControl.Throw:
+              break;
+            default:
+              Visit(instruction.Next);
+              break;
+          }
+        }
+
+        grew = false;
+        foreach (ExceptionHandler exceptionHandler in body.ExceptionHandlers)
+        {
+          if (!reached.Contains(exceptionHandler.TryStart))
+          {
+            continue;
+          }
+
+          int before = reached.Count;
+          Visit(exceptionHandler.FilterStart);
+          Visit(exceptionHandler.HandlerStart);
+          grew |= reached.Count != before;
+        }
+      }
+
+      return reached;
     }
 
     public IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
@@ -1067,6 +1118,7 @@ namespace Coverlet.Core.Symbols
 
       uint ordinal = 0;
       var instructions = methodDefinition.Body.Instructions.ToList();
+      HashSet<Instruction> reachableInstructions = ComputeReachableInstructions(methodDefinition.Body);
 
       bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
       bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
@@ -1172,7 +1224,7 @@ namespace Coverlet.Core.Symbols
             return list;
           }
 
-          if (!BuildPointsForConditionalBranch(list, instruction, branchingInstructionLine, document, branchOffset, pathCounter, instructions, ref ordinal, methodDefinition))
+          if (!BuildPointsForConditionalBranch(list, instruction, branchingInstructionLine, document, branchOffset, pathCounter, instructions, reachableInstructions, ref ordinal, methodDefinition))
           {
             return list;
           }
@@ -1187,7 +1239,7 @@ namespace Coverlet.Core.Symbols
 
     private static bool BuildPointsForConditionalBranch(List<BranchPoint> list, Instruction instruction,
         int branchingInstructionLine, string document, int branchOffset, int pathCounter,
-        List<Instruction> instructions, ref uint ordinal, MethodDefinition methodDefinition)
+        List<Instruction> instructions, HashSet<Instruction> reachableInstructions, ref uint ordinal, MethodDefinition methodDefinition)
     {
       // Add Default branch (Path=0)
 
@@ -1196,8 +1248,10 @@ namespace Coverlet.Core.Symbols
 
       List<int> pathOffsetList = GetBranchPath(@else);
 
-      // Determine if the else path is reachable
-      bool elsePathReachable = IsPathReachable(instructions, @else);
+      bool branchInstructionReachable = reachableInstructions.Contains(instruction);
+
+      // Branch paths are reachable when the branch instruction itself is reachable.
+      bool elsePathReachable = branchInstructionReachable;
 
       // add Path 0
       var path0 = new BranchPoint
@@ -1222,8 +1276,7 @@ namespace Coverlet.Core.Symbols
         if (instruction.Operand is not Instruction @then)
           return false;
 
-        // Determine if the then path is reachable
-        bool thenPathReachable = IsPathReachable(instructions, @then);
+        bool thenPathReachable = branchInstructionReachable;
 
         ordinal = BuildPointsForBranch(list, then, branchingInstructionLine, document, branchOffset,
             ordinal, pathCounter, path0, instructions, methodDefinition, thenPathReachable);
@@ -1234,7 +1287,7 @@ namespace Coverlet.Core.Symbols
           return false;
 
         ordinal = BuildPointsForSwitchCases(list, path0, branchInstructions, branchingInstructionLine,
-            document, branchOffset, ordinal, ref pathCounter, instructions);
+            document, branchOffset, ordinal, ref pathCounter, instructions, branchInstructionReachable);
       }
       return true;
     }
@@ -1298,7 +1351,7 @@ namespace Coverlet.Core.Symbols
     }
 
     private static uint BuildPointsForSwitchCases(List<BranchPoint> list, BranchPoint path0, Instruction[] branchInstructions,
-        int branchingInstructionLine, string document, int branchOffset, uint ordinal, ref int pathCounter, List<Instruction> instructions)
+        int branchingInstructionLine, string document, int branchOffset, uint ordinal, ref int pathCounter, List<Instruction> instructions, bool branchInstructionReachable)
     {
       int counter = pathCounter;
       list.Add(path0);
@@ -1307,7 +1360,7 @@ namespace Coverlet.Core.Symbols
       list.AddRange(branchInstructions.Select(branchInstruction =>
       {
         List<int> pathOffsetList1 = GetBranchPath(branchInstruction);
-        bool switchCaseReachable = IsPathReachable(instructions, branchInstruction);
+        bool switchCaseReachable = branchInstructionReachable;
 
         return new BranchPoint
         {

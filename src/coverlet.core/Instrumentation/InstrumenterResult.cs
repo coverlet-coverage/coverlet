@@ -35,6 +35,8 @@ namespace Coverlet.Core.Instrumentation
     public int Path;
     [DataMember]
     public uint Ordinal;
+    [DataMember]
+    public bool IsReachable = true;
   }
 
   [DebuggerDisplay("line = {Line} Ordinal = {Ordinal}")]
