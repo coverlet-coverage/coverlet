@@ -47,5 +47,13 @@ namespace Coverlet.Core.Symbols
     /// The url to the document if an entry was not mapped to an id
     /// </summary>
     public string Document { get; set; }
+
+    /// <summary>
+    /// Indicates whether this branch path can be reached from the method entry.
+    /// A path is reachable when its branching instruction is reachable in the
+    /// method's control-flow graph, including through exception handlers.
+    /// Default value: true (branch is considered reachable unless proven otherwise)
+    /// </summary>
+    public bool IsReachable { get; set; } = true;
   }
 }

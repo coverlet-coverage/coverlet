@@ -256,14 +256,14 @@ namespace Coverlet.Core
                 if (methods.TryGetValue(branch.Method, out Method method))
                 {
                   method.Branches.Add(new BranchInfo
-                  { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                  { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal, IsReachable = branch.IsReachable }
                   );
                 }
                 else
                 {
                   documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                   documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                  { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                  { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal, IsReachable = branch.IsReachable }
                   );
                 }
               }
@@ -272,7 +272,7 @@ namespace Coverlet.Core
                 documents[doc.Path].Add(branch.Class, []);
                 documents[doc.Path][branch.Class].Add(branch.Method, new Method());
                 documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+                { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal, IsReachable = branch.IsReachable }
                 );
               }
             }
@@ -282,7 +282,7 @@ namespace Coverlet.Core
               documents[doc.Path].Add(branch.Class, []);
               documents[doc.Path][branch.Class].Add(branch.Method, new Method());
               documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-              { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal }
+              { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal, IsReachable = branch.IsReachable }
               );
             }
           }

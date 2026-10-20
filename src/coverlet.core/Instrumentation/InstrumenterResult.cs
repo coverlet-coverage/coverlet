@@ -35,6 +35,13 @@ namespace Coverlet.Core.Instrumentation
     public int Path;
     [DataMember]
     public uint Ordinal;
+    [DataMember]
+    public bool IsReachable = true;
+
+    // DataContractSerializer does not run field initializers, so without this a state file
+    // written before IsReachable existed would read back with every branch unreachable
+    [OnDeserializing]
+    private void OnDeserializing(StreamingContext context) => IsReachable = true;
   }
 
   [DebuggerDisplay("line = {Line} Ordinal = {Ordinal}")]

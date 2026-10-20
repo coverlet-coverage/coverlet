@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Improvements
+
+- Add `IsReachable` to branch points, computed from the method's control-flow graph, and exclude unreachable branches from branch-coverage totals and from branch details in Cobertura, LCOV and OpenCover reports (follow-up to [#2047](https://github.com/coverlet-coverage/coverlet/pull/2047))
+
 ## Release date 2026-09-27
 ### Packages
 coverlet.msbuild 10.1.0

@@ -1019,6 +1019,91 @@ namespace Coverlet.Core.Symbols
                                                                                       instruction.Next is not null && instruction.Next.OpCode == OpCodes.Nop &&
                                                                                       instruction.Operand == instruction.Next?.Next;
 
+    /// <summary>
+    /// Computes the instructions reachable from the method entry using control-flow edges:
+    /// branch targets, the next instruction unless control transfers unconditionally
+    /// (br, leave, ret, jmp, throw, rethrow, endfinally, endfilter), and the filter and handler
+    /// entries of every exception handler whose try block is reachable.
+    /// </summary>
+    /// <param name="body">Method body to analyze.</param>
+    /// <returns>Set of reachable instructions.</returns>
+    private static HashSet<Instruction> ComputeReachableInstructions(MethodBody body)
+    {
+      var reached = new HashSet<Instruction>();
+      if (body.Instructions.Count == 0)
+      {
+        return reached;
+      }
+
+      var work = new Stack<Instruction>();
+
+      void Visit(Instruction instruction)
+      {
+        if (instruction is not null && reached.Add(instruction))
+        {
+          work.Push(instruction);
+        }
+      }
+
+      Visit(body.Instructions[0]);
+
+      bool grew = true;
+      while (grew)
+      {
+        while (work.Count > 0)
+        {
+          Instruction instruction = work.Pop();
+          switch (instruction.OpCode.FlowControl)
+          {
+            case FlowControl.Branch:
+              Visit(instruction.Operand as Instruction);
+              break;
+            case FlowControl.Cond_Branch:
+              if (instruction.Operand is Instruction conditionalTarget)
+              {
+                Visit(conditionalTarget);
+              }
+              else if (instruction.Operand is Instruction[] switchTargets)
+              {
+                foreach (Instruction switchTarget in switchTargets)
+                {
+                  Visit(switchTarget);
+                }
+              }
+
+              Visit(instruction.Next);
+              break;
+            case FlowControl.Return:
+            case FlowControl.Throw:
+              break;
+            case FlowControl.Call when instruction.OpCode.Code == Code.Jmp:
+              // jmp leaves the method; Cecil classifies it as a call
+              break;
+            default:
+              Visit(instruction.Next);
+              break;
+          }
+        }
+
+        // Handlers are entered from their try block, not by a branch
+        grew = false;
+        foreach (ExceptionHandler exceptionHandler in body.ExceptionHandlers)
+        {
+          if (!reached.Contains(exceptionHandler.TryStart))
+          {
+            continue;
+          }
+
+          int before = reached.Count;
+          Visit(exceptionHandler.FilterStart);
+          Visit(exceptionHandler.HandlerStart);
+          grew |= reached.Count != before;
+        }
+      }
+
+      return reached;
+    }
+
     public IReadOnlyList<BranchPoint> GetBranchPoints(MethodDefinition methodDefinition)
     {
       var list = new List<BranchPoint>();
@@ -1029,6 +1114,7 @@ namespace Coverlet.Core.Symbols
 
       uint ordinal = 0;
       var instructions = methodDefinition.Body.Instructions.ToList();
+      HashSet<Instruction> reachableInstructions = ComputeReachableInstructions(methodDefinition.Body);
 
       bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
       bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
@@ -1134,7 +1220,7 @@ namespace Coverlet.Core.Symbols
             return list;
           }
 
-          if (!BuildPointsForConditionalBranch(list, instruction, branchingInstructionLine, document, branchOffset, pathCounter, instructions, ref ordinal, methodDefinition))
+          if (!BuildPointsForConditionalBranch(list, instruction, branchingInstructionLine, document, branchOffset, pathCounter, instructions, ref ordinal, methodDefinition, reachableInstructions.Contains(instruction)))
           {
             return list;
           }
@@ -1149,7 +1235,7 @@ namespace Coverlet.Core.Symbols
 
     private static bool BuildPointsForConditionalBranch(List<BranchPoint> list, Instruction instruction,
         int branchingInstructionLine, string document, int branchOffset, int pathCounter,
-        List<Instruction> instructions, ref uint ordinal, MethodDefinition methodDefinition)
+        List<Instruction> instructions, ref uint ordinal, MethodDefinition methodDefinition, bool branchInstructionReachable)
     {
       // Add Default branch (Path=0)
 
@@ -1170,7 +1256,9 @@ namespace Coverlet.Core.Symbols
               pathOffsetList.Count > 1
                   ? pathOffsetList.GetRange(0, pathOffsetList.Count - 1)
                   : [],
-        EndOffset = pathOffsetList.Last()
+        EndOffset = pathOffsetList.Last(),
+        // Every path of a branch is reachable exactly when the branch instruction is reachable
+        IsReachable = branchInstructionReachable
       };
 
       // Add Conditional Branch (Path=1)
@@ -1211,7 +1299,8 @@ namespace Coverlet.Core.Symbols
               pathOffsetList1.Count > 1
                   ? pathOffsetList1.GetRange(0, pathOffsetList1.Count - 1)
                   : [],
-        EndOffset = pathOffsetList1.Last()
+        EndOffset = pathOffsetList1.Last(),
+        IsReachable = path0.IsReachable
       };
 
       // only add branch if branch does not match a known sequence 
@@ -1269,7 +1358,8 @@ namespace Coverlet.Core.Symbols
                   pathOffsetList1.Count > 1
                       ? pathOffsetList1.GetRange(0, pathOffsetList1.Count - 1)
                       : [],
-            EndOffset = pathOffsetList1.Last()
+            EndOffset = pathOffsetList1.Last(),
+            IsReachable = path0.IsReachable
           }));
       pathCounter = counter;
       return ordinal;

@@ -490,6 +490,103 @@ namespace Coverlet.Core.Tests.Reporters
     }
 
     [Fact]
+    public void Report_UnreachableBranch_ExcludedFromConditionCoverage()
+    {
+      var result = new CoverageResult
+      {
+        Identifier = Guid.NewGuid().ToString()
+      };
+
+      var lines = new Lines
+      {
+        { 1, 3 },
+        { 2, 0 }
+      };
+
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 3, Offset = 10, EndOffset = 20, Path = 0, Ordinal = 0, IsReachable = true },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 10, EndOffset = 30, Path = 1, Ordinal = 1, IsReachable = true },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 50, Path = 0, Ordinal = 2, IsReachable = false },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 40, EndOffset = 60, Path = 1, Ordinal = 3, IsReachable = false }
+      };
+
+      var methods = new Methods();
+      string methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestMethod()";
+      methods.Add(methodString, new Method());
+      methods[methodString].Lines = lines;
+      methods[methodString].Branches = branches;
+
+      var classes = new Classes
+      {
+        { "Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods }
+      };
+
+      var documents = new Documents
+      {
+        { RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? @"C:\doc.cs" : @"/doc.cs", classes }
+      };
+
+      result.Modules = new Modules
+      {
+        { "module", documents }
+      };
+      result.Parameters = new CoverageParameters();
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      XElement line = XDocument.Load(new StringReader(report)).Descendants("method").Single().Descendants("line").Single(l => l.Attribute("number").Value == "1");
+      Assert.Equal("50% (1/2)", line.Attribute("condition-coverage").Value);
+      XElement condition = Assert.Single(line.Element("conditions").Elements("condition"));
+      Assert.Equal("10", condition.Attribute("number").Value);
+    }
+
+    [Fact]
+    public void Report_LineWithOnlyUnreachableBranches_IsNotABranchLine()
+    {
+      var lines = new Lines
+      {
+        { 1, 3 },
+        { 2, 1 }
+      };
+
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 3, Offset = 10, EndOffset = 20, Path = 0, Ordinal = 0, IsReachable = true },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 10, EndOffset = 30, Path = 1, Ordinal = 1, IsReachable = true },
+        new BranchInfo { Line = 2, Hits = 1, Offset = 40, EndOffset = 50, Path = 0, Ordinal = 2, IsReachable = false },
+        new BranchInfo { Line = 2, Hits = 0, Offset = 40, EndOffset = 60, Path = 1, Ordinal = 3, IsReachable = false }
+      };
+
+      var methods = new Methods();
+      string methodString = "System.Void Coverlet.Core.Reporters.Tests.CoberturaReporterTests::TestMethod()";
+      methods.Add(methodString, new Method());
+      methods[methodString].Lines = lines;
+      methods[methodString].Branches = branches;
+
+      var result = new CoverageResult
+      {
+        Identifier = Guid.NewGuid().ToString(),
+        Parameters = new CoverageParameters(),
+        Modules = new Modules
+        {
+          { "module", new Documents { { RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? @"C:\doc.cs" : @"/doc.cs", new Classes { { "Coverlet.Core.Reporters.Tests.CoberturaReporterTests", methods } } } } }
+        }
+      };
+
+      string report = new CoberturaReporter().Report(result, new Mock<ISourceRootTranslator>().Object);
+
+      XElement[] reportLines = [.. XDocument.Load(new StringReader(report)).Descendants("method").Single().Descendants("line")];
+      XElement live = reportLines.Single(l => l.Attribute("number").Value == "1");
+      Assert.Equal("True", live.Attribute("branch").Value);
+      Assert.Equal("50% (1/2)", live.Attribute("condition-coverage").Value);
+      XElement dead = reportLines.Single(l => l.Attribute("number").Value == "2");
+      Assert.Equal("False", dead.Attribute("branch").Value);
+      Assert.Null(dead.Attribute("condition-coverage"));
+      Assert.Null(dead.Element("conditions"));
+    }
+
+    [Fact]
     public void Report_DeterministicReport_FilenameFromTranslator()
     {
       // When DeterministicReport = true, the filename must come from ResolveDeterministicPath.

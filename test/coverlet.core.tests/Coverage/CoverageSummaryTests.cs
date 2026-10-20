@@ -354,6 +354,54 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
+    public void CalculateBranchCoverage_AllBranchesReachable_CountsAllBranches()
+    {
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1, IsReachable = true },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2, IsReachable = true }
+      };
+
+      CoverageDetails result = CoverageSummary.CalculateBranchCoverage(branches);
+
+      Assert.Equal(2, result.Total);
+      Assert.Equal(1, result.Covered);
+      Assert.Equal(50, result.Percent);
+    }
+
+    [Fact]
+    public void CalculateBranchCoverage_OneUnreachableBranch_ExcludesUnreachable()
+    {
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1, IsReachable = true },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2, IsReachable = false }
+      };
+
+      CoverageDetails result = CoverageSummary.CalculateBranchCoverage(branches);
+
+      Assert.Equal(1, result.Total);
+      Assert.Equal(1, result.Covered);
+      Assert.Equal(100, result.Percent);
+    }
+
+    [Fact]
+    public void CalculateBranchCoverage_UnreachableBranchWithHits_NotCounted()
+    {
+      var branches = new Branches
+      {
+        new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1, IsReachable = false },
+        new BranchInfo { Line = 1, Hits = 0, Offset = 1, Path = 1, Ordinal = 2, IsReachable = false }
+      };
+
+      CoverageDetails result = CoverageSummary.CalculateBranchCoverage(branches);
+
+      Assert.Equal(0, result.Total);
+      Assert.Equal(0, result.Covered);
+      Assert.Equal(100, result.Percent);
+    }
+
+    [Fact]
     public void BuildCoverageSummaryTable_SingleModule_TwoSectionsSeparatedByNewLine()
     {
       string result = CoverageSummary.BuildCoverageSummaryTable(_averageCalculationSingleModule);

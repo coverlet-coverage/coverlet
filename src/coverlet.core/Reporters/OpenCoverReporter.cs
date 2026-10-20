@@ -147,7 +147,7 @@ namespace Coverlet.Core.Reporters
                 k++;
               }
 
-              foreach (BranchInfo branche in meth.Value.Branches)
+              foreach (BranchInfo branche in meth.Value.Branches.Where(b => b.IsReachable))
               {
                 var branchPoint = new XElement("BranchPoint");
                 branchPoint.Add(new XAttribute("vc", branche.Hits.ToString()));
