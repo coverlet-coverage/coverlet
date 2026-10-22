@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Improvements
 
-- Add `IsReachable` to branch points, computed from the method's control-flow graph, and exclude unreachable branches from branch-coverage totals and from branch details in Cobertura, LCOV and OpenCover reports (follow-up to [#2047](https://github.com/coverlet-coverage/coverlet/pull/2047))
+- Add `IsReachable` to branch points, computed from the method's control-flow graph, and exclude unreachable branches from branch-coverage totals and from branch details in Cobertura, LCOV and OpenCover reports [#2056](https://github.com/coverlet-coverage/coverlet/pull/2056) by <https://github.com/pcshrosbree>
+
+### Fixed
+
+- Fix Regression coverlet.MTP does not instrument local functions [#2046](https://github.com/coverlet-coverage/coverlet/pull/2046)
+
+## Maintenance
+
+- Update NuGet package versions [#2050](https://github.com/coverlet-coverage/coverlet/pull/2050)
 
 ## Release date 2026-09-27
 ### Packages
