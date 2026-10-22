@@ -1,9 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">net10.0;net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(LEGACY)' != ''">net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <DebugType>portable</DebugType>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -22,8 +21,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="9.0.11" Condition="'$(TargetFramework)' != 'net10.0'" />
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="8.2.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="9.1.0" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="10.1.0" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" VersionOverride="10.1.0" Condition="'$(TargetFramework)' == 'net11.0'" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
@@ -31,7 +32,10 @@
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Moq" />
     <!-- Tmds.ExecFunction removed - replaced with custom ProcessExecutor (Issue #1833) -->
-    <PackageReference Include="ReportGenerator.Core" />
+    <PackageReference Include="ReportGenerator.Core" VersionOverride="5.5.11" Condition="'$(LEGACY)' == ''"/>
+    <PackageReference Include="ReportGenerator.Core" VersionOverride="5.4.18" Condition="'$(LEGACY)' != ''"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration" VersionOverride="10.0.13" Condition="'$(TargetFramework)' != 'net11.0'"/>
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="xunit.v3.mtp-v2" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>

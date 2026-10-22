@@ -4,7 +4,7 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.10.94" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.11.13-beta" />
   </ItemGroup>
   <PropertyGroup>
     <!-- .NET 8.0 support -->
@@ -19,7 +19,7 @@
     <XunitRunnerVisualstudioVersion>4.0.1</XunitRunnerVisualstudioVersion>
     <MicrosoftTestingPlatformVersion>2.5.1</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.21.0</MoqVersion>
-    <MicrosoftNETRuntimeVersion Condition="'$(LEGACY)' == ''">10.0.13</MicrosoftNETRuntimeVersion>
+    <MicrosoftNETRuntimeVersion Condition="'$(LEGACY)' == ''">11.0.0-rc.2.26504.105</MicrosoftNETRuntimeVersion>
     <MicrosoftNETRuntimeVersion Condition="'$(LEGACY)' != ''">9.0.21</MicrosoftNETRuntimeVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -69,7 +69,7 @@
     <PackageVersion Include="ReportGenerator.Core" Version="5.4.18" Condition="'$(LEGACY)' != ''" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.1.0" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.13" />
+    <PackageVersion Include="System.CommandLine" Version="3.0.0-rc.2.26504.105" />
     <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.v3.runner.msbuild" Version="$(XunitV3Version)" />
