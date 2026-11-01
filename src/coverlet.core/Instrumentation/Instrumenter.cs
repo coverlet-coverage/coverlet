@@ -804,7 +804,6 @@ namespace Coverlet.Core.Instrumentation
     {
       method.Body.SimplifyMacros();
       ILProcessor processor = method.Body.GetILProcessor();
-      int index = 0;
       int count = processor.Body.Instructions.Count;
       IReadOnlyList<BranchPoint> branchPoints = _cecilSymbolHelper.GetBranchPoints(method);
       IDictionary<int, Instruction> targetsMap = new Dictionary<int, Instruction>();
@@ -873,7 +872,7 @@ namespace Coverlet.Core.Instrumentation
       int currentUnreachableRangeIx = 0;
       for (int n = 0; n < count; n++)
       {
-        Instruction currentInstruction = processor.Body.Instructions[index];
+        Instruction currentInstruction = originalInstructions[n];
         SequencePoint sequencePoint = method.DebugInformation.GetSequencePoint(currentInstruction);
         IEnumerable<BranchPoint> targetedBranchPoints = branchPoints.Where(p => p.EndOffset == currentInstruction.Offset);
 
@@ -895,7 +894,6 @@ namespace Coverlet.Core.Instrumentation
         // Check is both reachable, _and_ coverable
         if (isUnreachable || _cecilSymbolHelper.SkipNotCoverableInstruction(method, currentInstruction))
         {
-          index++;
           continue;
         }
 
@@ -904,14 +902,11 @@ namespace Coverlet.Core.Instrumentation
           if (_cecilSymbolHelper.SkipInlineAssignedAutoProperty(_parameters.SkipAutoProps, method,
                 currentInstruction) || IsInsideExcludedMethodSection(sequencePoint))
           {
-            index++;
             continue;
           }
 
           Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, sequencePoint);
           targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
-
-          index += 2;
         }
 
         foreach (BranchPoint branchTarget in targetedBranchPoints)
@@ -932,8 +927,6 @@ namespace Coverlet.Core.Instrumentation
             Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, branchTarget);
             if (!targetsMap.ContainsKey(currentInstruction.Offset))
               targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
-
-            index += 2;
           }
           else
           {
@@ -992,8 +985,6 @@ namespace Coverlet.Core.Instrumentation
               Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, branchTarget);
               if (!targetsMap.ContainsKey(currentInstruction.Offset))
                 targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
-
-              index += 2;
             }
             else
             {
@@ -1019,8 +1010,7 @@ namespace Coverlet.Core.Instrumentation
           }
         }
 
-        index++;
-      }
+        }
 
       foreach (Instruction bodyInstruction in originalInstructions)
         ReplaceInstructionTarget(bodyInstruction, targetsMap, branchRedirectMap);
