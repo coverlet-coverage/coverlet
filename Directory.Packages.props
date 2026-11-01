@@ -17,7 +17,7 @@
     <MicrosoftNETTestSdkVersion>18.11.0</MicrosoftNETTestSdkVersion>
     <XunitV3Version>4.0.2</XunitV3Version>
     <XunitRunnerVisualstudioVersion>4.0.1</XunitRunnerVisualstudioVersion>
-    <MicrosoftTestingPlatformVersion>2.5.1</MicrosoftTestingPlatformVersion>
+    <MicrosoftTestingPlatformVersion>2.5.2</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.21.0</MoqVersion>
     <MicrosoftNETRuntimeVersion Condition="'$(LEGACY)' == ''">10.0.14</MicrosoftNETRuntimeVersion>
     <MicrosoftNETRuntimeVersion Condition="'$(LEGACY)' != ''">9.0.22</MicrosoftNETRuntimeVersion>
