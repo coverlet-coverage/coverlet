@@ -7,6 +7,7 @@ This is a .NET based repository that contains the coverlet projects for code cov
 - Always ask for explicit approval before running any tests (`dotnet test`, integration tests, test scripts, coverage test runs, or equivalent). User prefers to run tests manually and does not want me to execute test runs unless explicitly requested.
 - Create a single, well-organized proposal or resolution document per issue, located in `Documentation/Plans/`. This folder is Git-ignored and local-only; documents are NOT uploaded to GitHub.
 - Stop deep analysis once effort/usage for a topic reaches about 60%, and keep investigation focused and efficient.
+- Use ILVerify as a local dotnet tool for future IL investigations.
 
 ## Code Standards
 
@@ -181,8 +182,7 @@ When mocking interfaces, **reference actual adapter implementations** in the cod
 - `src/coverlet.console/Logging/ConsoleLogger.cs` - Shows coverlet's internal `ILogger` implementation.
 - `src/coverlet.core/Abstractions/ILogger.cs` - Coverlet's internal logger interface.
 
-**Example from CoverletLoggerAdapter.cs:**
-// Shows actual MTP ILogger usage - simple methods, no EventId
+**Example from CoverletLoggerAdapter.cs:**// Shows actual MTP ILogger usage - simple methods, no EventId
 public void LogInformation(string message, bool important = false)
 {
     if (important)
@@ -193,7 +193,8 @@ public void LogInformation(string message, bool important = false)
     {
         _logger.LogInformation(message);
     }
-}### Test Generation Verification (Critical Rule)
+}
+### Test Generation Verification (Critical Rule)
 
 **Before generating any test, you MUST:**
 

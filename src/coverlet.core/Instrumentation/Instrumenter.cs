@@ -804,7 +804,6 @@ namespace Coverlet.Core.Instrumentation
     {
       method.Body.SimplifyMacros();
       ILProcessor processor = method.Body.GetILProcessor();
-      int index = 0;
       int count = processor.Body.Instructions.Count;
       IReadOnlyList<BranchPoint> branchPoints = _cecilSymbolHelper.GetBranchPoints(method);
       IDictionary<int, Instruction> targetsMap = new Dictionary<int, Instruction>();
@@ -853,11 +852,27 @@ namespace Coverlet.Core.Instrumentation
       // for the first original instruction instead of its intended target.
       List<Instruction> originalInstructions = [.. processor.Body.Instructions];
 
+      // Trampolines are appended at method end. If any exception-handler boundary is open-ended
+      // (null end marker), appending instructions extends that protected region and can pull the
+      // trampoline into a try/finally handler, yielding invalid IL in optimized loop shapes.
+      bool canUseBranchTrampolines = !method.Body.ExceptionHandlers.Any(h =>
+          (h.TryStart != null && h.TryEnd == null) ||
+          (h.HandlerStart != null && h.HandlerEnd == null));
+
+      // In optimized IL, the conditional branch for `if` can target a compiler-emitted NOP placed
+      // immediately before TryStart. Injecting a taken-branch counter before that NOP while we are
+      // forced to use inline fallback (no trampoline) can produce invalid IL in release loops.
+      // Track these offsets so we can skip only that unsafe taken-branch injection shape.
+      var offsetsImmediatelyBeforeTryStart = new HashSet<int>(
+          method.Body.ExceptionHandlers
+              .Where(h => h.TryStart?.Previous != null)
+              .Select(h => h.TryStart.Previous.Offset));
+
       System.Collections.Immutable.ImmutableArray<ReachabilityHelper.UnreachableRange> unreachableRanges = _reachabilityHelper.FindUnreachableIL(processor.Body.Instructions, processor.Body.ExceptionHandlers);
       int currentUnreachableRangeIx = 0;
       for (int n = 0; n < count; n++)
       {
-        Instruction currentInstruction = processor.Body.Instructions[index];
+        Instruction currentInstruction = originalInstructions[n];
         SequencePoint sequencePoint = method.DebugInformation.GetSequencePoint(currentInstruction);
         IEnumerable<BranchPoint> targetedBranchPoints = branchPoints.Where(p => p.EndOffset == currentInstruction.Offset);
 
@@ -879,7 +894,6 @@ namespace Coverlet.Core.Instrumentation
         // Check is both reachable, _and_ coverable
         if (isUnreachable || _cecilSymbolHelper.SkipNotCoverableInstruction(method, currentInstruction))
         {
-          index++;
           continue;
         }
 
@@ -888,14 +902,11 @@ namespace Coverlet.Core.Instrumentation
           if (_cecilSymbolHelper.SkipInlineAssignedAutoProperty(_parameters.SkipAutoProps, method,
                 currentInstruction) || IsInsideExcludedMethodSection(sequencePoint))
           {
-            index++;
             continue;
           }
 
           Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, sequencePoint);
           targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
-
-          index += 2;
         }
 
         foreach (BranchPoint branchTarget in targetedBranchPoints)
@@ -916,8 +927,6 @@ namespace Coverlet.Core.Instrumentation
             Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, branchTarget);
             if (!targetsMap.ContainsKey(currentInstruction.Offset))
               targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
-
-            index += 2;
           }
           else
           {
@@ -944,16 +953,38 @@ namespace Coverlet.Core.Instrumentation
                 insideExceptionHandlerOffsets.Contains(branchTarget.Offset) ||
                 insideExceptionHandlerOffsets.Contains(branchTarget.EndOffset);
 
-            if (crossesExceptionBoundary || !targetReachableByFallThrough)
+            if (!canUseBranchTrampolines || crossesExceptionBoundary || !targetReachableByFallThrough)
             {
               // Inline fallback: preserves valid IL. Counter is inserted before the jump target so
               // it fires on every arrival, which may produce false-positive counts for patterns like
               // `if` without `else` inside exception-handler regions (e.g. async state machines).
+              // When the target is the instruction immediately before TryStart and trampolines are
+              // unavailable, use a branch-local trampoline so both branch paths are still registered
+              // without injecting a taken counter at the unsafe pre-TryStart location.
+              if (!canUseBranchTrampolines && offsetsImmediatelyBeforeTryStart.Contains(currentInstruction.Offset))
+              {
+                Instruction branchInstruction = originalInstructions.FirstOrDefault(i => i.Offset == branchTarget.Offset);
+                if (branchInstruction is not null &&
+                    branchInstruction.Next is not null &&
+                    branchInstruction.Operand is Instruction)
+                {
+                  Instruction trampolineTarget = targetsMap.TryGetValue(currentInstruction.Offset, out Instruction firstCounter)
+                      ? firstCounter
+                      : currentInstruction;
+                  Instruction localTrampolineStart = AddLocalBranchTrampolineCode(method, processor, branchTarget, branchInstruction, trampolineTarget);
+#if NETSTANDARD2_0
+                  if (!branchRedirectMap.ContainsKey((branchTarget.Offset, branchTarget.Path)))
+                    branchRedirectMap.Add((branchTarget.Offset, branchTarget.Path), localTrampolineStart);
+#else
+                  branchRedirectMap.TryAdd((branchTarget.Offset, branchTarget.Path), localTrampolineStart);
+#endif
+                  continue;
+                }
+              }
+
               Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, branchTarget);
               if (!targetsMap.ContainsKey(currentInstruction.Offset))
                 targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
-
-              index += 2;
             }
             else
             {
@@ -979,8 +1010,7 @@ namespace Coverlet.Core.Instrumentation
           }
         }
 
-        index++;
-      }
+        }
 
       foreach (Instruction bodyInstruction in originalInstructions)
         ReplaceInstructionTarget(bodyInstruction, targetsMap, branchRedirectMap);
@@ -1089,7 +1119,55 @@ namespace Coverlet.Core.Instrumentation
 
     private Instruction AddBranchTrampolineCode(MethodDefinition method, ILProcessor processor, BranchPoint branchPoint, Instruction trampolineTarget)
     {
-      if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(branchPoint.Document), out Document document))
+      RegisterBranchHitCandidate(method, branchPoint, out Document document);
+
+      _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));
+
+      EnsureCustomTrackerRecordHitMethod(method);
+
+      // Append a self-contained trampoline block at the end of the method body:
+      //   ldc.i4  <hitEntryIndex>
+      //   call    RecordHit
+      //   br      <trampolineTarget>   ← jump to the normal entry point of the destination
+      // The trampoline is only reachable when the specific conditional jump is taken, so
+      // its counter does not fire on fall-through arrivals at the same destination.
+      var indxInstr = Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count - 1);
+      var callInstr = Instruction.Create(OpCodes.Call, _customTrackerRecordHitMethod);
+      var brInstr = Instruction.Create(OpCodes.Br, trampolineTarget);
+
+      processor.Append(indxInstr);
+      processor.Append(callInstr);
+      processor.Append(brInstr);
+
+      return indxInstr;
+    }
+
+    private Instruction AddLocalBranchTrampolineCode(MethodDefinition method, ILProcessor processor, BranchPoint branchPoint,
+        Instruction branchInstruction, Instruction trampolineTarget)
+    {
+      RegisterBranchHitCandidate(method, branchPoint, out Document document);
+
+      _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));
+
+      EnsureCustomTrackerRecordHitMethod(method);
+
+      Instruction fallThroughTarget = branchInstruction.Next;
+      var skipTrampolineInstr = Instruction.Create(OpCodes.Br, fallThroughTarget);
+      var indxInstr = Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count - 1);
+      var callInstr = Instruction.Create(OpCodes.Call, _customTrackerRecordHitMethod);
+      var brInstr = Instruction.Create(OpCodes.Br, trampolineTarget);
+
+      processor.InsertBefore(fallThroughTarget, brInstr);
+      processor.InsertBefore(brInstr, callInstr);
+      processor.InsertBefore(callInstr, indxInstr);
+      processor.InsertBefore(indxInstr, skipTrampolineInstr);
+
+      return indxInstr;
+    }
+
+    private void RegisterBranchHitCandidate(MethodDefinition method, BranchPoint branchPoint, out Document document)
+    {
+      if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(branchPoint.Document), out document))
       {
         document = new Document
         {
@@ -1130,26 +1208,6 @@ namespace Coverlet.Core.Instrumentation
           }
         }
       }
-
-      _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));
-
-      EnsureCustomTrackerRecordHitMethod(method);
-
-      // Append a self-contained trampoline block at the end of the method body:
-      //   ldc.i4  <hitEntryIndex>
-      //   call    RecordHit
-      //   br      <trampolineTarget>   ← jump to the normal entry point of the destination
-      // The trampoline is only reachable when the specific conditional jump is taken, so
-      // its counter does not fire on fall-through arrivals at the same destination.
-      var indxInstr = Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count - 1);
-      var callInstr = Instruction.Create(OpCodes.Call, _customTrackerRecordHitMethod);
-      var brInstr = Instruction.Create(OpCodes.Br, trampolineTarget);
-
-      processor.Append(indxInstr);
-      processor.Append(callInstr);
-      processor.Append(brInstr);
-
-      return indxInstr;
     }
 
     private Instruction AddInstrumentationInstructions(MethodDefinition method, ILProcessor processor, Instruction instruction, int hitEntryIndex)
@@ -1207,6 +1265,10 @@ namespace Coverlet.Core.Instrumentation
       if (handler.TryEnd is not null && targetsMap.TryGetValue(handler.TryEnd.Offset, out Instruction newTryEnd))
         handler.TryEnd = newTryEnd;
 
+      // Keep exception boundaries coordinated with branch-target rewriting.
+      // When a counter is inserted before TryStart and branch targets are rewritten to that
+      // counter, TryStart must move as well so intra-try back-edges remain inside the protected
+      // region (for example release-optimized do/while loops inside try/finally).
       if (handler.TryStart is not null && targetsMap.TryGetValue(handler.TryStart.Offset, out Instruction newTryStart))
         handler.TryStart = newTryStart;
     }

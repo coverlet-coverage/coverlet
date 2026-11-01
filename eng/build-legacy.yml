@@ -2,6 +2,9 @@ steps:
 - script: copy src\legacy\global-legacy.json global.json
   displayName: copy global.json from src/legacy
 
+- script: copy src\legacy\dotnet-tools-legacy.json .config\dotnet-tools.json
+  displayName: copy dotnet-tools.json from src/legacy
+
 - task: UseDotNet@2
   inputs:
     version: 8.0.427
