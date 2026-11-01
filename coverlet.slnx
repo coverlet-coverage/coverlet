@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path=".config/dotnet-tools.json" />
     <File Path=".editorconfig" />
     <File Path=".github/copilot-instructions.md" />
     <File Path=".gitignore" />
@@ -12,13 +13,14 @@
     <File Path="eng/build-legacy.yml" />
     <File Path="eng/build.yml" />
     <File Path="global.json" />
+    <File Path="src/legacy/dotnet-tools-legacy.json" />
     <File Path="src/legacy/global-legacy.json" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/coverlet.console/coverlet.console.csproj" />
     <Project Path="src/coverlet.core/coverlet.core.csproj" />
-    <Project Path="src/coverlet.template/coverlet.template.csproj" />
     <Project Path="src/coverlet.MTP/coverlet.MTP.csproj" />
+    <Project Path="src/coverlet.template/coverlet.template.csproj" />
     <Project Path="src/legacy/coverlet.collector/coverlet.collector.csproj" />
     <Project Path="src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj" />
   </Folder>
@@ -35,8 +37,8 @@
       <BuildDependency Project="src/legacy/coverlet.msbuild.tasks/coverlet.msbuild.tasks.csproj" />
     </Project>
     <Project Path="test/coverlet.integration.determisticbuild/coverlet.integration.determisticbuild.csproj" />
-    <Project Path="test/coverlet.integration.tests/coverlet.integration.tests.csproj" />
     <Project Path="test/coverlet.integration.template/coverlet.integration.template.csproj" />
+    <Project Path="test/coverlet.integration.tests/coverlet.integration.tests.csproj" />
     <Project Path="test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj" />
     <Project Path="test/coverlet.MTP.tests/coverlet.MTP.tests.csproj" />
     <Project Path="test/coverlet.MTP.validation.tests/coverlet.MTP.validation.tests.csproj" />

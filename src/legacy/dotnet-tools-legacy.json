@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "dotnet-reportgenerator-globaltool": {
+      "version": "5.5.11",
+      "commands": [
+        "reportgenerator"
+      ],
+      "rollForward": false
+    },
+    "dotnet-ilverify": {
+      "version": "9.0.22",
+      "commands": [
+        "ilverify"
+      ],
+      "rollForward": false
+    }
+  }
+}
