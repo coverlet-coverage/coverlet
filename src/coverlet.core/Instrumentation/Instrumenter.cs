@@ -860,6 +860,15 @@ namespace Coverlet.Core.Instrumentation
           (h.TryStart != null && h.TryEnd == null) ||
           (h.HandlerStart != null && h.HandlerEnd == null));
 
+      // In optimized IL, the conditional branch for `if` can target a compiler-emitted NOP placed
+      // immediately before TryStart. Injecting a taken-branch counter before that NOP while we are
+      // forced to use inline fallback (no trampoline) can produce invalid IL in release loops.
+      // Track these offsets so we can skip only that unsafe taken-branch injection shape.
+      var offsetsImmediatelyBeforeTryStart = new HashSet<int>(
+          method.Body.ExceptionHandlers
+              .Where(h => h.TryStart?.Previous != null)
+              .Select(h => h.TryStart.Previous.Offset));
+
       System.Collections.Immutable.ImmutableArray<ReachabilityHelper.UnreachableRange> unreachableRanges = _reachabilityHelper.FindUnreachableIL(processor.Body.Instructions, processor.Body.ExceptionHandlers);
       int currentUnreachableRangeIx = 0;
       for (int n = 0; n < count; n++)
@@ -956,6 +965,11 @@ namespace Coverlet.Core.Instrumentation
               // Inline fallback: preserves valid IL. Counter is inserted before the jump target so
               // it fires on every arrival, which may produce false-positive counts for patterns like
               // `if` without `else` inside exception-handler regions (e.g. async state machines).
+              // When the target is the instruction immediately before TryStart and trampolines are
+              // unavailable, skip taken-path counter injection to avoid invalid release IL.
+              if (!canUseBranchTrampolines && offsetsImmediatelyBeforeTryStart.Contains(currentInstruction.Offset))
+                continue;
+
               Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, branchTarget);
               if (!targetsMap.ContainsKey(currentInstruction.Offset))
                 targetsMap.Add(currentInstruction.Offset, firstInjectedInstrumentedOpCode);
