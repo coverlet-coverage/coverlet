@@ -74,5 +74,36 @@ namespace Coverlet.Core.CoverageSamples.Tests
         }
       }
     }
+
+    public void TryFinally_DoWhileBackEdge()
+    {
+      try
+      {
+        do
+        {
+          Tick();
+        }
+        while (Continue());
+      }
+      finally
+      {
+        Cleanup();
+      }
+    }
+
+    private void Tick()
+    {
+      _n++;
+    }
+
+    private bool Continue()
+    {
+      return _n >= 0;
+    }
+
+    private void Cleanup()
+    {
+      _n++;
+    }
   }
 }

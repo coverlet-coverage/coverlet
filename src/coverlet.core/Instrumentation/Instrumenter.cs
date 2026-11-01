@@ -1214,10 +1214,12 @@ namespace Coverlet.Core.Instrumentation
       if (handler.TryEnd is not null && targetsMap.TryGetValue(handler.TryEnd.Offset, out Instruction newTryEnd))
         handler.TryEnd = newTryEnd;
 
-      // Keep TryStart pointing to the original first protected instruction.
-      // If a counter is injected before TryStart because it is a branch target,
-      // retargeting TryStart to that counter can produce invalid IL in optimized
-      // loop/try-finally shapes (issue #2058).
+      // Keep exception boundaries coordinated with branch-target rewriting.
+      // When a counter is inserted before TryStart and branch targets are rewritten to that
+      // counter, TryStart must move as well so intra-try back-edges remain inside the protected
+      // region (for example release-optimized do/while loops inside try/finally).
+      if (handler.TryStart is not null && targetsMap.TryGetValue(handler.TryStart.Offset, out Instruction newTryStart))
+        handler.TryStart = newTryStart;
     }
 
     private bool IsExcludeAttribute(CustomAttribute customAttribute)

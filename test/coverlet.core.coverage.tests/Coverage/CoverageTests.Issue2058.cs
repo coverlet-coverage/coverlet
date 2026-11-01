@@ -21,6 +21,7 @@ namespace Coverlet.CoreCoverage.Tests
     [InlineData(nameof(Issue2058.WhileTrue_IfThenTryFinally))]
     [InlineData(nameof(Issue2058.WhileTrue_TryFinallyIfTryFinally))]
     [InlineData(nameof(Issue2058.WhileTrue_LockIfLock))]
+    [InlineData(nameof(Issue2058.TryFinally_DoWhileBackEdge))]
     public void Issue2058_ReleaseInstrumentation_PrepareMethod_DoesNotThrow(string methodName)
     {
       BuildConfiguration configuration = TestUtils.GetAssemblyBuildConfiguration();
