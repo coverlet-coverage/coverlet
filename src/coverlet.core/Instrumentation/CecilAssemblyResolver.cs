@@ -476,12 +476,13 @@ namespace Coverlet.Core.Instrumentation
           {
             try
             {
-              var semVersion = NuGetVersion.Parse(frameworkVersion);
-              var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
-              string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
-              uint latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
-                  .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
-              string resolvedPath = Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0];
+              NuGetVersion semVersion = NuGetVersion.Parse(frameworkVersion);
+              string frameworkRootPath = Path.Combine(runtimeRootPath, frameworkName);
+              if (!TryResolveSharedFrameworkDirectoryPath(frameworkRootPath, semVersion, out string resolvedPath))
+              {
+                continue;
+              }
+
               if (!_aspNetSharedFrameworkDirs.Any(path => path.Equals(resolvedPath, StringComparison.OrdinalIgnoreCase)))
               {
                 _aspNetSharedFrameworkDirs.Add(resolvedPath);
@@ -504,6 +505,44 @@ namespace Coverlet.Core.Instrumentation
       {
         _logger.LogVerbose(searchPath);
       }
+    }
+
+    private static bool TryResolveSharedFrameworkDirectoryPath(string frameworkRootPath, NuGetVersion requestedVersion, out string resolvedPath)
+    {
+      resolvedPath = string.Empty;
+      if (!Directory.Exists(frameworkRootPath))
+      {
+        return false;
+      }
+
+      List<(NuGetVersion Version, string Path)> candidateDirectories = [];
+      foreach (string directoryPath in Directory.GetDirectories(frameworkRootPath, "*", SearchOption.TopDirectoryOnly))
+      {
+        string directoryName = Path.GetFileName(directoryPath);
+        if (!NuGetVersion.TryParse(directoryName, out NuGetVersion directoryVersion))
+        {
+          continue;
+        }
+
+        if (directoryVersion.Major != requestedVersion.Major || directoryVersion.Minor != requestedVersion.Minor)
+        {
+          continue;
+        }
+
+        candidateDirectories.Add((directoryVersion, directoryPath));
+      }
+
+      if (candidateDirectories.Count == 0)
+      {
+        return false;
+      }
+
+      resolvedPath = candidateDirectories
+          .OrderByDescending(candidate => candidate.Version)
+          .ThenByDescending(candidate => candidate.Path, StringComparer.OrdinalIgnoreCase)
+          .Select(candidate => candidate.Path)
+          .First();
+      return true;
     }
 
     public bool TryResolveAssemblyPaths(CompilationLibrary library, List<string> assemblies)

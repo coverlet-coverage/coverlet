@@ -108,11 +108,75 @@ public class HelpCommandTests
     if (tfmsElement is null)
       throw new InvalidOperationException("No <TargetFrameworks> or <TargetFramework> element found in the first PropertyGroup.");
 
-    _testProjectTfms = tfmsElement.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+    _testProjectTfms = tfmsElement.Value
+      .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+      .Select(ResolveTargetFrameworkToken)
+      .ToArray();
 
     Assert.Contains(_buildTargetFramework, _testProjectTfms);
 
     deterministicTestProps.Save(Path.Combine(propsFile));
+  }
+
+  private string ResolveTargetFrameworkToken(string targetFramework)
+  {
+    if (!TryGetMsBuildPropertyName(targetFramework, out string propertyName))
+    {
+      return targetFramework;
+    }
+
+    return GetDirectoryBuildPropertyValue(propertyName);
+  }
+
+  private string GetDirectoryBuildPropertyValue(string propertyName)
+  {
+    string propsPath = Path.Combine(_repoRoot, "Directory.Build.props");
+    XElement props = XElement.Load(propsPath);
+
+    string legacy = Environment.GetEnvironmentVariable("LEGACY") ?? string.Empty;
+
+    IEnumerable<XElement> candidates = props
+      .Descendants(propertyName)
+      .Where(element => IsConditionMatch(element.Attribute("Condition")?.Value, legacy));
+
+    XElement? selectedElement = candidates.FirstOrDefault();
+
+    if (selectedElement is null || string.IsNullOrWhiteSpace(selectedElement.Value))
+    {
+      throw new InvalidOperationException($"No '{propertyName}' value found in '{propsPath}' for LEGACY='{legacy}'.");
+    }
+
+    return selectedElement.Value.Trim();
+  }
+
+  private static bool TryGetMsBuildPropertyName(string value, out string propertyName)
+  {
+    propertyName = string.Empty;
+
+    if (!value.StartsWith("$(", StringComparison.Ordinal) || !value.EndsWith(")", StringComparison.Ordinal))
+    {
+      return false;
+    }
+
+    propertyName = value[2..^1];
+    return !string.IsNullOrWhiteSpace(propertyName);
+  }
+
+  private static bool IsConditionMatch(string? condition, string legacy)
+  {
+    if (string.IsNullOrWhiteSpace(condition))
+    {
+      return true;
+    }
+
+    string normalizedCondition = condition.Replace(" ", string.Empty);
+
+    return normalizedCondition switch
+    {
+      "'$(LEGACY)'==''" => string.IsNullOrEmpty(legacy),
+      "'$(LEGACY)'!=''" => !string.IsNullOrEmpty(legacy),
+      _ => false,
+    };
   }
 
   [Fact]

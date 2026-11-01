@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">$(NetCurrent);net9.0;$(NetMinimum)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(LEGACY)' != ''">$(NetCurrent);$(NetMinimum)</TargetFrameworks>
+    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <UseMicrosoftTestingPlatformRunner Condition="'$(LEGACY)' == ''">true</UseMicrosoftTestingPlatformRunner>
     <IsPackable>false</IsPackable>
@@ -25,7 +24,7 @@
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
     <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
-    <PackageReference Condition="'$(LEGACY)' == ''" Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNetRuntimeVersion)" />
+    <PackageReference Condition="'$(LEGACY)' == ''" Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNETRuntimeVersion)" />
     <PackageReference Condition="'$(LEGACY)' != ''" Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

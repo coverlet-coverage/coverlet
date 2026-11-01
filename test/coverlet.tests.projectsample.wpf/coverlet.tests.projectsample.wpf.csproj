@@ -2,15 +2,13 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">net9.0-windows;net8.0-windows;net10.0-windows</TargetFrameworks>
-    <TargetFrameworks Condition="'$(LEGACY)' != ''">net9.0-windows;net8.0-windows</TargetFrameworks>
+    <TargetFrameworks>$(NetCurrent)-windows;$(NetMinimum)-windows</TargetFrameworks>
+    <RuntimeIdentifiers>win-x64;win-x86;win-arm64</RuntimeIdentifiers>
     <Nullable>enable</Nullable>
     <UseWpf>true</UseWpf>
     <IsTestProject>false</IsTestProject>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <IsPackable>false</IsPackable>
-    <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
 </Project>

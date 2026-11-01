@@ -14,27 +14,48 @@ namespace Coverlet.Integration.Tests
   {
     public static Classes Document(this Modules modules, string docName)
     {
+      if (modules is null)
+      {
+        throw new ArgumentNullException(nameof(modules));
+      }
+
       if (docName is null)
       {
         throw new ArgumentNullException(nameof(docName));
       }
 
+      var availableModules = new List<string>();
+      var availableDocuments = new List<string>();
+
       foreach (KeyValuePair<string, Documents> module in modules)
       {
+        availableModules.Add(module.Key);
+
         foreach (KeyValuePair<string, Classes> document in module.Value)
         {
-          if (Path.GetFileName(document.Key) == docName)
+          string documentFileName = Path.GetFileName(document.Key);
+          availableDocuments.Add(documentFileName);
+          if (documentFileName == docName)
           {
             return document.Value;
           }
         }
       }
 
-      throw new XunitException($"Document not found '{docName}'");
+      string details = modules.Count == 0
+        ? "Coverage report contains no modules."
+        : $"Available modules: {FormatLookupValues(availableModules)}. Available documents: {FormatLookupValues(availableDocuments)}.";
+
+      throw new XunitException($"Coverage document '{docName}' was not found. {details}");
     }
 
     public static Methods Class(this Classes classes, string className)
     {
+      if (classes is null)
+      {
+        throw new ArgumentNullException(nameof(classes));
+      }
+
       if (className is null)
       {
         throw new ArgumentNullException(nameof(className));
@@ -48,11 +69,16 @@ namespace Coverlet.Integration.Tests
         }
       }
 
-      throw new XunitException($"Document not found '{className}'");
+      throw new XunitException($"Coverage class '{className}' was not found. Available classes: {FormatLookupValues(classes.Keys)}.");
     }
 
     public static Method Method(this Methods methods, string methodName)
     {
+      if (methods is null)
+      {
+        throw new ArgumentNullException(nameof(methods));
+      }
+
       if (methodName is null)
       {
         throw new ArgumentNullException(nameof(methodName));
@@ -66,7 +92,7 @@ namespace Coverlet.Integration.Tests
         }
       }
 
-      throw new XunitException($"Document not found '{methodName}'");
+      throw new XunitException($"Coverage method containing '{methodName}' was not found. Available methods: {FormatLookupValues(methods.Keys)}.");
     }
 
     public static void AssertLinesCovered(this Method method, params (int line, int hits)[] lines)
@@ -97,6 +123,22 @@ namespace Coverlet.Integration.Tests
       {
         throw new XunitException($"Not all requested line found, {linesToCover.Select(l => l.ToString()).Aggregate((a, b) => $"{a}, {b}")}");
       }
+    }
+
+    private static string FormatLookupValues(IEnumerable<string> values)
+    {
+      if (values is null)
+      {
+        throw new ArgumentNullException(nameof(values));
+      }
+
+      string[] uniqueValues = values
+        .Where(v => !string.IsNullOrWhiteSpace(v))
+        .Distinct(StringComparer.Ordinal)
+        .OrderBy(v => v, StringComparer.Ordinal)
+        .ToArray();
+
+      return uniqueValues.Length == 0 ? "<none>" : string.Join(", ", uniqueValues);
     }
   }
 }

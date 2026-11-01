@@ -129,7 +129,7 @@ namespace Coverlet.Integration.Tests
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       Assert.False(clonedTemplateProject.IsMultipleTargetFramework());
       string framework = clonedTemplateProject.GetTargetFrameworks().Single();
-      DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError);
+      DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.{framework}.ext", out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);

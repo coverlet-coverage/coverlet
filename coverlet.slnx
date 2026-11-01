@@ -45,15 +45,15 @@
       <BuildDependency Project="test/coverlet.tests.projectsample.aspmvcrazor/coverlet.tests.projectsample.aspmvcrazor.csproj" />
     </Project>
     <Project Path="test/coverlet.tests.projectsample.aspmvcrazor/coverlet.tests.projectsample.aspmvcrazor.csproj" />
-    <Project Path="test/coverlet.tests.projectsample.aspnet8.tests/coverlet.tests.projectsample.aspnet8.tests.csproj" />
-    <Project Path="test/coverlet.tests.projectsample.aspnet8/coverlet.tests.projectsample.aspnet8.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.aspnet.tests/coverlet.tests.projectsample.aspnet.tests.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.aspnet/coverlet.tests.projectsample.aspnet.csproj" />
     <Project Path="test/coverlet.tests.projectsample.empty/coverlet.tests.projectsample.empty.csproj" />
     <Project Path="test/coverlet.tests.projectsample.excludedbyattribute/coverlet.tests.projectsample.excludedbyattribute.csproj" />
     <Project Path="test/coverlet.tests.projectsample.fsharp/coverlet.tests.projectsample.fsharp.fsproj" />
     <Project Path="test/coverlet.tests.projectsample.netframework/coverlet.tests.projectsample.netframework.csproj" />
     <Project Path="test/coverlet.tests.projectsample.vbmynamespace/coverlet.tests.projectsample.vbmynamespace.vbproj" />
-    <Project Path="test/coverlet.tests.projectsample.wpf8.selfcontained/coverlet.tests.projectsample.wpf8.selfcontained.csproj" />
-    <Project Path="test/coverlet.tests.projectsample.wpf8/coverlet.tests.projectsample.wpf8.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.wpf.selfcontained/coverlet.tests.projectsample.wpf.selfcontained.csproj" />
+    <Project Path="test/coverlet.tests.projectsample.wpf/coverlet.tests.projectsample.wpf.csproj" />
     <Project Path="test/coverlet.tests.utils/coverlet.tests.utils.csproj" />
   </Folder>
   <Folder Name="/test/Build/">

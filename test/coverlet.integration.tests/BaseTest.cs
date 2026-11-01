@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -65,10 +66,17 @@ namespace Coverlet.Integration.Tests
         File.Copy(file, Path.Combine(finalRoot.FullName, Path.GetFileName(file)));
       }
 
-      // We need to prevent the inheritance of global props/targets for template project
+      // We need to prevent the inheritance of global props/targets for template project,
+      // while still defining framework properties used by the template csproj.
       File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.props"),
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project>
+  <PropertyGroup>
+    <NetCurrent Condition=""'$(LEGACY)' == ''"">net11.0</NetCurrent>
+    <NetCurrent Condition=""'$(LEGACY)' != ''"">net9.0</NetCurrent>
+    <NetMinimum Condition=""'$(LEGACY)' == ''"">net10.0</NetMinimum>
+    <NetMinimum Condition=""'$(LEGACY)' != ''"">net8.0</NetMinimum>
+  </PropertyGroup>
 </Project>");
 
       File.WriteAllText(Path.Combine(finalRoot.FullName, "Directory.Build.targets"),
@@ -112,6 +120,27 @@ namespace Coverlet.Integration.Tests
     {
       _output.WriteLine($"dotnet {arguments}");
       return RunCommand("dotnet", arguments, out standardOutput, out standardError, workingDirectory);
+    }
+
+    private protected void AttachTextAttachment(string attachmentName, string filePath)
+    {
+      if (attachmentName is null)
+      {
+        throw new ArgumentNullException(nameof(attachmentName));
+      }
+
+      if (filePath is null)
+      {
+        throw new ArgumentNullException(nameof(filePath));
+      }
+
+      if (!File.Exists(filePath))
+      {
+        _output.WriteLine($"Attachment source file not found: {filePath}");
+        return;
+      }
+
+      TestContext.Current?.AddAttachment(attachmentName, File.ReadAllText(filePath));
     }
 
     private protected void UpdateNugetConfigWithLocalPackageFolder(string projectPath)
@@ -250,19 +279,60 @@ $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
       if (TestUtils.GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
       {
         bool coverageChecked = false;
+        var coverageDiagnostics = new List<string>();
+
         foreach (string coverageFile in clonedTemplateProject.GetFiles(filter))
         {
-          Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
-          if (document != null)
+          Modules? modules;
+          try
           {
-            document.Class("Coverlet.Integration.Template.DeepThought")
+            modules = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile));
+          }
+          catch (JsonException ex)
+          {
+            coverageDiagnostics.Add($"{coverageFile}: invalid coverage JSON payload ({ex.Message})");
+            continue;
+          }
+
+          if (modules is null)
+          {
+            coverageDiagnostics.Add($"{coverageFile}: coverage payload was null");
+            continue;
+          }
+
+          if (modules.Count == 0)
+          {
+            coverageDiagnostics.Add($"{coverageFile}: coverage payload contains no modules");
+            continue;
+          }
+
+          try
+          {
+            modules.Document("DeepThought.cs")
+                .Class("Coverlet.Integration.Template.DeepThought")
                 .Method("System.Int32 Coverlet.Integration.Template.DeepThought::AnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything()")
                 .AssertLinesCovered((6, 1), (7, 1), (8, 1));
             coverageChecked = true;
           }
+          catch (XunitException ex)
+          {
+            coverageDiagnostics.Add($"{coverageFile}: {ex.Message}");
+          }
         }
 
-        Assert.True(coverageChecked, $"Coverage check failed");
+        if (!coverageChecked)
+        {
+          string diagnostics = coverageDiagnostics.Count == 0
+            ? "No coverage files matched the requested filter."
+            : string.Join(Environment.NewLine, coverageDiagnostics.Select(d => $" - {d}"));
+
+          string output = string.IsNullOrWhiteSpace(standardOutput)
+            ? "<empty>"
+            : standardOutput;
+
+          Assert.Fail(
+            $"Coverage check failed for filter '{filter}'. Expected DeepThought.cs/module coverage but no matching non-empty coverage payload was found.{Environment.NewLine}Diagnostics:{Environment.NewLine}{diagnostics}{Environment.NewLine}dotnet test output:{Environment.NewLine}{output}");
+        }
       }
     }
 

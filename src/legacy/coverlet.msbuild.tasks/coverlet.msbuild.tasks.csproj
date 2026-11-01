@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">$(NetMinimum);net9.0;$(NetCurrent);netstandard2.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(LEGACY)' != ''">$(NetMinimum);$(NetCurrent);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(NetMinimum);$(NetCurrent);netstandard2.0</TargetFrameworks>
     <AssemblyTitle>coverlet.msbuild.tasks</AssemblyTitle>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
@@ -22,6 +21,7 @@
     <NoWarn>$(NoWarn);NU5100</NoWarn>
     <!-- create SBOM for CI build-->
     <GenerateSBOM>true</GenerateSBOM>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->

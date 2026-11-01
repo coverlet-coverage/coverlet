@@ -679,7 +679,6 @@ public class CollectCoverageTests : MtpValidationTestBase
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateAsyncSutLibraryProject(sutProjectPath);
@@ -704,7 +703,6 @@ public class CollectCoverageTests : MtpValidationTestBase
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateIssue1843SutProject(sutProjectPath);
@@ -722,7 +720,7 @@ public class CollectCoverageTests : MtpValidationTestBase
     string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
     File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(NetMinimum)</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -865,7 +863,7 @@ public class AsyncDataFetcherTests
     string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
     File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(NetMinimum)</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -967,7 +965,6 @@ public class Issue1843Tests
     Directory.CreateDirectory(sutProjectPath);
     Directory.CreateDirectory(testProjectPath);
 
-    CreateNugetConfig(solutionPath);
     string coverletMtpVersion = GetCoverletMtpPackageVersion();
 
     CreateSutLibraryProject(sutProjectPath, includeSimpleTest, includeMethodTests, includeCalculatorTest, includeBranchTest, includeMultipleClasses);
@@ -991,7 +988,7 @@ public class Issue1843Tests
     string sutCsproj = Path.Combine(sutProjectPath, $"{SutProjectName}.csproj");
     File.WriteAllText(sutCsproj, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(NetMinimum)</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
