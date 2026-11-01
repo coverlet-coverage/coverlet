@@ -966,9 +966,28 @@ namespace Coverlet.Core.Instrumentation
               // it fires on every arrival, which may produce false-positive counts for patterns like
               // `if` without `else` inside exception-handler regions (e.g. async state machines).
               // When the target is the instruction immediately before TryStart and trampolines are
-              // unavailable, skip taken-path counter injection to avoid invalid release IL.
+              // unavailable, use a branch-local trampoline so both branch paths are still registered
+              // without injecting a taken counter at the unsafe pre-TryStart location.
               if (!canUseBranchTrampolines && offsetsImmediatelyBeforeTryStart.Contains(currentInstruction.Offset))
-                continue;
+              {
+                Instruction branchInstruction = originalInstructions.FirstOrDefault(i => i.Offset == branchTarget.Offset);
+                if (branchInstruction is not null &&
+                    branchInstruction.Next is not null &&
+                    branchInstruction.Operand is Instruction)
+                {
+                  Instruction trampolineTarget = targetsMap.TryGetValue(currentInstruction.Offset, out Instruction firstCounter)
+                      ? firstCounter
+                      : currentInstruction;
+                  Instruction localTrampolineStart = AddLocalBranchTrampolineCode(method, processor, branchTarget, branchInstruction, trampolineTarget);
+#if NETSTANDARD2_0
+                  if (!branchRedirectMap.ContainsKey((branchTarget.Offset, branchTarget.Path)))
+                    branchRedirectMap.Add((branchTarget.Offset, branchTarget.Path), localTrampolineStart);
+#else
+                  branchRedirectMap.TryAdd((branchTarget.Offset, branchTarget.Path), localTrampolineStart);
+#endif
+                  continue;
+                }
+              }
 
               Instruction firstInjectedInstrumentedOpCode = AddInstrumentationCode(method, processor, currentInstruction, branchTarget);
               if (!targetsMap.ContainsKey(currentInstruction.Offset))
@@ -1110,7 +1129,55 @@ namespace Coverlet.Core.Instrumentation
 
     private Instruction AddBranchTrampolineCode(MethodDefinition method, ILProcessor processor, BranchPoint branchPoint, Instruction trampolineTarget)
     {
-      if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(branchPoint.Document), out Document document))
+      RegisterBranchHitCandidate(method, branchPoint, out Document document);
+
+      _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));
+
+      EnsureCustomTrackerRecordHitMethod(method);
+
+      // Append a self-contained trampoline block at the end of the method body:
+      //   ldc.i4  <hitEntryIndex>
+      //   call    RecordHit
+      //   br      <trampolineTarget>   ← jump to the normal entry point of the destination
+      // The trampoline is only reachable when the specific conditional jump is taken, so
+      // its counter does not fire on fall-through arrivals at the same destination.
+      var indxInstr = Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count - 1);
+      var callInstr = Instruction.Create(OpCodes.Call, _customTrackerRecordHitMethod);
+      var brInstr = Instruction.Create(OpCodes.Br, trampolineTarget);
+
+      processor.Append(indxInstr);
+      processor.Append(callInstr);
+      processor.Append(brInstr);
+
+      return indxInstr;
+    }
+
+    private Instruction AddLocalBranchTrampolineCode(MethodDefinition method, ILProcessor processor, BranchPoint branchPoint,
+        Instruction branchInstruction, Instruction trampolineTarget)
+    {
+      RegisterBranchHitCandidate(method, branchPoint, out Document document);
+
+      _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));
+
+      EnsureCustomTrackerRecordHitMethod(method);
+
+      Instruction fallThroughTarget = branchInstruction.Next;
+      var skipTrampolineInstr = Instruction.Create(OpCodes.Br, fallThroughTarget);
+      var indxInstr = Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count - 1);
+      var callInstr = Instruction.Create(OpCodes.Call, _customTrackerRecordHitMethod);
+      var brInstr = Instruction.Create(OpCodes.Br, trampolineTarget);
+
+      processor.InsertBefore(fallThroughTarget, brInstr);
+      processor.InsertBefore(brInstr, callInstr);
+      processor.InsertBefore(callInstr, indxInstr);
+      processor.InsertBefore(indxInstr, skipTrampolineInstr);
+
+      return indxInstr;
+    }
+
+    private void RegisterBranchHitCandidate(MethodDefinition method, BranchPoint branchPoint, out Document document)
+    {
+      if (!_result.Documents.TryGetValue(_sourceRootTranslator.ResolveFilePath(branchPoint.Document), out document))
       {
         document = new Document
         {
@@ -1151,26 +1218,6 @@ namespace Coverlet.Core.Instrumentation
           }
         }
       }
-
-      _result.HitCandidates.Add(new HitCandidate(true, document.Index, branchPoint.StartLine, (int)branchPoint.Ordinal));
-
-      EnsureCustomTrackerRecordHitMethod(method);
-
-      // Append a self-contained trampoline block at the end of the method body:
-      //   ldc.i4  <hitEntryIndex>
-      //   call    RecordHit
-      //   br      <trampolineTarget>   ← jump to the normal entry point of the destination
-      // The trampoline is only reachable when the specific conditional jump is taken, so
-      // its counter does not fire on fall-through arrivals at the same destination.
-      var indxInstr = Instruction.Create(OpCodes.Ldc_I4, _result.HitCandidates.Count - 1);
-      var callInstr = Instruction.Create(OpCodes.Call, _customTrackerRecordHitMethod);
-      var brInstr = Instruction.Create(OpCodes.Br, trampolineTarget);
-
-      processor.Append(indxInstr);
-      processor.Append(callInstr);
-      processor.Append(brInstr);
-
-      return indxInstr;
     }
 
     private Instruction AddInstrumentationInstructions(MethodDefinition method, ILProcessor processor, Instruction instruction, int hitEntryIndex)

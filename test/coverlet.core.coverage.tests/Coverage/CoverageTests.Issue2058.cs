@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -56,11 +57,24 @@ namespace Coverlet.CoreCoverage.Tests
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
         Assert.True(result.IsPresent("Instrumentation.Issue2058.cs"));
+
+        AssertMethodHasBothBranchPaths(result, methodName);
       }
       finally
       {
         File.Delete(path);
       }
+    }
+
+    private static void AssertMethodHasBothBranchPaths(CoverageResult result, string methodName)
+    {
+      var branches = result.Document("Instrumentation.Issue2058.cs").Branches.Values
+          .Where(b => b.Method.Contains($"::{methodName}(", StringComparison.Ordinal))
+          .ToList();
+
+      Assert.NotEmpty(branches);
+      Assert.Contains(branches, b => b.Path == 0);
+      Assert.Contains(branches, b => b.Path == 1);
     }
 
     private static string BuildIlDiagnostic(string methodName, BuildConfiguration configuration, MethodInfo originalMethod, MethodInfo instrumentedMethod)
