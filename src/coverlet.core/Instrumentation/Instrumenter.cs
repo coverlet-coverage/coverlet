@@ -853,6 +853,13 @@ namespace Coverlet.Core.Instrumentation
       // for the first original instruction instead of its intended target.
       List<Instruction> originalInstructions = [.. processor.Body.Instructions];
 
+      // Trampolines are appended at method end. If any exception-handler boundary is open-ended
+      // (null end marker), appending instructions extends that protected region and can pull the
+      // trampoline into a try/finally handler, yielding invalid IL in optimized loop shapes.
+      bool canUseBranchTrampolines = !method.Body.ExceptionHandlers.Any(h =>
+          (h.TryStart != null && h.TryEnd == null) ||
+          (h.HandlerStart != null && h.HandlerEnd == null));
+
       System.Collections.Immutable.ImmutableArray<ReachabilityHelper.UnreachableRange> unreachableRanges = _reachabilityHelper.FindUnreachableIL(processor.Body.Instructions, processor.Body.ExceptionHandlers);
       int currentUnreachableRangeIx = 0;
       for (int n = 0; n < count; n++)
@@ -944,7 +951,7 @@ namespace Coverlet.Core.Instrumentation
                 insideExceptionHandlerOffsets.Contains(branchTarget.Offset) ||
                 insideExceptionHandlerOffsets.Contains(branchTarget.EndOffset);
 
-            if (crossesExceptionBoundary || !targetReachableByFallThrough)
+            if (!canUseBranchTrampolines || crossesExceptionBoundary || !targetReachableByFallThrough)
             {
               // Inline fallback: preserves valid IL. Counter is inserted before the jump target so
               // it fires on every arrival, which may produce false-positive counts for patterns like
@@ -1207,8 +1214,10 @@ namespace Coverlet.Core.Instrumentation
       if (handler.TryEnd is not null && targetsMap.TryGetValue(handler.TryEnd.Offset, out Instruction newTryEnd))
         handler.TryEnd = newTryEnd;
 
-      if (handler.TryStart is not null && targetsMap.TryGetValue(handler.TryStart.Offset, out Instruction newTryStart))
-        handler.TryStart = newTryStart;
+      // Keep TryStart pointing to the original first protected instruction.
+      // If a counter is injected before TryStart because it is a branch target,
+      // retargeting TryStart to that counter can produce invalid IL in optimized
+      // loop/try-finally shapes (issue #2058).
     }
 
     private bool IsExcludeAttribute(CustomAttribute customAttribute)
