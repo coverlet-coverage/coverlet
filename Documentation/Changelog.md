@@ -7,12 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Release date xxxx-xx-xx
+### Packages
+coverlet.msbuild 10.1.1
+coverlet.console 10.1.1
+coverlet.collector 10.1.1
+coverlet.MTP 10.1.1
+
 ### Improvements
 
 - Add `IsReachable` to branch points, computed from the method's control-flow graph, and exclude unreachable branches from branch-coverage totals and from branch details in Cobertura, LCOV and OpenCover reports [#2056](https://github.com/coverlet-coverage/coverlet/pull/2056) by <https://github.com/pcshrosbree>
 
 ### Fixed
 
+- Fix Regression Prevent invalid IL from branch trampolines [#2067](https://github.com/coverlet-coverage/coverlet/pull/2067)
 - Fix Regression coverlet.MTP does not instrument local functions [#2046](https://github.com/coverlet-coverage/coverlet/pull/2046)
 
 ## Maintenance
