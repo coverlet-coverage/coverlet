@@ -222,8 +222,30 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    // Three-segment name → wildcarded to [Microsoft.Testing.*]*
-    Assert.Contains("[Microsoft.Testing.*]*", result);
+    Assert.Contains("[Microsoft.Testing.Extensions.MSBuild]*", result);
+  }
+
+  [Fact]
+  public void WhenLoadedAssemblySharesSutPrefixThenLoadedAssemblyFilterIsExact()
+  {
+    _mockProcessAssemblyHelper
+      .Setup(x => x.GetDepsJsonAssemblyNames(s_fakeModuleDir, TestAssemblyName))
+      .Returns([]);
+    _mockProcessAssemblyHelper
+      .Setup(x => x.GetLoadedAssemblyNames(TestAssemblyName))
+      .Returns(["MSS.Tools.xUnit"]);
+
+    var config = new CoverageConfiguration(
+      _mockCommandLineOptions.Object,
+      configFileSettings: null,
+      testModulePath: FakeModulePath,
+      logger: _mockLogger.Object,
+      processAssemblyHelper: _mockProcessAssemblyHelper.Object);
+
+    string[] result = config.GetExcludeFilters();
+
+    Assert.Contains("[MSS.Tools.xUnit]*", result);
+    Assert.DoesNotContain("[MSS.Tools.*]*", result);
   }
 
   [Fact]
@@ -246,10 +268,9 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    // Three-segment names are wildcarded to their two-segment prefix.
     Assert.Contains("[xunit.v3.*]*", result);
     Assert.Contains("[testhost]*", result);
-    Assert.Contains("[Microsoft.Testing.*]*", result);
+    Assert.Contains("[Microsoft.Testing.Extensions.MSBuild]*", result);
   }
 
   #endregion

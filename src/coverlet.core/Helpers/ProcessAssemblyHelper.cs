@@ -97,6 +97,14 @@ namespace Coverlet.Core.Helpers
     }
 
     /// <summary>
+    /// Converts a simple assembly name to an exact coverlet exclude-filter pattern.
+    /// </summary>
+    internal static string ToExactExcludeFilter(string assemblyName)
+    {
+      return $"[{assemblyName}]*";
+    }
+
+    /// <summary>
     /// Removes exact-name filters from <paramref name="filters"/> that are already matched
     /// by a wildcard filter present in the same collection.
     /// For example <c>[coverlet.core]*</c> is redundant when <c>[coverlet.*]*</c> is present.
