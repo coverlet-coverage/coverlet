@@ -187,8 +187,13 @@ internal sealed class CoverageConfiguration
       // such as Microsoft.Testing.Extensions.MSBuild that are held open before instrumentation).
       IReadOnlyList<string> loadedNames = _processAssemblyHelper.GetLoadedAssemblyNames(simpleTestName);
 
-      IEnumerable<string> dynamicFilters = depsNames.Concat(loadedNames)
+      IEnumerable<string> depsFilters = depsNames
         .Select(Coverlet.Core.Helpers.ProcessAssemblyHelper.ToExcludeFilter);
+
+      IEnumerable<string> loadedFilters = loadedNames
+        .Select(Coverlet.Core.Helpers.ProcessAssemblyHelper.ToExactExcludeFilter);
+
+      IEnumerable<string> dynamicFilters = depsFilters.Concat(loadedFilters);
 
       IEnumerable<string> merged = s_baselineExcludeFilters
         .Concat(dynamicFilters)

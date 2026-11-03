@@ -90,6 +90,18 @@ namespace Coverlet.Core.Tests.Helpers
     }
 
     [Theory]
+    [InlineData("xunit", "[xunit]*")]
+    [InlineData("coverlet.core", "[coverlet.core]*")]
+    [InlineData("Microsoft.Testing.Extensions.MSBuild", "[Microsoft.Testing.Extensions.MSBuild]*")]
+    [InlineData("MSS.Tools.xUnit", "[MSS.Tools.xUnit]*")]
+    public void WhenToExactExcludeFilterThenReturnsExactPattern(string assemblyName, string expectedFilter)
+    {
+      string result = ProcessAssemblyHelper.ToExactExcludeFilter(assemblyName);
+
+      Assert.Equal(expectedFilter, result);
+    }
+
+    [Theory]
     // An exact filter that is already covered by a wildcard should be pruned.
     [InlineData(new[] { "[coverlet.*]*", "[coverlet.core]*" }, new[] { "[coverlet.*]*" })]
     // A wildcard is not pruned by itself.

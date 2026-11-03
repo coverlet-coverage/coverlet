@@ -108,12 +108,14 @@ When using command line options **without** a configuration file, the following 
 - **Default Exclude Filters:** `[coverlet.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`, `[testhost*]*`
 - **Default Exclude by Attributes:** `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`
 
-**Dynamic Exclude Filters (Assembly Naming Convention):**
+**Dynamic Exclude Filters (Runtime Discovery):**
 
-Coverlet.MTP also applies **dynamic exclusions** derived from the test assembly name and its namespace conventions at runtime. These are intended to automatically exclude common test infrastructure assemblies that follow standard naming patterns.
+Coverlet.MTP also applies **dynamic exclusions** discovered at runtime from two sources:
 
-> [!WARNING]
-> **Assembly Naming Limitation:** Dynamic exclusions rely on the assembly name following conventional naming schemas (e.g., `MyApp.Tests`, `MyApp.UnitTests`, `MyApp.IntegrationTests`). Assemblies that **do not follow these naming conventions** will **not** be automatically excluded by the dynamic filter. In such cases, you must add explicit `--coverlet-exclude` filters manually.
+- Runtime package/library names from `*.deps.json`
+- Assemblies already loaded in the controller process (for example build/test extensions that may lock files before instrumentation)
+
+`deps.json` entries continue to use wildcard normalization for resilient matching. Loaded-assembly entries use **exact assembly-name filters** to avoid broad prefix exclusions. For example, a loaded assembly `MSS.Tools.xUnit` is excluded as `[MSS.Tools.xUnit]*` (not `[MSS.Tools.*]*`), which prevents accidental exclusion of a SUT like `MSS.Tools.Markdown`.
 
 **Configuration File Behavior (Authoritative Mode):**
 
