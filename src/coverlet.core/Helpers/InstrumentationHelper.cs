@@ -390,7 +390,7 @@ namespace Coverlet.Core.Helpers
       if (filter.EndsWith("]"))
         return false;
 
-      if (new Regex(@"[^\w*]", s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(filter.Replace(".", "").Replace("?", "").Replace("[", "").Replace("]", "")))
+      if (new Regex(@"[^\w*\-]", s_regexOptions, TimeSpan.FromSeconds(10)).IsMatch(filter.Replace(".", "").Replace("?", "").Replace("[", "").Replace("]", "")))
         return false;
 
       return true;

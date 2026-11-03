@@ -94,6 +94,7 @@ namespace Coverlet.Core.Tests.Helpers
     [InlineData("coverlet.core", "[coverlet.core]*")]
     [InlineData("Microsoft.Testing.Extensions.MSBuild", "[Microsoft.Testing.Extensions.MSBuild]*")]
     [InlineData("MSS.Tools.xUnit", "[MSS.Tools.xUnit]*")]
+    [InlineData("MSS.Tools.xUnit-Runner", "[MSS.Tools.xUnit-Runner]*")]
     public void WhenToExactExcludeFilterThenReturnsExactPattern(string assemblyName, string expectedFilter)
     {
       string result = ProcessAssemblyHelper.ToExactExcludeFilter(assemblyName);

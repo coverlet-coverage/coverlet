@@ -17,6 +17,7 @@ coverlet.MTP 10.1.1
 ### Improvements
 
 - Add `IsReachable` to branch points, computed from the method's control-flow graph, and exclude unreachable branches from branch-coverage totals and from branch details in Cobertura, LCOV and OpenCover reports [#2056](https://github.com/coverlet-coverage/coverlet/pull/2056) by <https://github.com/pcshrosbree>
+- coverlet.MTP: Narrow Dynamic Exclude Filters for Loaded Assemblies [#2069](https://github.com/coverlet-coverage/coverlet/pull/2069)
 
 ### Fixed
 
