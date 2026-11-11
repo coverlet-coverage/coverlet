@@ -1,13 +1,13 @@
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 8.0.427
-  displayName: Install .NET Core SDK 8.0.427
+    version: 8.0.428
+  displayName: Install .NET Core SDK 8.0.428
 
 - task: UseDotNet@2
   inputs:
-    version: 10.0.403
-  displayName: Install .NET Core SDK 10.0.403
+    version: 10.0.404
+  displayName: Install .NET Core SDK 10.0.404
 
 - task: UseDotNet@2
   inputs:

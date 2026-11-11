@@ -30,21 +30,21 @@
     <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="9.0.22"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="9.0.22" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="9.0.22" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="9.0.22" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="9.0.23"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="9.0.23" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="9.0.23" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="9.0.23" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Reflection.Metadata" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="9.0.22" />
-    <PackageReference Include="System.Text.Json" VersionOverride="9.0.22" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="9.0.23" />
+    <PackageReference Include="System.Text.Json" VersionOverride="9.0.23" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="10.0.13"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="10.0.13" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="10.0.13" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="10.0.13" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="10.0.13" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="10.0.15"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="10.0.15" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="10.0.15" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="10.0.15" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="10.0.15" />
     <!-- System.Text.Json is part of .NET 10 core - no explicit reference needed -->
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
