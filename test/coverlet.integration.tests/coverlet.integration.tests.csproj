@@ -13,22 +13,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Condition="'$(LEGACY)' != ''" Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
-    <PackageReference Condition="'$(LEGACY)' == ''" Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageReference Include="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="$(MicrosoftTestingPlatformVersion)" />
-    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)"/>
-    <!-- Microsoft.TestPlatform.TestHost depends on Newtonsoft.Json -->
+        <!-- Microsoft.TestPlatform.TestHost depends on Newtonsoft.Json -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageReference Include="Moq" Version="4.21.0" />
     <PackageReference Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
     <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
-    <PackageReference Condition="'$(LEGACY)' == ''" Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNETRuntimeVersion)" />
-    <PackageReference Condition="'$(LEGACY)' != ''" Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)">
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(LEGACY)' != ''">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(LEGACY)' == ''">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftNetRuntimeVersion)" />
+    <PackageReference Include="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="$(MicrosoftTestingPlatformVersion)" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="$(MicrosoftTestingPlatformVersion)"/>
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNETRuntimeVersion)" />
   </ItemGroup>
 
   <ItemGroup>
