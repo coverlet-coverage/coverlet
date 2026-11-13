@@ -14,10 +14,10 @@
     <!-- .NET 8.0 support -->
     <NugetPackageVersion>7.9.0</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
-    <MicrosoftNETTestSdkVersion>18.11.0</MicrosoftNETTestSdkVersion>
+    <MicrosoftNETTestSdkVersion>18.12.0</MicrosoftNETTestSdkVersion>
     <XunitV3Version>4.0.3</XunitV3Version>
     <XunitRunnerVisualstudioVersion>4.0.1</XunitRunnerVisualstudioVersion>
-    <MicrosoftTestingPlatformVersion>2.5.2</MicrosoftTestingPlatformVersion>
+    <MicrosoftTestingPlatformVersion>2.5.3</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.21.0</MoqVersion>
     <MicrosoftNetRuntimeVersion Condition="'$(LEGACY)' == ''">11.0.0</MicrosoftNetRuntimeVersion>
     <MicrosoftNetRuntimeVersion Condition="'$(LEGACY)' != ''">9.0.23</MicrosoftNetRuntimeVersion>
