@@ -158,5 +158,38 @@ namespace Coverlet.Tests.Utils
       return int.TryParse(majorVersionStr, out int majorVersion) && majorVersion >= 10;
     }
 
+    /// <summary>
+    /// Checks if the SDK version from global.json indicates .NET 11 or later.
+    /// </summary>
+    public static bool IsNet11OrLater()
+    {
+      string? sdkVersion = GetSdkVersionFromGlobalJson();
+      if (string.IsNullOrEmpty(sdkVersion))
+      {
+        return false;
+      }
+
+      // Parse major version (first number before the dot)
+      int dotIndex = sdkVersion!.IndexOf('.');
+#if NETSTANDARD2_0
+      string majorVersionStr = dotIndex > 0 ? sdkVersion.Substring(0, dotIndex) : sdkVersion;
+#else
+      string majorVersionStr = dotIndex > 0 ? sdkVersion[..dotIndex] : sdkVersion;
+#endif
+      return int.TryParse(majorVersionStr, out int majorVersion) && majorVersion >= 11;
+    }
+
+    /// <summary>
+    /// Checks .NET 11 uses VSTest mode.
+    /// </summary>
+    public static bool IsVsTestModeAvailable()
+    {
+      string? vstestMode = Environment.GetEnvironmentVariable("DOTNET_TEST_RUNNER");
+      if (string.IsNullOrEmpty(vstestMode))
+      {
+        return false;
+      }
+      return (IsNet11OrLater() && string.Equals(vstestMode, "vstest", StringComparison.OrdinalIgnoreCase));
+    }
   }
 }
