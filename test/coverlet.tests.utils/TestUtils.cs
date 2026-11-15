@@ -191,5 +191,18 @@ namespace Coverlet.Tests.Utils
       }
       return (IsNet11OrLater() && string.Equals(vstestMode, "vstest", StringComparison.OrdinalIgnoreCase));
     }
+
+    /// <summary>
+    /// Checks Legacy is not defined environment.
+    /// </summary>
+    public static bool IsNotLegacyEnvironment()
+    {
+      string? legacyMode = Environment.GetEnvironmentVariable("LEGACY");
+      if (string.IsNullOrEmpty(legacyMode))
+      {
+        return true;
+      }
+      return false;
+    }
   }
 }
