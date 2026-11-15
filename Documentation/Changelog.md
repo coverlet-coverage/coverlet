@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## Release date xxxx-xx-xx
+## Release date 2026-11-15
 ### Packages
 coverlet.msbuild 10.1.1
 coverlet.console 10.1.1
