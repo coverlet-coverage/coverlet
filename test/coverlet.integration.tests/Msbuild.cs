@@ -44,7 +44,7 @@ namespace Coverlet.Integration.Tests
           argument = argument + s_invokeTestingPlatformTarget;
       }
 
-      int result = DotnetCli(argument, out string standardOutput, out string standardError);
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -54,7 +54,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
-      Assert.Equal(0, result);
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"coverage.{TestUtils.GetAssemblyTargetFramework()}.json";
@@ -74,7 +74,8 @@ namespace Coverlet.Integration.Tests
       {
         argument = argument + s_invokeTestingPlatformTarget;
       }
-      int result = DotnetCli(argument, out string standardOutput, out string standardError);
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -84,7 +85,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
-      Assert.Equal(0, result);
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"coverage.{TestUtils.GetAssemblyTargetFramework()}.json";
@@ -104,7 +105,8 @@ namespace Coverlet.Integration.Tests
       {
         argument = argument + s_invokeTestingPlatformTarget;
       }
-      int result = DotnetCli(argument, out string standardOutput, out string standardError);
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -114,7 +116,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
-      Assert.Equal(0, result);
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.{TestUtils.GetAssemblyTargetFramework()}.json";
@@ -135,7 +137,17 @@ namespace Coverlet.Integration.Tests
         argument = argument + s_invokeTestingPlatformTarget;
       }
 
-      Assert.Equal(0, DotnetCli(argument, out string standardOutput, out string standardError));
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
+      if (!string.IsNullOrEmpty(standardError))
+      {
+        _output.WriteLine(standardError);
+      }
+      else
+      {
+        _output.WriteLine(standardOutput);
+      }
+
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.{TestUtils.GetAssemblyTargetFramework()}.ext";
@@ -159,8 +171,10 @@ namespace Coverlet.Integration.Tests
       {
         argument = argument + s_invokeTestingPlatformTarget;
       }
-      Assert.Equal(0, DotnetCli(argument, out string standardOutput, out string standardError));
-      if (TestUtils.IsNotLegacyEnvironment())
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
+      Assert.Equal(0, exitCode);
+      if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
       }
@@ -169,6 +183,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string fileName = "file." + TestUtils.GetAssemblyTargetFramework() + ".ext";
@@ -188,7 +203,9 @@ namespace Coverlet.Integration.Tests
       {
         argument = argument + s_invokeTestingPlatformTarget;
       }
-      Assert.Equal(0, DotnetCli(argument, out string standardOutput, out string standardError));
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
+      Assert.Equal(0, exitCode);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -198,6 +215,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.ext1.{TestUtils.GetAssemblyTargetFramework()}.ext2";
@@ -229,6 +247,7 @@ namespace Coverlet.Integration.Tests
         {
           argument = argument + s_invokeTestingPlatformTarget;
         }
+
         int exitCode = DotnetCli(argument, out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
         if (!string.IsNullOrEmpty(standardError))
         {
@@ -282,6 +301,7 @@ namespace Coverlet.Integration.Tests
         {
           _output.WriteLine(standardOutput);
         }
+
         Assert.Equal(0, result);
         Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
         Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
@@ -302,7 +322,8 @@ namespace Coverlet.Integration.Tests
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+
+      int exitCode = DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -312,6 +333,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
 
@@ -337,7 +359,8 @@ namespace Coverlet.Integration.Tests
       string[] frameworks = clonedTemplateProject.GetTargetFrameworks();
       Assert.Equal(2, frameworks.Length);
       string framework = frameworks.FirstOrDefault()!;
-      DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+
+      int exitCode = DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -389,6 +412,7 @@ namespace Coverlet.Integration.Tests
         {
           argument = argument + s_invokeTestingPlatformTarget;
         }
+
         int exitCode = DotnetCli(argument, out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
         if (!string.IsNullOrEmpty(standardError))
         {
@@ -433,6 +457,7 @@ namespace Coverlet.Integration.Tests
         {
           argument = argument + s_invokeTestingPlatformTarget;
         }
+
         int exitCode = DotnetCli(argument, out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
         if (!string.IsNullOrEmpty(standardError))
         {
@@ -442,6 +467,7 @@ namespace Coverlet.Integration.Tests
         {
           _output.WriteLine(standardOutput);
         }
+
         Assert.Equal(0, exitCode);
         Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
         Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
