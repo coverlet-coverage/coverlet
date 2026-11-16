@@ -61,7 +61,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="8.0.2" />
     <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
-    <PackageReference Include="NuGet.Versioning" VersionOverride="6.14.3"/> <!-- latest version that supports netstandard2.0 -->
+    <PackageReference Include="NuGet.Versioning" VersionOverride="6.14.3"/>
+    <!-- latest version that supports netstandard2.0 -->
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Reflection.Metadata" />

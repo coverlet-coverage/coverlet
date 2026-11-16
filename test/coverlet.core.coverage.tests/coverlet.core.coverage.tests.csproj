@@ -55,6 +55,6 @@
 
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
   </ItemGroup>
-  
+
   <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' " />
 </Project>
