@@ -56,7 +56,7 @@ namespace Coverlet.Integration.Tests
       }
     }
 
-    private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "17.5.0")
+    private protected ClonedTemplateProject CloneTemplateProject(bool cleanupOnDispose = true, string testSDKVersion = "18.12.0")
     {
       DirectoryInfo finalRoot = Directory.CreateDirectory($"{Guid.NewGuid().ToString("N")[..6]}{Interlocked.Increment(ref s_folderSuffix)}");
       foreach (string file in (Directory.GetFiles(Path.Join(TestUtils.GetTestProjectPath("coverlet.integration.template")), "*.cs")

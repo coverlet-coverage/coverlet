@@ -14,6 +14,8 @@ namespace Coverlet.Integration.Tests
     private readonly string _buildConfiguration;
     private readonly string _buildTargetFramework;
 
+    private static readonly string s_invokeTestingPlatformTarget = " -t:InvokeTestingPlatform";
+
     public Msbuild(ITestOutputHelper output) : base(output)
     {
       _buildConfiguration = TestUtils.GetBuildConfigurationString();
@@ -31,11 +33,18 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError);
+
+      string argument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\";
+      if (TestUtils.IsNotLegacyEnvironment())
+      {
+          argument = argument + s_invokeTestingPlatformTarget;
+      }
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -45,7 +54,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
-      Assert.Equal(0, result);
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"coverage.{TestUtils.GetAssemblyTargetFramework()}.json";
@@ -56,11 +65,17 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_NoCoverletOutput_Folder()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError);
+      string argument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true";
+      if (TestUtils.IsNotLegacyEnvironment())
+      {
+        argument = argument + s_invokeTestingPlatformTarget;
+      }
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -70,7 +85,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
-      Assert.Equal(0, result);
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"coverage.{TestUtils.GetAssemblyTargetFramework()}.json";
@@ -81,11 +96,17 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameWithoutExtension()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      int result = DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError);
+      string argument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file";
+      if (TestUtils.IsNotLegacyEnvironment())
+      {
+        argument = argument + s_invokeTestingPlatformTarget;
+      }
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -95,7 +116,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
-      Assert.Equal(0, result);
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.{TestUtils.GetAssemblyTargetFramework()}.json";
@@ -106,11 +127,27 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameExtension()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      Assert.Equal(0, DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError));
+      string argument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext";
+      if (TestUtils.IsNotLegacyEnvironment())
+      {
+        argument = argument + s_invokeTestingPlatformTarget;
+      }
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
+      if (!string.IsNullOrEmpty(standardError))
+      {
+        _output.WriteLine(standardError);
+      }
+      else
+      {
+        _output.WriteLine(standardOutput);
+      }
+
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.{TestUtils.GetAssemblyTargetFramework()}.ext";
@@ -121,15 +158,22 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameExtension_SpecifyFramework()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       string[] targetFrameworks = [_buildTargetFramework];
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       Assert.False(clonedTemplateProject.IsMultipleTargetFramework());
-      string framework = clonedTemplateProject.GetTargetFrameworks().Single();
-      DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.{framework}.ext", out string standardOutput, out string standardError);
+      string targetFramework = clonedTemplateProject.GetTargetFrameworks().Single();
+      string argument = $"test -c {_buildConfiguration} -f {targetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.{targetFramework}.ext";
+      if (TestUtils.IsNotLegacyEnvironment())
+      {
+        argument = argument + s_invokeTestingPlatformTarget;
+      }
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
+      Assert.Equal(0, exitCode);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -139,6 +183,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string fileName = "file." + TestUtils.GetAssemblyTargetFramework() + ".ext";
@@ -149,11 +194,18 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void TestMsbuild_CoverletOutput_Folder_FileNameWithDoubleExtension()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
-      DotnetCli($"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError);
+      string argument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2";
+      if (TestUtils.IsNotLegacyEnvironment())
+      {
+        argument = argument + s_invokeTestingPlatformTarget;
+      }
+
+      int exitCode = DotnetCli(argument, out string standardOutput, out string standardError);
+      Assert.Equal(0, exitCode);
       if (!string.IsNullOrEmpty(standardError))
       {
         _output.WriteLine(standardError);
@@ -163,6 +215,7 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(standardOutput);
       }
 
+      Assert.Equal(0, exitCode);
       Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
       Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
       string coverageFileName = $"file.ext1.{TestUtils.GetAssemblyTargetFramework()}.ext2";
@@ -173,60 +226,85 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_NoCoverletOutput()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
-      UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
-      if (!string.IsNullOrEmpty(standardError))
+      if (TestUtils.IsNotLegacyEnvironment())
       {
-        _output.WriteLine(standardError);
-      }
-      else
-      {
-        _output.WriteLine(standardOutput);
+        // Use only .NET 11/10 frameworks for legacy tests
+        targetFrameworks = ["net11.0", "net10.0"];
       }
 
-      Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
 
       foreach (string targetFramework in targetFrameworks)
       {
+        string argument = $"test -c {_buildConfiguration} -f {targetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true";
+        if (TestUtils.IsNotLegacyEnvironment())
+        {
+          argument = argument + s_invokeTestingPlatformTarget;
+        }
+
+        int exitCode = DotnetCli(argument, out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+        if (!string.IsNullOrEmpty(standardError))
+        {
+          _output.WriteLine(standardError);
+        }
+        else
+        {
+          _output.WriteLine(standardOutput);
+        }
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
         Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"coverage.{targetFramework}.json")));
       }
-
       AssertCoverage(clonedTemplateProject, "coverage.*.json");
     }
 
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
+
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
-      UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      int result = DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
-      if (!string.IsNullOrEmpty(standardError))
+      if (TestUtils.IsNotLegacyEnvironment())
       {
-        _output.WriteLine(standardError);
-      }
-      else
-      {
-        _output.WriteLine(standardOutput);
+        // Use only .NET 11/10 frameworks for legacy tests
+        targetFrameworks = ["net11.0", "net10.0"];
       }
 
-      Assert.Equal(0, result);
-      Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
 
       foreach (string targetFramework in targetFrameworks)
       {
+        string argument = $"test -c {_buildConfiguration} -f {targetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\";
+        if (TestUtils.IsNotLegacyEnvironment())
+        {
+          argument = argument + s_invokeTestingPlatformTarget;
+        }
+
+        int result = DotnetCli(argument, out string standardOutput, out string standardError);
+        if (!string.IsNullOrEmpty(standardError))
+        {
+          _output.WriteLine(standardError);
+        }
+        else
+        {
+          _output.WriteLine(standardOutput);
+        }
+
+        Assert.Equal(0, result);
+        Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
         string fileToCheck = Path.Combine(clonedTemplateProject.ProjectRootPath, $"coverage.{targetFramework}.json");
         Assert.True(File.Exists(fileToCheck), $"Expected file '{fileToCheck}'\nOutput:\n{standardOutput}");
       }
@@ -237,135 +315,184 @@ namespace Coverlet.Integration.Tests
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithoutExtension()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
+      if (TestUtils.IsNotLegacyEnvironment())
+      {
+        // Use only .NET 11/10 frameworks for legacy tests
+        targetFrameworks = ["net11.0", "net10.0"];
+      }
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
-      if (!string.IsNullOrEmpty(standardError))
-      {
-        _output.WriteLine(standardError);
-      }
-      else
-      {
-        _output.WriteLine(standardOutput);
-      }
-
-      Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
-
       foreach (string targetFramework in targetFrameworks)
       {
-        Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.json")));
-      }
+        string argument = $"test -c {_buildConfiguration} -f {targetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file";
+        if (TestUtils.IsNotLegacyEnvironment())
+        {
+          argument = argument + s_invokeTestingPlatformTarget;
+        }
+        int exitCode = DotnetCli(argument, out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+        if (!string.IsNullOrEmpty(standardError))
+        {
+          _output.WriteLine(standardError);
+        }
+        else
+        {
+          _output.WriteLine(standardOutput);
+        }
 
+        Assert.Equal(0, exitCode);
+        Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+        Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.json")));
+
+      }
       AssertCoverage(clonedTemplateProject, "file.*.json");
     }
 
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension_SpecifyFramework()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
+      if (TestUtils.IsNotLegacyEnvironment())
+      {
+        // Use only .NET 11/10 frameworks for legacy tests
+        targetFrameworks = ["net11.0", "net10.0"];
+      }
       UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
       Assert.True(clonedTemplateProject.IsMultipleTargetFramework());
       string[] frameworks = clonedTemplateProject.GetTargetFrameworks();
       Assert.Equal(2, frameworks.Length);
+      // Get first targetframework of list
       string framework = frameworks.FirstOrDefault()!;
-      DotnetCli($"test -c {_buildConfiguration} -f {framework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
-      if (!string.IsNullOrEmpty(standardError))
-      {
-        _output.WriteLine(standardError);
-      }
-      else
-      {
-        _output.WriteLine(standardOutput);
-      }
-
-      Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
 
       foreach (string targetFramework in targetFrameworks)
       {
-        if (framework == targetFramework)
+        string argument = $"test -c {_buildConfiguration} -f {targetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext";
+        if (TestUtils.IsNotLegacyEnvironment())
         {
-          Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.ext")));
+          argument = argument + s_invokeTestingPlatformTarget;
+        }
+        int exitCode = DotnetCli(argument, out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+        if (!string.IsNullOrEmpty(standardError))
+        {
+          _output.WriteLine(standardError);
         }
         else
         {
-          Assert.False(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.ext")));
+          _output.WriteLine(standardOutput);
+        }
+
+        Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+
+        if (framework == targetFramework)
+        {
+          string filePath = Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{framework}.ext");
+          Assert.True(File.Exists(filePath));
+          File.Delete(filePath);
+        }
+        else
+        {
+          Assert.False(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{framework}.ext")));
         }
       }
-
-      AssertCoverage(clonedTemplateProject, "file.*.ext");
+      AssertCoverage(clonedTemplateProject, "file.*.ext"); // one file still exists
     }
 
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithExtension()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
-      UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
-      if (!string.IsNullOrEmpty(standardError))
+      if (TestUtils.IsNotLegacyEnvironment())
       {
-        _output.WriteLine(standardError);
-      }
-      else
-      {
-        _output.WriteLine(standardOutput);
+        // Use only .NET 11/10 frameworks for legacy tests
+        targetFrameworks = ["net11.0", "net10.0"];
       }
 
-      Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
 
       foreach (string targetFramework in targetFrameworks)
       {
+        string argument = $"test -c {_buildConfiguration} -f {targetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext";
+        if (TestUtils.IsNotLegacyEnvironment())
+        {
+          argument = argument + s_invokeTestingPlatformTarget;
+        }
+
+        int exitCode = DotnetCli(argument, out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+        if (!string.IsNullOrEmpty(standardError))
+        {
+          _output.WriteLine(standardError);
+        }
+        else
+        {
+          _output.WriteLine(standardOutput);
+        }
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+
         Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.{targetFramework}.ext")));
       }
-
       AssertCoverage(clonedTemplateProject, "file.*.ext");
     }
 
     [Fact]
     public void Test_MultipleTargetFrameworkReport_CoverletOutput_Folder_FileNameWithDoubleExtension()
     {
-      // This test requires VSTest mode using 'dotnet test' which is only available on .NET 8/9
-      Assert.SkipWhen(TestUtils.IsNet10OrLater(), "VSTest mode is not available on .NET 10.0 or later");
+      // The legacy environment runs `dotnet test` in VSTest mode, supported only on .NET 8 and 9.
+      // .NET 10 and 11 use MTP mode, with the `InvokeTestingPlatform` MSBuild target enabled.
 
       using ClonedTemplateProject clonedTemplateProject = PrepareTemplateProject();
+
       // Use only .NET 8/9 frameworks for legacy tests
       string[] targetFrameworks = ["net9.0", "net8.0"];
-      UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
-      DotnetCli($"test -c {_buildConfiguration} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2", out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
-      if (!string.IsNullOrEmpty(standardError))
+      if (TestUtils.IsNotLegacyEnvironment())
       {
-        _output.WriteLine(standardError);
-      }
-      else
-      {
-        _output.WriteLine(standardOutput);
+        // Use only .NET 11/10 frameworks for legacy tests
+        targetFrameworks = ["net11.0", "net10.0"];
       }
 
-      Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
-      Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
+      UpdateProjectTargetFramework(clonedTemplateProject, targetFrameworks);
 
       foreach (string targetFramework in targetFrameworks)
       {
+        string argument = $"test -c {_buildConfiguration} -f {targetFramework} \"{clonedTemplateProject.ProjectRootPath}\" /p:CollectCoverage=true /p:Include=\"[{ClonedTemplateProject.AssemblyName}]*DeepThought\" /p:IncludeTestAssembly=true /p:CoverletOutput=\"{clonedTemplateProject.ProjectRootPath}\"\\file.ext1.ext2";
+        if (TestUtils.IsNotLegacyEnvironment())
+        {
+          argument = argument + s_invokeTestingPlatformTarget;
+        }
+
+        int exitCode = DotnetCli(argument, out string standardOutput, out string standardError, clonedTemplateProject.ProjectRootPath!);
+        if (!string.IsNullOrEmpty(standardError))
+        {
+          _output.WriteLine(standardError);
+        }
+        else
+        {
+          _output.WriteLine(standardOutput);
+        }
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("Passed!", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("| coverletsamplelib.integration.template | 50%  | 100%   | 50%    |", standardOutput, StringComparison.Ordinal);
         Assert.True(File.Exists(Path.Combine(clonedTemplateProject.ProjectRootPath, $"file.ext1.{targetFramework}.ext2")));
       }
-
       AssertCoverage(clonedTemplateProject, "file.ext1.*.ext2");
     }
   }
