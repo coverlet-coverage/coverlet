@@ -1,3 +1,4 @@
 <Project>
   <Import Project="$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\coverlet.msbuild.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\buildMultiTargeting\coverlet.msbuild.MTP.targets" Condition="'$(TestingPlatformDotnetTestSupport)' == 'true' And ('$(TargetFramework)' == 'net10.0' Or '$(TargetFramework)' == 'net11.0')" />
 </Project>
