@@ -213,85 +213,63 @@ namespace Coverlet.Core
         var documents = new Documents();
         foreach (Document doc in result.Documents.Values)
         {
+          if (!documents.TryGetValue(doc.Path, out Classes classes))
+          {
+            classes = new();
+            documents.Add(doc.Path, classes);
+          }
+
           // Construct Line Results
           foreach (Line line in doc.Lines.Values)
           {
-            if (documents.TryGetValue(doc.Path, out Classes classes))
+            if (!classes.TryGetValue(line.Class, out Methods methods))
             {
-              if (classes.TryGetValue(line.Class, out Methods methods))
-              {
-                if (methods.TryGetValue(line.Method, out Method method))
-                {
-                  documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
-                }
-                else
-                {
-                  documents[doc.Path][line.Class].Add(line.Method, new Method());
-                  documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
-                }
-              }
-              else
-              {
-                documents[doc.Path].Add(line.Class, []);
-                documents[doc.Path][line.Class].Add(line.Method, new Method());
-                documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
-              }
+              methods = new();
+              classes.Add(line.Class, methods);
             }
-            else
+
+            if (!methods.TryGetValue(line.Method, out Method method))
             {
-              documents.Add(doc.Path, []);
-              documents[doc.Path].Add(line.Class, []);
-              documents[doc.Path][line.Class].Add(line.Method, new Method());
-              documents[doc.Path][line.Class][line.Method].Lines.Add(line.Number, line.Hits);
+              method = new();
+              methods.Add(line.Method, method);
             }
+
+            method.Lines.Add(line.Number, line.Hits);
           }
 
           // Construct Branch Results
           foreach (Branch branch in doc.Branches.Values)
           {
-            if (documents.TryGetValue(doc.Path, out Classes classes))
+            var branchInfo = new BranchInfo()
             {
-              if (classes.TryGetValue(branch.Class, out Methods methods))
-              {
-                if (methods.TryGetValue(branch.Method, out Method method))
-                {
-                  method.Branches.Add(new BranchInfo
-                  { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal, IsReachable = branch.IsReachable }
-                  );
-                }
-                else
-                {
-                  documents[doc.Path][branch.Class].Add(branch.Method, new Method());
-                  documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                  { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal, IsReachable = branch.IsReachable }
-                  );
-                }
-              }
-              else
-              {
-                documents[doc.Path].Add(branch.Class, []);
-                documents[doc.Path][branch.Class].Add(branch.Method, new Method());
-                documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-                { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal, IsReachable = branch.IsReachable }
-                );
-              }
-            }
-            else
+              Line = branch.Number,
+              Hits = branch.Hits,
+              Offset = branch.Offset,
+              EndOffset = branch.EndOffset,
+              Path = branch.Path,
+              Ordinal = branch.Ordinal,
+              IsReachable = branch.IsReachable
+            };
+
+            if (!classes.TryGetValue(branch.Class, out Methods methods))
             {
-              documents.Add(doc.Path, []);
-              documents[doc.Path].Add(branch.Class, []);
-              documents[doc.Path][branch.Class].Add(branch.Method, new Method());
-              documents[doc.Path][branch.Class][branch.Method].Branches.Add(new BranchInfo
-              { Line = branch.Number, Hits = branch.Hits, Offset = branch.Offset, EndOffset = branch.EndOffset, Path = branch.Path, Ordinal = branch.Ordinal, IsReachable = branch.IsReachable }
-              );
+              methods = new();
+              classes.Add(branch.Class, methods);
             }
+
+            if (!methods.TryGetValue(branch.Method, out Method method))
+            {
+              method = new();
+              methods.Add(branch.Method, method);
+            }
+
+            method.Branches.Add(branchInfo);
           }
         }
 
         modules.Add(Path.GetFileName(result.ModulePath), documents);
         _instrumentationHelper.RestoreOriginalModule(result.ModulePath, Identifier);
       }
-
       // In case of anonymous delegate compiler generate a custom class and passes it as type.method delegate.
       // If in delegate method we've a branches we need to move these to "actual" class/method that use it.
       // We search "method" with same "Line" of closure class method and add missing branches to it,
