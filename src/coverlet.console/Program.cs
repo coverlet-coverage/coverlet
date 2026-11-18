@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -313,7 +314,7 @@ namespace Coverlet.Console
 
           foreach (string thresholdValue in thresholdValues)
           {
-            if (double.TryParse(thresholdValue, out double value))
+            if (double.TryParse(thresholdValue, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out double value))
             {
               thresholdTypeFlagValues[thresholdTypeFlagQueue.Dequeue()] = value;
             }
@@ -325,7 +326,7 @@ namespace Coverlet.Console
         }
         else
         {
-          double thresholdValue = threshold != null ? double.Parse(threshold) : 0;
+          double thresholdValue = threshold != null ? double.Parse(threshold, CultureInfo.InvariantCulture) : 0;
 
           while (thresholdTypeFlagQueue.Any())
           {
@@ -346,17 +347,17 @@ namespace Coverlet.Console
           var errorMessageBuilder = new StringBuilder();
           if ((thresholdTypeFlags & ThresholdTypeFlags.Line) != ThresholdTypeFlags.None)
           {
-            errorMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line]}");
+            errorMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} line coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Line].ToString(CultureInfo.InvariantCulture)}");
           }
 
           if ((thresholdTypeFlags & ThresholdTypeFlags.Branch) != ThresholdTypeFlags.None)
           {
-            errorMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Branch]}");
+            errorMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} branch coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Branch].ToString(CultureInfo.InvariantCulture)}");
           }
 
           if ((thresholdTypeFlags & ThresholdTypeFlags.Method) != ThresholdTypeFlags.None)
           {
-            errorMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method]}");
+            errorMessageBuilder.AppendLine($"The {thresholdStat.ToString().ToLower()} method coverage is below the specified {thresholdTypeFlagValues[ThresholdTypeFlags.Method].ToString(CultureInfo.InvariantCulture)}");
           }
           logger.LogError(errorMessageBuilder.ToString());
         }

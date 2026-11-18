@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using coverlet.msbuild.tasks.tests;
@@ -123,6 +124,64 @@ namespace coverlet.msbuild.tasks.tests
 
       Assert.Contains("coverageDir.cobertura.xml", coverageResultTask.ReportItems[0].ItemSpec);
       Assert.Equal(16, coverageResultTask.ReportItems[0].MetadataCount);
+    }
+
+    [Fact]
+    public void Execute_StateUnderTest_WithInstrumentationState_DecimalThresholdIsCultureInvariant()
+    {
+      CultureInfo originalCulture = CultureInfo.CurrentCulture;
+      try
+      {
+        // "." is the group separator, not the decimal separator, in tr-TR
+        CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
+
+        // Arrange
+        var mockFileSystem = new Mock<IFileSystem>();
+        mockFileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        mockFileSystem.Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()));
+        var log = new TaskLoggingHelper(_buildEngine.Object, "CoverageResultTask");
+
+        IServiceCollection serviceCollection = new ServiceCollection();
+        serviceCollection.AddTransient<IFileSystem, FileSystem>();
+        serviceCollection.AddTransient<IProcessExitHandler, ProcessExitHandler>();
+        serviceCollection.AddTransient<Coverlet.Core.Abstractions.ILogger, MSBuildLogger>(_ => new MSBuildLogger(log));
+        serviceCollection.AddTransient<IRetryHelper, RetryHelper>();
+        serviceCollection.AddSingleton<IInstrumentationHelper, InstrumentationHelperForDebugging>();
+        serviceCollection.AddSingleton<ISourceRootTranslator, SourceRootTranslator>(serviceProvider => new SourceRootTranslator("empty", serviceProvider.GetRequiredService<Coverlet.Core.Abstractions.ILogger>(), mockFileSystem.Object, _mockAssemblyAdapter.Object));
+        ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+        BaseTask.ServiceProvider = serviceProvider;
+        _buildEngine.Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>())).Callback<BuildErrorEventArgs>(e => _errors.Add(e));
+
+        var baseDirectory = AppDomain.CurrentDomain.SetupInformation.ApplicationBase ?? string.Empty;
+
+        // The task deletes the instrumenter state file once read, so work on a copy
+        string stateCopyPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".data1.xml");
+        File.Copy(Path.Combine(baseDirectory, "TestAssets\\InstrumenterState.ItemSpec.data1.xml"), stateCopyPath);
+        var InstrumenterState = new TaskItem(stateCopyPath);
+
+        var coverageResultTask = new CoverageResultTask
+        {
+          OutputFormat = "cobertura",
+          Output = "coverageDir",
+          Threshold = "99.5",
+          ThresholdType = "line",
+          ThresholdStat = "total",
+          InstrumenterState = InstrumenterState
+        };
+        coverageResultTask.BuildEngine = _buildEngine.Object;
+
+        // Act
+        bool success = coverageResultTask.Execute();
+
+        // Assert
+        Assert.False(success);
+        Assert.True(coverageResultTask.Log.HasLoggedErrors);
+        Assert.Contains("The total line coverage is below the specified 99.5", _errors[0].Message);
+      }
+      finally
+      {
+        CultureInfo.CurrentCulture = originalCulture;
+      }
     }
 
   }
