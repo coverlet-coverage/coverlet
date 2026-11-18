@@ -77,6 +77,16 @@ namespace Coverlet.Core.Symbols
       }
     }
 
+    // .NET 11 runtime-async methods are marked MethodImplAttributes.Async (0x2000)
+    // instead of being lowered to an IAsyncStateMachine. Mono.Cecil 0.11.6 has no
+    // named enum value for the flag, so we test the raw bit.
+    private const MethodImplAttributes RuntimeAsyncMethodImplFlag = (MethodImplAttributes)0x2000;
+
+    private static bool IsRuntimeAsyncMethod(MethodDefinition methodDefinition)
+    {
+      return (methodDefinition.ImplAttributes & RuntimeAsyncMethodImplFlag) != 0;
+    }
+
     private static bool IsMoveNextInsideAsyncStateMachine(MethodDefinition methodDefinition)
     {
       if (methodDefinition.FullName.EndsWith("::MoveNext()") && IsCompilerGenerated(methodDefinition))
@@ -1117,6 +1127,7 @@ namespace Coverlet.Core.Symbols
       HashSet<Instruction> reachableInstructions = ComputeReachableInstructions(methodDefinition.Body);
 
       bool isAsyncStateMachineMoveNext = IsMoveNextInsideAsyncStateMachine(methodDefinition);
+      bool isRuntimeAsyncMethod = IsRuntimeAsyncMethod(methodDefinition);
       bool isMoveNextInsideAsyncStateMachineProlog = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncStateMachineProlog(methodDefinition);
       bool isMoveNextInsideAsyncIterator = isAsyncStateMachineMoveNext && IsMoveNextInsideAsyncIterator(methodDefinition);
 
@@ -1162,7 +1173,7 @@ namespace Coverlet.Core.Symbols
             continue;
           }
 
-          if (isAsyncStateMachineMoveNext)
+          if (isAsyncStateMachineMoveNext || isRuntimeAsyncMethod)
           {
             if (SkipGeneratedBranchesForExceptionHandlers(methodDefinition, instruction, instructions) ||
                 SkipGeneratedBranchForExceptionRethrown(instructions, instruction) ||
