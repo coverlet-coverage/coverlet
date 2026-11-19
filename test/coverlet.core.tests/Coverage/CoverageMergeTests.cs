@@ -149,6 +149,36 @@ namespace Coverlet.Core.Tests
     }
 
     [Fact]
+    public void Merge_MergesLinesIntMaxValue()
+    {
+      // Arrange
+      var initialModules = new Modules
+            {
+                { "Module1", new Documents { { "Doc1", new Classes { { "Class1", new Methods { { "Method1", new Method { Lines = new Lines { { 1, 1 } } } } } } } } } }
+            };
+      var newModules = new Modules
+            {
+                { "Module1", new Documents { { "Doc1", new Classes { { "Class1", new Methods { { "Method1", new Method { Lines = new Lines { { 1, int.MaxValue }, { 2, 1 } } } } } } } } } }
+            };
+      var coverageResult = new CoverageResult
+      {
+        Modules = initialModules
+      };
+
+      // Act
+      coverageResult.Merge(newModules);
+
+      // Assert
+      Assert.Single(coverageResult.Modules);
+      Assert.Single(coverageResult.Modules["Module1"]);
+      Assert.Single(coverageResult.Modules["Module1"]["Doc1"]);
+      Assert.Single(coverageResult.Modules["Module1"]["Doc1"]["Class1"]);
+      Assert.Equal(2, coverageResult.Modules["Module1"]["Doc1"]["Class1"]["Method1"].Lines.Count);
+      Assert.Equal(int.MaxValue, coverageResult.Modules["Module1"]["Doc1"]["Class1"]["Method1"].Lines[1]);
+      Assert.Equal(1, coverageResult.Modules["Module1"]["Doc1"]["Class1"]["Method1"].Lines[2]);
+    }
+
+    [Fact]
     public void Merge_MergesBranchesInExistingMethods()
     {
       // Arrange
@@ -176,6 +206,34 @@ namespace Coverlet.Core.Tests
       Assert.Equal(2, coverageResult.Modules["Module1"]["Doc1"]["Class1"]["Method1"].Branches.Count);
       Assert.Equal(1, coverageResult.Modules["Module1"]["Doc1"]["Class1"]["Method1"].Branches.First(b => b.Line == 1 && b.Offset == 1 && b.Path == 0 && b.Ordinal == 1).Hits);
       Assert.Equal(1, coverageResult.Modules["Module1"]["Doc1"]["Class1"]["Method1"].Branches.First(b => b.Line == 1 && b.Offset == 1 && b.Path == 1 && b.Ordinal == 2).Hits);
+    }
+    [Fact]
+    public void Merge_MergesBranchesIntMaxValue()
+    {
+      // Arrange
+      var initialModules = new Modules
+            {
+                { "Module1", new Documents { { "Doc1", new Classes { { "Class1", new Methods { { "Method1", new Method { Branches = new Branches { new BranchInfo { Line = 1, Hits = 1, Offset = 1, Path = 0, Ordinal = 1 } } } } } } } } } }
+            };
+      var newModules = new Modules
+            {
+                { "Module1", new Documents { { "Doc1", new Classes { { "Class1", new Methods { { "Method1", new Method { Branches = new Branches { new BranchInfo { Line = 1, Hits = int.MaxValue, Offset = 1, Path = 0, Ordinal = 1 } } } } } } } } } }
+            };
+      var coverageResult = new CoverageResult
+      {
+        Modules = initialModules
+      };
+
+      // Act
+      coverageResult.Merge(newModules);
+
+      // Assert
+      Assert.Single(coverageResult.Modules);
+      Assert.Single(coverageResult.Modules["Module1"]);
+      Assert.Single(coverageResult.Modules["Module1"]["Doc1"]);
+      Assert.Single(coverageResult.Modules["Module1"]["Doc1"]["Class1"]);
+      Assert.Single(coverageResult.Modules["Module1"]["Doc1"]["Class1"]["Method1"].Branches);
+      Assert.Equal(int.MaxValue, coverageResult.Modules["Module1"]["Doc1"]["Class1"]["Method1"].Branches.First(b => b.Line == 1 && b.Offset == 1 && b.Path == 0 && b.Ordinal == 1).Hits);
     }
   }
 }
