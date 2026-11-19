@@ -95,7 +95,7 @@ namespace Coverlet.Core
                           Modules[module.Key][document.Key][@class.Key][method.Key].Lines.Add(line.Key, line.Value);
                         }
                         else
-                        { 
+                        {
                           Modules[module.Key][document.Key][@class.Key][method.Key].Lines[line.Key] += line.Value;
                           Modules[module.Key][document.Key][@class.Key][method.Key].Lines[line.Key] = Modules[module.Key][document.Key][@class.Key][method.Key].Lines[line.Key] < 0 ? int.MaxValue : Modules[module.Key][document.Key][@class.Key][method.Key].Lines[line.Key];
                         }
@@ -112,7 +112,7 @@ namespace Coverlet.Core
                           branchInfo.Hits += branch.Hits;
                           branchInfo.Hits = branchInfo.Hits < 0 ? int.MaxValue : branchInfo.Hits;
                         }
-                          
+
                       }
                     }
                   }
