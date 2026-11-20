@@ -7,6 +7,8 @@ This is a .NET based repository that contains the coverlet projects for code cov
 - Always ask for explicit approval before running any tests (`dotnet test`, integration tests, test scripts, coverage test runs, or equivalent). User prefers to run tests manually and does not want me to execute test runs unless explicitly requested.
 - Create a single, well-organized proposal or resolution document per issue, located in `Documentation/Plans/`. This folder is Git-ignored and local-only; documents are NOT uploaded to GitHub.
 - Stop deep analysis once effort/usage for a topic reaches about 60%, and keep investigation focused and efficient.
+- Do not use `rg` (ripgrep) commands because it is not available in the user's environment; use available alternatives instead.
+- Before continuing broader analysis/searches, verify the result of the most recent code update first (e.g., compile check/result verification).
 - Use ILVerify as a local dotnet tool for future IL investigations.
 
 ## Code Standards
@@ -152,7 +154,7 @@ This codebase uses **TWO different ILogger interfaces** with different signature
 // BAD - Microsoft.Testing.Platform.Logging.ILogger does NOT have EventId
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), // ⚠️ EventId does NOT exist in MTP LOGGER
      It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
-     
+
 ✅ **CORRECT** - Uses actual MTP ILogger API signature (async methods):
 // GOOD - Microsoft.Testing.Platform.Logging.ILogger uses simple async methods
 _mockLogger.Verify(x => x.LogInformationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -405,7 +407,7 @@ User: "I don't need all these docs..."
 ```text
 User: "Implement feature X"
 Copilot: [Creates feature code]
-         "Code implementation complete. Would you like me to create 
+         "Code implementation complete. Would you like me to create
           documentation? (e.g., usage guide, implementation details)"
 User: "No, code is clear enough. Just add inline comments if needed."
 Copilot: [Adds code comments where helpful]

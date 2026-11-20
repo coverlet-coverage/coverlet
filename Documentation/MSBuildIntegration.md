@@ -1,13 +1,17 @@
 # Coverlet integration with MSBuild
 
-> [!IMPORTANT]
-> **`coverlet.msbuild` is not compatible with the Microsoft Testing Platform (MTP v2).**
+> [!TIP]
+> **`coverlet.msbuild 11.0.0` requires additional configuration when used with Microsoft Testing Platform (MTP) v2.**
 >
-> This is particularly important if you're using the native `dotnet test` integration introduced in **.NET 10**, which can run tests through the Microsoft Testing Platform.
+> This is especially important if you use the native `dotnet test` integration introduced in **.NET 10 and 11**, which can run tests through Microsoft Testing Platform.
 >
-> The `coverlet.msbuild` package relies on **MSBuild test targets** that are part of the **VSTest** execution model. Because the **Microsoft Testing Platform** uses a different test execution architecture and does not invoke these targets, `coverlet.msbuild` cannot collect code coverage when running with MTP v2.
+> The `coverlet.msbuild` package relies on **MSBuild test targets**, which are available only when you add [`Microsoft.Testing.Platform.MSBuild`](https://www.nuget.org/packages/Microsoft.Testing.Platform.MSBuild) to your test project. This package defines the `InvokeTestingPlatform` target, which you must invoke by passing `-t:InvokeTestingPlatform` on the command line.
 >
-> For more information, see: [*Use Microsoft.Testing.Platform in the VSTest mode of `dotnet test`*](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-integration-dotnet-test).
+> ```text
+> dotnet test /p:CollectCoverage=true --% /p:CoverletOutputFormat="opencover,lcov" -t:InvokeTestingPlatform
+> ```
+>
+> For more information, see: [*Microsoft.Testing.Extensions.PackagedApp.MSBuild - Execution and compatibility*](https://github.com/microsoft/testfx/blob/89c4e2703027303df378afd8c354dcd9ab4bd483/src/Platform/Microsoft.Testing.Extensions.PackagedApp.MSBuild/PACKAGE.md#execution-and-compatibility).
 
 In this mode, Coverlet doesn't require any additional setup other than including the `coverlet.msbuild` NuGet package in the unit test project. It integrates with the `dotnet test` infrastructure built into the .NET Core CLI and when enabled, will automatically generate coverage results after tests are run.
 

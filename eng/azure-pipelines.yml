@@ -62,6 +62,8 @@ jobs:
     matrix:
       Debug:
         buildConfiguration: "debug"
+      Release:
+        buildConfiguration: "release"
   pool:
     vmImage: 'windows-latest'
   variables:

@@ -1,0 +1,8 @@
+<Project>
+  <!-- Required if hooking coverlet.msbuild targets into MTP's InvokeTestingPlatform -->
+  <Target Name="BuildProject" BeforeTargets="InvokeTestingPlatform" Condition="'$(TestingPlatformDotnetTestSupport)' == 'true'" />
+  <Target Name="GenerateCoverageResultAfterMTP"
+          AfterTargets="InvokeTestingPlatform"
+          DependsOnTargets="GenerateCoverageResult"
+          Condition="'$(CollectCoverage)' == 'true'" />
+</Project>
