@@ -466,48 +466,46 @@ namespace Coverlet.Core
           }
 
           var documentsList = result.Documents.Values.ToList();
-          using (Stream fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open, FileAccess.Read))
-          using (var br = new BinaryReader(fs))
+          using Stream fs = _fileSystem.NewFileStream(result.HitsFilePath, FileMode.Open, FileAccess.Read);
+          using var br = new BinaryReader(fs);
+          int hitCandidatesCount = br.ReadInt32();
+
+          // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
+
+          for (int i = 0; i < hitCandidatesCount; ++i)
           {
-            int hitCandidatesCount = br.ReadInt32();
+            HitCandidate hitLocation = result.HitCandidates[i];
+            Document document = documentsList[hitLocation.docIndex];
+            int hits = br.ReadInt32();
 
-            // TODO: hitCandidatesCount should be verified against result.HitCandidates.Count
+            if (hits == 0)
+              continue;
 
-            for (int i = 0; i < hitCandidatesCount; ++i)
+            moduleHasNonZeroHits = true;
+            hits = hits < 0 ? int.MaxValue : hits;
+
+            if (hitLocation.isBranch)
             {
-              HitCandidate hitLocation = result.HitCandidates[i];
-              Document document = documentsList[hitLocation.docIndex];
-              int hits = br.ReadInt32();
+              Branch branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
+              branch.Hits += hits;
 
-              if (hits == 0)
-                continue;
-
-              moduleHasNonZeroHits = true;
-              hits = hits < 0 ? int.MaxValue : hits;
-
-              if (hitLocation.isBranch)
+              if (branch.Hits < 0)
+                branch.Hits = int.MaxValue;
+            }
+            else
+            {
+              for (int j = hitLocation.start; j <= hitLocation.end; j++)
               {
-                Branch branch = document.Branches[new BranchKey(hitLocation.start, hitLocation.end)];
-                branch.Hits += hits;
-
-                if (branch.Hits < 0)
-                  branch.Hits = int.MaxValue;
-              }
-              else
-              {
-                for (int j = hitLocation.start; j <= hitLocation.end; j++)
+                if (hitLocation.AccountedByNestedInstrumentation?.Contains(j) == true)
                 {
-                  if (hitLocation.AccountedByNestedInstrumentation?.Contains(j) == true)
-                  {
-                    continue;
-                  }
-
-                  Line line = document.Lines[j];
-                  line.Hits += hits;
-
-                  if (line.Hits < 0)
-                    line.Hits = int.MaxValue;
+                  continue;
                 }
+
+                Line line = document.Lines[j];
+                line.Hits += hits;
+
+                if (line.Hits < 0)
+                  line.Hits = int.MaxValue;
               }
             }
           }
