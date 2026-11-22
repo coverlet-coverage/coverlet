@@ -279,7 +279,7 @@ namespace Coverlet.Core.Symbols
        */
 
       Instruction current = instruction.Previous;
-      for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
+      for (int instructionBefore = 2; instructionBefore > 0 && current != null; current = current.Previous, instructionBefore--)
       {
         // LambdaCacheField  https://github.com/dotnet/roslyn/blob/e704ca635bd6de70a0250e34c4567c7a28fa9f6d/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNameKind.cs#L31
         // https://github.com/dotnet/roslyn/blob/master/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs#L145
@@ -328,7 +328,7 @@ namespace Coverlet.Core.Symbols
        */
 
       Instruction current = instruction.Previous;
-      for (int instructionBefore = 2; instructionBefore > 0 && current.Previous != null; current = current.Previous, instructionBefore--)
+      for (int instructionBefore = 2; instructionBefore > 0 && current != null; current = current.Previous, instructionBefore--)
       {
         // https://github.com/dotnet/roslyn/blob/main/src/Compilers/CSharp/Portable/Symbols/Synthesized/GeneratedNames.cs#L513
         // Cecil may surface the operand as FieldDefinition or FieldReference. Both must be handled.

@@ -471,4 +471,25 @@ namespace Coverlet.Core.Samples.Tests
             }
         }
     }
+
+    // Sample for https://github.com/coverlet-coverage/coverlet/issues/2081
+    // In each Create* method the cached delegate field load (ldsfld) is the first
+    // IL instruction, followed by dup and brtrue.s.
+    public class DelegateCacheAtMethodStart
+    {
+        public static Func<int> CreateLambda() => () => 42;
+
+        public static Func<int, int> CreateMethodGroup() => Map;
+
+        public static Func<T> CreateGeneric<T>() where T : new() => () => new T();
+
+        public static int FirstInstructionBranch(bool value) => value ? 1 : 2;
+
+        // Same ldsfld, dup, brtrue.s shape on an ordinary field: a real branch.
+        public static object FieldAtFirstInstruction() => s_value ?? new object();
+
+        private static object s_value = null;
+
+        private static int Map(int value) => value + 1;
+    }
 }
