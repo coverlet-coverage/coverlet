@@ -1218,6 +1218,11 @@ namespace Coverlet.Core.Symbols
             continue;
           }
 
+          if (SkipBranchGeneratedByDebugAssertInterpolatedMessage(instruction))
+          {
+            continue;
+          }
+
           int pathCounter = 0;
 
           // store branch origin offset
@@ -1863,6 +1868,76 @@ namespace Coverlet.Core.Symbols
       }
 
       return next is not null && next.OpCode.FlowControl == FlowControl.Branch;
+    }
+
+    // https://github.com/coverlet-coverage/coverlet/issues/2087
+    // `Debug.Assert(condition, $"...")` binds the message to Debug.AssertInterpolatedStringHandler.
+    // Its constructor receives the condition and sets the `out bool shouldAppend` argument only
+    // when the condition is false, and the compiler then emits a branch on shouldAppend around
+    // the Append calls:
+    //
+    //   ldloca     shouldAppend
+    //   call       instance void Debug/AssertInterpolatedStringHandler::.ctor(int32, int32, bool, bool&)
+    //   ldloc      shouldAppend
+    //   brfalse    <skip the Append calls>
+    //
+    // Debug builds construct the handler with `newobj` and store it before the load:
+    //
+    //   ldloca     shouldAppend
+    //   newobj     instance void Debug/AssertInterpolatedStringHandler::.ctor(int32, int32, bool, bool&)
+    //   stloc      handler
+    //   ldloc      shouldAppend
+    //   brfalse    <skip the Append calls>
+    //
+    // The formatting path runs only when the assertion fails, so a passing test suite can never
+    // cover it. The condition itself is not a branch of the method, so nothing else is hidden.
+    private static bool SkipBranchGeneratedByDebugAssertInterpolatedMessage(Instruction instruction)
+    {
+      if (instruction.OpCode.Code != Code.Brfalse && instruction.OpCode.Code != Code.Brfalse_S)
+        return false;
+
+      Instruction loadShouldAppend = instruction.Previous;
+      if (loadShouldAppend is null || !TryGetLocalIndex(loadShouldAppend, isAddress: false, out int shouldAppendIndex))
+        return false;
+
+      Instruction constructorCall = loadShouldAppend.Previous;
+      if (constructorCall is not null && IsStoreLocal(constructorCall.OpCode.Code))
+      {
+        constructorCall = constructorCall.Previous;
+      }
+
+      if (constructorCall is null ||
+          (constructorCall.OpCode.Code != Code.Call && constructorCall.OpCode.Code != Code.Newobj) ||
+          constructorCall.Operand is not MethodReference { Name: ".ctor" } constructor ||
+          constructor.DeclaringType.FullName != "System.Diagnostics.Debug/AssertInterpolatedStringHandler")
+      {
+        return false;
+      }
+
+      // The last constructor argument is the address of the same shouldAppend local.
+      Instruction loadShouldAppendAddress = constructorCall.Previous;
+      return loadShouldAppendAddress is not null &&
+             TryGetLocalIndex(loadShouldAppendAddress, isAddress: true, out int addressIndex) &&
+             addressIndex == shouldAppendIndex;
+    }
+
+    private static bool IsStoreLocal(Code code) =>
+      code is Code.Stloc or Code.Stloc_S or Code.Stloc_0 or Code.Stloc_1 or Code.Stloc_2 or Code.Stloc_3;
+
+    private static bool TryGetLocalIndex(Instruction instruction, bool isAddress, out int index)
+    {
+      index = instruction.OpCode.Code switch
+      {
+        Code.Ldloc_0 when !isAddress => 0,
+        Code.Ldloc_1 when !isAddress => 1,
+        Code.Ldloc_2 when !isAddress => 2,
+        Code.Ldloc_3 when !isAddress => 3,
+        Code.Ldloc or Code.Ldloc_S when !isAddress => ((VariableDefinition)instruction.Operand).Index,
+        Code.Ldloca or Code.Ldloca_S when isAddress => ((VariableDefinition)instruction.Operand).Index,
+        _ => -1
+      };
+
+      return index >= 0;
     }
 
     // https://github.com/coverlet-coverage/coverlet/issues/1313

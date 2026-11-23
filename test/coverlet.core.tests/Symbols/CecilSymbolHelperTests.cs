@@ -649,6 +649,38 @@ namespace Coverlet.Core.Tests.Symbols
       Assert.Equal(2, points.Count);
     }
 
+    [Theory]
+    [InlineData(nameof(DebugAssertInterpolation.Assert))]
+    [InlineData(nameof(DebugAssertInterpolation.AssertTwice))]
+    [InlineData(nameof(DebugAssertInterpolation.AssertWithFormattedMessage))]
+    public void GetBranchPoints_Issue2087_DebugAssertInterpolatedMessage_Ignored(string methodName)
+    {
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(DebugAssertInterpolation).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.Name == methodName);
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      Assert.Contains(method.Body.Instructions, x => x.Operand is MethodReference { Name: "Assert", DeclaringType.FullName: "System.Diagnostics.Debug" });
+      Assert.Empty(points);
+    }
+
+    [Fact]
+    public void GetBranchPoints_Issue2087_BranchNextToDebugAssert_Reported()
+    {
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(DebugAssertInterpolation).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.Name == nameof(DebugAssertInterpolation.AssertAndBranch));
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      Assert.Equal(2, points.Count);
+    }
+
     #region Private Pattern Coverage Tests
 
     [Fact]
