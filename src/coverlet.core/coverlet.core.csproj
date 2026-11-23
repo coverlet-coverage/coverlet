@@ -14,10 +14,6 @@
     <PackageReference Include="Mono.Cecil" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' ">
-    <PackageReference Include="NuGet.Versioning" />
-  </ItemGroup>
-
   <!-- Use framework-matching versions of packages with System.Text.Json dependencies to avoid assembly version mismatch at runtime -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="8.0.0"/>
@@ -28,6 +24,7 @@
     <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="8.0.2" />
     <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
+    <PackageReference Include="NuGet.Versioning" VersionOverride="7.9.0"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="9.0.23"/>
@@ -38,6 +35,7 @@
     <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="9.0.23" />
     <PackageReference Include="System.Text.Json" VersionOverride="9.0.23" />
+    <PackageReference Include="NuGet.Versioning" VersionOverride="7.9.0"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="10.0.15"/>
@@ -46,6 +44,7 @@
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="10.0.15" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="10.0.15" />
     <!-- System.Text.Json is part of .NET 10 core - no explicit reference needed -->
+    <PackageReference Include="NuGet.Versioning" VersionOverride="8.0.0"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
@@ -54,6 +53,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <!-- System.Text.Json is part of .NET 11 core - no explicit reference needed -->
+    <PackageReference Include="NuGet.Versioning" VersionOverride="8.0.0"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="8.0.0" />

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -33,6 +33,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="NuGet.Versioning" VersionOverride="8.0.0" Condition="'$(TargetFramework)' == 'net11.0'"/>
+    <PackageReference Include="NuGet.Versioning" VersionOverride="8.0.0" Condition="'$(TargetFramework)' == 'net10.0'"/>
+    <PackageReference Include="NuGet.Versioning" VersionOverride="7.9.0" Condition="'$(TargetFramework)' == 'net9.0'"/>
+    <PackageReference Include="NuGet.Versioning" VersionOverride="7.9.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
   </ItemGroup>
 
   <ItemGroup>

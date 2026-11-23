@@ -11,8 +11,8 @@
     <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion>
     <MicrosoftCodeAnalysisVersion Condition="'$(LEGACY)' == ''">5.12.0</MicrosoftCodeAnalysisVersion>
     <MicrosoftCodeAnalysisVersion Condition="'$(LEGACY)' != ''">5.3.0</MicrosoftCodeAnalysisVersion>
-    <!-- .NET 8.0 support -->
-    <NugetPackageVersion>7.9.0</NugetPackageVersion>
+    <NugetPackageVersion Condition="'$(LEGACY)' == ''">8.0.0</NugetPackageVersion>
+    <NugetPackageVersion Condition="'$(LEGACY)' != ''">7.9.0</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>18.12.0</MicrosoftNETTestSdkVersion>
     <XunitV3Version>4.0.3</XunitV3Version>
@@ -26,7 +26,7 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="BenchmarkDotNet.TestAdapter" Version="0.15.8" />
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.8" />
-    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.12.37802.2" />
+    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.13.37903.2" />
     <!--<PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="17.13.35606.1" />-->
     <PackageVersion Include="DotNetConfig" Version="1.2.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNETRuntimeVersion)" />
@@ -65,8 +65,10 @@
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Moq" Version="$(MoqVersion)" />
-    <PackageVersion Include="ReportGenerator.Core" Version="5.6.0" Condition="'$(LEGACY)' == ''" />
-    <PackageVersion Include="ReportGenerator.Core" Version="5.4.18" Condition="'$(LEGACY)' != ''" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.6.1"  Condition="'$(TargetFramework)' == 'net11.0'" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.5.12" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.4.18" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageVersion Include="ReportGenerator.Core" Version="5.3.11" Condition="'$(TargetFramework)' == 'net8.0'" />
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.1.2" />
     <PackageVersion Include="System.CommandLine" Version="3.0.0" />
