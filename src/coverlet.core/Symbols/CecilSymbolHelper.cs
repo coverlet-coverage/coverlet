@@ -1223,6 +1223,11 @@ namespace Coverlet.Core.Symbols
             continue;
           }
 
+          if (SkipRepeatedNullOrZeroCheck(methodDefinition, instructions, instruction))
+          {
+            continue;
+          }
+
           int pathCounter = 0;
 
           // store branch origin offset
@@ -1939,6 +1944,60 @@ namespace Coverlet.Core.Symbols
 
       return index >= 0;
     }
+
+    // https://github.com/coverlet-coverage/coverlet/issues/2080
+    // A string switch with a `null` arm, a `""` arm and another constant is lowered to two null
+    // checks of the same argument or local in a row:
+    //
+    //   ldarg.0
+    //   brfalse    <null arm>
+    //   ldarg.0
+    //   brfalse    <compare with the other constants>   // can't be taken
+    //   ldarg.0
+    //   call       instance int32 System.String::get_Length()
+    //   brfalse    <"" arm>
+    //
+    // When the second check can only be reached by falling through the first one, the value was
+    // just found to be non-zero and nothing ran in between, so its taken outcome is impossible.
+    private static bool SkipRepeatedNullOrZeroCheck(MethodDefinition methodDefinition, List<Instruction> instructions, Instruction instruction)
+    {
+      if (!IsBranchOnFalse(instruction))
+        return false;
+
+      Instruction secondLoad = instruction.Previous;
+      Instruction firstCheck = secondLoad?.Previous;
+      Instruction firstLoad = firstCheck?.Previous;
+      if (firstLoad is null || !IsBranchOnFalse(firstCheck) || !IsArgumentOrLocalLoad(secondLoad) ||
+          secondLoad.OpCode != firstLoad.OpCode || !Equals(secondLoad.Operand, firstLoad.Operand))
+      {
+        return false;
+      }
+
+      // The second load must be reachable only from the first check's fall-through.
+      foreach (Instruction other in instructions)
+      {
+        if (other.Operand == secondLoad ||
+            (other.Operand is Instruction[] targets && Array.IndexOf(targets, secondLoad) >= 0))
+        {
+          return false;
+        }
+      }
+
+      foreach (ExceptionHandler handler in methodDefinition.Body.ExceptionHandlers)
+      {
+        if (handler.TryStart == secondLoad || handler.HandlerStart == secondLoad || handler.FilterStart == secondLoad)
+          return false;
+      }
+
+      return true;
+    }
+
+    private static bool IsBranchOnFalse(Instruction instruction) =>
+      instruction.OpCode.Code is Code.Brfalse or Code.Brfalse_S;
+
+    private static bool IsArgumentOrLocalLoad(Instruction instruction) =>
+      instruction.OpCode.Code is Code.Ldarg or Code.Ldarg_S or Code.Ldarg_0 or Code.Ldarg_1 or Code.Ldarg_2 or Code.Ldarg_3 or
+        Code.Ldloc or Code.Ldloc_S or Code.Ldloc_0 or Code.Ldloc_1 or Code.Ldloc_2 or Code.Ldloc_3;
 
     // https://github.com/coverlet-coverage/coverlet/issues/1313
     // When using `is` with a relational `and` pattern (e.g. `x is >= A and <= B`) the compiler
