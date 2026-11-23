@@ -160,13 +160,15 @@ namespace Coverlet.Collector.DataCollection
       {
         _eqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
 
-        // Get coverage reports
-        IEnumerable<(string report, string fileName)> coverageReports = _coverageManager?.GetCoverageReports();
+        CoverageManager coverageManager = _coverageManager;
+        // Collect the coverage result even when there are no reporters.
+        IEnumerable<(string report, string fileName)> coverageReports = coverageManager?.GetCoverageReports();
+        int reportCount = coverageManager?.Reporters.Length ?? 0;
 
-        if (coverageReports != null && coverageReports.Any())
+        if (reportCount > 0)
         {
           // Send result attachments to test platform.
-          using var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(coverageReports.Count(), TimeSpan.FromSeconds(30)));
+          using var attachmentManager = new AttachmentManager(_dataSink, _dataCollectionContext, _logger, _eqtTrace, _countDownEventFactory.Create(reportCount, TimeSpan.FromSeconds(30)));
           foreach ((string report, string fileName) in coverageReports)
           {
             attachmentManager.SendCoverageReport(report, fileName);
