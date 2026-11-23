@@ -681,6 +681,45 @@ namespace Coverlet.Core.Tests.Symbols
       Assert.Equal(2, points.Count);
     }
 
+    [Theory]
+    [InlineData(nameof(StringSwitchNullCheck.Classify))]
+    [InlineData(nameof(StringSwitchNullCheck.ClassifyLocal))]
+    public void GetBranchPoints_Issue2080_RepeatedNullCheckOfStringSwitch_Ignored(string methodName)
+    {
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(StringSwitchNullCheck).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.Name == methodName);
+      Instruction[] checks = method.Body.Instructions.Where(x => x.OpCode == OpCodes.Brfalse_S).ToArray();
+      Instruction nullCheck = checks[0];
+      Instruction repeatedCheck = checks[1];
+      Instruction lengthCheck = checks[2];
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      Assert.Same(nullCheck, repeatedCheck.Previous.Previous);
+      Assert.Equal(nullCheck.Previous.OpCode, repeatedCheck.Previous.OpCode);
+      Assert.DoesNotContain(points, x => x.Offset == repeatedCheck.Offset);
+      Assert.Equal(2, points.Count(x => x.Offset == nullCheck.Offset));
+      Assert.Equal(2, points.Count(x => x.Offset == lengthCheck.Offset));
+    }
+
+    [Fact]
+    public void GetBranchPoints_Issue2080_StringSwitchWithSingleNullCheck_Reported()
+    {
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(StringSwitchNullCheck).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.Name == nameof(StringSwitchNullCheck.ClassifyWithoutEmpty));
+      Instruction nullCheck = method.Body.Instructions.Single(x => x.OpCode == OpCodes.Brfalse_S);
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      Assert.Equal(2, points.Count(x => x.Offset == nullCheck.Offset));
+    }
+
     #region Private Pattern Coverage Tests
 
     [Fact]
