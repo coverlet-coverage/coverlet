@@ -99,7 +99,7 @@ namespace coverlet.msbuild.tasks.tests
       // The task deletes the instrumenter state file once read, so work on a copy
       // to leave the test asset in place for the other tests
       string stateCopyPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".data1.xml");
-      File.Copy(Path.Combine(baseDirectory, "TestAssets\\InstrumenterState.ItemSpec.data1.xml"), stateCopyPath);
+      File.Copy(Path.Combine(baseDirectory, "TestAssets","InstrumenterState.ItemSpec.data1.xml"), stateCopyPath);
       var InstrumenterState = new TaskItem(stateCopyPath);
 
       var coverageResultTask = new CoverageResultTask
@@ -161,7 +161,7 @@ namespace coverlet.msbuild.tasks.tests
 
         // The task deletes the instrumenter state file once read, so work on a copy
         string stateCopyPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".data1.xml");
-        File.Copy(Path.Combine(baseDirectory, "TestAssets\\InstrumenterState.ItemSpec.data1.xml"), stateCopyPath);
+        File.Copy(Path.Combine(baseDirectory, "TestAssets", "InstrumenterState.ItemSpec.data1.xml"), stateCopyPath);
         var InstrumenterState = new TaskItem(stateCopyPath);
 
         var coverageResultTask = new CoverageResultTask
