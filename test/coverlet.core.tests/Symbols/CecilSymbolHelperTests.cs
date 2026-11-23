@@ -615,6 +615,40 @@ namespace Coverlet.Core.Tests.Symbols
       Assert.All(patternMatchingOrPoints, x => Assert.Equal(branchLine, x.StartLine));
     }
 
+    [Theory]
+    [InlineData(nameof(DelegateCacheAtMethodStart.CreateLambda))]
+    [InlineData(nameof(DelegateCacheAtMethodStart.CreateMethodGroup))]
+    [InlineData(nameof(DelegateCacheAtMethodStart.CreateGeneric))]
+    public void GetBranchPoints_Issue2081_DelegateCacheAtFirstInstruction_Ignored(string methodName)
+    {
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(DelegateCacheAtMethodStart).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.Name == methodName);
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      Assert.Equal(OpCodes.Ldsfld, method.Body.Instructions[0].OpCode);
+      Assert.Empty(points);
+    }
+
+    [Theory]
+    [InlineData(nameof(DelegateCacheAtMethodStart.FirstInstructionBranch))]
+    [InlineData(nameof(DelegateCacheAtMethodStart.FieldAtFirstInstruction))]
+    public void GetBranchPoints_Issue2081_BranchAtMethodStart_Reported(string methodName)
+    {
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(DelegateCacheAtMethodStart).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.Name == methodName);
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      Assert.Equal(2, points.Count);
+    }
+
     #region Private Pattern Coverage Tests
 
     [Fact]
