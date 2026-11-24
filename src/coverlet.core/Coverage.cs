@@ -443,6 +443,12 @@ namespace Coverlet.Core
 
           // Calculate lines to skip for every hits start/end candidate
           // Nested ranges win on outermost one
+          // Only line ranges of the same document can nest, so group them once instead of scanning
+          // every candidate in the module for each range.
+          ILookup<int, HitCandidate> lineRangesByDocument = result.HitCandidates
+              .Where(candidate => !candidate.isBranch)
+              .ToLookup(candidate => candidate.docIndex);
+
           foreach (HitCandidate hitCandidate in result.HitCandidates)
           {
             if (hitCandidate.isBranch || hitCandidate.end == hitCandidate.start)
@@ -450,9 +456,9 @@ namespace Coverlet.Core
               continue;
             }
 
-            foreach (HitCandidate hitCandidateToCompare in result.HitCandidates.Where(x => x.docIndex.Equals(hitCandidate.docIndex)))
+            foreach (HitCandidate hitCandidateToCompare in lineRangesByDocument[hitCandidate.docIndex])
             {
-              if (hitCandidate != hitCandidateToCompare && !hitCandidateToCompare.isBranch && hitCandidateToCompare.start > hitCandidate.start &&
+              if (hitCandidate != hitCandidateToCompare && hitCandidateToCompare.start > hitCandidate.start &&
                    hitCandidateToCompare.end < hitCandidate.end)
               {
                 for (int i = hitCandidateToCompare.start;
