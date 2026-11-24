@@ -35,6 +35,7 @@ coverlet.core.benchmark.tests.CoverageBenchmarks.GetCoverageBenchmark
 coverlet.core.benchmark.tests.CoverageWorkflowBenchmark.SimulateWorkflow
 coverlet.core.benchmark.tests.InstrumentationOptionsBenchmarks.InstrumentWithOptions
 coverlet.core.benchmark.tests.InstrumenterBenchmarks.InstrumenterBenchmark
+coverlet.core.benchmark.tests.NestedRangesBenchmarks.GetCoverageResult
 coverlet.core.benchmark.tests.ReportFormatBenchmarks.GetCoverageAndReport
 ```
 
