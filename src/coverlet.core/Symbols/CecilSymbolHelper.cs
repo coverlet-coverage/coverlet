@@ -1872,7 +1872,21 @@ namespace Coverlet.Core.Symbols
         next = next.Next;
       }
 
-      return next is not null && next.OpCode.FlowControl == FlowControl.Branch;
+      if (next is null || next.OpCode.FlowControl != FlowControl.Branch)
+        return false;
+
+      // Only an `or` alternative shares its target with another conditional branch of the chain
+      // (the `brtrue.s` of "hello" above, or the `brfalse.s` of `null` in `text is null or "a"`).
+      // A string switch with its own arm per constant has the same shape in Debug but a distinct
+      // target, and its last comparison is the only decision between that arm and the default arm:
+      //
+      //   call  String::op_Equality         ; compare "a"
+      //   brtrue.s  -> ldc.i4.2            ; "a" => 2, the only branch of the switch
+      //   br.s -> ldc.i4.3                 ; _ => 3
+      return instruction.Operand is Instruction target &&
+        instructions.Exists(other => other != instruction &&
+          other.OpCode.FlowControl == FlowControl.Cond_Branch &&
+          other.Operand == target);
     }
 
     // https://github.com/coverlet-coverage/coverlet/issues/2087

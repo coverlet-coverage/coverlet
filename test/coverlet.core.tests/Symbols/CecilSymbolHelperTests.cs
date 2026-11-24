@@ -616,6 +616,52 @@ namespace Coverlet.Core.Tests.Symbols
     }
 
     [Theory]
+    [InlineData(nameof(StringEqualitySwitch.SwitchExpression))]
+    [InlineData(nameof(StringEqualitySwitch.SwitchStatement))]
+    [InlineData(nameof(StringEqualitySwitch.SwitchExpressionWithTwoConstants))]
+    public void GetBranchPoints_StringSwitchLastComparison_Reported(string methodName)
+    {
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(StringEqualitySwitch).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.Name == methodName);
+      Instruction lastComparison = method.Body.Instructions.Last(x =>
+        x.OpCode.FlowControl == FlowControl.Cond_Branch &&
+        x.Previous.Operand is MethodReference { Name: "op_Equality" });
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      Assert.Equal(2, points.Count(x => x.Offset == lastComparison.Offset));
+    }
+
+    [Theory]
+    [InlineData(nameof(StringEqualitySwitch.NullOrConstant))]
+    [InlineData(nameof(StringEqualitySwitch.SwitchArmWithOr))]
+    public void GetBranchPoints_OrAlternativeWithSharedTarget_StillSkipped(string methodName)
+    {
+      // arrange
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(StringEqualitySwitch).FullName);
+      MethodDefinition method = type.Methods.Single(x => x.Name == methodName);
+      Instruction lastComparison = method.Body.Instructions.Last(x =>
+        x.OpCode.FlowControl == FlowControl.Cond_Branch &&
+        x.Previous.Operand is MethodReference { Name: "op_Equality" });
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      if (TestUtils.GetAssemblyBuildConfiguration() == BuildConfiguration.Debug)
+      {
+        Assert.DoesNotContain(points, x => x.Offset == lastComparison.Offset);
+      }
+      else
+      {
+        Assert.Equal(2, points.Count(x => x.Offset == lastComparison.Offset));
+      }
+    }
+
+    [Theory]
     [InlineData(nameof(DelegateCacheAtMethodStart.CreateLambda))]
     [InlineData(nameof(DelegateCacheAtMethodStart.CreateMethodGroup))]
     [InlineData(nameof(DelegateCacheAtMethodStart.CreateGeneric))]
