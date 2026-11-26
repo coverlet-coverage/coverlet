@@ -513,6 +513,24 @@ namespace Coverlet.Core.Symbols
 
           int currentIndex = bodyInstructions.BinarySearch(handler.HandlerEnd, new InstructionByOffsetComparer());
 
+          // With three or more awaited catch blocks the compiler picks the handler body with a single switch
+          // instead of beq/bne.un, so its default target can't be reached:
+          //
+          // Debug:   ldarg.0 / ldfld '<>s__2' / stloc / ldloc / ldc.i4.1 / sub / switch (...)
+          // Release: ldloc.2 / ldc.i4.1 / sub / switch (...)
+          int switchIndex = currentIndex < 0 ? 0 : Enumerable.Range(currentIndex + 3, 4).FirstOrDefault(x =>
+              x < bodyInstructions.Count &&
+              bodyInstructions[x].OpCode == OpCodes.Switch &&
+              bodyInstructions[x - 1].OpCode == OpCodes.Sub &&
+              bodyInstructions[x - 2].OpCode == OpCodes.Ldc_I4 && (int)bodyInstructions[x - 2].Operand == 1 &&
+              bodyInstructions[x - 3].OpCode == OpCodes.Ldloc);
+
+          if (switchIndex > 0)
+          {
+            detectedBranches.Add(bodyInstructions[switchIndex].Offset);
+            continue;
+          }
+
           for (int i = 0; i < numberOfCatchBlocks; i++)
           {
             // We expect the first branch after the end of the handler to be no more than five instructions away.
