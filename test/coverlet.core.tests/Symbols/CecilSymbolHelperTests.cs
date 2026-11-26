@@ -10,6 +10,7 @@ using Coverlet.Core.Symbols;
 using Coverlet.Tests.Utils;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Symbols
@@ -764,6 +765,45 @@ namespace Coverlet.Core.Tests.Symbols
 
       // assert
       Assert.Equal(2, points.Count(x => x.Offset == nullCheck.Offset));
+    }
+
+    [Fact]
+    public void GetBranchPoints_Issue2085_AwaitedCatchDispatchSwitch_Ignored()
+    {
+      // arrange
+      MethodDefinition method = GetAwaitedCatchDispatchMoveNext(nameof(AwaitedCatchDispatch.ThreeHandlers));
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      Assert.Single(method.Body.Instructions, x => x.OpCode == OpCodes.Switch && x.Previous.OpCode == OpCodes.Sub);
+      Assert.Empty(points);
+    }
+
+    [Fact]
+    public void GetBranchPoints_Issue2085_SwitchInsideAwaitedCatch_Reported()
+    {
+      // arrange
+      MethodDefinition method = GetAwaitedCatchDispatchMoveNext(nameof(AwaitedCatchDispatch.ThreeHandlersAndSwitch));
+      Instruction dispatch = method.Body.Instructions.Single(x => x.OpCode == OpCodes.Switch && x.Previous.OpCode == OpCodes.Sub);
+
+      // act
+      System.Collections.Generic.IReadOnlyList<BranchPoint> points = _cecilSymbolHelper.GetBranchPoints(method);
+
+      // assert
+      Assert.DoesNotContain(points, x => x.Offset == dispatch.Offset);
+      Assert.Equal(4, points.Count);
+    }
+
+    private MethodDefinition GetAwaitedCatchDispatchMoveNext(string methodName)
+    {
+      TypeDefinition type = _module.Types.Single(x => x.FullName == typeof(AwaitedCatchDispatch).FullName);
+      TypeDefinition nestedType = type.NestedTypes.Single(x => x.Name.StartsWith($"<{methodName}>"));
+      MethodDefinition method = nestedType.Methods.Single(x => x.Name == "MoveNext");
+      // Instrumenter calls SimplifyMacros before GetBranchPoints.
+      method.Body.SimplifyMacros();
+      return method;
     }
 
     #region Private Pattern Coverage Tests
