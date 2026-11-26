@@ -1,14 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks Condition="'$(LEGACY)' == ''">net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LEGACY)' == ''">net8.0;net9.0;net10.0;net11.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(LEGACY)' != ''">net8.0;net9.0</TargetFrameworks>
     <ToolCommandName>coverlet</ToolCommandName>
     <PackAsTool>true</PackAsTool>
     <AssemblyTitle>coverlet.console</AssemblyTitle>
     <!-- create SBOM for CI build-->
     <GenerateSBOM>true</GenerateSBOM>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <!-- Nuget package properties https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets -->
@@ -32,6 +33,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="NuGet.Versioning" VersionOverride="8.0.0" Condition="'$(TargetFramework)' == 'net11.0'"/>
+    <PackageReference Include="NuGet.Versioning" VersionOverride="8.0.0" Condition="'$(TargetFramework)' == 'net10.0'"/>
+    <PackageReference Include="NuGet.Versioning" VersionOverride="7.9.0" Condition="'$(TargetFramework)' == 'net9.0'"/>
+    <PackageReference Include="NuGet.Versioning" VersionOverride="7.9.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
   </ItemGroup>
 
   <ItemGroup>
